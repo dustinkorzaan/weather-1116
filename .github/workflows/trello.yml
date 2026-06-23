@@ -36,11 +36,40 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Create Git Branch
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install GitHub Copilot CLI
+        env:
+          COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+        run: |
+          npm install -g @githubnext/copilot-cli
+
+      - name: Create and Push Git Branch
         run: |
           BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
           echo "Creating branch: $BRANCH_NAME"
           
           # Creates and pushes the new branch based off the current default branch
           git checkout -b "$BRANCH_NAME"
-          git push origin "$BRANCH_NAME"
+          git push --set-upstream origin "$BRANCH_NAME"
+
+      - name: Run Copilot to Generate Code
+        env:
+          GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }} # Authenticates the Copilot CLI
+        run: |
+          BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
+          prompt="Generate a GitHub Actions step that uses the existing branch name '$BRANCH_NAME' created from sanitize_name() and then checks out and pushes that branch."
+          echo "Prompt: $prompt"
+          copilot -p "$prompt" --allow-all --silent
+
+      - name: Commit and Push Generated Changes
+        run: |
+          git diff --quiet || (
+            git add -A
+            git commit -m "Apply Copilot generated changes"
+            git push origin HEAD
+          )
+
