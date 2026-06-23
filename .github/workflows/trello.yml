@@ -16,10 +16,11 @@ jobs:
         run: |
           # Cleans the Trello card name to make it web/git safe (lowercase, replaces spaces/special chars with hyphens)
           CLEAN_NAME=$(echo "${{ github.event.client_payload.card_name }}" | ltf="[:upper:]" utf="[:lower:]" tr "$ltf" "$utf" | sed 's/[^a-z0-9 ]//g' | tr ' ' '-')
+          CARD_NUMBER="${{ github.event.client_payload.card_number }}"
           CARD_ID="${{ github.event.client_payload.card_id }}"
           
-          # Formats final branch as feature/123-your-card-title
-          echo "branch_name=trello-${CARD_ID}-${CLEAN_NAME}" >> $GITHUB_OUTPUT
+          # Formats final branch as `trello-123-your-card-title`
+          echo "branch_name=trello-${CARD_NUMBER}-${CARD_ID}-${CLEAN_NAME}" >> $GITHUB_OUTPUT
 
       - name: Checkout Code
         uses: actions/checkout@v4
