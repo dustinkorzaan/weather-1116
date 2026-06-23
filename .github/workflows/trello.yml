@@ -61,7 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }} # Authenticates the Copilot CLI
         run: |
           BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
-          prompt="Generate a GitHub Actions step that uses the existing branch name '$BRANCH_NAME' created from sanitize_name() and then checks out and pushes that branch."
+          prompt="Try to apply this code change: '$BRANCH_NAME'"
           echo "Prompt: $prompt"
           copilot -p "$prompt" --allow-all --silent
 
