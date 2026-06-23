@@ -34,18 +34,18 @@ jobs:
           echo "branch_name=trello-${CARD_NUMBER}-${CARD_ID}-${CLEAN_NAME}" >> $GITHUB_OUTPUT
 
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install GitHub Copilot CLI
         env:
           COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
         run: |
-          npm install -g @githubnext/copilot-cli
+          npm install -g @github/copilot
 
       - name: Create and Push Git Branch
         run: |
