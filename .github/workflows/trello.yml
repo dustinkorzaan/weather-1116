@@ -14,9 +14,19 @@ jobs:
       - name: Format Branch Name
         id: branch_info
         run: |
-          # Cleans the Trello card name to make it web/git safe (lowercase, replaces spaces/special chars with hyphens)
+          # Cleans the Trello card name to make it web/git safe: lowercase and replace any non-alphanumeric with hyphens
+          sanitize_name() {
+            local sanitized
+            sanitized=$(printf '%s' "$1" |
+              tr '[:upper:]' '[:lower:]' |
+              sed 's/[^a-z0-9]/-/g' |
+              sed 's/-\+/-/g' |
+              sed 's/^-//; s/-$//')
+            printf '%s' "${sanitized:0:20}"
+          }
+
           card_name=${{ toJson(github.event.client_payload.card_name) }}
-          CLEAN_NAME=$(printf '%s' "$card_name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g' | tr ' ' '-')
+          CLEAN_NAME=$(sanitize_name "$card_name")
           CARD_NUMBER="${{ github.event.client_payload.card_number }}"
           CARD_ID="${{ github.event.client_payload.card_id }}"
           
