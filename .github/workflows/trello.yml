@@ -113,7 +113,7 @@ jobs:
             git config user.name "Dustin Korzaan"
             git add -A
             git commit -m "Apply Copilot generated changes"
-            git push origin HEAD
+            git push origin "$BRANCH_NAME"
             echo "Changes committed and pushed to $BRANCH_NAME"
           fi
 
