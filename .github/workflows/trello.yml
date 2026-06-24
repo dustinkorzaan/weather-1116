@@ -29,9 +29,33 @@ jobs:
           CLEAN_NAME=$(sanitize_name "$card_name")
           CARD_NUMBER="${{ github.event.client_payload.card_number }}"
           CARD_ID="${{ github.event.client_payload.card_id }}"
+          CARD_NAME="${{ toJson(github.event.client_payload.card_name) }}"
+          CARD_DESCRIPTION="${{ toJson(github.event.client_payload.card_description) }}"
+          CARD_CHECKLISTS="${{ toJson(github.event.client_payload.card_checklists) }}"
           
           # Formats final branch as `trello-123-your-card-title`
-          echo "branch_name=trello-${CARD_NUMBER}-${CARD_ID}-${CLEAN_NAME}" >> $GITHUB_OUTPUT
+          branch_name="trello-${CARD_NUMBER}-${CARD_ID}-${CLEAN_NAME}"
+          echo "branch_name=${branch_name}" >> "$GITHUB_OUTPUT"
+          echo "prompt<<EOF" >> "$GITHUB_OUTPUT"
+          prompt_lines=(
+            "You are working in the current branch: ${branch_name}"
+            ""
+            "Card number: ${CARD_NUMBER}"
+            "Card ID: ${CARD_ID}"
+            "Card name: ${CARD_NAME}"
+            "Card description:"
+            "${CARD_DESCRIPTION}"
+            ""
+            "Card checklists:"
+            "${CARD_CHECKLISTS}"
+            ""
+            "Generate code in the current branch ${branch_name} based on the Card description."
+            ""
+            "Do not stage, commit, or push any changes unless explicitly instructed to do so."
+            "Only modify the files in the current working tree."
+          )
+          printf '%s\n' "${prompt_lines[@]}" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Checkout Code
         uses: actions/checkout@v7
@@ -61,29 +85,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }} # Authenticates the Copilot CLI
         run: |
           BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
-          CARD_NUMBER="${{ github.event.client_payload.card_number }}"
-          CARD_ID="${{ github.event.client_payload.card_id }}"
-          CARD_NAME="${{ toJson(github.event.client_payload.card_name) }}"
-          CARD_DESCRIPTION="${{ toJson(github.event.client_payload.card_description) }}"
-          CARD_CHECKLISTS="${{ toJson(github.event.client_payload.card_checklists) }}"
+          prompt="${{ steps.branch_info.outputs.prompt }}"
 
-          prompt=$(cat <<EOF
-You are working in the current branch: ${BRANCH_NAME}
-
-Card number: ${CARD_NUMBER}
-Card ID: ${CARD_ID}
-Card name: ${CARD_NAME}
-Card description:
-${CARD_DESCRIPTION}
-
-Card checklists:
-${CARD_CHECKLISTS}
-
-Generate code in the current branch ${BRANCH_NAME} based on the Card description.
-
-Do not stage, commit, or push any changes unless explicitly instructed to do so. Only modify the files in the current working tree.
-EOF
-)
           echo "Prompt: $prompt"
           copilot -p "$prompt" --allow-all --silent
           echo "\n=== Git Status After Copilot ==="
