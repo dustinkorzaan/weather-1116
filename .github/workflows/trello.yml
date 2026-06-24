@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # Essential permission to create a branch reference
+      pull-requests: write
     env:
       CARD_NUMBER: ${{ github.event.client_payload.card_number }}
       CARD_ID: ${{ github.event.client_payload.card_id }}
