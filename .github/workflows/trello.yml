@@ -9,6 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # Essential permission to create a branch reference
+    env:
+      CARD_NUMBER: ${{ github.event.client_payload.card_number }}
+      CARD_ID: ${{ github.event.client_payload.card_id }}
+      CARD_NAME: ${{ github.event.client_payload.card_name }}
+      CARD_DESCRIPTION: ${{ github.event.client_payload.card_description }}
+      CARD_CHECKLISTS: ${{ toJson(github.event.client_payload.card_checklists) }}
 
     steps:
       - name: Prepare variables
@@ -25,22 +31,7 @@ jobs:
             printf '%s' "${sanitized:0:20}"
           }
 
-          card_name=${{ github.event.client_payload.card_name }}
-          CLEAN_NAME=$(sanitize_name "$card_name")
-          CARD_NUMBER="${{ github.event.client_payload.card_number }}"
-          CARD_ID="${{ github.event.client_payload.card_id }}"
-          CARD_NAME=$(cat <<'EOF_CARD_NAME'
-${{ github.event.client_payload.card_name }}
-EOF_CARD_NAME
-)
-          CARD_DESCRIPTION=$(cat <<'EOF_CARD_DESCRIPTION'
-${{ github.event.client_payload.card_description }}
-EOF_CARD_DESCRIPTION
-)
-          CARD_CHECKLISTS=$(cat <<'EOF_CARD_CHECKLISTS'
-${{ toJson(github.event.client_payload.card_checklists) }}
-EOF_CARD_CHECKLISTS
-)
+          CLEAN_NAME=$(sanitize_name "$CARD_NAME")
           
           # Formats final branch as `trello-123-your-card-title`
           branch_name="trello-${CARD_NUMBER}-${CARD_ID}-${CLEAN_NAME}"
