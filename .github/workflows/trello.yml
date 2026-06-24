@@ -25,13 +25,22 @@ jobs:
             printf '%s' "${sanitized:0:20}"
           }
 
-          card_name=${{ toJson(github.event.client_payload.card_name) }}
+          card_name=${{ github.event.client_payload.card_name }}
           CLEAN_NAME=$(sanitize_name "$card_name")
           CARD_NUMBER="${{ github.event.client_payload.card_number }}"
           CARD_ID="${{ github.event.client_payload.card_id }}"
-          CARD_NAME=$(printf %q "${{ github.event.client_payload.card_name }}")
-          CARD_DESCRIPTION=$(printf %q "${{ github.event.client_payload.card_description }}")
-          CARD_CHECKLISTS=$(printf %q "${{ toJson(github.event.client_payload.card_checklists) }}")
+          CARD_NAME=$(cat <<'EOF_CARD_NAME'
+${{ github.event.client_payload.card_name }}
+EOF_CARD_NAME
+)
+          CARD_DESCRIPTION=$(cat <<'EOF_CARD_DESCRIPTION'
+${{ github.event.client_payload.card_description }}
+EOF_CARD_DESCRIPTION
+)
+          CARD_CHECKLISTS=$(cat <<'EOF_CARD_CHECKLISTS'
+${{ toJson(github.event.client_payload.card_checklists) }}
+EOF_CARD_CHECKLISTS
+)
           
           # Formats final branch as `trello-123-your-card-title`
           branch_name="trello-${CARD_NUMBER}-${CARD_ID}-${CLEAN_NAME}"
