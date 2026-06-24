@@ -11,7 +11,7 @@ jobs:
       contents: write # Essential permission to create a branch reference
 
     steps:
-      - name: Format Branch Name
+      - name: Prepare variables
         id: branch_info
         run: |
           # Cleans the Trello card name to make it web/git safe: lowercase and replace any non-alphanumeric with hyphens
@@ -61,7 +61,29 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }} # Authenticates the Copilot CLI
         run: |
           BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
-          prompt="Try to apply this code change to this branch just based on the name: '$BRANCH_NAME'"
+          CARD_NUMBER="${{ github.event.client_payload.card_number }}"
+          CARD_ID="${{ github.event.client_payload.card_id }}"
+          CARD_NAME="${{ toJson(github.event.client_payload.card_name) }}"
+          CARD_DESCRIPTION="${{ toJson(github.event.client_payload.card_description) }}"
+          CARD_CHECKLISTS="${{ toJson(github.event.client_payload.card_checklists) }}"
+
+          prompt=$(cat <<EOF
+You are working in the current branch: ${BRANCH_NAME}
+
+Card number: ${CARD_NUMBER}
+Card ID: ${CARD_ID}
+Card name: ${CARD_NAME}
+Card description:
+${CARD_DESCRIPTION}
+
+Card checklists:
+${CARD_CHECKLISTS}
+
+Generate code in the current branch ${BRANCH_NAME} based on the Card description.
+
+Do not stage, commit, or push any changes unless explicitly instructed to do so. Only modify the files in the current working tree.
+EOF
+)
           echo "Prompt: $prompt"
           copilot -p "$prompt" --allow-all --silent
           echo "\n=== Git Status After Copilot ==="
