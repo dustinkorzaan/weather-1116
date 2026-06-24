@@ -72,11 +72,20 @@ jobs:
       - name: Create and Push Git Branch
         run: |
           BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
-          echo "Creating branch: $BRANCH_NAME"
+          echo "Pulling latest main..."
+          git pull origin main
+          echo "Checking branch: $BRANCH_NAME"
           
-          # Creates and pushes the new branch based off the current default branch
-          git checkout -b "$BRANCH_NAME"
-          git push --set-upstream origin "$BRANCH_NAME"
+          # Check if branch exists on remote
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "Branch exists, pulling and checking out..."
+            git fetch origin "$BRANCH_NAME"
+            git checkout "$BRANCH_NAME"
+          else
+            echo "Branch does not exist, creating..."
+            git checkout -b "$BRANCH_NAME"
+            git push --set-upstream origin "$BRANCH_NAME"
+          fi
 
       - name: Run Copilot to Generate Code
         env:
