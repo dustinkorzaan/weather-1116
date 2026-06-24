@@ -1,0 +1,36 @@
+# api-dotnet .gitignore
+
+# Build results
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+*.sln.iml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Rider
+.idea/
+*.sln.iml
+
+# Local user-specific files
+launchSettings.json
+appsettings.Development.json
+appsettings.Local.json

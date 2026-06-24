@@ -1,0 +1,18 @@
+name: ui-react
+displayName: ui-react
+description: React UI application built with Vite
+version: 0.0.1
+containerUser: codespace
+
+forwardPorts:
+  - 5173
+
+features:
+  ghcr.io/devcontainers/features/node:1: {}
+
+customizations:
+  vscode:
+    extensions:
+      - ES7+React/Redux/React-Native snippets
+      - dbaeumer.vscode-eslint
+      - esbenp.prettier-vscode
