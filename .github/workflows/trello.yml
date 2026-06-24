@@ -2,7 +2,7 @@ name: Trello Card Moved to Ready For Github
 
 on:
   repository_dispatch:
-    types: [trello_card_moved] # Matches event_type from Trello Butler payload
+    types: [trello_start_branch_for_story] # Matches event_type from Trello Butler payload
 
 jobs:
   create-branch:
@@ -11,11 +11,11 @@ jobs:
       contents: write # Essential permission to create a branch reference
       pull-requests: write
     env:
-      CARD_NUMBER: ${{ github.event.client_payload.card_number }}
-      CARD_ID: ${{ github.event.client_payload.card_id }}
-      CARD_NAME: ${{ github.event.client_payload.card_name }}
-      CARD_DESCRIPTION: ${{ github.event.client_payload.card_description }}
-      CARD_CHECKLISTS: ${{ toJson(github.event.client_payload.card_checklists) }}
+      STORY_NUMBER: ${{ github.event.client_payload.story_number }}
+      STORY_ID: ${{ github.event.client_payload.story_id }}
+      STORY_NAME: ${{ github.event.client_payload.story_name }}
+      STORY_DESCRIPTION: ${{ github.event.client_payload.story_description }}
+      STORY_CHECKLISTS: ${{ toJson(github.event.client_payload.story_checklists) }}
 
     steps:
       - name: Prepare variables
@@ -38,7 +38,7 @@ jobs:
           }
 
           # Formats final branch as `trello-123-your-story-name`
-          branch_name="trello-${CARD_NUMBER}-${CARD_NAME}"
+          branch_name="trello-${STORY_NUMBER}-${STORY_NAME}"
           branch_name=$(sanitize_name "$branch_name")
           echo "branch_name=${branch_name}" >> "$GITHUB_OUTPUT"
 
@@ -50,21 +50,21 @@ jobs:
           prompt_lines=(
             "You are working in the current branch: ${branch_name}"
             ""
-            "Card number: ${CARD_NUMBER}"
-            "Card ID: ${CARD_ID}"
-            "Card name: ${CARD_NAME}"
+            "Story Number: ${STORY_NUMBER}"
+            "Story ID: ${STORY_ID}"
+            "Story Name: ${STORY_NAME}"
             ""
-            "Card description:"
-            "<<<CARD_DESCRIPTION_START>>>"
-            "${CARD_DESCRIPTION}"
-            "<<<CARD_DESCRIPTION_END>>>"
+            "Story Description:"
+            "<<<STORY_DESCRIPTION_START>>>"
+            "${STORY_DESCRIPTION}"
+            "<<<STORY_DESCRIPTION_END>>>"
             ""
-            "Card checklists:"
-            "<<<CARD_CHECKLISTS_START>>>"
-            "${CARD_CHECKLISTS}"
-            "<<<CARD_CHECKLISTS_END>>>"
+            "Story Checklists:"
+            "<<<STORY_CHECKLISTS_START>>>"
+            "${STORY_CHECKLISTS}"
+            "<<<STORY_CHECKLISTS_END>>>"
             ""
-            "Generate code in the current branch ${branch_name} based on the Card description."
+            "Generate code in the current branch ${branch_name} based on the Story's description."
             ""
             "Do not stage, commit, or push any changes unless explicitly instructed to do so."
             "Only modify the files in the current working tree."
