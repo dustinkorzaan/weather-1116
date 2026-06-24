@@ -98,7 +98,9 @@ jobs:
           prompt='${{ steps.branch_info.outputs.prompt }}'
 
           echo "Prompt: $prompt"
-          copilot -p "$prompt" --allow-all --silent
+          TS=$(date +%Y%m%d-%H%M%S)
+          mkdir -p trello
+          copilot -p "$prompt" --allow-all --silent 2>&1 | tee "trello/${TS}-${BRANCH_NAME}.md"
           echo "\n=== Git Status After Copilot ==="
           git status --short
           echo "\n=== Git Diff Summary After Copilot ==="
