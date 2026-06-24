@@ -64,6 +64,10 @@ jobs:
           prompt="Try to apply this code change to this branch just based on the name: '$BRANCH_NAME'"
           echo "Prompt: $prompt"
           copilot -p "$prompt" --allow-all --silent
+          echo "\n=== Git Status After Copilot ==="
+          git status --short
+          echo "\n=== Git Diff Summary After Copilot ==="
+          git diff --stat
 
       - name: Commit and Push Generated Changes
         run: |
