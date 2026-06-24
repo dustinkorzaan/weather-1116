@@ -87,7 +87,7 @@ jobs:
             git push --set-upstream origin "$BRANCH_NAME"
           fi
 
-      - name: Run Copilot to Generate Code
+      - name: Run Copilot and Commit Changes
         env:
           GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }} # Authenticates the Copilot CLI
         run: |
@@ -100,12 +100,13 @@ jobs:
           git status --short
           echo "\n=== Git Diff Summary After Copilot ==="
           git diff --stat
-
-      - name: Commit and Push Generated Changes
-        run: |
+          
+          # Stage, commit, and push any generated changes
+          echo "\n=== Committing Changes ==="
           git diff --quiet || (
             git add -A
             git commit -m "Apply Copilot generated changes"
             git push origin HEAD
-          )
+            echo "Changes committed and pushed to $BRANCH_NAME"
+          ) || echo "No changes to commit"
 
