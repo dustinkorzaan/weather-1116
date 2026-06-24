@@ -86,6 +86,9 @@ jobs:
             git checkout -b "$BRANCH_NAME"
             git push --set-upstream origin "$BRANCH_NAME"
           fi
+          
+          echo "Rebasing $BRANCH_NAME onto main..."
+          git rebase origin/main || echo "Rebase already up to date"
 
       - name: Run Copilot and Commit Changes
         env:
