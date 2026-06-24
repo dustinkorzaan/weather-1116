@@ -46,8 +46,6 @@ jobs:
             "Card description:"
             "${CARD_DESCRIPTION}"
             ""
-            "Card checklists:"
-            "${CARD_CHECKLISTS}"
             ""
             "Generate code in the current branch ${branch_name} based on the Card description."
             ""
