@@ -109,6 +109,8 @@ jobs:
           if git diff --quiet; then
             echo "No changes to commit"
           else
+            git config user.email "dustin@korzaan.com"
+            git config user.name "Dustin Korzaan"
             git add -A
             git commit -m "Apply Copilot generated changes"
             git push origin HEAD
