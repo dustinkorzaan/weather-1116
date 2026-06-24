@@ -92,7 +92,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }} # Authenticates the Copilot CLI
         run: |
           BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
-          prompt="${{ steps.branch_info.outputs.prompt }}"
+          prompt='${{ steps.branch_info.outputs.prompt }}'
 
           echo "Prompt: $prompt"
           copilot -p "$prompt" --allow-all --silent
