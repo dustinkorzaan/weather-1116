@@ -20,7 +20,12 @@ jobs:
       - name: Prepare variables
         id: branch_info
         run: |
-          # Cleans the Trello card name to make it web/git safe: lowercase and replace any non-alphanumeric with hyphens
+          # Clean name to make it simple and web/git safe:
+          # - lowercase
+          # - non-alphanumeric as hyphens
+          # - collapse multiple hyphens
+          # - trim leading/trailing hyphens
+          # - limit to 50 characters
           sanitize_name() {
             local sanitized
             sanitized=$(printf '%s' "$1" |
@@ -28,13 +33,12 @@ jobs:
               sed 's/[^a-z0-9]/-/g' |
               sed 's/-\+/-/g' |
               sed 's/^-//; s/-$//')
-            printf '%s' "${sanitized:0:20}"
+            printf '%s' "${sanitized:0:50}"
           }
 
-          CLEAN_NAME=$(sanitize_name "$CARD_NAME")
-          
           # Formats final branch as `trello-123-your-card-title`
-          branch_name="trello-${CARD_NUMBER}-${CARD_ID}-${CLEAN_NAME}"
+          branch_name="trello-${CARD_NUMBER}-${CARD_NAME}"
+          branch_name=$(sanitize_name "$branch_name")
           echo "branch_name=${branch_name}" >> "$GITHUB_OUTPUT"
           echo "prompt<<EOF" >> "$GITHUB_OUTPUT"
           prompt_lines=(
@@ -43,9 +47,16 @@ jobs:
             "Card number: ${CARD_NUMBER}"
             "Card ID: ${CARD_ID}"
             "Card name: ${CARD_NAME}"
-            "Card description:"
-            "${CARD_DESCRIPTION}"
             ""
+            "Card description:"
+            "<<<CARD_DESCRIPTION_START>>>"
+            "${CARD_DESCRIPTION}"
+            "<<<CARD_DESCRIPTION_END>>>"
+            ""
+            "Card checklists:"
+            "<<<CARD_CHECKLISTS_START>>>"
+            "${CARD_CHECKLISTS}"
+            "<<<CARD_CHECKLISTS_END>>>"
             ""
             "Generate code in the current branch ${branch_name} based on the Card description."
             ""
@@ -69,38 +80,38 @@ jobs:
         run: |
           npm install -g @github/copilot
 
+      - name: Fail If Branch Already Exists
+        run: |
+          BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
+          echo "Checking if branch $BRANCH_NAME already exists on remote..."
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "Branch $BRANCH_NAME already exists on remote. Failing."
+            exit 1
+          fi
+          echo "Branch $BRANCH_NAME does not exist on remote."
+
       - name: Create and Push Git Branch
         run: |
           BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
           echo "Pulling latest main..."
+          git fetch origin main
+          git checkout main
           git pull origin main
-          echo "Checking branch: $BRANCH_NAME"
-          
-          # Check if branch exists on remote
-          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
-            echo "Branch exists, pulling and checking out..."
-            git fetch origin "$BRANCH_NAME"
-            git checkout "$BRANCH_NAME"
-          else
-            echo "Branch does not exist, creating..."
-            git checkout -b "$BRANCH_NAME"
-            git push --set-upstream origin "$BRANCH_NAME"
-          fi
-          
-          echo "Rebasing $BRANCH_NAME onto main..."
-          git rebase origin/main || echo "Rebase already up to date"
+          echo "Creating branch: $BRANCH_NAME"
+          git checkout -b "$BRANCH_NAME"
+          git push --set-upstream origin "$BRANCH_NAME"
 
       - name: Run Copilot and Commit Changes
         env:
           GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }} # Authenticates the Copilot CLI
+          COPILOT_PROMPT: ${{ steps.branch_info.outputs.prompt }}
         run: |
           BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
-          prompt='${{ steps.branch_info.outputs.prompt }}'
 
-          echo "Prompt: $prompt"
+          echo "Running Copilot with prompt from environment variable"
           TS=$(date +%Y%m%d-%H%M%S)
           mkdir -p trello
-          copilot -p "$prompt" --allow-all --silent 2>&1 | tee "trello/${TS}-${BRANCH_NAME}.md"
+          copilot -p "$COPILOT_PROMPT" --allow-all --silent 2>&1 | tee "trello/${TS}-${BRANCH_NAME}.md"
           echo "\n=== Git Status After Copilot ==="
           git status --short
           echo "\n=== Git Diff Summary After Copilot ==="
