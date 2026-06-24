@@ -36,10 +36,15 @@ jobs:
             printf '%s' "${sanitized:0:50}"
           }
 
-          # Formats final branch as `trello-123-your-card-title`
+          # Formats final branch as `trello-123-your-story-name`
           branch_name="trello-${CARD_NUMBER}-${CARD_NAME}"
           branch_name=$(sanitize_name "$branch_name")
           echo "branch_name=${branch_name}" >> "$GITHUB_OUTPUT"
+
+          # PR Name is the same as branch name but with hyphens replaced by spaces
+          pr_name="${branch_name//-/ }"
+          echo "pr_name=${pr_name}" >> "$GITHUB_OUTPUT"
+          
           echo "prompt<<EOF" >> "$GITHUB_OUTPUT"
           prompt_lines=(
             "You are working in the current branch: ${branch_name}"
@@ -99,7 +104,29 @@ jobs:
           git pull origin main
           echo "Creating branch: $BRANCH_NAME"
           git checkout -b "$BRANCH_NAME"
+          
+          # Create an empty commit using the prepared PR name so the PR step can create a pull request
+          PR_NAME="${{ steps.branch_info.outputs.pr_name }}"
+          git commit --allow-empty -m "$PR_NAME"
           git push --set-upstream origin "$BRANCH_NAME"
+
+      - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
+          PR_NAME="${{ steps.branch_info.outputs.pr_name }}"
+          REPO_FULL="${GITHUB_REPOSITORY}"
+          API_URL="https://api.github.com/repos/${REPO_FULL}/pulls"
+          PAYLOAD=$(printf '{"title":"%s","head":"%s","base":"main","body":"Automated PR created from Trello workflow"}' "${PR_NAME}" "${BRANCH_NAME}")
+          echo "Creating PR: ${PR_NAME} (${BRANCH_NAME})"
+          resp=$(curl -s -o /dev/stderr -w "%{http_code}" -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" -d "${PAYLOAD}" "${API_URL}")
+          if [ "$resp" -ge 200 ] && [ "$resp" -lt 300 ]; then
+            echo "Pull request created successfully"
+          else
+            echo "Failed to create pull request (status $resp)"
+            exit 1
+          fi
 
       - name: Run Copilot and Commit Changes
         env:
