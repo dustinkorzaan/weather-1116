@@ -106,14 +106,14 @@ jobs:
           
           # Stage, commit, and push any generated changes
           echo "\n=== Committing Changes ==="
-          if git diff --quiet; then
-            echo "No changes to commit"
-          else
+          if git status --porcelain --untracked-files=all | grep -q .; then
             git config user.email "dustin@korzaan.com"
             git config user.name "Dustin Korzaan"
             git add -A
             git commit -m "Apply Copilot generated changes"
             git push origin "$BRANCH_NAME"
             echo "Changes committed and pushed to $BRANCH_NAME"
+          else
+            echo "No changes to commit"
           fi
 
