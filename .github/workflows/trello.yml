@@ -98,15 +98,19 @@ jobs:
       - name: Create and Push Git Branch
         run: |
           BRANCH_NAME="${{ steps.branch_info.outputs.branch_name }}"
+          PR_NAME="${{ steps.branch_info.outputs.pr_name }}"
+
           echo "Pulling latest main..."
           git fetch origin main
           git checkout main
           git pull origin main
+          
           echo "Creating branch: $BRANCH_NAME"
           git checkout -b "$BRANCH_NAME"
           
           # Create an empty commit using the prepared PR name so the PR step can create a pull request
-          PR_NAME="${{ steps.branch_info.outputs.pr_name }}"
+          git config user.email "dustin@korzaan.com"
+          git config user.name "Dustin Korzaan"
           git commit --allow-empty -m "$PR_NAME"
           git push --set-upstream origin "$BRANCH_NAME"
 
