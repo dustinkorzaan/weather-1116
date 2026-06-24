@@ -106,10 +106,12 @@ jobs:
           
           # Stage, commit, and push any generated changes
           echo "\n=== Committing Changes ==="
-          git diff --quiet || (
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
             git add -A
             git commit -m "Apply Copilot generated changes"
             git push origin HEAD
             echo "Changes committed and pushed to $BRANCH_NAME"
-          ) || echo "No changes to commit"
+          fi
 
