@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         project:
-          - SampleApp/BackEnd/BackEnd.csproj
-          - SampleApp/FrontEnd/FrontEnd.csproj
+          - api-dotnet/BackEnd/BackEnd.csproj
+          - ui-blazor/FrontEnd/FrontEnd.csproj
 
     steps:
       - name: Checkout repository
