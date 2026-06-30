@@ -143,7 +143,7 @@ jobs:
           echo "Running Copilot with prompt from environment variable"
           TS=$(date +%Y%m%d-%H%M%S)
           mkdir -p trello
-          copilot -p "$COPILOT_PROMPT" --allow-all --silent 2>&1 | tee "trello/${TS}-${BRANCH_NAME}.md"
+          copilot -p "$COPILOT_PROMPT" --allow-all --silent 2>&1 | tee "docs/${TS}-${BRANCH_NAME}.md"
           echo "\n=== Git Status After Copilot ==="
           git status --short
           echo "\n=== Git Diff Summary After Copilot ==="
