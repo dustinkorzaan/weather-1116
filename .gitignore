@@ -1,0 +1,26 @@
+# Root .gitignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+# .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Dependencies
+node_modules/
+*.lock
+
+# Build outputs
+dist/
+build/
+bin/
+obj/
+
+# Environment
+.env
+.env.local

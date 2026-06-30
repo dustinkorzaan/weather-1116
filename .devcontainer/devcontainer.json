@@ -1,0 +1,79 @@
+{
+    "name": ".NET in Codespaces",
+    "image": "mcr.microsoft.com/dotnet/sdk:10.0",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {
+            "version": "2"
+        },
+        "ghcr.io/devcontainers/features/powershell:1": {
+            "version": "latest"
+        },
+        "ghcr.io/azure/azure-dev/azd:0": {
+            "version": "latest"
+        },
+        "ghcr.io/devcontainers/features/common-utils:2": {},
+        "ghcr.io/devcontainers/features/dotnet:2": {
+            "version": "none",
+            "dotnetRuntimeVersions": "10.0",
+            "aspNetCoreRuntimeVersions": "10.0"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.vscode-node-azure-pack",
+                "GitHub.copilot",
+                "GitHub.vscode-github-actions",
+                "ms-dotnettools.csdevkit"
+            ]
+        }
+    },
+    "forwardPorts": [
+        8080,
+        8081
+    ],
+    "postCreateCommand": "dotnet new install Aspire.ProjectTemplates && dotnet restore",
+    "hostRequirements": {
+        "memory": "8gb",
+        "cpus": 4
+    },
+    "remoteEnv": {
+        "DOTNET_MULTILEVEL_LOOKUP": "0",
+        "TARGET": "net10.0"
+    },
+    "portsAttributes": {
+        "8080": {
+            "label": "Weather API",
+            "onAutoForward": "notify"
+        },
+        "8081": {
+            "label": "Weather Front End",
+            "onAutoForward": "notify"
+        }
+    }
+}
+
+// {
+//   "image": "mcr.microsoft.com/devcontainers/universal:2",
+//   "waitFor": "onCreateCommand",
+//   "updateContentCommand": "cd ui-react && npm install",
+//   "postCreateCommand": "",
+//   "postAttachCommand": {
+//     "server": "cd ui-react && npm start"
+//   },
+//   "customizations": {
+//     "codespaces": {
+//       "openFiles": [
+//         "src/App.jsx"
+//       ]
+//     }
+//   },
+//   "portsAttributes": {
+//     "3000": {
+//       "label": "Application",
+//       "onAutoForward": "openPreview"
+//     }
+//   },
+//   "forwardPorts": [3000]
+// }
