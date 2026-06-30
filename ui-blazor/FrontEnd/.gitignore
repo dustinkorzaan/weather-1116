@@ -31,7 +31,7 @@ Thumbs.db
 *.sln.iml
 
 # Local user-specific files
-launchSettings.json
+# launchSettings.json
 appsettings.Development.json
 appsettings.Local.json
 
