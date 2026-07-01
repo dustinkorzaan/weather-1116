@@ -17,8 +17,9 @@ jobs:
       fail-fast: false
       matrix:
         project:
-          - api-dotnet/BackEnd/BackEnd.csproj
-          - ui-blazor/FrontEnd/FrontEnd.csproj
+          - api-dotnet/WeatherAPI/WeatherAPI.csproj
+          - ui-blazor/WeatherBlazor/WeatherBlazor.csproj
+          - mvc-dotnet/WeatherMVC/WeatherMVC.csproj
 
     steps:
       - name: Checkout repository
@@ -34,3 +35,26 @@ jobs:
 
       - name: Build project
         run: dotnet build ${{ matrix.project }} --no-restore --configuration Release
+
+  build-react:
+    name: Build React Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ui-react/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ui-react
+
+      - name: Build React app
+        run: npm run build
+        working-directory: ui-react

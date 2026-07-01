@@ -2,74 +2,110 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build frontend",
+            "label": "build weatherblazor",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/ui-blazor/FrontEnd/FrontEnd.csproj",
+                "${workspaceFolder}/ui-blazor/WeatherBlazor/WeatherBlazor.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish frontend",
+            "label": "publish weatherblazor",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/ui-blazor/FrontEnd/FrontEnd.csproj",
+                "${workspaceFolder}/ui-blazor/WeatherBlazor/WeatherBlazor.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "watch frontend",
+            "label": "watch weatherblazor",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/ui-blazor/FrontEnd/FrontEnd.csproj"
+                "${workspaceFolder}/ui-blazor/WeatherBlazor/WeatherBlazor.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build backend",
+            "label": "build weatherapi",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/api-dotnet/BackEnd/BackEnd.csproj",
+                "${workspaceFolder}/api-dotnet/WeatherAPI/WeatherAPI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish backend",
+            "label": "publish weatherapi",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/api-dotnet/BackEnd/BackEnd.csproj",
+                "${workspaceFolder}/api-dotnet/WeatherAPI/WeatherAPI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "watch backend",
+            "label": "watch weatherapi",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/api-dotnet/BackEnd/BackEnd.csproj"
+                "${workspaceFolder}/api-dotnet/WeatherAPI/WeatherAPI.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build weathermvc",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish weathermvc",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch weathermvc",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
