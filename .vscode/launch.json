@@ -62,7 +62,12 @@
             "type": "node-terminal",
             "request": "launch",
             "command": "npm start",
-            "cwd": "${workspaceFolder}/ui-react"
+            "cwd": "${workspaceFolder}/ui-react",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "Local:\\s+https?://localhost:(\\d+)",
+                "uriFormat": "http://localhost:%s"
+            }
         },
         {
             "name": ".NET Core Attach",
