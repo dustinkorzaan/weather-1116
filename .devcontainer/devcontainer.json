@@ -58,15 +58,15 @@
     "portsAttributes": {
         "3000": {
             "label": "React App",
-            "onAutoForward": "openBrowser"
+            "onAutoForward": "silent"
         },
         "8080": {
             "label": "Weather API",
-            "onAutoForward": "notify"
+            "onAutoForward": "silent"
         },
         "8081": {
             "label": "Weather Front End",
-            "onAutoForward": "notify"
+            "onAutoForward": "silent"
         }
     }
 }
