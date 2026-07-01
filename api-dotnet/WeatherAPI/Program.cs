@@ -1,29 +1,6 @@
-using Microsoft.AspNetCore.OpenApi;
-using Scalar.AspNetCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi(options =>
-{
-    // current workaround for port forwarding in codespaces
-    // https://github.com/dotnet/aspnetcore/issues/57332
-    options.AddDocumentTransformer((document, context, ct) =>
-    {
-        document.Servers = [];
-        return Task.CompletedTask;
-    });
-});
-
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
 
 app.UseHttpsRedirection();
 
@@ -46,7 +23,8 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
-//app.MapGet("/", () => Results.Redirect("/weatherforecast"));
+// hack, because the default route is not working in codespaces, so redirect to the weatherforecast endpoint
+app.MapGet("/", () => Results.Redirect("/weatherforecast"));
 
 app.Run();
 

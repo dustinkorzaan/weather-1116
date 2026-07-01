@@ -29,3 +29,9 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.site-logo {
+  display: inline-block;
+  width: 1.375rem;
+  height: 1.375rem;
+}

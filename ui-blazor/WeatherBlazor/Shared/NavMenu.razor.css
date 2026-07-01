@@ -11,6 +11,21 @@
     font-size: 1.1rem;
 }
 
+.site-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.site-logo {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
 .oi {
     width: 2rem;
     font-size: 1.1rem;
