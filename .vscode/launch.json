@@ -9,7 +9,8 @@
 			},
             "configurations": [
                 "BackEnd",
-                "FrontEnd"
+                "FrontEnd",
+                "React"
             ]
         }
     ],
@@ -55,6 +56,13 @@
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
             }
+        },
+        {
+            "name": "React",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "npm start",
+            "cwd": "${workspaceFolder}/ui-react"
         },
         {
             "name": ".NET Core Attach",

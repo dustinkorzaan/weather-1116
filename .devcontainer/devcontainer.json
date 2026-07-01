@@ -6,6 +6,9 @@
         "ghcr.io/devcontainers/features/github-cli:1": {
             "version": "2"
         },
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "lts"
+        },
         "ghcr.io/devcontainers/features/powershell:1": {
             "version": "latest"
         },
@@ -30,10 +33,11 @@
         }
     },
     "forwardPorts": [
+        3000,
         8080,
         8081
     ],
-    "postCreateCommand": "dotnet new install Aspire.ProjectTemplates && dotnet restore",
+    "postCreateCommand": "bash -lc 'dotnet new install Aspire.ProjectTemplates && dotnet restore && cd ui-react && npm ci'",
     "hostRequirements": {
         "memory": "8gb",
         "cpus": 4
@@ -43,6 +47,10 @@
         "TARGET": "net10.0"
     },
     "portsAttributes": {
+        "3000": {
+            "label": "React App",
+            "onAutoForward": "openPreview"
+        },
         "8080": {
             "label": "Weather API",
             "onAutoForward": "notify"
