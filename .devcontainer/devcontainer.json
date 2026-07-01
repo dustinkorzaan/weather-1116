@@ -59,19 +59,19 @@
     "portsAttributes": {
         "3000": {
             "label": "React App",
-            "onAutoForward": "silent"
+            "onAutoForward": "ignore"
         },
         "8080": {
             "label": "Weather API",
-            "onAutoForward": "silent"
+            "onAutoForward": "ignore"
         },
         "8090": {
             "label": "Weather Blazor",
-            "onAutoForward": "silent"
+            "onAutoForward": "ignore"
         },
         "8100": {
             "label": "Weather MVC",
-            "onAutoForward": "silent"
+            "onAutoForward": "ignore"
         }
     }
 }
