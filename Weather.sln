@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.33808.371
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontEnd", "ui-blazor\FrontEnd\FrontEnd.csproj", "{192C7008-36B8-4E28-BC6C-4BAE660537F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherBlazor", "ui-blazor\WeatherBlazor\WeatherBlazor.csproj", "{192C7008-36B8-4E28-BC6C-4BAE660537F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackEnd", "api-dotnet\BackEnd\BackEnd.csproj", "{36D2831B-4CD0-4CEE-A7E2-93914782305A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherAPI", "api-dotnet\WeatherAPI\WeatherAPI.csproj", "{36D2831B-4CD0-4CEE-A7E2-93914782305A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMVC", "mvc-dotnet\WeatherMVC\WeatherMVC.csproj", "{76692D10-B4B4-4896-8A1A-AED10DB540FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{36D2831B-4CD0-4CEE-A7E2-93914782305A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36D2831B-4CD0-4CEE-A7E2-93914782305A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36D2831B-4CD0-4CEE-A7E2-93914782305A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76692D10-B4B4-4896-8A1A-AED10DB540FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76692D10-B4B4-4896-8A1A-AED10DB540FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76692D10-B4B4-4896-8A1A-AED10DB540FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76692D10-B4B4-4896-8A1A-AED10DB540FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,4 @@
-using FrontEnd.Data;
+using WeatherBlazor.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

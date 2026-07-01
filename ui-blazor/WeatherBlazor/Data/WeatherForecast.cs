@@ -1,4 +1,4 @@
-namespace FrontEnd.Data;
+namespace WeatherBlazor.Data;
 
 public class WeatherForecast
 {
