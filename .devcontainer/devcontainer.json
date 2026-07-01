@@ -27,6 +27,11 @@
                 "GitHub.vscode-github-actions",
                 "ms-dotnettools.csdevkit"
             ]
+        },
+        "codespaces": {
+            "openFiles": [
+                "ui-react/src/App.jsx"
+            ]
         }
     },
     "forwardPorts": [
