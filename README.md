@@ -12,5 +12,6 @@ project relationships, and parity guidance.
 | API | [`api-dotnet/WeatherAPI`](api-dotnet/WeatherAPI) | ASP.NET Core Minimal API |
 | React UI | [`ui-react`](ui-react) | React + Vite |
 | Blazor UI | [`ui-blazor/WeatherBlazor`](ui-blazor/WeatherBlazor) | Blazor Server |
+| Core | [`core-dotnet/Core.csproj`](core-dotnet/Core.csproj) | Shared .NET class library referenced by MVC and API |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
