@@ -6,6 +6,8 @@
 
 <h1>Weather forecast</h1>
 
+<p><strong>@helloMessage</strong></p>
+
 <p>This component demonstrates fetching data from a service.</p>
 
 @if (forecasts == null)
@@ -39,9 +41,12 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    private string helloMessage = "Loading hello message...";
 
     protected override async Task OnInitializedAsync()
     {
+        var helloResponse = await ForecastClient.GetHelloAsync();
+        helloMessage = helloResponse?.RequestResponse ?? "No hello response returned.";
         forecasts = await ForecastClient.GetForecastAsync(DateTime.Now);
     }
 }

@@ -1,5 +1,11 @@
 namespace WeatherBlazor.Data;
 
+public class HelloWorldResponse
+{
+    public required string RequestMessage { get; set; }
+    public required string RequestResponse { get; set; }
+}
+
 public class WeatherForecastClient
 {
     private HttpClient _httpClient;
@@ -13,4 +19,7 @@ public class WeatherForecastClient
 
     public async Task<WeatherForecast[]> GetForecastAsync(DateTime? startDate)
         => await _httpClient.GetFromJsonAsync<WeatherForecast[]>($"WeatherForecast?startDate={startDate}") ?? [];
+
+    public async Task<HelloWorldResponse?> GetHelloAsync()
+        => await _httpClient.GetFromJsonAsync<HelloWorldResponse>("Home/Hello");
 }

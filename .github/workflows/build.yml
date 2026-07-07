@@ -17,6 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         project:
+          - core-dotnet/Core.csproj
           - api-dotnet/WeatherAPI/WeatherAPI.csproj
           - ui-blazor/WeatherBlazor/WeatherBlazor.csproj
           - mvc-dotnet/WeatherMVC/WeatherMVC.csproj

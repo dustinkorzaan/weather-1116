@@ -1,18 +1,19 @@
 using Core.demo.events;
+using MediatR;
 
 namespace Core.demo.handlers;
 
 /// <summary>
 /// Sample handler used to demonstrate the event/handler pattern for the Core project.
 /// </summary>
-public class HelloWorldHandler
+public class HelloWorldHandler : IRequestHandler<HelloWorldEvent, HelloWorldResponse>
 {
-    public HelloWorldResponse Handle(HelloWorldEvent helloWorldEvent)
+    public Task<HelloWorldResponse> Handle(HelloWorldEvent helloWorldEvent, CancellationToken cancellationToken)
     {
-        return new HelloWorldResponse
+        return Task.FromResult(new HelloWorldResponse
         {
             RequestMessage = helloWorldEvent.Message,
             RequestResponse = $"Hello, {helloWorldEvent.Message}!"
-        };
+        });
     }
 }

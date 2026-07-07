@@ -2,9 +2,10 @@
 
 ## Purpose
 
-This repository contains one Weather sample implemented as four projects. The
-goal is feature parity across all UI implementations while keeping each project
-idiomatic for its framework.
+This repository contains one Weather sample implemented as five projects: four
+runnable applications plus one shared .NET class library. The goal is feature
+parity across all UI implementations while keeping each project idiomatic for
+its framework.
 
 ## Projects
 
@@ -47,9 +48,9 @@ duplicating equivalent UI behavior in all three projects.
 
 ## Local Run Model
 
-All four projects are intended to run together in VS Code via Run and Debug
-"Run All", using `.vscode/launch.json` and port forwarding configured in
-`.devcontainer/devcontainer.json`.
+The four runnable applications are intended to run together in VS Code via Run
+and Debug "Run All", using `.vscode/launch.json` and port forwarding
+configured in `.devcontainer/devcontainer.json`.
 
 ## Build and CI
 
