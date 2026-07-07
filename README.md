@@ -1,3 +1,16 @@
-# README
+# Weather
 
-This repository is intentionally left minimal for publishing.
+Weather forecast sample app implemented across four stacks.
+
+This README is intentionally brief. Use it for quick orientation, and use
+[`docs/architecture.md`](docs/architecture.md) for architecture constraints,
+project relationships, and parity guidance.
+
+| Project | Path | Stack |
+| --- | --- | --- |
+| MVC UI | [`mvc-dotnet/WeatherMVC`](mvc-dotnet/WeatherMVC) | ASP.NET Core MVC |
+| API | [`api-dotnet/WeatherAPI`](api-dotnet/WeatherAPI) | ASP.NET Core Minimal API |
+| React UI | [`ui-react`](ui-react) | React + Vite |
+| Blazor UI | [`ui-blazor/WeatherBlazor`](ui-blazor/WeatherBlazor) | Blazor Server |
+
+Architecture reference: [`docs/architecture.md`](docs/architecture.md)

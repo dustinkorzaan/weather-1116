@@ -64,9 +64,8 @@ jobs:
             "${STORY_CHECKLISTS}"
             "<<<STORY_CHECKLISTS_END>>>"
             ""
-            "Generate code in the current branch ${branch_name} based on the Story's description."
-            ""
-            "Do not stage, commit, or push any changes unless explicitly instructed to do so."
+            "Begin this prompt by echoing this prompt to the console for logging purposes."
+            "Generate and push code in the current branch ${branch_name} based on the Story's description."
             "Only modify the files in the current working tree."
           )
           printf '%s\n' "${prompt_lines[@]}" >> "$GITHUB_OUTPUT"
@@ -143,7 +142,7 @@ jobs:
           echo "Running Copilot with prompt from environment variable"
           TS=$(date +%Y%m%d-%H%M%S)
           mkdir -p trello
-          copilot -p "$COPILOT_PROMPT" --allow-all --silent 2>&1 | tee "docs/${TS}-${BRANCH_NAME}.md"
+          copilot -p "$COPILOT_PROMPT" --allow-all --silent 2>&1 | tee "docs/${TS}-${BRANCH_NAME}-log.md"
           echo "\n=== Git Status After Copilot ==="
           git status --short
           echo "\n=== Git Diff Summary After Copilot ==="
@@ -159,6 +158,6 @@ jobs:
             git push origin "$BRANCH_NAME"
             echo "Changes committed and pushed to $BRANCH_NAME"
           else
-            echo "No changes to commit"
+            echo "No remaining changes to commit"
           fi
 
