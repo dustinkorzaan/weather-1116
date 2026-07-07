@@ -161,3 +161,35 @@ jobs:
             echo "No remaining changes to commit"
           fi
 
+      - name: Move Trello Card to In Progress
+        env:
+          TRELLO_KEY: ${{ secrets.TRELLO_KEY }}
+          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
+          TRELLO_IN_PROGRESS_LIST_ID: ${{ secrets.TRELLO_IN_PROGRESS_LIST_ID }}
+        run: |
+          if [ -z "$STORY_ID" ]; then
+            echo "STORY_ID is required to move card"
+            exit 1
+          fi
+
+          if [ -z "$TRELLO_KEY" ] || [ -z "$TRELLO_TOKEN" ] || [ -z "$TRELLO_IN_PROGRESS_LIST_ID" ]; then
+            echo "Missing Trello configuration. Ensure TRELLO_KEY, TRELLO_TOKEN, and TRELLO_IN_PROGRESS_LIST_ID are set."
+            exit 1
+          fi
+
+          echo "Moving Trello card ${STORY_ID} to In Progress list ${TRELLO_IN_PROGRESS_LIST_ID}"
+          status_code=$(curl -sS -o /tmp/trello_move_response.json -w "%{http_code}" \
+            -X PUT "https://api.trello.com/1/cards/${STORY_ID}" \
+            --get \
+            --data-urlencode "idList=${TRELLO_IN_PROGRESS_LIST_ID}" \
+            --data-urlencode "key=${TRELLO_KEY}" \
+            --data-urlencode "token=${TRELLO_TOKEN}")
+
+          if [ "$status_code" -lt 200 ] || [ "$status_code" -ge 300 ]; then
+            echo "Failed to move Trello card (HTTP ${status_code})"
+            cat /tmp/trello_move_response.json
+            exit 1
+          fi
+
+          echo "Trello card moved to In Progress successfully"
+
