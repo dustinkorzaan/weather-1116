@@ -7,4 +7,9 @@ public class HelloWorldResponse
 {
     public required string RequestMessage { get; set; }
     public required string RequestResponse { get; set; }
+
+    /// <summary>
+    /// The UTC timestamp at which the response was generated.
+    /// </summary>
+    public required DateTime TimestampUtc { get; set; }
 }

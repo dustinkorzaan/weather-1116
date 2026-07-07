@@ -13,7 +13,8 @@ public class HelloWorldHandler : IRequestHandler<HelloWorldEvent, HelloWorldResp
         return Task.FromResult(new HelloWorldResponse
         {
             RequestMessage = helloWorldEvent.Message,
-            RequestResponse = $"Hello, {helloWorldEvent.Message}!"
+            RequestResponse = $"Hello, {helloWorldEvent.Message}!",
+            TimestampUtc = DateTime.UtcNow
         });
     }
 }
