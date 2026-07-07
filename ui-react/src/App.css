@@ -25,3 +25,13 @@
   font-size: 1.25rem;
   font-weight: 600;
 }
+
+.home-content {
+  margin-top: 1rem;
+}
+
+.hello-message {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+}

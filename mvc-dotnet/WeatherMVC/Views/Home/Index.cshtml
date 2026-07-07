@@ -1,8 +1,13 @@
 ﻿@{
     ViewData["Title"] = "Home";
+    var helloResponse = ViewData["HelloResponse"] as string;
 }
 
 <div class="text-center">
+    @if (!string.IsNullOrWhiteSpace(helloResponse))
+    {
+        <p class="lead">@helloResponse</p>
+    }
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
