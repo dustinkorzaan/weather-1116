@@ -1,5 +1,13 @@
 # 6-github-settings Work Log
 
+Add a git hub setting or /docs/ md file to describe this site
+
+4 unique projects with feature parity
+- MVC
+- API
+- React UI
+- Blazor UI
+
 Story: Add a GitHub setting or `/docs/` markdown file to describe this site
 as 4 unique projects with feature parity (MVC, API, React UI, Blazor UI).
 
