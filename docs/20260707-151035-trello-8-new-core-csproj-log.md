@@ -35,3 +35,17 @@ Now update the CI workflow matrix to include Core.csproj build.
 Now rebuild to double check everything still fine, then commit and push.
 
 Build succeeds. Now commit and push.
+
+I need to revert just the workflow file change since I lack permission to push it, then amend the commit.
+
+Pushed successfully.
+
+## Summary
+Added `core-dotnet/Core.csproj` (net10.0 class library) with:
+- `demo/events/HelloWorldEvent.cs` — `Message` string input
+- `demo/handlers/HelloWorldHandler.cs` + `HelloWorldResponse.cs` — `RequestMessage`/`RequestResponse` output
+
+Wired up `ProjectReference` to Core from both `WeatherAPI.csproj` and `WeatherMVC.csproj`, added Core to `Weather.sln`, verified `dotnet build` succeeds for all 4 projects, added a VS Code build task, and updated `README.md`/`docs/architecture.md`.
+
+Note: couldn't update `.github/workflows/build.yml` (CI matrix) — the app lacks the `workflows` permission to push workflow file changes. Left a note in the commit; a maintainer should add `core-dotnet/Core.csproj` to the CI matrix separately. Everything else pushed to `trello-8-new-core-csproj`.
+
