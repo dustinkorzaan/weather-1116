@@ -54,7 +54,7 @@ jobs:
             npx -y @github/copilot -p "${PROMPT}" --allow-all --silent
           elif [ "${AI_TARGET}" = "cursor" ]; then
             echo "Running Cursor Agent for branch ${BRANCH_NAME}"
-            npx -y @nothumanwork/cursor-agents-sdk --print --trust --force "${PROMPT}"
+            npx -y @nothumanwork/cursor-agents-sdk --print --force "${PROMPT}"
           else
             echo "Unsupported ai_target: ${AI_TARGET}"
             exit 1
