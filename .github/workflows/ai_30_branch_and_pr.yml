@@ -3,7 +3,7 @@ name: AI 30 Branch And PR
 on:
   workflow_call:
     inputs:
-      ai_target:
+      ai_target_dev:
         type: string
         required: true
       branch_name:
@@ -59,7 +59,7 @@ jobs:
           PR_NAME="${{ inputs.pr_name }}"
           REPO_FULL="${GITHUB_REPOSITORY}"
           API_URL="https://api.github.com/repos/${REPO_FULL}/pulls"
-          PAYLOAD=$(printf '{"title":"%s","head":"%s","base":"main","body":"Automated PR created from AI workflow (%s)"}' "${PR_NAME}" "${BRANCH_NAME}" "${{ inputs.ai_target }}")
+          PAYLOAD=$(printf '{"title":"%s","head":"%s","base":"main","body":"Automated PR created from AI workflow (%s)"}' "${PR_NAME}" "${BRANCH_NAME}" "${{ inputs.ai_target_dev }}")
 
           echo "Creating PR: ${PR_NAME} (${BRANCH_NAME})"
           resp=$(curl -s -o /dev/stderr -w "%{http_code}" \

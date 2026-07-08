@@ -51,7 +51,7 @@ jobs:
       - name: Run AI target
         env:
           GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
-          COPILOT_PROMPT: ${{ inputs.prompt }}
+          PROMPT: ${{ inputs.prompt }}
           AI_TARGET: ${{ inputs.ai_target }}
           BRANCH_NAME: ${{ inputs.branch_name }}
         shell: bash
@@ -60,10 +60,10 @@ jobs:
 
           if [ "${AI_TARGET}" = "copilot" ]; then
             echo "Running Copilot for branch ${BRANCH_NAME}"
-            copilot -p "${COPILOT_PROMPT}" --allow-all --silent
+            copilot -p "${PROMPT}" --allow-all --silent
           elif [ "${AI_TARGET}" = "cursor" ]; then
             echo "Running Cursor Agent for branch ${BRANCH_NAME}"
-            cursor-agent --print --trust --force "${COPILOT_PROMPT}"
+            cursor-agent --print --trust --force "${PROMPT}"
           else
             echo "Unsupported ai_target: ${AI_TARGET}"
             exit 1
@@ -83,7 +83,7 @@ jobs:
             git config user.email "dustin@korzaan.com"
             git config user.name "Dustin Korzaan"
             git add -A
-            git commit -m "Apply ${{ inputs.ai_target }} generated changes"
+            git commit -m "Apply ${{ inputs.ai_target }} changes"
             git push origin "${{ inputs.branch_name }}"
             echo "Changes committed and pushed to ${{ inputs.branch_name }}"
           else
