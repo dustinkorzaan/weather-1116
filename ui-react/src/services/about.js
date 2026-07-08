@@ -2,7 +2,7 @@
 //   name (string), isHealthy (bool), version (string|null), buildStart (datetime|null),
 //   buildNumber (int|null), children (array)
 
-function createNode(name, overrides = {}) {
+export function createNode(name, overrides = {}) {
   return {
     name,
     isHealthy: true,
@@ -14,32 +14,54 @@ function createNode(name, overrides = {}) {
   };
 }
 
-function computeAggregateHealth(nodes) {
+export function computeAggregateHealth(nodes) {
   return nodes.every((node) => node.isHealthy && computeAggregateHealth(node.children ?? []));
 }
 
-/**
- * Builds the "UI React Root" About tree. The first child is always the UI React app
- * itself, followed by the API's own About tree (which nests Core beneath it).
- */
-export async function fetchAbout() {
+export function buildApiAboutTree({ apiHealthy = true, coreHealthy = true } = {}) {
+  const apiNode = createNode('API', { isHealthy: apiHealthy });
+  const coreNode = createNode('Core', { isHealthy: coreHealthy });
+  const coreRootChildren = [coreNode];
+  const coreRoot = createNode('Core Root', {
+    isHealthy: computeAggregateHealth(coreRootChildren),
+    children: coreRootChildren,
+  });
+  const apiRootChildren = [apiNode, coreRoot];
+
+  return createNode('API Root', {
+    isHealthy: computeAggregateHealth(apiRootChildren),
+    children: apiRootChildren,
+  });
+}
+
+export function buildReactAboutTree(apiRoot) {
   const uiReactNode = createNode('UI React');
-
-  let apiRoot;
-  try {
-    const response = await fetch('/About');
-    if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`);
-    }
-    apiRoot = await response.json();
-  } catch {
-    apiRoot = createNode('API Root', { isHealthy: false });
-  }
-
   const children = [uiReactNode, apiRoot];
 
   return createNode('UI React Root', {
     isHealthy: computeAggregateHealth(children),
     children,
   });
+}
+
+export async function fetchApiAbout(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch {
+    return buildApiAboutTree({ apiHealthy: false, coreHealthy: false });
+  }
+}
+
+export async function fetchAbout() {
+  const response = await fetch('/About');
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return response.json();
 }
