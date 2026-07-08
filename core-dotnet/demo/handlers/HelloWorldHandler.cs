@@ -8,6 +8,7 @@ namespace Core.demo.handlers;
 /// </summary>
 public class HelloWorldHandler : IRequestHandler<HelloWorldEvent, HelloWorldResponse>
 {
+    // Hello
     public Task<HelloWorldResponse> Handle(HelloWorldEvent helloWorldEvent, CancellationToken cancellationToken)
     {
         var timestampUtc = DateTime.UtcNow;
