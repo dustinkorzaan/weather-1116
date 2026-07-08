@@ -12,6 +12,7 @@ public class HelloWorldHandler : IRequestHandler<HelloWorldEvent, HelloWorldResp
     {
         var timestampUtc = DateTime.UtcNow;
 
+        // Hello response stays centralized here for all consumers.
         return Task.FromResult(new HelloWorldResponse
         {
             RequestMessage = helloWorldEvent.Message,
