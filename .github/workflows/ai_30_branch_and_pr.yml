@@ -1,0 +1,77 @@
+name: AI 30 Branch And PR
+
+on:
+  workflow_call:
+    inputs:
+      ai_target:
+        type: string
+        required: true
+      branch_name:
+        type: string
+        required: true
+      pr_name:
+        type: string
+        required: true
+
+jobs:
+  branch_and_pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Fail if branch already exists
+        shell: bash
+        run: |
+          BRANCH_NAME="${{ inputs.branch_name }}"
+          echo "Checking if branch ${BRANCH_NAME} already exists on remote..."
+          if git ls-remote --heads origin "${BRANCH_NAME}" | grep -q "${BRANCH_NAME}"; then
+            echo "Branch ${BRANCH_NAME} already exists on remote. Failing."
+            exit 1
+          fi
+          echo "Branch ${BRANCH_NAME} does not exist on remote."
+
+      - name: Create and push branch
+        shell: bash
+        run: |
+          BRANCH_NAME="${{ inputs.branch_name }}"
+          PR_NAME="${{ inputs.pr_name }}"
+
+          git fetch origin main
+          git checkout -B "${BRANCH_NAME}" "origin/main"
+
+          git config user.email "dustin@korzaan.com"
+          git config user.name "Dustin Korzaan"
+          git commit --allow-empty -m "${PR_NAME}"
+          git push --set-upstream origin "${BRANCH_NAME}"
+
+      - name: Create pull request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          BRANCH_NAME="${{ inputs.branch_name }}"
+          PR_NAME="${{ inputs.pr_name }}"
+          REPO_FULL="${GITHUB_REPOSITORY}"
+          API_URL="https://api.github.com/repos/${REPO_FULL}/pulls"
+          PAYLOAD=$(printf '{"title":"%s","head":"%s","base":"main","body":"Automated PR created from AI workflow (%s)"}' "${PR_NAME}" "${BRANCH_NAME}" "${{ inputs.ai_target }}")
+
+          echo "Creating PR: ${PR_NAME} (${BRANCH_NAME})"
+          resp=$(curl -s -o /dev/stderr -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -d "${PAYLOAD}" \
+            "${API_URL}")
+
+          if [ "${resp}" -ge 200 ] && [ "${resp}" -lt 300 ]; then
+            echo "Pull request created successfully"
+          else
+            echo "Failed to create pull request (status ${resp})"
+            exit 1
+          fi

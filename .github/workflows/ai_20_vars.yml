@@ -1,0 +1,97 @@
+name: AI 20 Vars
+
+on:
+  workflow_call:
+    inputs:
+      story_source:
+        type: string
+        required: true
+      story_number:
+        type: string
+        required: true
+      story_id:
+        type: string
+        required: true
+      story_name:
+        type: string
+        required: true
+      story_description:
+        type: string
+        required: false
+      story_checklists_json:
+        type: string
+        required: false
+    outputs:
+      story_source:
+        value: ${{ jobs.vars.outputs.story_source }}
+      story_id:
+        value: ${{ jobs.vars.outputs.story_id }}
+      prompt:
+        value: ${{ jobs.vars.outputs.prompt }}
+      targets_json:
+        value: ${{ jobs.vars.outputs.targets_json }}
+
+jobs:
+  vars:
+    runs-on: ubuntu-latest
+    outputs:
+      story_source: ${{ steps.out.outputs.story_source }}
+      story_id: ${{ steps.out.outputs.story_id }}
+      prompt: ${{ steps.out.outputs.prompt }}
+      targets_json: ${{ steps.out.outputs.targets_json }}
+    steps:
+      - name: Prepare variables
+        id: out
+        shell: bash
+        env:
+          STORY_SOURCE: ${{ inputs.story_source }}
+          STORY_NUMBER: ${{ inputs.story_number }}
+          STORY_ID: ${{ inputs.story_id }}
+          STORY_NAME: ${{ inputs.story_name }}
+          STORY_DESCRIPTION: ${{ inputs.story_description }}
+          STORY_CHECKLISTS: ${{ inputs.story_checklists_json }}
+        run: |
+          sanitize_name() {
+            local sanitized
+            sanitized=$(printf '%s' "$1" |
+              tr '[:upper:]' '[:lower:]' |
+              sed 's/[^a-z0-9]/-/g' |
+              sed 's/-\+/-/g' |
+              sed 's/^-//; s/-$//')
+            printf '%s' "${sanitized:0:50}"
+          }
+
+          branch_name="trello-${STORY_NUMBER}-${STORY_NAME}"
+          branch_name=$(sanitize_name "$branch_name")
+          pr_name="${branch_name//-/ }"
+
+          echo "story_source=${STORY_SOURCE}" >> "$GITHUB_OUTPUT"
+          echo "story_id=${STORY_ID}" >> "$GITHUB_OUTPUT"
+
+          targets_json=$(printf '[{"ai_target":"copilot","branch_name":"%s","pr_name":"%s"}]' "$branch_name" "$pr_name")
+          echo "targets_json=${targets_json}" >> "$GITHUB_OUTPUT"
+
+          echo "prompt<<EOF" >> "$GITHUB_OUTPUT"
+          prompt_lines=(
+            "You are working in the current branch: ${branch_name}"
+            ""
+            "Story Number: ${STORY_NUMBER}"
+            "Story ID: ${STORY_ID}"
+            "Story Name: ${STORY_NAME}"
+            ""
+            "Story Description:"
+            "<<<STORY_DESCRIPTION_START>>>"
+            "${STORY_DESCRIPTION}"
+            "<<<STORY_DESCRIPTION_END>>>"
+            ""
+            "Story Checklists:"
+            "<<<STORY_CHECKLISTS_START>>>"
+            "${STORY_CHECKLISTS}"
+            "<<<STORY_CHECKLISTS_END>>>"
+            ""
+            "Begin this prompt by echoing this prompt to the console for logging purposes."
+            "Generate and push code in the current branch ${branch_name} based on the Story's description."
+            "Only modify the files in the current working tree."
+          )
+          printf '%s\n' "${prompt_lines[@]}" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
