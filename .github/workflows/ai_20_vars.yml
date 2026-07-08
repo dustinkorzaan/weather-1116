@@ -22,12 +22,6 @@ on:
         type: string
         required: false
     outputs:
-      story_source:
-        value: ${{ jobs.vars.outputs.story_source }}
-      story_id:
-        value: ${{ jobs.vars.outputs.story_id }}
-      prompt:
-        value: ${{ jobs.vars.outputs.prompt }}
       targets_json:
         value: ${{ jobs.vars.outputs.targets_json }}
 
@@ -35,9 +29,6 @@ jobs:
   vars:
     runs-on: ubuntu-latest
     outputs:
-      story_source: ${{ steps.out.outputs.story_source }}
-      story_id: ${{ steps.out.outputs.story_id }}
-      prompt: ${{ steps.out.outputs.prompt }}
       targets_json: ${{ steps.out.outputs.targets_json }}
     steps:
       - name: Prepare variables
@@ -61,37 +52,45 @@ jobs:
             printf '%s' "${sanitized:0:50}"
           }
 
-          branch_name="trello-${STORY_NUMBER}-${STORY_NAME}"
-          branch_name=$(sanitize_name "$branch_name")
-          pr_name="${branch_name//-/ }"
+          build_prompt() {
+            local branch_name="$1"
 
-          echo "story_source=${STORY_SOURCE}" >> "$GITHUB_OUTPUT"
-          echo "story_id=${STORY_ID}" >> "$GITHUB_OUTPUT"
+            printf '%s\n' \
+              "You are working in the current branch: ${branch_name}" \
+              "" \
+              "Story Number: ${STORY_NUMBER}" \
+              "Story ID: ${STORY_ID}" \
+              "Story Name: ${STORY_NAME}" \
+              "" \
+              "Story Description:" \
+              "<<<STORY_DESCRIPTION_START>>>" \
+              "${STORY_DESCRIPTION}" \
+              "<<<STORY_DESCRIPTION_END>>>" \
+              "" \
+              "Story Checklists:" \
+              "<<<STORY_CHECKLISTS_START>>>" \
+              "${STORY_CHECKLISTS}" \
+              "<<<STORY_CHECKLISTS_END>>>" \
+              "" \
+              "Begin this prompt by echoing this prompt to the console for logging purposes." \
+              "Generate and push code in the current branch ${branch_name} based on the Story's description." \
+              "Only modify the files in the current working tree."
+          }
 
-          targets_json=$(printf '[{"ai_target":"copilot","branch_name":"%s","pr_name":"%s"},{"ai_target":"cursor","branch_name":"%s","pr_name":"%s"}]' "$branch_name" "$pr_name" "$branch_name" "$pr_name")
+          build_target_json() {
+            local ai_target="$1"
+            local branch_name
+            local pr_name
+            local prompt_json
+
+            branch_name=$(sanitize_name "trello-${STORY_NUMBER}-${STORY_NAME}-${ai_target}")
+            pr_name="${branch_name//-/ }"
+            prompt_json=$(build_prompt "$branch_name" | jq -Rs .)
+
+            printf '{"ai_target":"%s","branch_name":"%s","pr_name":"%s","prompt":%s}' "$ai_target" "$branch_name" "$pr_name" "$prompt_json"
+          }
+
+          targets_json=$(printf '[%s,%s]' \
+            "$(build_target_json "copilot")" \
+            "$(build_target_json "cursor")")
           echo "targets_json=${targets_json}" >> "$GITHUB_OUTPUT"
-
-          echo "prompt<<EOF" >> "$GITHUB_OUTPUT"
-          prompt_lines=(
-            "You are working in the current branch: ${branch_name}"
-            ""
-            "Story Number: ${STORY_NUMBER}"
-            "Story ID: ${STORY_ID}"
-            "Story Name: ${STORY_NAME}"
-            ""
-            "Story Description:"
-            "<<<STORY_DESCRIPTION_START>>>"
-            "${STORY_DESCRIPTION}"
-            "<<<STORY_DESCRIPTION_END>>>"
-            ""
-            "Story Checklists:"
-            "<<<STORY_CHECKLISTS_START>>>"
-            "${STORY_CHECKLISTS}"
-            "<<<STORY_CHECKLISTS_END>>>"
-            ""
-            "Begin this prompt by echoing this prompt to the console for logging purposes."
-            "Generate and push code in the current branch ${branch_name} based on the Story's description."
-            "Only modify the files in the current working tree."
-          )
-          printf '%s\n' "${prompt_lines[@]}" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"

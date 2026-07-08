@@ -45,7 +45,7 @@ jobs:
     with:
       ai_target: ${{ matrix.target.ai_target }}
       branch_name: ${{ matrix.target.branch_name }}
-      prompt: ${{ needs.vars.outputs.prompt }}
+      prompt: ${{ matrix.target.prompt }}
     secrets: inherit
 
   callback:
@@ -53,7 +53,7 @@ jobs:
     if: ${{ always() }}
     uses: ./.github/workflows/ai_90_callback.yml
     with:
-      story_source: ${{ needs.vars.outputs.story_source }}
-      story_id: ${{ needs.vars.outputs.story_id }}
+      story_source: ${{ github.event.client_payload.story_source }}
+      story_id: ${{ github.event.client_payload.story_id }}
       run_status: ${{ needs.run_ai.result }}
     secrets: inherit
