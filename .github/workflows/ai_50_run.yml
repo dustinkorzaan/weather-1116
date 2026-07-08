@@ -14,7 +14,7 @@ on:
         required: true
     secrets:
       COPILOT_TOKEN:
-        required: false
+        required: true
 
 jobs:
   run_ai:
@@ -52,11 +52,14 @@ jobs:
           set -euo pipefail
 
           TS=$(date +%Y%m%d-%H%M%S)
-          mkdir -p docs
+          LOG_DIR="${RUNNER_TEMP}/ai-run-logs"
+          mkdir -p "${LOG_DIR}"
+          LOG_FILE="${LOG_DIR}/${TS}-${BRANCH_NAME}-${AI_TARGET}-log.md"
+          echo "LOG_FILE=${LOG_FILE}" >> "$GITHUB_ENV"
 
           if [ "${AI_TARGET}" = "copilot" ]; then
             echo "Running Copilot for branch ${BRANCH_NAME}"
-            copilot -p "${COPILOT_PROMPT}" --allow-all --silent 2>&1 | tee "docs/${TS}-${BRANCH_NAME}-${AI_TARGET}-log.md"
+            copilot -p "${COPILOT_PROMPT}" --allow-all --silent 2>&1 | tee "${LOG_FILE}"
           else
             echo "Unsupported ai_target: ${AI_TARGET}"
             exit 1
@@ -82,3 +85,33 @@ jobs:
           else
             echo "No remaining changes to commit"
           fi
+
+      - name: Upload AI run log artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-run-log-${{ inputs.ai_target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.LOG_FILE }}
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Add AI run summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          {
+            echo "## AI Run Log"
+            echo ""
+            echo "- Target: ${{ inputs.ai_target }}"
+            echo "- Branch: ${{ inputs.branch_name }}"
+            echo "- Artifact: ai-run-log-${{ inputs.ai_target }}-${{ github.run_id }}-${{ github.run_attempt }}"
+            echo ""
+            if [ -n "${LOG_FILE:-}" ] && [ -f "${LOG_FILE}" ]; then
+              echo "### Last 40 Log Lines"
+              echo '```text'
+              tail -n 40 "${LOG_FILE}"
+              echo '```'
+            else
+              echo "Log file was not created."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
