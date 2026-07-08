@@ -35,3 +35,28 @@ body {
   width: 1.375rem;
   height: 1.375rem;
 }
+
+/* Avatar menu (top-right, all pages/viewports). Placeholder for future auth-backed identity. */
+.avatar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: #185ca9;
+  color: #fff;
+}
+
+.avatar-button:hover,
+.avatar-button:focus {
+  background-color: #12457f;
+  color: #fff;
+}
+
+.avatar-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
