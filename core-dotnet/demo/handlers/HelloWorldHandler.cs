@@ -10,6 +10,7 @@ public class HelloWorldHandler : IRequestHandler<HelloWorldEvent, HelloWorldResp
 {
     public Task<HelloWorldResponse> Handle(HelloWorldEvent helloWorldEvent, CancellationToken cancellationToken)
     {
+        // Hello
         var timestampUtc = DateTime.UtcNow;
 
         return Task.FromResult(new HelloWorldResponse
