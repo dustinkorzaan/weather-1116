@@ -45,6 +45,8 @@ jobs:
       - name: Run AI target
         env:
           COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+          # Copilot CLI reads COPILOT_GITHUB_TOKEN / GH_TOKEN / GITHUB_TOKEN, not COPILOT_TOKEN.
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           PROMPT: ${{ inputs.prompt }}
           AI_TARGET: ${{ inputs.ai_target }}

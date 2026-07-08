@@ -50,7 +50,9 @@ jobs:
 
   review_ai:
     needs: [vars, run_ai]
-    if: ${{ needs.run_ai.result == 'success' }}
+    # Matrix run_ai is failure if any leg fails; still review completed legs.
+    # Overall success still requires both stages via callback run_status.
+    if: ${{ !cancelled() && contains(fromJSON('["success", "failure"]'), needs.run_ai.result) }}
     permissions:
       contents: write
       pull-requests: write
