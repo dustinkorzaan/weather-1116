@@ -70,13 +70,26 @@ jobs:
       - name: Commit and push generated changes
         shell: bash
         run: |
+          set -euo pipefail
+
+          git config user.email "dustin@korzaan.com"
+          git config user.name "Dustin Korzaan"
+
+          # Commit any leftover dirty files the AI left uncommitted.
           if git status --porcelain --untracked-files=all | grep -q .; then
-            git config user.email "dustin@korzaan.com"
-            git config user.name "Dustin Korzaan"
             git add -A
             git commit -m "Apply ${{ inputs.ai_target }} changes"
-            git push origin "${{ inputs.branch_name }}"
-            echo "Changes committed and pushed to ${{ inputs.branch_name }}"
+            echo "Committed remaining working-tree changes"
           else
-            echo "No remaining changes to commit"
+            echo "No remaining working-tree changes to commit"
+          fi
+
+          # Push whenever local HEAD is ahead of origin, including the case
+          # where the AI committed locally but did not push.
+          AHEAD_COUNT="$(git rev-list --count "origin/${{ inputs.branch_name }}..HEAD")"
+          if [ "${AHEAD_COUNT}" -gt 0 ]; then
+            git push origin "${{ inputs.branch_name }}"
+            echo "Pushed ${AHEAD_COUNT} commit(s) to ${{ inputs.branch_name }}"
+          else
+            echo "No local commits to push"
           fi
