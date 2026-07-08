@@ -38,8 +38,6 @@ jobs:
 
       - name: Install GitHub Copilot CLI
         if: ${{ inputs.ai_target == 'copilot' }}
-        env:
-          COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
         shell: bash
         run: |
           npm install -g @github/copilot
