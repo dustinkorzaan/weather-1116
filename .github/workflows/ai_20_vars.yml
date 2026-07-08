@@ -22,12 +22,6 @@ on:
         type: string
         required: false
     outputs:
-      story_source:
-        value: ${{ jobs.vars.outputs.story_source }}
-      story_id:
-        value: ${{ jobs.vars.outputs.story_id }}
-      prompt:
-        value: ${{ jobs.vars.outputs.prompt }}
       targets_json:
         value: ${{ jobs.vars.outputs.targets_json }}
 
@@ -35,9 +29,6 @@ jobs:
   vars:
     runs-on: ubuntu-latest
     outputs:
-      story_source: ${{ steps.out.outputs.story_source }}
-      story_id: ${{ steps.out.outputs.story_id }}
-      prompt: ${{ steps.out.outputs.prompt }}
       targets_json: ${{ steps.out.outputs.targets_json }}
     steps:
       - name: Prepare variables
@@ -61,37 +52,111 @@ jobs:
             printf '%s' "${sanitized:0:50}"
           }
 
-          branch_name="trello-${STORY_NUMBER}-${STORY_NAME}"
-          branch_name=$(sanitize_name "$branch_name")
-          pr_name="${branch_name//-/ }"
+          build_prompt_dev() {
+            local branch_name="$1"
 
-          echo "story_source=${STORY_SOURCE}" >> "$GITHUB_OUTPUT"
-          echo "story_id=${STORY_ID}" >> "$GITHUB_OUTPUT"
+            printf '%s\n' \
+              "Context" \
+              "- You are working in the current branch: ${branch_name}" \
+              "" \
+              "Story Metadata" \
+              "- Story Number: ${STORY_NUMBER}" \
+              "- Story ID: ${STORY_ID}" \
+              "- Story Name: ${STORY_NAME}" \
+              "" \
+              "Story Description" \
+              "<<<STORY_DESCRIPTION_START>>>" \
+              "${STORY_DESCRIPTION}" \
+              "<<<STORY_DESCRIPTION_END>>>" \
+              "" \
+              "Story Checklists" \
+              "<<<STORY_CHECKLISTS_START>>>" \
+              "${STORY_CHECKLISTS}" \
+              "<<<STORY_CHECKLISTS_END>>>" \
+              "" \
+              "Task" \
+              "- Implement the story on the current branch." \
+              "- Use the story description and checklists as the source of truth for the requested behavior." \
+              "- Prefer minimal, targeted changes that solve the requested problem at the root cause." \
+              "" \
+              "Constraints" \
+              "- Only modify files in the current working tree." \
+              "- Do not make unrelated refactors, formatting-only edits, or speculative changes." \
+              "- Preserve existing behavior outside the requested scope." \
+              "- If the story is ambiguous, make the smallest reasonable implementation consistent with the provided description and checklist items." \
+              "- You may add TODO: comments for genuine outstanding items, known limitations, or necessary follow-up work, but not as a substitute for required implementation in scope." \
+              "" \
+              "Output Expectations" \
+              "- Begin by echoing this full prompt to the console for logging." \
+              "- Then inspect the codebase, implement the required changes, and commit only the files needed for the story." \
+              "- Before finishing, verify the changed code with the narrowest relevant checks available."
+          }
 
-          targets_json=$(printf '[{"ai_target":"copilot","branch_name":"%s","pr_name":"%s"}]' "$branch_name" "$pr_name")
+          build_prompt_review() {
+            local branch_name="$1"
+
+            printf '%s\n' \
+              "Context" \
+              "- You are reviewing code already generated on the current branch: ${branch_name}" \
+              "" \
+              "Story Metadata" \
+              "- Story Number: ${STORY_NUMBER}" \
+              "- Story ID: ${STORY_ID}" \
+              "- Story Name: ${STORY_NAME}" \
+              "" \
+              "Story Description" \
+              "<<<STORY_DESCRIPTION_START>>>" \
+              "${STORY_DESCRIPTION}" \
+              "<<<STORY_DESCRIPTION_END>>>" \
+              "" \
+              "Story Checklists" \
+              "<<<STORY_CHECKLISTS_START>>>" \
+              "${STORY_CHECKLISTS}" \
+              "<<<STORY_CHECKLISTS_END>>>" \
+              "" \
+              "Review Task" \
+              "- Review only the changes on the current branch against the story description and checklist items." \
+              "- Focus on correctness, regressions, missing requirements, and scope control." \
+              "- Treat the story description and checklist items as the acceptance criteria." \
+              "" \
+              "Review Constraints" \
+              "- Keep changes tightly scoped to issues you find while reviewing the current branch against the story requirements." \
+              "- Do not review unrelated parts of the repository unless the generated changes clearly affect them." \
+              "- Prefer concrete findings over general advice." \
+              "- Do not make unrelated refactors, formatting-only edits, or speculative changes." \
+              "- You may add TODO: comments for genuine outstanding items, known limitations, or necessary follow-up work, but not as a substitute for fixing issues that are clearly in scope." \
+              "" \
+              "Blocking Findings" \
+              "- Report a blocking finding if you detect a likely bug, a missed acceptance criterion, an obvious regression risk, or an unrelated change outside the story scope." \
+              "" \
+              "Output Format" \
+              "- Begin by echoing this full prompt to the console for logging." \
+              "- Then inspect the current branch, make any necessary corrections that stay within story scope, and commit only the files needed for those corrections." \
+              "- End with a concise review summary describing what you verified and what, if anything, you changed." \
+              "" \
+              "Each finding or correction summary should include:" \
+              "- the affected file or area" \
+              "- the problem or risk addressed" \
+              "- why it matters relative to the story requirements"
+          }
+
+          build_target_json() {
+            local ai_target_dev="$1"
+            local ai_target_review="$2"
+            local branch_name
+            local pr_name
+            local prompt_dev_json
+            local prompt_review_json
+
+            branch_name=$(sanitize_name "trello-${ai_target_dev}-${STORY_NUMBER}-${STORY_NAME}")
+            pr_name="${branch_name//-/ }"
+            prompt_dev_json=$(build_prompt_dev "$branch_name" | jq -Rs .)
+            prompt_review_json=$(build_prompt_review "$branch_name" | jq -Rs .)
+
+            printf '{"ai_target_dev":"%s","ai_target_review":"%s","branch_name":"%s","pr_name":"%s","prompt_dev":%s,"prompt_review":%s}' "$ai_target_dev" "$ai_target_review" "$branch_name" "$pr_name" "$prompt_dev_json" "$prompt_review_json"
+          }
+
+          targets_json=$(printf '[%s,%s]' \
+            "$(build_target_json "copilot" "cursor")" \
+            "$(build_target_json "cursor" "copilot")")
           echo "targets_json=${targets_json}" >> "$GITHUB_OUTPUT"
-
-          echo "prompt<<EOF" >> "$GITHUB_OUTPUT"
-          prompt_lines=(
-            "You are working in the current branch: ${branch_name}"
-            ""
-            "Story Number: ${STORY_NUMBER}"
-            "Story ID: ${STORY_ID}"
-            "Story Name: ${STORY_NAME}"
-            ""
-            "Story Description:"
-            "<<<STORY_DESCRIPTION_START>>>"
-            "${STORY_DESCRIPTION}"
-            "<<<STORY_DESCRIPTION_END>>>"
-            ""
-            "Story Checklists:"
-            "<<<STORY_CHECKLISTS_START>>>"
-            "${STORY_CHECKLISTS}"
-            "<<<STORY_CHECKLISTS_END>>>"
-            ""
-            "Begin this prompt by echoing this prompt to the console for logging purposes."
-            "Generate and push code in the current branch ${branch_name} based on the Story's description."
-            "Only modify the files in the current working tree."
-          )
-          printf '%s\n' "${prompt_lines[@]}" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
