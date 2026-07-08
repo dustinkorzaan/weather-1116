@@ -35,6 +35,7 @@ jobs:
           node-version: "24"
 
       - name: Install GitHub Copilot CLI
+        if: ${{ inputs.ai_target == 'copilot' }}
         env:
           COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
         shell: bash
@@ -42,6 +43,7 @@ jobs:
           npm install -g @github/copilot
 
       - name: Install Cursor CLI
+        if: ${{ inputs.ai_target == 'cursor' }}
         shell: bash
         run: |
           npm install -g @nothumanwork/cursor-agent-cli
