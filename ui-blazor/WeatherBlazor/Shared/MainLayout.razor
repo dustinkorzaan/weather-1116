@@ -9,7 +9,31 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <div class="avatar-menu" @onclick:stopPropagation="true">
+                <button type="button"
+                        class="avatar-button"
+                        aria-haspopup="true"
+                        aria-expanded="@_isMenuOpen.ToString().ToLowerInvariant()"
+                        aria-label="Open user menu"
+                        @onclick="ToggleMenu">
+                    <svg viewBox="0 0 24 24" class="avatar-icon" aria-hidden="true" focusable="false">
+                        <circle cx="12" cy="8" r="4" fill="currentColor" />
+                        <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" fill="currentColor" />
+                    </svg>
+                </button>
+
+                @if (_isMenuOpen)
+                {
+                    <div class="avatar-dropdown-backdrop" role="presentation" @onclick="CloseMenu"></div>
+                    <ul class="avatar-dropdown" role="menu">
+                        <li role="none">
+                            <button type="button" role="menuitem" class="avatar-dropdown-item" @onclick="OpenAboutModal">
+                                About
+                            </button>
+                        </li>
+                    </ul>
+                }
+            </div>
         </div>
 
         <article class="content px-4">
@@ -17,3 +41,43 @@
         </article>
     </main>
 </div>
+
+@if (_isAboutModalOpen)
+{
+    <div class="modal-backdrop" role="presentation" @onclick="CloseAboutModal">
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="about-modal-title" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h2 id="about-modal-title" class="modal-title">About</h2>
+                <button type="button" class="modal-close" aria-label="Close" @onclick="CloseAboutModal">&times;</button>
+            </div>
+            <!-- Placeholder body - intentionally blank. About content to be added in a future story. -->
+            <div class="modal-body"></div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _isMenuOpen;
+    private bool _isAboutModalOpen;
+
+    private void ToggleMenu()
+    {
+        _isMenuOpen = !_isMenuOpen;
+    }
+
+    private void CloseMenu()
+    {
+        _isMenuOpen = false;
+    }
+
+    private void OpenAboutModal()
+    {
+        _isMenuOpen = false;
+        _isAboutModalOpen = true;
+    }
+
+    private void CloseAboutModal()
+    {
+        _isAboutModalOpen = false;
+    }
+}
