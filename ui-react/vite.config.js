@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { aboutEndpointPlugin } from "./vite-about-plugin.js";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), aboutEndpointPlugin()],
   server: {
     proxy: {
       '/Home': {
