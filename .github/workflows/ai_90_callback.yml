@@ -9,9 +9,6 @@ on:
       story_id:
         type: string
         required: true
-      run_status:
-        type: string
-        required: true
     secrets:
       TRELLO_KEY:
         required: false
@@ -28,14 +25,11 @@ jobs:
       - name: Move Trello card to In Progress
         env:
           STORY_ID: ${{ inputs.story_id }}
-          RUN_STATUS: ${{ inputs.run_status }}
           TRELLO_KEY: ${{ secrets.TRELLO_KEY }}
           TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
           TRELLO_IN_PROGRESS_LIST_ID: ${{ secrets.TRELLO_IN_PROGRESS_LIST_ID }}
         shell: bash
         run: |
-          echo "Upstream AI run status: ${RUN_STATUS}"
-
           if [ -z "${STORY_ID}" ]; then
             echo "STORY_ID is required to move card"
             exit 1
