@@ -68,7 +68,7 @@ jobs:
           echo "story_source=${STORY_SOURCE}" >> "$GITHUB_OUTPUT"
           echo "story_id=${STORY_ID}" >> "$GITHUB_OUTPUT"
 
-          targets_json=$(printf '[{"ai_target":"copilot","branch_name":"%s","pr_name":"%s"}]' "$branch_name" "$pr_name")
+          targets_json=$(printf '[{"ai_target":"copilot","branch_name":"%s","pr_name":"%s"},{"ai_target":"cursor","branch_name":"%s","pr_name":"%s"}]' "$branch_name" "$pr_name" "$branch_name" "$pr_name")
           echo "targets_json=${targets_json}" >> "$GITHUB_OUTPUT"
 
           echo "prompt<<EOF" >> "$GITHUB_OUTPUT"
