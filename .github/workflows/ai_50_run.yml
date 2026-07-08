@@ -36,11 +36,7 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Install GitHub Copilot CLI
-        if: ${{ inputs.ai_target == 'copilot' }}
-        shell: bash
-        run: |
-          npm install -g @github/copilot
+
 
       - name: Run AI target
         env:
@@ -55,7 +51,7 @@ jobs:
 
           if [ "${AI_TARGET}" = "copilot" ]; then
             echo "Running Copilot for branch ${BRANCH_NAME}"
-            copilot -p "${PROMPT}" --allow-all --silent
+            npx -y @github/copilot -p "${PROMPT}" --allow-all --silent
           elif [ "${AI_TARGET}" = "cursor" ]; then
             echo "Running Cursor Agent for branch ${BRANCH_NAME}"
             npx -y @nothumanwork/cursor-agents-sdk --print --trust --force "${PROMPT}"

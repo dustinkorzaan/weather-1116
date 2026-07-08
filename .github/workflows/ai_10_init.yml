@@ -71,5 +71,4 @@ jobs:
     with:
       story_source: ${{ github.event.client_payload.story_source }}
       story_id: ${{ github.event.client_payload.story_id }}
-      run_status: ${{ needs.run_ai.result == 'success' && needs.review_ai.result || needs.run_ai.result }}
     secrets: inherit
