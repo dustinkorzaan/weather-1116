@@ -1,0 +1,57 @@
+name: AI 90 Callback
+
+on:
+  workflow_call:
+    inputs:
+      story_source:
+        type: string
+        required: true
+      story_id:
+        type: string
+        required: true
+    secrets:
+      TRELLO_KEY:
+        required: false
+      TRELLO_TOKEN:
+        required: false
+      TRELLO_IN_PROGRESS_LIST_ID:
+        required: false
+
+jobs:
+  trello_callback:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.story_source == 'trello' }}
+    steps:
+      - name: Move Trello card to In Progress
+        env:
+          STORY_ID: ${{ inputs.story_id }}
+          TRELLO_KEY: ${{ secrets.TRELLO_KEY }}
+          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
+          TRELLO_IN_PROGRESS_LIST_ID: ${{ secrets.TRELLO_IN_PROGRESS_LIST_ID }}
+        shell: bash
+        run: |
+          if [ -z "${STORY_ID}" ]; then
+            echo "STORY_ID is required to move card"
+            exit 1
+          fi
+
+          if [ -z "${TRELLO_KEY}" ] || [ -z "${TRELLO_TOKEN}" ] || [ -z "${TRELLO_IN_PROGRESS_LIST_ID}" ]; then
+            echo "Missing Trello configuration. Ensure TRELLO_KEY, TRELLO_TOKEN, and TRELLO_IN_PROGRESS_LIST_ID are set."
+            exit 1
+          fi
+
+          echo "Moving Trello card ${STORY_ID} to In Progress list ${TRELLO_IN_PROGRESS_LIST_ID}"
+          status_code=$(curl -sS -o /tmp/trello_move_response.json -w "%{http_code}" \
+            -X PUT "https://api.trello.com/1/cards/${STORY_ID}" \
+            --get \
+            --data-urlencode "idList=${TRELLO_IN_PROGRESS_LIST_ID}" \
+            --data-urlencode "key=${TRELLO_KEY}" \
+            --data-urlencode "token=${TRELLO_TOKEN}")
+
+          if [ "${status_code}" -lt 200 ] || [ "${status_code}" -ge 300 ]; then
+            echo "Failed to move Trello card (HTTP ${status_code})"
+            cat /tmp/trello_move_response.json
+            exit 1
+          fi
+
+          echo "Trello card moved to In Progress successfully"

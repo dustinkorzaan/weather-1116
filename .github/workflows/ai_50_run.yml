@@ -1,0 +1,82 @@
+name: AI 50 Run
+
+on:
+  workflow_call:
+    inputs:
+      ai_target:
+        type: string
+        required: true
+      branch_name:
+        type: string
+        required: true
+      prompt:
+        type: string
+        required: true
+    secrets:
+      COPILOT_TOKEN:
+        required: true
+      CURSOR_API_KEY:
+        required: true
+
+jobs:
+  run_ai:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.branch_name }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+
+
+      - name: Run AI target
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          PROMPT: ${{ inputs.prompt }}
+          AI_TARGET: ${{ inputs.ai_target }}
+          BRANCH_NAME: ${{ inputs.branch_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${AI_TARGET}" = "copilot" ]; then
+            echo "Running Copilot for branch ${BRANCH_NAME}"
+            npx -y @github/copilot -p "${PROMPT}" --allow-all --silent
+          elif [ "${AI_TARGET}" = "cursor" ]; then
+            echo "Running Cursor Agent for branch ${BRANCH_NAME}"
+            npx -y @nothumanwork/cursor-agents-sdk --print --force "${PROMPT}"
+          else
+            echo "Unsupported ai_target: ${AI_TARGET}"
+            exit 1
+          fi
+
+          echo ""
+          echo "=== Git Status After AI ==="
+          git status --short
+          echo ""
+          echo "=== Git Diff Summary After AI ==="
+          git diff --stat
+
+      - name: Commit and push generated changes
+        shell: bash
+        run: |
+          if git status --porcelain --untracked-files=all | grep -q .; then
+            git config user.email "dustin@korzaan.com"
+            git config user.name "Dustin Korzaan"
+            git add -A
+            git commit -m "Apply ${{ inputs.ai_target }} changes"
+            git push origin "${{ inputs.branch_name }}"
+            echo "Changes committed and pushed to ${{ inputs.branch_name }}"
+          else
+            echo "No remaining changes to commit"
+          fi
