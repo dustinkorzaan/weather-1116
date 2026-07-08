@@ -14,6 +14,10 @@ export default defineConfig({
         target: process.env.WEATHER_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
+      '/About': {
+        target: process.env.WEATHER_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
   test: {
