@@ -83,7 +83,7 @@ jobs:
             local pr_name
             local prompt_json
 
-            branch_name=$(sanitize_name "trello-${STORY_NUMBER}-${STORY_NAME}-${ai_target}")
+            branch_name=$(sanitize_name "trello-${ai_target}-${STORY_NUMBER}-${STORY_NAME}")
             pr_name="${branch_name//-/ }"
             prompt_json=$(build_prompt "$branch_name" | jq -Rs .)
 
