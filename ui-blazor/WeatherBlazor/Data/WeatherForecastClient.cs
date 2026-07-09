@@ -15,7 +15,13 @@ public class WeatherForecastClient
     }
 
     public async Task<WeatherForecast[]> GetForecastAsync(DateTime? startDate)
-        => await _httpClient.GetFromJsonAsync<WeatherForecast[]>($"WeatherForecast?startDate={startDate}") ?? [];
+    {
+        var route = startDate.HasValue
+            ? $"WeatherForecast?startDate={Uri.EscapeDataString(startDate.Value.ToString("O"))}"
+            : "WeatherForecast";
+
+        return await _httpClient.GetFromJsonAsync<WeatherForecast[]>(route) ?? [];
+    }
 
     public async Task<HelloWorldResponse?> GetHelloAsync()
         => await _httpClient.GetFromJsonAsync<HelloWorldResponse>("Home/Hello");
