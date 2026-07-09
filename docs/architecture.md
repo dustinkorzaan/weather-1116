@@ -46,6 +46,11 @@ equivalent backend logic in both projects.
 For UI changes, keep MVC, React, and Blazor implementations aligned by
 duplicating equivalent UI behavior in all three projects.
 
+It is acceptable for React and Blazor to repeat equivalent frontend
+models instead of sharing code. These projects are intentionally framework-
+native and independently maintainable; parity is behavioral and API-contract
+based, not enforced through shared frontend model artifacts.
+
 ## Local Run Model
 
 The four runnable applications are intended to run together in VS Code via Run
