@@ -144,3 +144,50 @@
   min-height: 4rem;
   padding: 1rem;
 }
+
+.about-status {
+  margin: 0;
+  color: #333;
+}
+
+.about-status.error {
+  color: #b42318;
+}
+
+.about-tree-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.about-tree-list.root {
+  padding-left: 0;
+}
+
+.about-tree-item {
+  margin: 0.35rem 0;
+}
+
+.about-tree-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.about-tree-name {
+  font-weight: 600;
+}
+
+.about-tree-health {
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.about-tree-health.healthy {
+  color: #137333;
+}
+
+.about-tree-health.unhealthy {
+  color: #b42318;
+}

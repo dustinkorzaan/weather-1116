@@ -2,3 +2,79 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+(function initAboutModal() {
+	function createNode(node) {
+		const li = document.createElement('li');
+		li.className = 'about-tree-item';
+
+		const row = document.createElement('div');
+		row.className = 'about-tree-row';
+
+		const name = document.createElement('span');
+		name.className = 'about-tree-name';
+		name.textContent = node?.name ?? 'Unnamed node';
+
+		const health = document.createElement('span');
+		const isHealthy = !!node?.isHealthy;
+		health.className = `about-tree-health ${isHealthy ? 'healthy' : 'unhealthy'}`;
+		health.textContent = isHealthy ? 'Healthy' : 'Unhealthy';
+
+		row.appendChild(name);
+		row.appendChild(health);
+		li.appendChild(row);
+
+		if (Array.isArray(node?.children) && node.children.length > 0) {
+			const childList = document.createElement('ul');
+			childList.className = 'about-tree-list';
+
+			node.children.forEach((child) => {
+				childList.appendChild(createNode(child));
+			});
+
+			li.appendChild(childList);
+		}
+
+		return li;
+	}
+
+	async function loadAbout() {
+		const status = document.getElementById('aboutStatus');
+		const container = document.getElementById('aboutTreeContainer');
+		if (!status || !container) {
+			return;
+		}
+
+		status.textContent = 'Loading About information...';
+		status.classList.remove('d-none', 'about-status-error');
+		container.classList.add('d-none');
+		container.textContent = '';
+
+		try {
+			const response = await fetch('/About');
+			if (!response.ok) {
+				throw new Error(`Request failed: ${response.status}`);
+			}
+
+			const root = await response.json();
+			const rootList = document.createElement('ul');
+			rootList.className = 'about-tree-list root';
+			rootList.appendChild(createNode(root));
+
+			container.appendChild(rootList);
+			container.classList.remove('d-none');
+			status.classList.add('d-none');
+		} catch {
+			status.textContent = 'Unable to load About information.';
+			status.classList.add('about-status-error');
+		}
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		const aboutModal = document.getElementById('aboutModal');
+		if (!aboutModal) {
+			return;
+		}
+
+		aboutModal.addEventListener('show.bs.modal', loadAbout);
+	});
+})();

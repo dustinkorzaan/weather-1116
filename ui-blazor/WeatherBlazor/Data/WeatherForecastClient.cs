@@ -22,4 +22,47 @@ public class WeatherForecastClient
 
     public async Task<HelloWorldResponse?> GetHelloAsync()
         => await _httpClient.GetFromJsonAsync<HelloWorldResponse>("Home/Hello");
+
+    public async Task<AboutNode> GetAboutAsync()
+    {
+        AboutNode apiRoot;
+
+        try
+        {
+            apiRoot = await _httpClient.GetFromJsonAsync<AboutNode>("About")
+                ?? new AboutNode { Name = "API Root", IsHealthy = false };
+        }
+        catch
+        {
+            apiRoot = new AboutNode { Name = "API Root", IsHealthy = false };
+        }
+
+        var blazorNode = new AboutNode
+        {
+            Name = "Blazor",
+            IsHealthy = true,
+        };
+
+        var children = new List<AboutNode> { blazorNode, apiRoot };
+
+        return new AboutNode
+        {
+            Name = "Blazor Root",
+            Children = children,
+            IsHealthy = ComputeAggregateHealth(children),
+        };
+    }
+
+    private static bool ComputeAggregateHealth(IEnumerable<AboutNode> nodes)
+    {
+        foreach (var node in nodes)
+        {
+            if (!node.IsHealthy || !ComputeAggregateHealth(node.Children))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

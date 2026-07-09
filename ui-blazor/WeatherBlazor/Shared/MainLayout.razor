@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@using WeatherBlazor.Data
+@inject WeatherForecastClient WeatherClient
 
 <PageTitle>WeatherBlazor</PageTitle>
 
@@ -50,8 +52,22 @@
                 <h2 id="about-modal-title" class="modal-title">About</h2>
                 <button type="button" class="modal-close" aria-label="Close" @onclick="CloseAboutModal">&times;</button>
             </div>
-            <!-- Placeholder body - intentionally blank. About content to be added in a future story. -->
-            <div class="modal-body"></div>
+            <div class="modal-body">
+                @if (_isAboutLoading)
+                {
+                    <p class="about-status">Loading About information...</p>
+                }
+                else if (!string.IsNullOrWhiteSpace(_aboutError))
+                {
+                    <p class="about-status error">@_aboutError</p>
+                }
+                else if (_aboutRoot is not null)
+                {
+                    <ul class="about-tree-list root">
+                        <AboutTreeNode Node="_aboutRoot" />
+                    </ul>
+                }
+            </div>
         </div>
     </div>
 }
@@ -59,6 +75,9 @@
 @code {
     private bool _isMenuOpen;
     private bool _isAboutModalOpen;
+    private bool _isAboutLoading;
+    private string _aboutError = string.Empty;
+    private AboutNode? _aboutRoot;
 
     private void ToggleMenu()
     {
@@ -70,10 +89,30 @@
         _isMenuOpen = false;
     }
 
-    private void OpenAboutModal()
+    private async Task OpenAboutModal()
     {
         _isMenuOpen = false;
         _isAboutModalOpen = true;
+        _isAboutLoading = true;
+        _aboutError = string.Empty;
+
+        try
+        {
+            _aboutRoot = await WeatherClient.GetAboutAsync();
+            if (_aboutRoot is null)
+            {
+                _aboutError = "Unable to load About information.";
+            }
+        }
+        catch
+        {
+            _aboutRoot = null;
+            _aboutError = "Unable to load About information.";
+        }
+        finally
+        {
+            _isAboutLoading = false;
+        }
     }
 
     private void CloseAboutModal()

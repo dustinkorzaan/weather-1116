@@ -1,10 +1,41 @@
 import './App.css';
 import { useEffect, useRef, useState } from 'react';
+import { fetchAbout } from './services/about';
+
+function AboutTreeNode({ node }) {
+  if (!node) {
+    return null;
+  }
+
+  const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+
+  return (
+    <li className="about-tree-item">
+      <div className="about-tree-row">
+        <span className="about-tree-name">{node.name ?? 'Unnamed node'}</span>
+        <span className={`about-tree-health ${node.isHealthy ? 'healthy' : 'unhealthy'}`}>
+          {node.isHealthy ? 'Healthy' : 'Unhealthy'}
+        </span>
+      </div>
+
+      {hasChildren && (
+        <ul className="about-tree-list">
+          {node.children.map((child, index) => (
+            <AboutTreeNode key={`${child.name ?? 'node'}-${index}`} node={child} />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
 
 function App() {
   const [helloMessage, setHelloMessage] = useState('Loading hello message...');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [aboutTree, setAboutTree] = useState(null);
+  const [aboutError, setAboutError] = useState('');
+  const [isAboutLoading, setIsAboutLoading] = useState(false);
   const avatarMenuRef = useRef(null);
 
   useEffect(() => {
@@ -64,9 +95,21 @@ function App() {
     setIsMenuOpen((open) => !open);
   };
 
-  const handleAboutClick = () => {
+  const handleAboutClick = async () => {
     setIsMenuOpen(false);
     setIsAboutOpen(true);
+    setIsAboutLoading(true);
+    setAboutError('');
+
+    try {
+      const data = await fetchAbout();
+      setAboutTree(data);
+    } catch {
+      setAboutTree(null);
+      setAboutError('Unable to load About information.');
+    } finally {
+      setIsAboutLoading(false);
+    }
   };
 
   const closeAboutModal = () => {
@@ -135,8 +178,15 @@ function App() {
                 &times;
               </button>
             </div>
-            {/* Placeholder body - intentionally blank. About content to be added in a future story. */}
-            <div className="modal-body"></div>
+            <div className="modal-body">
+              {isAboutLoading && <p className="about-status">Loading About information...</p>}
+              {!isAboutLoading && aboutError && <p className="about-status error">{aboutError}</p>}
+              {!isAboutLoading && !aboutError && aboutTree && (
+                <ul className="about-tree-list root">
+                  <AboutTreeNode node={aboutTree} />
+                </ul>
+              )}
+            </div>
           </div>
         </div>
       )}
