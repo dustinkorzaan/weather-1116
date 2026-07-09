@@ -1,7 +1,10 @@
-using Core.about;
-using Core.demo.handlers;
-
 namespace WeatherBlazor.Data;
+
+public class HelloWorldResponse
+{
+    public required string RequestMessage { get; set; }
+    public required string RequestResponse { get; set; }
+}
 
 public class WeatherForecastClient
 {
@@ -46,6 +49,26 @@ public class WeatherForecastClient
             IsHealthy = true,
         };
 
-        return AboutTreeBuilder.BuildRoot("Blazor Root", blazorNode, apiRoot);
+        var children = new List<AboutNode> { blazorNode, apiRoot };
+
+        return new AboutNode
+        {
+            Name = "Blazor Root",
+            Children = children,
+            IsHealthy = ComputeAggregateHealth(children),
+        };
+    }
+
+    private static bool ComputeAggregateHealth(IEnumerable<AboutNode> nodes)
+    {
+        foreach (var node in nodes)
+        {
+            if (!node.IsHealthy || !ComputeAggregateHealth(node.Children))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
