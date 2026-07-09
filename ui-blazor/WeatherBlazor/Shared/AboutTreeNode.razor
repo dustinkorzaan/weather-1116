@@ -1,10 +1,10 @@
-@using WeatherBlazor.Data
+@using Core.about
 
 @if (Node is not null)
 {
     <li class="about-tree-item">
         <div class="about-tree-row">
-            <span class="about-tree-name">@(Node.Name ?? "Unnamed node")</span>
+            <span class="about-tree-name">@Node.Name</span>
             <span class="about-tree-health @(Node.IsHealthy ? "healthy" : "unhealthy")">
                 @(Node.IsHealthy ? "Healthy" : "Unhealthy")
             </span>
