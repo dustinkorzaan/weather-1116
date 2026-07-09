@@ -13,6 +13,18 @@ function formatForecastDate(isoDate) {
   return new Date(year, month - 1, day).toLocaleDateString();
 }
 
+function kelvinToC(kelvin) {
+  return Number.isFinite(kelvin) ? kelvin - 273.15 : NaN;
+}
+
+function kelvinToF(kelvin) {
+  return Number.isFinite(kelvin) ? ((kelvin - 273.15) * 9) / 5 + 32 : NaN;
+}
+
+function formatTemp(value) {
+  return Number.isFinite(value) ? value.toFixed(2) : 'N/A';
+}
+
 function AboutTreeNode({ node }) {
   if (!node) {
     return null;
@@ -208,8 +220,8 @@ function App() {
               {forecasts.map((forecast) => (
                 <tr key={forecast.date}>
                   <td>{formatForecastDate(forecast.date)}</td>
-                  <td>{forecast.temperatureC}</td>
-                  <td>{forecast.temperatureF}</td>
+                  <td>{formatTemp(kelvinToC(forecast.temperatureK))}</td>
+                  <td>{formatTemp(kelvinToF(forecast.temperatureK))}</td>
                   <td>{forecast.summary}</td>
                 </tr>
               ))}

@@ -3,8 +3,8 @@ using MediatR;
 namespace Core.demo.forecast;
 
 /// <summary>
-/// Generates a sample multi-day forecast using the same summary vocabulary and
-/// temperature range as the Weather API's /weatherforecast endpoint.
+/// Generates a sample multi-day forecast using the same summary vocabulary as
+/// the Weather API and a direct Kelvin range from 250 to 325.
 /// </summary>
 public class WeatherForecastHandler : IRequestHandler<WeatherForecastEvent, WeatherForecast[]>
 {
@@ -17,11 +17,16 @@ public class WeatherForecastHandler : IRequestHandler<WeatherForecastEvent, Weat
     {
         var startDate = request.StartDate ?? DateOnly.FromDateTime(DateTime.Now);
 
-        var forecast = Enumerable.Range(1, request.Days).Select(index => new WeatherForecast
+        var forecast = Enumerable.Range(1, request.Days).Select(index =>
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)],
+            var temperatureK = Random.Shared.Next(250, 326);
+
+            return new WeatherForecast
+            {
+                Date = startDate.AddDays(index),
+                TemperatureK = temperatureK,
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)],
+            };
         }).ToArray();
 
         return Task.FromResult(forecast);
