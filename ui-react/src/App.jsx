@@ -3,6 +3,16 @@ import { useEffect, useRef, useState } from 'react';
 import { fetchAbout } from './services/about';
 import { fetchForecast } from './services/forecast';
 
+/** Formats an API date-only string (yyyy-MM-dd) in local time, matching .NET ToShortDateString(). */
+function formatForecastDate(isoDate) {
+  const datePart = String(isoDate).split('T')[0];
+  const [year, month, day] = datePart.split('-').map(Number);
+  if (!year || !month || !day) {
+    return datePart;
+  }
+  return new Date(year, month - 1, day).toLocaleDateString();
+}
+
 function AboutTreeNode({ node }) {
   if (!node) {
     return null;
@@ -197,7 +207,7 @@ function App() {
             <tbody>
               {forecasts.map((forecast) => (
                 <tr key={forecast.date}>
-                  <td>{new Date(forecast.date).toLocaleDateString()}</td>
+                  <td>{formatForecastDate(forecast.date)}</td>
                   <td>{forecast.temperatureC}</td>
                   <td>{forecast.temperatureF}</td>
                   <td>{forecast.summary}</td>
