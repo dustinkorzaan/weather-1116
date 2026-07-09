@@ -1,6 +1,7 @@
 import './App.css';
 import { useEffect, useRef, useState } from 'react';
 import { fetchAbout } from './services/about';
+import { fetchForecast } from './services/forecast';
 
 function AboutTreeNode({ node }) {
   if (!node) {
@@ -31,6 +32,8 @@ function AboutTreeNode({ node }) {
 
 function App() {
   const [helloMessage, setHelloMessage] = useState('Loading hello message...');
+  const [forecasts, setForecasts] = useState(null);
+  const [forecastError, setForecastError] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [aboutTree, setAboutTree] = useState(null);
@@ -57,6 +60,26 @@ function App() {
       .catch(() => {
         if (isMounted) {
           setHelloMessage('Unable to load hello message from API.');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchForecast()
+      .then((data) => {
+        if (isMounted) {
+          setForecasts(data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setForecastError('Unable to load weather forecast from API.');
         }
       });
 
@@ -156,6 +179,33 @@ function App() {
 
       <main className="home-content">
         <p className="hello-message">{helloMessage}</p>
+
+        <h2 className="forecast-title">Weather forecast</h2>
+
+        {!forecasts && !forecastError && <p className="forecast-status">Loading...</p>}
+        {forecastError && <p className="forecast-status error">{forecastError}</p>}
+        {forecasts && (
+          <table className="forecast-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+              </tr>
+            </thead>
+            <tbody>
+              {forecasts.map((forecast) => (
+                <tr key={forecast.date}>
+                  <td>{new Date(forecast.date).toLocaleDateString()}</td>
+                  <td>{forecast.temperatureC}</td>
+                  <td>{forecast.temperatureF}</td>
+                  <td>{forecast.summary}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </main>
 
       {isAboutOpen && (
