@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Core.demo.events;
+using Core.demo.forecast;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WeatherMVC.Models;
@@ -19,7 +20,9 @@ public class HomeController : Controller
     {
         var helloResponse = await _mediator.Send(new HelloWorldEvent { Message = "from WeatherMVC" }, cancellationToken);
         ViewData["HelloResponse"] = helloResponse.RequestResponse;
-        return View();
+
+        var forecasts = await _mediator.Send(new WeatherForecastEvent(), cancellationToken);
+        return View(forecasts);
     }
 
     public IActionResult Privacy()

@@ -30,8 +30,8 @@ else
             {
                 <tr>
                     <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
+                    <td>@((forecast.TemperatureK - 273.15).ToString("0.##"))</td>
+                    <td>@((((forecast.TemperatureK - 273.15) * 9.0 / 5.0) + 32.0).ToString("0.##"))</td>
                     <td>@forecast.Summary</td>
                 </tr>
             }

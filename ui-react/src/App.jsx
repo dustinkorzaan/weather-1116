@@ -1,6 +1,29 @@
 import './App.css';
 import { useEffect, useRef, useState } from 'react';
 import { fetchAbout } from './services/about';
+import { fetchForecast } from './services/forecast';
+
+/** Formats an API date-only string (yyyy-MM-dd) in local time, matching .NET ToShortDateString(). */
+function formatForecastDate(isoDate) {
+  const datePart = String(isoDate).split('T')[0];
+  const [year, month, day] = datePart.split('-').map(Number);
+  if (!year || !month || !day) {
+    return datePart;
+  }
+  return new Date(year, month - 1, day).toLocaleDateString();
+}
+
+function kelvinToC(kelvin) {
+  return Number.isFinite(kelvin) ? kelvin - 273.15 : NaN;
+}
+
+function kelvinToF(kelvin) {
+  return Number.isFinite(kelvin) ? ((kelvin - 273.15) * 9) / 5 + 32 : NaN;
+}
+
+function formatTemp(value) {
+  return Number.isFinite(value) ? value.toFixed(2) : 'N/A';
+}
 
 function AboutTreeNode({ node }) {
   if (!node) {
@@ -31,6 +54,8 @@ function AboutTreeNode({ node }) {
 
 function App() {
   const [helloMessage, setHelloMessage] = useState('Loading hello message...');
+  const [forecasts, setForecasts] = useState(null);
+  const [forecastError, setForecastError] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [aboutTree, setAboutTree] = useState(null);
@@ -57,6 +82,26 @@ function App() {
       .catch(() => {
         if (isMounted) {
           setHelloMessage('Unable to load hello message from API.');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchForecast()
+      .then((data) => {
+        if (isMounted) {
+          setForecasts(data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setForecastError('Unable to load weather forecast from API.');
         }
       });
 
@@ -156,6 +201,33 @@ function App() {
 
       <main className="home-content">
         <p className="hello-message">{helloMessage}</p>
+
+        <h2 className="forecast-title">Weather forecast</h2>
+
+        {!forecasts && !forecastError && <p className="forecast-status">Loading...</p>}
+        {forecastError && <p className="forecast-status error">{forecastError}</p>}
+        {forecasts && (
+          <table className="forecast-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+              </tr>
+            </thead>
+            <tbody>
+              {forecasts.map((forecast) => (
+                <tr key={forecast.date}>
+                  <td>{formatForecastDate(forecast.date)}</td>
+                  <td>{formatTemp(kelvinToC(forecast.temperatureK))}</td>
+                  <td>{formatTemp(kelvinToF(forecast.temperatureK))}</td>
+                  <td>{forecast.summary}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </main>
 
       {isAboutOpen && (

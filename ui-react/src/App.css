@@ -37,6 +37,33 @@
   font-weight: 500;
 }
 
+.forecast-title {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.forecast-status {
+  margin: 0;
+  color: #333;
+}
+
+.forecast-status.error {
+  color: #b42318;
+}
+
+.forecast-table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 40rem;
+}
+
+.forecast-table th,
+.forecast-table td {
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e5e5;
+}
+
 /* Avatar menu (top-right, all viewports) */
 .avatar-menu {
   position: relative;
