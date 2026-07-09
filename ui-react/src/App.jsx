@@ -29,8 +29,17 @@ function AboutTreeNode({ node }) {
   );
 }
 
+function formatForecastDate(dateValue) {
+  if (!dateValue) {
+    return '';
+  }
+
+  return new Date(`${dateValue}T00:00:00`).toLocaleDateString();
+}
+
 function App() {
   const [helloMessage, setHelloMessage] = useState('Loading hello message...');
+  const [forecasts, setForecasts] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [aboutTree, setAboutTree] = useState(null);
@@ -41,23 +50,39 @@ function App() {
   useEffect(() => {
     let isMounted = true;
 
-    fetch('/Home/Hello')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Request failed: ${response.status}`);
+    Promise.all([
+      fetch('/Home/Hello')
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Request failed: ${response.status}`);
+          }
+
+          return response.json();
+        }),
+      fetch('/weatherforecast')
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Request failed: ${response.status}`);
+          }
+
+          return response.json();
+        }),
+    ])
+      .then(([helloData, forecastData]) => {
+        if (!isMounted) {
+          return;
         }
 
-        return response.json();
-      })
-      .then((data) => {
-        if (isMounted) {
-          setHelloMessage(data.requestResponse ?? 'No hello response returned.');
-        }
+        setHelloMessage(helloData.requestResponse ?? 'No hello response returned.');
+        setForecasts(Array.isArray(forecastData) ? forecastData : []);
       })
       .catch(() => {
-        if (isMounted) {
-          setHelloMessage('Unable to load hello message from API.');
+        if (!isMounted) {
+          return;
         }
+
+        setHelloMessage('Unable to load hello message from API.');
+        setForecasts([]);
       });
 
     return () => {
@@ -156,6 +181,34 @@ function App() {
 
       <main className="home-content">
         <p className="hello-message">{helloMessage}</p>
+        <p>This component demonstrates fetching data from a service.</p>
+
+        {forecasts === null ? (
+          <p><em>Loading...</em></p>
+        ) : (
+          <div className="forecast-table-wrapper">
+            <table className="forecast-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Temp. (C)</th>
+                  <th>Temp. (F)</th>
+                  <th>Summary</th>
+                </tr>
+              </thead>
+              <tbody>
+                {forecasts.map((forecast) => (
+                  <tr key={`${forecast.date}-${forecast.temperatureC}-${forecast.summary}`}>
+                    <td>{formatForecastDate(forecast.date)}</td>
+                    <td>{forecast.temperatureC}</td>
+                    <td>{forecast.temperatureF}</td>
+                    <td>{forecast.summary}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </main>
 
       {isAboutOpen && (

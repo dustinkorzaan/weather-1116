@@ -37,6 +37,23 @@
   font-weight: 500;
 }
 
+.forecast-table-wrapper {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.forecast-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.forecast-table th,
+.forecast-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #d9d9d9;
+  text-align: left;
+}
+
 /* Avatar menu (top-right, all viewports) */
 .avatar-menu {
   position: relative;

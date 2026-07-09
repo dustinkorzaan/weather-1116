@@ -8,6 +8,11 @@ namespace WeatherMVC.Controllers;
 
 public class HomeController : Controller
 {
+    private static readonly string[] Summaries =
+    [
+        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+    ];
+
     private readonly IMediator _mediator;
 
     public HomeController(IMediator mediator)
@@ -18,8 +23,20 @@ public class HomeController : Controller
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var helloResponse = await _mediator.Send(new HelloWorldEvent { Message = "from WeatherMVC" }, cancellationToken);
-        ViewData["HelloResponse"] = helloResponse.RequestResponse;
-        return View();
+        var forecasts = Enumerable.Range(1, 5).Select(index =>
+            new WeatherForecastViewModel
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            })
+            .ToArray();
+
+        return View(new HomeIndexViewModel
+        {
+            HelloResponse = helloResponse.RequestResponse,
+            Forecasts = forecasts
+        });
     }
 
     public IActionResult Privacy()
