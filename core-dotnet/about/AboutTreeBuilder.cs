@@ -2,8 +2,8 @@ namespace Core.about;
 
 /// <summary>
 /// Builds the nested About trees shared by the runnable apps. Core itself is a class
-/// library (not an HTTP app), so it only ever appears as a nested "Core Root" -> "Core"
-/// subtree inside the API's tree.
+/// library (not an HTTP app), so it appears as a nested "Core Root" -> "Core"
+/// subtree inside app trees that depend on it.
 /// </summary>
 public static class AboutTreeBuilder
 {
@@ -17,7 +17,7 @@ public static class AboutTreeBuilder
 
     public static AboutNode BuildMvcNode() => new() { Name = "MVC" };
 
-    public static AboutNode BuildMvcRoot() => BuildRoot("MVC Root", BuildMvcNode());
+    public static AboutNode BuildMvcRoot() => BuildRoot("MVC Root", BuildMvcNode(), BuildCoreRoot());
 
     /// <summary>
     /// Creates a root node whose first child is always <paramref name="selfNode"/>,
