@@ -21,12 +21,17 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Debug AZURE_UI_REACT_TOKEN length
+        shell: bash
+        env:
+          AZURE_UI_REACT_TOKEN: ${{ secrets.AZURE_UI_REACT_TOKEN }}
+        run: echo "AZURE_UI_REACT_TOKEN length=${#AZURE_UI_REACT_TOKEN}"
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_UI_REACT_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          # repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
