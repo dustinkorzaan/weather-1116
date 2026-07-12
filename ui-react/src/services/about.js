@@ -78,9 +78,14 @@ export async function getAboutTree(weatherUrl) {
 
 /** Fetches the About tree from the React host's /About endpoint. */
 export async function fetchAbout() {
-  const response = await fetch('/About');
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+  try {
+    const response = await fetch('/About');
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`);
+    }
+    return await response.json();
+  } catch {
+    // Fallback for hosts that do not run the Vite /About middleware (for example static hosting).
+    return getAboutTree();
   }
-  return response.json();
 }
