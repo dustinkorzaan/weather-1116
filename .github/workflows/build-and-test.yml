@@ -1,5 +1,5 @@
-name: Build Backend and Frontend
-run-name: Build Backend and Frontend
+name: Build and Test
+run-name: Build and Test
 
 on:
   # pull_request:
@@ -39,8 +39,8 @@ jobs:
       - name: Build project
         run: dotnet build ${{ matrix.project }} --no-restore --configuration Release
 
-  build-react:
-    name: Build React Project
+  build-and-test-react:
+    name: Build and Test React Project
     runs-on: ubuntu-latest
 
     steps:
@@ -63,3 +63,7 @@ jobs:
         working-directory: ui-react
         env:
           VITE_WEATHER1116_API_URL: ${{ secrets.PROD_WEATHER1116_API_URL }}
+
+      - name: Run React tests
+        run: npm test -- --run
+        working-directory: ui-react

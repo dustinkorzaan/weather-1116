@@ -43,9 +43,10 @@ hot reload); React uses `npm start`. Ports come from each project's
 
 ### Lint / test / build
 
-- Build everything: `dotnet build Weather.sln` (CI in `.github/workflows/build.yml`
-  builds each `.csproj` in Release + `npm ci && npm run build` in `ui-react`).
-- React: `npm run build`, and `npm test -- --run` (Vitest). Note: `src/App.test.jsx`
-  is a stale default-template test ("renders learn react link") that fails against
-  the current app — this is a pre-existing failure, not an environment problem.
+- Build everything: `dotnet build Weather.sln` (CI in
+  `.github/workflows/build-and-test.yml` builds each `.csproj` in Release +
+  `npm ci && npm run build && npm test -- --run` in `ui-react`).
+- React: `npm run build`, and `npm test -- --run` (Vitest).
 - There is no separate .NET test project.
+- The four `prod-deploy-*.yml` workflows only deploy when `Build and Test`
+  completes successfully on `main` (or via manual `workflow_dispatch` on `main`).
