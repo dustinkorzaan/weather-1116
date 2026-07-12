@@ -48,6 +48,8 @@ jobs:
     runs-on: windows-latest
     needs: build
     environment: prod
+    env:
+      WEATHER1116_API_URL: ${{ secrets.PROD_WEATHER1116_API_URL }}
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -76,6 +78,18 @@ jobs:
           client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Set App Service settings
+        uses: Azure/appservice-settings@v1
+        with:
+          app-name: 'weather1116-prod-blazor'
+          app-settings-json: |
+            [
+              {
+                "name": "WEATHER1116_API_URL",
+                "value": "${{ env.WEATHER1116_API_URL }}"
+              }
+            ]
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
