@@ -54,7 +54,7 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: .net-app
           path: ${{ github.workspace }}/publish/ui-blazor
@@ -69,7 +69,7 @@ jobs:
           echo "AZURE_GITHUB_CLIENTID length=${#AZURE_GITHUB_CLIENTID}"
           echo "AZURE_TENANTID length=${#AZURE_TENANTID}"
           echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
-      
+
       - name: Login to Azure
         uses: azure/login@v3
         with:
