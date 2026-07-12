@@ -11,7 +11,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 // hack, because the default route is not working in codespaces, so redirect to the weatherforecast endpoint
-app.MapGet("/", () => Results.Redirect("/weatherforecast"));
+app.MapGet("/", () => Results.Redirect("/about"));
 app.MapControllers();
 
 app.Run();
