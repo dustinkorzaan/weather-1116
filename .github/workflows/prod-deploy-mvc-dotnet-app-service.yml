@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
 name: CICD weather1116-prod-mvc
-run-name: Deploy MVC to Production
+run-name: CICD weather1116-prod-mvc
 
 on:
   workflow_run:
@@ -58,9 +58,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_DC33B15CFEB14C0A96A09F238B85FA81 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C4BBF9C6B62C4946BC529FCDC0A439C5 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3BA500ADC50B4A158533F08E0159AECA }}
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
