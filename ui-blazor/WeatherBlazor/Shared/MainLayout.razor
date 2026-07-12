@@ -1,43 +1,66 @@
 ﻿@inherits LayoutComponentBase
 @using WeatherBlazor.Data
 @inject WeatherForecastClient WeatherClient
+@inject IConfiguration Configuration
 
 <PageTitle>WeatherBlazor</PageTitle>
 
+@{
+    var uiReactUrl = Configuration["SiteLinks:UiReact"] ?? "http://localhost:3000";
+    var uiBlazorUrl = Configuration["SiteLinks:UiBlazor"] ?? "http://localhost:8090";
+    var mvcUrl = Configuration["SiteLinks:Mvc"] ?? "http://localhost:8100";
+    var apiUrl = (Configuration["SiteLinks:ApiDotNet"] ?? "http://localhost:8080").TrimEnd('/');
+    var apiAboutUrl = $"{apiUrl}/About";
+}
+
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    <header class="top-row">
+        <NavLink class="site-brand" href="" Match="NavLinkMatch.All">
+            <img src="logo.svg" alt="Weather logo" class="site-logo" />
+            <span>Weather Blazor</span>
+        </NavLink>
+
+        <div class="avatar-menu" @onclick:stopPropagation="true">
+            <button type="button"
+                    class="avatar-button"
+                    aria-haspopup="true"
+                    aria-expanded="@_isMenuOpen.ToString().ToLowerInvariant()"
+                    aria-label="Open user menu"
+                    @onclick="ToggleMenu">
+                <svg viewBox="0 0 24 24" class="avatar-icon" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="8" r="4" fill="currentColor" />
+                    <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" fill="currentColor" />
+                </svg>
+            </button>
+
+            @if (_isMenuOpen)
+            {
+                <div class="avatar-dropdown-backdrop" role="presentation" @onclick="CloseMenu"></div>
+                <ul class="avatar-dropdown" role="menu">
+                    <li role="none">
+                        <a class="avatar-dropdown-item" role="menuitem" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
+                    </li>
+                    <li role="none">
+                        <a class="avatar-dropdown-item" role="menuitem" href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
+                    </li>
+                    <li role="none">
+                        <a class="avatar-dropdown-item" role="menuitem" href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
+                    </li>
+                    <li role="none">
+                        <a class="avatar-dropdown-item" role="menuitem" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
+                    </li>
+                    <li role="separator" class="avatar-dropdown-divider"></li>
+                    <li role="none">
+                        <button type="button" role="menuitem" class="avatar-dropdown-item" @onclick="OpenAboutModal">
+                            About
+                        </button>
+                    </li>
+                </ul>
+            }
+        </div>
+    </header>
 
     <main>
-        <div class="top-row px-4">
-            <div class="avatar-menu" @onclick:stopPropagation="true">
-                <button type="button"
-                        class="avatar-button"
-                        aria-haspopup="true"
-                        aria-expanded="@_isMenuOpen.ToString().ToLowerInvariant()"
-                        aria-label="Open user menu"
-                        @onclick="ToggleMenu">
-                    <svg viewBox="0 0 24 24" class="avatar-icon" aria-hidden="true" focusable="false">
-                        <circle cx="12" cy="8" r="4" fill="currentColor" />
-                        <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" fill="currentColor" />
-                    </svg>
-                </button>
-
-                @if (_isMenuOpen)
-                {
-                    <div class="avatar-dropdown-backdrop" role="presentation" @onclick="CloseMenu"></div>
-                    <ul class="avatar-dropdown" role="menu">
-                        <li role="none">
-                            <button type="button" role="menuitem" class="avatar-dropdown-item" @onclick="OpenAboutModal">
-                                About
-                            </button>
-                        </li>
-                    </ul>
-                }
-            </div>
-        </div>
-
         <article class="content px-4">
             <div class="content-inner">
                 @Body
@@ -69,6 +92,12 @@
                         <AboutTreeNode Node="_aboutRoot" />
                     </ul>
                 }
+                <div class="site-links-footer">
+                    <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
+                    <a href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
+                    <a href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
+                    <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
+                </div>
             </div>
         </div>
     </div>

@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  margin-bottom: 0;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -112,4 +112,23 @@ body {
 
 .about-tree-health.unhealthy {
   color: #b42318;
+}
+
+.site-links-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e5e5;
+  font-size: 0.9rem;
+}
+
+.site-links-footer a {
+  color: #185ca9;
+  text-decoration: none;
+}
+
+.site-links-footer a:hover {
+  text-decoration: underline;
 }

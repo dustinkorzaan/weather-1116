@@ -62,7 +62,10 @@ jobs:
         run: npm run build
         working-directory: ui-react
         env:
-          VITE_WEATHER1116_API_URL: ${{ secrets.PROD_WEATHER1116_API_URL }}
+          VITE_API_DOTNET_URL: ${{ secrets.PROD_API_DOTNET_URL }}
+          VITE_UI_REACT_URL: ${{ secrets.PROD_UI_REACT_URL }}
+          VITE_UI_BLAZOR_URL: ${{ secrets.PROD_UI_BLAZOR_URL }}
+          VITE_MVC_DOTNET_URL: ${{ secrets.PROD_MVC_DOTNET_URL }}
 
       - name: Run React tests
         run: npm test -- --run

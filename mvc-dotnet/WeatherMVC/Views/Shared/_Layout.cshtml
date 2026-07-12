@@ -1,4 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@inject IConfiguration Configuration
+@{
+    var uiReactUrl = Configuration["SiteLinks:UiReact"] ?? "http://localhost:3000";
+    var uiBlazorUrl = Configuration["SiteLinks:UiBlazor"] ?? "http://localhost:8090";
+    var mvcUrl = Configuration["SiteLinks:Mvc"] ?? "http://localhost:8100";
+    var apiUrl = (Configuration["SiteLinks:ApiDotNet"] ?? "http://localhost:8080").TrimEnd('/');
+    var apiAboutUrl = $"{apiUrl}/About";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -15,23 +23,12 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
+        <nav class="navbar navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid px-3 px-sm-4">
                 <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
                     <img src="~/logo.svg" alt="Weather logo" class="site-logo" />
                     <span class="fw-semibold text-dark">Weather MVC</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                    </ul>
-                </div>
                 <div class="dropdown avatar-menu ms-auto">
                     <button class="btn avatar-button" type="button" id="avatarMenuButton" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open user menu">
                         <svg viewBox="0 0 24 24" class="avatar-icon" aria-hidden="true" focusable="false">
@@ -40,6 +37,11 @@
                         </svg>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="avatarMenuButton">
+                        <li><a class="dropdown-item" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a></li>
+                        <li><a class="dropdown-item" href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a></li>
+                        <li><a class="dropdown-item" href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a></li>
+                        <li><a class="dropdown-item" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a></li>
+                        <li><hr class="dropdown-divider" /></li>
                         <li>
                             <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#aboutModal">About</button>
                         </li>
@@ -54,12 +56,6 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - WeatherMVC
-        </div>
-    </footer>
-
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -70,6 +66,12 @@
                 <div class="modal-body">
                     <p class="about-status" id="aboutStatus">Loading About information...</p>
                     <div id="aboutTreeContainer" class="d-none"></div>
+                    <div class="site-links-footer">
+                        <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
+                        <a href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
+                        <a href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
+                        <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
+                    </div>
                 </div>
             </div>
         </div>

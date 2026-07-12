@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { buildUiReactRoot } from './about';
 
 function resolveApiBaseUrl() {
-  const configuredBaseUrl = import.meta.env.VITE_WEATHER1116_API_URL?.replace(/\/$/, '');
+  const configuredBaseUrl = import.meta.env.VITE_API_DOTNET_URL?.replace(/\/$/, '');
   if (configuredBaseUrl) {
     return configuredBaseUrl;
   }
