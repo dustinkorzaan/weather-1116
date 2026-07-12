@@ -2,11 +2,17 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
 name: Build and deploy ASP.Net Core app to Azure Web App - weather1116-prod-mvc
+run-name: Deploy MVC to Production
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows:
+      - Build Backend and Frontend
+    # branches:
+    #   - main
+    types:
+      - completed
+  # Keep manual trigger for emergency redeploys and controlled production rollouts.
   workflow_dispatch:
 
 jobs:
@@ -24,16 +30,16 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build ./mvc-dotnet/WeatherMVC/WeatherMVC.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish ./mvc-dotnet/WeatherMVC/WeatherMVC.csproj -c Release -o "${{ github.workspace }}/publish/mvc-dotnet"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ${{ github.workspace }}/publish/mvc-dotnet
 
   deploy:
     runs-on: windows-latest
@@ -47,6 +53,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+          path: ${{ github.workspace }}/publish/mvc-dotnet
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -61,5 +68,5 @@ jobs:
         with:
           app-name: 'weather1116-prod-mvc'
           slot-name: 'Production'
-          package: .
+          package: ${{ github.workspace }}/publish/mvc-dotnet
           
