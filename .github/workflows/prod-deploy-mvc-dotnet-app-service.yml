@@ -58,6 +58,17 @@ jobs:
         with:
           name: .net-app
           path: ${{ github.workspace }}/publish/mvc-dotnet
+
+      - name: Debug Azure OIDC secret lengths
+        shell: bash
+        env:
+          AZURE_GITHUB_CLIENTID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          AZURE_TENANTID: ${{ secrets.AZURE_TENANTID }}
+          AZURE_SUBSCRIPTIONID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+        run: |
+          echo "AZURE_GITHUB_CLIENTID length=${#AZURE_GITHUB_CLIENTID}"
+          echo "AZURE_TENANTID length=${#AZURE_TENANTID}"
+          echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
       
       - name: Login to Azure
         uses: azure/login@v2
