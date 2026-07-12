@@ -1,8 +1,8 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - weather1116-prod-api
-run-name: Deploy API to Production
+name: CICD weather1116-prod-api
+run-name: CICD weather1116-prod-api
 
 on:
   workflow_run:
@@ -58,9 +58,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_7BEAFC6B69684A48A530775AFA9F5CBC }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_86E8A94708E04160B8D1CF64C93A8BBE }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E26C433728B1426F96B897DD80B393F1 }}
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
