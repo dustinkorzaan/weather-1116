@@ -21,27 +21,29 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@((forecast.TemperatureK - 273.15).ToString("0.##"))</td>
-                    <td>@((((forecast.TemperatureK - 273.15) * 9.0 / 5.0) + 32.0).ToString("0.##"))</td>
-                    <td>@forecast.Summary</td>
+                    <th>Date</th>
+                    <th>Temp. (C)</th>
+                    <th>Temp. (F)</th>
+                    <th>Summary</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var forecast in forecasts)
+                {
+                    <tr>
+                        <td>@forecast.Date.ToShortDateString()</td>
+                        <td>@((forecast.TemperatureK - 273.15).ToString("0.##"))</td>
+                        <td>@((((forecast.TemperatureK - 273.15) * 9.0 / 5.0) + 32.0).ToString("0.##"))</td>
+                        <td>@forecast.Summary</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {
