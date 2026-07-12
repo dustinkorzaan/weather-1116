@@ -45,7 +45,8 @@
                 "chat.tools.terminal.autoApprove": {
                     "mv": true,
                     "dotnet build": true,
-                    "npm test": true
+                    "npm test": true,
+                    "gh": true
                 },
                 "git.autofetch": true,
                 "git.confirmSync": false,
