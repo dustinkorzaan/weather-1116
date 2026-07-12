@@ -48,6 +48,8 @@ jobs:
     runs-on: windows-latest
     needs: build
     environment: prod
+    env:
+      WEATHER1116_UI_REACT_URL: ${{ secrets.PROD_WEATHER1116_UI_REACT }}
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -88,6 +90,10 @@ jobs:
           app-name: 'weather1116-prod-api'
           app-settings-json: |
             [
+              {
+                "name": "Cors__AllowedOrigins__0",
+                "value": "${{ env.WEATHER1116_UI_REACT_URL }}"
+              },
               {
                 "name": "ASPNETCORE_ENVIRONMENT",
                 "value": "Production"
