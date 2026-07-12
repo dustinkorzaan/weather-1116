@@ -18,7 +18,7 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   BUILD_NUMBER: ${{ github.run_number }}
-  BUILD_START: ${{ github.run_started_at }}
+  BUILD_START: ${{ github.event.workflow_run.run_started_at || github.event.head_commit.timestamp || github.event.repository.updated_at }}
 
 jobs:
   build:

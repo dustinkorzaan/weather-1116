@@ -14,7 +14,7 @@ on:
 
 env:
   BUILD_NUMBER: ${{ github.run_number }}
-  BUILD_START: ${{ github.run_started_at }}
+  BUILD_START: ${{ github.event.workflow_run.run_started_at || github.event.head_commit.timestamp || github.event.repository.updated_at }}
 
 jobs:
   build_and_deploy_job:
