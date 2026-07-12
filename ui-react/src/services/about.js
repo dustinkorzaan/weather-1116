@@ -42,7 +42,7 @@ function computeAggregateHealth(nodes) {
 
 /**
  * Builds the "UI React Root" About tree. The first child is always the UI React app
- * itself, followed by the API's own About tree (which nests Core beneath it).
+ * itself, followed by the API's own About tree.
  */
 export function buildUiReactRoot(apiRoot) {
   const uiReactNode = createNode('UI React');

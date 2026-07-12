@@ -11,16 +11,6 @@ describe('buildUiReactRoot', () => {
       buildNumber: null,
       children: [
         { name: 'API', isHealthy: true, version: null, buildStart: null, buildNumber: null, children: [] },
-        {
-          name: 'Core Root',
-          isHealthy: true,
-          version: null,
-          buildStart: null,
-          buildNumber: null,
-          children: [
-            { name: 'Core', isHealthy: true, version: null, buildStart: null, buildNumber: null, children: [] },
-          ],
-        },
       ],
     };
 
@@ -40,17 +30,7 @@ describe('buildUiReactRoot', () => {
       buildStart: null,
       buildNumber: null,
       children: [
-        { name: 'API', isHealthy: true, version: null, buildStart: null, buildNumber: null, children: [] },
-        {
-          name: 'Core Root',
-          isHealthy: false,
-          version: null,
-          buildStart: null,
-          buildNumber: null,
-          children: [
-            { name: 'Core', isHealthy: false, version: null, buildStart: null, buildNumber: null, children: [] },
-          ],
-        },
+        { name: 'API', isHealthy: false, version: null, buildStart: null, buildNumber: null, children: [] },
       ],
     };
 
