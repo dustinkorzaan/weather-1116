@@ -1,3 +1,4 @@
+@using System.Globalization
 @using WeatherBlazor.Data
 
 @if (Node is not null)
@@ -22,7 +23,7 @@
                     {
                         <span> | </span>
                     }
-                    <span>Started @Node.BuildStart.Value.ToString("u")</span>
+                    <span>Started @FormatBuildStart(Node.BuildStart.Value)</span>
                 }
             </div>
         }
@@ -42,4 +43,8 @@
 @code {
     [Parameter, EditorRequired]
     public AboutNode? Node { get; set; }
+
+    /// <summary>Formats a build timestamp like "7/12/2026 10:22:14 PM UTC" (matches MVC and React).</summary>
+    private static string FormatBuildStart(DateTime buildStart)
+        => buildStart.ToString("M/d/yyyy h:mm:ss tt 'UTC'", CultureInfo.InvariantCulture);
 }

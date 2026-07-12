@@ -28,6 +28,24 @@ function formatTemp(value) {
   return Number.isFinite(value) ? value.toFixed(2) : 'N/A';
 }
 
+/** Formats a build timestamp like "7/12/2026 10:22:14 PM UTC" (matches MVC and Blazor). */
+function formatBuildStart(isoDate) {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) {
+    return String(isoDate);
+  }
+
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const year = date.getUTCFullYear();
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+  const period = date.getUTCHours() >= 12 ? 'PM' : 'AM';
+  const hours = date.getUTCHours() % 12 || 12;
+
+  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${period} UTC`;
+}
+
 function AboutTreeNode({ node }) {
   if (!node) {
     return null;
@@ -39,7 +57,7 @@ function AboutTreeNode({ node }) {
     metadata.push(`Build #${node.buildNumber}`);
   }
   if (node.buildStart) {
-    metadata.push(`Started ${node.buildStart}`);
+    metadata.push(`Started ${formatBuildStart(node.buildStart)}`);
   }
 
   return (
@@ -118,38 +136,40 @@ function App() {
   return (
     <div className="app">
       <header className="top-bar">
-        <div className="site-brand">
-          <img src="/logo.svg" alt="Weather logo" className="site-logo" />
-          <h1 className="title">Weather React</h1>
-        </div>
+        <div className="top-bar-inner">
+          <div className="site-brand">
+            <img src="/logo.svg" alt="Weather logo" className="site-logo" />
+            <h1 className="title">Weather React</h1>
+          </div>
 
-        <div className="avatar-menu" ref={avatarMenuRef}>
-          <button
-            type="button"
-            className="avatar-button"
-            aria-haspopup="true"
-            aria-expanded={isMenuOpen}
-            aria-label="Open user menu"
-            onClick={handleAvatarClick}
-          >
-            <svg viewBox="0 0 24 24" className="avatar-icon" aria-hidden="true" focusable="false">
-              <circle cx="12" cy="8" r="4" fill="currentColor" />
-              <path
-                d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
+          <div className="avatar-menu" ref={avatarMenuRef}>
+            <button
+              type="button"
+              className="avatar-button"
+              aria-haspopup="true"
+              aria-expanded={isMenuOpen}
+              aria-label="Open user menu"
+              onClick={handleAvatarClick}
+            >
+              <svg viewBox="0 0 24 24" className="avatar-icon" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="8" r="4" fill="currentColor" />
+                <path
+                  d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
 
-          {isMenuOpen && (
-            <ul className="avatar-dropdown" role="menu">
-              <li role="none">
-                <button type="button" role="menuitem" className="avatar-dropdown-item" onClick={handleAboutClick}>
-                  About
-                </button>
-              </li>
-            </ul>
-          )}
+            {isMenuOpen && (
+              <ul className="avatar-dropdown" role="menu">
+                <li role="none">
+                  <button type="button" role="menuitem" className="avatar-dropdown-item" onClick={handleAboutClick}>
+                    About
+                  </button>
+                </li>
+              </ul>
+            )}
+          </div>
         </div>
       </header>
 
@@ -163,26 +183,28 @@ function App() {
         {isForecastLoading && <p className="forecast-status">Loading...</p>}
         {isForecastError && <p className="forecast-status error">Unable to load weather forecast from API.</p>}
         {forecasts && (
-          <table className="forecast-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-              </tr>
-            </thead>
-            <tbody>
-              {forecasts.map((forecast) => (
-                <tr key={forecast.date}>
-                  <td>{formatForecastDate(forecast.date)}</td>
-                  <td>{formatTemp(kelvinToC(forecast.temperatureK))}</td>
-                  <td>{formatTemp(kelvinToF(forecast.temperatureK))}</td>
-                  <td>{forecast.summary}</td>
+          <div className="table-responsive">
+            <table className="forecast-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Temp. (C)</th>
+                  <th>Temp. (F)</th>
+                  <th>Summary</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {forecasts.map((forecast) => (
+                  <tr key={forecast.date}>
+                    <td>{formatForecastDate(forecast.date)}</td>
+                    <td>{formatTemp(kelvinToC(forecast.temperatureK))}</td>
+                    <td>{formatTemp(kelvinToF(forecast.temperatureK))}</td>
+                    <td>{forecast.summary}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </main>
 
