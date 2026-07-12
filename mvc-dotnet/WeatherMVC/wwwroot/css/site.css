@@ -93,6 +93,12 @@ body {
   font-weight: 600;
 }
 
+.about-tree-meta {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: #667085;
+}
+
 .about-tree-health {
   font-size: 0.82rem;
   font-weight: 600;

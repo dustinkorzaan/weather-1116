@@ -43,7 +43,9 @@
                 // "dotnet.defaultSolution": "Weather.sln",
                 "@azure.argTenant": "",
                 "chat.tools.terminal.autoApprove": {
-                    "mv": true
+                    "mv": true,
+                    "dotnet build": true,
+                    "npm test": true
                 },
                 "git.autofetch": true,
                 "git.confirmSync": false,

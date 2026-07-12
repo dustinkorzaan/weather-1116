@@ -9,6 +9,23 @@
                 @(Node.IsHealthy ? "Healthy" : "Unhealthy")
             </span>
         </div>
+        @if (Node.BuildNumber.HasValue || Node.BuildStart.HasValue)
+        {
+            <div class="about-tree-meta">
+                @if (Node.BuildNumber.HasValue)
+                {
+                    <span>Build #@Node.BuildNumber</span>
+                }
+                @if (Node.BuildStart.HasValue)
+                {
+                    @if (Node.BuildNumber.HasValue)
+                    {
+                        <span> | </span>
+                    }
+                    <span>Started @Node.BuildStart.Value.ToString("u")</span>
+                }
+            </div>
+        }
 
         @if (Node.Children.Count > 0)
         {

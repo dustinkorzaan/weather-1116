@@ -23,6 +23,20 @@
 		row.appendChild(health);
 		li.appendChild(row);
 
+		const metadata = [];
+		if (Number.isFinite(node?.buildNumber)) {
+			metadata.push(`Build #${node.buildNumber}`);
+		}
+		if (node?.buildStart) {
+			metadata.push(`Started ${node.buildStart}`);
+		}
+		if (metadata.length > 0) {
+			const meta = document.createElement('div');
+			meta.className = 'about-tree-meta';
+			meta.textContent = metadata.join(' | ');
+			li.appendChild(meta);
+		}
+
 		if (Array.isArray(node?.children) && node.children.length > 0) {
 			const childList = document.createElement('ul');
 			childList.className = 'about-tree-list';

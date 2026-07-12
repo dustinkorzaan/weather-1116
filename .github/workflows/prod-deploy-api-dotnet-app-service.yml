@@ -17,6 +17,8 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_START: ${{ github.run_started_at }}
 
 jobs:
   build:
@@ -48,11 +50,18 @@ jobs:
     runs-on: windows-latest
     needs: build
     environment: prod
+    env:
+      WEATHER1116_UI_REACT_URL: ${{ secrets.PROD_WEATHER1116_UI_REACT }}
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
 
     steps:
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -78,20 +87,19 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
       - name: Set App Service settings
-        uses: Azure/appservice-settings@v1
+        uses: azure/cli@v2
         with:
-          app-name: 'weather1116-prod-api'
-          app-settings-json: |
-            [
-              {
-                "name": "ASPNETCORE_ENVIRONMENT",
-                "value": "Production"
-              },
-              {
-                "name": "ASPNETCORE_DETAILEDERRORS",
-                "value": "false"
-              }
-            ]
+          inlineScript: |
+            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-api'].resourceGroup | [0]" -o tsv)
+            if [ -z "$APP_RG" ]; then
+              echo "Could not resolve resource group for weather1116-prod-api" >&2
+              exit 1
+            fi
+
+            az webapp config appsettings set \
+              --name weather1116-prod-api \
+              --resource-group "$APP_RG" \
+              --settings Cors__AllowedOrigins__0="${{ env.WEATHER1116_UI_REACT_URL }}" ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_DETAILEDERRORS=false BUILD_NUMBER="${{ env.BUILD_NUMBER }}" BUILD_START="${{ env.BUILD_START }}"
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp

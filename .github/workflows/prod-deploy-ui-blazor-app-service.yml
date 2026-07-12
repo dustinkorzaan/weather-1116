@@ -17,6 +17,8 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_START: ${{ github.run_started_at }}
 
 jobs:
   build:
@@ -55,6 +57,11 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -80,24 +87,19 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
       - name: Set App Service settings
-        uses: Azure/appservice-settings@v1
+        uses: azure/cli@v2
         with:
-          app-name: 'weather1116-prod-blazor'
-          app-settings-json: |
-            [
-              {
-                "name": "WEATHER1116_API_URL",
-                "value": "${{ env.WEATHER1116_API_URL }}"
-              },
-              {
-                "name": "ASPNETCORE_ENVIRONMENT",
-                "value": "Production"
-              },
-              {
-                "name": "ASPNETCORE_DETAILEDERRORS",
-                "value": "false"
-              }
-            ]
+          inlineScript: |
+            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-blazor'].resourceGroup | [0]" -o tsv)
+            if [ -z "$APP_RG" ]; then
+              echo "Could not resolve resource group for weather1116-prod-blazor" >&2
+              exit 1
+            fi
+
+            az webapp config appsettings set \
+              --name weather1116-prod-blazor \
+              --resource-group "$APP_RG" \
+              --settings WEATHER1116_API_URL="${{ env.WEATHER1116_API_URL }}" ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_DETAILEDERRORS=false BUILD_NUMBER="${{ env.BUILD_NUMBER }}" BUILD_START="${{ env.BUILD_START }}"
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp

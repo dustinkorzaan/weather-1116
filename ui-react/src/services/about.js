@@ -7,11 +7,33 @@ function createNode(name, overrides = {}) {
     name,
     isHealthy: true,
     version: null,
-    buildStart: null,
-    buildNumber: null,
+    buildStart: resolveBuildStart(),
+    buildNumber: resolveBuildNumber(),
     children: [],
     ...overrides,
   };
+}
+
+function resolveBuildNumber() {
+  const viteValue = typeof import.meta !== 'undefined' && import.meta.env
+    ? import.meta.env.VITE_BUILD_NUMBER
+    : undefined;
+  const nodeValue = typeof process !== 'undefined' && process.env
+    ? process.env.VITE_BUILD_NUMBER
+    : undefined;
+  const rawValue = viteValue ?? nodeValue;
+  const value = Number.parseInt(rawValue, 10);
+  return Number.isFinite(value) ? value : null;
+}
+
+function resolveBuildStart() {
+  const viteValue = typeof import.meta !== 'undefined' && import.meta.env
+    ? import.meta.env.VITE_BUILD_START
+    : undefined;
+  const nodeValue = typeof process !== 'undefined' && process.env
+    ? process.env.VITE_BUILD_START
+    : undefined;
+  return viteValue ?? nodeValue ?? null;
 }
 
 function computeAggregateHealth(nodes) {

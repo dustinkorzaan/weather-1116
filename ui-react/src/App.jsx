@@ -36,6 +36,13 @@ function AboutTreeNode({ node }) {
   }
 
   const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+  const metadata = [];
+  if (Number.isFinite(node.buildNumber)) {
+    metadata.push(`Build #${node.buildNumber}`);
+  }
+  if (node.buildStart) {
+    metadata.push(`Started ${node.buildStart}`);
+  }
 
   return (
     <li className="about-tree-item">
@@ -45,6 +52,7 @@ function AboutTreeNode({ node }) {
           {node.isHealthy ? 'Healthy' : 'Unhealthy'}
         </span>
       </div>
+      {metadata.length > 0 && <div className="about-tree-meta">{metadata.join(' | ')}</div>}
 
       {hasChildren && (
         <ul className="about-tree-list">
