@@ -7,15 +7,13 @@ namespace Core.about;
 /// </summary>
 public static class AboutTreeBuilder
 {
-    public static AboutNode BuildCoreNode() => CreateNode("Core");
-
     public static AboutNode BuildApiNode() => CreateNode("API");
 
     public static AboutNode BuildApiRoot() => BuildRoot("API Root", BuildApiNode());
 
     public static AboutNode BuildMvcNode() => CreateNode("MVC");
 
-    public static AboutNode BuildMvcRoot() => BuildRoot("MVC Root", BuildMvcNode(), BuildApiRoot(), BuildCoreNode());
+    public static AboutNode BuildMvcRoot() => BuildRoot("MVC Root", BuildMvcNode(), BuildApiRoot());
 
     /// <summary>
     /// Creates a root node whose first child is always <paramref name="selfNode"/>,
