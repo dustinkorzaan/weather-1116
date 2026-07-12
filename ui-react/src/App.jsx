@@ -28,7 +28,7 @@ function formatTemp(value) {
   return Number.isFinite(value) ? value.toFixed(2) : 'N/A';
 }
 
-/** Formats a build timestamp like "7/12/2026 10:22:14 PM" (matches MVC and Blazor). */
+/** Formats a build timestamp like "7/12/2026 10:22:14 PM UTC" (matches MVC and Blazor). */
 function formatBuildStart(isoDate) {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) {
@@ -43,7 +43,7 @@ function formatBuildStart(isoDate) {
   const period = date.getUTCHours() >= 12 ? 'PM' : 'AM';
   const hours = date.getUTCHours() % 12 || 12;
 
-  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${period}`;
+  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${period} UTC`;
 }
 
 function AboutTreeNode({ node }) {

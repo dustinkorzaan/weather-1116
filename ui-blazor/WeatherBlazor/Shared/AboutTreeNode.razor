@@ -44,7 +44,7 @@
     [Parameter, EditorRequired]
     public AboutNode? Node { get; set; }
 
-    /// <summary>Formats a build timestamp like "7/12/2026 10:22:14 PM" (matches MVC and React).</summary>
+    /// <summary>Formats a build timestamp like "7/12/2026 10:22:14 PM UTC" (matches MVC and React).</summary>
     private static string FormatBuildStart(DateTime buildStart)
-        => buildStart.ToString("M/d/yyyy h:mm:ss tt", CultureInfo.InvariantCulture);
+        => buildStart.ToString("M/d/yyyy h:mm:ss tt 'UTC'", CultureInfo.InvariantCulture);
 }
