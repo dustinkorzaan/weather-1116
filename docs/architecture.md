@@ -51,6 +51,29 @@ models instead of sharing code. These projects are intentionally framework-
 native and independently maintainable; parity is behavioral and API-contract
 based, not enforced through shared frontend model artifacts.
 
+## Responsive Design Contract
+
+All three UI projects (MVC, React, Blazor) are built to be responsive: each
+site must render cleanly from small mobile browser widths (~320px) up through
+full desktop/full-screen widths, without relying on a separate mobile-only
+experience.
+
+Shared responsive conventions kept in parity across the three sites:
+
+- A single fluid layout adapts at breakpoints rather than branching into
+  distinct mobile/desktop templates.
+- Primary navigation collapses behind a toggle (hamburger) on narrow
+  viewports and expands inline (MVC navbar, Blazor sidebar, React top bar) on
+  wider viewports.
+- The avatar/About menu stays reachable and usable at every width and never
+  overflows the viewport.
+- The weather forecast table scrolls horizontally within its own container
+  (rather than the whole page) on viewports too narrow to show all columns.
+- Main content is centered with a max-width on large screens instead of
+  stretching to full width, keeping line lengths and table density readable.
+- Base typography scales down slightly on small screens and back up at
+  tablet/desktop breakpoints for comfortable readability at every size.
+
 ## Local Run Model
 
 The four runnable applications are intended to run together in VS Code via Run
