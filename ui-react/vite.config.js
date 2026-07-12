@@ -8,11 +8,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/Home': {
-        target: process.env.WEATHER_URL ?? 'http://localhost:8080',
+        target: process.env.WEATHER1116_API_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
       '/weatherforecast': {
-        target: process.env.WEATHER_URL ?? 'http://localhost:8080',
+        target: process.env.WEATHER1116_API_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
     },

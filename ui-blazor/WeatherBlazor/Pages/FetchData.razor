@@ -8,6 +8,11 @@
 
 <p><strong>@helloMessage</strong></p>
 
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+
 <p>This component demonstrates fetching data from a service.</p>
 
 @if (forecasts == null)
@@ -42,11 +47,29 @@ else
 @code {
     private WeatherForecast[]? forecasts;
     private string helloMessage = "Loading hello message...";
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        var helloResponse = await ForecastClient.GetHelloAsync();
-        helloMessage = helloResponse?.RequestResponse ?? "No hello response returned.";
-        forecasts = await ForecastClient.GetForecastAsync(DateTime.Now);
+        try
+        {
+            var helloResponse = await ForecastClient.GetHelloAsync();
+            helloMessage = helloResponse?.RequestResponse ?? "No hello response returned.";
+        }
+        catch
+        {
+            helloMessage = "Unable to load hello message from API.";
+            errorMessage ??= "Unable to load data from the weather API.";
+        }
+
+        try
+        {
+            forecasts = await ForecastClient.GetForecastAsync(DateTime.Now);
+        }
+        catch
+        {
+            forecasts = [];
+            errorMessage ??= "Unable to load data from the weather API.";
+        }
     }
 }

@@ -25,10 +25,10 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.x'
 
@@ -39,7 +39,7 @@ jobs:
         run: dotnet publish ./ui-blazor/WeatherBlazor/WeatherBlazor.csproj -c Release -o "${{ github.workspace }}/publish/ui-blazor"
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: .net-app
           path: ${{ github.workspace }}/publish/ui-blazor
@@ -48,6 +48,8 @@ jobs:
     runs-on: windows-latest
     needs: build
     environment: prod
+    env:
+      WEATHER1116_API_URL: ${{ secrets.PROD_WEATHER1116_API_URL }}
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -69,13 +71,33 @@ jobs:
           echo "AZURE_GITHUB_CLIENTID length=${#AZURE_GITHUB_CLIENTID}"
           echo "AZURE_TENANTID length=${#AZURE_TENANTID}"
           echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
-      
+
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Set App Service settings
+        uses: Azure/appservice-settings@v1
+        with:
+          app-name: 'weather1116-prod-blazor'
+          app-settings-json: |
+            [
+              {
+                "name": "WEATHER1116_API_URL",
+                "value": "${{ env.WEATHER1116_API_URL }}"
+              },
+              {
+                "name": "ASPNETCORE_ENVIRONMENT",
+                "value": "Production"
+              },
+              {
+                "name": "ASPNETCORE_DETAILEDERRORS",
+                "value": "false"
+              }
+            ]
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp

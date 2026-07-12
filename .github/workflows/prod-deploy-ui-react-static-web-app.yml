@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           submodules: true
           lfs: false
@@ -29,6 +29,8 @@ jobs:
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
+        env:
+          WEATHER1116_API_URL: ${{ secrets.PROD_WEATHER1116_API_URL }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_UI_REACT_TOKEN }}
           # repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
