@@ -33,7 +33,10 @@ export function buildUiReactRoot(apiRoot) {
 }
 
 export async function fetchApiAbout(weatherUrl) {
-  const baseUrl = weatherUrl ?? process.env.WEATHER1116_API_URL ?? 'http://localhost:8080';
+  const viteApiUrl = typeof import.meta !== 'undefined' && import.meta.env
+    ? import.meta.env.VITE_WEATHER1116_API_URL
+    : undefined;
+  const baseUrl = (weatherUrl ?? viteApiUrl ?? 'http://localhost:8080').replace(/\/$/, '');
   try {
     const response = await fetch(`${baseUrl}/About`);
     if (!response.ok) {

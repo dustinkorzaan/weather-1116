@@ -25,6 +25,11 @@ function formatTemp(value) {
   return Number.isFinite(value) ? value.toFixed(2) : 'N/A';
 }
 
+function getApiEndpoint(path) {
+  const apiBaseUrl = import.meta.env.VITE_WEATHER1116_API_URL?.replace(/\/$/, '');
+  return apiBaseUrl ? `${apiBaseUrl}${path}` : path;
+}
+
 function AboutTreeNode({ node }) {
   if (!node) {
     return null;
@@ -66,7 +71,7 @@ function App() {
   useEffect(() => {
     let isMounted = true;
 
-    fetch('/Home/Hello')
+    fetch(getApiEndpoint('/Home/Hello'))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Request failed: ${response.status}`);
