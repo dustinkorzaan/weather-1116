@@ -28,6 +28,24 @@ function formatTemp(value) {
   return Number.isFinite(value) ? value.toFixed(2) : 'N/A';
 }
 
+/** Formats a build timestamp like "7/12/2026 10:22:14 PM" (matches MVC and Blazor). */
+function formatBuildStart(isoDate) {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) {
+    return String(isoDate);
+  }
+
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const year = date.getUTCFullYear();
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+  const period = date.getUTCHours() >= 12 ? 'PM' : 'AM';
+  const hours = date.getUTCHours() % 12 || 12;
+
+  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${period}`;
+}
+
 function AboutTreeNode({ node }) {
   if (!node) {
     return null;
@@ -39,7 +57,7 @@ function AboutTreeNode({ node }) {
     metadata.push(`Build #${node.buildNumber}`);
   }
   if (node.buildStart) {
-    metadata.push(`Started ${node.buildStart}`);
+    metadata.push(`Started ${formatBuildStart(node.buildStart)}`);
   }
 
   return (
