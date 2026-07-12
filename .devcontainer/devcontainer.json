@@ -46,7 +46,8 @@
                     "mv": true,
                     "dotnet build": true,
                     "npm test": true,
-                    "gh": true
+                    "gh": true,
+                    "npm --prefix ui-react": true
                 },
                 "git.autofetch": true,
                 "git.confirmSync": false,
