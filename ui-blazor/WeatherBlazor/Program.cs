@@ -7,8 +7,8 @@ builder.Services.AddServerSideBlazor();
 
 builder.Services.AddHttpClient<WeatherForecastClient>(c =>
 {
-    var url = builder.Configuration["WEATHER1116_API_URL"]
-        ?? throw new InvalidOperationException("WEATHER1116_API_URL is not set");
+    var url = builder.Configuration["API_DOTNET_URL"]
+        ?? throw new InvalidOperationException("API_DOTNET_URL is not set");
 
     c.BaseAddress = new(url);
 });

@@ -7,15 +7,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/Home': {
-        target: process.env.VITE_WEATHER1116_API_URL ?? 'http://localhost:8080',
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
       '/About': {
-        target: process.env.VITE_WEATHER1116_API_URL ?? 'http://localhost:8080',
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
       '/weatherforecast': {
-        target: process.env.VITE_WEATHER1116_API_URL ?? 'http://localhost:8080',
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
     },

@@ -32,10 +32,10 @@ hot reload); React uses `npm start`. Ports come from each project's
 ### Non-obvious caveats
 
 - Start `WeatherAPI` (8080) FIRST. Both the React UI (Vite proxies `/Home` and
-  `/weatherforecast` to `http://localhost:8080`, override with `WEATHER1116_API_URL`) and
-  the Blazor UI (`WEATHER1116_API_URL` in `ui-blazor/WeatherBlazor/appsettings.json`)
-  depend on it. Without the API, React shows "Unable to load hello message" and
-  Blazor's forecast/hello calls fail.
+ `/weatherforecast` to `http://localhost:8080`, override with `VITE_API_DOTNET_URL`) and
+ the Blazor UI (`API_DOTNET_URL` in `ui-blazor/WeatherBlazor/appsettings.json`)
+ depend on it. Without the API, React shows "Unable to load hello message" and
+ Blazor's forecast/hello calls fail.
 - `WeatherMVC` is standalone (duplicates backend logic via `Core`/MediatR) and
   does not call the API.
 - The apps listen on plain HTTP only (no HTTPS profile). `UseHttpsRedirection`

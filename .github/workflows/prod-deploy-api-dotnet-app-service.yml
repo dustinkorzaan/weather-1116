@@ -58,7 +58,7 @@ jobs:
     needs: build
     environment: prod
     env:
-      WEATHER1116_UI_REACT_URL: ${{ secrets.PROD_WEATHER1116_UI_REACT }}
+      UI_REACT_URL: ${{ secrets.PROD_UI_REACT_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -107,7 +107,7 @@ jobs:
             az webapp config appsettings set \
               --name weather1116-prod-api \
               --resource-group "$APP_RG" \
-              --settings Cors__AllowedOrigins__0="${{ env.WEATHER1116_UI_REACT_URL }}" ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_DETAILEDERRORS=false BUILD_NUMBER="${{ env.BUILD_NUMBER }}" BUILD_START="${{ env.BUILD_START }}"
+              --settings Cors__AllowedOrigins__0="${{ env.UI_REACT_URL }}" ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_DETAILEDERRORS=false BUILD_NUMBER="${{ env.BUILD_NUMBER }}" BUILD_START="${{ env.BUILD_START }}"
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
