@@ -1,13 +1,16 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { aboutEndpointPlugin } from "./vite-about-plugin.js";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), aboutEndpointPlugin()],
+  plugins: [react()],
   server: {
     proxy: {
       '/Home': {
+        target: process.env.VITE_WEATHER1116_API_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/About': {
         target: process.env.VITE_WEATHER1116_API_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },

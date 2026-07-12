@@ -1,7 +1,10 @@
 import './App.css';
 import { useEffect, useRef, useState } from 'react';
-import { fetchAbout } from './services/about';
-import { fetchForecast } from './services/forecast';
+import {
+  useGetForecastQuery,
+  useGetHelloQuery,
+  useLazyGetAboutQuery,
+} from './services/weatherApi';
 
 /** Formats an API date-only string (yyyy-MM-dd) in local time, matching .NET ToShortDateString(). */
 function formatForecastDate(isoDate) {
@@ -23,11 +26,6 @@ function kelvinToF(kelvin) {
 
 function formatTemp(value) {
   return Number.isFinite(value) ? value.toFixed(2) : 'N/A';
-}
-
-function getApiEndpoint(path) {
-  const apiBaseUrl = import.meta.env.VITE_WEATHER1116_API_URL?.replace(/\/$/, '');
-  return apiBaseUrl ? `${apiBaseUrl}${path}` : path;
 }
 
 function AboutTreeNode({ node }) {
@@ -66,62 +64,16 @@ function AboutTreeNode({ node }) {
 }
 
 function App() {
-  const [helloMessage, setHelloMessage] = useState('Loading hello message...');
-  const [forecasts, setForecasts] = useState(null);
-  const [forecastError, setForecastError] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const [aboutTree, setAboutTree] = useState(null);
-  const [aboutError, setAboutError] = useState('');
-  const [isAboutLoading, setIsAboutLoading] = useState(false);
   const avatarMenuRef = useRef(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    fetch(getApiEndpoint('/Home/Hello'))
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Request failed: ${response.status}`);
-        }
-
-        return response.json();
-      })
-      .then((data) => {
-        if (isMounted) {
-          setHelloMessage(data.requestResponse ?? 'No hello response returned.');
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setHelloMessage('Unable to load hello message from API.');
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    fetchForecast()
-      .then((data) => {
-        if (isMounted) {
-          setForecasts(data);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setForecastError('Unable to load weather forecast from API.');
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const { data: helloMessage, isError: isHelloError } = useGetHelloQuery();
+  const {
+    data: forecasts,
+    isLoading: isForecastLoading,
+    isError: isForecastError,
+  } = useGetForecastQuery();
+  const [loadAbout, aboutQuery] = useLazyGetAboutQuery();
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -153,21 +105,10 @@ function App() {
     setIsMenuOpen((open) => !open);
   };
 
-  const handleAboutClick = async () => {
+  const handleAboutClick = () => {
     setIsMenuOpen(false);
     setIsAboutOpen(true);
-    setIsAboutLoading(true);
-    setAboutError('');
-
-    try {
-      const data = await fetchAbout();
-      setAboutTree(data);
-    } catch {
-      setAboutTree(null);
-      setAboutError('Unable to load About information.');
-    } finally {
-      setIsAboutLoading(false);
-    }
+    loadAbout();
   };
 
   const closeAboutModal = () => {
@@ -213,12 +154,14 @@ function App() {
       </header>
 
       <main className="home-content">
-        <p className="hello-message">{helloMessage}</p>
+        <p className="hello-message">
+          {isHelloError ? 'Unable to load hello message from API.' : (helloMessage ?? 'Loading hello message...')}
+        </p>
 
         <h2 className="forecast-title">Weather forecast</h2>
 
-        {!forecasts && !forecastError && <p className="forecast-status">Loading...</p>}
-        {forecastError && <p className="forecast-status error">{forecastError}</p>}
+        {isForecastLoading && <p className="forecast-status">Loading...</p>}
+        {isForecastError && <p className="forecast-status error">Unable to load weather forecast from API.</p>}
         {forecasts && (
           <table className="forecast-table">
             <thead>
@@ -264,11 +207,13 @@ function App() {
               </button>
             </div>
             <div className="modal-body">
-              {isAboutLoading && <p className="about-status">Loading About information...</p>}
-              {!isAboutLoading && aboutError && <p className="about-status error">{aboutError}</p>}
-              {!isAboutLoading && !aboutError && aboutTree && (
+              {aboutQuery.isFetching && <p className="about-status">Loading About information...</p>}
+              {!aboutQuery.isFetching && aboutQuery.isError && (
+                <p className="about-status error">Unable to load About information.</p>
+              )}
+              {!aboutQuery.isFetching && !aboutQuery.isError && aboutQuery.data && (
                 <ul className="about-tree-list root">
-                  <AboutTreeNode node={aboutTree} />
+                  <AboutTreeNode node={aboutQuery.data} />
                 </ul>
               )}
             </div>

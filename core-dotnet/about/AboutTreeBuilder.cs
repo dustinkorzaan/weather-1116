@@ -3,23 +3,19 @@ using System.Globalization;
 namespace Core.about;
 
 /// <summary>
-/// Builds the nested About trees shared by the runnable apps. Core itself is a class
-/// library (not an HTTP app), so it appears as a nested "Core Root" -> "Core"
-/// subtree inside app trees that depend on it.
+/// Builds the nested About trees shared by the runnable apps.
 /// </summary>
 public static class AboutTreeBuilder
 {
     public static AboutNode BuildCoreNode() => CreateNode("Core");
 
-    public static AboutNode BuildCoreRoot() => BuildRoot("Core Root", BuildCoreNode());
-
     public static AboutNode BuildApiNode() => CreateNode("API");
 
-    public static AboutNode BuildApiRoot() => BuildRoot("API Root", BuildApiNode(), BuildCoreRoot());
+    public static AboutNode BuildApiRoot() => BuildRoot("API Root", BuildApiNode());
 
     public static AboutNode BuildMvcNode() => CreateNode("MVC");
 
-    public static AboutNode BuildMvcRoot() => BuildRoot("MVC Root", BuildMvcNode(), BuildCoreRoot());
+    public static AboutNode BuildMvcRoot() => BuildRoot("MVC Root", BuildMvcNode(), BuildApiRoot(), BuildCoreNode());
 
     /// <summary>
     /// Creates a root node whose first child is always <paramref name="selfNode"/>,

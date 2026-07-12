@@ -1,0 +1,41 @@
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { buildUiReactRoot } from './about';
+
+function resolveApiBaseUrl() {
+  const configuredBaseUrl = import.meta.env.VITE_WEATHER1116_API_URL?.replace(/\/$/, '');
+  if (configuredBaseUrl) {
+    return configuredBaseUrl;
+  }
+
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  return '';
+}
+
+const apiBaseUrl = resolveApiBaseUrl();
+
+export const weatherApi = createApi({
+  reducerPath: 'weatherApi',
+  baseQuery: fetchBaseQuery({ baseUrl: apiBaseUrl }),
+  endpoints: (builder) => ({
+    getHello: builder.query({
+      query: () => '/Home/Hello',
+      transformResponse: (response) => response?.requestResponse ?? 'No hello response returned.',
+    }),
+    getForecast: builder.query({
+      query: () => '/weatherforecast',
+    }),
+    getAbout: builder.query({
+      query: () => '/About',
+      transformResponse: (apiRoot) => buildUiReactRoot(apiRoot),
+    }),
+  }),
+});
+
+export const {
+  useGetHelloQuery,
+  useGetForecastQuery,
+  useLazyGetAboutQuery,
+} = weatherApi;

@@ -53,34 +53,3 @@ export function buildUiReactRoot(apiRoot) {
     children,
   });
 }
-
-export async function fetchApiAbout(weatherUrl) {
-  const viteApiUrl = typeof import.meta !== 'undefined' && import.meta.env
-    ? import.meta.env.VITE_WEATHER1116_API_URL
-    : undefined;
-  const baseUrl = (weatherUrl ?? viteApiUrl ?? 'http://localhost:8080').replace(/\/$/, '');
-  try {
-    const response = await fetch(`${baseUrl}/About`);
-    if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`);
-    }
-    return await response.json();
-  } catch {
-    return createNode('API Root', { isHealthy: false });
-  }
-}
-
-/** Builds the full UI React About tree (used by the React host /About endpoint). */
-export async function getAboutTree(weatherUrl) {
-  const apiRoot = await fetchApiAbout(weatherUrl);
-  return buildUiReactRoot(apiRoot);
-}
-
-/** Fetches the About tree from the React host's /About endpoint. */
-export async function fetchAbout() {
-  const response = await fetch('/About');
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
-  }
-  return response.json();
-}
