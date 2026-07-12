@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Core.about;
 
 /// <summary>
@@ -7,15 +9,15 @@ namespace Core.about;
 /// </summary>
 public static class AboutTreeBuilder
 {
-    public static AboutNode BuildCoreNode() => new() { Name = "Core" };
+    public static AboutNode BuildCoreNode() => CreateNode("Core");
 
     public static AboutNode BuildCoreRoot() => BuildRoot("Core Root", BuildCoreNode());
 
-    public static AboutNode BuildApiNode() => new() { Name = "API" };
+    public static AboutNode BuildApiNode() => CreateNode("API");
 
     public static AboutNode BuildApiRoot() => BuildRoot("API Root", BuildApiNode(), BuildCoreRoot());
 
-    public static AboutNode BuildMvcNode() => new() { Name = "MVC" };
+    public static AboutNode BuildMvcNode() => CreateNode("MVC");
 
     public static AboutNode BuildMvcRoot() => BuildRoot("MVC Root", BuildMvcNode(), BuildCoreRoot());
 
@@ -33,6 +35,8 @@ public static class AboutTreeBuilder
         {
             Name = rootName,
             Children = children,
+            BuildNumber = ResolveBuildNumber(),
+            BuildStart = ResolveBuildStart(),
         };
         root.IsHealthy = ComputeAggregateHealth(children);
 
@@ -53,5 +57,35 @@ public static class AboutTreeBuilder
         }
 
         return true;
+    }
+
+    private static AboutNode CreateNode(string name)
+        => new()
+        {
+            Name = name,
+            BuildNumber = ResolveBuildNumber(),
+            BuildStart = ResolveBuildStart(),
+        };
+
+    private static int? ResolveBuildNumber()
+    {
+        var value = Environment.GetEnvironmentVariable("BUILD_NUMBER");
+        return int.TryParse(value, out var number) ? number : null;
+    }
+
+    private static DateTime? ResolveBuildStart()
+    {
+        var value = Environment.GetEnvironmentVariable("BUILD_START");
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var startedAt))
+        {
+            return startedAt;
+        }
+
+        return null;
     }
 }

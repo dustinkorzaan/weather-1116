@@ -1,5 +1,7 @@
 namespace WeatherBlazor.Data;
 
+using System.Globalization;
+
 public class HelloWorldResponse
 {
     public required string RequestMessage { get; set; }
@@ -47,6 +49,8 @@ public class WeatherForecastClient
         {
             Name = "Blazor",
             IsHealthy = true,
+            BuildNumber = ResolveBuildNumber(),
+            BuildStart = ResolveBuildStart(),
         };
 
         var children = new List<AboutNode> { blazorNode, apiRoot };
@@ -56,6 +60,8 @@ public class WeatherForecastClient
             Name = "Blazor Root",
             Children = children,
             IsHealthy = ComputeAggregateHealth(children),
+            BuildNumber = ResolveBuildNumber(),
+            BuildStart = ResolveBuildStart(),
         };
     }
 
@@ -70,5 +76,27 @@ public class WeatherForecastClient
         }
 
         return true;
+    }
+
+    private static int? ResolveBuildNumber()
+    {
+        var value = Environment.GetEnvironmentVariable("BUILD_NUMBER");
+        return int.TryParse(value, out var number) ? number : null;
+    }
+
+    private static DateTime? ResolveBuildStart()
+    {
+        var value = Environment.GetEnvironmentVariable("BUILD_START");
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var startedAt))
+        {
+            return startedAt;
+        }
+
+        return null;
     }
 }
