@@ -82,12 +82,17 @@ configured in `.devcontainer/devcontainer.json`.
 
 ## Build and CI
 
-The workflow [`build.yml`](../.github/workflows/build.yml) builds all projects
-on pull requests to `main`:
+The workflow [`build-and-test.yml`](../.github/workflows/build-and-test.yml)
+builds all projects on every push:
 
 - `Core.csproj`, `WeatherAPI.csproj`, `WeatherBlazor.csproj`, and
   `WeatherMVC.csproj` via `dotnet build`.
-- React app in `ui-react` via `npm ci && npm run build`.
+- React app in `ui-react` via `npm ci && npm run build`, followed by
+  `npm test -- --run` (Vitest).
+
+The four `prod-deploy-*.yml` workflows deploy to production only after
+`Build and Test` completes successfully on `main` (or via manual
+`workflow_dispatch` on `main`).
 
 ## Repository Layout
 
