@@ -85,24 +85,19 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
       - name: Set App Service settings
-        uses: Azure/appservice-settings@v1
+        uses: azure/cli@v2
         with:
-          app-name: 'weather1116-prod-api'
-          app-settings-json: |
-            [
-              {
-                "name": "Cors__AllowedOrigins__0",
-                "value": "${{ env.WEATHER1116_UI_REACT_URL }}"
-              },
-              {
-                "name": "ASPNETCORE_ENVIRONMENT",
-                "value": "Production"
-              },
-              {
-                "name": "ASPNETCORE_DETAILEDERRORS",
-                "value": "false"
-              }
-            ]
+          inlineScript: |
+            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-api'].resourceGroup | [0]" -o tsv)
+            if [ -z "$APP_RG" ]; then
+              echo "Could not resolve resource group for weather1116-prod-api" >&2
+              exit 1
+            fi
+
+            az webapp config appsettings set \
+              --name weather1116-prod-api \
+              --resource-group "$APP_RG" \
+              --settings Cors__AllowedOrigins__0="${{ env.WEATHER1116_UI_REACT_URL }}" ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_DETAILEDERRORS=false
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
