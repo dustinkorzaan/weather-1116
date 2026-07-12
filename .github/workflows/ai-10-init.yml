@@ -1,4 +1,5 @@
 name: AI 10 Init
+run-name: AI 10 Init
 
 on:
   repository_dispatch:

@@ -2,11 +2,16 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
 name: Build and deploy ASP.Net Core app to Azure Web App - weather1116-prod-api
+run-name: Deploy API to Production
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Build Backend and Frontend
     # branches:
     #   - main
+    types:
+      - completed
   # Keep manual trigger for emergency redeploys and controlled production rollouts.
   workflow_dispatch:
 

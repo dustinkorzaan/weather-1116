@@ -1,9 +1,14 @@
 name: Azure Static Web Apps CI/CD
+run-name: Deploy React to Production
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Build Backend and Frontend
     # branches:
     #   - main
+    types:
+      - completed
   # Keep manual trigger for emergency redeploys and controlled production rollouts.
   workflow_dispatch:
 
