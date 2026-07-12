@@ -2,6 +2,7 @@ import { afterEach, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
 import App from './App';
 import { weatherApi } from './services/weatherApi';
 
@@ -58,7 +59,9 @@ test('renders weather app title and loaded data', async () => {
 
   render(
     <Provider store={store}>
-      <App />
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>
     </Provider>
   );
 
