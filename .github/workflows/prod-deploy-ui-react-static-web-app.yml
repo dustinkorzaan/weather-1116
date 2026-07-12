@@ -1,5 +1,5 @@
-name: Azure Static Web Apps CI/CD
-run-name: Deploy React to Production
+name: CICD weather1116-prod-react
+run-name: CICD weather1116-prod-react
 
 on:
   workflow_run:
