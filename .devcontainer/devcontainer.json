@@ -47,7 +47,7 @@
                 },
                 "git.autofetch": true,
                 "git.confirmSync": false,
-                "git.postCommitCommand": "push",
+                "git.postCommitCommand": "sync",
                 "editor.fontSize": 12,
                 "editor.lineHeight": 14,
                 "editor.letterSpacing": -0.25,
