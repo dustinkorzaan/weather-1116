@@ -15,6 +15,9 @@ on:
   # Keep manual trigger for emergency redeploys and controlled production rollouts.
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: windows-latest
