@@ -58,10 +58,6 @@
     "forwardPorts": [
         // ui-react
         3000,
-        // Foundry Tracing / OpenTelemetry Protocol (OTLP) default port for gRPC
-        4317,
-        // Foundry Tracing / OpenTelemetry Protocol (OTLP) default port for HTTP
-        4318,
         // api-dotnet
         8080,
         // ui-blazor
