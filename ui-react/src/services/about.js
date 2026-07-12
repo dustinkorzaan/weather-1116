@@ -36,7 +36,7 @@ export async function fetchApiAbout(weatherUrl) {
   const viteApiUrl = typeof import.meta !== 'undefined' && import.meta.env
     ? import.meta.env.VITE_WEATHER1116_API_URL
     : undefined;
-  const baseUrl = weatherUrl ?? viteApiUrl ?? 'http://localhost:8080';
+  const baseUrl = (weatherUrl ?? viteApiUrl ?? 'http://localhost:8080').replace(/\/$/, '');
   try {
     const response = await fetch(`${baseUrl}/About`);
     if (!response.ok) {
