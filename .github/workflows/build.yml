@@ -61,3 +61,5 @@ jobs:
       - name: Build React app
         run: npm run build
         working-directory: ui-react
+        env:
+          WEATHER1116_API_URL: ${{ secrets.PROD_WEATHER1116_API_URL }}

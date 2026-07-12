@@ -21,7 +21,7 @@ function aboutEndpointMiddleware(weatherUrl) {
 }
 
 /** Serves GET /About on the React dev/preview server with the nested UI React tree. */
-export function aboutEndpointPlugin(weatherUrl = process.env.WEATHER_URL) {
+export function aboutEndpointPlugin(weatherUrl = process.env.WEATHER1116_API_URL) {
   const middleware = aboutEndpointMiddleware(weatherUrl);
 
   return {
