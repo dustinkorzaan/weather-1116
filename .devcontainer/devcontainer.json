@@ -56,9 +56,17 @@
         }
     },
     "forwardPorts": [
+        // ui-react
         3000,
+        // Foundry Tracing / OpenTelemetry Protocol (OTLP) default port for gRPC
+        4317,
+        // Foundry Tracing / OpenTelemetry Protocol (OTLP) default port for HTTP
+        4318,
+        // api-dotnet
         8080,
+        // ui-blazor
         8090,
+        // mvc-dotnet
         8100
     ],
     "postCreateCommand": "bash -lc 'dotnet dev-certs https && dotnet new install Aspire.ProjectTemplates && dotnet restore && cd ui-react && npm ci'",
