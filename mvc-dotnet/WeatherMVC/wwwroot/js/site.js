@@ -3,6 +3,24 @@
 
 // Write your JavaScript code.
 (function initAboutModal() {
+	// Formats a build timestamp like "7/12/2026 10:22:14 PM" (matches React and Blazor).
+	function formatBuildStart(isoDate) {
+		const date = new Date(isoDate);
+		if (Number.isNaN(date.getTime())) {
+			return String(isoDate);
+		}
+
+		const month = date.getUTCMonth() + 1;
+		const day = date.getUTCDate();
+		const year = date.getUTCFullYear();
+		const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+		const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+		const period = date.getUTCHours() >= 12 ? 'PM' : 'AM';
+		const hours = date.getUTCHours() % 12 || 12;
+
+		return `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${period}`;
+	}
+
 	function createNode(node) {
 		const li = document.createElement('li');
 		li.className = 'about-tree-item';
@@ -28,7 +46,7 @@
 			metadata.push(`Build #${node.buildNumber}`);
 		}
 		if (node?.buildStart) {
-			metadata.push(`Started ${node.buildStart}`);
+			metadata.push(`Started ${formatBuildStart(node.buildStart)}`);
 		}
 		if (metadata.length > 0) {
 			const meta = document.createElement('div');
