@@ -88,6 +88,14 @@ jobs:
               {
                 "name": "WEATHER1116_API_URL",
                 "value": "${{ env.WEATHER1116_API_URL }}"
+              },
+              {
+                "name": "ASPNETCORE_ENVIRONMENT",
+                "value": "Production"
+              },
+              {
+                "name": "ASPNETCORE_DETAILEDERRORS",
+                "value": "false"
               }
             ]
 

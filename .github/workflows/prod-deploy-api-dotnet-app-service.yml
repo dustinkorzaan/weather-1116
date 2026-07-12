@@ -77,6 +77,22 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
+      - name: Set App Service settings
+        uses: Azure/appservice-settings@v1
+        with:
+          app-name: 'weather1116-prod-api'
+          app-settings-json: |
+            [
+              {
+                "name": "ASPNETCORE_ENVIRONMENT",
+                "value": "Production"
+              },
+              {
+                "name": "ASPNETCORE_DETAILEDERRORS",
+                "value": "false"
+              }
+            ]
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
