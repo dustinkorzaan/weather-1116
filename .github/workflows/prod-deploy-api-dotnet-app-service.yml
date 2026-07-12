@@ -47,7 +47,7 @@ jobs:
           path: ${{ github.workspace }}/publish/api-dotnet
 
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build
     environment: prod
     env:
