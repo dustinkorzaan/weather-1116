@@ -40,6 +40,11 @@ hot reload); React uses `npm start`. Ports come from each project's
   does not call the API.
 - The apps listen on plain HTTP only (no HTTPS profile). `UseHttpsRedirection`
   logs a harmless "failed to determine the https port" warning — ignore it.
+- Google Maps (city pins on all three UIs) needs a browser API key with
+  **Maps JavaScript API** enabled. Set:
+  - React: `VITE_GOOGLE_MAPS_API_KEY` (see `ui-react/.env.example`)
+  - Blazor / MVC: `GoogleMaps:ApiKey` or env `GoogleMaps__ApiKey`
+  Without a key the UIs still run; the map section shows a setup hint.
 
 ### Lint / test / build
 
