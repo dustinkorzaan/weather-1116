@@ -6,7 +6,12 @@ on:
   #   branches:
   #     - main
   push:
-      
+
+# Newer pushes cancel older in-progress builds for the same ref (e.g. main).
+concurrency:
+  group: build-and-test-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

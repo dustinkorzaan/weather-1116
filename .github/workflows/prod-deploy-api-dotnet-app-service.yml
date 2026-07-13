@@ -15,6 +15,11 @@ on:
   # Keep manual trigger for emergency redeploys and controlled production rollouts.
   workflow_dispatch:
 
+# Newer deploys cancel older in-progress runs of this workflow.
+concurrency:
+  group: prod-deploy-api
+  cancel-in-progress: true
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   BUILD_NUMBER: ${{ github.run_number }}
