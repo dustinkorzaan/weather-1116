@@ -186,11 +186,7 @@ main {
 
 .about-tree-list {
     margin: 0;
-    padding-left: 1.1rem;
-}
-
-.about-tree-list.root {
-    padding-left: 0;
+    padding-left: 1.5rem;
 }
 
 .about-tree-item {
