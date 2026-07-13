@@ -39,3 +39,5 @@ app.MapGet("/", () => Results.Redirect("/about"));
 app.MapControllers();
 
 app.Run();
+
+public partial class Program;
