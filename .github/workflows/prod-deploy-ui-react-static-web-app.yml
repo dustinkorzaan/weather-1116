@@ -12,6 +12,11 @@ on:
   # Keep manual trigger for emergency redeploys and controlled production rollouts.
   workflow_dispatch:
 
+# Newer deploys cancel older in-progress runs of this workflow.
+concurrency:
+  group: prod-deploy-react
+  cancel-in-progress: true
+
 env:
   BUILD_NUMBER: ${{ github.run_number }}
 
