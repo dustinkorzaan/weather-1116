@@ -6,10 +6,6 @@ const apiBaseUrl = trimUrl(import.meta.env.VITE_API_DOTNET_URL) || 'http://local
 
 export const siteLinks = [
   {
-    label: 'UI React',
-    href: import.meta.env.VITE_UI_REACT_URL || 'http://localhost:3000',
-  },
-  {
     label: 'UI Blazor',
     href: import.meta.env.VITE_UI_BLAZOR_URL || 'http://localhost:8090',
   },
