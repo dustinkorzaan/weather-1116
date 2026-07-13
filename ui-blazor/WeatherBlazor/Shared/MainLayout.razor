@@ -3,11 +3,10 @@
 @inject WeatherForecastClient WeatherClient
 @inject IConfiguration Configuration
 
-<PageTitle>WeatherBlazor</PageTitle>
+<PageTitle>Weather Razor</PageTitle>
 
 @{
     var uiReactUrl = Configuration["SiteLinks:UiReact"] ?? "http://localhost:3000";
-    var uiBlazorUrl = Configuration["SiteLinks:UiBlazor"] ?? "http://localhost:8090";
     var mvcUrl = Configuration["SiteLinks:Mvc"] ?? "http://localhost:8100";
     var apiUrl = (Configuration["SiteLinks:ApiDotNet"] ?? "http://localhost:8080").TrimEnd('/');
     var apiAboutUrl = $"{apiUrl}/About";
@@ -39,9 +38,6 @@
                 <ul class="avatar-dropdown" role="menu">
                     <li role="none">
                         <a class="avatar-dropdown-item" role="menuitem" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
-                    </li>
-                    <li role="none">
-                        <a class="avatar-dropdown-item" role="menuitem" href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
                     </li>
                     <li role="none">
                         <a class="avatar-dropdown-item" role="menuitem" href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
@@ -94,7 +90,6 @@
                 }
                 <div class="site-links-footer">
                     <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
-                    <a href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
                     <a href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
                     <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
                 </div>
