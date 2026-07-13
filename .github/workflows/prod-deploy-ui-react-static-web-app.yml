@@ -41,6 +41,7 @@ jobs:
           VITE_UI_REACT_URL: ${{ secrets.PROD_UI_REACT_URL }}
           VITE_UI_BLAZOR_URL: ${{ secrets.PROD_UI_BLAZOR_URL }}
           VITE_MVC_DOTNET_URL: ${{ secrets.PROD_MVC_DOTNET_URL }}
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           VITE_BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
           VITE_BUILD_START: ${{ env.BUILD_START }}
         with:

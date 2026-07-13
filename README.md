@@ -16,3 +16,23 @@ project relationships, and parity guidance.
 | Core | [`core-dotnet/Core.csproj`](core-dotnet/Core.csproj) | Shared .NET class library referenced by MVC and API |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
+
+## Google Maps (city map on all three UIs)
+
+Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
+Atlanta, Charlotte). Weather overlays will come later.
+
+**API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
+in a Google Cloud project.
+
+**API key:** Create a browser key in Google Cloud Console → APIs & Services →
+Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
+`http://localhost:8090/*`, `http://localhost:8100/*`, plus your prod hosts).
+
+| UI | Config |
+| --- | --- |
+| React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see `.env.example`) |
+| Blazor | `GoogleMaps:ApiKey` in `appsettings.json`, or env `GoogleMaps__ApiKey` |
+| MVC | `GoogleMaps:ApiKey` in `appsettings.json`, or env `GoogleMaps__ApiKey` |
+
+Without a key, the map container still renders and each UI shows a short setup hint.
