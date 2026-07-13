@@ -1,5 +1,5 @@
-@inject IJSRuntime JS
 @inject IConfiguration Configuration
+@using System.Text.Json
 
 <section class="weather-map-section" aria-label="City map">
     <h2>City map</h2>
@@ -10,56 +10,36 @@
             Set <code>GoogleMaps:ApiKey</code> in appsettings (or env <code>GoogleMaps__ApiKey</code>) to enable Google Maps.
         </p>
     }
-    else if (!string.IsNullOrWhiteSpace(_errorMessage))
-    {
-        <p class="text-danger">@_errorMessage</p>
-    }
 
-    <div id="weather-map" class="weather-map" @ref="_mapElement" data-status="@_status"></div>
+    @* Map is initialized by wwwroot/js/weatherMap.js from these data attributes.
+       That keeps the map working even when the Blazor SignalR circuit is slow or fails. *@
+    <div id="weather-map"
+         class="weather-map"
+         data-google-maps-key="@_apiKey"
+         data-cities="@_citiesJson"
+         data-status="@(string.IsNullOrWhiteSpace(_apiKey) ? "missing-key" : "pending")"></div>
 </section>
 
 @code {
-    private sealed record MapCity(string Id, string Name, double Lat, double Lng);
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
 
-    private static readonly MapCity[] Cities =
+    private static readonly object[] Cities =
     [
-        new("nyc", "New York", 40.7128, -74.006),
-        new("toronto", "Toronto", 43.6532, -79.3832),
-        new("atlanta", "Atlanta", 33.749, -84.388),
-        new("charlotte", "Charlotte", 35.2271, -80.8431),
+        new { id = "nyc", name = "New York", lat = 40.7128, lng = -74.006 },
+        new { id = "toronto", name = "Toronto", lat = 43.6532, lng = -79.3832 },
+        new { id = "atlanta", name = "Atlanta", lat = 33.749, lng = -84.388 },
+        new { id = "charlotte", name = "Charlotte", lat = 35.2271, lng = -80.8431 },
     ];
 
-    private ElementReference _mapElement;
     private string _apiKey = "";
-    private string _status = "idle";
-    private string? _errorMessage;
-    private bool _initialized;
+    private string _citiesJson = "[]";
 
     protected override void OnInitialized()
     {
         _apiKey = Configuration["GoogleMaps:ApiKey"] ?? "";
-        _status = string.IsNullOrWhiteSpace(_apiKey) ? "missing-key" : "loading";
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender || _initialized || string.IsNullOrWhiteSpace(_apiKey))
-        {
-            return;
-        }
-
-        _initialized = true;
-
-        try
-        {
-            await JS.InvokeVoidAsync("weatherMap.init", _mapElement, _apiKey, Cities);
-            _status = "ready";
-        }
-        catch
-        {
-            _status = "error";
-            _errorMessage = "Unable to load Google Maps. Check the API key and that Maps JavaScript API is enabled.";
-            StateHasChanged();
-        }
+        _citiesJson = JsonSerializer.Serialize(Cities, JsonOptions);
     }
 }

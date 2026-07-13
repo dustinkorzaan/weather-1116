@@ -40,6 +40,7 @@ window.weatherMap = (function () {
   ];
 
   let loadPromise = null;
+  const mapByElement = new WeakMap();
 
   function loadGoogleMaps(apiKey) {
     if (window.google && window.google.maps) {
@@ -58,7 +59,8 @@ window.weatherMap = (function () {
       const script = document.createElement('script');
       script.src =
         'https://maps.googleapis.com/maps/api/js?key=' +
-        encodeURIComponent(apiKey);
+        encodeURIComponent(apiKey) +
+        '&loading=async';
       script.async = true;
       script.defer = true;
       script.onload = function () {
@@ -108,6 +110,10 @@ window.weatherMap = (function () {
       return Promise.reject(new Error('Map container not found.'));
     }
 
+    if (mapByElement.has(element) || element.getAttribute('data-status') === 'ready') {
+      return Promise.resolve(mapByElement.get(element));
+    }
+
     if (!apiKey) {
       element.setAttribute('data-status', 'missing-key');
       return Promise.reject(new Error('Missing Google Maps API key.'));
@@ -116,7 +122,17 @@ window.weatherMap = (function () {
     element.setAttribute('data-status', 'loading');
 
     return loadGoogleMaps(apiKey).then(function (maps) {
-      const map = new maps.Map(element, {
+      // Blazor may replace the node between schedule and resolve; re-check.
+      const current = resolveElement(element.id || elementOrId) || element;
+      if (!current.isConnected) {
+        return null;
+      }
+
+      if (mapByElement.has(current)) {
+        return mapByElement.get(current);
+      }
+
+      const map = new maps.Map(current, {
         center: DEFAULT_CENTER,
         zoom: DEFAULT_ZOOM,
         styles: DARK_MAP_STYLES,
@@ -145,10 +161,92 @@ window.weatherMap = (function () {
         });
       });
 
-      element.setAttribute('data-status', 'ready');
+      mapByElement.set(current, map);
+      current.setAttribute('data-status', 'ready');
       return map;
     });
   }
 
-  return { init: init };
+  function parseCities(raw) {
+    if (!raw) {
+      return [];
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function tryAutoInit(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    const elements = [];
+
+    if (scope.getElementById) {
+      const byId = scope.getElementById('weather-map');
+      if (byId) {
+        elements.push(byId);
+      }
+    }
+
+    scope.querySelectorAll('[data-google-maps-key]').forEach(function (el) {
+      if (elements.indexOf(el) === -1) {
+        elements.push(el);
+      }
+    });
+
+    elements.forEach(function (el) {
+      const status = el.getAttribute('data-status');
+      // Skip containers that are already initializing, ready, or known missing a key.
+      if (status === 'ready' || status === 'loading' || status === 'missing-key') {
+        return;
+      }
+
+      const apiKey = el.getAttribute('data-google-maps-key') || '';
+      if (!apiKey) {
+        el.setAttribute('data-status', 'missing-key');
+        return;
+      }
+
+      init(el, apiKey, parseCities(el.getAttribute('data-cities'))).catch(function () {
+        if (el.isConnected) {
+          el.setAttribute('data-status', 'error');
+        }
+      });
+    });
+  }
+
+  function startAutoInit() {
+    tryAutoInit(document);
+
+    if (window.MutationObserver) {
+      const observer = new MutationObserver(function (mutations) {
+        for (let i = 0; i < mutations.length; i++) {
+          const mutation = mutations[i];
+          if (mutation.addedNodes && mutation.addedNodes.length) {
+            tryAutoInit(document);
+            return;
+          }
+        }
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    }
+
+    // Blazor circuit connect can replace prerendered nodes shortly after load.
+    window.setTimeout(function () {
+      tryAutoInit(document);
+    }, 500);
+    window.setTimeout(function () {
+      tryAutoInit(document);
+    }, 2000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startAutoInit);
+  } else {
+    startAutoInit();
+  }
+
+  return { init: init, tryAutoInit: tryAutoInit };
 })();
