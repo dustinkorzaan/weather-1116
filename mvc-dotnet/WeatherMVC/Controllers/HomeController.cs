@@ -27,8 +27,15 @@ public class HomeController : Controller
 
     public async Task<IActionResult> HelloWorld(CancellationToken cancellationToken)
     {
-        var helloResponse = await _mediator.Send(new HelloWorldEvent { Message = "from WeatherMVC" }, cancellationToken);
-        ViewData["HelloResponse"] = helloResponse.RequestResponse;
+        try
+        {
+            var helloResponse = await _mediator.Send(new HelloWorldEvent { Message = "from WeatherMVC" }, cancellationToken);
+            ViewData["HelloResponse"] = helloResponse.RequestResponse;
+        }
+        catch
+        {
+            ViewData["HelloResponse"] = "Unable to load hello message.";
+        }
         return View();
     }
 
