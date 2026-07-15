@@ -2,6 +2,7 @@ import './App.css';
 import { useEffect, useRef, useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { siteLinks } from './config/siteLinks';
+import HelloWorldPage from './pages/HelloWorldPage';
 import HomePage from './pages/HomePage';
 import {
   useLazyGetAboutQuery,
@@ -166,6 +167,16 @@ function App() {
                     About
                   </button>
                 </li>
+                <li role="none">
+                  <Link
+                    className="avatar-dropdown-item"
+                    role="menuitem"
+                    to="/hello-world"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Hello World
+                  </Link>
+                </li>
               </ul>
             )}
           </div>
@@ -174,6 +185,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/hello-world" element={<HelloWorldPage />} />
       </Routes>
 
       {isAboutOpen && (
