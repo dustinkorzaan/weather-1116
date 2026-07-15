@@ -25,6 +25,13 @@ public class HomeController : Controller
         return View(forecasts);
     }
 
+    public async Task<IActionResult> HelloWorld(CancellationToken cancellationToken)
+    {
+        var helloResponse = await _mediator.Send(new HelloWorldEvent { Message = "from WeatherMVC" }, cancellationToken);
+        ViewData["HelloResponse"] = helloResponse.RequestResponse;
+        return View();
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "Hello World";
+    var helloResponse = ViewData["HelloResponse"] as string;
+}
+
+<h1>Hello World</h1>
+
+@if (!string.IsNullOrWhiteSpace(helloResponse))
+{
+    <p class="lead">@helloResponse</p>
+}

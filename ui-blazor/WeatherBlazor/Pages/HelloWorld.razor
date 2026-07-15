@@ -1,0 +1,26 @@
+@page "/hello-world"
+@using WeatherBlazor.Data
+@inject WeatherForecastClient ForecastClient
+
+<PageTitle>Hello World - Weather Razor</PageTitle>
+
+<h1>Hello World</h1>
+
+<p><strong>@helloMessage</strong></p>
+
+@code {
+    private string helloMessage = "Loading hello message...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var helloResponse = await ForecastClient.GetHelloAsync();
+            helloMessage = helloResponse?.RequestResponse ?? "No hello response returned.";
+        }
+        catch
+        {
+            helloMessage = "Unable to load hello message from API.";
+        }
+    }
+}
