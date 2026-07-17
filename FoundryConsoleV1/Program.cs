@@ -34,7 +34,12 @@ internal class Program
 	private static async Task GetWeatherWillFail(string location)
 	{
 		Console.Clear();
-		Console.WriteLine($"Method 1a - What is the current weather in {location}? (will fail)");
+		Console.WriteLine($"""
+		Example 1
+		 - Ask AI "What is the current weather in {location}?"
+		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
+		 - This is expected to fail because it doesn't have supporting data.
+		""");
 
 		// AI prep
 		var systemPrompt = "You are a helpful weather assistant.";
@@ -42,10 +47,10 @@ internal class Program
 		What is the current weather today for {location}?
 		""";
 
-		Console.WriteLine("System Prompt:");
+		Console.WriteLine("\nSystem Prompt:");
 		Console.WriteLine(systemPrompt);
 
-		Console.WriteLine("User Prompt:");
+		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
 		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
@@ -66,8 +71,7 @@ internal class Program
 		try
 		{
 			var response = await chatClient.CompleteChatAsync(messages);
-			Console.WriteLine();
-			Console.WriteLine("Response:");
+			Console.WriteLine("\nResponse:");
 			Console.WriteLine(response.Value.Content[0].Text);
 		}
 		catch (Exception ex)
@@ -75,7 +79,7 @@ internal class Program
 			Console.WriteLine($"Request failed: {ex.Message}");
 		}
 
-		Console.WriteLine("Press any key to continue.");
+		Console.WriteLine("\nPress any key to continue.");
 		Console.ReadKey(true);
 	}
 
@@ -86,7 +90,12 @@ internal class Program
 	private static async Task GetWeatherMakeUpSomething(string location)
 	{
 		Console.Clear();
-		Console.WriteLine($"Method 1b - What is the current weather in {location}? (make something up)");
+		Console.WriteLine($"""
+		Example 2
+		 - Ask AI "What is the current weather in {location}?"
+		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
+		 - Ask it to make something up because it doesn't have supporting data.
+		""");
 
 		// AI prep
 		var systemPrompt = "You are a helpful weather assistant.";
@@ -96,10 +105,10 @@ internal class Program
 		- Keep it short.
 		""";
 
-		Console.WriteLine("System Prompt:");
+		Console.WriteLine("\nSystem Prompt:");
 		Console.WriteLine(systemPrompt);
 
-		Console.WriteLine("User Prompt:");
+		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
 		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
@@ -120,8 +129,7 @@ internal class Program
 		try
 		{
 			var response = await chatClient.CompleteChatAsync(messages);
-			Console.WriteLine();
-			Console.WriteLine("Response:");
+			Console.WriteLine("\nResponse:");
 			Console.WriteLine(response.Value.Content[0].Text);
 		}
 		catch (Exception ex)
@@ -129,7 +137,7 @@ internal class Program
 			Console.WriteLine($"Request failed: {ex.Message}");
 		}
 
-		Console.WriteLine("Press any key to continue.");
+		Console.WriteLine("\nPress any key to continue.");
 		Console.ReadKey(true);
 	}
 
@@ -140,29 +148,35 @@ internal class Program
 	private static async Task GetWeatherJsonInStringOut(string location)
 	{
 		Console.Clear();
-		Console.WriteLine($"Method 2 - What is the current weather in {location}? (JSON in, string out)");
+		Console.WriteLine($"""
+		Example 3
+		 - Ask AI "What is the current weather in {location}?"
+		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
+		 - Provide raw JSON input from a weather API
+		 - String output from AI
+		""");
 
-		// Non AI prep
+		// Non-AI prep
 		var latLong = await GetLatLongData(location);
 		var weatherData = await GetWeatherData(latLong);
 		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
 
 		// AI prep
 		var systemPrompt = """
-		You are a helpful weather assistant.  
+		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
 		""";
 		var userPrompt = $"""
-		You are given these WeatherConditions for {location} in JSON:
+		You are given this WeatherConditions JSON:
 		{weatherDataJson}
 
 		Describe today's current weather in {location}?
 		""";
 
-		Console.WriteLine("System Prompt:");
+		Console.WriteLine("\nSystem Prompt:");
 		Console.WriteLine(systemPrompt);
 
-		Console.WriteLine("User Prompt:");
+		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
 		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
@@ -184,8 +198,7 @@ internal class Program
 		{
 			var response = await chatClient.CompleteChatAsync(messages);
 
-			Console.WriteLine();
-			Console.WriteLine("Response:");
+			Console.WriteLine("\nResponse:");
 			Console.WriteLine(response.Value.Content[0].Text);
 		}
 		catch (Exception ex)
@@ -193,7 +206,7 @@ internal class Program
 			Console.WriteLine($"Request failed: {ex.Message}");
 		}
 
-		Console.WriteLine("Press any key to continue.");
+		Console.WriteLine("\nPress any key to continue.");
 		Console.ReadKey(true);
 	}
 
@@ -204,16 +217,22 @@ internal class Program
 	private static async Task GetWeatherJsonInJsonOut(string location)
 	{
 		Console.Clear();
-		Console.WriteLine($"Method 3 - What is the current weather in {location}? (JSON in, JSON out)");
+		Console.WriteLine($"""
+		Example 4
+		 - Ask AI "What is the current weather in {location}?"
+		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
+		 - Provide raw JSON input from a weather API
+		 - JSON output from AI
+		""");
 
-		// Non AI prep
+		// Non-AI prep
 		var latLong = await GetLatLongData(location);
 		var weatherData = await GetWeatherData(latLong);
 		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
 
 		// AI prep
 		var systemPrompt = """
-		You are a helpful weather assistant.  
+		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
 		""";
 		var userPrompt = $"""
@@ -221,7 +240,7 @@ internal class Program
 		{weatherDataJson}
 
 		Return valid JSON with these fields:
-		- summary (string) (full sentence summary of the current weather includeing temperature, wind speed, wind direction, and conditions)
+		- summary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
 		- temperature (number)
 		- windSpeed (number)
 		- windDirection (string)
@@ -247,13 +266,13 @@ internal class Program
 		}
 		""";
 
-		Console.WriteLine("System Prompt:");
+		Console.WriteLine("\nSystem Prompt:");
 		Console.WriteLine(systemPrompt);
 
-		Console.WriteLine("User Prompt:");
+		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		Console.WriteLine("AI Output Schema:");
+		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
 		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
@@ -293,8 +312,7 @@ internal class Program
 			}
 			else
 			{
-				Console.WriteLine();
-				Console.WriteLine("Response:");
+				Console.WriteLine("\nResponse:");
 				Console.WriteLine(JsonSerializer.Serialize(aiWeather, new JsonSerializerOptions { WriteIndented = true }));
 			}
 		}
@@ -303,7 +321,7 @@ internal class Program
 			Console.WriteLine($"Request failed: {ex.Message}");
 		}
 
-		Console.WriteLine("Press any key to continue.");
+		Console.WriteLine("\nPress any key to continue.");
 		Console.ReadKey(true);
 	}
 
@@ -352,8 +370,7 @@ internal class Program
 			// 3. Deserialize into the C# Class Model
 			NonAIWeatherResponse weatherData = JsonSerializer.Deserialize<NonAIWeatherResponse>(jsonResponse, options) ?? new NonAIWeatherResponse();
 
-			// 4. Serialize back to JSON and console print as-is
-			string outputJson = JsonSerializer.Serialize(weatherData, options);
+			// 4. Return deserialized weather data
 			return weatherData;
 		}
 		catch (Exception ex)
