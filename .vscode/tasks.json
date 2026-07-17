@@ -127,7 +127,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FoundryConsoleV1/WeatherFoundryConsole.csproj",
+                "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint/WeatherFoundryConsole.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
