@@ -1,6 +1,7 @@
 using Core.currentweather;
 using Core.demo.handlers;
 using MediatR;
+using WeatherAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 

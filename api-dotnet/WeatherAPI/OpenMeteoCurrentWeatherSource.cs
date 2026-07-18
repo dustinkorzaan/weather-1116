@@ -1,12 +1,12 @@
+using Core.currentweather;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
-namespace Core.currentweather;
+namespace WeatherAPI;
 
 /// <summary>
 /// Fetches current weather conditions from the free Open Meteo API
 /// (https://open-meteo.com). No API key is required.
-/// Used by both WeatherAPI and WeatherMVC.
 /// </summary>
 public class OpenMeteoCurrentWeatherSource : ICurrentWeatherSource
 {
