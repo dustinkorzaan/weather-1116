@@ -120,6 +120,18 @@
                 "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build foundry console v1",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint/WeatherFoundryConsole.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }

@@ -86,6 +86,17 @@
             }
         },
         {
+            "name": "Foundry Console V1 Model Direct Legacy Cognitive Services Endpoint",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build foundry console v1",
+            "program": "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint/bin/Debug/net10.0/WeatherFoundryConsole.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        },
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
