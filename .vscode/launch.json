@@ -97,6 +97,39 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "Foundry Console V2 Model Direct New Unified AI Services",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build foundry console v2",
+            "program": "${workspaceFolder}/FoundryConsoleV2ModelDirectNewUnifiedAIServices/bin/Debug/net10.0/WeatherFoundryConsole.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/FoundryConsoleV2ModelDirectNewUnifiedAIServices",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Foundry Console V3 Inject Functions",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build foundry console v3",
+            "program": "${workspaceFolder}/FoundryConsoleV3InjectFunctions/bin/Debug/net10.0/WeatherFoundryConsole.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/FoundryConsoleV3InjectFunctions",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Foundry Console V4 MCP",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build foundry console v4",
+            "program": "${workspaceFolder}/FoundryConsoleV4MCP/bin/Debug/net10.0/WeatherFoundryConsole.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/FoundryConsoleV4MCP",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        },
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
