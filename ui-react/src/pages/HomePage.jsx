@@ -1,11 +1,8 @@
 import WeatherMap from '../components/WeatherMap';
 import {
-  useGetCurrentWeatherQuery,
   useGetForecastQuery,
   useGetHelloQuery,
 } from '../services/weatherApi';
-
-const DEFAULT_LOCATION = 'New York, NY';
 
 /** Formats an API date-only string (yyyy-MM-dd) in local time, matching .NET ToShortDateString(). */
 function formatForecastDate(isoDate) {
@@ -36,7 +33,6 @@ function HomePage() {
     isLoading: isForecastLoading,
     isError: isForecastError,
   } = useGetForecastQuery();
-  const { data: currentWeather } = useGetCurrentWeatherQuery(DEFAULT_LOCATION);
 
   return (
     <main className="home-content">
@@ -45,20 +41,6 @@ function HomePage() {
       </p>
 
       <WeatherMap />
-
-      {currentWeather && (
-        <section className="current-weather-section" aria-label="Current weather">
-          <h2 className="current-weather-title">Current conditions — {currentWeather.location}</h2>
-          <dl className="current-weather-details">
-            <dt>Temperature</dt>
-            <dd>{currentWeather.temperatureC.toFixed(2)} °C / {(currentWeather.temperatureC * 9 / 5 + 32).toFixed(2)} °F</dd>
-            <dt>Wind</dt>
-            <dd>{currentWeather.windSpeedKph.toFixed(1)} km/h at {currentWeather.windDirectionDeg}°</dd>
-            <dt>Observed at</dt>
-            <dd>{currentWeather.observedAt}</dd>
-          </dl>
-        </section>
-      )}
 
       <h2 className="forecast-title">Weather forecast</h2>
 

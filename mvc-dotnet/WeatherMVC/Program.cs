@@ -1,14 +1,11 @@
-using Core.currentweather;
 using Core.demo.handlers;
 using MediatR;
-using WeatherMVC;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
-builder.Services.AddHttpClient<ICurrentWeatherSource, OpenMeteoCurrentWeatherSource>();
 
 var app = builder.Build();
 

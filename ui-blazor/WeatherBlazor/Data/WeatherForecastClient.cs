@@ -31,10 +31,6 @@ public class WeatherForecastClient
     public async Task<HelloWorldResponse?> GetHelloAsync()
         => await _httpClient.GetFromJsonAsync<HelloWorldResponse>("Home/Hello");
 
-    public async Task<CurrentWeatherConditions?> GetCurrentWeatherAsync(string location)
-        => await _httpClient.GetFromJsonAsync<CurrentWeatherConditions>(
-            $"CurrentWeather?location={Uri.EscapeDataString(location)}");
-
     public async Task<AboutNode> GetAboutAsync()
     {
         AboutNode apiRoot;

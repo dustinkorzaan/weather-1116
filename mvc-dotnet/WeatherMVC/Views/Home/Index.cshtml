@@ -1,11 +1,9 @@
 ﻿@using System.Text.Json
-@using Core.currentweather
 @inject IConfiguration Configuration
 @model Core.demo.forecast.WeatherForecast[]
 @{
     ViewData["Title"] = "Home";
     var helloResponse = ViewData["HelloResponse"] as string;
-    var currentWeather = ViewData["CurrentWeather"] as CurrentWeatherConditions;
     var mapsApiKey = Configuration["GoogleMaps:ApiKey"] ?? "";
     var mapCities = new[]
     {
@@ -32,21 +30,6 @@
     }
     <div id="weather-map" class="weather-map" data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"></div>
 </section>
-
-@if (currentWeather is not null)
-{
-    <section class="current-weather-section" aria-label="Current weather">
-        <h2>Current conditions — @currentWeather.Location</h2>
-        <dl class="current-weather-details">
-            <dt>Temperature</dt>
-            <dd>@((currentWeather.TemperatureC).ToString("0.##")) °C / @((currentWeather.TemperatureC * 9.0 / 5.0 + 32.0).ToString("0.##")) °F</dd>
-            <dt>Wind</dt>
-            <dd>@(currentWeather.WindSpeedKph.ToString("0.#")) km/h at @(currentWeather.WindDirectionDeg)°</dd>
-            <dt>Observed at</dt>
-            <dd>@currentWeather.ObservedAt</dd>
-        </dl>
-    </section>
-}
 
 <h2>Weather forecast</h2>
 
