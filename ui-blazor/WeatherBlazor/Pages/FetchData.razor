@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using WeatherBlazor.Data
 @inject WeatherForecastClient ForecastClient
+@inject IConfiguration Configuration
 
 <PageTitle>Weather Razor</PageTitle>
 
@@ -14,6 +15,21 @@
 }
 
 <WeatherMap />
+
+@if (currentWeather is not null)
+{
+    <section class="current-weather-section" aria-label="Current weather">
+        <h2>Current conditions — @currentWeather.Location</h2>
+        <dl class="current-weather-details">
+            <dt>Temperature</dt>
+            <dd>@((currentWeather.TemperatureC).ToString("0.##")) °C / @((currentWeather.TemperatureC * 9.0 / 5.0 + 32.0).ToString("0.##")) °F</dd>
+            <dt>Wind</dt>
+            <dd>@(currentWeather.WindSpeedKph.ToString("0.#")) km/h at @(currentWeather.WindDirectionDeg)°</dd>
+            <dt>Observed at</dt>
+            <dd>@currentWeather.ObservedAt</dd>
+        </dl>
+    </section>
+}
 
 @if (forecasts == null)
 {
@@ -48,6 +64,7 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    private CurrentWeatherConditions? currentWeather;
     private string helloMessage = "Loading hello message...";
     private string? errorMessage;
 
@@ -62,6 +79,16 @@ else
         {
             helloMessage = "Unable to load hello message from API.";
             errorMessage ??= "Unable to load data from the weather API.";
+        }
+
+        try
+        {
+            var defaultLocation = Configuration["CurrentWeather:DefaultLocation"] ?? "New York, NY";
+            currentWeather = await ForecastClient.GetCurrentWeatherAsync(defaultLocation);
+        }
+        catch
+        {
+            // Non-fatal: current weather is best-effort.
         }
 
         try
