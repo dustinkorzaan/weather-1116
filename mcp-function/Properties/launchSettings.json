@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "WeatherMcpFunction": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 8120",
+      "launchBrowser": false
+    }
+  }
+}
