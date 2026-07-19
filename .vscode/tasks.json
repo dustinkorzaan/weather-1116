@@ -148,7 +148,7 @@
         {
             "type": "func",
             "label": "func: host start",
-            "command": "host start --port 7208",
+            "command": "host start --port 8120",
             "options": {
                 "cwd": "${workspaceFolder}/mcp-function/bin/Debug/net10.0"
             },

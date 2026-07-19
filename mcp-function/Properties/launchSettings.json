@@ -2,7 +2,7 @@
   "profiles": {
     "WeatherMcpFunction": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7208",
+      "commandLineArgs": "--port 8120",
       "launchBrowser": false
     }
   }

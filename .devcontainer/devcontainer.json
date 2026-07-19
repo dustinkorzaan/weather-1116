@@ -67,7 +67,11 @@
         // ui-blazor
         8090,
         // mvc-dotnet
-        8100
+        8100,
+        // mcp-dotnet (ASP.NET Core MCP)
+        8110,
+        // mcp-function (Azure Functions MCP)
+        8120
     ],
     "postCreateCommand": "bash -lc 'dotnet dev-certs https && dotnet new install Aspire.ProjectTemplates && dotnet restore && cd ui-react && npm ci'",
     // "hostRequirements": {
@@ -96,6 +100,14 @@
         },
         "8100": {
             "label": "Weather MVC",
+            "onAutoForward": "ignore"
+        },
+        "8110": {
+            "label": "Weather MCP DotNet",
+            "onAutoForward": "ignore"
+        },
+        "8120": {
+            "label": "Weather MCP Function",
             "onAutoForward": "ignore"
         }
     }
