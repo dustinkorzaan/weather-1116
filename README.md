@@ -1,7 +1,7 @@
 # Weather
 
-Weather forecast sample app implemented across four runnable UI/API stacks, two
-MCP tool hosts, plus one shared .NET class library.
+Weather forecast sample app implemented across four runnable stacks plus one
+shared .NET class library.
 
 This README is intentionally brief. Use it for quick orientation, and use
 [`docs/architecture.md`](docs/architecture.md) for architecture constraints,
@@ -13,15 +13,38 @@ project relationships, and parity guidance.
 | API | [`api-dotnet/WeatherAPI`](api-dotnet/WeatherAPI) | ASP.NET Core Minimal API | 8080 |
 | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
 | Blazor UI | [`ui-blazor/WeatherBlazor`](ui-blazor/WeatherBlazor) | Blazor Server | 8090 |
-| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | ASP.NET Core MCP server (`GetPublicWeatherData`) | 8110 |
-| MCP Function | [`mcp-function`](mcp-function) | Azure Functions MCP server (`GetLatLongData`) | 8120 |
-| Core | [`core-dotnet/Core.csproj`](core-dotnet/Core.csproj) | Shared .NET class library referenced by MVC, API, and MCP hosts | — |
-
-Both MCP hosts call Core via MediatR. Local/Codespaces ports are also listed in
-[`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json) for
-forwarding. VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**.
+| Core | [`core-dotnet/Core.csproj`](core-dotnet/Core.csproj) | Shared .NET class library referenced by MVC and API | — |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
+
+## MCP tool hosts
+
+Ultra-simple remote MCP servers that expose Core weather tools via MediatR.
+Auth is intentionally open for local exploration.
+
+| Project | Path | Tool | Port | Endpoint |
+| --- | --- | --- | --- | --- |
+| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | `GetPublicWeatherData` | 8110 | `/mcp` |
+| MCP Function | [`mcp-function`](mcp-function) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` |
+
+VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
+also forwarded in [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json).
+
+## Foundry console demos
+
+Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
+against Core weather data. Not part of `Weather.sln` deployables; run from VS Code
+or `dotnet run` in each folder. Expect a Foundry API key in the environment
+(see each `Program.cs`).
+
+| Project | Path | Pattern |
+| --- | --- | --- |
+| V1 | [`FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint`](FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
+| V2 | [`FoundryConsoleV2ModelDirectNewUnifiedAIServices`](FoundryConsoleV2ModelDirectNewUnifiedAIServices) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
+| V3 | [`FoundryConsoleV3InjectFunctions`](FoundryConsoleV3InjectFunctions) | Injected function tools (`GetLatLongData`, `GetPublicWeatherData`) handled in-process |
+| V4 | [`FoundryConsoleV4MCP`](FoundryConsoleV4MCP) | Model-direct JSON in / JSON out (named MCP; remote MCP hosts are the projects above) |
+
+VS Code launch configs: **Foundry Console V1** … **V4**.
 
 ## Google Maps (city map on all three UIs)
 
