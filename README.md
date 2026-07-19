@@ -1,19 +1,25 @@
 # Weather
 
-Weather forecast sample app implemented across four runnable stacks plus one
-shared .NET class library.
+Weather forecast sample app implemented across four runnable UI/API stacks, two
+MCP tool hosts, plus one shared .NET class library.
 
 This README is intentionally brief. Use it for quick orientation, and use
 [`docs/architecture.md`](docs/architecture.md) for architecture constraints,
 project relationships, and parity guidance.
 
-| Project | Path | Stack |
-| --- | --- | --- |
-| MVC UI | [`mvc-dotnet/WeatherMVC`](mvc-dotnet/WeatherMVC) | ASP.NET Core MVC |
-| API | [`api-dotnet/WeatherAPI`](api-dotnet/WeatherAPI) | ASP.NET Core Minimal API |
-| React UI | [`ui-react`](ui-react) | React + Vite |
-| Blazor UI | [`ui-blazor/WeatherBlazor`](ui-blazor/WeatherBlazor) | Blazor Server |
-| Core | [`core-dotnet/Core.csproj`](core-dotnet/Core.csproj) | Shared .NET class library referenced by MVC and API |
+| Project | Path | Stack | Port |
+| --- | --- | --- | --- |
+| MVC UI | [`mvc-dotnet/WeatherMVC`](mvc-dotnet/WeatherMVC) | ASP.NET Core MVC | 8100 |
+| API | [`api-dotnet/WeatherAPI`](api-dotnet/WeatherAPI) | ASP.NET Core Minimal API | 8080 |
+| React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
+| Blazor UI | [`ui-blazor/WeatherBlazor`](ui-blazor/WeatherBlazor) | Blazor Server | 8090 |
+| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | ASP.NET Core MCP server (`GetPublicWeatherData`) | 8110 |
+| MCP Function | [`mcp-function`](mcp-function) | Azure Functions MCP server (`GetLatLongData`) | 8120 |
+| Core | [`core-dotnet/Core.csproj`](core-dotnet/Core.csproj) | Shared .NET class library referenced by MVC, API, and MCP hosts | — |
+
+Both MCP hosts call Core via MediatR. Local/Codespaces ports are also listed in
+[`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json) for
+forwarding. VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**.
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
