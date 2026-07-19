@@ -10,6 +10,12 @@
   <ItemGroup>
     <PackageReference Include="Azure.AI.OpenAI" Version="2.*" />
     <PackageReference Include="DotNetEnv" Version="3.*" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\core-dotnet\Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,11 +1,14 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
+using Core.demo.handlers;
+using Core.geo.Events;
+using Core.weather.Events;
 using DotNetEnv;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -17,14 +20,19 @@ internal class Program
 	{
 		Env.TraversePath().Load();
 
+		var services = new ServiceCollection();
+		services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
+		using var serviceProvider = services.BuildServiceProvider();
+		var mediator = serviceProvider.GetRequiredService<IMediator>();
+
 		string location = "Nashville, TN";
 
 		await GetWeatherWillFail(location);
 		await GetWeatherMakeUpSomething(location);
 
-		await GetWeatherJsonInStringOut(location);
+		await GetWeatherJsonInStringOut(mediator, location);
 
-		await GetWeatherJsonInJsonOut(location);
+		await GetWeatherJsonInJsonOut(mediator, location);
 	}
 
 
@@ -145,7 +153,7 @@ internal class Program
 
 
 
-	private static async Task GetWeatherJsonInStringOut(string location)
+	private static async Task GetWeatherJsonInStringOut(IMediator mediator, string location)
 	{
 		Console.Clear();
 		Console.WriteLine($"""
@@ -157,8 +165,8 @@ internal class Program
 		""");
 
 		// Non-AI prep
-		var latLong = await GetLatLongData(location);
-		var weatherData = await GetWeatherData(latLong);
+		var latLong = await mediator.Send(new GetLatLongDataEvent { Location = location });
+		var weatherData = await mediator.Send(new GetPublicWeatherDataEvent { LatLong = latLong });
 		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
 
 		// AI prep
@@ -214,7 +222,7 @@ internal class Program
 
 
 
-	private static async Task GetWeatherJsonInJsonOut(string location)
+	private static async Task GetWeatherJsonInJsonOut(IMediator mediator, string location)
 	{
 		Console.Clear();
 		Console.WriteLine($"""
@@ -226,8 +234,8 @@ internal class Program
 		""");
 
 		// Non-AI prep
-		var latLong = await GetLatLongData(location);
-		var weatherData = await GetWeatherData(latLong);
+		var latLong = await mediator.Send(new GetLatLongDataEvent { Location = location });
+		var weatherData = await mediator.Send(new GetPublicWeatherDataEvent { LatLong = latLong });
 		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
 
 		// AI prep
@@ -346,192 +354,4 @@ internal class Program
 		[JsonPropertyName("conditions")]
 		public string Conditions { get; set; } = string.Empty;
 	}
-
-
-
-
-
-	private static async Task<NonAIWeatherResponse> GetWeatherData(NonAILatLongResponse latLong)
-	{
-		var client = new HttpClient();
-		var currentWeatherPath = "forecast";
-
-		string url = $"https://api.open-meteo.com/v1/{currentWeatherPath}?latitude={latLong.Latitude}&longitude={latLong.Longitude}&current_weather=true";
-		Console.WriteLine($"Non-AI: Fetching weather data from: {url}");
-
-		try
-		{
-			// 1. Fetch raw JSON string from API
-			string jsonResponse = await client.GetStringAsync(url);
-
-			// 2. Options to format the console output nicely
-			var options = new JsonSerializerOptions { WriteIndented = true };
-
-			// 3. Deserialize into the C# Class Model
-			NonAIWeatherResponse weatherData = JsonSerializer.Deserialize<NonAIWeatherResponse>(jsonResponse, options) ?? new NonAIWeatherResponse();
-
-			// 4. Return deserialized weather data
-			return weatherData;
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Error: {ex.Message}");
-			return new NonAIWeatherResponse();
-		}
-	}
-
-	private static async Task<NonAILatLongResponse> GetLatLongData(string location)
-	{
-		var client = new HttpClient();
-
-		try
-		{
-			// Try multiple location variants to handle inputs like "City, ST".
-			var queries = new List<string> { location };
-			if (location.Contains(','))
-			{
-				queries.Add(location.Split(',')[0].Trim());
-			}
-
-			foreach (var query in queries.Distinct(StringComparer.OrdinalIgnoreCase))
-			{
-				string encodedLocation = Uri.EscapeDataString(query);
-				string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedLocation}&count=1&language=en&format=json";
-				Console.WriteLine($"Non-AI: Fetching geocoding data from: {url}");
-				string jsonResponse = await client.GetStringAsync(url);
-				var geoData = JsonSerializer.Deserialize<NonAIGeocodingResponse>(jsonResponse);
-
-				if (geoData?.Results != null && geoData.Results.Count > 0)
-				{
-					var topMatch = geoData.Results[0];
-					Console.WriteLine($"Non-AI: Found: {topMatch.Name}, {topMatch.Admin1}, {topMatch.Country}");
-					return new NonAILatLongResponse { Latitude = topMatch.Latitude, Longitude = topMatch.Longitude };
-				}
-			}
-
-			Console.WriteLine($"Non-AI: No results found for '{location}'.");
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Non-AI: An error occurred: {ex.Message}");
-		}
-
-		// BNA: 36.1317° N, -86.6688° W
-		return new NonAILatLongResponse { Latitude = 36.1317, Longitude = -86.6688 };
-	}
-}
-
-
-
-
-
-public class NonAIGeocodingResponse
-{
-	[JsonPropertyName("results")]
-	public List<NonAIGeocodingResult> Results { get; set; } = [];
-}
-
-public class NonAIGeocodingResult
-{
-	[JsonPropertyName("name")]
-	public string Name { get; set; } = string.Empty;
-
-	[JsonPropertyName("admin1")]
-	public string Admin1 { get; set; } = string.Empty;
-
-	[JsonPropertyName("country")]
-	public string Country { get; set; } = string.Empty;
-
-	[JsonPropertyName("latitude")]
-	public double Latitude { get; set; }
-
-	[JsonPropertyName("longitude")]
-	public double Longitude { get; set; }
-}
-
-public class NonAILatLongResponse
-{
-	[JsonPropertyName("latitude")]
-	public double Latitude { get; set; }
-
-	[JsonPropertyName("longitude")]
-	public double Longitude { get; set; }
-}
-
-public class NonAIWeatherResponse
-{
-	[JsonPropertyName("latitude")]
-	public double Latitude { get; set; }
-
-	[JsonPropertyName("longitude")]
-	public double Longitude { get; set; }
-
-	[JsonPropertyName("generationtime_ms")]
-	public double GenerationTimeMs { get; set; }
-
-	[JsonPropertyName("utc_offset_seconds")]
-	public int UtcOffsetSeconds { get; set; }
-
-	[JsonPropertyName("timezone")]
-	public string Timezone { get; set; } = string.Empty;
-
-	[JsonPropertyName("timezone_abbreviation")]
-	public string TimezoneAbbreviation { get; set; } = string.Empty;
-
-	[JsonPropertyName("elevation")]
-	public double Elevation { get; set; }
-
-	[JsonPropertyName("current_weather_units")]
-	public NonAICurrentWeatherUnits CurrentWeatherUnits { get; set; } = new();
-
-	[JsonPropertyName("current_weather")]
-	public NonAICurrentWeather CurrentWeather { get; set; } = new();
-}
-
-public class NonAICurrentWeatherUnits
-{
-	[JsonPropertyName("time")]
-	public string Time { get; set; } = string.Empty;
-
-	[JsonPropertyName("interval")]
-	public string Interval { get; set; } = string.Empty;
-
-	[JsonPropertyName("temperature")]
-	public string Temperature { get; set; } = string.Empty;
-
-	[JsonPropertyName("windspeed")]
-	public string WindSpeed { get; set; } = string.Empty;
-
-	[JsonPropertyName("winddirection")]
-	public string WindDirection { get; set; } = string.Empty;
-
-	[JsonPropertyName("is_day")]
-	public string IsDay { get; set; } = string.Empty;
-
-	[JsonPropertyName("weathercode")]
-	public string WeatherCode { get; set; } = string.Empty;
-}
-
-public class NonAICurrentWeather
-{
-	[JsonPropertyName("time")]
-	public string Time { get; set; } = string.Empty;
-
-	[JsonPropertyName("interval")]
-	public int Interval { get; set; }
-
-	[JsonPropertyName("temperature")]
-	public double Temperature { get; set; }
-
-	[JsonPropertyName("windspeed")]
-	public double WindSpeed { get; set; }
-
-	[JsonPropertyName("winddirection")]
-	public int WindDirection { get; set; }
-
-	[JsonPropertyName("is_day")]
-	public int IsDay { get; set; }
-
-	[JsonPropertyName("weathercode")]
-	public int WeatherCode { get; set; }
 }
