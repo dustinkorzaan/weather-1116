@@ -1,15 +1,13 @@
-﻿using Azure;
-using Azure.AI.OpenAI;
-using Core.demo.handlers;
+﻿using Core.demo.handlers;
 using Core.geo.Events;
 using Core.weather.Events;
 using DotNetEnv;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenAI.Chat;
+using OpenAI.Responses;
 using System;
-using System.Collections.Generic;
+using System.ClientModel;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -40,14 +38,13 @@ internal class Program
 
 
 
-
 	private static async Task GetWeatherWillFail(string location)
 	{
 		Console.Clear();
 		Console.WriteLine($"""
 		Example 1
 		 - Ask AI "What is the current weather in {location}?"
-		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
+		 - Model Direct (using ResponsesClient against unified AI services endpoint)
 		 - This is expected to fail because it doesn't have supporting data.
 		""");
 
@@ -63,26 +60,32 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
-		var deploymentName = "gpt-5.4-mini";
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		AzureOpenAIClient azureClient = new(
-			endpoint,
-			new AzureKeyCredential(apiKey));
-		ChatClient chatClient = azureClient.GetChatClient(deploymentName);
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions()
+			{
+				Endpoint = new Uri(endpoint),
+			});
 
-		var messages = new List<ChatMessage>()
+		CreateResponseOptions options = new()
 		{
-			new SystemChatMessage(systemPrompt),
-			new UserChatMessage(userPrompt),
+			Model = deploymentName,
+			Instructions = systemPrompt,
+			InputItems =
+			{
+				ResponseItem.CreateUserMessageItem(userPrompt),
+			},
 		};
 
 		try
 		{
-			var response = await chatClient.CompleteChatAsync(messages);
+			ResponseResult response = await client.CreateResponseAsync(options);
 			Console.WriteLine("\nResponse:");
-			Console.WriteLine(response.Value.Content[0].Text);
+			Console.WriteLine(response.GetOutputText());
 		}
 		catch (Exception ex)
 		{
@@ -103,7 +106,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 2
 		 - Ask AI "What is the current weather in {location}?"
-		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
+		 - Model Direct (using ResponsesClient against unified AI services endpoint)
 		 - Ask it to make something up because it doesn't have supporting data.
 		""");
 
@@ -121,26 +124,32 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
-		var deploymentName = "gpt-5.4-mini";
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		AzureOpenAIClient azureClient = new(
-			endpoint,
-			new AzureKeyCredential(apiKey));
-		ChatClient chatClient = azureClient.GetChatClient(deploymentName);
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions()
+			{
+				Endpoint = new Uri(endpoint),
+			});
 
-		var messages = new List<ChatMessage>()
+		CreateResponseOptions options = new()
 		{
-			new SystemChatMessage(systemPrompt),
-			new UserChatMessage(userPrompt),
+			Model = deploymentName,
+			Instructions = systemPrompt,
+			InputItems =
+			{
+				ResponseItem.CreateUserMessageItem(userPrompt),
+			},
 		};
 
 		try
 		{
-			var response = await chatClient.CompleteChatAsync(messages);
+			ResponseResult response = await client.CreateResponseAsync(options);
 			Console.WriteLine("\nResponse:");
-			Console.WriteLine(response.Value.Content[0].Text);
+			Console.WriteLine(response.GetOutputText());
 		}
 		catch (Exception ex)
 		{
@@ -161,7 +170,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 3
 		 - Ask AI "What is the current weather in {location}?"
-		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
+		 - Model Direct (using ResponsesClient against unified AI services endpoint)
 		 - Provide raw JSON input from a weather API
 		 - String output from AI
 		""");
@@ -189,27 +198,32 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
-		var deploymentName = "gpt-5.4-mini";
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		AzureOpenAIClient azureClient = new(
-			endpoint,
-			new AzureKeyCredential(apiKey));
-		ChatClient chatClient = azureClient.GetChatClient(deploymentName);
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions()
+			{
+				Endpoint = new Uri(endpoint),
+			});
 
-		var messages = new List<ChatMessage>()
+		CreateResponseOptions options = new()
 		{
-			new SystemChatMessage(systemPrompt),
-			new UserChatMessage(userPrompt),
+			Model = deploymentName,
+			Instructions = systemPrompt,
+			InputItems =
+			{
+				ResponseItem.CreateUserMessageItem(userPrompt),
+			},
 		};
 
 		try
 		{
-			var response = await chatClient.CompleteChatAsync(messages);
-
+			ResponseResult response = await client.CreateResponseAsync(options);
 			Console.WriteLine("\nResponse:");
-			Console.WriteLine(response.Value.Content[0].Text);
+			Console.WriteLine(response.GetOutputText());
 		}
 		catch (Exception ex)
 		{
@@ -230,7 +244,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
+		 - Model Direct (using ResponsesClient against unified AI services endpoint)
 		 - Provide raw JSON input from a weather API
 		 - JSON output from AI
 		""");
@@ -285,33 +299,38 @@ internal class Program
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
-		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
-		var deploymentName = "gpt-5.4-mini";
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		AzureOpenAIClient azureClient = new(
-			endpoint,
-			new AzureKeyCredential(apiKey));
-		ChatClient chatClient = azureClient.GetChatClient(deploymentName);
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions()
+			{
+				Endpoint = new Uri(endpoint),
+			});
 
-		var messages = new List<ChatMessage>()
+		CreateResponseOptions options = new()
 		{
-			new SystemChatMessage(systemPrompt),
-			new UserChatMessage(userPrompt),
-		};
-
-		ChatCompletionOptions options = new()
-		{
-			ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
-				jsonSchemaFormatName: "ai_weather_response",
-				jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
-				jsonSchemaIsStrict: true)
+			Model = deploymentName,
+			Instructions = systemPrompt,
+			InputItems =
+			{
+				ResponseItem.CreateUserMessageItem(userPrompt),
+			},
+			TextOptions = new ResponseTextOptions
+			{
+				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+					jsonSchemaFormatName: "ai_weather_response",
+					jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+					jsonSchemaIsStrict: true)
+			}
 		};
 
 		try
 		{
-			var response = await chatClient.CompleteChatAsync(messages, options);
-			var content = response.Value.Content[0].Text;
+			ResponseResult response = await client.CreateResponseAsync(options);
+			var content = response.GetOutputText();
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
 				content,
 				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
