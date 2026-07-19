@@ -15,9 +15,6 @@ using System.Threading.Tasks;
 
 internal class Program
 {
-	private const string DeploymentName = "gpt-5.4-mini";
-	private const string Endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
-
 	private static async Task Main(string[] args)
 	{
 		Env.TraversePath().Load();
@@ -37,20 +34,6 @@ internal class Program
 
 		await GetWeatherJsonInJsonOut(mediator, location);
 	}
-
-
-
-
-	private static ResponsesClient CreateResponsesClient(string apiKey) => new(
-		credential: new ApiKeyCredential(apiKey),
-		options: new ResponsesClientOptions()
-		{
-			Endpoint = new Uri(Endpoint),
-		});
-
-	private static string GetApiKey() =>
-		Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
-		?? throw new InvalidOperationException("API key not found in environment variables.");
 
 
 
@@ -77,10 +60,20 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		ResponsesClient client = CreateResponsesClient(GetApiKey());
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions()
+			{
+				Endpoint = new Uri(endpoint),
+			});
+
 		CreateResponseOptions options = new()
 		{
-			Model = DeploymentName,
+			Model = deploymentName,
 			Instructions = systemPrompt,
 			InputItems =
 			{
@@ -131,10 +124,20 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		ResponsesClient client = CreateResponsesClient(GetApiKey());
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions()
+			{
+				Endpoint = new Uri(endpoint),
+			});
+
 		CreateResponseOptions options = new()
 		{
-			Model = DeploymentName,
+			Model = deploymentName,
 			Instructions = systemPrompt,
 			InputItems =
 			{
@@ -195,10 +198,20 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		ResponsesClient client = CreateResponsesClient(GetApiKey());
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions()
+			{
+				Endpoint = new Uri(endpoint),
+			});
+
 		CreateResponseOptions options = new()
 		{
-			Model = DeploymentName,
+			Model = deploymentName,
 			Instructions = systemPrompt,
 			InputItems =
 			{
@@ -286,10 +299,20 @@ internal class Program
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
-		ResponsesClient client = CreateResponsesClient(GetApiKey());
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions()
+			{
+				Endpoint = new Uri(endpoint),
+			});
+
 		CreateResponseOptions options = new()
 		{
-			Model = DeploymentName,
+			Model = deploymentName,
 			Instructions = systemPrompt,
 			InputItems =
 			{
