@@ -122,6 +122,77 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "build mcp function",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/mcp-function/WeatherMcpFunction.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish mcp function",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/mcp-function/WeatherMcpFunction.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "type": "func",
+            "label": "func: host start",
+            "command": "host start --port 7208",
+            "options": {
+                "cwd": "${workspaceFolder}/mcp-function/bin/Debug/net10.0"
+            },
+            "isBackground": true,
+            "dependsOn": "build mcp function",
+            "problemMatcher": "$func-dotnet-watch"
+        },
+        {
+            "label": "build mcp dotnet",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/mcp-dotnet/WeatherMcpDotNet.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish mcp dotnet",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/mcp-dotnet/WeatherMcpDotNet.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch mcp dotnet",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/mcp-dotnet/WeatherMcpDotNet.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "build foundry console v1",
             "command": "dotnet",
             "type": "process",

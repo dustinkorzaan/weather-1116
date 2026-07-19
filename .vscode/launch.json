@@ -86,6 +86,30 @@
             }
         },
         {
+            "name": "WeatherMcpDotNet",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build mcp dotnet",
+            "program": "${workspaceFolder}/mcp-dotnet/bin/Debug/net10.0/WeatherMcpDotNet.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/mcp-dotnet",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/health"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "WeatherMcpFunction",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:azureFunctions.pickProcess}"
+        },
+        {
             "name": "Foundry Console V1 Model Direct Legacy Cognitive Services Endpoint",
             "type": "coreclr",
             "request": "launch",

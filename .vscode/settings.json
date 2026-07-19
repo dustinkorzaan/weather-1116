@@ -1,4 +1,9 @@
 {
+    "azureFunctions.projectSubpath": "mcp-function",
+    "azureFunctions.projectLanguage": "C#",
+    "azureFunctions.projectRuntime": "~4",
+    "azureFunctions.preDeployTask": "publish mcp function",
+    "azureFunctions.deploySubpath": "mcp-function/bin/Release/net10.0/publish"
     // "dotnet.defaultSolution": "Weather.sln",
     // "@azure.argTenant": "",
     // "chat.tools.terminal.autoApprove": {
