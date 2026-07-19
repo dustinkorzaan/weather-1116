@@ -25,7 +25,28 @@ builder.Services
 
 var app = builder.Build();
 
-// No auth for now — explore authentication later.
+// Shared secret for MCP clients (Foundry project connection, MCP Inspector, etc.).
+// Override with env Mcp__ApiKey or appsettings Mcp:ApiKey.
+var mcpApiKey = builder.Configuration["Mcp:ApiKey"]
+	?? throw new InvalidOperationException("Mcp:ApiKey is not configured.");
+
+app.Use(async (context, next) =>
+{
+	if (context.Request.Path.StartsWithSegments("/mcp"))
+	{
+		var header = context.Request.Headers.Authorization.ToString();
+		const string prefix = "Bearer ";
+		if (!header.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+			|| !string.Equals(header[prefix.Length..].Trim(), mcpApiKey, StringComparison.Ordinal))
+		{
+			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+			return;
+		}
+	}
+
+	await next();
+});
+
 app.MapMcp("/mcp");
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", server = "WeatherMcpDotNet" }));
 

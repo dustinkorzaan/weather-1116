@@ -20,15 +20,16 @@ Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 ## MCP tool hosts
 
 Ultra-simple remote MCP servers that expose Core weather tools via MediatR.
-Auth is intentionally open for local exploration.
 
-| Project | Path | Tool | Port | Endpoint |
-| --- | --- | --- | --- | --- |
-| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | `GetPublicWeatherData` | 8110 | `/mcp` |
-| MCP Function | [`mcp-function`](mcp-function) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` |
+| Project | Path | Tool | Port | Endpoint | Auth |
+| --- | --- | --- | --- | --- | --- |
+| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer token (`Mcp:ApiKey` / env `Mcp__ApiKey`; Dev default `dev-mcp-dotnet-key`) |
+| MCP Function | [`mcp-function`](mcp-function) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` | Anonymous for now (Functions `mcp_extension` key later) |
 
 VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json).
+
+Example MCP DotNet call header: `Authorization: Bearer dev-mcp-dotnet-key`. `/health` stays open.
 
 ## Foundry console demos
 
