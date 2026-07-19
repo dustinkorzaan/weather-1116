@@ -6,6 +6,7 @@ using Core.weather.Events;
 using DotNetEnv;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ internal class Program
 		Env.TraversePath().Load();
 
 		var services = new ServiceCollection();
+		services.AddLogging(logging => logging.AddConsole());
 		services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();

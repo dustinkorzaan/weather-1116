@@ -12,6 +12,8 @@
     <PackageReference Include="DotNetEnv" Version="3.*" />
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.*" />
   </ItemGroup>
 
   <ItemGroup>
