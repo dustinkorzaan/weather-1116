@@ -27,13 +27,18 @@ var app = builder.Build();
 
 // Shared secret for MCP clients (Foundry project connection, MCP Inspector, etc.).
 // Override with env Mcp__ApiKey or appsettings Mcp:ApiKey.
-var mcpApiKey = builder.Configuration["Mcp:ApiKey"]
-	?? throw new InvalidOperationException("Mcp:ApiKey is not configured.");
+var mcpApiKey = builder.Configuration["Mcp:ApiKey"];
 
 app.Use(async (context, next) =>
 {
 	if (context.Request.Path.StartsWithSegments("/mcp"))
 	{
+		if (string.IsNullOrWhiteSpace(mcpApiKey))
+		{
+			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+			return;
+		}
+
 		var header = context.Request.Headers.Authorization.ToString();
 		const string prefix = "Bearer ";
 		if (!header.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
