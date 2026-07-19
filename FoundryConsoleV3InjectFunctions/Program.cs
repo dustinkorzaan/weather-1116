@@ -266,8 +266,10 @@ internal class Program
 					Tools = { getLatLongTool, getPublicWeatherTool },
 				};
 
+				Console.WriteLine("\nCreating response with options...");
 				ResponseResult response = await client.CreateResponseAsync(options);
 
+				Console.WriteLine("Adding response output items to input items...");
 				inputItems.AddRange(response.OutputItems);
 
 				foreach (ResponseItem outputItem in response.OutputItems)
@@ -285,7 +287,7 @@ internal class Program
 									Console.WriteLine($"\nTool call: GetLatLongData({toolLocation})");
 									var latLong = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
 									string functionOutput = JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
-									Console.WriteLine(functionOutput);
+									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
 								}
@@ -306,7 +308,7 @@ internal class Program
 										}
 									});
 									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
-									Console.WriteLine(functionOutput);
+									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
 								}
@@ -476,8 +478,10 @@ internal class Program
 					}
 				};
 
+				Console.WriteLine("\nCreating response with options...");
 				ResponseResult response = await client.CreateResponseAsync(options);
 
+				Console.WriteLine("Adding response output items to input items...");
 				inputItems.AddRange(response.OutputItems);
 
 				foreach (ResponseItem outputItem in response.OutputItems)
@@ -495,7 +499,7 @@ internal class Program
 									Console.WriteLine($"\nTool call: GetLatLongData({toolLocation})");
 									var latLong = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
 									string functionOutput = JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
-									Console.WriteLine(functionOutput);
+									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
 								}
@@ -516,7 +520,7 @@ internal class Program
 										}
 									});
 									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
-									Console.WriteLine(functionOutput);
+									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
 								}
