@@ -6,8 +6,6 @@ using DotNetEnv;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenAI;
-using OpenAI.Chat;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
@@ -174,7 +172,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 3
 		 - Ask AI "What is the current weather in {location}?"
-		 - Chat Completions with injected function tools (GetLatLongData, GetPublicWeatherData)
+		 - ResponsesClient with injected function tools (GetLatLongData, GetPublicWeatherData)
 		 - Model can call tools to derive lat/long and fetch public weather
 		 - String output from AI
 		""");
@@ -202,16 +200,14 @@ internal class Program
 		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		OpenAIClient openAIClient = new(
+		ResponsesClient client = new(
 			credential: new ApiKeyCredential(apiKey),
-			options: new OpenAIClientOptions()
+			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
-		ChatClient chatClient = openAIClient.GetChatClient(deploymentName);
 
-		// ChatTool is the current OpenAI SDK equivalent of ChatCompletionsFunctionToolDefinition.
-		ChatTool getLatLongTool = ChatTool.CreateFunctionTool(
+		FunctionTool getLatLongTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetLatLongData",
 			functionDescription: "Resolve a location name to latitude and longitude using public geocoding data.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
@@ -227,9 +223,9 @@ internal class Program
 			  "additionalProperties": false
 			}
 			""")),
-			functionSchemaIsStrict: true);
+			strictModeEnabled: true);
 
-		ChatTool getPublicWeatherTool = ChatTool.CreateFunctionTool(
+		FunctionTool getPublicWeatherTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetPublicWeatherData",
 			functionDescription: "Get current public weather conditions for a latitude and longitude.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
@@ -249,18 +245,12 @@ internal class Program
 			  "additionalProperties": false
 			}
 			""")),
-			functionSchemaIsStrict: true);
+			strictModeEnabled: true);
 
-		List<ChatMessage> messages =
+		List<ResponseItem> inputItems =
 		[
-			new SystemChatMessage(systemPrompt),
-			new UserChatMessage(userPrompt),
+			ResponseItem.CreateUserMessageItem(userPrompt),
 		];
-
-		ChatCompletionOptions options = new()
-		{
-			Tools = { getLatLongTool, getPublicWeatherTool },
-		};
 
 		try
 		{
@@ -269,81 +259,70 @@ internal class Program
 			do
 			{
 				requiresAction = false;
-				ChatCompletion completion = await chatClient.CompleteChatAsync(messages, options);
 
-				switch (completion.FinishReason)
+				CreateResponseOptions options = new(deploymentName, inputItems)
 				{
-					case ChatFinishReason.Stop:
-						{
-							messages.Add(new AssistantChatMessage(completion));
-							Console.WriteLine("\nResponse:");
-							Console.WriteLine(completion.Content[0].Text);
-							break;
-						}
+					Instructions = systemPrompt,
+					Tools = { getLatLongTool, getPublicWeatherTool },
+				};
 
-					case ChatFinishReason.ToolCalls:
-						{
-							messages.Add(new AssistantChatMessage(completion));
+				ResponseResult response = await client.CreateResponseAsync(options);
 
-							foreach (ChatToolCall toolCall in completion.ToolCalls)
-							{
-								switch (toolCall.FunctionName)
+				inputItems.AddRange(response.OutputItems);
+
+				foreach (ResponseItem outputItem in response.OutputItems)
+				{
+					if (outputItem is FunctionCallResponseItem functionCall)
+					{
+						switch (functionCall.FunctionName)
+						{
+							case "GetLatLongData":
 								{
-									case "GetLatLongData":
-										{
-											using JsonDocument argumentsJson = JsonDocument.Parse(toolCall.FunctionArguments);
-											string toolLocation = argumentsJson.RootElement.GetProperty("location").GetString()
-												?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
+									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									string toolLocation = argumentsJson.RootElement.GetProperty("location").GetString()
+										?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
 
-											Console.WriteLine($"\nTool call: GetLatLongData({toolLocation})");
-											var latLong = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
-											string toolResult = JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
-											Console.WriteLine(toolResult);
-											messages.Add(new ToolChatMessage(toolCall.Id, toolResult));
-											break;
-										}
-
-									case "GetPublicWeatherData":
-										{
-											using JsonDocument argumentsJson = JsonDocument.Parse(toolCall.FunctionArguments);
-											double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
-											double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
-
-											Console.WriteLine($"\nTool call: GetPublicWeatherData({latitude}, {longitude})");
-											var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
-											{
-												LatLong = new NonAILatLongResponse
-												{
-													Latitude = latitude,
-													Longitude = longitude,
-												}
-											});
-											string toolResult = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
-											Console.WriteLine(toolResult);
-											messages.Add(new ToolChatMessage(toolCall.Id, toolResult));
-											break;
-										}
-
-									default:
-										throw new NotImplementedException($"Unexpected tool call: {toolCall.FunctionName}");
+									Console.WriteLine($"\nTool call: GetLatLongData({toolLocation})");
+									var latLong = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
+									string functionOutput = JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
+									Console.WriteLine(functionOutput);
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
 								}
-							}
 
-							requiresAction = true;
-							break;
+							case "GetPublicWeatherData":
+								{
+									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+
+									Console.WriteLine($"\nTool call: GetPublicWeatherData({latitude}, {longitude})");
+									var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
+									{
+										LatLong = new NonAILatLongResponse
+										{
+											Latitude = latitude,
+											Longitude = longitude,
+										}
+									});
+									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+									Console.WriteLine(functionOutput);
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
+								}
+
+							default:
+								throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}");
 						}
 
-					case ChatFinishReason.Length:
-						throw new InvalidOperationException("Incomplete model output due to token limit.");
+						requiresAction = true;
+					}
+				}
 
-					case ChatFinishReason.ContentFilter:
-						throw new InvalidOperationException("Omitted content due to a content filter flag.");
-
-					case ChatFinishReason.FunctionCall:
-						throw new InvalidOperationException("Deprecated FunctionCall finish reason; use tool calls.");
-
-					default:
-						throw new NotImplementedException(completion.FinishReason.ToString());
+				if (!requiresAction)
+				{
+					Console.WriteLine("\nResponse:");
+					Console.WriteLine(response.GetOutputText());
 				}
 			} while (requiresAction);
 		}
@@ -366,7 +345,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - Chat Completions with injected function tools (GetLatLongData, GetPublicWeatherData)
+		 - ResponsesClient with injected function tools (GetLatLongData, GetPublicWeatherData)
 		 - Model can call tools to derive lat/long and fetch public weather
 		 - JSON output from AI
 		""");
@@ -423,16 +402,14 @@ internal class Program
 		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		OpenAIClient openAIClient = new(
+		ResponsesClient client = new(
 			credential: new ApiKeyCredential(apiKey),
-			options: new OpenAIClientOptions()
+			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
-		ChatClient chatClient = openAIClient.GetChatClient(deploymentName);
 
-		// ChatTool is the current OpenAI SDK equivalent of ChatCompletionsFunctionToolDefinition.
-		ChatTool getLatLongTool = ChatTool.CreateFunctionTool(
+		FunctionTool getLatLongTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetLatLongData",
 			functionDescription: "Resolve a location name to latitude and longitude using public geocoding data.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
@@ -448,9 +425,9 @@ internal class Program
 			  "additionalProperties": false
 			}
 			""")),
-			functionSchemaIsStrict: true);
+			strictModeEnabled: true);
 
-		ChatTool getPublicWeatherTool = ChatTool.CreateFunctionTool(
+		FunctionTool getPublicWeatherTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetPublicWeatherData",
 			functionDescription: "Get current public weather conditions for a latitude and longitude.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
@@ -470,22 +447,12 @@ internal class Program
 			  "additionalProperties": false
 			}
 			""")),
-			functionSchemaIsStrict: true);
+			strictModeEnabled: true);
 
-		List<ChatMessage> messages =
+		List<ResponseItem> inputItems =
 		[
-			new SystemChatMessage(systemPrompt),
-			new UserChatMessage(userPrompt),
+			ResponseItem.CreateUserMessageItem(userPrompt),
 		];
-
-		ChatCompletionOptions options = new()
-		{
-			Tools = { getLatLongTool, getPublicWeatherTool },
-			ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
-				jsonSchemaFormatName: "ai_weather_response",
-				jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
-				jsonSchemaIsStrict: true)
-		};
 
 		try
 		{
@@ -495,80 +462,76 @@ internal class Program
 			do
 			{
 				requiresAction = false;
-				ChatCompletion completion = await chatClient.CompleteChatAsync(messages, options);
 
-				switch (completion.FinishReason)
+				CreateResponseOptions options = new(deploymentName, inputItems)
 				{
-					case ChatFinishReason.Stop:
-						{
-							messages.Add(new AssistantChatMessage(completion));
-							finalContent = completion.Content[0].Text;
-							break;
-						}
+					Instructions = systemPrompt,
+					Tools = { getLatLongTool, getPublicWeatherTool },
+					TextOptions = new ResponseTextOptions
+					{
+						TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+							jsonSchemaFormatName: "ai_weather_response",
+							jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+							jsonSchemaIsStrict: true)
+					}
+				};
 
-					case ChatFinishReason.ToolCalls:
-						{
-							messages.Add(new AssistantChatMessage(completion));
+				ResponseResult response = await client.CreateResponseAsync(options);
 
-							foreach (ChatToolCall toolCall in completion.ToolCalls)
-							{
-								switch (toolCall.FunctionName)
+				inputItems.AddRange(response.OutputItems);
+
+				foreach (ResponseItem outputItem in response.OutputItems)
+				{
+					if (outputItem is FunctionCallResponseItem functionCall)
+					{
+						switch (functionCall.FunctionName)
+						{
+							case "GetLatLongData":
 								{
-									case "GetLatLongData":
-										{
-											using JsonDocument argumentsJson = JsonDocument.Parse(toolCall.FunctionArguments);
-											string toolLocation = argumentsJson.RootElement.GetProperty("location").GetString()
-												?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
+									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									string toolLocation = argumentsJson.RootElement.GetProperty("location").GetString()
+										?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
 
-											Console.WriteLine($"\nTool call: GetLatLongData({toolLocation})");
-											var latLong = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
-											string toolResult = JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
-											Console.WriteLine(toolResult);
-											messages.Add(new ToolChatMessage(toolCall.Id, toolResult));
-											break;
-										}
-
-									case "GetPublicWeatherData":
-										{
-											using JsonDocument argumentsJson = JsonDocument.Parse(toolCall.FunctionArguments);
-											double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
-											double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
-
-											Console.WriteLine($"\nTool call: GetPublicWeatherData({latitude}, {longitude})");
-											var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
-											{
-												LatLong = new NonAILatLongResponse
-												{
-													Latitude = latitude,
-													Longitude = longitude,
-												}
-											});
-											string toolResult = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
-											Console.WriteLine(toolResult);
-											messages.Add(new ToolChatMessage(toolCall.Id, toolResult));
-											break;
-										}
-
-									default:
-										throw new NotImplementedException($"Unexpected tool call: {toolCall.FunctionName}");
+									Console.WriteLine($"\nTool call: GetLatLongData({toolLocation})");
+									var latLong = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
+									string functionOutput = JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
+									Console.WriteLine(functionOutput);
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
 								}
-							}
 
-							requiresAction = true;
-							break;
+							case "GetPublicWeatherData":
+								{
+									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+
+									Console.WriteLine($"\nTool call: GetPublicWeatherData({latitude}, {longitude})");
+									var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
+									{
+										LatLong = new NonAILatLongResponse
+										{
+											Latitude = latitude,
+											Longitude = longitude,
+										}
+									});
+									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+									Console.WriteLine(functionOutput);
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
+								}
+
+							default:
+								throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}");
 						}
 
-					case ChatFinishReason.Length:
-						throw new InvalidOperationException("Incomplete model output due to token limit.");
+						requiresAction = true;
+					}
+				}
 
-					case ChatFinishReason.ContentFilter:
-						throw new InvalidOperationException("Omitted content due to a content filter flag.");
-
-					case ChatFinishReason.FunctionCall:
-						throw new InvalidOperationException("Deprecated FunctionCall finish reason; use tool calls.");
-
-					default:
-						throw new NotImplementedException(completion.FinishReason.ToString());
+				if (!requiresAction)
+				{
+					finalContent = response.GetOutputText();
 				}
 			} while (requiresAction);
 
