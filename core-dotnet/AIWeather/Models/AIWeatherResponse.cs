@@ -4,8 +4,8 @@ namespace Core.AIWeather.Models;
 
 public class AIWeatherResponse
 {
-	[JsonPropertyName("summary")]
-	public string Summary { get; set; } = string.Empty;
+	[JsonPropertyName("fullSummary")]
+	public string FullSummary { get; set; } = string.Empty;
 
 	[JsonPropertyName("temperatureF")]
 	public double TemperatureF { get; set; }

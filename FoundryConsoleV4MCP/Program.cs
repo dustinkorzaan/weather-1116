@@ -53,13 +53,13 @@ internal class Program
 		{
 		  "type": "object",
 		  "properties": {
-		    "summary": { "type": "string" },
+		    "fullSummary": { "type": "string" },
 		    "temperatureF": { "type": "number" },
 		    "windSpeedMPH": { "type": "number" },
 		    "windDirection": { "type": "string" },
 		    "conditions": { "type": "string" }
 		  },
-		  "required": ["summary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
+		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
 		  "additionalProperties": false
 		}
 		""";
@@ -74,7 +74,7 @@ internal class Program
 		{aiOutputSchema}
 
 		Field notes:
-		- summary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
+		- fullSummary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
 		- temperatureF (number) in Fahrenheit
 		- windSpeedMPH (number) in MPH
 		- windDirection (string)
@@ -84,7 +84,7 @@ internal class Program
 		You only return valid JSON.
 		Do not include any text outside the JSON.
 		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
-		The summary field must state only the current weather facts — nothing conversational after that.
+		The fullSummary field must state only the current weather facts — nothing conversational after that.
 		""";
 
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
