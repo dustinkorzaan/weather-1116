@@ -31,6 +31,10 @@ export const weatherApi = createApi({
       query: () => '/About',
       transformResponse: (apiRoot) => buildUiReactRoot(apiRoot),
     }),
+    getCurrentAIWeather: builder.query({
+      query: (location) =>
+        `/AIWeather/Current?location=${encodeURIComponent(location || 'Nashville, TN')}`,
+    }),
   }),
 });
 
@@ -38,4 +42,5 @@ export const {
   useGetHelloQuery,
   useGetForecastQuery,
   useLazyGetAboutQuery,
+  useLazyGetCurrentAIWeatherQuery,
 } = weatherApi;

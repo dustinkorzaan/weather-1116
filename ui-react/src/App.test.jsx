@@ -67,5 +67,7 @@ test('renders weather app title and loaded data', async () => {
 
   expect(await screen.findByRole('heading', { name: /weather react/i })).toBeDefined();
   expect(await screen.findByText('Hello from test API.')).toBeDefined();
+  expect(await screen.findByLabelText(/location:/i)).toBeDefined();
+  expect(await screen.findByRole('button', { name: /get current ai weather/i })).toBeDefined();
   expect(await screen.findByText('Warm')).toBeDefined();
 });

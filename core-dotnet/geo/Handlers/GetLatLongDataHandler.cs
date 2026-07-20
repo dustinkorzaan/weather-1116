@@ -45,7 +45,12 @@ public class GetLatLongDataHandler : IRequestHandler<GetLatLongDataEvent, NonAIL
                     topMatch.Name,
                     topMatch.Admin1,
                     topMatch.Country);
-                return new NonAILatLongResponse { Latitude = topMatch.Latitude, Longitude = topMatch.Longitude };
+                return new NonAILatLongResponse
+                {
+                    Name = topMatch.Name,
+                    Latitude = topMatch.Latitude,
+                    Longitude = topMatch.Longitude,
+                };
             }
         }
 
