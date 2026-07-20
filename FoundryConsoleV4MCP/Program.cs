@@ -1,16 +1,11 @@
-﻿using Core.demo.handlers;
-using Core.geo.Events;
-using Core.weather.Events;
+﻿using Azure.AI.Extensions.OpenAI;
+using Azure.AI.Projects;
+using Azure.Identity;
 using DotNetEnv;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.ClientModel.Primitives;
 using System.Threading.Tasks;
 
 internal class Program
@@ -19,156 +14,75 @@ internal class Program
 	{
 		Env.TraversePath().Load();
 
-		var services = new ServiceCollection();
-		services.AddLogging(logging => logging.AddConsole());
-		services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
-		using var serviceProvider = services.BuildServiceProvider();
-		var mediator = serviceProvider.GetRequiredService<IMediator>();
-
 		string location = "Nashville, TN";
- 
-		await GetWeatherJsonInJsonOut(mediator, location);
+		await AskFoundryAgent(location);
 	}
 
-
-
-
-
-	private static async Task GetWeatherJsonInJsonOut(IMediator mediator, string location)
+	private static async Task AskFoundryAgent(string location)
 	{
 		Console.Clear();
 		Console.WriteLine($"""
 		Example 4
-		 - Ask AI "What is the current weather in {location}?"
-		 - Model Direct (using ResponsesClient against unified AI services endpoint)
-		 - Provide raw JSON input from a weather API
-		 - JSON output from AI
+		 - Ask Foundry Agent "What is today's weather in {location}?"
+		 - Call a hosted Microsoft Foundry Agent (not a model directly)
+		 - Agent uses its configured tools (lat/long + current weather)
 		""");
 
-		// Non-AI prep
-		var latLong = await mediator.Send(new GetLatLongDataEvent { Location = location });
-		var weatherData = await mediator.Send(new GetPublicWeatherDataEvent { LatLong = latLong });
-		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+		var projectEndpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJECT_ENDPOINT")
+			?? throw new InvalidOperationException(
+				"Missing AZURE_FOUNDRY_PROD_EUS2_PROJECT_ENDPOINT. " +
+				"Set it to your Foundry project endpoint, e.g. " +
+				"https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/<project-name>");
 
-		// AI prep
-		var systemPrompt = """
-		You are a helpful weather assistant.
-		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
-		""";
-		var userPrompt = $"""
-		You are given this WeatherConditions JSON:
-		{weatherDataJson}
+		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
+			?? "wx1116-agent-default";
 
-		Return valid JSON with these fields:
-		- summary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
-		- temperature (number)
-		- windSpeed (number)
-		- windDirection (string)
-		- conditions (string)
+		var userPrompt = $"What is today's weather in {location}?";
 
-		Use {location} as the location context.
+		Console.WriteLine($"\nProject endpoint: {projectEndpoint}");
+		Console.WriteLine($"Agent name: {agentName}");
+		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
 
-		You only return valid JSON.
-		""";
-
-		var aiOutputSchema = """
-		{
-		  "type": "object",
-		  "properties": {
-		    "summary": { "type": "string" },
-		    "temperature": { "type": "number" },
-		    "windSpeed": { "type": "number" },
-		    "windDirection": { "type": "string" },
-		    "conditions": { "type": "string" }
-		  },
-		  "required": ["summary", "temperature", "windSpeed", "windDirection", "conditions"],
-		  "additionalProperties": false
-		}
-		""";
-
-		Console.WriteLine("\nSystem Prompt:");
-		Console.WriteLine(systemPrompt);
-
-		Console.WriteLine("\nUser Prompt:");
-		Console.WriteLine(userPrompt);
-
-		Console.WriteLine("\nAI Output Schema:");
-		Console.WriteLine(aiOutputSchema);
-
-		const string deploymentName = "gpt-5.4-mini";
-		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
-
-		ResponsesClient client = new(
-			credential: new ApiKeyCredential(apiKey),
-			options: new ResponsesClientOptions()
-			{
-				Endpoint = new Uri(endpoint),
-			});
-
-		CreateResponseOptions options = new()
-		{
-			Model = deploymentName,
-			Instructions = systemPrompt,
-			InputItems =
-			{
-				ResponseItem.CreateUserMessageItem(userPrompt),
-			},
-			TextOptions = new ResponseTextOptions
-			{
-				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
-					jsonSchemaFormatName: "ai_weather_response",
-					jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
-					jsonSchemaIsStrict: true)
-			}
-		};
+		ProjectOpenAIClient projectOpenAIClient = CreateProjectOpenAIClient(new Uri(projectEndpoint));
+		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			ResponseResult response = await responseClient.CreateResponseAsync(userPrompt);
 			var content = response.GetOutputText();
-			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
-				content,
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-			if (aiWeather is null)
-			{
-				Console.WriteLine("Received empty or invalid JSON response.");
-			}
-			else
-			{
-				Console.WriteLine("\nResponse:");
-				Console.WriteLine(JsonSerializer.Serialize(aiWeather, new JsonSerializerOptions { WriteIndented = true }));
-			}
+			Console.WriteLine("\nResponse:");
+			Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty response)" : content);
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Request failed: {ex.Message}");
+			if (ex.InnerException is not null)
+			{
+				Console.WriteLine($"Inner: {ex.InnerException.Message}");
+			}
 		}
 
 		Console.WriteLine("\nPress any key to continue.");
 		Console.ReadKey(true);
 	}
 
-
-
-
-
-	public class AIWeatherResponse
+	/// <summary>
+	/// Prefer the same API-key env var used by V1–V3 when present; otherwise Entra ID via DefaultAzureCredential.
+	/// Agent/project APIs often require Entra — set AZURE_FOUNDRY_PROD_EUS2_PROJECT_ENDPOINT and sign in (az login) if key auth fails.
+	/// </summary>
+	private static ProjectOpenAIClient CreateProjectOpenAIClient(Uri projectEndpoint)
 	{
-		[JsonPropertyName("summary")]
-		public string Summary { get; set; } = string.Empty;
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY");
+		if (!string.IsNullOrWhiteSpace(apiKey))
+		{
+			Console.WriteLine("Auth: AZURE_FOUNDRY_PROD_EUS2_KEY (api-key header)");
+			return new ProjectOpenAIClient(
+				ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
+				new ProjectOpenAIClientOptions { Endpoint = projectEndpoint });
+		}
 
-		[JsonPropertyName("temperature")]
-		public double Temperature { get; set; }
-
-		[JsonPropertyName("windSpeed")]
-		public double WindSpeed { get; set; }
-
-		[JsonPropertyName("windDirection")]
-		public string WindDirection { get; set; } = string.Empty;
-
-		[JsonPropertyName("conditions")]
-		public string Conditions { get; set; } = string.Empty;
+		Console.WriteLine("Auth: DefaultAzureCredential (AZURE_FOUNDRY_PROD_EUS2_KEY not set)");
+		return new ProjectOpenAIClient(projectEndpoint, new DefaultAzureCredential());
 	}
 }
