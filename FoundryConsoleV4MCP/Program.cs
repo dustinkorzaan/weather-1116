@@ -39,6 +39,14 @@ internal class Program
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
+		// Same intent as V3's system prompt. CreateResponseOptions.Instructions is rejected when an
+		// agent is specified, so this is folded into the user message (and printed for the demo).
+		var systemPrompt = """
+		You are a helpful weather assistant.
+		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
+		Use your tools to resolve a place name to latitude/longitude and to fetch current public weather for those coordinates whenever you need real weather data.
+		""";
+
 		// Same field list / shape as V2's last example. Kept in the prompt because
 		// CreateResponseOptions.TextOptions (text.format) is rejected when an agent is specified.
 		var aiOutputSchema = """
@@ -57,6 +65,8 @@ internal class Program
 		""";
 
 		var userPrompt = $"""
+		{systemPrompt.Trim()}
+
 		What is today's weather in {location}?
 		Use your tools to look up coordinates and current weather.
 
@@ -65,8 +75,8 @@ internal class Program
 
 		Field notes:
 		- summary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
-		- temperature (number)
-		- windSpeed (number)
+		- temperature (number) in Fahrenheit
+		- windSpeed (number) in MPH
 		- windDirection (string)
 		- conditions (string)
 
@@ -79,6 +89,8 @@ internal class Program
 
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
+		Console.WriteLine("\nSystem Prompt (included in user message; Instructions not allowed with agents):");
+		Console.WriteLine(systemPrompt);
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
