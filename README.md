@@ -56,7 +56,7 @@ See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2` |
 | `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` |
 | `AZURE_FOUNDRY_PROD_EUS2_AGENT_VERSION` | No | Defaults to `7` |
-| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 (`api-key` header; sandbox sample uses Entra instead) |
+| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 |
 
 VS Code launch configs: **Foundry Console V1** … **V4**.
 

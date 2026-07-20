@@ -45,12 +45,8 @@ internal class Program
 		Console.WriteLine($"Agent: {agentName} (version {agentVersion})");
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
 
-		// Sandbox sample uses:
-		//   AIProjectClient + DefaultAzureCredential → projectClient.OpenAI / ProjectOpenAIClient
-		// AIProjectClient is Entra-only; for api-key we construct the same ProjectOpenAIClient
-		// the sandbox reaches via projectClient.OpenAI.
-		// ApiKey AuthenticationPolicy does not rewrite to /openai/v1 (TokenProvider/AIProjectClient does),
-		// so append that segment — otherwise the service returns "Missing required query parameter: api-version".
+		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
+		// Append /openai/v1 for the ApiKey client path — required to avoid "Missing required query parameter: api-version".
 		ProjectOpenAIClient projectOpenAIClient = new(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
