@@ -72,6 +72,100 @@
   font-size: 1.15rem;
 }
 
+.ai-weather-section {
+  margin: 1.25rem 0 0.5rem;
+}
+
+.ai-weather-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+}
+
+.ai-weather-label {
+  font-weight: 600;
+}
+
+.ai-weather-input {
+  flex: 1 1 12rem;
+  min-width: 10rem;
+  max-width: 20rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  font: inherit;
+}
+
+.ai-weather-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid #1861ac;
+  border-radius: 0.25rem;
+  background-color: #1b6ec2;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ai-weather-button:hover:not(:disabled),
+.ai-weather-button:focus-visible {
+  background-color: #185ca9;
+}
+
+.ai-weather-button:disabled {
+  opacity: 0.85;
+  cursor: wait;
+}
+
+.ai-weather-spinner {
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ai-weather-spin 0.7s linear infinite;
+}
+
+@keyframes ai-weather-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ai-weather-results {
+  margin-top: 0.85rem;
+}
+
+.ai-weather-summary {
+  margin: 0 0 0.65rem;
+  font-size: 1.02rem;
+}
+
+.ai-weather-stats {
+  display: grid;
+  gap: 0.35rem 1rem;
+  margin: 0;
+}
+
+.ai-weather-stat {
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.ai-weather-stat dt {
+  margin: 0;
+  font-weight: 600;
+}
+
+.ai-weather-stat dd {
+  margin: 0;
+}
+
 .weather-map-section {
   margin-top: 0.5rem;
 }

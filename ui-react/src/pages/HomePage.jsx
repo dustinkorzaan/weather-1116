@@ -1,3 +1,4 @@
+import CurrentAIWeather from '../components/CurrentAIWeather';
 import WeatherMap from '../components/WeatherMap';
 import {
   useGetForecastQuery,
@@ -39,6 +40,8 @@ function HomePage() {
       <p className="hello-message">
         {isHelloError ? 'Unable to load hello message from API.' : (helloMessage ?? 'Loading hello message...')}
       </p>
+
+      <CurrentAIWeather />
 
       <WeatherMap />
 

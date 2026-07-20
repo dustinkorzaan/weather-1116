@@ -8,6 +8,15 @@ public class HelloWorldResponse
     public required string RequestResponse { get; set; }
 }
 
+public class AIWeatherResponse
+{
+    public string FullSummary { get; set; } = string.Empty;
+    public double TemperatureF { get; set; }
+    public double WindSpeedMPH { get; set; }
+    public string WindDirection { get; set; } = string.Empty;
+    public string Conditions { get; set; } = string.Empty;
+}
+
 public class WeatherForecastClient
 {
     private HttpClient _httpClient;
@@ -30,6 +39,12 @@ public class WeatherForecastClient
 
     public async Task<HelloWorldResponse?> GetHelloAsync()
         => await _httpClient.GetFromJsonAsync<HelloWorldResponse>("Home/Hello");
+
+    public async Task<AIWeatherResponse?> GetCurrentAIWeatherAsync(string location)
+    {
+        var route = $"AIWeather/Current?location={Uri.EscapeDataString(location)}";
+        return await _httpClient.GetFromJsonAsync<AIWeatherResponse>(route);
+    }
 
     public async Task<AboutNode> GetAboutAsync()
     {

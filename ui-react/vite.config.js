@@ -14,6 +14,10 @@ export default defineConfig({
         target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
+      '/AIWeather': {
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+      },
       '/weatherforecast': {
         target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
         changeOrigin: true,

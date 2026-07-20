@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Core.AIWeather.Events;
 using Core.demo.events;
 using Core.demo.forecast;
 using MediatR;
@@ -23,6 +24,19 @@ public class HomeController : Controller
 
         var forecasts = await _mediator.Send(new WeatherForecastEvent(), cancellationToken);
         return View(forecasts);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetCurrentAIWeather([FromQuery] string? location, CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(
+            new GetCurrentAIWeatherEvent
+            {
+                Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
+            },
+            cancellationToken);
+
+        return Json(response);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
