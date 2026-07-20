@@ -46,11 +46,12 @@ internal class Program
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
+		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
 		ProjectOpenAIClient projectOpenAIClient = new(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
-				Endpoint = new Uri(endpoint),
+				Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1"),
 			});
 
 		AgentReference agentReference = new(name: agentName, version: agentVersion);
