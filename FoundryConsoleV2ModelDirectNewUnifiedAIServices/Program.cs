@@ -1,4 +1,5 @@
-﻿using Core.demo.handlers;
+﻿using Core.AIWeather.Models;
+using Core.demo.handlers;
 using Core.geo.Events;
 using Core.weather.Events;
 using DotNetEnv;
@@ -10,7 +11,6 @@ using System;
 using System.ClientModel;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 internal class Program
@@ -352,27 +352,5 @@ internal class Program
 
 		Console.WriteLine("\nPress any key to continue.");
 		Console.ReadKey(true);
-	}
-
-
-
-
-
-	public class AIWeatherResponse
-	{
-		[JsonPropertyName("summary")]
-		public string Summary { get; set; } = string.Empty;
-
-		[JsonPropertyName("temperature")]
-		public double Temperature { get; set; }
-
-		[JsonPropertyName("windSpeed")]
-		public double WindSpeed { get; set; }
-
-		[JsonPropertyName("windDirection")]
-		public string WindDirection { get; set; } = string.Empty;
-
-		[JsonPropertyName("conditions")]
-		public string Conditions { get; set; } = string.Empty;
 	}
 }

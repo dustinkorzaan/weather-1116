@@ -13,4 +13,8 @@
     <PackageReference Include="DotNetEnv" Version="3.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\core-dotnet\Core.csproj" />
+  </ItemGroup>
+
 </Project>
