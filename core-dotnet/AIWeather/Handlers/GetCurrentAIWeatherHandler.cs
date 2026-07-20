@@ -67,9 +67,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var userPrompt = $"""
 		{systemPrompt.Trim()}
 
-		What is the current weather in {location}?
+		What is the current weather in the user entered location: `{location}`?
 		Use your tools to look up coordinates and current weather.
-		When your geo tool returns a location, use the "name" field from that response as the place name in fullSummary (not the raw user input if they differ).
+		When your geo tool returns a location, choose whichever place name is more user-friendly for fullSummary: the user entered location (`{location}`) or the geo tool response "name" (for example prefer a clear city name over a raw ZIP or opaque code).
 
 		Return valid JSON matching this schema exactly:
 		{aiOutputSchema}
@@ -81,7 +81,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		- windDirection (string)
 		- conditions (string)
 
-		Use the geo tool "name" as the location context when available; otherwise use {location}.
+		Use the more user-friendly place name as the location context in fullSummary.
 		You only return valid JSON.
 		Do not include any text outside the JSON.
 		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
