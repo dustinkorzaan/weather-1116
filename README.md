@@ -53,7 +53,7 @@ See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_PROJECT_ENDPOINT` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/<project>` |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2` |
 | `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Preferred | Same API key as V1–V3; if unset, V4 falls back to `DefaultAzureCredential` |
 

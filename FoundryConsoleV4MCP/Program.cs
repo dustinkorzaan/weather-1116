@@ -28,11 +28,11 @@ internal class Program
 		 - Agent uses its configured tools (lat/long + current weather)
 		""");
 
-		var projectEndpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJECT_ENDPOINT")
+		var projectEndpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
 			?? throw new InvalidOperationException(
-				"Missing AZURE_FOUNDRY_PROD_EUS2_PROJECT_ENDPOINT. " +
+				"Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL. " +
 				"Set it to your Foundry project endpoint, e.g. " +
-				"https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/<project-name>");
+				"https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2");
 
 		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
 			?? "wx1116-agent-default";
@@ -69,7 +69,7 @@ internal class Program
 
 	/// <summary>
 	/// Prefer the same API-key env var used by V1–V3 when present; otherwise Entra ID via DefaultAzureCredential.
-	/// Agent/project APIs often require Entra — set AZURE_FOUNDRY_PROD_EUS2_PROJECT_ENDPOINT and sign in (az login) if key auth fails.
+	/// Agent/project APIs often require Entra — set AZURE_FOUNDRY_PROD_EUS2_PROJ_URL and sign in (az login) if key auth fails.
 	/// </summary>
 	private static ProjectOpenAIClient CreateProjectOpenAIClient(Uri projectEndpoint)
 	{
