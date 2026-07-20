@@ -1,4 +1,5 @@
-﻿using Core.demo.handlers;
+﻿using Core.AIWeather.Models;
+using Core.demo.handlers;
 using Core.geo.Events;
 using Core.geo.Models;
 using Core.weather.Events;
@@ -12,7 +13,6 @@ using System.ClientModel;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 internal class Program
@@ -60,9 +60,9 @@ internal class Program
 		Use the available function tools to look up coordinates and public weather data.
 
 		Return valid JSON with these fields:
-		- summary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
-		- temperature (number)
-		- windSpeed (number)
+		- fullSummary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
+		- temperatureF (number) in Fahrenheit
+		- windSpeedMPH (number) in MPH
 		- windDirection (string)
 		- conditions (string)
 
@@ -75,13 +75,13 @@ internal class Program
 		{
 		  "type": "object",
 		  "properties": {
-		    "summary": { "type": "string" },
-		    "temperature": { "type": "number" },
-		    "windSpeed": { "type": "number" },
+		    "fullSummary": { "type": "string" },
+		    "temperatureF": { "type": "number" },
+		    "windSpeedMPH": { "type": "number" },
 		    "windDirection": { "type": "string" },
 		    "conditions": { "type": "string" }
 		  },
-		  "required": ["summary", "temperature", "windSpeed", "windDirection", "conditions"],
+		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
 		  "additionalProperties": false
 		}
 		""";
@@ -255,27 +255,5 @@ internal class Program
 
 		Console.WriteLine("\nPress any key to continue.");
 		Console.ReadKey(true);
-	}
-
-
-
-
-
-	public class AIWeatherResponse
-	{
-		[JsonPropertyName("summary")]
-		public string Summary { get; set; } = string.Empty;
-
-		[JsonPropertyName("temperature")]
-		public double Temperature { get; set; }
-
-		[JsonPropertyName("windSpeed")]
-		public double WindSpeed { get; set; }
-
-		[JsonPropertyName("windDirection")]
-		public string WindDirection { get; set; } = string.Empty;
-
-		[JsonPropertyName("conditions")]
-		public string Conditions { get; set; } = string.Empty;
 	}
 }

@@ -38,16 +38,24 @@ Examples:
 ## Foundry console demos
 
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
-against Core weather data. Not part of `Weather.sln` deployables; run from VS Code
-or `dotnet run` in each folder. Expect a Foundry API key in the environment
-(see each `Program.cs`).
+against Core weather data (V1–V3) or a hosted Foundry Agent (V4). Not part of
+`Weather.sln` deployables; run from VS Code or `dotnet run` in each folder.
+See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 
 | Project | Path | Pattern |
 | --- | --- | --- |
 | V1 | [`FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint`](FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | V2 | [`FoundryConsoleV2ModelDirectNewUnifiedAIServices`](FoundryConsoleV2ModelDirectNewUnifiedAIServices) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
 | V3 | [`FoundryConsoleV3InjectFunctions`](FoundryConsoleV3InjectFunctions) | Injected function tools (`GetLatLongData`, `GetPublicWeatherData`) handled in-process |
-| V4 | [`FoundryConsoleV4MCP`](FoundryConsoleV4MCP) | Model-direct JSON in / JSON out (named MCP; remote MCP hosts are the projects above) |
+| V4 | [`FoundryConsoleV4MCP`](FoundryConsoleV4MCP) | Calls hosted Foundry Agent `wx1116-agent-default` (agent uses MCP lat/long + weather tools) |
+
+**V4 settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V3):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2` |
+| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` (project default version) |
+| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 |
 
 VS Code launch configs: **Foundry Console V1** … **V4**.
 
