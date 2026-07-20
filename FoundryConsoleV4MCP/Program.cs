@@ -1,6 +1,4 @@
 ﻿using Azure.AI.Extensions.OpenAI;
-using Azure.AI.Projects;
-using Azure.Identity;
 using DotNetEnv;
 using OpenAI.Responses;
 using System;
@@ -28,23 +26,41 @@ internal class Program
 		 - Agent uses its configured tools (lat/long + current weather)
 		""");
 
-		var projectEndpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
+		// Same shape as the Foundry sandbox sample, with AZURE_FOUNDRY_PROD_EUS2_* settings.
+		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
 			?? throw new InvalidOperationException(
 				"Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL. " +
-				"Set it to your Foundry project endpoint, e.g. " +
-				"https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2");
+				"Expected e.g. https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2");
 
 		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
 			?? "wx1116-agent-default";
+		var agentVersion = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_VERSION")
+			?? "7";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
+			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
 		var userPrompt = $"What is today's weather in {location}?";
 
-		Console.WriteLine($"\nProject endpoint: {projectEndpoint}");
-		Console.WriteLine($"Agent name: {agentName}");
+		Console.WriteLine($"\nProject endpoint: {endpoint}");
+		Console.WriteLine($"Agent: {agentName} (version {agentVersion})");
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
 
-		ProjectOpenAIClient projectOpenAIClient = CreateProjectOpenAIClient(new Uri(projectEndpoint));
-		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+		// Sandbox sample uses:
+		//   AIProjectClient + DefaultAzureCredential → projectClient.OpenAI / ProjectOpenAIClient
+		// AIProjectClient is Entra-only; for api-key we construct the same ProjectOpenAIClient
+		// the sandbox reaches via projectClient.OpenAI.
+		// ApiKey AuthenticationPolicy does not rewrite to /openai/v1 (TokenProvider/AIProjectClient does),
+		// so append that segment — otherwise the service returns "Missing required query parameter: api-version".
+		ProjectOpenAIClient projectOpenAIClient = new(
+			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
+			new ProjectOpenAIClientOptions
+			{
+				Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1"),
+				ApiVersion = "v1",
+			});
+
+		AgentReference agentReference = new(name: agentName, version: agentVersion);
+		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentReference);
 
 		try
 		{
@@ -65,35 +81,5 @@ internal class Program
 
 		Console.WriteLine("\nPress any key to continue.");
 		Console.ReadKey(true);
-	}
-
-	/// <summary>
-	/// Prefer the same API-key env var used by V1–V3 when present; otherwise Entra ID via DefaultAzureCredential.
-	/// Note: the ApiKey AuthenticationPolicy constructor does not rewrite the path to /openai/v1 (unlike the
-	/// TokenProvider constructor), so we append that segment ourselves — otherwise the service returns
-	/// "Missing required query parameter: api-version".
-	/// </summary>
-	private static ProjectOpenAIClient CreateProjectOpenAIClient(Uri projectEndpoint)
-	{
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY");
-		if (!string.IsNullOrWhiteSpace(apiKey))
-		{
-			var openAiEndpoint = new Uri($"{projectEndpoint.AbsoluteUri.TrimEnd('/')}/openai/v1");
-			Console.WriteLine("Auth: AZURE_FOUNDRY_PROD_EUS2_KEY (api-key header)");
-			Console.WriteLine($"OpenAI endpoint: {openAiEndpoint}");
-			return new ProjectOpenAIClient(
-				ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-				new ProjectOpenAIClientOptions
-				{
-					Endpoint = openAiEndpoint,
-					ApiVersion = "v1",
-				});
-		}
-
-		Console.WriteLine("Auth: DefaultAzureCredential (AZURE_FOUNDRY_PROD_EUS2_KEY not set)");
-		return new ProjectOpenAIClient(
-			projectEndpoint,
-			new DefaultAzureCredential(),
-			new ProjectOpenAIClientOptions { ApiVersion = "v1" });
 	}
 }
