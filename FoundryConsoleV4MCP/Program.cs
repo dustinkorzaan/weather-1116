@@ -34,15 +34,13 @@ internal class Program
 
 		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
 			?? "wx1116-agent-default";
-		var agentVersion = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_VERSION")
-			?? "7";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
 		var userPrompt = $"What is today's weather in {location}?";
 
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
-		Console.WriteLine($"Agent: {agentName} (version {agentVersion})");
+		Console.WriteLine($"Agent: {agentName}");
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
@@ -54,8 +52,8 @@ internal class Program
 				Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1"),
 			});
 
-		AgentReference agentReference = new(name: agentName, version: agentVersion);
-		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentReference);
+		// Name only — Foundry uses the agent's current default version.
+		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
 		try
 		{
