@@ -54,12 +54,12 @@ internal class Program
 		  "type": "object",
 		  "properties": {
 		    "summary": { "type": "string" },
-		    "temperature": { "type": "number" },
-		    "windSpeed": { "type": "number" },
+		    "temperatureF": { "type": "number" },
+		    "windSpeedMPH": { "type": "number" },
 		    "windDirection": { "type": "string" },
 		    "conditions": { "type": "string" }
 		  },
-		  "required": ["summary", "temperature", "windSpeed", "windDirection", "conditions"],
+		  "required": ["summary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
 		  "additionalProperties": false
 		}
 		""";
@@ -75,8 +75,8 @@ internal class Program
 
 		Field notes:
 		- summary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
-		- temperature (number) in Fahrenheit
-		- windSpeed (number) in MPH
+		- temperatureF (number) in Fahrenheit
+		- windSpeedMPH (number) in MPH
 		- windDirection (string)
 		- conditions (string)
 

@@ -251,8 +251,8 @@ internal class Program
 
 		Return valid JSON with these fields:
 		- summary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
-		- temperature (number)
-		- windSpeed (number)
+		- temperatureF (number) in Fahrenheit
+		- windSpeedMPH (number) in MPH
 		- windDirection (string)
 		- conditions (string)
 
@@ -266,12 +266,12 @@ internal class Program
 		  "type": "object",
 		  "properties": {
 		    "summary": { "type": "string" },
-		    "temperature": { "type": "number" },
-		    "windSpeed": { "type": "number" },
+		    "temperatureF": { "type": "number" },
+		    "windSpeedMPH": { "type": "number" },
 		    "windDirection": { "type": "string" },
 		    "conditions": { "type": "string" }
 		  },
-		  "required": ["summary", "temperature", "windSpeed", "windDirection", "conditions"],
+		  "required": ["summary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
 		  "additionalProperties": false
 		}
 		""";
