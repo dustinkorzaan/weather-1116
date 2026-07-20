@@ -4,7 +4,6 @@ using System.Text.Json;
 using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
-using Core.geo.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
@@ -13,16 +12,14 @@ namespace Core.AIWeather.Handlers;
 
 /// <summary>
 /// Calls the hosted Microsoft Foundry Agent for current weather (same pattern as Foundry Console V4).
-/// Resolves the requested location via GetLatLongData first so the prompt uses the geocoded place name.
+/// The agent uses its configured geo/weather tools; this handler does not call geo directly.
 /// </summary>
 public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEvent, AIWeatherResponse>
 {
-	private readonly IMediator _mediator;
 	private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
 
-	public GetCurrentAIWeatherHandler(IMediator mediator, ILogger<GetCurrentAIWeatherHandler> logger)
+	public GetCurrentAIWeatherHandler(ILogger<GetCurrentAIWeatherHandler> logger)
 	{
-		_mediator = mediator;
 		_logger = logger;
 	}
 
@@ -31,12 +28,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var location = string.IsNullOrWhiteSpace(request.Location)
 			? "Nashville, TN"
 			: request.Location.Trim();
-
-		var latLong = await _mediator.Send(
-			new GetLatLongDataEvent { Location = location },
-			cancellationToken);
-
-		var locationName = string.IsNullOrWhiteSpace(latLong.Name) ? location : latLong.Name;
 
 		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
 			?? throw new InvalidOperationException(
@@ -76,8 +67,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var userPrompt = $"""
 		{systemPrompt.Trim()}
 
-		What is the current weather in {locationName}?
+		What is the current weather in {location}?
 		Use your tools to look up coordinates and current weather.
+		When your geo tool returns a location, use the "name" field from that response as the place name in fullSummary (not the raw user input if they differ).
 
 		Return valid JSON matching this schema exactly:
 		{aiOutputSchema}
@@ -89,21 +81,15 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		- windDirection (string)
 		- conditions (string)
 
-		Use {locationName} as the location context.
+		Use the geo tool "name" as the location context when available; otherwise use {location}.
 		You only return valid JSON.
 		Do not include any text outside the JSON.
 		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
 		The fullSummary field must state only the current weather facts — nothing conversational after that.
 		""";
 
-		_logger.LogInformation(
-			"AI Weather: Resolved '{InputLocation}' to '{LocationName}' ({Latitude}, {Longitude})",
-			location,
-			locationName,
-			latLong.Latitude,
-			latLong.Longitude);
 		_logger.LogInformation("AI Weather: Project endpoint {Endpoint}, Agent {Agent}", endpoint, agentName);
-		_logger.LogInformation("AI Weather: User prompt for {LocationName}: {Prompt}", locationName, userPrompt);
+		_logger.LogInformation("AI Weather: User prompt for {Location}: {Prompt}", location, userPrompt);
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
 		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
