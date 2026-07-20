@@ -69,20 +69,31 @@ internal class Program
 
 	/// <summary>
 	/// Prefer the same API-key env var used by V1–V3 when present; otherwise Entra ID via DefaultAzureCredential.
-	/// Agent/project APIs often require Entra — set AZURE_FOUNDRY_PROD_EUS2_PROJ_URL and sign in (az login) if key auth fails.
+	/// Note: the ApiKey AuthenticationPolicy constructor does not rewrite the path to /openai/v1 (unlike the
+	/// TokenProvider constructor), so we append that segment ourselves — otherwise the service returns
+	/// "Missing required query parameter: api-version".
 	/// </summary>
 	private static ProjectOpenAIClient CreateProjectOpenAIClient(Uri projectEndpoint)
 	{
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY");
 		if (!string.IsNullOrWhiteSpace(apiKey))
 		{
+			var openAiEndpoint = new Uri($"{projectEndpoint.AbsoluteUri.TrimEnd('/')}/openai/v1");
 			Console.WriteLine("Auth: AZURE_FOUNDRY_PROD_EUS2_KEY (api-key header)");
+			Console.WriteLine($"OpenAI endpoint: {openAiEndpoint}");
 			return new ProjectOpenAIClient(
 				ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-				new ProjectOpenAIClientOptions { Endpoint = projectEndpoint });
+				new ProjectOpenAIClientOptions
+				{
+					Endpoint = openAiEndpoint,
+					ApiVersion = "v1",
+				});
 		}
 
 		Console.WriteLine("Auth: DefaultAzureCredential (AZURE_FOUNDRY_PROD_EUS2_KEY not set)");
-		return new ProjectOpenAIClient(projectEndpoint, new DefaultAzureCredential());
+		return new ProjectOpenAIClient(
+			projectEndpoint,
+			new DefaultAzureCredential(),
+			new ProjectOpenAIClientOptions { ApiVersion = "v1" });
 	}
 }
