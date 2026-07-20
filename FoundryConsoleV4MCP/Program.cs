@@ -53,6 +53,9 @@ internal class Program
 
 		Use {location} as the location context.
 		You only return valid JSON.
+		Do not include any text outside the JSON.
+		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
+		The summary field must state only the current weather facts — nothing conversational after that.
 		""";
 
 		var aiOutputSchema = """
