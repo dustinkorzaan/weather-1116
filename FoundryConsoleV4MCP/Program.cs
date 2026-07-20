@@ -5,7 +5,6 @@ using OpenAI.Responses;
 using System;
 using System.ClientModel;
 using System.ClientModel.Primitives;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -27,7 +26,7 @@ internal class Program
 		 - Ask Foundry Agent "What is today's weather in {location}?"
 		 - Call a hosted Microsoft Foundry Agent (not a model directly)
 		 - Agent uses its configured tools (lat/long + current weather)
-		 - JSON output from AI (strict schema)
+		 - JSON output from AI (prompt-shaped; Responses text.format is not allowed with agents)
 		""");
 
 		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
@@ -40,24 +39,8 @@ internal class Program
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
-		var userPrompt = $"""
-		What is today's weather in {location}?
-		Use your tools to look up coordinates and current weather.
-
-		Return valid JSON with these fields:
-		- summary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
-		- temperature (number)
-		- windSpeed (number)
-		- windDirection (string)
-		- conditions (string)
-
-		Use {location} as the location context.
-		You only return valid JSON.
-		Do not include any text outside the JSON.
-		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
-		The summary field must state only the current weather facts — nothing conversational after that.
-		""";
-
+		// Same field list / shape as V2's last example. Kept in the prompt because
+		// CreateResponseOptions.TextOptions (text.format) is rejected when an agent is specified.
 		var aiOutputSchema = """
 		{
 		  "type": "object",
@@ -73,11 +56,30 @@ internal class Program
 		}
 		""";
 
+		var userPrompt = $"""
+		What is today's weather in {location}?
+		Use your tools to look up coordinates and current weather.
+
+		Return valid JSON matching this schema exactly:
+		{aiOutputSchema}
+
+		Field notes:
+		- summary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
+		- temperature (number)
+		- windSpeed (number)
+		- windDirection (string)
+		- conditions (string)
+
+		Use {location} as the location context.
+		You only return valid JSON.
+		Do not include any text outside the JSON.
+		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
+		The summary field must state only the current weather facts — nothing conversational after that.
+		""";
+
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
-		Console.WriteLine("\nAI Output Schema:");
-		Console.WriteLine(aiOutputSchema);
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
 		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
@@ -97,13 +99,6 @@ internal class Program
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
 			},
-			TextOptions = new ResponseTextOptions
-			{
-				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
-					jsonSchemaFormatName: "ai_weather_response",
-					jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
-					jsonSchemaIsStrict: true)
-			}
 		};
 
 		try
@@ -117,6 +112,8 @@ internal class Program
 			if (aiWeather is null)
 			{
 				Console.WriteLine("Received empty or invalid JSON response.");
+				Console.WriteLine("Raw output:");
+				Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty)" : content);
 			}
 			else
 			{
