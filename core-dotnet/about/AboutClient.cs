@@ -3,9 +3,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.about;
 
-public sealed class McpAboutClient(
+/// <summary>
+/// HTTP client that loads a remote <see cref="AboutNode"/> for inclusion in an About tree.
+/// </summary>
+public sealed class AboutClient(
     HttpClient httpClient,
-    ILogger<McpAboutClient> logger) : IMcpAboutClient
+    ILogger<AboutClient> logger) : IAboutClient
 {
     public async Task<AboutNode> GetAsync(
         string? url,
@@ -15,7 +18,7 @@ public sealed class McpAboutClient(
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)
             || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {
-            logger.LogWarning("MCP About URL for {ExpectedName} is missing or invalid", expectedName);
+            logger.LogWarning("About URL for {ExpectedName} is missing or invalid", expectedName);
             return CreateUnhealthyNode(expectedName);
         }
 
@@ -25,7 +28,7 @@ public sealed class McpAboutClient(
             if (node is null || !string.Equals(node.Name, expectedName, StringComparison.Ordinal))
             {
                 logger.LogWarning(
-                    "MCP About endpoint {Url} did not return the expected {ExpectedName} node",
+                    "About endpoint {Url} did not return the expected {ExpectedName} node",
                     uri,
                     expectedName);
                 return CreateUnhealthyNode(expectedName);
@@ -41,7 +44,7 @@ public sealed class McpAboutClient(
         {
             logger.LogWarning(
                 exception,
-                "Could not load MCP About node {ExpectedName} from {Url}",
+                "Could not load About node {ExpectedName} from {Url}",
                 expectedName,
                 uri);
             return CreateUnhealthyNode(expectedName);

@@ -15,7 +15,12 @@ public static class AboutTreeBuilder
     public static AboutNode BuildMvcNode() => CreateNode("MVC");
 
     public static AboutNode BuildMvcRoot(params AboutNode[] dependencyNodes)
-        => BuildRoot("MVC Root", BuildMvcNode(), BuildApiRoot(), dependencyNodes);
+    {
+        var otherChildren = new AboutNode[dependencyNodes.Length + 1];
+        otherChildren[0] = BuildApiRoot();
+        dependencyNodes.CopyTo(otherChildren, 1);
+        return BuildRoot("MVC Root", BuildMvcNode(), otherChildren);
+    }
 
     /// <summary>
     /// Single leaf node for the MCP DotNet host (no children).

@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient<IMcpAboutClient, McpAboutClient>(client =>
+builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(5);
 });

@@ -6,17 +6,17 @@ namespace WeatherMVC.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class AboutController(
-    IMcpAboutClient mcpAboutClient,
+    IAboutClient aboutClient,
     IConfiguration configuration) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<AboutNode>> Get(CancellationToken cancellationToken)
     {
-        var mcpDotNetTask = mcpAboutClient.GetAsync(
+        var mcpDotNetTask = aboutClient.GetAsync(
             configuration["McpAbout:DotNetUrl"],
             "mcp-dotnet",
             cancellationToken);
-        var mcpFunctionTask = mcpAboutClient.GetAsync(
+        var mcpFunctionTask = aboutClient.GetAsync(
             configuration["McpAbout:FunctionUrl"],
             "mcp-function",
             cancellationToken);

@@ -13,12 +13,12 @@ public class WeatherApiWebApplicationFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Development");
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll<IMcpAboutClient>();
-            services.AddSingleton<IMcpAboutClient, StubMcpAboutClient>();
+            services.RemoveAll<IAboutClient>();
+            services.AddSingleton<IAboutClient, StubAboutClient>();
         });
     }
 
-    private sealed class StubMcpAboutClient : IMcpAboutClient
+    private sealed class StubAboutClient : IAboutClient
     {
         public Task<AboutNode> GetAsync(
             string? url,
