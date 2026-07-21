@@ -9,11 +9,13 @@ public static class AboutTreeBuilder
 {
     public static AboutNode BuildApiNode() => CreateNode("API");
 
-    public static AboutNode BuildApiRoot() => BuildRoot("API Root", BuildApiNode());
+    public static AboutNode BuildApiRoot(params AboutNode[] dependencyNodes)
+        => BuildRoot("API Root", BuildApiNode(), dependencyNodes);
 
     public static AboutNode BuildMvcNode() => CreateNode("MVC");
 
-    public static AboutNode BuildMvcRoot() => BuildRoot("MVC Root", BuildMvcNode(), BuildApiRoot());
+    public static AboutNode BuildMvcRoot(params AboutNode[] dependencyNodes)
+        => BuildRoot("MVC Root", BuildMvcNode(), BuildApiRoot(), dependencyNodes);
 
     /// <summary>
     /// Single leaf node for the MCP DotNet host (no children).

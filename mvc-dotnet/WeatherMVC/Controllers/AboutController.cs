@@ -5,12 +5,27 @@ namespace WeatherMVC.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AboutController : ControllerBase
+public class AboutController(
+    IMcpAboutClient mcpAboutClient,
+    IConfiguration configuration) : ControllerBase
 {
     [HttpGet]
-    public ActionResult<AboutNode> Get()
+    public async Task<ActionResult<AboutNode>> Get(CancellationToken cancellationToken)
     {
-        var root = AboutTreeBuilder.BuildMvcRoot();
+        var mcpDotNetTask = mcpAboutClient.GetAsync(
+            configuration["McpAbout:DotNetUrl"],
+            "mcp-dotnet",
+            cancellationToken);
+        var mcpFunctionTask = mcpAboutClient.GetAsync(
+            configuration["McpAbout:FunctionUrl"],
+            "mcp-function",
+            cancellationToken);
+
+        await Task.WhenAll(mcpDotNetTask, mcpFunctionTask);
+
+        var root = AboutTreeBuilder.BuildMvcRoot(
+            await mcpDotNetTask,
+            await mcpFunctionTask);
         return Ok(root);
     }
 }

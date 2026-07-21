@@ -1,3 +1,4 @@
+using Core.about;
 using Core.demo.handlers;
 using DotNetEnv;
 using MediatR;
@@ -8,6 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient<IMcpAboutClient, McpAboutClient>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
 
 var app = builder.Build();

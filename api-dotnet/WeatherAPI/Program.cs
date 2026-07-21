@@ -1,3 +1,4 @@
+using Core.about;
 using Core.demo.handlers;
 using DotNetEnv;
 using MediatR;
@@ -9,6 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
 	options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+});
+builder.Services.AddHttpClient<IMcpAboutClient, McpAboutClient>(client =>
+{
+	client.Timeout = TimeSpan.FromSeconds(5);
 });
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
 builder.Services.AddCors(options =>
