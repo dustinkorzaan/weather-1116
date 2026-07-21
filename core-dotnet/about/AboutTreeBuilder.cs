@@ -26,6 +26,16 @@ public static class AboutTreeBuilder
     }
 
     /// <summary>
+    /// Single leaf node for the MCP Function host (no children).
+    /// </summary>
+    public static AboutNode BuildMcpFunctionNode(bool isHealthy = true)
+    {
+        var node = CreateNode("mcp-function");
+        node.IsHealthy = isHealthy;
+        return node;
+    }
+
+    /// <summary>
     /// Creates a root node whose first child is always <paramref name="selfNode"/>,
     /// followed by any additional dependency nodes, then computes the root's
     /// IsHealthy as the aggregate (logical AND) of every descendant's health.

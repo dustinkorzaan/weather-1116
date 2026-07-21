@@ -67,6 +67,8 @@ jobs:
     needs: build
     environment: prod
     env:
+      # Surfaced on /about via Core.about.AboutTreeBuilder (BUILD_NUMBER / BUILD_START).
+      BUILD_NUMBER: ${{ github.run_number }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -127,7 +129,10 @@ jobs:
             az functionapp config appsettings set \
               --name weather1116-prod-mcpfunc \
               --resource-group "$APP_RG" \
-              --settings ASPNETCORE_ENVIRONMENT=Production BUILD_NUMBER="${{ env.BUILD_NUMBER }}" BUILD_START="${{ env.BUILD_START }}"
+              --settings \
+                ASPNETCORE_ENVIRONMENT=Production \
+                BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \
+                BUILD_START="${{ env.BUILD_START }}"
 
       - name: Deploy to Azure Function App
         id: deploy-to-functionapp

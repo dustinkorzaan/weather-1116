@@ -33,7 +33,7 @@ Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see `prod-depl
 
 Examples:
 - MCP DotNet: `Authorization: Bearer dev-mcp-dotnet-key` (`/about` stays open)
-- MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}`
+- MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/about` is anonymous)
 
 ## Foundry console demos
 
