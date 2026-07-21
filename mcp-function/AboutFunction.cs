@@ -13,13 +13,13 @@ namespace WeatherMcpFunction;
 public class AboutFunction
 {
 	private const string ExpectedTool = "GetLatLongData";
+	private static readonly Lazy<bool> HasExpectedTool = new(() => HasMcpTool(ExpectedTool));
 
 	[Function(nameof(About))]
 	public IActionResult About(
-		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "about")] HttpRequest req)
+		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "about")] HttpRequest _)
 	{
-		var isHealthy = HasMcpTool(ExpectedTool);
-		return new OkObjectResult(AboutTreeBuilder.BuildMcpFunctionNode(isHealthy));
+		return new OkObjectResult(AboutTreeBuilder.BuildMcpFunctionNode(HasExpectedTool.Value));
 	}
 
 	/// <summary>
