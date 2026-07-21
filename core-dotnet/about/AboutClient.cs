@@ -12,26 +12,26 @@ public sealed class AboutClient(
 {
     public async Task<AboutNode> GetAsync(
         string? url,
-        string expectedName,
+        string name,
         CancellationToken cancellationToken = default)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)
             || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {
-            logger.LogWarning("About URL for {ExpectedName} is missing or invalid", expectedName);
-            return CreateUnhealthyNode(expectedName);
+            logger.LogWarning("About URL for {name} is missing or invalid", name);
+            return CreateUnhealthyNode(name);
         }
 
         try
         {
             var node = await httpClient.GetFromJsonAsync<AboutNode>(uri, cancellationToken);
-            if (node is null || !string.Equals(node.Name, expectedName, StringComparison.Ordinal))
+            if (node is null || !string.Equals(node.Name, name, StringComparison.Ordinal))
             {
                 logger.LogWarning(
-                    "About endpoint {Url} did not return the expected {ExpectedName} node",
+                    "About endpoint {Url} did not return the expected {name} node",
                     uri,
-                    expectedName);
-                return CreateUnhealthyNode(expectedName);
+                    name);
+                return CreateUnhealthyNode(name);
             }
 
             return node;
@@ -44,10 +44,10 @@ public sealed class AboutClient(
         {
             logger.LogWarning(
                 exception,
-                "Could not load About node {ExpectedName} from {Url}",
-                expectedName,
+                "Could not load About node {name} from {Url}",
+                name,
                 uri);
-            return CreateUnhealthyNode(expectedName);
+            return CreateUnhealthyNode(name);
         }
     }
 

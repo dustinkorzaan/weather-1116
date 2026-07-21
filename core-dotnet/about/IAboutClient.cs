@@ -8,6 +8,6 @@ public interface IAboutClient
 {
     Task<AboutNode> GetAsync(
         string? url,
-        string expectedName,
+        string name,
         CancellationToken cancellationToken = default);
 }
