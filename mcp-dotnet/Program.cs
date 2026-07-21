@@ -1,6 +1,9 @@
 using Core.weather.Handlers;
+using DotNetEnv;
 using MediatR;
 using ModelContextProtocol.Server;
+
+Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
