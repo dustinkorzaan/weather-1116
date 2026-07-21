@@ -1,4 +1,7 @@
+using DotNetEnv;
 using WeatherBlazor.Data;
+
+Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 

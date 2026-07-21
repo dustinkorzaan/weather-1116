@@ -1,6 +1,10 @@
+using Core.about;
 using Core.weather.Handlers;
+using DotNetEnv;
 using MediatR;
 using ModelContextProtocol.Server;
+
+Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,9 +30,9 @@ builder.Services
 var app = builder.Build();
 
 // Shared secret for MCP clients (Foundry project connection, MCP Inspector, etc.).
-// Override with env Mcp__ApiKey or appsettings Mcp:ApiKey.
 var mcpApiKey = builder.Configuration["Mcp:ApiKey"];
 
+// Auth filter: require a valid Bearer token for all /mcp requests.
 app.Use(async (context, next) =>
 {
 	if (context.Request.Path.StartsWithSegments("/mcp"))
@@ -53,6 +57,13 @@ app.Use(async (context, next) =>
 });
 
 app.MapMcp("/mcp");
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", server = "WeatherMcpDotNet" }));
+
+app.MapGet("/about", (IEnumerable<McpServerTool> tools) =>
+{
+	const string expectedTool = "GetPublicWeatherData";
+	var isHealthy = !string.IsNullOrWhiteSpace(mcpApiKey) && tools.Any(t =>
+		string.Equals(t.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
+	return Results.Ok(AboutTreeBuilder.BuildMcpDotNetNode(isHealthy));
+});
 
 app.Run();
