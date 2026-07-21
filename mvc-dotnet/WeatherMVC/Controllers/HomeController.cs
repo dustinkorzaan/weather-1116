@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Core.AIWeather.Events;
 using Core.demo.events;
 using Core.demo.forecast;
@@ -10,34 +11,55 @@ namespace WeatherMVC.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly IMediator _mediator;
+	private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public HomeController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+	private readonly IMediator _mediator;
 
-    public async Task<IActionResult> Index(CancellationToken cancellationToken)
-    {
-        var helloResponse = await _mediator.Send(new HelloWorldEvent { Message = "from WeatherMVC" }, cancellationToken);
-        ViewData["HelloResponse"] = helloResponse.RequestResponse;
+	public HomeController(IMediator mediator)
+	{
+		_mediator = mediator;
+	}
 
-        var forecasts = await _mediator.Send(new WeatherForecastEvent(), cancellationToken);
-        return View(forecasts);
-    }
+	public async Task<IActionResult> Index(CancellationToken cancellationToken)
+	{
+		var helloResponse = await _mediator.Send(new HelloWorldEvent { Message = "from WeatherMVC" }, cancellationToken);
+		ViewData["HelloResponse"] = helloResponse.RequestResponse;
 
-    [HttpGet]
-    public async Task<IActionResult> GetCurrentAIWeather([FromQuery] string? location, CancellationToken cancellationToken)
-    {
-        var response = await _mediator.Send(
-            new GetCurrentAIWeatherEvent
-            {
-                Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
-            },
-            cancellationToken);
+		var forecasts = await _mediator.Send(new WeatherForecastEvent(), cancellationToken);
+		return View(forecasts);
+	}
 
-        return Json(response);
-    }
+	[HttpGet]
+	public async Task<IActionResult> GetCurrentAIWeather([FromQuery] string? location, CancellationToken cancellationToken)
+	{
+		var response = await _mediator.Send(
+			new GetCurrentAIWeatherEvent
+			{
+				Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
+			},
+			cancellationToken);
+
+		return Json(response);
+	}
+
+	[HttpGet]
+	public async Task GetCurrentAIWeatherStream([FromQuery] string? location, CancellationToken cancellationToken)
+	{
+		Response.Headers.ContentType = "text/event-stream";
+		Response.Headers.CacheControl = "no-cache";
+
+		await foreach (var update in _mediator.CreateStream(
+			new GetCurrentAIWeatherStreamEvent
+			{
+				Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
+			},
+			cancellationToken))
+		{
+			var json = JsonSerializer.Serialize(update, JsonOptions);
+			await Response.WriteAsync($"data: {json}\n\n", cancellationToken);
+			await Response.Body.FlushAsync(cancellationToken);
+		}
+	}
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

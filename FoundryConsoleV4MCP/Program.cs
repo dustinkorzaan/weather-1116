@@ -111,11 +111,71 @@ internal class Program
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
 			},
+			StreamingEnabled = true,
 		};
 
 		try
 		{
-			ResponseResult response = await responseClient.CreateResponseAsync(options);
+			Console.WriteLine("\nStreaming agent response...");
+			ResponseResult? response = null;
+
+			await foreach (StreamingResponseUpdate streamUpdate in responseClient.CreateResponseStreamingAsync(options))
+			{
+				switch (streamUpdate)
+				{
+					case StreamingResponseCreatedUpdate:
+						Console.WriteLine("[status] Request accepted by Foundry Agent...");
+						break;
+					case StreamingResponseQueuedUpdate:
+						Console.WriteLine("[status] Request queued...");
+						break;
+					case StreamingResponseInProgressUpdate:
+						Console.WriteLine("[status] Agent is working...");
+						break;
+					case StreamingResponseMcpListToolsInProgressUpdate:
+						Console.WriteLine("[status] Agent is discovering tools...");
+						break;
+					case StreamingResponseMcpListToolsCompletedUpdate:
+						Console.WriteLine("[status] Tool discovery completed.");
+						break;
+					case StreamingResponseMcpCallInProgressUpdate:
+						Console.WriteLine("[status] Agent is calling a weather tool...");
+						break;
+					case StreamingResponseMcpCallCompletedUpdate:
+						Console.WriteLine("[status] Weather tool call completed.");
+						break;
+					case StreamingResponseMcpCallFailedUpdate:
+						Console.WriteLine("[status] A weather tool call failed.");
+						break;
+					case StreamingResponseOutputItemAddedUpdate { Item: McpToolCallItem mcpCall }:
+						Console.WriteLine($"[tool] Agent requested: {mcpCall.ToolName}");
+						break;
+					case StreamingResponseOutputItemDoneUpdate { Item: McpToolCallItem mcpCall }:
+						Console.WriteLine($"[tool] Finished: {mcpCall.ToolName}");
+						break;
+					case StreamingResponseOutputTextDeltaUpdate textDelta when !string.IsNullOrEmpty(textDelta.Delta):
+						Console.Write(textDelta.Delta);
+						break;
+					case StreamingResponseCompletedUpdate completed:
+						response = completed.Response;
+						break;
+					case StreamingResponseErrorUpdate errorUpdate:
+						Console.WriteLine($"\n[error] {errorUpdate.Message}");
+						break;
+					case StreamingResponseFailedUpdate failedUpdate:
+						Console.WriteLine($"\n[error] Agent request failed: {failedUpdate.Response?.Status}");
+						break;
+				}
+			}
+
+			Console.WriteLine();
+
+			if (response is null)
+			{
+				Console.WriteLine("Received empty response from Foundry Agent.");
+				return;
+			}
+
 			var content = response.GetOutputText();
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
 				content,

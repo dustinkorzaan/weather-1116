@@ -192,9 +192,28 @@ body {
 }
 
 @keyframes ai-weather-spin {
-  to {
-    transform: rotate(360deg);
-  }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.ai-weather-status {
+    margin: 0.75rem 0 0;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.ai-weather-stream-preview {
+    margin: 0.75rem 0 0;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: #f8f9fa;
+    color: #495057;
+    font-size: 0.875rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 8rem;
+    overflow: auto;
 }
 
 .ai-weather-results {

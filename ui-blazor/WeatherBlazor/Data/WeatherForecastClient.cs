@@ -17,6 +17,14 @@ public class AIWeatherResponse
     public string Conditions { get; set; } = string.Empty;
 }
 
+public class AIWeatherStreamUpdate
+{
+    public string Type { get; set; } = string.Empty;
+    public string? Message { get; set; }
+    public string? Delta { get; set; }
+    public AIWeatherResponse? Result { get; set; }
+}
+
 public class WeatherForecastClient
 {
     private HttpClient _httpClient;
@@ -44,6 +52,63 @@ public class WeatherForecastClient
     {
         var route = $"AIWeather/Current?location={Uri.EscapeDataString(location)}";
         return await _httpClient.GetFromJsonAsync<AIWeatherResponse>(route);
+    }
+
+    public async Task StreamCurrentAIWeatherAsync(
+        string location,
+        Action<AIWeatherStreamUpdate> onUpdate,
+        CancellationToken cancellationToken = default)
+    {
+        var route = $"AIWeather/Current/stream?location={Uri.EscapeDataString(location)}";
+        using var request = new HttpRequestMessage(HttpMethod.Get, route);
+        request.Headers.Accept.ParseAdd("text/event-stream");
+
+        using var response = await _httpClient.SendAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var reader = new StreamReader(stream);
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var line = await reader.ReadLineAsync(cancellationToken);
+            if (line is null)
+            {
+                break;
+            }
+
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            if (!line.StartsWith("data: ", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var update = System.Text.Json.JsonSerializer.Deserialize<AIWeatherStreamUpdate>(
+                line["data: ".Length..],
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (update is null)
+            {
+                continue;
+            }
+
+            onUpdate(update);
+
+            if (update.Type == "error")
+            {
+                throw new InvalidOperationException(update.Message ?? "Unable to load AI weather.");
+            }
+        }
     }
 
     public async Task<AboutNode> GetAboutAsync()

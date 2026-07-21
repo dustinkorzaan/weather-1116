@@ -1,20 +1,65 @@
-import { useState } from 'react';
-import { useLazyGetCurrentAIWeatherQuery } from '../services/weatherApi';
+import { useRef, useState } from 'react';
+import { streamCurrentAIWeather } from '../services/streamCurrentAIWeather';
 
 function CurrentAIWeather() {
   const [location, setLocation] = useState('Nashville, TN');
-  const [trigger, { data, isFetching, isError, error }] = useLazyGetCurrentAIWeatherQuery();
+  const [data, setData] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [streamPreview, setStreamPreview] = useState('');
+  const abortRef = useRef(null);
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
-    const trimmed = location.trim() || 'Nashville, TN';
-    trigger(trimmed);
-  };
+    abortRef.current?.abort();
 
-  const errorMessage =
-    error && typeof error === 'object' && 'data' in error && error.data?.title
-      ? error.data.title
-      : 'Unable to load AI weather.';
+    const trimmed = location.trim() || 'Nashville, TN';
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setLocation(trimmed);
+    setIsFetching(true);
+    setIsError(false);
+    setErrorMessage('');
+    setStatusMessage('Starting AI weather request...');
+    setStreamPreview('');
+    setData(null);
+
+    try {
+      await streamCurrentAIWeather(trimmed, {
+        signal: controller.signal,
+        onUpdate: (update) => {
+          if (update.type === 'status' && update.message) {
+            setStatusMessage(update.message);
+          }
+
+          if (update.type === 'textDelta' && update.delta) {
+            setStreamPreview((current) => current + update.delta);
+          }
+
+          if (update.type === 'complete' && update.result) {
+            setData(update.result);
+            setStatusMessage('');
+            setStreamPreview('');
+          }
+        },
+      });
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        setIsError(true);
+        setErrorMessage(error.message || 'Unable to load AI weather.');
+        setStatusMessage('');
+        setStreamPreview('');
+      }
+    } finally {
+      if (abortRef.current === controller) {
+        setIsFetching(false);
+        abortRef.current = null;
+      }
+    }
+  };
 
   return (
     <section className="ai-weather-section" aria-label="Current AI weather">
@@ -41,6 +86,18 @@ function CurrentAIWeather() {
           <span>Get Current AI Weather</span>
         </button>
       </form>
+
+      {isFetching && statusMessage && (
+        <p className="ai-weather-status" aria-live="polite">
+          {statusMessage}
+        </p>
+      )}
+
+      {isFetching && streamPreview && (
+        <pre className="ai-weather-stream-preview" aria-live="polite">
+          {streamPreview}
+        </pre>
+      )}
 
       {isError && <p className="forecast-status error">{errorMessage}</p>}
 

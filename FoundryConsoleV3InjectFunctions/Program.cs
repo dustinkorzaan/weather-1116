@@ -170,11 +170,44 @@ internal class Program
 							jsonSchemaFormatName: "ai_weather_response",
 							jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
 							jsonSchemaIsStrict: true)
-					}
+					},
+					StreamingEnabled = true,
 				};
 
-				Console.WriteLine("\nCreating response with options...");
-				ResponseResult response = await client.CreateResponseAsync(options);
+				Console.WriteLine("\nStreaming response...");
+				ResponseResult? response = null;
+
+				await foreach (StreamingResponseUpdate streamUpdate in client.CreateResponseStreamingAsync(options))
+				{
+					switch (streamUpdate)
+					{
+						case StreamingResponseCreatedUpdate:
+							Console.WriteLine("[status] Request created...");
+							break;
+						case StreamingResponseInProgressUpdate:
+							Console.WriteLine("[status] Model is working...");
+							break;
+						case StreamingResponseOutputItemAddedUpdate { Item: FunctionCallResponseItem functionCall }:
+							Console.WriteLine($"[tool] Model requested: {functionCall.FunctionName}");
+							break;
+						case StreamingResponseOutputTextDeltaUpdate textDelta when !string.IsNullOrEmpty(textDelta.Delta):
+							Console.Write(textDelta.Delta);
+							break;
+						case StreamingResponseCompletedUpdate completed:
+							response = completed.Response;
+							break;
+						case StreamingResponseErrorUpdate errorUpdate:
+							Console.WriteLine($"\n[error] {errorUpdate.Message}");
+							break;
+					}
+				}
+
+				Console.WriteLine();
+
+				if (response is null)
+				{
+					throw new InvalidOperationException("Model finished without producing a completed response.");
+				}
 
 				Console.WriteLine("Adding response output items to input items...");
 				inputItems.AddRange(response.OutputItems);

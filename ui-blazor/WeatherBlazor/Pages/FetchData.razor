@@ -39,6 +39,16 @@
         <p class="text-danger">@aiWeatherError</p>
     }
 
+    @if (isAiWeatherLoading && !string.IsNullOrWhiteSpace(aiWeatherStatus))
+    {
+        <p class="ai-weather-status" aria-live="polite">@aiWeatherStatus</p>
+    }
+
+    @if (isAiWeatherLoading && !string.IsNullOrWhiteSpace(aiWeatherStreamPreview))
+    {
+        <pre class="ai-weather-stream-preview" aria-live="polite">@aiWeatherStreamPreview</pre>
+    }
+
     @if (aiWeather is not null && !isAiWeatherLoading)
     {
         <div class="ai-weather-results">
@@ -105,6 +115,8 @@ else
     private string location = "Nashville, TN";
     private bool isAiWeatherLoading;
     private string? aiWeatherError;
+    private string? aiWeatherStatus;
+    private string aiWeatherStreamPreview = string.Empty;
     private AIWeatherResponse? aiWeather;
 
     protected override async Task OnInitializedAsync()
@@ -135,22 +147,43 @@ else
     {
         isAiWeatherLoading = true;
         aiWeatherError = null;
+        aiWeatherStatus = "Starting AI weather request...";
+        aiWeatherStreamPreview = string.Empty;
         aiWeather = null;
 
         try
         {
             var trimmed = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location.Trim();
             location = trimmed;
-            aiWeather = await ForecastClient.GetCurrentAIWeatherAsync(trimmed);
-            if (aiWeather is null)
+
+            await ForecastClient.StreamCurrentAIWeatherAsync(trimmed, update =>
             {
-                aiWeatherError = "Unable to load AI weather.";
-            }
+                if (update.Type == "status" && !string.IsNullOrWhiteSpace(update.Message))
+                {
+                    aiWeatherStatus = update.Message;
+                }
+
+                if (update.Type == "textDelta" && !string.IsNullOrWhiteSpace(update.Delta))
+                {
+                    aiWeatherStreamPreview += update.Delta;
+                }
+
+                if (update.Type == "complete" && update.Result is not null)
+                {
+                    aiWeather = update.Result;
+                    aiWeatherStatus = null;
+                    aiWeatherStreamPreview = string.Empty;
+                }
+
+                InvokeAsync(StateHasChanged);
+            });
         }
         catch
         {
             aiWeather = null;
             aiWeatherError = "Unable to load AI weather.";
+            aiWeatherStatus = null;
+            aiWeatherStreamPreview = string.Empty;
         }
         finally
         {

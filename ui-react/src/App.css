@@ -135,6 +135,25 @@
   }
 }
 
+.ai-weather-status {
+  margin: 0.75rem 0 0;
+  color: #4b5563;
+  font-style: italic;
+}
+
+.ai-weather-stream-preview {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 8rem;
+  overflow: auto;
+}
+
 .ai-weather-results {
   margin-top: 0.85rem;
 }
