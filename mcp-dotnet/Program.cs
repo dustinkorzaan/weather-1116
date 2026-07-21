@@ -29,9 +29,9 @@ builder.Services
 var app = builder.Build();
 
 // Shared secret for MCP clients (Foundry project connection, MCP Inspector, etc.).
-// Override with env Mcp__ApiKey or appsettings Mcp:ApiKey.
 var mcpApiKey = builder.Configuration["Mcp:ApiKey"];
 
+// Auth filter: require a valid Bearer token for all /mcp requests.
 app.Use(async (context, next) =>
 {
 	if (context.Request.Path.StartsWithSegments("/mcp"))
@@ -56,6 +56,8 @@ app.Use(async (context, next) =>
 });
 
 app.MapMcp("/mcp");
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", server = "WeatherMcpDotNet" }));
+
+app.MapGet("/health", (IEnumerable<McpServerTool> tools) =>
+	Results.Ok(new { status = "healthy", server = "WeatherMcpDotNet", toolCount = tools.Count() }));
 
 app.Run();
