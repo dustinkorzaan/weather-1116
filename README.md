@@ -32,7 +32,7 @@ also forwarded in [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer
 Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see `prod-deploy-mcp-*.yml`).
 
 Examples:
-- MCP DotNet: `Authorization: Bearer dev-mcp-dotnet-key` (`/health` stays open)
+- MCP DotNet: `Authorization: Bearer dev-mcp-dotnet-key` (`/about` stays open)
 - MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}`
 
 ## Foundry console demos

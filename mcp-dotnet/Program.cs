@@ -1,3 +1,4 @@
+using Core.about;
 using Core.weather.Handlers;
 using DotNetEnv;
 using MediatR;
@@ -57,22 +58,13 @@ app.Use(async (context, next) =>
 
 app.MapMcp("/mcp");
 
-app.MapGet("/health", (IEnumerable<McpServerTool> tools) =>
+app.MapGet("/about", (IEnumerable<McpServerTool> tools) =>
 {
 	const string expectedTool = "GetPublicWeatherData";
-	var toolList = tools as IList<McpServerTool> ?? tools.ToList();
-	var toolCount = toolList.Count;
-	var hasExpectedTool = toolList.Any(t =>
+	var isHealthy = tools.Any(t =>
 		string.Equals(t.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
 
-	if (toolCount >= 1 && hasExpectedTool)
-	{
-		return Results.Ok(new { status = "healthy", server = "WeatherMcpDotNet", toolCount });
-	}
-
-	return Results.Json(
-		new { status = "unhealthy", server = "WeatherMcpDotNet", toolCount },
-		statusCode: StatusCodes.Status503ServiceUnavailable);
+	return Results.Ok(AboutTreeBuilder.BuildMcpDotNetNode(isHealthy));
 });
 
 app.Run();
