@@ -13,6 +13,58 @@
     <p class="text-danger">@errorMessage</p>
 }
 
+<section class="ai-weather-section" aria-label="Current AI weather">
+    <form class="ai-weather-form" @onsubmit="GetCurrentAIWeatherAsync" @onsubmit:preventDefault>
+        <label class="ai-weather-label" for="ai-weather-location">Location:</label>
+        <input id="ai-weather-location"
+               class="form-control ai-weather-input"
+               type="text"
+               @bind="location"
+               disabled="@isAiWeatherLoading"
+               autocomplete="address-level2" />
+        <button type="submit"
+                class="btn btn-primary ai-weather-button"
+                disabled="@isAiWeatherLoading"
+                aria-busy="@isAiWeatherLoading.ToString().ToLowerInvariant()">
+            @if (isAiWeatherLoading)
+            {
+                <span class="ai-weather-spinner" aria-hidden="true"></span>
+            }
+            <span>Get Current AI Weather</span>
+        </button>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(aiWeatherError))
+    {
+        <p class="text-danger">@aiWeatherError</p>
+    }
+
+    @if (aiWeather is not null && !isAiWeatherLoading)
+    {
+        <div class="ai-weather-results">
+            <p class="ai-weather-summary">@aiWeather.FullSummary</p>
+            <dl class="ai-weather-stats">
+                <div class="ai-weather-stat">
+                    <dt>Temperature F</dt>
+                    <dd>@aiWeather.TemperatureF</dd>
+                </div>
+                <div class="ai-weather-stat">
+                    <dt>Wind Speed MPH</dt>
+                    <dd>@aiWeather.WindSpeedMPH</dd>
+                </div>
+                <div class="ai-weather-stat">
+                    <dt>Wind Direction</dt>
+                    <dd>@aiWeather.WindDirection</dd>
+                </div>
+                <div class="ai-weather-stat">
+                    <dt>Conditions</dt>
+                    <dd>@aiWeather.Conditions</dd>
+                </div>
+            </dl>
+        </div>
+    }
+</section>
+
 <WeatherMap />
 
 @if (forecasts == null)
@@ -50,6 +102,10 @@ else
     private WeatherForecast[]? forecasts;
     private string helloMessage = "Loading hello message...";
     private string? errorMessage;
+    private string location = "Nashville, TN";
+    private bool isAiWeatherLoading;
+    private string? aiWeatherError;
+    private AIWeatherResponse? aiWeather;
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,6 +128,33 @@ else
         {
             forecasts = [];
             errorMessage ??= "Unable to load data from the weather API.";
+        }
+    }
+
+    private async Task GetCurrentAIWeatherAsync()
+    {
+        isAiWeatherLoading = true;
+        aiWeatherError = null;
+        aiWeather = null;
+
+        try
+        {
+            var trimmed = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location.Trim();
+            location = trimmed;
+            aiWeather = await ForecastClient.GetCurrentAIWeatherAsync(trimmed);
+            if (aiWeather is null)
+            {
+                aiWeatherError = "Unable to load AI weather.";
+            }
+        }
+        catch
+        {
+            aiWeather = null;
+            aiWeatherError = "Unable to load AI weather.";
+        }
+        finally
+        {
+            isAiWeatherLoading = false;
         }
     }
 }

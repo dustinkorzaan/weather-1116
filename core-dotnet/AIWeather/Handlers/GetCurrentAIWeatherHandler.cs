@@ -1,33 +1,33 @@
-﻿using Azure.AI.Extensions.OpenAI;
-using Core.AIWeather.Models;
-using DotNetEnv;
-using OpenAI.Responses;
-using System;
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Azure.AI.Extensions.OpenAI;
+using Core.AIWeather.Events;
+using Core.AIWeather.Models;
+using MediatR;
+using Microsoft.Extensions.Logging;
+using OpenAI.Responses;
 
-internal class Program
+namespace Core.AIWeather.Handlers;
+
+/// <summary>
+/// Calls the hosted Microsoft Foundry Agent for current weather (same pattern as Foundry Console V4).
+/// The agent uses its configured geo/weather tools; this handler does not call geo directly.
+/// </summary>
+public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEvent, AIWeatherResponse>
 {
-	private static async Task Main(string[] args)
-	{
-		Env.TraversePath().Load();
+	private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
 
-		string location = "Nashville, TN";
-		await AskFoundryAgent(location);
+	public GetCurrentAIWeatherHandler(ILogger<GetCurrentAIWeatherHandler> logger)
+	{
+		_logger = logger;
 	}
 
-	private static async Task AskFoundryAgent(string location)
+	public async Task<AIWeatherResponse> Handle(GetCurrentAIWeatherEvent request, CancellationToken cancellationToken)
 	{
-		Console.Clear();
-		Console.WriteLine($"""
-		Example 4
-		 - Ask Foundry Agent "What is today's weather in {location}?"
-		 - Call a hosted Microsoft Foundry Agent (not a model directly)
-		 - Agent uses its configured tools (lat/long + current weather)
-		 - JSON output from AI (prompt-shaped; Responses text.format is not allowed with agents)
-		""");
+		var location = string.IsNullOrWhiteSpace(request.Location)
+			? "Nashville, TN"
+			: request.Location.Trim();
 
 		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
 			?? throw new InvalidOperationException(
@@ -40,7 +40,7 @@ internal class Program
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
 		// Same intent as V3's system prompt. CreateResponseOptions.Instructions is rejected when an
-		// agent is specified, so this is folded into the user message (and printed for the demo).
+		// agent is specified, so this is folded into the user message.
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
@@ -67,8 +67,9 @@ internal class Program
 		var userPrompt = $"""
 		{systemPrompt.Trim()}
 
-		What is today's weather in {location}?
+		What is the current weather in the user entered location: `{location}`?
 		Use your tools to look up coordinates and current weather.
+		When your geo tool returns a location, choose whichever place name is more user-friendly for fullSummary: the user entered location (`{location}`) or the geo tool response "name" (for example prefer a clear city name over a raw ZIP or opaque code).
 
 		Return valid JSON matching this schema exactly:
 		{aiOutputSchema}
@@ -80,18 +81,15 @@ internal class Program
 		- windDirection (string)
 		- conditions (string)
 
-		Use {location} as the location context.
+		Use the more user-friendly place name as the location context in fullSummary.
 		You only return valid JSON.
 		Do not include any text outside the JSON.
 		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
 		The fullSummary field must state only the current weather facts — nothing conversational after that.
 		""";
 
-		Console.WriteLine($"\nProject endpoint: {endpoint}");
-		Console.WriteLine($"Agent: {agentName}");
-		Console.WriteLine("\nSystem Prompt (included in user message; Instructions not allowed with agents):");
-		Console.WriteLine(systemPrompt);
-		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
+		_logger.LogInformation("AI Weather: Project endpoint {Endpoint}, Agent {Agent}", endpoint, agentName);
+		_logger.LogInformation("AI Weather: User prompt for {Location}: {Prompt}", location, userPrompt);
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
 		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
@@ -113,36 +111,18 @@ internal class Program
 			},
 		};
 
-		try
-		{
-			ResponseResult response = await responseClient.CreateResponseAsync(options);
-			var content = response.GetOutputText();
-			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
-				content,
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+		ResponseResult response = await responseClient.CreateResponseAsync(options, cancellationToken);
+		var content = response.GetOutputText();
+		var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
+			content,
+			new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-			if (aiWeather is null)
-			{
-				Console.WriteLine("Received empty or invalid JSON response.");
-				Console.WriteLine("Raw output:");
-				Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty)" : content);
-			}
-			else
-			{
-				Console.WriteLine("\nResponse:");
-				Console.WriteLine(JsonSerializer.Serialize(aiWeather, new JsonSerializerOptions { WriteIndented = true }));
-			}
-		}
-		catch (Exception ex)
+		if (aiWeather is null)
 		{
-			Console.WriteLine($"Request failed: {ex.Message}");
-			if (ex.InnerException is not null)
-			{
-				Console.WriteLine($"Inner: {ex.InnerException.Message}");
-			}
+			throw new InvalidOperationException(
+				$"Foundry Agent returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
 		}
 
-		Console.WriteLine("\nPress any key to continue.");
-		Console.ReadKey(true);
+		return aiWeather;
 	}
 }

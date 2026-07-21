@@ -1,8 +1,8 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# Docs for Azure Functions deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: CICD weather1116-prod-api
-run-name: CICD weather1116-prod-api
+name: CICD weather1116-prod-mcpfunc
+run-name: CICD weather1116-prod-mcpfunc
 
 on:
   workflow_run:
@@ -17,11 +17,12 @@ on:
 
 # Newer deploys cancel older in-progress runs of this workflow.
 concurrency:
-  group: prod-deploy-api
+  group: prod-deploy-mcpfunc
   cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  DOTNET_VERSION: '10.x'
   BUILD_NUMBER: ${{ github.run_number }}
 
 jobs:
@@ -44,26 +45,28 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Build with dotnet
-        run: dotnet build ./api-dotnet/WeatherAPI/WeatherAPI.csproj --configuration Release
+        run: dotnet build ./mcp-function/WeatherMcpFunction.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ./api-dotnet/WeatherAPI/WeatherAPI.csproj -c Release -o "${{ github.workspace }}/publish/api-dotnet"
+        run: dotnet publish ./mcp-function/WeatherMcpFunction.csproj -c Release -o "${{ github.workspace }}/publish/mcp-function"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v7
         with:
           name: .net-app
-          path: ${{ github.workspace }}/publish/api-dotnet
+          path: ${{ github.workspace }}/publish/mcp-function
+          # Flex Consumption OneDeploy requires .azurefunctions at package root.
+          # upload-artifact@v4+ excludes hidden (dot) files/dirs by default.
+          include-hidden-files: true
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment: prod
     env:
-      UI_REACT_URL: ${{ secrets.PROD_UI_REACT_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -76,10 +79,22 @@ jobs:
           node-version: '24'
 
       - name: Download artifact from build job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: .net-app
-          path: ${{ github.workspace }}/publish/api-dotnet
+          path: ${{ github.workspace }}/publish/mcp-function
+
+      - name: Verify Flex Consumption package contents
+        shell: bash
+        run: |
+          PACKAGE_DIR="${{ github.workspace }}/publish/mcp-function"
+          if [ ! -d "$PACKAGE_DIR/.azurefunctions" ]; then
+            echo "Missing required .azurefunctions directory in publish package:" >&2
+            ls -la "$PACKAGE_DIR" >&2
+            exit 1
+          fi
+          echo "Found .azurefunctions package content:"
+          ls -la "$PACKAGE_DIR/.azurefunctions"
 
       - name: Debug Azure OIDC secret lengths
         shell: bash
@@ -99,26 +114,26 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
-      - name: Set App Service settings
+      - name: Set Function App settings
         uses: azure/cli@v2
         with:
           inlineScript: |
-            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-api'].resourceGroup | [0]" -o tsv)
+            APP_RG=$(az functionapp list --query "[?name=='weather1116-prod-mcpfunc'].resourceGroup | [0]" -o tsv)
             if [ -z "$APP_RG" ]; then
-              echo "Could not resolve resource group for weather1116-prod-api" >&2
+              echo "Could not resolve resource group for weather1116-prod-mcpfunc" >&2
               exit 1
             fi
 
-            az webapp config appsettings set \
-              --name weather1116-prod-api \
+            az functionapp config appsettings set \
+              --name weather1116-prod-mcpfunc \
               --resource-group "$APP_RG" \
-              --settings Cors__AllowedOrigins__0="${{ env.UI_REACT_URL }}" AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" AZURE_FOUNDRY_PROD_EUS2_KEY="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}" AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME }}" ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_DETAILEDERRORS=false BUILD_NUMBER="${{ env.BUILD_NUMBER }}" BUILD_START="${{ env.BUILD_START }}"
+              --settings ASPNETCORE_ENVIRONMENT=Production BUILD_NUMBER="${{ env.BUILD_NUMBER }}" BUILD_START="${{ env.BUILD_START }}"
 
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
+      - name: Deploy to Azure Function App
+        id: deploy-to-functionapp
+        uses: Azure/functions-action@v1
         with:
-          app-name: 'weather1116-prod-api'
+          app-name: 'weather1116-prod-mcpfunc'
           slot-name: 'Production'
-          package: ${{ github.workspace }}/publish/api-dotnet
+          package: ${{ github.workspace }}/publish/mcp-function
           

@@ -1,5 +1,8 @@
 using Core.demo.handlers;
+using DotNetEnv;
 using MediatR;
+
+Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
