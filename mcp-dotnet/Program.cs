@@ -61,9 +61,8 @@ app.MapMcp("/mcp");
 app.MapGet("/about", (IEnumerable<McpServerTool> tools) =>
 {
 	const string expectedTool = "GetPublicWeatherData";
-	var isHealthy = tools.Any(t =>
+	var isHealthy = !string.IsNullOrWhiteSpace(mcpApiKey) && tools.Any(t =>
 		string.Equals(t.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
-
 	return Results.Ok(AboutTreeBuilder.BuildMcpDotNetNode(isHealthy));
 });
 
