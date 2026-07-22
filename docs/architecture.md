@@ -95,7 +95,7 @@ MediatR handlers the sample uses in-process elsewhere.
 
 | Host | Tool | Endpoint | Auth |
 | --- | --- | --- | --- |
-| MCP DotNet | `GetPublicWeatherData` | `/mcp` | Bearer `Mcp:ApiKey` / `Mcp__ApiKey` |
+| MCP DotNet | `GetPublicWeatherData` | `/mcp` | Bearer `MCP_API_KEY` |
 | MCP Function | `GetLatLongData` | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` |
 
 Each host also exposes an anonymous **`/about`** probe that returns a leaf
