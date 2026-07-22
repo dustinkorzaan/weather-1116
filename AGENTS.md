@@ -6,6 +6,13 @@ This repo is one Weather sample implemented as five .NET/JS projects (see
 `README.md` and `docs/architecture.md`). Four are runnable apps plus one shared
 `Core` class library.
 
+## Git / PR policy
+
+- Create and update pull requests only.
+- **Never** merge, squash-merge, or rebase-merge pull requests.
+- **Never** run `gh pr merge` or equivalent.
+- The user merges pull requests manually.
+
 ### Toolchain (already provisioned in the VM snapshot)
 
 - .NET SDK 10 lives in `~/.dotnet` (installed via the official `dotnet-install.sh`,
