@@ -63,10 +63,10 @@ jobs:
     needs: build
     environment: prod
     env:
-      API_DOTNET_URL: ${{ secrets.PROD_API_DOTNET_URL }}
-      UI_REACT_URL: ${{ secrets.PROD_UI_REACT_URL }}
-      UI_BLAZOR_URL: ${{ secrets.PROD_UI_BLAZOR_URL }}
-      MVC_DOTNET_URL: ${{ secrets.PROD_MVC_DOTNET_URL }}
+      API_DOTNET_URL: ${{ vars.PROD_API_DOTNET_URL }}
+      UI_REACT_URL: ${{ vars.PROD_UI_REACT_URL }}
+      UI_BLAZOR_URL: ${{ vars.PROD_UI_BLAZOR_URL }}
+      MVC_DOTNET_URL: ${{ vars.PROD_MVC_DOTNET_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT

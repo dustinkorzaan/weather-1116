@@ -63,9 +63,9 @@ jobs:
     needs: build
     environment: prod
     env:
-      UI_REACT_URL: ${{ secrets.PROD_UI_REACT_URL }}
-      MCP_DOTNET_ABOUT_URL: ${{ secrets.PROD_MCP_DOTNET_ABOUT_URL }}
-      MCP_FUNCTION_ABOUT_URL: ${{ secrets.PROD_MCP_FUNCTION_ABOUT_URL }}
+      UI_REACT_URL: ${{ vars.PROD_UI_REACT_URL }}
+      MCP_DOTNET_URL: ${{ vars.PROD_MCP_DOTNET_URL }}
+      MCP_FUNCTION_URL: ${{ vars.PROD_MCP_FUNCTION_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -116,11 +116,11 @@ jobs:
               --resource-group "$APP_RG" \
               --settings \
                 Cors__AllowedOrigins__0="${{ env.UI_REACT_URL }}" \
-                McpAbout__DotNetUrl="${{ env.MCP_DOTNET_ABOUT_URL }}" \
-                McpAbout__FunctionUrl="${{ env.MCP_FUNCTION_ABOUT_URL }}" \
-                AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
+                McpAbout__DotNetUrl="${{ env.MCP_DOTNET_URL }}/about" \
+                McpAbout__FunctionUrl="${{ env.MCP_FUNCTION_URL }}/about" \
+                AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
                 AZURE_FOUNDRY_PROD_EUS2_KEY="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}" \
-                AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME }}" \
+                AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME="${{ vars.AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME }}" \
                 ASPNETCORE_ENVIRONMENT=Production \
                 ASPNETCORE_DETAILEDERRORS=false \
                 BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \

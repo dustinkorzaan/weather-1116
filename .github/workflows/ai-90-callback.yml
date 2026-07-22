@@ -14,8 +14,6 @@ on:
         required: false
       TRELLO_TOKEN:
         required: false
-      TRELLO_IN_PROGRESS_LIST_ID:
-        required: false
 
 jobs:
   trello_callback:
@@ -27,7 +25,7 @@ jobs:
           STORY_ID: ${{ inputs.story_id }}
           TRELLO_KEY: ${{ secrets.TRELLO_KEY }}
           TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
-          TRELLO_IN_PROGRESS_LIST_ID: ${{ secrets.TRELLO_IN_PROGRESS_LIST_ID }}
+          TRELLO_IN_PROGRESS_LIST_ID: ${{ vars.TRELLO_IN_PROGRESS_LIST_ID }}
         shell: bash
         run: |
           if [ -z "${STORY_ID}" ]; then
