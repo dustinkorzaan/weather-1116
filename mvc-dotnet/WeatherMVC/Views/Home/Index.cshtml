@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = "Home";
     var helloResponse = ViewData["HelloResponse"] as string;
-    var mapsApiKey = Configuration["GoogleMapsApiKey"] ?? "";
+    var mapsApiKey = Configuration["GOOGLE_MAPS_API_KEY"] ?? "";
     var mapCities = new[]
     {
         new { id = "nyc", name = "New York", lat = 40.7128, lng = -74.006 },
@@ -62,7 +62,7 @@
     @if (string.IsNullOrWhiteSpace(mapsApiKey))
     {
         <p class="text-danger">
-            Set <code>GoogleMapsApiKey</code> in appsettings (or env <code>GoogleMapsApiKey</code>) to enable Google Maps.
+            Set <code>GOOGLE_MAPS_API_KEY</code> in appsettings (or env <code>GOOGLE_MAPS_API_KEY</code>) to enable Google Maps.
         </p>
     }
     <div id="weather-map" class="weather-map" data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"></div>

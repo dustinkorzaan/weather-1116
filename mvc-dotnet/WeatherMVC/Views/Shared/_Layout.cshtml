@@ -1,7 +1,7 @@
 ﻿@inject IConfiguration Configuration
 @{
-    var uiReactUrl = Configuration["UiReactUrl"] ?? "http://localhost:3000";
-    var uiBlazorUrl = Configuration["UiBlazorUrl"] ?? "http://localhost:8090";
+    var uiReactUrl = Configuration["UI_REACT_URL"] ?? "http://localhost:3000";
+    var uiBlazorUrl = Configuration["UI_BLAZOR_URL"] ?? "http://localhost:8090";
     var apiUrl = (Configuration["ApiDotNetUrl"] ?? "http://localhost:8080").TrimEnd('/');
     var apiAboutUrl = $"{apiUrl}/About";
 }
