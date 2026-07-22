@@ -116,8 +116,8 @@ jobs:
               --resource-group "$APP_RG" \
               --settings \
                 Cors__AllowedOrigins__0="${{ env.UI_REACT_URL }}" \
-                DotNetUrl="${{ env.MCP_DOTNET_URL }}" \
-                FunctionUrl="${{ env.MCP_FUNCTION_URL }}" \
+                MCPDotNetUrl="${{ env.MCP_DOTNET_URL }}" \
+                MCPFunctionUrl="${{ env.MCP_FUNCTION_URL }}" \
                 AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
                 AZURE_FOUNDRY_PROD_EUS2_KEY="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}" \
                 AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME="${{ vars.AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME }}" \
