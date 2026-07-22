@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Core.http;
 using Core.weather.Events;
 using Core.weather.Models;
 using MediatR;
@@ -20,23 +21,15 @@ public class GetPublicWeatherDataHandler : IRequestHandler<GetPublicWeatherDataE
 
     public async Task<NonAIWeatherResponse> Handle(GetPublicWeatherDataEvent request, CancellationToken cancellationToken)
     {
-        var client = new HttpClient();
         var currentWeatherPath = "forecast";
 
         string url = $"https://api.open-meteo.com/v1/{currentWeatherPath}?latitude={request.LatLong.Latitude}&longitude={request.LatLong.Longitude}&current_weather=true";
-        _logger.LogInformation("Non-AI: Fetching weather data from: {Url}", url);
 
-        // 1. Fetch raw JSON string from API
-        string jsonResponse = await client.GetStringAsync(url, cancellationToken);
-
-        // 2. Options to format the console output nicely
         var options = new JsonSerializerOptions { WriteIndented = true };
 
-        // 3. Deserialize into the C# Class Model
-        NonAIWeatherResponse weatherData = JsonSerializer.Deserialize<NonAIWeatherResponse>(jsonResponse, options)
+        NonAIWeatherResponse weatherData = await OpenMeteoJsonClient.GetAsync<NonAIWeatherResponse>(url, _logger, cancellationToken, options)
             ?? throw new InvalidOperationException("Non-AI: Weather API returned empty or invalid JSON.");
 
-        // 4. Return deserialized weather data
         return weatherData;
     }
 }

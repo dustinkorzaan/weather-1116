@@ -1,6 +1,6 @@
-using System.Text.Json;
 using Core.geo.Events;
 using Core.geo.Models;
+using Core.http;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -20,8 +20,6 @@ public class GetLatLongDataHandler : IRequestHandler<GetLatLongDataEvent, NonAIL
 
     public async Task<NonAILatLongResponse> Handle(GetLatLongDataEvent request, CancellationToken cancellationToken)
     {
-        var client = new HttpClient();
-
         // Try multiple location variants to handle inputs like "City, ST".
         var queries = new List<string> { request.Location };
         if (request.Location.Contains(','))
@@ -33,9 +31,7 @@ public class GetLatLongDataHandler : IRequestHandler<GetLatLongDataEvent, NonAIL
         {
             string encodedLocation = Uri.EscapeDataString(query);
             string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedLocation}&count=1&language=en&format=json";
-            _logger.LogInformation("Non-AI: Fetching geocoding data from: {Url}", url);
-            string jsonResponse = await client.GetStringAsync(url, cancellationToken);
-            var geoData = JsonSerializer.Deserialize<NonAIGeocodingResponse>(jsonResponse);
+            var geoData = await OpenMeteoJsonClient.GetAsync<NonAIGeocodingResponse>(url, _logger, cancellationToken);
 
             if (geoData?.Results != null && geoData.Results.Count > 0)
             {
