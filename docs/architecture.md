@@ -103,9 +103,9 @@ Each host also exposes an anonymous **`/about`** probe that returns a leaf
 optional `BUILD_NUMBER` / `BUILD_START` metadata.
 
 API and MVC `/About` aggregate those remote nodes as children under their
-`API Root` subtree (see [About and health](#about-and-health)). Production URLs
-are configured via `McpAbout:DotNetUrl` and `McpAbout:FunctionUrl` (GitHub
-secrets `PROD_MCP_DOTNET_ABOUT_URL`, `PROD_MCP_FUNCTION_ABOUT_URL`).
+`API Root` subtree (see [About and health](#about-and-health)). Production base
+URLs are configured via `DotNetUrl` and `FunctionUrl` (GitHub variables
+`PROD_MCP_DOTNET_URL`, `PROD_MCP_FUNCTION_URL`); `/about` is appended in code.
 
 ## Foundry Console Demos (learning path)
 
