@@ -6,9 +6,9 @@
 <PageTitle>Weather Razor</PageTitle>
 
 @{
-    var uiReactUrl = Configuration["SiteLinks:UiReact"] ?? "http://localhost:3000";
-    var mvcUrl = Configuration["SiteLinks:Mvc"] ?? "http://localhost:8100";
-    var apiUrl = (Configuration["SiteLinks:ApiDotNet"] ?? "http://localhost:8080").TrimEnd('/');
+    var uiReactUrl = Configuration["UiReactUrl"] ?? "http://localhost:3000";
+    var mvcUrl = Configuration["MvcUrl"] ?? "http://localhost:8100";
+    var apiUrl = (Configuration["ApiDotNetUrl"] ?? "http://localhost:8080").TrimEnd('/');
     var apiAboutUrl = $"{apiUrl}/About";
 }
 

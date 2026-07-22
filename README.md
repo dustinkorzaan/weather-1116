@@ -74,7 +74,7 @@ Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
 | UI | Config |
 | --- | --- |
 | React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see `.env.example`) |
-| Blazor | `GoogleMaps:ApiKey` in `appsettings.json`, or env `GoogleMaps__ApiKey` |
-| MVC | `GoogleMaps:ApiKey` in `appsettings.json`, or env `GoogleMaps__ApiKey` |
+| Blazor | `GoogleMapsApiKey` in `appsettings.json`, or env `GoogleMapsApiKey` |
+| MVC | `GoogleMapsApiKey` in `appsettings.json`, or env `GoogleMapsApiKey` |
 
 Without a key, the map container still renders and each UI shows a short setup hint.

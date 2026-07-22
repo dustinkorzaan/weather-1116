@@ -118,13 +118,13 @@ jobs:
               --name weather1116-prod-mvc \
               --resource-group "$APP_RG" \
               --settings \
-                SiteLinks__UiReact="${{ env.UI_REACT_URL }}" \
-                SiteLinks__UiBlazor="${{ env.UI_BLAZOR_URL }}" \
-                SiteLinks__Mvc="${{ env.MVC_DOTNET_URL }}" \
-                SiteLinks__ApiDotNet="${{ env.API_DOTNET_URL }}" \
+                UiReactUrl="${{ env.UI_REACT_URL }}" \
+                UiBlazorUrl="${{ env.UI_BLAZOR_URL }}" \
+                MvcUrl="${{ env.MVC_DOTNET_URL }}" \
+                ApiDotNetUrl="${{ env.API_DOTNET_URL }}" \
                 MCPDotNetUrl="${{ env.MCP_DOTNET_URL }}" \
                 MCPFunctionUrl="${{ env.MCP_FUNCTION_URL }}" \
-                GoogleMaps__ApiKey="${{ secrets.GOOGLE_MAPS_API_KEY }}" \
+                GoogleMapsApiKey="${{ secrets.GOOGLE_MAPS_API_KEY }}" \
                 AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
                 AZURE_FOUNDRY_PROD_EUS2_KEY="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}" \
                 AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME="${{ vars.AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME }}" \

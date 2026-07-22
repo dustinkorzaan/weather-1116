@@ -203,7 +203,7 @@ All three UIs embed a Maps JavaScript API map with sample city coordinates.
 Configuration:
 
 - React: `VITE_GOOGLE_MAPS_API_KEY` (build-time Vite env)
-- Blazor / MVC: `GoogleMaps:ApiKey` (appsettings or `GoogleMaps__ApiKey` env)
+- Blazor / MVC: `GoogleMapsApiKey` (appsettings or `GoogleMapsApiKey` env)
 
 Pins are static sample data today (ready for weather overlays later).
 
