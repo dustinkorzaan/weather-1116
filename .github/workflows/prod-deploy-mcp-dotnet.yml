@@ -63,7 +63,6 @@ jobs:
     needs: build
     environment: prod
     env:
-      # Surfaced on /about via Core.about.AboutTreeBuilder (BUILD_NUMBER / BUILD_START).
       BUILD_NUMBER: ${{ github.run_number }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
@@ -114,7 +113,7 @@ jobs:
               --name weather1116-prod-mcpapp \
               --resource-group "$APP_RG" \
               --settings \
-                Mcp__ApiKey="${{ secrets.PROD_MCP_DOTNET_API_KEY }}" \
+                MCP_API_KEY="${{ secrets.PROD_MCP_DOTNET_API_KEY }}" \
                 ASPNETCORE_ENVIRONMENT=Production \
                 ASPNETCORE_DETAILEDERRORS=false \
                 BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \

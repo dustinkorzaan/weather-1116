@@ -67,7 +67,6 @@ jobs:
     needs: build
     environment: prod
     env:
-      # Surfaced on /about via Core.about.AboutTreeBuilder (BUILD_NUMBER / BUILD_START).
       BUILD_NUMBER: ${{ github.run_number }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:

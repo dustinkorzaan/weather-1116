@@ -63,12 +63,12 @@ jobs:
     needs: build
     environment: prod
     env:
-      UI_REACT_URL: ${{ secrets.PROD_UI_REACT_URL }}
-      UI_BLAZOR_URL: ${{ secrets.PROD_UI_BLAZOR_URL }}
-      MVC_DOTNET_URL: ${{ secrets.PROD_MVC_DOTNET_URL }}
-      API_DOTNET_URL: ${{ secrets.PROD_API_DOTNET_URL }}
-      MCP_DOTNET_ABOUT_URL: ${{ secrets.PROD_MCP_DOTNET_ABOUT_URL }}
-      MCP_FUNCTION_ABOUT_URL: ${{ secrets.PROD_MCP_FUNCTION_ABOUT_URL }}
+      UI_REACT_URL: ${{ vars.PROD_UI_REACT_URL }}
+      UI_BLAZOR_URL: ${{ vars.PROD_UI_BLAZOR_URL }}
+      MVC_DOTNET_URL: ${{ vars.PROD_MVC_DOTNET_URL }}
+      API_DOTNET_URL: ${{ vars.PROD_API_DOTNET_URL }}
+      MCP_DOTNET_URL: ${{ vars.PROD_MCP_DOTNET_URL }}
+      MCP_FUNCTION_URL: ${{ vars.PROD_MCP_FUNCTION_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -118,16 +118,16 @@ jobs:
               --name weather1116-prod-mvc \
               --resource-group "$APP_RG" \
               --settings \
-                SiteLinks__UiReact="${{ env.UI_REACT_URL }}" \
-                SiteLinks__UiBlazor="${{ env.UI_BLAZOR_URL }}" \
-                SiteLinks__Mvc="${{ env.MVC_DOTNET_URL }}" \
-                SiteLinks__ApiDotNet="${{ env.API_DOTNET_URL }}" \
-                McpAbout__DotNetUrl="${{ env.MCP_DOTNET_ABOUT_URL }}" \
-                McpAbout__FunctionUrl="${{ env.MCP_FUNCTION_ABOUT_URL }}" \
-                GoogleMaps__ApiKey="${{ secrets.GOOGLE_MAPS_API_KEY }}" \
-                AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
+                UI_REACT_URL="${{ env.UI_REACT_URL }}" \
+                UI_BLAZOR_URL="${{ env.UI_BLAZOR_URL }}" \
+                MVC_URL="${{ env.MVC_DOTNET_URL }}" \
+                API_DOTNET_URL="${{ env.API_DOTNET_URL }}" \
+                MCP_DOTNET_URL="${{ env.MCP_DOTNET_URL }}" \
+                MCP_FUNCTION_URL="${{ env.MCP_FUNCTION_URL }}" \
+                GOOGLE_MAPS_API_KEY="${{ secrets.GOOGLE_MAPS_API_KEY }}" \
+                AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
                 AZURE_FOUNDRY_PROD_EUS2_KEY="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}" \
-                AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME }}" \
+                AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME="${{ vars.AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME }}" \
                 ASPNETCORE_ENVIRONMENT=Production \
                 ASPNETCORE_DETAILEDERRORS=false \
                 BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \
