@@ -8,7 +8,7 @@
 @{
     var uiReactUrl = Configuration["UiReactUrl"] ?? "http://localhost:3000";
     var mvcUrl = Configuration["MvcUrl"] ?? "http://localhost:8100";
-    var apiUrl = (Configuration["ApiDotNetUrl"] ?? "http://localhost:8080").TrimEnd('/');
+    var apiUrl = (Configuration["API_DOTNET_URL"] ?? "http://localhost:8080").TrimEnd('/');
     var apiAboutUrl = $"{apiUrl}/About";
 }
 
