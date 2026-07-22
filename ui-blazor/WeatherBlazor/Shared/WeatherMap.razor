@@ -7,7 +7,7 @@
     @if (string.IsNullOrWhiteSpace(_apiKey))
     {
         <p class="text-danger">
-            Set <code>GoogleMaps:ApiKey</code> in appsettings (or env <code>GoogleMaps__ApiKey</code>) to enable Google Maps.
+            Set <code>GOOGLE_MAPS_API_KEY</code> in appsettings (or env <code>GOOGLE_MAPS_API_KEY</code>) to enable Google Maps.
         </p>
     }
 
@@ -39,7 +39,7 @@
 
     protected override void OnInitialized()
     {
-        _apiKey = Configuration["GoogleMaps:ApiKey"] ?? "";
+        _apiKey = Configuration["GOOGLE_MAPS_API_KEY"] ?? "";
         _citiesJson = JsonSerializer.Serialize(Cities, JsonOptions);
     }
 }

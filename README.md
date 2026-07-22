@@ -23,7 +23,7 @@ Ultra-simple remote MCP servers that expose Core weather tools via MediatR.
 
 | Project | Path | Tool | Port | Endpoint | Auth |
 | --- | --- | --- | --- | --- | --- |
-| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer token (`Mcp:ApiKey` / env `Mcp__ApiKey`; no default — must be set by developer) |
+| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer token (`MCP_API_KEY`; no default — must be set by developer) |
 | MCP Function | [`mcp-function`](mcp-function) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` | Built-in Functions system key `mcp_extension` (`x-functions-key` header) |
 
 VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
@@ -32,7 +32,7 @@ also forwarded in [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer
 Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see `prod-deploy-mcp-*.yml`).
 
 Examples:
-- MCP DotNet: `Authorization: Bearer {your Mcp__ApiKey value}` (`/about` stays open)
+- MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/about` stays open)
 - MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/about` is anonymous)
 
 ## Foundry console demos
@@ -74,7 +74,7 @@ Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
 | UI | Config |
 | --- | --- |
 | React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see `.env.example`) |
-| Blazor | `GoogleMaps:ApiKey` in `appsettings.json`, or env `GoogleMaps__ApiKey` |
-| MVC | `GoogleMaps:ApiKey` in `appsettings.json`, or env `GoogleMaps__ApiKey` |
+| Blazor | `GOOGLE_MAPS_API_KEY` in `appsettings.json`, or env `GOOGLE_MAPS_API_KEY` |
+| MVC | `GOOGLE_MAPS_API_KEY` in `appsettings.json`, or env `GOOGLE_MAPS_API_KEY` |
 
 Without a key, the map container still renders and each UI shows a short setup hint.

@@ -30,7 +30,7 @@ builder.Services
 var app = builder.Build();
 
 // Shared secret for MCP clients (Foundry project connection, MCP Inspector, etc.).
-var mcpApiKey = builder.Configuration["Mcp:ApiKey"];
+var mcpApiKey = builder.Configuration["MCP_API_KEY"];
 
 // Auth filter: require a valid Bearer token for all /mcp requests.
 app.Use(async (context, next) =>

@@ -6,6 +6,13 @@ This repo is one Weather sample implemented as five .NET/JS projects (see
 `README.md` and `docs/architecture.md`). Four are runnable apps plus one shared
 `Core` class library.
 
+## Git / PR policy
+
+- Create and update pull requests only.
+- **Never** merge, squash-merge, or rebase-merge pull requests.
+- **Never** run `gh pr merge` or equivalent.
+- The user merges pull requests manually.
+
 ### Toolchain (already provisioned in the VM snapshot)
 
 - .NET SDK 10 lives in `~/.dotnet` (installed via the official `dotnet-install.sh`,
@@ -45,7 +52,7 @@ hot reload); React uses `npm start`. Ports come from each project's
 - Google Maps (city pins on all three UIs) needs a browser API key with
   **Maps JavaScript API** enabled. Set:
   - React: `VITE_GOOGLE_MAPS_API_KEY` (see `ui-react/.env.example`)
-  - Blazor / MVC: `GoogleMaps:ApiKey` or env `GoogleMaps__ApiKey`
+  - Blazor / MVC: `GOOGLE_MAPS_API_KEY` or env `GOOGLE_MAPS_API_KEY`
   Without a key the UIs still run; the map section shows a setup hint.
 
 ### Lint / test / build

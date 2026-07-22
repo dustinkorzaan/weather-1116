@@ -95,7 +95,7 @@ MediatR handlers the sample uses in-process elsewhere.
 
 | Host | Tool | Endpoint | Auth |
 | --- | --- | --- | --- |
-| MCP DotNet | `GetPublicWeatherData` | `/mcp` | Bearer `Mcp:ApiKey` / `Mcp__ApiKey` |
+| MCP DotNet | `GetPublicWeatherData` | `/mcp` | Bearer `MCP_API_KEY` |
 | MCP Function | `GetLatLongData` | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` |
 
 Each host also exposes an anonymous **`/about`** probe that returns a leaf
@@ -103,9 +103,9 @@ Each host also exposes an anonymous **`/about`** probe that returns a leaf
 optional `BUILD_NUMBER` / `BUILD_START` metadata.
 
 API and MVC `/About` aggregate those remote nodes as children under their
-`API Root` subtree (see [About and health](#about-and-health)). Production URLs
-are configured via `McpAbout:DotNetUrl` and `McpAbout:FunctionUrl` (GitHub
-secrets `PROD_MCP_DOTNET_ABOUT_URL`, `PROD_MCP_FUNCTION_ABOUT_URL`).
+`API Root` subtree (see [About and health](#about-and-health)). Production base
+URLs are configured via `MCP_DOTNET_URL` and `MCP_FUNCTION_URL` (GitHub variables
+`PROD_MCP_DOTNET_URL`, `PROD_MCP_FUNCTION_URL`); `/about` is appended in code.
 
 ## Foundry Console Demos (learning path)
 
@@ -203,7 +203,7 @@ All three UIs embed a Maps JavaScript API map with sample city coordinates.
 Configuration:
 
 - React: `VITE_GOOGLE_MAPS_API_KEY` (build-time Vite env)
-- Blazor / MVC: `GoogleMaps:ApiKey` (appsettings or `GoogleMaps__ApiKey` env)
+- Blazor / MVC: `GOOGLE_MAPS_API_KEY` (appsettings or `GOOGLE_MAPS_API_KEY` env)
 
 Pins are static sample data today (ready for weather overlays later).
 
