@@ -35,6 +35,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
 	options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 });
+builder.Services.AddProblemDetails();
 builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 {
 	client.Timeout = TimeSpan.FromSeconds(5);
@@ -66,6 +67,9 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.UseHttpsRedirection();
 app.UseCors("ReactClient");

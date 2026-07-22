@@ -46,17 +46,22 @@ public class WeatherForecastClient
         return await _httpClient.GetFromJsonAsync<AIWeatherResponse>(route);
     }
 
-    public async Task<AboutNode> GetAboutAsync()
+    public async Task<AboutNode> GetAboutAsync(CancellationToken cancellationToken = default)
     {
         AboutNode apiRoot;
 
         try
         {
-            apiRoot = await _httpClient.GetFromJsonAsync<AboutNode>("About")
+            apiRoot = await _httpClient.GetFromJsonAsync<AboutNode>("About", cancellationToken)
                 ?? new AboutNode { Name = "API Root", IsHealthy = false };
         }
-        catch
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Could not load About node from the weather API");
             apiRoot = new AboutNode { Name = "API Root", IsHealthy = false };
         }
 

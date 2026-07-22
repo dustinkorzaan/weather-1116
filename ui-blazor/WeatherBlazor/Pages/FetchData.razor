@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using WeatherBlazor.Data
 @inject WeatherForecastClient ForecastClient
+@inject ILogger<FetchData> Logger
 
 <PageTitle>Weather Razor</PageTitle>
 
@@ -114,8 +115,9 @@ else
             var helloResponse = await ForecastClient.GetHelloAsync();
             helloMessage = helloResponse?.RequestResponse ?? "No hello response returned.";
         }
-        catch
+        catch (Exception exception)
         {
+            Logger.LogWarning(exception, "Failed to load hello message from the weather API");
             helloMessage = "Unable to load hello message from API.";
             errorMessage ??= "Unable to load data from the weather API.";
         }
@@ -124,8 +126,9 @@ else
         {
             forecasts = await ForecastClient.GetForecastAsync(DateTime.Now);
         }
-        catch
+        catch (Exception exception)
         {
+            Logger.LogWarning(exception, "Failed to load weather forecast from the weather API");
             forecasts = [];
             errorMessage ??= "Unable to load data from the weather API.";
         }
@@ -147,8 +150,9 @@ else
                 aiWeatherError = "Unable to load AI weather.";
             }
         }
-        catch
+        catch (Exception exception)
         {
+            Logger.LogWarning(exception, "Failed to load AI weather for {Location}", location);
             aiWeather = null;
             aiWeatherError = "Unable to load AI weather.";
         }

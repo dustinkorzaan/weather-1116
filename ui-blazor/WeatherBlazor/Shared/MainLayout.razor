@@ -2,6 +2,7 @@
 @using WeatherBlazor.Data
 @inject WeatherForecastClient WeatherClient
 @inject IConfiguration Configuration
+@inject ILogger<MainLayout> Logger
 
 <PageTitle>Weather Razor</PageTitle>
 
@@ -133,8 +134,9 @@
                 _aboutError = "Unable to load About information.";
             }
         }
-        catch
+        catch (Exception exception)
         {
+            Logger.LogWarning(exception, "Failed to load About information");
             _aboutRoot = null;
             _aboutError = "Unable to load About information.";
         }
