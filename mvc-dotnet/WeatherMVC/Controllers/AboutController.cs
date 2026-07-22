@@ -13,11 +13,11 @@ public class AboutController(
     public async Task<ActionResult<AboutNode>> Get(CancellationToken cancellationToken)
     {
         var mcpDotNetTask = aboutClient.GetAsync(
-            AboutEndpointUrls.ToAboutUrl(configuration["MCP_DOTNET_URL"]),
+            $"{configuration["MCP_DOTNET_URL"]}/About",
             "mcp-dotnet",
             cancellationToken);
         var mcpFunctionTask = aboutClient.GetAsync(
-            AboutEndpointUrls.ToAboutUrl(configuration["MCP_FUNCTION_URL"]),
+            $"{configuration["MCP_FUNCTION_URL"]}/About",
             "mcp-function",
             cancellationToken);
 
