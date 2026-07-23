@@ -72,6 +72,13 @@ builder.Services.AddHostedService<RecurringJobScheduler>();
 
 var app = builder.Build();
 
+// Hangfire dashboard, open to all (POC — no auth). It reads the shared storage,
+// so it also shows jobs enqueued by the api/mvc clients.
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+	Authorization = [new AllowAllDashboardAuthorizationFilter()],
+});
+
 // Always-healthy leaf for now; the API/MVC About trees probe this endpoint.
 app.MapGet("/about", () => Results.Ok(AboutTreeBuilder.BuildWorkerDotNetNode(true)));
 
