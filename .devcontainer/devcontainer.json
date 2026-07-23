@@ -71,7 +71,9 @@
         // mcp-dotnet (ASP.NET Core MCP)
         8110,
         // mcp-function (Azure Functions MCP)
-        8120
+        8120,
+        // worker-dotnet
+        8130
     ],
     "postCreateCommand": "bash -lc 'dotnet dev-certs https && dotnet new install Aspire.ProjectTemplates && dotnet restore && cd ui-react && npm ci'",
     // "hostRequirements": {
@@ -108,6 +110,10 @@
         },
         "8120": {
             "label": "Weather MCP Function",
+            "onAutoForward": "ignore"
+        },
+        "8130": {
+            "label": "Weather Worker DotNet",
             "onAutoForward": "ignore"
         }
     }
