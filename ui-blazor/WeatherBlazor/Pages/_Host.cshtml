@@ -10,12 +10,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#185ca9" />
     <base href="~/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link href="css/site.css" rel="stylesheet" />
-    <link href="WeatherBlazor.styles.css" rel="stylesheet" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="~/css/bootstrap/bootstrap.min.css" asp-append-version="true" />
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/WeatherBlazor.styles.css" rel="stylesheet" asp-append-version="true" />
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" asp-append-version="true" />
+    <link rel="apple-touch-icon" href="~/apple-touch-icon.png" asp-append-version="true" />
+    <link rel="manifest" href="~/manifest.webmanifest" asp-append-version="true" />
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
@@ -32,7 +32,7 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <script src="js/weatherMap.js"></script>
+    <script src="~/js/weatherMap.js" asp-append-version="true"></script>
     <script src="_framework/blazor.server.js"></script>
 </body>
 </html>
