@@ -63,7 +63,6 @@ jobs:
     needs: build
     environment: prod
     env:
-      WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -114,7 +113,6 @@ jobs:
               --name weather1116-prod-worker \
               --resource-group "$APP_RG" \
               --settings \
-                WORKER_DOTNET_URL="${{ env.WORKER_DOTNET_URL }}" \
                 DB_CONNECTION_STRING="${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}" \
                 DOTNET_ENVIRONMENT=Production \
                 BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \
