@@ -76,7 +76,10 @@
             <div class="modal-body">
                 @if (_isAboutLoading)
                 {
-                    <p class="about-status">Loading About information...</p>
+                    <p class="about-status loading">
+                        <span class="about-spinner" aria-hidden="true"></span>
+                        <span>Loading About information...</span>
+                    </p>
                 }
                 else if (!string.IsNullOrWhiteSpace(_aboutError))
                 {

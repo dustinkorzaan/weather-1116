@@ -308,16 +308,16 @@
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 30;
-  padding: 1rem;
+  padding: 4rem 1rem 1rem;
 }
 
 .modal-dialog {
   width: 100%;
-  max-width: 26rem;
+  max-width: 34rem;
   background-color: #fff;
   border-radius: 0.5rem;
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.25);
@@ -354,6 +354,27 @@
 .about-status {
   margin: 0;
   color: #333;
+}
+
+.about-status.loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.about-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 0.16rem solid #cfe2ff;
+  border-top-color: #185ca9;
+  border-radius: 50%;
+  animation: about-spinner 0.8s linear infinite;
+}
+
+@keyframes about-spinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .about-status.error {

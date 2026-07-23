@@ -197,7 +197,12 @@ function App() {
               </button>
             </div>
             <div className="modal-body">
-              {aboutQuery.isFetching && <p className="about-status">Loading About information...</p>}
+              {aboutQuery.isFetching && (
+                <p className="about-status loading">
+                  <span className="about-spinner" aria-hidden="true"></span>
+                  <span>Loading About information...</span>
+                </p>
+              )}
               {!aboutQuery.isFetching && aboutQuery.isError && (
                 <p className="about-status error">Unable to load About information.</p>
               )}
