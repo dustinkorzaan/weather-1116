@@ -7,12 +7,16 @@ namespace Core.config;
 /// </summary>
 public class WeatherQueueOptions
 {
-	public const string ConnectionStringKey = "DB_CONNECTION_STRING";
+	public const string ServiceBusConnectionStringKey = "SERVICE_BUS_CONNECTION_STRING";
+	public const string DbConnectionStringKey = "DB_CONNECTION_STRING";
 	public const string RequestQueueNameKey = "WEATHER_REQUEST_QUEUE_NAME";
 	public const string ResponseQueueNameKey = "WEATHER_RESPONSE_QUEUE_NAME";
 
-	/// <summary>Full connection string, or blank to run in idle mode for now.</summary>
-	public string? ConnectionString { get; set; }
+	/// <summary>Azure Service Bus connection string, or blank to run idle for now.</summary>
+	public string? ServiceBusConnectionString { get; set; }
+
+	/// <summary>Database connection string (used once persistence is wired up).</summary>
+	public string? DbConnectionString { get; set; }
 
 	/// <summary>Queue the worker reads incoming requests from.</summary>
 	public string RequestQueueName { get; set; } = "request";

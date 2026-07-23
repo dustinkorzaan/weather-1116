@@ -32,14 +32,14 @@ public class QueueWorker : BackgroundService
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		if (string.IsNullOrWhiteSpace(_options.ConnectionString))
+		if (string.IsNullOrWhiteSpace(_options.ServiceBusConnectionString))
 		{
 			_logger.LogWarning(
-				"No queue connection string configured; worker is idle until one is provided.");
+				"No Service Bus connection string configured; worker is idle until one is provided.");
 			return;
 		}
 
-		_client = new ServiceBusClient(_options.ConnectionString);
+		_client = new ServiceBusClient(_options.ServiceBusConnectionString);
 		_processor = _client.CreateProcessor(_options.RequestQueueName, new ServiceBusProcessorOptions());
 
 		_processor.ProcessMessageAsync += ProcessMessageAsync;

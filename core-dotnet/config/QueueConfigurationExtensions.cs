@@ -19,7 +19,10 @@ public static class QueueConfigurationExtensions
 	{
 		services.Configure<WeatherQueueOptions>(options =>
 		{
-			options.ConnectionString = configuration[WeatherQueueOptions.ConnectionStringKey];
+			options.ServiceBusConnectionString =
+				configuration[WeatherQueueOptions.ServiceBusConnectionStringKey];
+			options.DbConnectionString =
+				configuration[WeatherQueueOptions.DbConnectionStringKey];
 			options.RequestQueueName =
 				configuration[WeatherQueueOptions.RequestQueueNameKey] ?? options.RequestQueueName;
 			options.ResponseQueueName =
