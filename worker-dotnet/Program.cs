@@ -3,7 +3,7 @@ using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using MediatR;
-using WeatherWorkerHangfire;
+using WeatherWorkerDotNet;
 
 Env.TraversePath().Load();
 

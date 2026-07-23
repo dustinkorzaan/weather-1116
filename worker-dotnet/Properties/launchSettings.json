@@ -1,7 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "WeatherWorkerHangfire": {
+    "WeatherWorkerDotNet": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "environmentVariables": {

@@ -1,7 +1,7 @@
 using Core.demo.forecast;
 using MediatR;
 
-namespace WeatherWorkerHangfire;
+namespace WeatherWorkerDotNet;
 
 /// <summary>
 /// Hangfire job that exercises Core (via MediatR) to generate a sample forecast.

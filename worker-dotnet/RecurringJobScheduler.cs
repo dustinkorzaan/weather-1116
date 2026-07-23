@@ -1,6 +1,6 @@
 using Hangfire;
 
-namespace WeatherWorkerHangfire;
+namespace WeatherWorkerDotNet;
 
 /// <summary>
 /// Registers the worker's recurring jobs once the host starts. Job cadence is

@@ -4,8 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>WeatherWorkerHangfire</RootNamespace>
-    <UserSecretsId>weather-worker-hangfire</UserSecretsId>
+    <RootNamespace>WeatherWorkerDotNet</RootNamespace>
+    <UserSecretsId>weather-worker-dotnet</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
