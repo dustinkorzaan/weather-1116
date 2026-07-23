@@ -13,12 +13,48 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
 
-// In-memory storage keeps the worker self-contained for now. A durable
-// backing store (SQL Server / PostgreSQL) will be wired up later.
-builder.Services.AddHangfire(config =>
-	config.UseMemoryStorage());
+// Durable SQL Server storage wherever a connection string is provided
+// (DB_CONNECTION_STRING). Falls back to in-memory storage locally so the
+// worker still runs without a database.
+var dbConnectionString = builder.Configuration["DB_CONNECTION_STRING"];
 
-builder.Services.AddHangfireServer();
+builder.Services.AddHangfire(config =>
+{
+	if (string.IsNullOrWhiteSpace(dbConnectionString))
+	{
+		config.UseMemoryStorage();
+	}
+	else
+	{
+		config.UseSqlServerStorage(dbConnectionString);
+	}
+});
+
+// The worker is the only app that runs Hangfire servers. It runs one server
+// per queue so each queue's concurrency can be tuned independently.
+builder.Services.AddHangfireServer(options =>
+{
+	options.ServerName = "default";
+	options.Queues = ["default"];
+});
+builder.Services.AddHangfireServer(options =>
+{
+	options.ServerName = "default-single";
+	options.Queues = ["default-single"];
+	options.WorkerCount = 1;
+});
+builder.Services.AddHangfireServer(options =>
+{
+	options.ServerName = "batch-single";
+	options.Queues = ["batch-single"];
+	options.WorkerCount = 1;
+});
+builder.Services.AddHangfireServer(options =>
+{
+	options.ServerName = "batch-multi";
+	options.Queues = ["batch-multi"];
+	options.WorkerCount = 10;
+});
 
 builder.Services.AddHostedService<RecurringJobScheduler>();
 
