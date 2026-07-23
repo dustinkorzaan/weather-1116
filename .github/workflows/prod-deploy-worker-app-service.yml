@@ -109,7 +109,7 @@ jobs:
             APP_NAME="${BASH_REMATCH[1]}"
           fi
 
-          if ! [[ "$APP_NAME" =~ ^[a-z0-9]([a-z0-9-]{0,58}[a-z0-9])$ ]]; then
+          if ! [[ "$APP_NAME" =~ ^[a-z0-9]([a-z0-9-]{0,58}[a-z0-9])?$ ]]; then
             echo "Invalid App Service name resolved: ${APP_NAME}" >&2
             exit 1
           fi
