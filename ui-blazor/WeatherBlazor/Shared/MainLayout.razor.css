@@ -141,7 +141,7 @@ main {
 
 .modal-dialog {
     width: 100%;
-    max-width: 26rem;
+    max-width: 32rem;
     background-color: #fff;
     border-radius: 0.5rem;
     box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.25);
@@ -189,38 +189,47 @@ main {
     padding-left: 1.5rem;
 }
 
-.about-tree-item {
+/* The tree nodes are rendered by the child component AboutTreeNode.razor, so
+   their markup lives outside this component's CSS-isolation scope. Reach them
+   with ::deep from the root <ul class="about-tree-list root"> declared here in
+   MainLayout.razor. */
+.about-tree-list.root ::deep .about-tree-list {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.about-tree-list.root ::deep .about-tree-item {
     margin: 0.35rem 0;
 }
 
-.about-tree-row {
+.about-tree-list.root ::deep .about-tree-row {
     display: flex;
     gap: 0.5rem;
     align-items: baseline;
 }
 
-.about-tree-name {
+.about-tree-list.root ::deep .about-tree-name {
     font-weight: 600;
 }
 
-.about-tree-meta {
+.about-tree-list.root ::deep .about-tree-meta {
     margin-top: 0.2rem;
     font-size: 0.78rem;
     color: #667085;
 }
 
-.about-tree-health {
+.about-tree-list.root ::deep .about-tree-health {
     font-size: 0.82rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
-.about-tree-health.healthy {
+.about-tree-list.root ::deep .about-tree-health.healthy {
     color: #137333;
 }
 
-.about-tree-health.unhealthy {
+.about-tree-list.root ::deep .about-tree-health.unhealthy {
     color: #b42318;
 }
 
