@@ -1,3 +1,4 @@
+using Core.about;
 using Core.weather.Handlers;
 using DotNetEnv;
 using Hangfire;
@@ -7,7 +8,7 @@ using WeatherWorkerDotNet;
 
 Env.TraversePath().Load();
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
@@ -21,6 +22,9 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddHostedService<RecurringJobScheduler>();
 
-var host = builder.Build();
+var app = builder.Build();
 
-host.Run();
+// Always-healthy leaf for now; the API/MVC About trees probe this endpoint.
+app.MapGet("/about", () => Results.Ok(AboutTreeBuilder.BuildWorkerDotNetNode(true)));
+
+app.Run();

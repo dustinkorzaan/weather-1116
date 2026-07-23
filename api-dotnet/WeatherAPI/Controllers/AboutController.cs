@@ -20,12 +20,17 @@ public class AboutController(
             $"{configuration["MCP_FUNCTION_URL"]}/About",
             "mcp-function",
             cancellationToken);
+        var workerDotNetTask = aboutClient.GetAsync(
+            $"{configuration["WORKER_DOTNET_URL"]}/About",
+            "worker-dotnet",
+            cancellationToken);
 
-        await Task.WhenAll(mcpDotNetTask, mcpFunctionTask);
+        await Task.WhenAll(mcpDotNetTask, mcpFunctionTask, workerDotNetTask);
 
         var root = AboutTreeBuilder.BuildApiRoot(
             await mcpDotNetTask,
-            await mcpFunctionTask);
+            await mcpFunctionTask,
+            await workerDotNetTask);
         return Ok(root);
     }
 }
