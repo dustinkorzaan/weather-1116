@@ -3,6 +3,7 @@ using Core.demo.handlers;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Hangfire.SqlServer;
 using MediatR;
 
 Env.TraversePath().Load();
@@ -21,7 +22,12 @@ builder.Services.AddHangfire(config =>
 	}
 	else
 	{
-		config.UseSqlServerStorage(dbConnectionString);
+		// Explicit non-zero poll interval keeps Hangfire on interval polling
+		// (every 15s) rather than the aggressive/continuous mode.
+		config.UseSqlServerStorage(dbConnectionString, new SqlServerStorageOptions
+		{
+			QueuePollInterval = TimeSpan.FromSeconds(15),
+		});
 	}
 });
 

@@ -3,6 +3,7 @@ using Core.weather.Handlers;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Hangfire.SqlServer;
 using MediatR;
 using WeatherWorkerDotNet;
 
@@ -18,6 +19,10 @@ builder.Services.AddMediatR(cfg =>
 // worker still runs without a database.
 var dbConnectionString = builder.Configuration["DB_CONNECTION_STRING"];
 
+// Explicit, non-zero poll interval: a value > TimeSpan.Zero keeps Hangfire on
+// interval polling (every 15s) rather than the aggressive/continuous mode.
+var queuePollInterval = TimeSpan.FromSeconds(15);
+
 builder.Services.AddHangfire(config =>
 {
 	if (string.IsNullOrWhiteSpace(dbConnectionString))
@@ -26,7 +31,10 @@ builder.Services.AddHangfire(config =>
 	}
 	else
 	{
-		config.UseSqlServerStorage(dbConnectionString);
+		config.UseSqlServerStorage(dbConnectionString, new SqlServerStorageOptions
+		{
+			QueuePollInterval = queuePollInterval,
+		});
 	}
 });
 
@@ -36,24 +44,28 @@ builder.Services.AddHangfireServer(options =>
 {
 	options.ServerName = "default";
 	options.Queues = ["default"];
+	options.SchedulePollingInterval = queuePollInterval;
 });
 builder.Services.AddHangfireServer(options =>
 {
 	options.ServerName = "default-single";
 	options.Queues = ["default-single"];
 	options.WorkerCount = 1;
+	options.SchedulePollingInterval = queuePollInterval;
 });
 builder.Services.AddHangfireServer(options =>
 {
 	options.ServerName = "batch-single";
 	options.Queues = ["batch-single"];
 	options.WorkerCount = 1;
+	options.SchedulePollingInterval = queuePollInterval;
 });
 builder.Services.AddHangfireServer(options =>
 {
 	options.ServerName = "batch-multi";
 	options.Queues = ["batch-multi"];
 	options.WorkerCount = 10;
+	options.SchedulePollingInterval = queuePollInterval;
 });
 
 builder.Services.AddHostedService<RecurringJobScheduler>();
