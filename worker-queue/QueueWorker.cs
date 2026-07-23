@@ -1,4 +1,5 @@
 using Azure.Messaging.ServiceBus;
+using Core.config;
 using Core.demo.forecast;
 using MediatR;
 using Microsoft.Extensions.Options;
@@ -12,7 +13,7 @@ namespace WeatherWorkerQueue;
 /// </summary>
 public class QueueWorker : BackgroundService
 {
-	private readonly QueueOptions _options;
+	private readonly WeatherQueueOptions _options;
 	private readonly IServiceProvider _services;
 	private readonly ILogger<QueueWorker> _logger;
 
@@ -20,7 +21,7 @@ public class QueueWorker : BackgroundService
 	private ServiceBusProcessor? _processor;
 
 	public QueueWorker(
-		IOptions<QueueOptions> options,
+		IOptions<WeatherQueueOptions> options,
 		IServiceProvider services,
 		ILogger<QueueWorker> logger)
 	{
