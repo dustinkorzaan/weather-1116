@@ -44,6 +44,7 @@ builder.Services.AddHangfireServer(options =>
 {
 	options.ServerName = "default";
 	options.Queues = ["default"];
+	options.WorkerCount = 1;
 	options.SchedulePollingInterval = queuePollInterval;
 });
 builder.Services.AddHangfireServer(options =>
