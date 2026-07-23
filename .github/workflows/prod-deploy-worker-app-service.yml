@@ -64,6 +64,7 @@ jobs:
     environment: prod
     env:
       WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
+      WORKER_APP_NAME: ${{ vars.PROD_WORKER_APP_NAME }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -103,15 +104,12 @@ jobs:
       - name: Resolve App Service name
         shell: bash
         run: |
-          APP_NAME=weather1116-prod-worker
-          if [ -n "${WORKER_DOTNET_URL}" ]; then
-            PARSED_APP_NAME=$(echo "${WORKER_DOTNET_URL}" | sed -E 's#^https?://([^/]+)/?.*$#\1#' | cut -d. -f1)
-            if [ -n "$PARSED_APP_NAME" ]; then
-              APP_NAME="$PARSED_APP_NAME"
-            fi
+          APP_NAME="${WORKER_APP_NAME:-weather1116-prod-worker}"
+          if [[ -n "${WORKER_DOTNET_URL}" && "${WORKER_DOTNET_URL}" =~ ^https?://([a-z0-9-]+)\.azurewebsites\.net(/.*)?$ ]]; then
+            APP_NAME="${BASH_REMATCH[1]}"
           fi
 
-          if ! [[ "$APP_NAME" =~ ^[a-z0-9-]{2,60}$ ]]; then
+          if ! [[ "$APP_NAME" =~ ^[a-z0-9]([a-z0-9-]{0,58}[a-z0-9])$ ]]; then
             echo "Invalid App Service name resolved: ${APP_NAME}" >&2
             exit 1
           fi
