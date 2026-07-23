@@ -39,12 +39,12 @@ public class QueueWorker : BackgroundService
 		}
 
 		_client = new ServiceBusClient(_options.ConnectionString);
-		_processor = _client.CreateProcessor(_options.QueueName, new ServiceBusProcessorOptions());
+		_processor = _client.CreateProcessor(_options.RequestQueueName, new ServiceBusProcessorOptions());
 
 		_processor.ProcessMessageAsync += ProcessMessageAsync;
 		_processor.ProcessErrorAsync += ProcessErrorAsync;
 
-		_logger.LogInformation("Listening on queue {Queue}.", _options.QueueName);
+		_logger.LogInformation("Listening on queue {Queue}.", _options.RequestQueueName);
 		await _processor.StartProcessingAsync(stoppingToken);
 	}
 
