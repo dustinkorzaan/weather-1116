@@ -118,6 +118,7 @@ jobs:
               --resource-group "$APP_RG" \
               --settings \
                 Cors__AllowedOrigins__0="${{ env.UI_REACT_URL }}" \
+                DB_CONNECTION_STRING="${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}" \
                 WORKER_DOTNET_URL="${{ env.WORKER_DOTNET_URL }}" \
                 MCP_DOTNET_URL="${{ env.MCP_DOTNET_URL }}" \
                 MCP_FUNCTION_URL="${{ env.MCP_FUNCTION_URL }}" \

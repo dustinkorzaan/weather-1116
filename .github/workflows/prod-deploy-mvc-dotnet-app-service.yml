@@ -120,6 +120,7 @@ jobs:
               --name weather1116-prod-mvc \
               --resource-group "$APP_RG" \
               --settings \
+                DB_CONNECTION_STRING="${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}" \
                 UI_REACT_URL="${{ env.UI_REACT_URL }}" \
                 UI_BLAZOR_URL="${{ env.UI_BLAZOR_URL }}" \
                 MVC_URL="${{ env.MVC_DOTNET_URL }}" \
