@@ -35,6 +35,24 @@ Examples:
 - MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/about` stays open)
 - MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/about` is anonymous)
 
+## Background worker (Hangfire)
+
+[`worker-dotnet`](worker-dotnet) is the only host that runs Hangfire job servers.
+API and MVC register Hangfire client storage (shared `DB_CONNECTION_STRING`) so
+they can enqueue jobs later; the worker processes them.
+
+| Project | Path | Role | Port | Endpoint |
+| --- | --- | --- | --- | --- |
+| Worker DotNet | [`worker-dotnet`](worker-dotnet) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/about` |
+
+Without `DB_CONNECTION_STRING`, each app falls back to in-memory Hangfire
+storage (jobs do not cross processes locally). In production, set
+`DB_CONNECTION_STRING` to the same Azure SQL connection string on the worker,
+API, and MVC.
+
+Prod app: `weather1116-prod-worker` (see `prod-deploy-worker-app-service.yml`).
+API and MVC probe the worker via `WORKER_DOTNET_URL` in their About trees.
+
 ## Foundry console demos
 
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns

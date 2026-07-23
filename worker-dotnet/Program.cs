@@ -20,8 +20,8 @@ builder.Services.AddMediatR(cfg =>
 var dbConnectionString = builder.Configuration["DB_CONNECTION_STRING"];
 
 // Explicit, non-zero poll interval: a value > TimeSpan.Zero keeps Hangfire on
-// interval polling (every 15s) rather than the aggressive/continuous mode.
-var queuePollInterval = TimeSpan.FromSeconds(15);
+// interval polling (every 60s) rather than the aggressive/continuous mode.
+var queuePollInterval = TimeSpan.FromSeconds(60);
 
 builder.Services.AddHangfire(config =>
 {

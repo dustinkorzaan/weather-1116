@@ -2,8 +2,8 @@
 
 ## Purpose
 
-This repository contains one Weather sample implemented as five primary
-projects: four runnable applications plus one shared .NET class library. The
+This repository contains one Weather sample implemented as six primary
+projects: five runnable applications plus one shared .NET class library. The
 goal is feature parity across all UI implementations while keeping each project
 idiomatic for its framework.
 
@@ -33,6 +33,7 @@ for hello/forecast/map flows in the three UIs.
 | --- | --- | --- |
 | MCP DotNet | [`mcp-dotnet`](../mcp-dotnet) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
 | MCP Function | [`mcp-function`](../mcp-function) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
+| Worker DotNet | [`worker-dotnet`](../worker-dotnet) | Hangfire job servers, dashboard (`/hangfire`), and `/about` health leaf |
 | Foundry Console V1–V4 | [`FoundryConsoleV1…`](../FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint) … [`V4`](../FoundryConsoleV4MCP) | Local learning demos for Foundry / agent patterns (not in `Weather.sln`) |
 
 Ports, auth, and env vars for MCP and console apps live in [`README.md`](../README.md)
@@ -104,8 +105,22 @@ optional `BUILD_NUMBER` / `BUILD_START` metadata.
 
 API and MVC `/About` aggregate those remote nodes as children under their
 `API Root` subtree (see [About and health](#about-and-health)). Production base
-URLs are configured via `MCP_DOTNET_URL` and `MCP_FUNCTION_URL` (GitHub variables
-`PROD_MCP_DOTNET_URL`, `PROD_MCP_FUNCTION_URL`); `/about` is appended in code.
+URLs are configured via `MCP_DOTNET_URL`, `MCP_FUNCTION_URL`, and
+`WORKER_DOTNET_URL` (GitHub variables `PROD_MCP_DOTNET_URL`,
+`PROD_MCP_FUNCTION_URL`, `PROD_WORKER_DOTNET_URL`); `/about` is appended in code.
+
+## Background Worker (Hangfire)
+
+[`worker-dotnet`](../worker-dotnet) is the only app that runs Hangfire servers.
+It registers recurring and queue-based workers against shared storage
+(`DB_CONNECTION_STRING`, SQL Server in production). API and MVC register the
+same storage as Hangfire **clients** so they can enqueue jobs without running
+servers.
+
+- **Dashboard:** `/hangfire` on the worker (POC — open to all; auth TBD).
+- **Health:** `/about` returns a `worker-dotnet` leaf node probed by API/MVC.
+- **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
+  storage; jobs do not cross apps until a shared database is configured.
 
 ## Foundry Console Demos (learning path)
 
@@ -134,8 +149,9 @@ Every runnable app can participate in a shared **About tree** contract
 | App | `/about` or `/About` behavior |
 | --- | --- |
 | MCP DotNet / MCP Function | Leaf node for self; health checks expected MCP tool registration |
-| WeatherAPI | `API Root` → `API` + remote MCP about nodes |
-| WeatherMVC | `MVC Root` → `MVC` + nested `API Root` (same MCP children as API) |
+| Worker DotNet | Leaf node for self (`worker-dotnet`); always healthy for now |
+| WeatherAPI | `API Root` → `API` + remote worker and MCP about nodes |
+| WeatherMVC | `MVC Root` → `MVC` + nested `API Root` (same worker/MCP children as API) |
 | React | Fetches API `/About` and wraps with `UI React Root` |
 | Blazor | Fetches API `/About` and wraps with `Blazor Root` |
 
@@ -146,7 +162,7 @@ without failing the entire response.
 ## Core Project
 
 `Core` (`core-dotnet/Core.csproj`) is a .NET class library referenced by
-`WeatherMVC`, `WeatherAPI`, and both MCP hosts. It hosts shared MediatR events
+`WeatherMVC`, `WeatherAPI`, `worker-dotnet`, and both MCP hosts. It hosts shared MediatR events
 and handlers, including:
 
 - `core-dotnet/demo/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
@@ -223,14 +239,14 @@ The workflow [`build-and-test.yml`](../.github/workflows/build-and-test.yml)
 builds on every push:
 
 - `Core.csproj`, `WeatherAPI.csproj`, `WeatherBlazor.csproj`, `WeatherMVC.csproj`,
-  `WeatherMcpDotNet.csproj`, and `WeatherMcpFunction.csproj` via `dotnet build`.
+  `WeatherWorkerDotNet.csproj`, `WeatherMcpDotNet.csproj`, and `WeatherMcpFunction.csproj` via `dotnet build`.
 - React app in `ui-react` via `npm ci && npm run build`, followed by
   `npm test -- --run` (Vitest).
 - `WeatherAPI.Tests` integration tests.
 
 Production deploy workflows (`prod-deploy-*.yml`) run only after **Build and Test**
 completes successfully on `main` (or via manual `workflow_dispatch` on `main`).
-Deployables include API, MVC, React, Blazor, and both MCP hosts.
+Deployables include API, MVC, React, Blazor, worker-dotnet, and both MCP hosts.
 
 ## Repository Layout
 
@@ -242,6 +258,7 @@ ui-react/                    React UI project
 core-dotnet/                 Core shared class library (Core.csproj)
 mcp-dotnet/                  MCP DotNet tool host (GetPublicWeatherData)
 mcp-function/                MCP Function tool host (GetLatLongData)
+worker-dotnet/               Hangfire background worker (job servers + dashboard)
 FoundryConsoleV1…V4/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```

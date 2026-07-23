@@ -23,10 +23,10 @@ builder.Services.AddHangfire(config =>
     else
     {
         // Explicit non-zero poll interval keeps Hangfire on interval polling
-        // (every 15s) rather than the aggressive/continuous mode.
+        // (every 60s) rather than the aggressive/continuous mode.
         config.UseSqlServerStorage(dbConnectionString, new SqlServerStorageOptions
         {
-            QueuePollInterval = TimeSpan.FromSeconds(15),
+            QueuePollInterval = TimeSpan.FromSeconds(60),
         });
     }
 });
