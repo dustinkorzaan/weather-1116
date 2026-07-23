@@ -30,6 +30,8 @@ jobs:
           - mvc-dotnet/WeatherMVC/WeatherMVC.csproj
           - mcp-function/WeatherMcpFunction.csproj
           - mcp-dotnet/WeatherMcpDotNet.csproj
+          - worker-hangfire/WeatherWorkerHangfire.csproj
+          - worker-queue/WeatherWorkerQueue.csproj
 
     steps:
       - name: Checkout repository
