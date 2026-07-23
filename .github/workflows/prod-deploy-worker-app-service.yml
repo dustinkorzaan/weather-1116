@@ -1,0 +1,129 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: CICD weather1116-prod-worker
+run-name: CICD weather1116-prod-worker
+
+on:
+  workflow_run:
+    workflows:
+      - Build and Test
+    branches:
+      - main
+    types:
+      - completed
+  # Keep manual trigger for emergency redeploys and controlled production rollouts.
+  workflow_dispatch:
+
+# Newer deploys cancel older in-progress runs of this workflow.
+concurrency:
+  group: prod-deploy-worker
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  BUILD_NUMBER: ${{ github.run_number }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    if: ${{ (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+    permissions:
+      contents: read #This is required for actions/checkout
+    outputs:
+      build_start: ${{ steps.build_start.outputs.build_start }}
+
+    steps:
+      - name: Record build start time
+        id: build_start
+        shell: bash
+        run: echo "build_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.x'
+
+      - name: Build with dotnet
+        run: dotnet build ./worker-dotnet/WeatherWorkerDotNet.csproj --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish ./worker-dotnet/WeatherWorkerDotNet.csproj -c Release -o "${{ github.workspace }}/publish/worker-dotnet"
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v7
+        with:
+          name: .net-app
+          path: ${{ github.workspace }}/publish/worker-dotnet
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment: prod
+    env:
+      WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
+      BUILD_START: ${{ needs.build.outputs.build_start }}
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v7
+        with:
+          name: .net-app
+          path: ${{ github.workspace }}/publish/worker-dotnet
+
+      - name: Debug Azure OIDC secret lengths
+        shell: bash
+        env:
+          AZURE_GITHUB_CLIENTID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          AZURE_TENANTID: ${{ secrets.AZURE_TENANTID }}
+          AZURE_SUBSCRIPTIONID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+        run: |
+          echo "AZURE_GITHUB_CLIENTID length=${#AZURE_GITHUB_CLIENTID}"
+          echo "AZURE_TENANTID length=${#AZURE_TENANTID}"
+          echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Set App Service settings
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-worker'].resourceGroup | [0]" -o tsv)
+            if [ -z "$APP_RG" ]; then
+              echo "Could not resolve resource group for weather1116-prod-worker" >&2
+              exit 1
+            fi
+
+            az webapp config appsettings set \
+              --name weather1116-prod-worker \
+              --resource-group "$APP_RG" \
+              --settings \
+                WORKER_DOTNET_URL="${{ env.WORKER_DOTNET_URL }}" \
+                DB_CONNECTION_STRING="${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}" \
+                DOTNET_ENVIRONMENT=Production \
+                BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \
+                BUILD_START="${{ env.BUILD_START }}"
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'weather1116-prod-worker'
+          slot-name: 'Production'
+          package: ${{ github.workspace }}/publish/worker-dotnet
