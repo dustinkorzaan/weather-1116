@@ -175,3 +175,163 @@ a, .btn-link {
 .ai-weather-stat dd {
     margin: 0;
 }
+
+/* Blazor About modal: global styles so production does not depend on scoped CSS ordering/caching. */
+.about-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+    padding: 4rem 1rem 1rem;
+}
+
+.about-modal-dialog {
+    width: min(100%, 52rem);
+    max-height: calc(100vh - 5rem);
+    overflow: hidden;
+    background-color: #fff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.25);
+}
+
+.about-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.15rem 1.35rem;
+    border-bottom: 1px solid #e5e5e5;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.about-modal-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.about-modal-close {
+    border: none;
+    background: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #333;
+}
+
+.about-modal-body {
+    min-height: 4rem;
+    max-height: calc(100vh - 12rem);
+    overflow-y: auto;
+    padding: 1.25rem 1.35rem;
+}
+
+.about-status {
+    margin: 0;
+    color: #333;
+}
+
+.about-status.loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.about-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 0.16rem solid #cfe2ff;
+    border-top-color: #185ca9;
+    border-radius: 50%;
+    animation: about-spinner 0.8s linear infinite;
+}
+
+@keyframes about-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.about-status.error {
+    color: #b42318;
+}
+
+.about-tree-list {
+    margin: 0.4rem 0 0;
+    padding-left: 1.35rem;
+}
+
+.about-tree-list.root {
+    margin: 0;
+    padding: 0.25rem 0 0 1.25rem;
+}
+
+.about-tree-item {
+    margin: 0.65rem 0;
+}
+
+.about-tree-list.root > .about-tree-item {
+    margin-top: 0;
+}
+
+.about-tree-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.about-tree-name {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.about-tree-meta {
+    margin-top: 0.25rem;
+    font-size: 0.82rem;
+    color: #667085;
+}
+
+.about-tree-health {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.about-tree-health.healthy {
+    background-color: #dcfce7;
+    color: #137333;
+}
+
+.about-tree-health.unhealthy {
+    background-color: #fee2e2;
+    color: #b42318;
+}
+
+.site-links-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e5e5e5;
+    font-size: 0.9rem;
+}
+
+.site-links-footer a {
+    color: #185ca9;
+    text-decoration: none;
+}
+
+.site-links-footer a:hover {
+    text-decoration: underline;
+}
