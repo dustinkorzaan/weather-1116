@@ -114,7 +114,8 @@ jobs:
               --resource-group "$APP_RG" \
               --settings \
                 DB_CONNECTION_STRING="${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}" \
-                DOTNET_ENVIRONMENT=Production \
+                ASPNETCORE_ENVIRONMENT=Production \
+                ASPNETCORE_DETAILEDERRORS=false \
                 BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \
                 BUILD_START="${{ env.BUILD_START }}"
 
