@@ -31,12 +31,12 @@ for hello/forecast/map flows in the three UIs.
 
 | Project | Path | Role |
 | --- | --- | --- |
+| Worker DotNet | [`worker-dotnet`](../worker-dotnet) | Hangfire job servers, dashboard (`/hangfire`), and `/about` health leaf |
 | MCP DotNet | [`mcp-dotnet`](../mcp-dotnet) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
 | MCP Function | [`mcp-function`](../mcp-function) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
-| Worker DotNet | [`worker-dotnet`](../worker-dotnet) | Hangfire job servers, dashboard (`/hangfire`), and `/about` health leaf |
 | Foundry Console V1–V4 | [`FoundryConsoleV1…`](../FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint) … [`V4`](../FoundryConsoleV4MCP) | Local learning demos for Foundry / agent patterns (not in `Weather.sln`) |
 
-Ports, auth, and env vars for MCP and console apps live in [`README.md`](../README.md)
+Ports, auth, and env vars for the worker, MCP, and console apps live in [`README.md`](../README.md)
 and each project's `.env.example`.
 
 ## Runtime Model
@@ -148,10 +148,10 @@ Every runnable app can participate in a shared **About tree** contract
 
 | App | `/about` or `/About` behavior |
 | --- | --- |
-| MCP DotNet / MCP Function | Leaf node for self; health checks expected MCP tool registration |
-| Worker DotNet | Leaf node for self (`worker-dotnet`); always healthy for now |
 | WeatherAPI | `API Root` → `API` + remote worker and MCP about nodes |
 | WeatherMVC | `MVC Root` → `MVC` + nested `API Root` (same worker/MCP children as API) |
+| Worker DotNet | Leaf node for self (`worker-dotnet`); always healthy for now |
+| MCP DotNet / MCP Function | Leaf node for self; health checks expected MCP tool registration |
 | React | Fetches API `/About` and wraps with `UI React Root` |
 | Blazor | Fetches API `/About` and wraps with `Blazor Root` |
 
@@ -256,9 +256,9 @@ mvc-dotnet/WeatherMVC/       MVC UI project
 ui-blazor/WeatherBlazor/     Blazor UI project
 ui-react/                    React UI project
 core-dotnet/                 Core shared class library (Core.csproj)
+worker-dotnet/               Hangfire background worker (job servers + dashboard)
 mcp-dotnet/                  MCP DotNet tool host (GetPublicWeatherData)
 mcp-function/                MCP Function tool host (GetLatLongData)
-worker-dotnet/               Hangfire background worker (job servers + dashboard)
 FoundryConsoleV1…V4/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```

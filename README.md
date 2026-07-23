@@ -17,24 +17,6 @@ project relationships, and parity guidance.
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
-## MCP tool hosts
-
-Ultra-simple remote MCP servers that expose Core weather tools via MediatR.
-
-| Project | Path | Tool | Port | Endpoint | Auth |
-| --- | --- | --- | --- | --- | --- |
-| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer token (`MCP_API_KEY`; no default — must be set by developer) |
-| MCP Function | [`mcp-function`](mcp-function) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` | Built-in Functions system key `mcp_extension` (`x-functions-key` header) |
-
-VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
-also forwarded in [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json).
-
-Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see `prod-deploy-mcp-*.yml`).
-
-Examples:
-- MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/about` stays open)
-- MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/about` is anonymous)
-
 ## Background worker (Hangfire)
 
 [`worker-dotnet`](worker-dotnet) is the only host that runs Hangfire job servers.
@@ -52,6 +34,24 @@ API, and MVC.
 
 Prod app: `weather1116-prod-worker` (see `prod-deploy-worker-app-service.yml`).
 API and MVC probe the worker via `WORKER_DOTNET_URL` in their About trees.
+
+## MCP tool hosts
+
+Ultra-simple remote MCP servers that expose Core weather tools via MediatR.
+
+| Project | Path | Tool | Port | Endpoint | Auth |
+| --- | --- | --- | --- | --- | --- |
+| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer token (`MCP_API_KEY`; no default — must be set by developer) |
+| MCP Function | [`mcp-function`](mcp-function) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` | Built-in Functions system key `mcp_extension` (`x-functions-key` header) |
+
+VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
+also forwarded in [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json).
+
+Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see `prod-deploy-mcp-*.yml`).
+
+Examples:
+- MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/about` stays open)
+- MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/about` is anonymous)
 
 ## Foundry console demos
 
