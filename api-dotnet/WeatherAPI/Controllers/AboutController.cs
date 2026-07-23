@@ -12,6 +12,10 @@ public class AboutController(
     [HttpGet]
     public async Task<ActionResult<AboutNode>> Get(CancellationToken cancellationToken)
     {
+        var workerDotNetTask = aboutClient.GetAsync(
+            $"{configuration["WORKER_DOTNET_URL"]}/About",
+            "worker-dotnet",
+            cancellationToken);
         var mcpDotNetTask = aboutClient.GetAsync(
             $"{configuration["MCP_DOTNET_URL"]}/About",
             "mcp-dotnet",
@@ -21,9 +25,10 @@ public class AboutController(
             "mcp-function",
             cancellationToken);
 
-        await Task.WhenAll(mcpDotNetTask, mcpFunctionTask);
+        await Task.WhenAll(workerDotNetTask, mcpDotNetTask, mcpFunctionTask);
 
         var root = AboutTreeBuilder.BuildApiRoot(
+            await workerDotNetTask,
             await mcpDotNetTask,
             await mcpFunctionTask);
         return Ok(root);

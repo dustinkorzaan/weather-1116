@@ -28,6 +28,7 @@ jobs:
           - api-dotnet/WeatherAPI/WeatherAPI.csproj
           - ui-blazor/WeatherBlazor/WeatherBlazor.csproj
           - mvc-dotnet/WeatherMVC/WeatherMVC.csproj
+          - worker-dotnet/WeatherWorkerDotNet.csproj
           - mcp-function/WeatherMcpFunction.csproj
           - mcp-dotnet/WeatherMcpDotNet.csproj
 

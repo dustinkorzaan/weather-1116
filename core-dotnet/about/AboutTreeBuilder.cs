@@ -38,6 +38,16 @@ public static class AboutTreeBuilder
     }
 
     /// <summary>
+    /// Single leaf node for the worker-dotnet host (no children).
+    /// </summary>
+    public static AboutNode BuildWorkerDotNetNode(bool isHealthy = true)
+    {
+        var node = CreateNode("worker-dotnet");
+        node.IsHealthy = isHealthy;
+        return node;
+    }
+
+    /// <summary>
     /// Creates a root node whose first child is always <paramref name="selfNode"/>,
     /// followed by any additional dependency nodes, then computes the root's
     /// IsHealthy as the aggregate (logical AND) of every descendant's health.

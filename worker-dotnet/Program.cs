@@ -1,0 +1,85 @@
+using Core.about;
+using Core.weather.Handlers;
+using DotNetEnv;
+using Hangfire;
+using Hangfire.MemoryStorage;
+using Hangfire.SqlServer;
+using MediatR;
+using WeatherWorkerDotNet;
+
+Env.TraversePath().Load();
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddMediatR(cfg =>
+	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
+
+// Durable SQL Server storage wherever a connection string is provided
+// (DB_CONNECTION_STRING). Falls back to in-memory storage locally so the
+// worker still runs without a database.
+var dbConnectionString = builder.Configuration["DB_CONNECTION_STRING"];
+
+// Explicit, non-zero poll interval: a value > TimeSpan.Zero keeps Hangfire on
+// interval polling (every 60s) rather than the aggressive/continuous mode.
+var queuePollInterval = TimeSpan.FromSeconds(60);
+
+builder.Services.AddHangfire(config =>
+{
+	if (string.IsNullOrWhiteSpace(dbConnectionString))
+	{
+		config.UseMemoryStorage();
+	}
+	else
+	{
+		config.UseSqlServerStorage(dbConnectionString, new SqlServerStorageOptions
+		{
+			QueuePollInterval = queuePollInterval,
+		});
+	}
+});
+
+// The worker is the only app that runs Hangfire servers. It runs one server
+// per queue so each queue's concurrency can be tuned independently.
+builder.Services.AddHangfireServer(options =>
+{
+	options.ServerName = "default";
+	options.Queues = ["default"];
+	options.SchedulePollingInterval = queuePollInterval;
+});
+builder.Services.AddHangfireServer(options =>
+{
+	options.ServerName = "default-single";
+	options.Queues = ["default-single"];
+	options.WorkerCount = 1;
+	options.SchedulePollingInterval = queuePollInterval;
+});
+builder.Services.AddHangfireServer(options =>
+{
+	options.ServerName = "batch-single";
+	options.Queues = ["batch-single"];
+	options.WorkerCount = 1;
+	options.SchedulePollingInterval = queuePollInterval;
+});
+builder.Services.AddHangfireServer(options =>
+{
+	options.ServerName = "batch-multi";
+	options.Queues = ["batch-multi"];
+	options.WorkerCount = 10;
+	options.SchedulePollingInterval = queuePollInterval;
+});
+
+builder.Services.AddHostedService<RecurringJobScheduler>();
+
+var app = builder.Build();
+
+// Hangfire dashboard, open to all (POC — no auth). It reads the shared storage,
+// so it also shows jobs enqueued by the api/mvc clients.
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+	Authorization = [new AllowAllDashboardAuthorizationFilter()],
+});
+
+// Always-healthy leaf for now; the API/MVC About trees probe this endpoint.
+app.MapGet("/about", () => Results.Ok(AboutTreeBuilder.BuildWorkerDotNetNode(true)));
+
+app.Run();

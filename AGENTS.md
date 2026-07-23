@@ -2,8 +2,8 @@
 
 ## Cursor Cloud specific instructions
 
-This repo is one Weather sample implemented as five .NET/JS projects (see
-`README.md` and `docs/architecture.md`). Four are runnable apps plus one shared
+This repo is one Weather sample implemented as six .NET/JS projects (see
+`README.md` and `docs/architecture.md`). Five are runnable apps plus one shared
 `Core` class library.
 
 ## Git / PR policy
@@ -35,6 +35,7 @@ hot reload); React uses `npm start`. Ports come from each project's
 | Weather Blazor | `ui-blazor/WeatherBlazor` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8090 |
 | Weather MVC | `mvc-dotnet/WeatherMVC` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8100 |
 | React UI | `ui-react` | `npm start` | 3000 |
+| Worker DotNet | `worker-dotnet` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8130 |
 | MCP DotNet | `mcp-dotnet` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8110 |
 | MCP Function | `mcp-function` | `func start` (or VS Code **WeatherMcpFunction**) | 8120 |
 
@@ -47,6 +48,10 @@ hot reload); React uses `npm start`. Ports come from each project's
  Blazor's forecast/hello calls fail.
 - `WeatherMVC` is standalone (duplicates backend logic via `Core`/MediatR) and
   does not call the API.
+- `worker-dotnet` runs Hangfire job servers and exposes `/hangfire` (dashboard,
+  POC — no auth) and `/about`. API and MVC are Hangfire clients only (shared
+  `DB_CONNECTION_STRING` storage); without a DB connection string each process
+  falls back to its own in-memory storage, so jobs do not cross apps locally.
 - The apps listen on plain HTTP only (no HTTPS profile). `UseHttpsRedirection`
   logs a harmless "failed to determine the https port" warning — ignore it.
 - Google Maps (city pins on all three UIs) needs a browser API key with
@@ -62,5 +67,5 @@ hot reload); React uses `npm start`. Ports come from each project's
   `npm ci && npm run build && npm test -- --run` in `ui-react`).
 - React: `npm run build`, and `npm test -- --run` (Vitest).
 - There is no separate .NET test project.
-- The four `prod-deploy-*.yml` workflows only deploy when `Build and Test`
+- The five `prod-deploy-*.yml` workflows only deploy when `Build and Test`
   completes successfully on `main` (or via manual `workflow_dispatch` on `main`).
