@@ -28,10 +28,10 @@ jobs:
           - api-dotnet/WeatherAPI/WeatherAPI.csproj
           - ui-blazor/WeatherBlazor/WeatherBlazor.csproj
           - mvc-dotnet/WeatherMVC/WeatherMVC.csproj
-          - mcp-function/WeatherMcpFunction.csproj
-          - mcp-dotnet/WeatherMcpDotNet.csproj
           - worker-hangfire/WeatherWorkerHangfire.csproj
           - worker-queue/WeatherWorkerQueue.csproj
+          - mcp-function/WeatherMcpFunction.csproj
+          - mcp-dotnet/WeatherMcpDotNet.csproj
 
     steps:
       - name: Checkout repository
