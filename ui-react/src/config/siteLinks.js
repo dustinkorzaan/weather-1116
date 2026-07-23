@@ -3,6 +3,7 @@ function trimUrl(url) {
 }
 
 const apiBaseUrl = trimUrl(import.meta.env.VITE_API_DOTNET_URL) || 'http://localhost:8080';
+const workerBaseUrl = trimUrl(import.meta.env.VITE_WORKER_DOTNET_URL) || 'http://localhost:8130';
 
 export const siteLinks = [
   {
@@ -16,5 +17,9 @@ export const siteLinks = [
   {
     label: 'API About',
     href: `${apiBaseUrl}/About`,
+  },
+  {
+    label: 'Worker Hangfire',
+    href: `${workerBaseUrl}/hangfire`,
   },
 ];

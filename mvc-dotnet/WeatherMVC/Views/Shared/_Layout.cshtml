@@ -4,6 +4,8 @@
     var uiBlazorUrl = Configuration["UI_BLAZOR_URL"] ?? "http://localhost:8090";
     var apiUrl = (Configuration["API_DOTNET_URL"] ?? "http://localhost:8080").TrimEnd('/');
     var apiAboutUrl = $"{apiUrl}/About";
+    var workerUrl = (Configuration["WORKER_DOTNET_URL"] ?? "http://localhost:8130").TrimEnd('/');
+    var workerHangfireUrl = $"{workerUrl}/hangfire";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -39,6 +41,7 @@
                         <li><a class="dropdown-item" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a></li>
                         <li><a class="dropdown-item" href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a></li>
                         <li><a class="dropdown-item" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a></li>
+                        <li><a class="dropdown-item" href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a></li>
                         <li><hr class="dropdown-divider" /></li>
                         <li>
                             <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#aboutModal">About</button>
@@ -71,6 +74,7 @@
                         <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
                         <a href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
                         <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
+                        <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
                     </div>
                 </div>
             </div>

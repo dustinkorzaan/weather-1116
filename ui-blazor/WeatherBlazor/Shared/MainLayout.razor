@@ -10,6 +10,8 @@
     var mvcUrl = Configuration["MVC_URL"] ?? "http://localhost:8100";
     var apiUrl = (Configuration["API_DOTNET_URL"] ?? "http://localhost:8080").TrimEnd('/');
     var apiAboutUrl = $"{apiUrl}/About";
+    var workerUrl = (Configuration["WORKER_DOTNET_URL"] ?? "http://localhost:8130").TrimEnd('/');
+    var workerHangfireUrl = $"{workerUrl}/hangfire";
 }
 
 <div class="page">
@@ -44,6 +46,9 @@
                     </li>
                     <li role="none">
                         <a class="avatar-dropdown-item" role="menuitem" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
+                    </li>
+                    <li role="none">
+                        <a class="avatar-dropdown-item" role="menuitem" href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
                     </li>
                     <li role="separator" class="avatar-dropdown-divider"></li>
                     <li role="none">
@@ -95,6 +100,7 @@
                     <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
                     <a href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
                     <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
+                    <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
                 </div>
             </div>
         </div>
