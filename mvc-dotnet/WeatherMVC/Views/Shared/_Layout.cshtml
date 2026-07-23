@@ -55,14 +55,17 @@
     </div>
 
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable about-modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="aboutModalLabel">About</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="about-status" id="aboutStatus">Loading About information...</p>
+                    <p class="about-status loading" id="aboutStatus">
+                        <span class="about-spinner" aria-hidden="true"></span>
+                        <span>Loading About information...</span>
+                    </p>
                     <div id="aboutTreeContainer" class="d-none"></div>
                     <div class="site-links-footer">
                         <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>

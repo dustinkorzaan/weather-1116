@@ -76,8 +76,9 @@
 			return;
 		}
 
-		status.textContent = 'Loading About information...';
+		status.innerHTML = '<span class="about-spinner" aria-hidden="true"></span><span>Loading About information...</span>';
 		status.classList.remove('d-none', 'about-status-error');
+		status.classList.add('loading');
 		container.classList.add('d-none');
 		container.textContent = '';
 
@@ -94,9 +95,11 @@
 
 			container.appendChild(rootList);
 			container.classList.remove('d-none');
+			status.classList.remove('loading');
 			status.classList.add('d-none');
 		} catch {
 			status.textContent = 'Unable to load About information.';
+			status.classList.remove('loading');
 			status.classList.add('about-status-error');
 		}
 	}

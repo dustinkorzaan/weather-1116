@@ -61,10 +61,36 @@ body {
   height: 1.5rem;
 }
 
+.about-modal-dialog {
+  margin-top: 4rem;
+}
+
 .about-status {
   margin: 0;
   color: #212529;
 }
+
+.about-status.loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.about-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 0.16rem solid #cfe2ff;
+  border-top-color: #185ca9;
+  border-radius: 50%;
+  animation: about-spinner 0.8s linear infinite;
+}
+
+@keyframes about-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 .about-status-error {
   color: #b42318;

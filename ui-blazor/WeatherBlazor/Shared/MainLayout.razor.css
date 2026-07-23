@@ -132,16 +132,16 @@ main {
     position: fixed;
     inset: 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 30;
-    padding: 1rem;
+    padding: 4rem 1rem 1rem;
 }
 
 .modal-dialog {
     width: 100%;
-    max-width: 26rem;
+    max-width: 34rem;
     background-color: #fff;
     border-radius: 0.5rem;
     box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.25);
@@ -180,47 +180,68 @@ main {
     color: #333;
 }
 
+.about-status.loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.about-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 0.16rem solid #cfe2ff;
+    border-top-color: #185ca9;
+    border-radius: 50%;
+    animation: about-spinner 0.8s linear infinite;
+}
+
+@keyframes about-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .about-status.error {
     color: #b42318;
 }
 
-.about-tree-list {
+::deep .about-tree-list {
     margin: 0;
     padding-left: 1.5rem;
 }
 
-.about-tree-item {
+::deep .about-tree-item {
     margin: 0.35rem 0;
 }
 
-.about-tree-row {
+::deep .about-tree-row {
     display: flex;
     gap: 0.5rem;
     align-items: baseline;
 }
 
-.about-tree-name {
+::deep .about-tree-name {
     font-weight: 600;
 }
 
-.about-tree-meta {
+::deep .about-tree-meta {
     margin-top: 0.2rem;
     font-size: 0.78rem;
     color: #667085;
 }
 
-.about-tree-health {
+::deep .about-tree-health {
     font-size: 0.82rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
-.about-tree-health.healthy {
+::deep .about-tree-health.healthy {
     color: #137333;
 }
 
-.about-tree-health.unhealthy {
+::deep .about-tree-health.unhealthy {
     color: #b42318;
 }
 
