@@ -63,6 +63,7 @@ jobs:
     needs: build
     environment: prod
     env:
+      WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -99,18 +100,66 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
-      - name: Set App Service settings
+      - name: Resolve App Service name
+        shell: bash
+        run: |
+          APP_NAME="weather1116-prod-worker"
+          if [[ -n "${WORKER_DOTNET_URL}" && "${WORKER_DOTNET_URL}" =~ ^https?://([a-z0-9-]+)\.azurewebsites\.net(/.*)?$ ]]; then
+            APP_NAME="${BASH_REMATCH[1]}"
+          fi
+
+          if ! [[ "$APP_NAME" =~ ^[a-z0-9]([a-z0-9-]{0,58}[a-z0-9])?$ ]]; then
+            echo "Invalid App Service name resolved: ${APP_NAME}" >&2
+            exit 1
+          fi
+
+          echo "APP_NAME=${APP_NAME}" >> "$GITHUB_ENV"
+
+      - name: Ensure App Service exists and set settings
         uses: azure/cli@v2
         with:
           inlineScript: |
-            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-worker'].resourceGroup | [0]" -o tsv)
+            set -euo pipefail
+
+            REF_APP="weather1116-prod-api"
+            APP_RG=$(az webapp list --query "[?name=='${APP_NAME}'].resourceGroup | [0]" -o tsv)
+
             if [ -z "$APP_RG" ]; then
-              echo "Could not resolve resource group for weather1116-prod-worker" >&2
-              exit 1
+              echo "App Service ${APP_NAME} not found; creating from reference ${REF_APP}..."
+
+              REF_RG=$(az webapp list --query "[?name=='${REF_APP}'].resourceGroup | [0]" -o tsv)
+              if [ -z "$REF_RG" ]; then
+                echo "Could not resolve reference App Service ${REF_APP}" >&2
+                exit 1
+              fi
+
+              PLAN_ID=$(az webapp show --name "$REF_APP" --resource-group "$REF_RG" --query appServicePlanId -o tsv)
+              PLAN_NAME="${PLAN_ID##*/}"
+              PLAN_KIND=$(az appservice plan show --ids "$PLAN_ID" --query kind -o tsv)
+
+              if [[ "$PLAN_KIND" == *"linux"* ]]; then
+                RUNTIME=$(az webapp config show --name "$REF_APP" --resource-group "$REF_RG" --query linuxFxVersion -o tsv)
+                if [ -z "$RUNTIME" ] || [ "$RUNTIME" = "null" ]; then
+                  RUNTIME="DOTNET:10"
+                fi
+                az webapp create \
+                  --name "${APP_NAME}" \
+                  --resource-group "$REF_RG" \
+                  --plan "$PLAN_NAME" \
+                  --runtime "$RUNTIME"
+              else
+                az webapp create \
+                  --name "${APP_NAME}" \
+                  --resource-group "$REF_RG" \
+                  --plan "$PLAN_NAME"
+              fi
+
+              APP_RG="$REF_RG"
+              echo "Created App Service ${APP_NAME} in ${APP_RG}"
             fi
 
             az webapp config appsettings set \
-              --name weather1116-prod-worker \
+              --name "${APP_NAME}" \
               --resource-group "$APP_RG" \
               --settings \
                 DB_CONNECTION_STRING="${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}" \
@@ -123,6 +172,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'weather1116-prod-worker'
+          app-name: ${{ env.APP_NAME }}
           slot-name: 'Production'
           package: ${{ github.workspace }}/publish/worker-dotnet
