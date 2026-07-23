@@ -63,6 +63,7 @@ jobs:
     needs: build
     environment: prod
     env:
+      WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -99,18 +100,27 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
+      - name: Resolve App Service name
+        shell: bash
+        run: |
+          APP_NAME=$(echo "${WORKER_DOTNET_URL}" | sed -E 's#^https?://([^/]+)/?.*$#\1#' | cut -d. -f1)
+          if [ -z "$APP_NAME" ]; then
+            APP_NAME=weather1116-prod-worker
+          fi
+          echo "APP_NAME=${APP_NAME}" >> "$GITHUB_ENV"
+
       - name: Set App Service settings
         uses: azure/cli@v2
         with:
           inlineScript: |
-            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-worker'].resourceGroup | [0]" -o tsv)
+            APP_RG=$(az webapp list --query "[?name=='${APP_NAME}'].resourceGroup | [0]" -o tsv)
             if [ -z "$APP_RG" ]; then
-              echo "Could not resolve resource group for weather1116-prod-worker" >&2
+              echo "Could not resolve resource group for ${APP_NAME}" >&2
               exit 1
             fi
 
             az webapp config appsettings set \
-              --name weather1116-prod-worker \
+              --name "${APP_NAME}" \
               --resource-group "$APP_RG" \
               --settings \
                 DB_CONNECTION_STRING="${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}" \
@@ -123,6 +133,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'weather1116-prod-worker'
+          app-name: ${{ env.APP_NAME }}
           slot-name: 'Production'
           package: ${{ github.workspace }}/publish/worker-dotnet
