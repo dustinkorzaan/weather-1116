@@ -22,16 +22,20 @@ builder.Services.AddCors(options =>
 	{
 		var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 
-		if (allowedOrigins is { Length: > 0 })
+		if (allowedOrigins is not { Length: > 0 })
 		{
-			policy.WithOrigins(allowedOrigins)
-				.AllowAnyHeader()
-				.AllowAnyMethod();
-			return;
+			// No explicit origins configured: fall back to the known local UI dev
+			// origins instead of allowing any origin. Configure Cors:AllowedOrigins
+			// (appsettings or the Cors__AllowedOrigins__N env vars) for other hosts.
+			allowedOrigins = new[]
+			{
+				"http://localhost:3000",
+				"http://localhost:8090",
+				"http://localhost:8100",
+			};
 		}
 
-		// Sample fallback: allow cross-origin calls when no explicit origins are configured.
-		policy.AllowAnyOrigin()
+		policy.WithOrigins(allowedOrigins)
 			.AllowAnyHeader()
 			.AllowAnyMethod();
 	});
