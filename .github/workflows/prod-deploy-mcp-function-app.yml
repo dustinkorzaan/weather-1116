@@ -10,6 +10,7 @@ on:
       - Build and Test
     branches:
       - main
+      - claude-testing
     types:
       - completed
   # Keep manual trigger for emergency redeploys and controlled production rollouts.
@@ -28,7 +29,7 @@ env:
 jobs:
   build:
     runs-on: windows-latest
-    if: ${{ (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude-testing')) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
     permissions:
       contents: read #This is required for actions/checkout
     outputs:
