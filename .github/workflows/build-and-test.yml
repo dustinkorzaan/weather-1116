@@ -31,10 +31,10 @@ jobs:
           - worker-dotnet/WeatherWorkerDotNet.csproj
           - mcp-function/WeatherMcpFunction.csproj
           - mcp-dotnet/WeatherMcpDotNet.csproj
-          - FoundryConsoleV1ModelDirectLegacy/WeatherConsoleV1.csproj
-          - FoundryConsoleV2ModelDirectUnifiedAI/WeatherConsoleV2.csproj
-          - FoundryConsoleV3InjectFunctions/WeatherConsoleV3.csproj
-          - FoundryConsoleV4MCP/WeatherConsoleV4MCP.csproj
+          - FoundryConsoleV1/FoundryConsoleV1ModelDirectLegacy.csproj
+          - FoundryConsoleV2/FoundryConsoleV2ModelDirectUnifiedAI.csproj
+          - FoundryConsoleV3/FoundryConsoleV3InjectFunctions.csproj
+          - FoundryConsoleV4/FoundryConsoleV4MCP.csproj
 
     steps:
       - name: Checkout repository

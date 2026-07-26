@@ -35,21 +35,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{194A79AE-9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "core-dotnet\test\Core.Tests\Core.Tests.csproj", "{B37B2222-6C80-4DF4-BBF5-B8735E925EFC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV1ModelDirectLegacy", "FoundryConsoleV1ModelDirectLegacy", "{93D8A408-32AF-09F8-72E3-0D17BAD9122F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV1", "FoundryConsoleV1", "{93D8A408-32AF-09F8-72E3-0D17BAD9122F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherConsoleV1", "FoundryConsoleV1ModelDirectLegacy\WeatherConsoleV1.csproj", "{85B99CAF-4346-43DF-80CC-BCE7ABA3A085}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoundryConsoleV1ModelDirectLegacy", "FoundryConsoleV1\FoundryConsoleV1ModelDirectLegacy.csproj", "{85B99CAF-4346-43DF-80CC-BCE7ABA3A085}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV2ModelDirectUnifiedAI", "FoundryConsoleV2ModelDirectUnifiedAI", "{43ACDC19-4532-3CBF-D1B9-47ADF35ED454}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV2", "FoundryConsoleV2", "{43ACDC19-4532-3CBF-D1B9-47ADF35ED454}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherConsoleV2", "FoundryConsoleV2ModelDirectUnifiedAI\WeatherConsoleV2.csproj", "{0E27C959-B26F-4028-92E1-9F66183F0BAE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoundryConsoleV2ModelDirectUnifiedAI", "FoundryConsoleV2\FoundryConsoleV2ModelDirectUnifiedAI.csproj", "{0E27C959-B26F-4028-92E1-9F66183F0BAE}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV3InjectFunctions", "FoundryConsoleV3InjectFunctions", "{731B528E-B0F6-DC7F-0757-E7FC6279829A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV3", "FoundryConsoleV3", "{731B528E-B0F6-DC7F-0757-E7FC6279829A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherConsoleV3", "FoundryConsoleV3InjectFunctions\WeatherConsoleV3.csproj", "{1EB58FFC-4129-4745-8DAE-275DD1ED30D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoundryConsoleV3InjectFunctions", "FoundryConsoleV3\FoundryConsoleV3InjectFunctions.csproj", "{1EB58FFC-4129-4745-8DAE-275DD1ED30D1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV4MCP", "FoundryConsoleV4MCP", "{DE349B40-A10F-7B7E-155A-C89584ACB3F0}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV4", "FoundryConsoleV4", "{DE349B40-A10F-7B7E-155A-C89584ACB3F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherConsoleV4MCP", "FoundryConsoleV4MCP\WeatherConsoleV4MCP.csproj", "{CFFFEE4B-3F86-4615-9ACA-B567E2D21D2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoundryConsoleV4MCP", "FoundryConsoleV4\FoundryConsoleV4MCP.csproj", "{CFFFEE4B-3F86-4615-9ACA-B567E2D21D2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

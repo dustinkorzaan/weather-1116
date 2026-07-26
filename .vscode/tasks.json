@@ -198,7 +198,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacy/WeatherConsoleV1.csproj",
+                "${workspaceFolder}/FoundryConsoleV1/FoundryConsoleV1ModelDirectLegacy.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -210,7 +210,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FoundryConsoleV2ModelDirectUnifiedAI/WeatherConsoleV2.csproj",
+                "${workspaceFolder}/FoundryConsoleV2/FoundryConsoleV2ModelDirectUnifiedAI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -222,7 +222,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FoundryConsoleV3InjectFunctions/WeatherConsoleV3.csproj",
+                "${workspaceFolder}/FoundryConsoleV3/FoundryConsoleV3InjectFunctions.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -234,7 +234,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FoundryConsoleV4MCP/WeatherConsoleV4MCP.csproj",
+                "${workspaceFolder}/FoundryConsoleV4/FoundryConsoleV4MCP.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
