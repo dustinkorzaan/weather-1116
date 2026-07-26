@@ -1,13 +1,14 @@
-name: AI 10 Init
-run-name: AI 10 Init
+name: V1 AI 10 Init
+run-name: V1 AI 10 Init
 
 on:
   repository_dispatch:
-    types: [start_story_with_ai]
+    # Renamed from start_story_with_ai when workflows were versioned to v1-ai-*.
+    types: [start_story_with_v1_ai]
 
 jobs:
   vars:
-    uses: ./.github/workflows/ai-20-vars.yml
+    uses: ./.github/workflows/v1-ai-20-vars.yml
     with:
       story_source: ${{ github.event.client_payload.story_source }}
       story_number: ${{ github.event.client_payload.story_number }}
@@ -26,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         target: ${{ fromJson(needs.vars.outputs.targets_json) }}
-    uses: ./.github/workflows/ai-30-branch-and-pr.yml
+    uses: ./.github/workflows/v1-ai-30-branch-and-pr.yml
     with:
       ai_target_dev: ${{ matrix.target.ai_target_dev }}
       branch_name: ${{ matrix.target.branch_name }}
@@ -42,7 +43,7 @@ jobs:
       fail-fast: false
       matrix:
         target: ${{ fromJson(needs.vars.outputs.targets_json) }}
-    uses: ./.github/workflows/ai-50-run.yml
+    uses: ./.github/workflows/v1-ai-50-run.yml
     with:
       ai_target: ${{ matrix.target.ai_target_dev }}
       branch_name: ${{ matrix.target.branch_name }}
@@ -58,7 +59,7 @@ jobs:
       fail-fast: false
       matrix:
         target: ${{ fromJson(needs.vars.outputs.targets_json) }}
-    uses: ./.github/workflows/ai-50-run.yml
+    uses: ./.github/workflows/v1-ai-50-run.yml
     with:
       ai_target: ${{ matrix.target.ai_target_review }}
       branch_name: ${{ matrix.target.branch_name }}
@@ -68,7 +69,7 @@ jobs:
   callback:
     needs: [vars, run_ai, review_ai]
     if: ${{ always() }}
-    uses: ./.github/workflows/ai-90-callback.yml
+    uses: ./.github/workflows/v1-ai-90-callback.yml
     with:
       story_source: ${{ github.event.client_payload.story_source }}
       story_id: ${{ github.event.client_payload.story_id }}

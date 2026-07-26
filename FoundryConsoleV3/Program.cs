@@ -7,6 +7,7 @@ using DotNetEnv;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenAI;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
@@ -101,7 +102,7 @@ internal class Program
 
 		ResponsesClient client = new(
 			credential: new ApiKeyCredential(apiKey),
-			options: new ResponsesClientOptions()
+			options: new OpenAIClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});

@@ -20,6 +20,7 @@ This repo is one Weather sample implemented as six .NET/JS projects (see
   shells get `dotnet` automatically. In non-interactive contexts, call
   `"$HOME/.dotnet/dotnet"` directly.
 - Node (with `npm`) is provided via nvm. React deps install into `ui-react`.
+  Pin: `ui-react/.nvmrc` and `package.json` `engines` require **Node >=24** and **npm >=11**.
 - The update script runs `npm --prefix ui-react ci` and `dotnet restore Weather.sln`;
   it intentionally does NOT install the SDK (that is snapshot state).
 

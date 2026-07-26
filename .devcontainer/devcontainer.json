@@ -13,7 +13,7 @@
             "version": "2"
         },
         "ghcr.io/devcontainers/features/node:1": {
-            "version": "lts"
+            "version": "24"
         },
         "ghcr.io/devcontainers/features/powershell:1": {
             "version": "latest"

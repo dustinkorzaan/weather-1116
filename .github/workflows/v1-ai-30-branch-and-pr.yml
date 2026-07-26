@@ -1,4 +1,4 @@
-name: AI 30 Branch And PR
+name: V1 AI 30 Branch And PR
 
 on:
   workflow_call:

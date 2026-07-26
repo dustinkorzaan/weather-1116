@@ -1,4 +1,4 @@
-name: AI 50 Run
+name: V1 AI 50 Run
 
 on:
   workflow_call:
@@ -35,6 +35,7 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '24'
+          npm-version: '11'
           package-manager-cache: false
 
 

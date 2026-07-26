@@ -56,16 +56,17 @@ Examples:
 ## Foundry console demos
 
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
-against Core weather data (V1–V3) or a hosted Foundry Agent (V4). Not part of
-`Weather.sln` deployables; run from VS Code or `dotnet run` in each folder.
+against Core weather data (V1–V3) or a hosted Foundry Agent (V4). In
+`Weather.sln` and CI, but not a production deployable; run from VS Code or
+`dotnet run` in each folder.
 See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 
 | Project | Path | Pattern |
 | --- | --- | --- |
-| V1 | [`FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint`](FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
-| V2 | [`FoundryConsoleV2ModelDirectNewUnifiedAIServices`](FoundryConsoleV2ModelDirectNewUnifiedAIServices) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| V3 | [`FoundryConsoleV3InjectFunctions`](FoundryConsoleV3InjectFunctions) | Injected function tools (`GetLatLongData`, `GetPublicWeatherData`) handled in-process |
-| V4 | [`FoundryConsoleV4MCP`](FoundryConsoleV4MCP) | Calls hosted Foundry Agent `wx1116-agent-default` (agent uses MCP lat/long + weather tools) |
+| V1 | [`FoundryConsoleV1`](FoundryConsoleV1) (`FoundryConsoleV1ModelDirectLegacy.csproj`) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
+| V2 | [`FoundryConsoleV2`](FoundryConsoleV2) (`FoundryConsoleV2ModelDirectUnifiedAI.csproj`) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
+| V3 | [`FoundryConsoleV3`](FoundryConsoleV3) (`FoundryConsoleV3InjectFunctions.csproj`) | Injected function tools (`GetLatLongData`, `GetPublicWeatherData`) handled in-process |
+| V4 | [`FoundryConsoleV4`](FoundryConsoleV4) (`FoundryConsoleV4MCP.csproj`) | Calls hosted Foundry Agent `wx1116-agent-default` (agent uses MCP lat/long + weather tools) |
 
 **V4 settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V3):
 
