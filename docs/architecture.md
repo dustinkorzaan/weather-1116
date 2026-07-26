@@ -34,7 +34,7 @@ for hello/forecast/map flows in the three UIs.
 | Worker DotNet | [`worker-dotnet`](../worker-dotnet) | Hangfire job servers, dashboard (`/hangfire`), and `/about` health leaf |
 | MCP DotNet | [`mcp-dotnet`](../mcp-dotnet) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
 | MCP Function | [`mcp-function`](../mcp-function) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
-| Foundry Console V1–V4 | [`FoundryConsoleV1…`](../FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint) … [`V4`](../FoundryConsoleV4MCP) | Local learning demos for Foundry / agent patterns (not in `Weather.sln`) |
+| Foundry Console V1–V4 | [`FoundryConsoleV1…`](../FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint) … [`V4`](../FoundryConsoleV4MCP) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `WeatherFoundryConsole.V1`–`V4MCP`; not in CI build matrix) |
 
 Ports, auth, and env vars for the worker, MCP, and console apps live in [`README.md`](../README.md)
 and each project's `.env.example`.

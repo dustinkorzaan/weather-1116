@@ -3,6 +3,7 @@ run-name: V1 AI 10 Init
 
 on:
   repository_dispatch:
+    # Renamed from start_story_with_ai when workflows were versioned to v1-ai-*.
     types: [start_story_with_v1_ai]
 
 jobs:
