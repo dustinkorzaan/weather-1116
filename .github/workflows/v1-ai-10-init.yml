@@ -3,7 +3,7 @@ run-name: V1 AI 10 Init
 
 on:
   repository_dispatch:
-    types: [start_story_with_ai]
+    types: [start_story_with_v1_ai]
 
 jobs:
   vars:
