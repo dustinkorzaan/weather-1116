@@ -1,5 +1,5 @@
-name: AI 10 Init
-run-name: AI 10 Init
+name: V1 AI 10 Init
+run-name: V1 AI 10 Init
 
 on:
   repository_dispatch:

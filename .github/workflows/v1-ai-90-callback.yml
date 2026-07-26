@@ -1,4 +1,4 @@
-name: AI 90 Callback
+name: V1 AI 90 Callback
 
 on:
   workflow_call:
