@@ -198,7 +198,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint/WeatherConsoleV1.csproj",
+                "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacy/WeatherConsoleV1.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -210,7 +210,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FoundryConsoleV2ModelDirectNewUnifiedAIServices/WeatherConsoleV2.csproj",
+                "${workspaceFolder}/FoundryConsoleV2ModelDirectUnifiedAI/WeatherConsoleV2.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

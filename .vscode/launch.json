@@ -114,9 +114,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build foundry console v1",
-            "program": "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint/bin/Debug/net10.0/WeatherConsoleV1.dll",
+            "program": "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacy/bin/Debug/net10.0/WeatherConsoleV1.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacyCognitiveServicesEndpoint",
+            "cwd": "${workspaceFolder}/FoundryConsoleV1ModelDirectLegacy",
             "stopAtEntry": false,
             "console": "integratedTerminal"
         },
@@ -125,9 +125,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build foundry console v2",
-            "program": "${workspaceFolder}/FoundryConsoleV2ModelDirectNewUnifiedAIServices/bin/Debug/net10.0/WeatherConsoleV2.dll",
+            "program": "${workspaceFolder}/FoundryConsoleV2ModelDirectUnifiedAI/bin/Debug/net10.0/WeatherConsoleV2.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/FoundryConsoleV2ModelDirectNewUnifiedAIServices",
+            "cwd": "${workspaceFolder}/FoundryConsoleV2ModelDirectUnifiedAI",
             "stopAtEntry": false,
             "console": "integratedTerminal"
         },
