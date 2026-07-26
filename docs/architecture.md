@@ -246,8 +246,10 @@ builds on every push:
 - `WeatherAPI.Tests` integration tests.
 
 Production deploy workflows (`prod-deploy-*.yml`) run only after **Build and Test**
-completes successfully on `main` (or via manual `workflow_dispatch` on `main`).
-Deployables include API, MVC, React, Blazor, worker-dotnet, and both MCP hosts.
+completes successfully on `main` (push/merge) or on a non-draft pull request targeting
+`main` (including when marked ready for review). Manual `workflow_dispatch` redeploys
+are limited to `main`. Deployables include API, MVC, React, Blazor, worker-dotnet, and
+both MCP hosts.
 
 ## Repository Layout
 

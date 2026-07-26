@@ -2,10 +2,17 @@ name: Build and Test
 run-name: Build and Test
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
   push:
+    branches:
+      - main
 
 # Newer pushes cancel older in-progress builds for the same ref (e.g. main).
 concurrency:
