@@ -76,9 +76,6 @@ public class WeatherForecastClient
             Name = "Blazor Root",
             Children = children,
             IsHealthy = ComputeAggregateHealth(children),
-            BuildNumber = ResolveBuildNumber(),
-            BuildStart = ResolveBuildStart(),
-            BuildBranchName = ResolveBuildBranchName(),
         };
     }
 

@@ -63,5 +63,8 @@ export function buildUiReactRoot(apiRoot) {
   return createNode('UI React Root', {
     isHealthy: computeAggregateHealth(children),
     children,
+    buildStart: null,
+    buildNumber: null,
+    buildBranchName: null,
   });
 }

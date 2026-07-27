@@ -183,7 +183,7 @@ public class AboutTreeBuilderTests
         {
             var root = AboutTreeBuilder.BuildApiRoot();
 
-            Assert.Equal("feature/my-branch", root.BuildBranchName);
+            Assert.Null(root.BuildBranchName);
             Assert.Equal("feature/my-branch", root.Children[0].BuildBranchName);
         });
     }
@@ -207,11 +207,13 @@ public class AboutTreeBuilderTests
         {
             var root = AboutTreeBuilder.BuildApiRoot();
 
-            Assert.Equal(4242, root.BuildNumber);
-            Assert.NotNull(root.BuildStart);
+            Assert.Equal(4242, root.Children[0].BuildNumber);
+            Assert.NotNull(root.Children[0].BuildStart);
             Assert.Equal(
                 new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc),
-                root.BuildStart!.Value.ToUniversalTime());
+                root.Children[0].BuildStart!.Value.ToUniversalTime());
+            Assert.Null(root.BuildNumber);
+            Assert.Null(root.BuildStart);
         });
     }
 

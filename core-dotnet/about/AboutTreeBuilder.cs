@@ -61,9 +61,6 @@ public static class AboutTreeBuilder
         {
             Name = rootName,
             Children = children,
-            BuildNumber = ResolveBuildNumber(),
-            BuildStart = ResolveBuildStart(),
-            BuildBranchName = ResolveBuildBranchName(),
         };
         root.IsHealthy = ComputeAggregateHealth(children);
 
