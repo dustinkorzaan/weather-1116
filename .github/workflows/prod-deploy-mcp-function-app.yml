@@ -14,7 +14,6 @@ on:
       - completed
   workflow_dispatch:
 
-# Newer deploys cancel older in-progress runs of this workflow.
 concurrency:
   group: prod-deploy-mcpfunc
   cancel-in-progress: true
