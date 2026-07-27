@@ -5,6 +5,7 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
 using MediatR;
+using System.Text.Json.Serialization;
 
 Env.TraversePath().Load();
 
@@ -32,7 +33,11 @@ builder.Services.AddHangfire(config =>
 });
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(5);
