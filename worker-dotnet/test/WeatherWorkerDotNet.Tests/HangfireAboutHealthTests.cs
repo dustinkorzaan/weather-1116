@@ -1,4 +1,5 @@
 using Hangfire.Storage.Monitoring;
+using Microsoft.Extensions.Configuration;
 using WeatherWorkerDotNet;
 
 namespace WeatherWorkerDotNet.Tests;
@@ -6,7 +7,8 @@ namespace WeatherWorkerDotNet.Tests;
 public class HangfireAboutHealthTests
 {
     private static readonly DateTime UtcNow = new(2026, 7, 27, 12, 0, 0, DateTimeKind.Utc);
-    private static readonly HangfireAboutHealthOptions DefaultOptions = new();
+    private static readonly HangfireAboutHealthOptions DefaultOptions =
+        HangfireAboutHealthOptions.Bind(new ConfigurationBuilder().Build());
 
     [Fact]
     public void IsHealthy_ReturnsFalse_WhenFailedJobsExist()

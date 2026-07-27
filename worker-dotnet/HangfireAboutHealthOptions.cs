@@ -7,15 +7,8 @@ namespace WeatherWorkerDotNet;
 /// </summary>
 public sealed class HangfireAboutHealthOptions
 {
-    /// <summary>
-    /// Processing jobs running longer than this are treated as unhealthy.
-    /// </summary>
-    public int StaleProcessingMinutes { get; set; } = 30;
-
-    /// <summary>
-    /// Enqueued jobs waiting longer than this are treated as unhealthy.
-    /// </summary>
-    public int StaleEnqueuedMinutes { get; set; } = 60;
+    public int StaleProcessingMinutes { get; set; }
+    public int StaleEnqueuedMinutes { get; set; }
 
     public static HangfireAboutHealthOptions Bind(IConfiguration configuration)
         => new()
