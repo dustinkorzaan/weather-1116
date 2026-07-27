@@ -1,10 +1,12 @@
 using Core.about;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WeatherMVC.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[AllowAnonymous]
 public class AboutController(
     IAboutClient aboutClient,
     IConfiguration configuration) : ControllerBase

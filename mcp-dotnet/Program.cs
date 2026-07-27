@@ -64,6 +64,6 @@ app.MapGet("/about", (IEnumerable<McpServerTool> tools) =>
 	var isHealthy = !string.IsNullOrWhiteSpace(mcpApiKey) && tools.Any(t =>
 		string.Equals(t.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
 	return Results.Ok(AboutTreeBuilder.BuildMcpDotNetNode(isHealthy));
-});
+}).AllowAnonymous();
 
 app.Run();

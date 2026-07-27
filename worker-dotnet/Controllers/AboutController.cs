@@ -1,11 +1,13 @@
 using Core.about;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WeatherWorkerDotNet.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[AllowAnonymous]
 public sealed class AboutController(
     ILogger<AboutController> logger) : ControllerBase
 {
