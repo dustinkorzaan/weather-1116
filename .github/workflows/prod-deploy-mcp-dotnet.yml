@@ -60,7 +60,6 @@ jobs:
     needs: build
     environment: prod
     env:
-      BUILD_NUMBER: ${{ github.run_number }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
