@@ -39,9 +39,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build weatherblazor",
-            "program": "${workspaceFolder}/ui-blazor/WeatherBlazor/bin/Debug/net10.0/WeatherBlazor.dll",
+            "program": "${workspaceFolder}/ui-blazor/blazor/bin/Debug/net10.0/WeatherBlazor.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/ui-blazor/WeatherBlazor",
+            "cwd": "${workspaceFolder}/ui-blazor/blazor",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
@@ -57,9 +57,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build weathermvc",
-            "program": "${workspaceFolder}/mvc-dotnet/WeatherMVC/bin/Debug/net10.0/WeatherMVC.dll",
+            "program": "${workspaceFolder}/mvc-dotnet/mvc/bin/Debug/net10.0/WeatherMVC.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/mvc-dotnet/WeatherMVC",
+            "cwd": "${workspaceFolder}/mvc-dotnet/mvc",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
@@ -70,7 +70,7 @@
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
             "sourceFileMap": {
-                "/Views": "${workspaceFolder}/mvc-dotnet/WeatherMVC/Views"
+                "/Views": "${workspaceFolder}/mvc-dotnet/mvc/Views"
             }
         },
         {

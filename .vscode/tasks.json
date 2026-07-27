@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/ui-blazor/WeatherBlazor/WeatherBlazor.csproj",
+                "${workspaceFolder}/ui-blazor/blazor/WeatherBlazor.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -31,7 +31,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/ui-blazor/WeatherBlazor/WeatherBlazor.csproj",
+                "${workspaceFolder}/ui-blazor/blazor/WeatherBlazor.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -45,7 +45,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/ui-blazor/WeatherBlazor/WeatherBlazor.csproj"
+                "${workspaceFolder}/ui-blazor/blazor/WeatherBlazor.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -91,7 +91,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj",
+                "${workspaceFolder}/mvc-dotnet/mvc/WeatherMVC.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -103,7 +103,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj",
+                "${workspaceFolder}/mvc-dotnet/mvc/WeatherMVC.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -117,7 +117,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj"
+                "${workspaceFolder}/mvc-dotnet/mvc/WeatherMVC.csproj"
             ],
             "problemMatcher": "$msCompile"
         },

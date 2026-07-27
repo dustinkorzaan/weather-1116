@@ -9,9 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="test/**" />
-    <Content Remove="test/**" />
-    <None Remove="test/**" />
+    <Compile Remove="../worker.tests/**" />
+    <Content Remove="../worker.tests/**" />
+    <None Remove="../worker.tests/**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\core-dotnet\core\Core.csproj" />
+    <ProjectReference Include="..\..\core-dotnet\core\Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

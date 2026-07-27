@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\WeatherBlazor\WeatherBlazor.csproj" />
+    <ProjectReference Include="..\blazor\WeatherBlazor.csproj" />
   </ItemGroup>
 
 </Project>

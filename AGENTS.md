@@ -33,10 +33,10 @@ hot reload); React uses `npm start`. Ports come from each project's
 | Service | Path | Run command | Port |
 | --- | --- | --- | --- |
 | Weather API | `api-dotnet/api` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8080 |
-| Weather Blazor | `ui-blazor/WeatherBlazor` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8090 |
-| Weather MVC | `mvc-dotnet/WeatherMVC` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8100 |
+| Weather Blazor | `ui-blazor/blazor` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8090 |
+| Weather MVC | `mvc-dotnet/mvc` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8100 |
 | React UI | `ui-react` | `npm start` | 3000 |
-| Worker DotNet | `worker-dotnet` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8130 |
+| Worker DotNet | `worker-dotnet/worker` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8130 |
 | MCP DotNet | `mcp-dotnet` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8110 |
 | MCP Function | `mcp-function` | `func start` (or VS Code **WeatherMcpFunction**) | 8120 |
 
@@ -44,7 +44,7 @@ hot reload); React uses `npm start`. Ports come from each project's
 
 - Start `WeatherAPI` (8080) FIRST. Both the React UI (Vite proxies `/Home` and
  `/AIWeather` to `http://localhost:8080`, override with `VITE_API_DOTNET_URL`) and
- the Blazor UI (`API_DOTNET_URL` in `ui-blazor/WeatherBlazor/appsettings.json`)
+ the Blazor UI (`API_DOTNET_URL` in `ui-blazor/blazor/appsettings.json`)
  depend on it. Without the API, React shows "Unable to load hello message" and
  Blazor's hello call fails.
 - `WeatherMVC` is standalone (duplicates backend logic via `Core`/MediatR) and
@@ -67,7 +67,9 @@ hot reload); React uses `npm start`. Ports come from each project's
   `.github/workflows/build-and-test.yml` builds each `.csproj` in Release +
   `npm ci && npm run build && npm test -- --run` in `ui-react`).
 - React: `npm run build`, and `npm test -- --run` (Vitest).
-- There is no separate .NET test project.
+- .NET test projects: `core-dotnet/core.tests`, `api-dotnet/api.tests`,
+  `worker-dotnet/worker.tests`, and `ui-blazor/blazor.tests` (see CI
+  `build-and-test.yml`).
 - The `prod-deploy-*.yml` workflows auto-deploy when `build-and-test` completes
   successfully on `main` (e.g. after a merged PR). Each workflow can also be run
   manually via `workflow_dispatch` on any branch (e.g. hotfixes).

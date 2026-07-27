@@ -9,10 +9,10 @@ project relationships, and parity guidance.
 
 | Project | Path | Stack | Port |
 | --- | --- | --- | --- |
-| MVC UI | [`mvc-dotnet/WeatherMVC`](mvc-dotnet/WeatherMVC) | ASP.NET Core MVC | 8100 |
+| MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
 | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
 | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
-| Blazor UI | [`ui-blazor/WeatherBlazor`](ui-blazor/WeatherBlazor) | Blazor Server | 8090 |
+| Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor Server | 8090 |
 | Core | [`core-dotnet/core/Core.csproj`](core-dotnet/core/Core.csproj) | Shared .NET class library referenced by MVC and API | — |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
@@ -25,7 +25,7 @@ they can enqueue jobs later; the worker processes them.
 
 | Project | Path | Role | Port | Endpoint |
 | --- | --- | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet`](worker-dotnet) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/About` |
+| Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/About` |
 
 Without `DB_CONNECTION_STRING`, each app falls back to in-memory Hangfire
 storage (jobs do not cross processes locally). In production, set

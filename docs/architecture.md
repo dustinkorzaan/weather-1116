@@ -18,10 +18,10 @@ AI Weather in API and MVC.
 
 | # | Project | Path | Stack | Role |
 | - | --- | --- | --- | --- |
-| 1 | MVC UI | [`mvc-dotnet/WeatherMVC`](../mvc-dotnet/WeatherMVC) | ASP.NET Core MVC | Server-rendered web UI |
+| 1 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
 | 2 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
 | 3 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
-| 4 | Blazor UI | [`ui-blazor/WeatherBlazor`](../ui-blazor/WeatherBlazor) | Blazor Server | Interactive server-rendered UI in C# |
+| 4 | Blazor UI | [`ui-blazor/blazor`](../ui-blazor/blazor) | Blazor Server | Interactive server-rendered UI in C# |
 | 5 | Core | [`core-dotnet/core/Core.csproj`](../core-dotnet/core/Core.csproj) | .NET class library | Shared events/handlers referenced by MVC, API, and MCP hosts |
 
 ### Adjacent projects (not UI/API dependencies)
@@ -31,7 +31,7 @@ for hello/AI weather/map flows in the three UIs.
 
 | Project | Path | Role |
 | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet`](../worker-dotnet) | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
+| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
 | MCP DotNet | [`mcp-dotnet`](../mcp-dotnet) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
 | MCP Function | [`mcp-function`](../mcp-function) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V4 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V4`](../FoundryConsoleV4) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V4MCP`; built in CI) |
@@ -235,6 +235,7 @@ builds on every push:
 - React app in `ui-react` via `npm ci && npm run build`, followed by
   `npm test -- --run` (Vitest).
 - `WeatherAPI.Tests` integration tests.
+- `WeatherBlazor.Tests` component tests.
 
 Production deploy workflows (`prod-deploy-*.yml`) auto-deploy when **build-and-test**
 completes successfully on `main`. Each deploy workflow can also be triggered manually
@@ -247,13 +248,18 @@ worker-dotnet, and both MCP hosts.
 api-dotnet/
   api/                       API project (WeatherAPI.csproj)
   api.tests/                 API unit tests (WeatherAPI.Tests.csproj)
-mvc-dotnet/WeatherMVC/       MVC UI project
-ui-blazor/WeatherBlazor/     Blazor UI project
+mvc-dotnet/
+  mvc/                       MVC UI project (WeatherMVC.csproj)
+ui-blazor/
+  blazor/                    Blazor UI project (WeatherBlazor.csproj)
+  blazor.tests/              Blazor unit tests (WeatherBlazor.Tests.csproj)
 ui-react/                    React UI project
 core-dotnet/
   core/                      Core shared class library (Core.csproj)
   core.tests/                Core unit tests (Core.Tests.csproj)
-worker-dotnet/               Hangfire background worker (job servers + dashboard)
+worker-dotnet/
+  worker/                    Hangfire background worker (WeatherWorkerDotNet.csproj)
+  worker.tests/              Worker unit tests (WeatherWorkerDotNet.Tests.csproj)
 mcp-dotnet/                  MCP DotNet tool host (GetPublicWeatherData)
 mcp-function/                MCP Function tool host (GetLatLongData)
 FoundryConsoleV1…V4/         Foundry learning console demos

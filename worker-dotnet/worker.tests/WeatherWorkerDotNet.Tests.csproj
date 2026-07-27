@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\WeatherWorkerDotNet.csproj" />
+    <ProjectReference Include="..\worker\WeatherWorkerDotNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>
