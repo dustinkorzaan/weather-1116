@@ -118,7 +118,13 @@ same storage as Hangfire **clients** so they can enqueue jobs without running
 servers.
 
 - **Dashboard:** `/hangfire` on the worker (POC — open to all; auth TBD).
-- **Health:** `/about` returns a `worker-dotnet` leaf node probed by API/MVC.
+- **Health:** `/About` returns `Worker Root` with `worker-dotnet` and a `Hangfire`
+  child. The Hangfire node exposes queue counts in `publicMessage` and marks
+  itself unhealthy when failed jobs exist or jobs exceed staleness thresholds
+  (default 30 minutes processing / 60 minutes enqueued; configure via
+  `HangfireAboutHealth_StaleProcessingMinutes` and
+  `HangfireAboutHealth_StaleEnqueuedMinutes` in `appsettings.json` or `.env`).
+  API and MVC probe this tree as the `Worker Root` child.
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
 
@@ -143,21 +149,8 @@ Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler
 ## About and Health
 
 Every runnable app can participate in a shared **About tree** contract
-(`Core.about.AboutNode`): `name`, `isHealthy`, optional build metadata, and
-`children`.
-
-| App | `/about` or `/About` behavior |
-| --- | --- |
-| WeatherAPI | `API Root` → `API` + remote worker and MCP about nodes |
-| WeatherMVC | `MVC Root` → `MVC` + nested `API Root` (same worker/MCP children as API) |
-| Worker DotNet | Leaf node for self (`worker-dotnet`); always healthy for now |
-| MCP DotNet / MCP Function | Leaf node for self; health checks expected MCP tool registration |
-| React | Fetches API `/About` and wraps with `UI React Root` |
-| Blazor | Fetches API `/About` and wraps with `Blazor Root` |
-
-`Core.about.AboutClient` (`IAboutClient`) fetches remote about JSON from
-configured URLs. Missing or unhealthy dependencies become unhealthy leaf nodes
-without failing the entire response.
+(`Core.about.AboutNode`): `name`, `publicMessage`, `isHealthy`, build metadata,
+and `children`.
 
 ## Core Project
 

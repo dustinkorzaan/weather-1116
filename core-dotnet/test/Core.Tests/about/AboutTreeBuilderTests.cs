@@ -108,6 +108,24 @@ public class AboutTreeBuilderTests
     }
 
     [Fact]
+    public void BuildWorkerRoot_PutsWorkerAndHangfireNodesUnderRoot()
+    {
+        var worker = AboutTreeBuilder.BuildWorkerDotNetNode();
+        var hangfire = new AboutNode
+        {
+            Name = "Hangfire",
+            PublicMessage = "0 failed, 1 processing, 2 enqueued",
+        };
+
+        var root = AboutTreeBuilder.BuildWorkerRoot(worker, hangfire);
+
+        Assert.Equal("Worker Root", root.Name);
+        Assert.Equal(["worker-dotnet", "Hangfire"], root.Children.Select(child => child.Name));
+        Assert.Equal("0 failed, 1 processing, 2 enqueued", root.Children[1].PublicMessage);
+        Assert.True(root.IsHealthy);
+    }
+
+    [Fact]
     public void BuildMcpNodes_DefaultToHealthy()
     {
         Assert.True(AboutTreeBuilder.BuildMcpDotNetNode().IsHealthy);

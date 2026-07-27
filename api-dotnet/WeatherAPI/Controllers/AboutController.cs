@@ -1,10 +1,12 @@
 using Core.about;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WeatherAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[AllowAnonymous]
 public class AboutController(
     IAboutClient aboutClient,
     IConfiguration configuration) : ControllerBase
@@ -14,7 +16,7 @@ public class AboutController(
     {
         var workerDotNetTask = aboutClient.GetAsync(
             $"{configuration["WORKER_DOTNET_URL"]}/About",
-            "worker-dotnet",
+            "Worker Root",
             cancellationToken);
         var mcpDotNetTask = aboutClient.GetAsync(
             $"{configuration["MCP_DOTNET_URL"]}/About",

@@ -38,7 +38,7 @@ public static class AboutTreeBuilder
     }
 
     /// <summary>
-    /// Single leaf node for the worker-dotnet host (no children).
+    /// Single leaf node for the worker-dotnet host.
     /// </summary>
     public static AboutNode BuildWorkerDotNetNode(bool isHealthy = true)
     {
@@ -46,6 +46,11 @@ public static class AboutTreeBuilder
         node.IsHealthy = isHealthy;
         return node;
     }
+
+    public static AboutNode BuildWorkerRoot(
+        AboutNode workerNode,
+        AboutNode hangfireNode)
+        => BuildRoot("Worker Root", workerNode, hangfireNode);
 
     /// <summary>
     /// Creates a root node whose first child is always <paramref name="selfNode"/>,

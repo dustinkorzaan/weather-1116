@@ -25,7 +25,7 @@ function formatBuildStart(isoDate) {
   return `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${period} UTC`;
 }
 
-function AboutTreeNode({ node }) {
+export function AboutTreeNode({ node }) {
   if (!node) {
     return null;
   }
@@ -33,13 +33,13 @@ function AboutTreeNode({ node }) {
   const hasChildren = Array.isArray(node.children) && node.children.length > 0;
   const metadata = [];
   if (Number.isFinite(node.buildNumber)) {
-    metadata.push(`Build #${node.buildNumber}`);
+    metadata.push({ text: `Build #${node.buildNumber}`, value: node.buildNumber });
   }
   if (node.buildStart) {
-    metadata.push(`Started ${formatBuildStart(node.buildStart)}`);
+    metadata.push({ text: `Started ${formatBuildStart(node.buildStart)}`, value: formatBuildStart(node.buildStart) });
   }
   if (node.buildBranchName) {
-    metadata.push(`Branch ${node.buildBranchName}`);
+    metadata.push({ text: `Branch ${node.buildBranchName}`, value: node.buildBranchName, isBranch: true });
   }
 
   return (
@@ -50,7 +50,19 @@ function AboutTreeNode({ node }) {
           {node.isHealthy ? 'Healthy' : 'Unhealthy'}
         </span>
       </div>
-      {metadata.length > 0 && <div className="about-tree-meta">{metadata.join(' | ')}</div>}
+      {node.publicMessage && <div className="about-tree-public-message">{node.publicMessage}</div>}
+      {metadata.length > 0 && (
+        <div className="about-tree-meta">
+          {metadata.map((item, index) => (
+            <span key={`${item.text}-${index}`}>
+              {index > 0 && ' | '}
+              <span className={item.isBranch && item.value !== 'main' ? 'about-tree-branch-non-main' : undefined}>
+                {item.text}
+              </span>
+            </span>
+          ))}
+        </div>
+      )}
 
       {hasChildren && (
         <ul className="about-tree-list">

@@ -8,8 +8,8 @@ namespace Core.about;
 public class AboutNode
 {
     public required string Name { get; set; }
+    public string? PublicMessage { get; set; }
     public bool IsHealthy { get; set; } = true;
-    public string? Version { get; set; }
     public DateTime? BuildStart { get; set; }
     public int? BuildNumber { get; set; }
     public string? BuildBranchName { get; set; }

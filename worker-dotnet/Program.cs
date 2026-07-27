@@ -13,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
+builder.Services.Configure<HangfireAboutHealthOptions>(
+	_ => HangfireAboutHealthOptions.Bind(builder.Configuration));
+builder.Services.AddControllers();
 
 // Durable SQL Server storage wherever a connection string is provided
 // (DB_CONNECTION_STRING). Falls back to in-memory storage locally so the
@@ -80,7 +83,6 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 	Authorization = [new AllowAllDashboardAuthorizationFilter()],
 });
 
-// Always-healthy leaf for now; the API/MVC About trees probe this endpoint.
-app.MapGet("/about", () => Results.Ok(AboutTreeBuilder.BuildWorkerDotNetNode(true)));
+app.MapControllers();
 
 app.Run();

@@ -35,7 +35,7 @@ builder.Services.AddHangfire(config =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(5);
+    client.Timeout = TimeSpan.FromSeconds(15);
 });
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
 

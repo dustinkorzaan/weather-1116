@@ -1,4 +1,3 @@
-using Core.about;
 using Core.weather.Handlers;
 using DotNetEnv;
 using MediatR;
@@ -7,6 +6,8 @@ using ModelContextProtocol.Server;
 Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
@@ -57,13 +58,6 @@ app.Use(async (context, next) =>
 });
 
 app.MapMcp("/mcp");
-
-app.MapGet("/about", (IEnumerable<McpServerTool> tools) =>
-{
-	const string expectedTool = "GetPublicWeatherData";
-	var isHealthy = !string.IsNullOrWhiteSpace(mcpApiKey) && tools.Any(t =>
-		string.Equals(t.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
-	return Results.Ok(AboutTreeBuilder.BuildMcpDotNetNode(isHealthy));
-});
+app.MapControllers();
 
 app.Run();

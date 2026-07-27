@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
-import App from './App';
+import App, { AboutTreeNode } from './App';
 import { weatherApi } from './services/weatherApi';
 
 function createTestStore() {
@@ -70,4 +70,19 @@ test('renders weather app title and loaded data', async () => {
   expect(await screen.findByLabelText(/location:/i)).toBeDefined();
   expect(await screen.findByRole('button', { name: /get current ai weather/i })).toBeDefined();
   expect(await screen.findByText('Warm')).toBeDefined();
+});
+
+test('renders a public message in the About tree', () => {
+  render(
+    <AboutTreeNode
+      node={{
+        name: 'Hangfire',
+        publicMessage: '0 failed, 1 processing, 2 enqueued',
+        isHealthy: true,
+        children: [],
+      }}
+    />
+  );
+
+  expect(screen.getByText('0 failed, 1 processing, 2 enqueued')).toBeDefined();
 });

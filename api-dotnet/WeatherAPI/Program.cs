@@ -31,13 +31,10 @@ builder.Services.AddHangfire(config =>
 	}
 });
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-	options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-});
+builder.Services.AddControllers();
 builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 {
-	client.Timeout = TimeSpan.FromSeconds(5);
+	client.Timeout = TimeSpan.FromSeconds(15);
 });
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
 builder.Services.AddCors(options =>

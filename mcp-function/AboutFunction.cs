@@ -19,7 +19,8 @@ public class AboutFunction
 	public IActionResult About(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "about")] HttpRequest _)
 	{
-		return new OkObjectResult(AboutTreeBuilder.BuildMcpFunctionNode(HasExpectedTool.Value));
+		return new OkObjectResult(
+			AboutTreeBuilder.BuildMcpFunctionNode(HasExpectedTool.Value));
 	}
 
 	/// <summary>
