@@ -1,13 +1,10 @@
-name: Build and Test
+name: build-and-test
 run-name: Build and Test
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
   push:
 
-# Newer pushes cancel older in-progress builds for the same ref (e.g. main).
+# Newer pushes cancel older in-progress builds for the same ref.
 concurrency:
   group: build-and-test-${{ github.ref }}
   cancel-in-progress: true
@@ -95,7 +92,6 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '24'
-          npm-version: '11'
           cache: 'npm'
           cache-dependency-path: ui-react/package-lock.json
 

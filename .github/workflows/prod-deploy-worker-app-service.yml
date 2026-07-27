@@ -1,34 +1,27 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: CICD weather1116-prod-worker
+name: cicd-weather1116-prod-worker
 run-name: CICD weather1116-prod-worker
 
 on:
   workflow_run:
     workflows:
-      - Build and Test
+      - build-and-test
     branches:
       - main
-      - claude-testing
     types:
       - completed
-  # Keep manual trigger for emergency redeploys and controlled production rollouts.
   workflow_dispatch:
 
-# Newer deploys cancel older in-progress runs of this workflow.
 concurrency:
   group: prod-deploy-worker
   cancel-in-progress: true
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   BUILD_NUMBER: ${{ github.run_number }}
 
 jobs:
   build:
     runs-on: windows-latest
-    if: ${{ (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude-testing')) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read #This is required for actions/checkout
     outputs:
@@ -41,6 +34,8 @@ jobs:
         run: echo "build_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v6
@@ -70,13 +65,6 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-      - name: Set up Node.js 24
-        uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-          npm-version: '11'
-          package-manager-cache: false
-
       - name: Download artifact from build job
         uses: actions/download-artifact@v7
         with:
@@ -102,7 +90,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
       - name: Set App Service settings
-        uses: azure/cli@v2
+        uses: azure/cli@v3
         with:
           inlineScript: |
             APP_RG=$(az webapp list --query "[?name=='weather1116-prod-worker'].resourceGroup | [0]" -o tsv)

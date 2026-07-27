@@ -1,19 +1,16 @@
-name: CICD weather1116-prod-react
+name: cicd-weather1116-prod-react
 run-name: CICD weather1116-prod-react
 
 on:
   workflow_run:
     workflows:
-      - Build and Test
+      - build-and-test
     branches:
       - main
-      - claude-testing
     types:
       - completed
-  # Keep manual trigger for emergency redeploys and controlled production rollouts.
   workflow_dispatch:
 
-# Newer deploys cancel older in-progress runs of this workflow.
 concurrency:
   group: prod-deploy-react
   cancel-in-progress: true
@@ -25,13 +22,14 @@ jobs:
   build_and_deploy_job:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
-    if: ${{ (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude-testing')) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Record build start time
         run: echo "BUILD_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
           submodules: true
           lfs: false
       - name: Debug AZURE_UI_REACT_TOKEN length

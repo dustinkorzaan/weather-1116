@@ -1,4 +1,5 @@
-name: V1 AI 90 Callback
+name: v1-ai-90-callback
+run-name: V1 AI 90 Callback
 
 on:
   workflow_call:
