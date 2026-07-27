@@ -158,7 +158,7 @@ and `children`.
 `WeatherMVC`, `WeatherAPI`, `worker-dotnet`, and both MCP hosts. It hosts shared MediatR events
 and handlers, including:
 
-- `core-dotnet/demo/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
+- `core-dotnet/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
 - `core-dotnet/geo/` — geocoding (`GetLatLongData`)
 - `core-dotnet/weather/` — public weather (`GetPublicWeatherData`)
 - `core-dotnet/AIWeather/` — Foundry agent integration (`GetCurrentAIWeatherHandler`)

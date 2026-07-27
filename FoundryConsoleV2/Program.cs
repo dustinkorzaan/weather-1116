@@ -1,5 +1,5 @@
 ﻿using Core.AIWeather.Models;
-using Core.demo.handlers;
+using Core.HelloWorld.handlers;
 using Core.geo.Events;
 using Core.weather.Events;
 using DotNetEnv;

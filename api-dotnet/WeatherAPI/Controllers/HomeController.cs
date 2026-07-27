@@ -1,5 +1,5 @@
-using Core.demo.events;
-using Core.demo.handlers;
+using Core.HelloWorld.events;
+using Core.HelloWorld.handlers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

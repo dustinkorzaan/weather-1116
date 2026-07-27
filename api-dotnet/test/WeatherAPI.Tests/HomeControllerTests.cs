@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Core.demo.handlers;
+using Core.HelloWorld.handlers;
 
 namespace WeatherAPI.Tests;
 
