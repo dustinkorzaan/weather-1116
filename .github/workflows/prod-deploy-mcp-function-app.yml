@@ -16,7 +16,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   DOTNET_VERSION: '10.x'
   BUILD_NUMBER: ${{ github.run_number }}
 
@@ -108,7 +107,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
       - name: Set Function App settings
-        uses: azure/cli@v2
+        uses: azure/cli@v3
         with:
           inlineScript: |
             APP_RG=$(az functionapp list --query "[?name=='weather1116-prod-mcpfunc'].resourceGroup | [0]" -o tsv)
