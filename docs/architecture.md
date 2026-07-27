@@ -19,7 +19,7 @@ AI Weather in API and MVC.
 | # | Project | Path | Stack | Role |
 | - | --- | --- | --- | --- |
 | 1 | MVC UI | [`mvc-dotnet/WeatherMVC`](../mvc-dotnet/WeatherMVC) | ASP.NET Core MVC | Server-rendered web UI |
-| 2 | API | [`api-dotnet/WeatherAPI`](../api-dotnet/WeatherAPI) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
+| 2 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
 | 3 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
 | 4 | Blazor UI | [`ui-blazor/WeatherBlazor`](../ui-blazor/WeatherBlazor) | Blazor Server | Interactive server-rendered UI in C# |
 | 5 | Core | [`core-dotnet/core/Core.csproj`](../core-dotnet/core/Core.csproj) | .NET class library | Shared events/handlers referenced by MVC, API, and MCP hosts |
@@ -244,7 +244,9 @@ worker-dotnet, and both MCP hosts.
 ## Repository Layout
 
 ```text
-api-dotnet/WeatherAPI/       API project
+api-dotnet/
+  api/                       API project (WeatherAPI.csproj)
+  api.tests/                 API unit tests (WeatherAPI.Tests.csproj)
 mvc-dotnet/WeatherMVC/       MVC UI project
 ui-blazor/WeatherBlazor/     Blazor UI project
 ui-react/                    React UI project

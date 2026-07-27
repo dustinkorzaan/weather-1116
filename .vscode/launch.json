@@ -21,9 +21,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build weatherapi",
-            "program": "${workspaceFolder}/api-dotnet/WeatherAPI/bin/Debug/net10.0/WeatherAPI.dll",
+            "program": "${workspaceFolder}/api-dotnet/api/bin/Debug/net10.0/WeatherAPI.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/api-dotnet/WeatherAPI",
+            "cwd": "${workspaceFolder}/api-dotnet/api",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",

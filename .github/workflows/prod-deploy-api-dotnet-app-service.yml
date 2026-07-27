@@ -44,10 +44,10 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Build with dotnet
-        run: dotnet build ./api-dotnet/WeatherAPI/WeatherAPI.csproj --configuration Release
+        run: dotnet build ./api-dotnet/api/WeatherAPI.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ./api-dotnet/WeatherAPI/WeatherAPI.csproj -c Release -o "${{ github.workspace }}/publish/api-dotnet"
+        run: dotnet publish ./api-dotnet/api/WeatherAPI.csproj -c Release -o "${{ github.workspace }}/publish/api-dotnet"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v7

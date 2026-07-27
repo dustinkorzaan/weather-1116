@@ -55,7 +55,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/api-dotnet/WeatherAPI/WeatherAPI.csproj",
+                "${workspaceFolder}/api-dotnet/api/WeatherAPI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -67,7 +67,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/api-dotnet/WeatherAPI/WeatherAPI.csproj",
+                "${workspaceFolder}/api-dotnet/api/WeatherAPI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -81,7 +81,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/api-dotnet/WeatherAPI/WeatherAPI.csproj"
+                "${workspaceFolder}/api-dotnet/api/WeatherAPI.csproj"
             ],
             "problemMatcher": "$msCompile"
         },

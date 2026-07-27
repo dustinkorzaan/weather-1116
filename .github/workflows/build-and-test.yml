@@ -22,7 +22,7 @@ jobs:
       matrix:
         project:
           - core-dotnet/core/Core.csproj
-          - api-dotnet/WeatherAPI/WeatherAPI.csproj
+          - api-dotnet/api/WeatherAPI.csproj
           - ui-blazor/WeatherBlazor/WeatherBlazor.csproj
           - mvc-dotnet/WeatherMVC/WeatherMVC.csproj
           - worker-dotnet/WeatherWorkerDotNet.csproj
@@ -62,7 +62,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Run Weather API tests
-        run: dotnet test api-dotnet/test/WeatherAPI.Tests/WeatherAPI.Tests.csproj --configuration Release --verbosity normal
+        run: dotnet test api-dotnet/api.tests/WeatherAPI.Tests.csproj --configuration Release --verbosity normal
 
   test-core:
     name: Test Core Library

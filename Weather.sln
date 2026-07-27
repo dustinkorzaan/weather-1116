@@ -5,7 +5,7 @@ VisualStudioVersion = 17.7.33808.371
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherBlazor", "ui-blazor\WeatherBlazor\WeatherBlazor.csproj", "{192C7008-36B8-4E28-BC6C-4BAE660537F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherAPI", "api-dotnet\WeatherAPI\WeatherAPI.csproj", "{36D2831B-4CD0-4CEE-A7E2-93914782305A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherAPI", "api-dotnet\api\WeatherAPI.csproj", "{36D2831B-4CD0-4CEE-A7E2-93914782305A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMVC", "mvc-dotnet\WeatherMVC\WeatherMVC.csproj", "{76692D10-B4B4-4896-8A1A-AED10DB540FD}"
 EndProject
@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api-dotnet", "api-dotnet", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5ABBC0E5-CF93-86E3-8916-9EAE665EBE5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherAPI.Tests", "api-dotnet\test\WeatherAPI.Tests\WeatherAPI.Tests.csproj", "{DFF4E329-4BC4-4A02-B1F1-67153CF7CFEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherAPI.Tests", "api-dotnet\api.tests\WeatherAPI.Tests.csproj", "{DFF4E329-4BC4-4A02-B1F1-67153CF7CFEB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp-function", "mcp-function", "{8B9FDB55-B235-7FC9-E677-CC22ECA932D6}"
 EndProject

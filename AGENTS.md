@@ -32,7 +32,7 @@ hot reload); React uses `npm start`. Ports come from each project's
 
 | Service | Path | Run command | Port |
 | --- | --- | --- | --- |
-| Weather API | `api-dotnet/WeatherAPI` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8080 |
+| Weather API | `api-dotnet/api` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8080 |
 | Weather Blazor | `ui-blazor/WeatherBlazor` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8090 |
 | Weather MVC | `mvc-dotnet/WeatherMVC` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8100 |
 | React UI | `ui-react` | `npm start` | 3000 |
