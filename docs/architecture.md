@@ -146,6 +146,17 @@ Every runnable app can participate in a shared **About tree** contract
 (`Core.about.AboutNode`): `name`, `isHealthy`, optional build metadata, and
 `children`.
 
+| Property | JSON name | Description |
+| --- | --- | --- |
+| Name | `name` | Display name for the service or health check |
+| PublicMessage | `publicMessage` | Optional message safe for the anonymous About endpoint |
+| IsHealthy | `isHealthy` | Health status for this node and its monitored dependency |
+| Version | `version` | Optional application version |
+| BuildStart | `buildStart` | Optional build start timestamp |
+| BuildNumber | `buildNumber` | Optional build number |
+| BuildBranchName | `buildBranchName` | Optional source branch name |
+| Children | `children` | Nested About nodes |
+
 | App | `/about` or `/About` behavior |
 | --- | --- |
 | WeatherAPI | `API Root` → `API` + remote worker and MCP about nodes |
