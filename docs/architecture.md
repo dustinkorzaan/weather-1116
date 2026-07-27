@@ -31,7 +31,7 @@ for hello/AI weather/map flows in the three UIs.
 
 | Project | Path | Role |
 | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet`](../worker-dotnet) | Hangfire job servers, dashboard (`/hangfire`), and `/about` health leaf |
+| Worker DotNet | [`worker-dotnet`](../worker-dotnet) | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
 | MCP DotNet | [`mcp-dotnet`](../mcp-dotnet) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
 | MCP Function | [`mcp-function`](../mcp-function) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V4 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V4`](../FoundryConsoleV4) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V4MCP`; built in CI) |
@@ -99,7 +99,7 @@ MediatR handlers the sample uses in-process elsewhere.
 | MCP DotNet | `GetPublicWeatherData` | `/mcp` | Bearer `MCP_API_KEY` |
 | MCP Function | `GetLatLongData` | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` |
 
-Each host also exposes an anonymous **`/about`** probe that returns a leaf
+Each host also exposes an anonymous **`/About`** probe that returns a leaf
 `AboutNode` (`mcp-dotnet` or `mcp-function`) with tool-registration health and
 optional `BUILD_NUMBER` / `BUILD_START` / `BUILD_BRANCH_NAME` metadata.
 
@@ -107,7 +107,7 @@ API and MVC `/About` aggregate those remote nodes as children under their
 `API Root` subtree (see [About and health](#about-and-health)). Production base
 URLs are configured via `MCP_DOTNET_URL`, `MCP_FUNCTION_URL`, and
 `WORKER_DOTNET_URL` (GitHub variables `PROD_MCP_DOTNET_URL`,
-`PROD_MCP_FUNCTION_URL`, `PROD_WORKER_DOTNET_URL`); `/about` is appended in code.
+`PROD_MCP_FUNCTION_URL`, `PROD_WORKER_DOTNET_URL`); `/About` is appended in code.
 
 ## Background Worker (Hangfire)
 

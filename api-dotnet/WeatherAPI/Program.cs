@@ -68,7 +68,7 @@ app.UseHttpsRedirection();
 app.UseCors("ReactClient");
 
 // hack, because the default route is not working in codespaces, so redirect to the about endpoint
-app.MapGet("/", () => Results.Redirect("/about"));
+app.MapGet("/", () => Results.Redirect("/About"));
 app.MapControllers();
 
 app.Run();

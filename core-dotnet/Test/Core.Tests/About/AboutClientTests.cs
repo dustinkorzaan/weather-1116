@@ -16,18 +16,18 @@ public class AboutClientTests
         var payload = new AboutNode { Name = NodeName, IsHealthy = true };
         var client = CreateClient(JsonResponse(payload), out var recorded);
 
-        var node = await client.GetAsync("https://example.com/about", NodeName);
+        var node = await client.GetAsync("https://example.com/About", NodeName);
 
         Assert.Equal(NodeName, node.Name);
         Assert.True(node.IsHealthy);
-        Assert.Equal("https://example.com/about", recorded.LastRequestUri?.ToString());
+        Assert.Equal("https://example.com/About", recorded.LastRequestUri?.ToString());
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("not-a-url")]
-    [InlineData("ftp://example.com/about")]
+    [InlineData("ftp://example.com/About")]
     public async Task GetAsync_MissingOrNonHttpUrl_ReturnsUnhealthyNodeWithoutCallingNetwork(string? url)
     {
         var client = CreateClient(JsonResponse(new AboutNode { Name = NodeName }), out var recorded);
@@ -45,7 +45,7 @@ public class AboutClientTests
         var payload = new AboutNode { Name = "something-else", IsHealthy = true };
         var client = CreateClient(JsonResponse(payload), out _);
 
-        var node = await client.GetAsync("https://example.com/about", NodeName);
+        var node = await client.GetAsync("https://example.com/About", NodeName);
 
         Assert.Equal(NodeName, node.Name);
         Assert.False(node.IsHealthy);
@@ -60,7 +60,7 @@ public class AboutClientTests
         };
         var client = CreateClient(response, out _);
 
-        var node = await client.GetAsync("https://example.com/about", NodeName);
+        var node = await client.GetAsync("https://example.com/About", NodeName);
 
         Assert.Equal(NodeName, node.Name);
         Assert.False(node.IsHealthy);
@@ -72,7 +72,7 @@ public class AboutClientTests
         var response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
         var client = CreateClient(response, out _);
 
-        var node = await client.GetAsync("https://example.com/about", NodeName);
+        var node = await client.GetAsync("https://example.com/About", NodeName);
 
         Assert.Equal(NodeName, node.Name);
         Assert.False(node.IsHealthy);
@@ -85,7 +85,7 @@ public class AboutClientTests
             new HttpClient(new ThrowingHandler(new HttpRequestException("boom"))),
             NullLogger<AboutClient>.Instance);
 
-        var node = await client.GetAsync("https://example.com/about", NodeName);
+        var node = await client.GetAsync("https://example.com/About", NodeName);
 
         Assert.Equal(NodeName, node.Name);
         Assert.False(node.IsHealthy);
@@ -101,7 +101,7 @@ public class AboutClientTests
             NullLogger<AboutClient>.Instance);
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            () => client.GetAsync("https://example.com/about", NodeName, cts.Token));
+            () => client.GetAsync("https://example.com/About", NodeName, cts.Token));
     }
 
     private static HttpResponseMessage JsonResponse(AboutNode node)

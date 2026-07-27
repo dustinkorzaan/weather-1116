@@ -15,6 +15,6 @@ public class RootEndpointTests(WeatherApiWebApplicationFactory factory) : IClass
         var response = await client.GetAsync("/");
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-        Assert.Equal("/about", response.Headers.Location?.OriginalString);
+        Assert.Equal("/About", response.Headers.Location?.OriginalString);
     }
 }

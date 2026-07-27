@@ -25,7 +25,7 @@ they can enqueue jobs later; the worker processes them.
 
 | Project | Path | Role | Port | Endpoint |
 | --- | --- | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet`](worker-dotnet) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/about` |
+| Worker DotNet | [`worker-dotnet`](worker-dotnet) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/About` |
 
 Without `DB_CONNECTION_STRING`, each app falls back to in-memory Hangfire
 storage (jobs do not cross processes locally). In production, set
@@ -50,8 +50,8 @@ also forwarded in [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer
 Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see `prod-deploy-mcp-*.yml`).
 
 Examples:
-- MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/about` stays open)
-- MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/about` is anonymous)
+- MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/About` stays open)
+- MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 
 ## Foundry console demos
 

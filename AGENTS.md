@@ -50,7 +50,7 @@ hot reload); React uses `npm start`. Ports come from each project's
 - `WeatherMVC` is standalone (duplicates backend logic via `Core`/MediatR) and
   does not call the API.
 - `worker-dotnet` runs Hangfire job servers and exposes `/hangfire` (dashboard,
-  POC — no auth) and `/about`. API and MVC are Hangfire clients only (shared
+  POC — no auth) and `/About`. API and MVC are Hangfire clients only (shared
   `DB_CONNECTION_STRING` storage); without a DB connection string each process
   falls back to its own in-memory storage, so jobs do not cross apps locally.
 - The apps listen on plain HTTP only (no HTTPS profile). `UseHttpsRedirection`
