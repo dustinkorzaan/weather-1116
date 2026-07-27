@@ -7,9 +7,6 @@ namespace WeatherWorkerDotNet;
 /// </summary>
 public sealed class HangfireAboutHealthOptions
 {
-    public const string StaleProcessingMinutesKey = "HangfireAboutHealth_StaleProcessingMinutes";
-    public const string StaleEnqueuedMinutesKey = "HangfireAboutHealth_StaleEnqueuedMinutes";
-
     /// <summary>
     /// Processing jobs running longer than this are treated as unhealthy.
     /// </summary>
@@ -21,14 +18,11 @@ public sealed class HangfireAboutHealthOptions
     public int StaleEnqueuedMinutes { get; set; } = 60;
 
     public static HangfireAboutHealthOptions Bind(IConfiguration configuration)
-    {
-        var options = new HangfireAboutHealthOptions();
-        options.StaleProcessingMinutes = configuration.GetValue(
-            StaleProcessingMinutesKey,
-            options.StaleProcessingMinutes);
-        options.StaleEnqueuedMinutes = configuration.GetValue(
-            StaleEnqueuedMinutesKey,
-            options.StaleEnqueuedMinutes);
-        return options;
-    }
+        => new()
+        {
+            StaleProcessingMinutes = configuration.GetValue<int?>(
+                "HangfireAboutHealth_StaleProcessingMinutes") ?? 30,
+            StaleEnqueuedMinutes = configuration.GetValue<int?>(
+                "HangfireAboutHealth_StaleEnqueuedMinutes") ?? 60,
+        };
 }
