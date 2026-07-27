@@ -112,6 +112,22 @@ jobs:
       - name: Run Blazor tests
         run: dotnet test ui-blazor/blazor.tests/WeatherBlazor.Tests.csproj --configuration Release --verbosity normal
 
+  test-mvc:
+    name: Test MVC UI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run MVC tests
+        run: dotnet test mvc-dotnet/mvc.tests/WeatherMVC.Tests.csproj --configuration Release --verbosity normal
+
   build-and-test-react:
     name: Build and Test React Project
     runs-on: ubuntu-latest

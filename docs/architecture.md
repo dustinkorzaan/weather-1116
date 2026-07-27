@@ -235,6 +235,7 @@ builds on every push:
 - React app in `ui-react` via `npm ci && npm run build`, followed by
   `npm test -- --run` (Vitest).
 - `WeatherAPI.Tests` integration tests.
+- `WeatherMVC.Tests` integration tests.
 - `WeatherBlazor.Tests` component tests.
 
 Production deploy workflows (`prod-deploy-*.yml`) auto-deploy when **build-and-test**
@@ -250,6 +251,7 @@ api-dotnet/
   api.tests/                 API unit tests (WeatherAPI.Tests.csproj)
 mvc-dotnet/
   mvc/                       MVC UI project (WeatherMVC.csproj)
+  mvc.tests/                 MVC integration tests (WeatherMVC.Tests.csproj)
 ui-blazor/
   blazor/                    Blazor UI project (WeatherBlazor.csproj)
   blazor.tests/              Blazor unit tests (WeatherBlazor.Tests.csproj)

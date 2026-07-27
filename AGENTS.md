@@ -68,8 +68,8 @@ hot reload); React uses `npm start`. Ports come from each project's
   `npm ci && npm run build && npm test -- --run` in `ui-react`).
 - React: `npm run build`, and `npm test -- --run` (Vitest).
 - .NET test projects: `core-dotnet/core.tests`, `api-dotnet/api.tests`,
-  `worker-dotnet/worker.tests`, and `ui-blazor/blazor.tests` (see CI
-  `build-and-test.yml`).
+  `mvc-dotnet/mvc.tests`, `worker-dotnet/worker.tests`, and
+  `ui-blazor/blazor.tests` (see CI `build-and-test.yml`).
 - The `prod-deploy-*.yml` workflows auto-deploy when `build-and-test` completes
   successfully on `main` (e.g. after a merged PR). Each workflow can also be run
   manually via `workflow_dispatch` on any branch (e.g. hotfixes).
