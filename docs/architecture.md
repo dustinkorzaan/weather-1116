@@ -245,11 +245,10 @@ builds on every push:
   `npm test -- --run` (Vitest).
 - `WeatherAPI.Tests` integration tests.
 
-Production deploy workflows (`prod-deploy-*.yml`) run only after **Build and Test**
-completes successfully on `main` (push/merge) or on a non-draft pull request targeting
-`main` (including when marked ready for review). Manual `workflow_dispatch` redeploys
-are limited to `main`. Deployables include API, MVC, React, Blazor, worker-dotnet, and
-both MCP hosts.
+Production deploy workflows (`prod-deploy-*.yml`) auto-deploy when **build-and-test**
+completes successfully on `main`. Each deploy workflow can also be triggered manually
+via `workflow_dispatch` on any branch. Deployables include API, MVC, React, Blazor,
+worker-dotnet, and both MCP hosts.
 
 ## Repository Layout
 

@@ -7,10 +7,11 @@ run-name: CICD weather1116-prod-mcpapp
 on:
   workflow_run:
     workflows:
-      - Build and Test
+      - build-and-test
+    branches:
+      - main
     types:
       - completed
-  # Keep manual trigger for emergency redeploys and controlled production rollouts.
   workflow_dispatch:
 
 # Newer deploys cancel older in-progress runs of this workflow.
@@ -25,14 +26,7 @@ env:
 jobs:
   build:
     runs-on: windows-latest
-    if: >-
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       (
-         (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') ||
-         (github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0].draft == false)
-       ))
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read #This is required for actions/checkout
     outputs:
