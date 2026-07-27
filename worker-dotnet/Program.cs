@@ -4,8 +4,6 @@ using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
-using Hangfire.Storage;
-using Hangfire.Storage.Monitoring;
 using MediatR;
 using WeatherWorkerDotNet;
 
@@ -15,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
+builder.Services.AddControllers();
 
 // Durable SQL Server storage wherever a connection string is provided
 // (DB_CONNECTION_STRING). Falls back to in-memory storage locally so the
@@ -82,51 +81,6 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 	Authorization = [new AllowAllDashboardAuthorizationFilter()],
 });
 
-app.MapGet("/about", () =>
-{
-	var workerNode = AboutTreeBuilder.BuildWorkerDotNetNode();
-	var hangfireNode = BuildHangfireNode();
-	return Results.Ok(AboutTreeBuilder.BuildWorkerRoot(workerNode, hangfireNode));
-});
+app.MapControllers();
 
 app.Run();
-
-AboutNode BuildHangfireNode()
-{
-	try
-	{
-		var monitoringApi = JobStorage.Current.GetMonitoringApi();
-		var statistics = monitoringApi.GetStatistics();
-		var processingJobs = monitoringApi.ProcessingJobs(0, int.MaxValue).Select(item => item.Value).ToList();
-		var enqueuedJobs = monitoringApi
-			.Queues()
-			.SelectMany(queue => monitoringApi.EnqueuedJobs(queue.Name, 0, int.MaxValue))
-			.Select(item => item.Value)
-			.ToList();
-
-		var now = DateTime.UtcNow;
-		var hasStaleProcessing = processingJobs.Any(job =>
-			job.StartedAt.HasValue &&
-			now - job.StartedAt.Value > TimeSpan.FromMinutes(30));
-		var hasStaleEnqueued = enqueuedJobs.Any(job =>
-			job.EnqueuedAt.HasValue &&
-			now - job.EnqueuedAt.Value > TimeSpan.FromMinutes(60));
-
-		return new AboutNode
-		{
-			Name = "Hangfire",
-			PublicMessage = $"{statistics.Failed} failed, {statistics.Processing} processing, {statistics.Enqueued} enqueued",
-			IsHealthy = statistics.Failed == 0 && !hasStaleProcessing && !hasStaleEnqueued,
-		};
-	}
-	catch (Exception exception)
-	{
-		app.Logger.LogWarning(exception, "Could not read Hangfire monitoring statistics");
-		return new AboutNode
-		{
-			Name = "Hangfire",
-			PublicMessage = "Unable to read Hangfire statistics",
-			IsHealthy = false,
-		};
-	}
-}
