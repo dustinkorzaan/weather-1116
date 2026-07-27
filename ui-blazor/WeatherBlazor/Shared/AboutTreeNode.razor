@@ -10,9 +10,9 @@
                 @(Node.IsHealthy ? "Healthy" : "Unhealthy")
             </span>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Node.Message))
+        @if (!string.IsNullOrWhiteSpace(Node.PublicMessage))
         {
-            <div class="about-tree-message">@Node.Message</div>
+            <div class="about-tree-public-message">@Node.PublicMessage</div>
         }
         @if (Node.BuildNumber.HasValue || Node.BuildStart.HasValue || !string.IsNullOrWhiteSpace(Node.BuildBranchName))
         {

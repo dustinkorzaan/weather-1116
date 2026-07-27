@@ -1,11 +1,11 @@
 // Shared About node contract (mirrors Core.about.AboutNode on the .NET side):
-//   name (string), message (string|null), isHealthy (bool), version (string|null), buildStart (datetime|null),
+//   name (string), publicMessage (string|null), isHealthy (bool), version (string|null), buildStart (datetime|null),
 //   buildNumber (int|null), buildBranchName (string|null), children (array)
 
 function createLeafNode(name, overrides = {}) {
   return {
     name,
-    message: null,
+    publicMessage: null,
     isHealthy: true,
     version: null,
     buildStart: resolveBuildStart(),

@@ -115,7 +115,7 @@ AboutNode BuildHangfireNode()
 		return new AboutNode
 		{
 			Name = "Hangfire",
-			Message = $"{statistics.Failed} failed, {statistics.Processing} processing, {statistics.Enqueued} enqueued",
+			PublicMessage = $"{statistics.Failed} failed, {statistics.Processing} processing, {statistics.Enqueued} enqueued",
 			IsHealthy = statistics.Failed == 0 && !hasStaleProcessing && !hasStaleEnqueued,
 		};
 	}
@@ -125,7 +125,7 @@ AboutNode BuildHangfireNode()
 		return new AboutNode
 		{
 			Name = "Hangfire",
-			Message = "Unable to read Hangfire statistics",
+			PublicMessage = "Unable to read Hangfire statistics",
 			IsHealthy = false,
 		};
 	}

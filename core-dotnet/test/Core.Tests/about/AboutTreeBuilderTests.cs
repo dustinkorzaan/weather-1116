@@ -114,14 +114,14 @@ public class AboutTreeBuilderTests
         var hangfire = new AboutNode
         {
             Name = "Hangfire",
-            Message = "0 failed, 1 processing, 2 enqueued",
+            PublicMessage = "0 failed, 1 processing, 2 enqueued",
         };
 
         var root = AboutTreeBuilder.BuildWorkerRoot(worker, hangfire);
 
         Assert.Equal("Worker Root", root.Name);
         Assert.Equal(["worker-dotnet", "Hangfire"], root.Children.Select(child => child.Name));
-        Assert.Equal("0 failed, 1 processing, 2 enqueued", root.Children[1].Message);
+        Assert.Equal("0 failed, 1 processing, 2 enqueued", root.Children[1].PublicMessage);
         Assert.True(root.IsHealthy);
     }
 

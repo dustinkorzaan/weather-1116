@@ -50,7 +50,7 @@ function AboutTreeNode({ node }) {
           {node.isHealthy ? 'Healthy' : 'Unhealthy'}
         </span>
       </div>
-      {node.message && <div className="about-tree-message">{node.message}</div>}
+      {node.publicMessage && <div className="about-tree-public-message">{node.publicMessage}</div>}
       {metadata.length > 0 && (
         <div className="about-tree-meta">
           {metadata.map((item, index) => (

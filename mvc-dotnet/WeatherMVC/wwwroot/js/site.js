@@ -41,10 +41,10 @@
 		row.appendChild(health);
 		li.appendChild(row);
 
-		if (node?.message) {
+		if (node?.publicMessage) {
 			const message = document.createElement('div');
-			message.className = 'about-tree-message';
-			message.textContent = node.message;
+			message.className = 'about-tree-public-message';
+			message.textContent = node.publicMessage;
 			li.appendChild(message);
 		}
 
