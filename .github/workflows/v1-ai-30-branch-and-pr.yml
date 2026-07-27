@@ -1,5 +1,5 @@
 name: v1-ai-30-branch-and-pr
-run-name: v1-ai-30-branch-and-pr
+run-name: V1 AI 30 Branch And PR
 
 on:
   workflow_call:

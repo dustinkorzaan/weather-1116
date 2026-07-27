@@ -1,5 +1,5 @@
 name: v1-ai-20-vars
-run-name: v1-ai-20-vars
+run-name: V1 AI 20 Vars
 
 on:
   workflow_call:

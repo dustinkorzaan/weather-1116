@@ -1,5 +1,5 @@
 name: v1-ai-50-run
-run-name: v1-ai-50-run
+run-name: V1 AI 50 Run
 
 on:
   workflow_call:

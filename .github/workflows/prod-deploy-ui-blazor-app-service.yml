@@ -1,5 +1,5 @@
 name: cicd-weather1116-prod-blazor
-run-name: cicd-weather1116-prod-blazor
+run-name: CICD weather1116-prod-blazor
 
 on:
   workflow_run:

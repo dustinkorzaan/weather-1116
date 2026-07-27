@@ -1,5 +1,5 @@
 name: cicd-weather1116-prod-mcpapp
-run-name: cicd-weather1116-prod-mcpapp
+run-name: CICD weather1116-prod-mcpapp
 
 on:
   workflow_run:

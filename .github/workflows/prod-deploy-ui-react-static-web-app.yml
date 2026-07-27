@@ -1,5 +1,5 @@
 name: cicd-weather1116-prod-react
-run-name: cicd-weather1116-prod-react
+run-name: CICD weather1116-prod-react
 
 on:
   workflow_run:
