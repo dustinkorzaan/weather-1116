@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace WeatherMcpFunction;
 
@@ -16,22 +14,13 @@ public class AboutFunction
 {
 	private const string ExpectedTool = "GetLatLongData";
 	private static readonly Lazy<bool> HasExpectedTool = new(() => HasMcpTool(ExpectedTool));
-	private static readonly JsonSerializerOptions AboutJsonOptions = new(JsonSerializerDefaults.Web)
-	{
-		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-	};
 
 	[Function(nameof(About))]
 	public IActionResult About(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "about")] HttpRequest _)
 	{
-		var aboutNode = AboutTreeBuilder.BuildMcpFunctionNode(HasExpectedTool.Value);
-		return new ContentResult
-		{
-			Content = JsonSerializer.Serialize(aboutNode, AboutJsonOptions),
-			ContentType = "application/json",
-			StatusCode = StatusCodes.Status200OK,
-		};
+		return AboutJsonResult.Create(
+			AboutTreeBuilder.BuildMcpFunctionNode(HasExpectedTool.Value));
 	}
 
 	/// <summary>
