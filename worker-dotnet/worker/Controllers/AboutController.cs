@@ -11,6 +11,7 @@ namespace WeatherWorkerDotNet.Controllers;
 [AllowAnonymous]
 public sealed class AboutController(
     ILogger<AboutController> logger,
+    JobStorage jobStorage,
     IOptions<HangfireAboutHealthOptions> hangfireHealthOptions) : ControllerBase
 {
     [HttpGet]
@@ -25,7 +26,7 @@ public sealed class AboutController(
     {
         try
         {
-            var monitoringApi = JobStorage.Current.GetMonitoringApi();
+            var monitoringApi = jobStorage.GetMonitoringApi();
             var statistics = monitoringApi.GetStatistics();
             return new AboutNode
             {
