@@ -4,7 +4,7 @@ using System.Text.Json;
 using Core.About;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Core.Tests.about;
+namespace Core.Tests.About;
 
 public class AboutClientTests
 {

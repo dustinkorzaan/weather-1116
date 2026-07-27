@@ -1,6 +1,6 @@
 using Core.About;
 
-namespace Core.Tests.about;
+namespace Core.Tests.About;
 
 /// <summary>
 /// Tests for <see cref="AboutTreeBuilder"/>. Build metadata is read from the

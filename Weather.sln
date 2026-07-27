@@ -33,7 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherWorkerDotNet", "work
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{194A79AE-9FE4-5F0D-4EE9-CA51D4E6243D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "core-dotnet\test\Core.Tests\Core.Tests.csproj", "{B37B2222-6C80-4DF4-BBF5-B8735E925EFC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "core-dotnet\Test\Core.Tests\Core.Tests.csproj", "{B37B2222-6C80-4DF4-BBF5-B8735E925EFC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV1", "FoundryConsoleV1", "{93D8A408-32AF-09F8-72E3-0D17BAD9122F}"
 EndProject

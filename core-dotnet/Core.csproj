@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- The Core.Tests project lives under test/; keep its sources out of the library build. -->
+    <!-- The Core.Tests project lives under Test/; keep its sources out of the library build. -->
     <Compile Remove="test/**/*.cs" />
   </ItemGroup>
 
