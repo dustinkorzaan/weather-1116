@@ -22,7 +22,7 @@ AI Weather in API and MVC.
 | 2 | API | [`api-dotnet/WeatherAPI`](../api-dotnet/WeatherAPI) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
 | 3 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
 | 4 | Blazor UI | [`ui-blazor/WeatherBlazor`](../ui-blazor/WeatherBlazor) | Blazor Server | Interactive server-rendered UI in C# |
-| 5 | Core | [`core-dotnet/Core.csproj`](../core-dotnet/Core.csproj) | .NET class library | Shared events/handlers referenced by MVC, API, and MCP hosts |
+| 5 | Core | [`core-dotnet/core/Core.csproj`](../core-dotnet/core/Core.csproj) | .NET class library | Shared events/handlers referenced by MVC, API, and MCP hosts |
 
 ### Adjacent projects (not UI/API dependencies)
 
@@ -144,7 +144,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see [`README.md`](../README.md)).
 
 Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
-`core-dotnet/AIWeather`.
+`core-dotnet/core/AIWeather`.
 
 ## About and Health
 
@@ -154,15 +154,15 @@ and `children`.
 
 ## Core Project
 
-`Core` (`core-dotnet/Core.csproj`) is a .NET class library referenced by
+`Core` (`core-dotnet/core/Core.csproj`) is a .NET class library referenced by
 `WeatherMVC`, `WeatherAPI`, `worker-dotnet`, and both MCP hosts. It hosts shared MediatR events
 and handlers, including:
 
-- `core-dotnet/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
-- `core-dotnet/Geo/` — geocoding (`GetLatLongData`)
-- `core-dotnet/Weather/` — public weather (`GetPublicWeatherData`)
-- `core-dotnet/AIWeather/` — Foundry agent integration (`GetCurrentAIWeatherHandler`)
-- `core-dotnet/About/` — About tree builder and remote about client
+- `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
+- `core-dotnet/core/Geo/` — geocoding (`GetLatLongData`)
+- `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherData`)
+- `core-dotnet/core/AIWeather/` — Foundry agent integration (`GetCurrentAIWeatherHandler`)
+- `core-dotnet/core/About/` — About tree builder and remote about client
 
 ## Feature Parity Contract
 
@@ -248,7 +248,9 @@ api-dotnet/WeatherAPI/       API project
 mvc-dotnet/WeatherMVC/       MVC UI project
 ui-blazor/WeatherBlazor/     Blazor UI project
 ui-react/                    React UI project
-core-dotnet/                 Core shared class library (Core.csproj)
+core-dotnet/
+  core/                      Core shared class library (Core.csproj)
+  test/Core.Tests/           Core unit tests
 worker-dotnet/               Hangfire background worker (job servers + dashboard)
 mcp-dotnet/                  MCP DotNet tool host (GetPublicWeatherData)
 mcp-function/                MCP Function tool host (GetLatLongData)

@@ -15,7 +15,7 @@
     <PackageReference Include="MediatR" Version="12.5.0" />
     <!-- Override Hangfire's vulnerable transitive Newtonsoft.Json (NU1903). -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <ProjectReference Include="..\..\core-dotnet\Core.csproj" />
+    <ProjectReference Include="..\..\core-dotnet\core\Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         project:
-          - core-dotnet/Core.csproj
+          - core-dotnet/core/Core.csproj
           - api-dotnet/WeatherAPI/WeatherAPI.csproj
           - ui-blazor/WeatherBlazor/WeatherBlazor.csproj
           - mvc-dotnet/WeatherMVC/WeatherMVC.csproj
@@ -78,7 +78,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Run Core tests
-        run: dotnet test core-dotnet/Test/Core.Tests/Core.Tests.csproj --configuration Release --verbosity normal
+        run: dotnet test core-dotnet/test/Core.Tests/Core.Tests.csproj --configuration Release --verbosity normal
 
   test-worker:
     name: Test Worker DotNet

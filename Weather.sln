@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherAPI", "api-dotnet\We
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMVC", "mvc-dotnet\WeatherMVC\WeatherMVC.csproj", "{76692D10-B4B4-4896-8A1A-AED10DB540FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "core-dotnet\Core.csproj", "{5A1E1F2E-2E0B-4E5A-9C2B-2C6E7F4A9B3D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "core-dotnet\core\Core.csproj", "{5A1E1F2E-2E0B-4E5A-9C2B-2C6E7F4A9B3D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api-dotnet", "api-dotnet", "{63619B0A-1656-1D74-FE7C-8394D7436D49}"
 EndProject
@@ -33,7 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherWorkerDotNet", "work
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{194A79AE-9FE4-5F0D-4EE9-CA51D4E6243D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "core-dotnet\Test\Core.Tests\Core.Tests.csproj", "{B37B2222-6C80-4DF4-BBF5-B8735E925EFC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "core-dotnet\test\Core.Tests\Core.Tests.csproj", "{B37B2222-6C80-4DF4-BBF5-B8735E925EFC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV1", "FoundryConsoleV1", "{93D8A408-32AF-09F8-72E3-0D17BAD9122F}"
 EndProject
