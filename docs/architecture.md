@@ -122,8 +122,9 @@ servers.
   child. The Hangfire node exposes queue counts in `publicMessage` and marks
   itself unhealthy when failed jobs exist or jobs exceed staleness thresholds
   (default 30 minutes processing / 60 minutes enqueued; configure via
-  `HangfireAboutHealth` in `appsettings.json` or `HangfireAboutHealth__*` env
-  vars). API and MVC probe this tree as the `Worker Root` child.
+  `HangfireAboutHealth_StaleProcessingMinutes` and
+  `HangfireAboutHealth_StaleEnqueuedMinutes` in `appsettings.json` or `.env`).
+  API and MVC probe this tree as the `Worker Root` child.
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
 
