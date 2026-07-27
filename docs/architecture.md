@@ -250,7 +250,7 @@ ui-blazor/WeatherBlazor/     Blazor UI project
 ui-react/                    React UI project
 core-dotnet/
   core/                      Core shared class library (Core.csproj)
-  test/Core.Tests/           Core unit tests
+  core.tests/                Core unit tests (Core.Tests.csproj)
 worker-dotnet/               Hangfire background worker (job servers + dashboard)
 mcp-dotnet/                  MCP DotNet tool host (GetPublicWeatherData)
 mcp-function/                MCP Function tool host (GetLatLongData)
