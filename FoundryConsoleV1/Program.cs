@@ -1,9 +1,9 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
 using Core.AIWeather.Models;
-using Core.demo.handlers;
-using Core.geo.Events;
-using Core.weather.Events;
+using Core.HelloWorld.handlers;
+using Core.Geo.Events;
+using Core.Weather.Events;
 using DotNetEnv;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;

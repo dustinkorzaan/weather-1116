@@ -21,13 +21,13 @@ jobs:
       fail-fast: false
       matrix:
         project:
-          - core-dotnet/Core.csproj
-          - api-dotnet/WeatherAPI/WeatherAPI.csproj
-          - ui-blazor/WeatherBlazor/WeatherBlazor.csproj
-          - mvc-dotnet/WeatherMVC/WeatherMVC.csproj
-          - worker-dotnet/WeatherWorkerDotNet.csproj
-          - mcp-function/WeatherMcpFunction.csproj
-          - mcp-dotnet/WeatherMcpDotNet.csproj
+          - core-dotnet/core/Core.csproj
+          - api-dotnet/api/WeatherAPI.csproj
+          - ui-blazor/blazor/WeatherBlazor.csproj
+          - mvc-dotnet/mvc/WeatherMVC.csproj
+          - worker-dotnet/worker/WeatherWorkerDotNet.csproj
+          - mcp-function/mcp/WeatherMcpFunction.csproj
+          - mcp-dotnet/mcp/WeatherMcpDotNet.csproj
           - FoundryConsoleV1/FoundryConsoleV1ModelDirectLegacy.csproj
           - FoundryConsoleV2/FoundryConsoleV2ModelDirectUnifiedAI.csproj
           - FoundryConsoleV3/FoundryConsoleV3InjectFunctions.csproj
@@ -62,7 +62,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Run Weather API tests
-        run: dotnet test api-dotnet/test/WeatherAPI.Tests/WeatherAPI.Tests.csproj --configuration Release --verbosity normal
+        run: dotnet test api-dotnet/api.tests/WeatherAPI.Tests.csproj --configuration Release --verbosity normal
 
   test-core:
     name: Test Core Library
@@ -78,7 +78,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Run Core tests
-        run: dotnet test core-dotnet/test/Core.Tests/Core.Tests.csproj --configuration Release --verbosity normal
+        run: dotnet test core-dotnet/core.tests/Core.Tests.csproj --configuration Release --verbosity normal
 
   test-worker:
     name: Test Worker DotNet
@@ -94,7 +94,71 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Run Worker DotNet tests
-        run: dotnet test worker-dotnet/test/WeatherWorkerDotNet.Tests/WeatherWorkerDotNet.Tests.csproj --configuration Release --verbosity normal
+        run: dotnet test worker-dotnet/worker.tests/WeatherWorkerDotNet.Tests.csproj --configuration Release --verbosity normal
+
+  test-blazor:
+    name: Test Blazor UI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run Blazor tests
+        run: dotnet test ui-blazor/blazor.tests/WeatherBlazor.Tests.csproj --configuration Release --verbosity normal
+
+  test-mvc:
+    name: Test MVC UI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run MVC tests
+        run: dotnet test mvc-dotnet/mvc.tests/WeatherMVC.Tests.csproj --configuration Release --verbosity normal
+
+  test-mcp-dotnet:
+    name: Test MCP DotNet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run MCP DotNet tests
+        run: dotnet test mcp-dotnet/mcp.tests/WeatherMcpDotNet.Tests.csproj --configuration Release --verbosity normal
+
+  test-mcp-function:
+    name: Test MCP Function
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run MCP Function tests
+        run: dotnet test mcp-function/mcp.tests/WeatherMcpFunction.Tests.csproj --configuration Release --verbosity normal
 
   build-and-test-react:
     name: Build and Test React Project

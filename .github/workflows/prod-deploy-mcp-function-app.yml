@@ -45,10 +45,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Build with dotnet
-        run: dotnet build ./mcp-function/WeatherMcpFunction.csproj --configuration Release
+        run: dotnet build ./mcp-function/mcp/WeatherMcpFunction.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ./mcp-function/WeatherMcpFunction.csproj -c Release -o "${{ github.workspace }}/publish/mcp-function"
+        run: dotnet publish ./mcp-function/mcp/WeatherMcpFunction.csproj -c Release -o "${{ github.workspace }}/publish/mcp-function"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v7

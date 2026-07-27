@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/core-dotnet/Core.csproj",
+                "${workspaceFolder}/core-dotnet/core/Core.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/ui-blazor/WeatherBlazor/WeatherBlazor.csproj",
+                "${workspaceFolder}/ui-blazor/blazor/WeatherBlazor.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -31,7 +31,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/ui-blazor/WeatherBlazor/WeatherBlazor.csproj",
+                "${workspaceFolder}/ui-blazor/blazor/WeatherBlazor.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -45,7 +45,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/ui-blazor/WeatherBlazor/WeatherBlazor.csproj"
+                "${workspaceFolder}/ui-blazor/blazor/WeatherBlazor.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -55,7 +55,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/api-dotnet/WeatherAPI/WeatherAPI.csproj",
+                "${workspaceFolder}/api-dotnet/api/WeatherAPI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -67,7 +67,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/api-dotnet/WeatherAPI/WeatherAPI.csproj",
+                "${workspaceFolder}/api-dotnet/api/WeatherAPI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -81,7 +81,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/api-dotnet/WeatherAPI/WeatherAPI.csproj"
+                "${workspaceFolder}/api-dotnet/api/WeatherAPI.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -91,7 +91,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj",
+                "${workspaceFolder}/mvc-dotnet/mvc/WeatherMVC.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -103,7 +103,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj",
+                "${workspaceFolder}/mvc-dotnet/mvc/WeatherMVC.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -117,7 +117,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/mvc-dotnet/WeatherMVC/WeatherMVC.csproj"
+                "${workspaceFolder}/mvc-dotnet/mvc/WeatherMVC.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -127,7 +127,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/mcp-function/WeatherMcpFunction.csproj",
+                "${workspaceFolder}/mcp-function/mcp/WeatherMcpFunction.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -139,7 +139,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/mcp-function/WeatherMcpFunction.csproj",
+                "${workspaceFolder}/mcp-function/mcp/WeatherMcpFunction.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -150,7 +150,7 @@
             "label": "func: host start",
             "command": "host start --port 8120",
             "options": {
-                "cwd": "${workspaceFolder}/mcp-function/bin/Debug/net10.0"
+                "cwd": "${workspaceFolder}/mcp-function/mcp/bin/Debug/net10.0"
             },
             "isBackground": true,
             "dependsOn": "build mcp function",
@@ -162,7 +162,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/mcp-dotnet/WeatherMcpDotNet.csproj",
+                "${workspaceFolder}/mcp-dotnet/mcp/WeatherMcpDotNet.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -174,7 +174,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/mcp-dotnet/WeatherMcpDotNet.csproj",
+                "${workspaceFolder}/mcp-dotnet/mcp/WeatherMcpDotNet.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -188,7 +188,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/mcp-dotnet/WeatherMcpDotNet.csproj"
+                "${workspaceFolder}/mcp-dotnet/mcp/WeatherMcpDotNet.csproj"
             ],
             "problemMatcher": "$msCompile"
         },

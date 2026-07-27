@@ -1,0 +1,43 @@
+@inject IConfiguration Configuration
+@using System.Text.Json
+
+<section class="weather-map-section" aria-label="Map">
+    @if (string.IsNullOrWhiteSpace(_apiKey))
+    {
+        <p class="text-danger">
+            Set <code>GOOGLE_MAPS_API_KEY</code> in appsettings (or env <code>GOOGLE_MAPS_API_KEY</code>) to enable Google Maps.
+        </p>
+    }
+
+    @* Map is initialized by wwwroot/js/weatherMap.js from these data attributes.
+       That keeps the map working even when the Blazor SignalR circuit is slow or fails. *@
+    <div id="weather-map"
+         class="weather-map"
+         data-google-maps-key="@_apiKey"
+         data-cities="@_citiesJson"
+         data-status="@(string.IsNullOrWhiteSpace(_apiKey) ? "missing-key" : "pending")"></div>
+</section>
+
+@code {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
+    private static readonly object[] Cities =
+    [
+        new { id = "nyc", name = "New York", lat = 40.7128, lng = -74.006 },
+        new { id = "toronto", name = "Toronto", lat = 43.6532, lng = -79.3832 },
+        new { id = "atlanta", name = "Atlanta", lat = 33.749, lng = -84.388 },
+        new { id = "charlotte", name = "Charlotte", lat = 35.2271, lng = -80.8431 },
+    ];
+
+    private string _apiKey = "";
+    private string _citiesJson = "[]";
+
+    protected override void OnInitialized()
+    {
+        _apiKey = Configuration["GOOGLE_MAPS_API_KEY"] ?? "";
+        _citiesJson = JsonSerializer.Serialize(Cities, JsonOptions);
+    }
+}

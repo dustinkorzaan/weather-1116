@@ -1,4 +1,4 @@
-// Shared About node contract (mirrors Core.about.AboutNode on the .NET side):
+// Shared About node contract (mirrors Core.About.AboutNode on the .NET side):
 //   name (string), publicMessage (string|null), isHealthy (bool), buildStart (datetime|null),
 //   buildNumber (int|null), buildBranchName (string|null), children (array)
 

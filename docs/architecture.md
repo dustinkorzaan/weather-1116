@@ -18,22 +18,22 @@ AI Weather in API and MVC.
 
 | # | Project | Path | Stack | Role |
 | - | --- | --- | --- | --- |
-| 1 | MVC UI | [`mvc-dotnet/WeatherMVC`](../mvc-dotnet/WeatherMVC) | ASP.NET Core MVC | Server-rendered web UI |
-| 2 | API | [`api-dotnet/WeatherAPI`](../api-dotnet/WeatherAPI) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
+| 1 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
+| 2 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
 | 3 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
-| 4 | Blazor UI | [`ui-blazor/WeatherBlazor`](../ui-blazor/WeatherBlazor) | Blazor Server | Interactive server-rendered UI in C# |
-| 5 | Core | [`core-dotnet/Core.csproj`](../core-dotnet/Core.csproj) | .NET class library | Shared events/handlers referenced by MVC, API, and MCP hosts |
+| 4 | Blazor UI | [`ui-blazor/blazor`](../ui-blazor/blazor) | Blazor Server | Interactive server-rendered UI in C# |
+| 5 | Core | [`core-dotnet/core/Core.csproj`](../core-dotnet/core/Core.csproj) | .NET class library | Shared events/handlers referenced by MVC, API, and MCP hosts |
 
 ### Adjacent projects (not UI/API dependencies)
 
 These are part of the overall system map but are **not** on the critical path
-for hello/forecast/map flows in the three UIs.
+for hello/AI weather/map flows in the three UIs.
 
 | Project | Path | Role |
 | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet`](../worker-dotnet) | Hangfire job servers, dashboard (`/hangfire`), and `/about` health leaf |
-| MCP DotNet | [`mcp-dotnet`](../mcp-dotnet) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
-| MCP Function | [`mcp-function`](../mcp-function) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
+| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
+| MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
+| MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V4 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V4`](../FoundryConsoleV4) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V4MCP`; built in CI) |
 
 Ports, auth, and env vars for the worker, MCP, and console apps live in [`README.md`](../README.md)
@@ -41,15 +41,15 @@ and each project's `.env.example`.
 
 ## Runtime Model
 
-- `WeatherAPI` provides forecast data for React UI and Blazor UI.
+- `WeatherAPI` provides hello and AI weather data for React UI and Blazor UI.
 - React UI and Blazor UI consume `WeatherAPI`.
-- MVC UI does not consume `WeatherAPI` for forecast/hello; it duplicates the
+- MVC UI does not consume `WeatherAPI` for AI weather/hello; it duplicates the
   equivalent backend logic locally via `Core`.
 - Backend logic is intentionally duplicated in MVC and API (no shared backend
   dependency between those projects), except for shared cross-cutting code
   (events/handlers) provided by `Core`, which both MVC and API reference.
 - **MCP hosts are not called by any UI or by `WeatherAPI` for standard
-  forecast/hello flows.** They are used indirectly when the hosted Foundry
+  AI weather/hello flows.** They are used indirectly when the hosted Foundry
   agent resolves a place name and fetches weather (see below).
 
 ## AI Weather and Foundry Agent
@@ -86,7 +86,8 @@ flowchart LR
 
 Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`,
 `AZURE_FOUNDRY_PROD_EUS2_KEY`, and optionally `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`.
-See deploy workflows and `.env.example` files in `api-dotnet` and `mvc-dotnet`.
+See deploy workflows and `.env.example` files under `api-dotnet/api`,
+`mvc-dotnet/mvc`, `ui-blazor/blazor`, and `worker-dotnet/worker`.
 
 ## MCP Tool Hosts
 
@@ -99,7 +100,7 @@ MediatR handlers the sample uses in-process elsewhere.
 | MCP DotNet | `GetPublicWeatherData` | `/mcp` | Bearer `MCP_API_KEY` |
 | MCP Function | `GetLatLongData` | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` |
 
-Each host also exposes an anonymous **`/about`** probe that returns a leaf
+Each host also exposes an anonymous **`/About`** probe that returns a leaf
 `AboutNode` (`mcp-dotnet` or `mcp-function`) with tool-registration health and
 optional `BUILD_NUMBER` / `BUILD_START` / `BUILD_BRANCH_NAME` metadata.
 
@@ -107,12 +108,12 @@ API and MVC `/About` aggregate those remote nodes as children under their
 `API Root` subtree (see [About and health](#about-and-health)). Production base
 URLs are configured via `MCP_DOTNET_URL`, `MCP_FUNCTION_URL`, and
 `WORKER_DOTNET_URL` (GitHub variables `PROD_MCP_DOTNET_URL`,
-`PROD_MCP_FUNCTION_URL`, `PROD_WORKER_DOTNET_URL`); `/about` is appended in code.
+`PROD_MCP_FUNCTION_URL`, `PROD_WORKER_DOTNET_URL`); `/About` is appended in code.
 
 ## Background Worker (Hangfire)
 
 [`worker-dotnet`](../worker-dotnet) is the only app that runs Hangfire servers.
-It registers recurring and queue-based workers against shared storage
+It runs queue-based Hangfire servers against shared storage
 (`DB_CONNECTION_STRING`, SQL Server in production). API and MVC register the
 same storage as Hangfire **clients** so they can enqueue jobs without running
 servers.
@@ -144,25 +145,25 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see [`README.md`](../README.md)).
 
 Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
-`core-dotnet/AIWeather`.
+`core-dotnet/core/AIWeather`.
 
 ## About and Health
 
 Every runnable app can participate in a shared **About tree** contract
-(`Core.about.AboutNode`): `name`, `publicMessage`, `isHealthy`, build metadata,
+(`Core.About.AboutNode`): `name`, `publicMessage`, `isHealthy`, build metadata,
 and `children`.
 
 ## Core Project
 
-`Core` (`core-dotnet/Core.csproj`) is a .NET class library referenced by
+`Core` (`core-dotnet/core/Core.csproj`) is a .NET class library referenced by
 `WeatherMVC`, `WeatherAPI`, `worker-dotnet`, and both MCP hosts. It hosts shared MediatR events
 and handlers, including:
 
-- `core-dotnet/demo/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
-- `core-dotnet/geo/` — geocoding (`GetLatLongData`)
-- `core-dotnet/weather/` — public weather (`GetPublicWeatherData`)
-- `core-dotnet/AIWeather/` — Foundry agent integration (`GetCurrentAIWeatherHandler`)
-- `core-dotnet/about/` — About tree builder and remote about client
+- `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
+- `core-dotnet/core/Geo/` — geocoding (`GetLatLongData`)
+- `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherData`)
+- `core-dotnet/core/AIWeather/` — Foundry agent integration (`GetCurrentAIWeatherHandler`)
+- `core-dotnet/core/About/` — About tree builder and remote about client
 
 ## Feature Parity Contract
 
@@ -191,18 +192,16 @@ Shared responsive conventions kept in parity across the three sites:
 
 - A single fluid layout adapts at breakpoints rather than branching into
   distinct mobile/desktop templates.
-- Primary navigation collapses behind a toggle (hamburger) on narrow
-  viewports and expands inline (MVC navbar, Blazor sidebar, React top bar) on
-  wider viewports.
+- Primary navigation uses a top bar with an avatar/About menu on all three UIs
+  (MVC navbar, Blazor top row, React top bar); layout stays fluid at narrow widths
+  without separate mobile-only templates.
 - The avatar/About menu stays reachable and usable at every width and never
   overflows the viewport.
-- The weather forecast table scrolls horizontally within its own container
-  (rather than the whole page) on viewports too narrow to show all columns.
 - Main content is centered with a max-width on large screens instead of
   stretching to full width, keeping line lengths and table density readable.
 - Base typography scales down slightly on small screens and back up at
   tablet/desktop breakpoints for comfortable readability at every size.
-- The city map section (Google Maps) appears on the home page of each UI with
+- The map section (Google Maps) appears on the home page of each UI with
   the same sample pins and dark styling; map height stays usable on narrow
   viewports.
 
@@ -236,7 +235,12 @@ builds on every push:
   and the four Foundry console projects (`FoundryConsoleV1ModelDirectLegacy`–`V4MCP`) via `dotnet build`.
 - React app in `ui-react` via `npm ci && npm run build`, followed by
   `npm test -- --run` (Vitest).
+- `Core.Tests` unit tests.
 - `WeatherAPI.Tests` integration tests.
+- `WeatherMVC.Tests` integration tests.
+- `WeatherWorkerDotNet.Tests` unit tests.
+- `WeatherBlazor.Tests` component tests.
+- `WeatherMcpDotNet.Tests` and `WeatherMcpFunction.Tests` About/tool-registration tests.
 
 Production deploy workflows (`prod-deploy-*.yml`) auto-deploy when **build-and-test**
 completes successfully on `main`. Each deploy workflow can also be triggered manually
@@ -246,14 +250,28 @@ worker-dotnet, and both MCP hosts.
 ## Repository Layout
 
 ```text
-api-dotnet/WeatherAPI/       API project
-mvc-dotnet/WeatherMVC/       MVC UI project
-ui-blazor/WeatherBlazor/     Blazor UI project
+api-dotnet/
+  api/                       API project (WeatherAPI.csproj)
+  api.tests/                 API unit tests (WeatherAPI.Tests.csproj)
+mvc-dotnet/
+  mvc/                       MVC UI project (WeatherMVC.csproj)
+  mvc.tests/                 MVC integration tests (WeatherMVC.Tests.csproj)
+ui-blazor/
+  blazor/                    Blazor UI project (WeatherBlazor.csproj)
+  blazor.tests/              Blazor unit tests (WeatherBlazor.Tests.csproj)
 ui-react/                    React UI project
-core-dotnet/                 Core shared class library (Core.csproj)
-worker-dotnet/               Hangfire background worker (job servers + dashboard)
-mcp-dotnet/                  MCP DotNet tool host (GetPublicWeatherData)
-mcp-function/                MCP Function tool host (GetLatLongData)
+core-dotnet/
+  core/                      Core shared class library (Core.csproj)
+  core.tests/                Core unit tests (Core.Tests.csproj)
+worker-dotnet/
+  worker/                    Hangfire background worker (WeatherWorkerDotNet.csproj)
+  worker.tests/              Worker unit tests (WeatherWorkerDotNet.Tests.csproj)
+mcp-dotnet/
+  mcp/                       MCP DotNet tool host (WeatherMcpDotNet.csproj)
+  mcp.tests/                 MCP DotNet tests (WeatherMcpDotNet.Tests.csproj)
+mcp-function/
+  mcp/                       MCP Function tool host (WeatherMcpFunction.csproj)
+  mcp.tests/                 MCP Function tests (WeatherMcpFunction.Tests.csproj)
 FoundryConsoleV1…V4/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```

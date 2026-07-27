@@ -21,14 +21,14 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build weatherapi",
-            "program": "${workspaceFolder}/api-dotnet/WeatherAPI/bin/Debug/net10.0/WeatherAPI.dll",
+            "program": "${workspaceFolder}/api-dotnet/api/bin/Debug/net10.0/WeatherAPI.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/api-dotnet/WeatherAPI",
+            "cwd": "${workspaceFolder}/api-dotnet/api",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
                 "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
-                "uriFormat": "%s/weatherforecast"
+                "uriFormat": "%s/About"
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
@@ -39,9 +39,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build weatherblazor",
-            "program": "${workspaceFolder}/ui-blazor/WeatherBlazor/bin/Debug/net10.0/WeatherBlazor.dll",
+            "program": "${workspaceFolder}/ui-blazor/blazor/bin/Debug/net10.0/WeatherBlazor.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/ui-blazor/WeatherBlazor",
+            "cwd": "${workspaceFolder}/ui-blazor/blazor",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
@@ -57,9 +57,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build weathermvc",
-            "program": "${workspaceFolder}/mvc-dotnet/WeatherMVC/bin/Debug/net10.0/WeatherMVC.dll",
+            "program": "${workspaceFolder}/mvc-dotnet/mvc/bin/Debug/net10.0/WeatherMVC.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/mvc-dotnet/WeatherMVC",
+            "cwd": "${workspaceFolder}/mvc-dotnet/mvc",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
@@ -70,7 +70,7 @@
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
             "sourceFileMap": {
-                "/Views": "${workspaceFolder}/mvc-dotnet/WeatherMVC/Views"
+                "/Views": "${workspaceFolder}/mvc-dotnet/mvc/Views"
             }
         },
         {
@@ -90,14 +90,14 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build mcp dotnet",
-            "program": "${workspaceFolder}/mcp-dotnet/bin/Debug/net10.0/WeatherMcpDotNet.dll",
+            "program": "${workspaceFolder}/mcp-dotnet/mcp/bin/Debug/net10.0/WeatherMcpDotNet.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/mcp-dotnet",
+            "cwd": "${workspaceFolder}/mcp-dotnet/mcp",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
                 "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
-                "uriFormat": "%s/about"
+                "uriFormat": "%s/About"
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"

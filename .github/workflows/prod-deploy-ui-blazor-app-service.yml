@@ -44,10 +44,10 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Build with dotnet
-        run: dotnet build ./ui-blazor/WeatherBlazor/WeatherBlazor.csproj --configuration Release
+        run: dotnet build ./ui-blazor/blazor/WeatherBlazor.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ./ui-blazor/WeatherBlazor/WeatherBlazor.csproj -c Release -o "${{ github.workspace }}/publish/ui-blazor"
+        run: dotnet publish ./ui-blazor/blazor/WeatherBlazor.csproj -c Release -o "${{ github.workspace }}/publish/ui-blazor"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v7
