@@ -67,12 +67,6 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-      - name: Set up Node.js 24
-        uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-          package-manager-cache: false
-
       - name: Download artifact from build job
         uses: actions/download-artifact@v7
         with:
