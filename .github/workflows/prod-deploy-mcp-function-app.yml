@@ -18,6 +18,7 @@ concurrency:
 env:
   DOTNET_VERSION: '10.x'
   BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
 
 jobs:
   build:
@@ -63,7 +64,6 @@ jobs:
     needs: build
     environment: prod
     env:
-      BUILD_NUMBER: ${{ github.run_number }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -122,7 +122,8 @@ jobs:
               --settings \
                 AZURE_FUNCTIONS_ENVIRONMENT=Production \
                 BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \
-                BUILD_START="${{ env.BUILD_START }}"
+                BUILD_START="${{ env.BUILD_START }}" \
+                BUILD_BRANCH_NAME="${{ env.BUILD_BRANCH_NAME }}"
 
       - name: Deploy to Azure Function App
         id: deploy-to-functionapp

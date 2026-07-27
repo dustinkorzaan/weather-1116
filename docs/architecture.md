@@ -101,7 +101,7 @@ MediatR handlers the sample uses in-process elsewhere.
 
 Each host also exposes an anonymous **`/about`** probe that returns a leaf
 `AboutNode` (`mcp-dotnet` or `mcp-function`) with tool-registration health and
-optional `BUILD_NUMBER` / `BUILD_START` metadata.
+optional `BUILD_NUMBER` / `BUILD_START` / `BUILD_BRANCH_NAME` metadata.
 
 API and MVC `/About` aggregate those remote nodes as children under their
 `API Root` subtree (see [About and health](#about-and-health)). Production base

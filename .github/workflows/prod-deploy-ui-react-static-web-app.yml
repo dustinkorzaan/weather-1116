@@ -17,6 +17,7 @@ concurrency:
 
 env:
   BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
 
 jobs:
   build_and_deploy_job:
@@ -49,6 +50,7 @@ jobs:
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           VITE_BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
           VITE_BUILD_START: ${{ env.BUILD_START }}
+          VITE_BUILD_BRANCH_NAME: ${{ env.BUILD_BRANCH_NAME }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_UI_REACT_TOKEN }}
           # repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)

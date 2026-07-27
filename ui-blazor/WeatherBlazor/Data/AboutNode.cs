@@ -7,5 +7,6 @@ public class AboutNode
     public string? Version { get; set; }
     public DateTime? BuildStart { get; set; }
     public int? BuildNumber { get; set; }
+    public string? BuildBranchName { get; set; }
     public List<AboutNode> Children { get; set; } = [];
 }

@@ -48,6 +48,9 @@
 		if (node?.buildStart) {
 			metadata.push(`Started ${formatBuildStart(node.buildStart)}`);
 		}
+		if (node?.buildBranchName) {
+			metadata.push(`Branch ${node.buildBranchName}`);
+		}
 		if (metadata.length > 0) {
 			const meta = document.createElement('div');
 			meta.className = 'about-tree-meta';
