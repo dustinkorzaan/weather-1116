@@ -13,13 +13,13 @@ project relationships, and parity guidance.
 | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
 | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
 | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor Server | 8090 |
-| Core | [`core-dotnet/core/Core.csproj`](core-dotnet/core/Core.csproj) | Shared .NET class library referenced by MVC and API | — |
+| Core | [`core-dotnet/core/Core.csproj`](core-dotnet/core/Core.csproj) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
 ## Background worker (Hangfire)
 
-[`worker-dotnet`](worker-dotnet) is the only host that runs Hangfire job servers.
+[`worker-dotnet/worker`](worker-dotnet/worker) is the only host that runs Hangfire job servers.
 API and MVC register Hangfire client storage (shared `DB_CONNECTION_STRING`) so
 they can enqueue jobs later; the worker processes them.
 
@@ -92,8 +92,8 @@ Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
 
 | UI | Config |
 | --- | --- |
-| React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see `.env.example`) |
-| Blazor | `GOOGLE_MAPS_API_KEY` in `appsettings.json`, or env `GOOGLE_MAPS_API_KEY` |
-| MVC | `GOOGLE_MAPS_API_KEY` in `appsettings.json`, or env `GOOGLE_MAPS_API_KEY` |
+| React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see `ui-react/.env.example`) |
+| Blazor | `GOOGLE_MAPS_API_KEY` in `ui-blazor/blazor/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see `ui-blazor/blazor/.env.example`) |
+| MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see `mvc-dotnet/mvc/.env.example`) |
 
 Without a key, the map container still renders and each UI shows a short setup hint.

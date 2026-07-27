@@ -74,6 +74,9 @@ builder.Services.AddHangfireServer(options =>
 
 var app = builder.Build();
 
+// Drop legacy recurring job from shared SQL storage (handler removed with forecast demo).
+RecurringJob.RemoveIfExists("weather-forecast");
+
 // Hangfire dashboard, open to all (POC — no auth). It reads the shared storage,
 // so it also shows jobs enqueued by the api/mvc clients.
 app.UseHangfireDashboard("/hangfire", new DashboardOptions

@@ -86,7 +86,8 @@ flowchart LR
 
 Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`,
 `AZURE_FOUNDRY_PROD_EUS2_KEY`, and optionally `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`.
-See deploy workflows and `.env.example` files in `api-dotnet` and `mvc-dotnet`.
+See deploy workflows and `.env.example` files under `api-dotnet/api`,
+`mvc-dotnet/mvc`, `ui-blazor/blazor`, and `worker-dotnet/worker`.
 
 ## MCP Tool Hosts
 
@@ -191,9 +192,9 @@ Shared responsive conventions kept in parity across the three sites:
 
 - A single fluid layout adapts at breakpoints rather than branching into
   distinct mobile/desktop templates.
-- Primary navigation collapses behind a toggle (hamburger) on narrow
-  viewports and expands inline (MVC navbar, Blazor sidebar, React top bar) on
-  wider viewports.
+- Primary navigation uses a top bar with an avatar/About menu on all three UIs
+  (MVC navbar, Blazor top row, React top bar); layout stays fluid at narrow widths
+  without separate mobile-only templates.
 - The avatar/About menu stays reachable and usable at every width and never
   overflows the viewport.
 - Main content is centered with a max-width on large screens instead of
@@ -234,8 +235,10 @@ builds on every push:
   and the four Foundry console projects (`FoundryConsoleV1ModelDirectLegacy`–`V4MCP`) via `dotnet build`.
 - React app in `ui-react` via `npm ci && npm run build`, followed by
   `npm test -- --run` (Vitest).
+- `Core.Tests` unit tests.
 - `WeatherAPI.Tests` integration tests.
 - `WeatherMVC.Tests` integration tests.
+- `WeatherWorkerDotNet.Tests` unit tests.
 - `WeatherBlazor.Tests` component tests.
 - `WeatherMcpDotNet.Tests` and `WeatherMcpFunction.Tests` About/tool-registration tests.
 
