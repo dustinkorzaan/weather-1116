@@ -31,10 +31,7 @@ builder.Services.AddHangfire(config =>
 	}
 });
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-	options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-});
+builder.Services.AddControllers();
 builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 {
 	client.Timeout = TimeSpan.FromSeconds(5);

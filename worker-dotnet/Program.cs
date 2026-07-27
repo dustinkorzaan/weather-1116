@@ -5,7 +5,6 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
 using MediatR;
-using System.Text.Json.Serialization;
 using WeatherWorkerDotNet;
 
 Env.TraversePath().Load();
@@ -14,11 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
-builder.Services.AddControllers()
-	.AddJsonOptions(options =>
-	{
-		options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-	});
+builder.Services.AddControllers();
 
 // Durable SQL Server storage wherever a connection string is provided
 // (DB_CONNECTION_STRING). Falls back to in-memory storage locally so the
