@@ -81,11 +81,6 @@ a, .btn-link {
     margin: 1.5rem 0;
 }
 
-.weather-map-section h2 {
-    font-size: 1.15rem;
-    margin-bottom: 0.5rem;
-}
-
 .weather-map {
     width: 100%;
     height: 22rem;

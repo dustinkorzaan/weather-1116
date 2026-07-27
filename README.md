@@ -78,7 +78,7 @@ See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 
 VS Code launch configs: **Foundry Console V1** … **V4**.
 
-## Google Maps (city map on all three UIs)
+## Google Maps (map on all three UIs)
 
 Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
 Atlanta, Charlotte). Weather overlays will come later.

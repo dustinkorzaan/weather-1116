@@ -202,7 +202,7 @@ Shared responsive conventions kept in parity across the three sites:
   stretching to full width, keeping line lengths and table density readable.
 - Base typography scales down slightly on small screens and back up at
   tablet/desktop breakpoints for comfortable readability at every size.
-- The city map section (Google Maps) appears on the home page of each UI with
+- The map section (Google Maps) appears on the home page of each UI with
   the same sample pins and dark styling; map height stays usable on narrow
   viewports.
 

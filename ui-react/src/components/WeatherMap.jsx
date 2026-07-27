@@ -82,8 +82,7 @@ function WeatherMap() {
   }, []);
 
   return (
-    <section className="weather-map-section" aria-label="City map">
-      <h2 className="forecast-title">City map</h2>
+    <section className="weather-map-section" aria-label="Map">
       {!apiKey && (
         <p className="forecast-status error">
           Set <code>VITE_GOOGLE_MAPS_API_KEY</code> to enable Google Maps.

@@ -1,9 +1,7 @@
 @inject IConfiguration Configuration
 @using System.Text.Json
 
-<section class="weather-map-section" aria-label="City map">
-    <h2>City map</h2>
-
+<section class="weather-map-section" aria-label="Map">
     @if (string.IsNullOrWhiteSpace(_apiKey))
     {
         <p class="text-danger">
