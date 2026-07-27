@@ -9,23 +9,25 @@ namespace WeatherWorkerDotNet;
 /// </summary>
 internal static class HangfireAboutHealth
 {
-    private const int SampleSize = 10;
-    private static readonly TimeSpan StaleProcessingThreshold = TimeSpan.FromMinutes(30);
-    private static readonly TimeSpan StaleEnqueuedThreshold = TimeSpan.FromMinutes(60);
+    internal const int SampleSize = 10;
 
-    public static bool IsHealthy(IMonitoringApi monitoringApi, StatisticsDto statistics, DateTime utcNow)
+    public static bool IsHealthy(
+        IMonitoringApi monitoringApi,
+        StatisticsDto statistics,
+        DateTime utcNow,
+        HangfireAboutHealthOptions options)
     {
         if (statistics.Failed > 0)
         {
             return false;
         }
 
-        if (HasStaleProcessingJobs(monitoringApi, statistics, utcNow))
+        if (HasStaleProcessingJobs(monitoringApi, statistics, utcNow, options))
         {
             return false;
         }
 
-        if (HasStaleEnqueuedJobs(monitoringApi, statistics, utcNow))
+        if (HasStaleEnqueuedJobs(monitoringApi, statistics, utcNow, options))
         {
             return false;
         }
@@ -36,16 +38,18 @@ internal static class HangfireAboutHealth
     private static bool HasStaleProcessingJobs(
         IMonitoringApi monitoringApi,
         StatisticsDto statistics,
-        DateTime utcNow)
+        DateTime utcNow,
+        HangfireAboutHealthOptions options)
     {
         if (statistics.Processing == 0)
         {
             return false;
         }
 
+        var staleThreshold = TimeSpan.FromMinutes(options.StaleProcessingMinutes);
         var processingCount = ToIntCount(statistics.Processing);
         var sample = GetProcessingJobs(monitoringApi, 0, Math.Min(SampleSize, processingCount));
-        if (ContainsStaleProcessing(sample, utcNow))
+        if (ContainsStaleProcessing(sample, utcNow, staleThreshold))
         {
             return true;
         }
@@ -56,18 +60,21 @@ internal static class HangfireAboutHealth
         }
 
         var all = GetProcessingJobs(monitoringApi, 0, processingCount);
-        return ContainsStaleProcessing(all, utcNow);
+        return ContainsStaleProcessing(all, utcNow, staleThreshold);
     }
 
     private static bool HasStaleEnqueuedJobs(
         IMonitoringApi monitoringApi,
         StatisticsDto statistics,
-        DateTime utcNow)
+        DateTime utcNow,
+        HangfireAboutHealthOptions options)
     {
         if (statistics.Enqueued == 0)
         {
             return false;
         }
+
+        var staleThreshold = TimeSpan.FromMinutes(options.StaleEnqueuedMinutes);
 
         foreach (var queue in monitoringApi.Queues())
         {
@@ -79,7 +86,7 @@ internal static class HangfireAboutHealth
             var queueLength = ToIntCount(queue.Length);
             var sampleCount = Math.Min(SampleSize, queueLength);
             var sample = GetEnqueuedJobs(monitoringApi, queue.Name, 0, sampleCount);
-            if (ContainsStaleEnqueued(sample, utcNow))
+            if (ContainsStaleEnqueued(sample, utcNow, staleThreshold))
             {
                 return true;
             }
@@ -90,7 +97,7 @@ internal static class HangfireAboutHealth
             }
 
             var all = GetEnqueuedJobs(monitoringApi, queue.Name, 0, queueLength);
-            if (ContainsStaleEnqueued(all, utcNow))
+            if (ContainsStaleEnqueued(all, utcNow, staleThreshold))
             {
                 return true;
             }
@@ -99,15 +106,21 @@ internal static class HangfireAboutHealth
         return false;
     }
 
-    private static bool ContainsStaleProcessing(IEnumerable<ProcessingJobDto> jobs, DateTime utcNow)
+    private static bool ContainsStaleProcessing(
+        IEnumerable<ProcessingJobDto> jobs,
+        DateTime utcNow,
+        TimeSpan staleThreshold)
         => jobs.Any(job =>
             job.StartedAt.HasValue &&
-            utcNow - job.StartedAt.Value > StaleProcessingThreshold);
+            utcNow - job.StartedAt.Value > staleThreshold);
 
-    private static bool ContainsStaleEnqueued(IEnumerable<EnqueuedJobDto> jobs, DateTime utcNow)
+    private static bool ContainsStaleEnqueued(
+        IEnumerable<EnqueuedJobDto> jobs,
+        DateTime utcNow,
+        TimeSpan staleThreshold)
         => jobs.Any(job =>
             job.EnqueuedAt.HasValue &&
-            utcNow - job.EnqueuedAt.Value > StaleEnqueuedThreshold);
+            utcNow - job.EnqueuedAt.Value > staleThreshold);
 
     private static List<ProcessingJobDto> GetProcessingJobs(
         IMonitoringApi monitoringApi,

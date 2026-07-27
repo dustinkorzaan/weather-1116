@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="test/**" />
+    <Content Remove="test/**" />
+    <None Remove="test/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.*" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.20" />
     <PackageReference Include="Hangfire.NetCore" Version="1.8.20" />
@@ -22,6 +28,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\core-dotnet\Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="WeatherWorkerDotNet.Tests" />
   </ItemGroup>
 
 </Project>

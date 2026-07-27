@@ -2,6 +2,7 @@ using Core.about;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace WeatherWorkerDotNet.Controllers;
 
@@ -9,7 +10,8 @@ namespace WeatherWorkerDotNet.Controllers;
 [Route("[controller]")]
 [AllowAnonymous]
 public sealed class AboutController(
-    ILogger<AboutController> logger) : ControllerBase
+    ILogger<AboutController> logger,
+    IOptions<HangfireAboutHealthOptions> hangfireHealthOptions) : ControllerBase
 {
     [HttpGet]
     public ActionResult<AboutNode> Get()
@@ -29,7 +31,11 @@ public sealed class AboutController(
             {
                 Name = "Hangfire",
                 PublicMessage = $"{statistics.Failed} failed, {statistics.Processing} processing, {statistics.Enqueued} enqueued",
-                IsHealthy = HangfireAboutHealth.IsHealthy(monitoringApi, statistics, DateTime.UtcNow),
+                IsHealthy = HangfireAboutHealth.IsHealthy(
+                    monitoringApi,
+                    statistics,
+                    DateTime.UtcNow,
+                    hangfireHealthOptions.Value),
             };
         }
         catch (Exception exception)

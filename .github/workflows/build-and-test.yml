@@ -80,6 +80,22 @@ jobs:
       - name: Run Core tests
         run: dotnet test core-dotnet/test/Core.Tests/Core.Tests.csproj --configuration Release --verbosity normal
 
+  test-worker:
+    name: Test Worker DotNet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run Worker DotNet tests
+        run: dotnet test worker-dotnet/test/WeatherWorkerDotNet.Tests/WeatherWorkerDotNet.Tests.csproj --configuration Release --verbosity normal
+
   build-and-test-react:
     name: Build and Test React Project
     runs-on: ubuntu-latest

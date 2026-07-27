@@ -118,7 +118,12 @@ same storage as Hangfire **clients** so they can enqueue jobs without running
 servers.
 
 - **Dashboard:** `/hangfire` on the worker (POC — open to all; auth TBD).
-- **Health:** `/about` returns a `worker-dotnet` leaf node probed by API/MVC.
+- **Health:** `/About` returns `Worker Root` with `worker-dotnet` and a `Hangfire`
+  child. The Hangfire node exposes queue counts in `publicMessage` and marks
+  itself unhealthy when failed jobs exist or jobs exceed staleness thresholds
+  (default 30 minutes processing / 60 minutes enqueued; configure via
+  `HangfireAboutHealth` in `appsettings.json` or `HangfireAboutHealth__*` env
+  vars). API and MVC probe this tree as the `Worker Root` child.
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
 
