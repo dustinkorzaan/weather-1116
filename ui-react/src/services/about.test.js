@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { buildUiReactRoot } from './About';
+import { buildUiReactRoot } from './about';
 
 describe('buildUiReactRoot', () => {
   test('returns a single "UI React Root" node whose first child is UI React itself', () => {

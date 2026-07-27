@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { buildUiReactRoot } from './About';
+import { buildUiReactRoot } from './about';
 
 function resolveApiBaseUrl() {
   const configuredBaseUrl = import.meta.env.VITE_API_DOTNET_URL?.replace(/\/$/, '');
