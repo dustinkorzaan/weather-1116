@@ -4,7 +4,7 @@ namespace Core.Tests.about;
 
 /// <summary>
 /// Tests for <see cref="AboutTreeBuilder"/>. Build metadata is read from the
-/// BUILD_NUMBER / BUILD_START environment variables, so those tests clear the
+/// BUILD_NUMBER / BUILD_START / BUILD_BRANCH_NAME environment variables, so those tests clear the
 /// variables to keep results deterministic regardless of the host environment.
 /// </summary>
 public class AboutTreeBuilderTests
@@ -177,9 +177,33 @@ public class AboutTreeBuilderTests
     }
 
     [Fact]
+    public void BuildRoot_ReadsBuildBranchNameFromEnvironment()
+    {
+        RunWithBuildEnvironment("4242", "2024-01-02T03:04:05Z", "feature/my-branch", () =>
+        {
+            var root = AboutTreeBuilder.BuildApiRoot();
+
+            Assert.Equal("feature/my-branch", root.BuildBranchName);
+            Assert.Equal("feature/my-branch", root.Children[0].BuildBranchName);
+        });
+    }
+
+    [Fact]
+    public void BuildRoot_MissingBuildBranchName_LeavesMetadataNull()
+    {
+        RunWithBuildEnvironment(null, null, null, () =>
+        {
+            var root = AboutTreeBuilder.BuildApiRoot();
+
+            Assert.Null(root.BuildBranchName);
+            Assert.Null(root.Children[0].BuildBranchName);
+        });
+    }
+
+    [Fact]
     public void BuildRoot_ReadsBuildNumberAndStartFromEnvironment()
     {
-        RunWithBuildEnvironment("4242", "2024-01-02T03:04:05Z", () =>
+        RunWithBuildEnvironment("4242", "2024-01-02T03:04:05Z", null, () =>
         {
             var root = AboutTreeBuilder.BuildApiRoot();
 
@@ -194,7 +218,7 @@ public class AboutTreeBuilderTests
     [Fact]
     public void BuildRoot_MissingBuildEnvironment_LeavesMetadataNull()
     {
-        RunWithBuildEnvironment(null, null, () =>
+        RunWithBuildEnvironment(null, null, null, () =>
         {
             var root = AboutTreeBuilder.BuildApiRoot();
 
@@ -206,7 +230,7 @@ public class AboutTreeBuilderTests
     [Fact]
     public void BuildRoot_InvalidBuildEnvironment_LeavesMetadataNull()
     {
-        RunWithBuildEnvironment("not-a-number", "not-a-date", () =>
+        RunWithBuildEnvironment("not-a-number", "not-a-date", "main", () =>
         {
             var root = AboutTreeBuilder.BuildApiRoot();
 
@@ -215,20 +239,23 @@ public class AboutTreeBuilderTests
         });
     }
 
-    private static void RunWithBuildEnvironment(string? buildNumber, string? buildStart, Action action)
+    private static void RunWithBuildEnvironment(string? buildNumber, string? buildStart, string? buildBranchName, Action action)
     {
         var previousNumber = Environment.GetEnvironmentVariable("BUILD_NUMBER");
         var previousStart = Environment.GetEnvironmentVariable("BUILD_START");
+        var previousBranch = Environment.GetEnvironmentVariable("BUILD_BRANCH_NAME");
         try
         {
             Environment.SetEnvironmentVariable("BUILD_NUMBER", buildNumber);
             Environment.SetEnvironmentVariable("BUILD_START", buildStart);
+            Environment.SetEnvironmentVariable("BUILD_BRANCH_NAME", buildBranchName);
             action();
         }
         finally
         {
             Environment.SetEnvironmentVariable("BUILD_NUMBER", previousNumber);
             Environment.SetEnvironmentVariable("BUILD_START", previousStart);
+            Environment.SetEnvironmentVariable("BUILD_BRANCH_NAME", previousBranch);
         }
     }
 }

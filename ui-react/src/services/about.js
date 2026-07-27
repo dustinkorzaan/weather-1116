@@ -1,6 +1,6 @@
 // Shared About node contract (mirrors Core.about.AboutNode on the .NET side):
 //   name (string), isHealthy (bool), version (string|null), buildStart (datetime|null),
-//   buildNumber (int|null), children (array)
+//   buildNumber (int|null), buildBranchName (string|null), children (array)
 
 function createNode(name, overrides = {}) {
   return {
@@ -9,6 +9,7 @@ function createNode(name, overrides = {}) {
     version: null,
     buildStart: resolveBuildStart(),
     buildNumber: resolveBuildNumber(),
+    buildBranchName: resolveBuildBranchName(),
     children: [],
     ...overrides,
   };
@@ -34,6 +35,17 @@ function resolveBuildStart() {
     ? process.env.VITE_BUILD_START
     : undefined;
   return viteValue ?? nodeValue ?? null;
+}
+
+function resolveBuildBranchName() {
+  const viteValue = typeof import.meta !== 'undefined' && import.meta.env
+    ? import.meta.env.VITE_BUILD_BRANCH_NAME
+    : undefined;
+  const nodeValue = typeof process !== 'undefined' && process.env
+    ? process.env.VITE_BUILD_BRANCH_NAME
+    : undefined;
+  const rawValue = viteValue ?? nodeValue;
+  return rawValue || null;
 }
 
 function computeAggregateHealth(nodes) {

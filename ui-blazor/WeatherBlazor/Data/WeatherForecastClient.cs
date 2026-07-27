@@ -66,6 +66,7 @@ public class WeatherForecastClient
             IsHealthy = true,
             BuildNumber = ResolveBuildNumber(),
             BuildStart = ResolveBuildStart(),
+            BuildBranchName = ResolveBuildBranchName(),
         };
 
         var children = new List<AboutNode> { blazorNode, apiRoot };
@@ -77,6 +78,7 @@ public class WeatherForecastClient
             IsHealthy = ComputeAggregateHealth(children),
             BuildNumber = ResolveBuildNumber(),
             BuildStart = ResolveBuildStart(),
+            BuildBranchName = ResolveBuildBranchName(),
         };
     }
 
@@ -113,5 +115,11 @@ public class WeatherForecastClient
         }
 
         return null;
+    }
+
+    private static string? ResolveBuildBranchName()
+    {
+        var value = Environment.GetEnvironmentVariable("BUILD_BRANCH_NAME");
+        return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 }

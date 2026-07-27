@@ -10,7 +10,7 @@
                 @(Node.IsHealthy ? "Healthy" : "Unhealthy")
             </span>
         </div>
-        @if (Node.BuildNumber.HasValue || Node.BuildStart.HasValue)
+        @if (Node.BuildNumber.HasValue || Node.BuildStart.HasValue || !string.IsNullOrWhiteSpace(Node.BuildBranchName))
         {
             <div class="about-tree-meta">
                 @if (Node.BuildNumber.HasValue)
@@ -24,6 +24,14 @@
                         <span> | </span>
                     }
                     <span>Started @FormatBuildStart(Node.BuildStart.Value)</span>
+                }
+                @if (!string.IsNullOrWhiteSpace(Node.BuildBranchName))
+                {
+                    @if (Node.BuildNumber.HasValue || Node.BuildStart.HasValue)
+                    {
+                        <span> | </span>
+                    }
+                    <span>Branch @Node.BuildBranchName</span>
                 }
             </div>
         }

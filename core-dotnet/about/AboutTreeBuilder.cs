@@ -63,6 +63,7 @@ public static class AboutTreeBuilder
             Children = children,
             BuildNumber = ResolveBuildNumber(),
             BuildStart = ResolveBuildStart(),
+            BuildBranchName = ResolveBuildBranchName(),
         };
         root.IsHealthy = ComputeAggregateHealth(children);
 
@@ -91,6 +92,7 @@ public static class AboutTreeBuilder
             Name = name,
             BuildNumber = ResolveBuildNumber(),
             BuildStart = ResolveBuildStart(),
+            BuildBranchName = ResolveBuildBranchName(),
         };
 
     private static int? ResolveBuildNumber()
@@ -113,5 +115,11 @@ public static class AboutTreeBuilder
         }
 
         return null;
+    }
+
+    private static string? ResolveBuildBranchName()
+    {
+        var value = Environment.GetEnvironmentVariable("BUILD_BRANCH_NAME");
+        return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 }

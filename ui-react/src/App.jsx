@@ -38,6 +38,9 @@ function AboutTreeNode({ node }) {
   if (node.buildStart) {
     metadata.push(`Started ${formatBuildStart(node.buildStart)}`);
   }
+  if (node.buildBranchName) {
+    metadata.push(`Branch ${node.buildBranchName}`);
+  }
 
   return (
     <li className="about-tree-item">
