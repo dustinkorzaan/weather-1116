@@ -25,7 +25,7 @@ function formatBuildStart(isoDate) {
   return `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${period} UTC`;
 }
 
-function AboutTreeNode({ node }) {
+export function AboutTreeNode({ node }) {
   if (!node) {
     return null;
   }
