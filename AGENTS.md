@@ -37,8 +37,8 @@ hot reload); React uses `npm start`. Ports come from each project's
 | Weather MVC | `mvc-dotnet/mvc` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8100 |
 | React UI | `ui-react` | `npm start` | 3000 |
 | Worker DotNet | `worker-dotnet/worker` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8130 |
-| MCP DotNet | `mcp-dotnet` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8110 |
-| MCP Function | `mcp-function` | `func start` (or VS Code **WeatherMcpFunction**) | 8120 |
+| MCP DotNet | `mcp-dotnet/mcp` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8110 |
+| MCP Function | `mcp-function/mcp` | `func start` (or VS Code **WeatherMcpFunction**) | 8120 |
 
 ### Non-obvious caveats
 

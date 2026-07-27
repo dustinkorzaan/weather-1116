@@ -26,8 +26,8 @@ jobs:
           - ui-blazor/blazor/WeatherBlazor.csproj
           - mvc-dotnet/mvc/WeatherMVC.csproj
           - worker-dotnet/worker/WeatherWorkerDotNet.csproj
-          - mcp-function/WeatherMcpFunction.csproj
-          - mcp-dotnet/WeatherMcpDotNet.csproj
+          - mcp-function/mcp/WeatherMcpFunction.csproj
+          - mcp-dotnet/mcp/WeatherMcpDotNet.csproj
           - FoundryConsoleV1/FoundryConsoleV1ModelDirectLegacy.csproj
           - FoundryConsoleV2/FoundryConsoleV2ModelDirectUnifiedAI.csproj
           - FoundryConsoleV3/FoundryConsoleV3InjectFunctions.csproj

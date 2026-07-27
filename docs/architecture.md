@@ -32,8 +32,8 @@ for hello/AI weather/map flows in the three UIs.
 | Project | Path | Role |
 | --- | --- | --- |
 | Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
-| MCP DotNet | [`mcp-dotnet`](../mcp-dotnet) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
-| MCP Function | [`mcp-function`](../mcp-function) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
+| MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
+| MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V4 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V4`](../FoundryConsoleV4) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V4MCP`; built in CI) |
 
 Ports, auth, and env vars for the worker, MCP, and console apps live in [`README.md`](../README.md)
@@ -260,8 +260,10 @@ core-dotnet/
 worker-dotnet/
   worker/                    Hangfire background worker (WeatherWorkerDotNet.csproj)
   worker.tests/              Worker unit tests (WeatherWorkerDotNet.Tests.csproj)
-mcp-dotnet/                  MCP DotNet tool host (GetPublicWeatherData)
-mcp-function/                MCP Function tool host (GetLatLongData)
+mcp-dotnet/
+  mcp/                       MCP DotNet tool host (WeatherMcpDotNet.csproj)
+mcp-function/
+  mcp/                       MCP Function tool host (WeatherMcpFunction.csproj)
 FoundryConsoleV1…V4/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```

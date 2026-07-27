@@ -41,8 +41,8 @@ Ultra-simple remote MCP servers that expose Core weather tools via MediatR.
 
 | Project | Path | Tool | Port | Endpoint | Auth |
 | --- | --- | --- | --- | --- | --- |
-| MCP DotNet | [`mcp-dotnet`](mcp-dotnet) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer token (`MCP_API_KEY`; no default — must be set by developer) |
-| MCP Function | [`mcp-function`](mcp-function) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` | Built-in Functions system key `mcp_extension` (`x-functions-key` header) |
+| MCP DotNet | [`mcp-dotnet/mcp`](mcp-dotnet/mcp) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer token (`MCP_API_KEY`; no default — must be set by developer) |
+| MCP Function | [`mcp-function/mcp`](mcp-function/mcp) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` | Built-in Functions system key `mcp_extension` (`x-functions-key` header) |
 
 VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json).
