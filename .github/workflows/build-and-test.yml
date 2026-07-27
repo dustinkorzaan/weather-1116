@@ -128,6 +128,38 @@ jobs:
       - name: Run MVC tests
         run: dotnet test mvc-dotnet/mvc.tests/WeatherMVC.Tests.csproj --configuration Release --verbosity normal
 
+  test-mcp-dotnet:
+    name: Test MCP DotNet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run MCP DotNet tests
+        run: dotnet test mcp-dotnet/mcp.tests/WeatherMcpDotNet.Tests.csproj --configuration Release --verbosity normal
+
+  test-mcp-function:
+    name: Test MCP Function
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run MCP Function tests
+        run: dotnet test mcp-function/mcp.tests/WeatherMcpFunction.Tests.csproj --configuration Release --verbosity normal
+
   build-and-test-react:
     name: Build and Test React Project
     runs-on: ubuntu-latest

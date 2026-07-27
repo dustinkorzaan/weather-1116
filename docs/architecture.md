@@ -237,6 +237,7 @@ builds on every push:
 - `WeatherAPI.Tests` integration tests.
 - `WeatherMVC.Tests` integration tests.
 - `WeatherBlazor.Tests` component tests.
+- `WeatherMcpDotNet.Tests` and `WeatherMcpFunction.Tests` About/tool-registration tests.
 
 Production deploy workflows (`prod-deploy-*.yml`) auto-deploy when **build-and-test**
 completes successfully on `main`. Each deploy workflow can also be triggered manually
@@ -264,8 +265,10 @@ worker-dotnet/
   worker.tests/              Worker unit tests (WeatherWorkerDotNet.Tests.csproj)
 mcp-dotnet/
   mcp/                       MCP DotNet tool host (WeatherMcpDotNet.csproj)
+  mcp.tests/                 MCP DotNet tests (WeatherMcpDotNet.Tests.csproj)
 mcp-function/
   mcp/                       MCP Function tool host (WeatherMcpFunction.csproj)
+  mcp.tests/                 MCP Function tests (WeatherMcpFunction.Tests.csproj)
 FoundryConsoleV1…V4/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```

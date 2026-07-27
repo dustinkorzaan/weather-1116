@@ -61,3 +61,5 @@ app.MapMcp("/mcp");
 app.MapControllers();
 
 app.Run();
+
+public partial class Program;
