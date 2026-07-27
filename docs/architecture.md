@@ -143,31 +143,8 @@ Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler
 ## About and Health
 
 Every runnable app can participate in a shared **About tree** contract
-(`Core.about.AboutNode`): `name`, `isHealthy`, optional build metadata, and
-`children`.
-
-| Property | JSON name | Description |
-| --- | --- | --- |
-| Name | `name` | Display name for the service or health check |
-| PublicMessage | `publicMessage` | Optional message safe for the anonymous About endpoint |
-| IsHealthy | `isHealthy` | Health status for this node and its monitored dependency |
-| BuildStart | `buildStart` | Optional build start timestamp |
-| BuildNumber | `buildNumber` | Optional build number |
-| BuildBranchName | `buildBranchName` | Optional source branch name |
-| Children | `children` | Nested About nodes |
-
-| App | `/about` or `/About` behavior |
-| --- | --- |
-| WeatherAPI | `API Root` → `API` + remote worker and MCP about nodes |
-| WeatherMVC | `MVC Root` → `MVC` + nested `API Root` (same worker/MCP children as API) |
-| Worker DotNet | Leaf node for self (`worker-dotnet`); always healthy for now |
-| MCP DotNet / MCP Function | Leaf node for self; health checks expected MCP tool registration |
-| React | Fetches API `/About` and wraps with `UI React Root` |
-| Blazor | Fetches API `/About` and wraps with `Blazor Root` |
-
-`Core.about.AboutClient` (`IAboutClient`) fetches remote about JSON from
-configured URLs. Missing or unhealthy dependencies become unhealthy leaf nodes
-without failing the entire response.
+(`Core.about.AboutNode`): `name`, `publicMessage`, `isHealthy`, build metadata,
+and `children`.
 
 ## Core Project
 
