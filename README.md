@@ -1,6 +1,6 @@
 # Weather
 
-Weather forecast sample app implemented across four runnable stacks plus one
+Weather sample app implemented across four runnable stacks plus one
 shared .NET class library.
 
 This README is intentionally brief. Use it for quick orientation, and use

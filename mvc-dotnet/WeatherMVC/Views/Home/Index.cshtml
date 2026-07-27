@@ -1,6 +1,5 @@
 ﻿@using System.Text.Json
 @inject IConfiguration Configuration
-@model Core.demo.forecast.WeatherForecast[]
 @{
     ViewData["Title"] = "Home";
     var helloResponse = ViewData["HelloResponse"] as string;
@@ -66,39 +65,6 @@
     }
     <div id="weather-map" class="weather-map" data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"></div>
 </section>
-
-<h2>Weather forecast</h2>
-
-@if (Model == null || Model.Length == 0)
-{
-    <p><em>No forecast data available.</em></p>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var forecast in Model)
-                {
-                    <tr>
-                        <td>@forecast.Date.ToShortDateString()</td>
-                        <td>@((forecast.TemperatureK - 273.15).ToString("0.##"))</td>
-                        <td>@((((forecast.TemperatureK - 273.15) * 9.0 / 5.0) + 32.0).ToString("0.##"))</td>
-                        <td>@forecast.Summary</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-}
 
 @section Scripts {
     <script src="~/js/currentAIWeather.js" asp-append-version="true"></script>

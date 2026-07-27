@@ -67,7 +67,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseCors("ReactClient");
 
-// hack, because the default route is not working in codespaces, so redirect to the weatherforecast endpoint
+// hack, because the default route is not working in codespaces, so redirect to the about endpoint
 app.MapGet("/", () => Results.Redirect("/about"));
 app.MapControllers();
 

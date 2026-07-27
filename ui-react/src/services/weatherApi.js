@@ -24,9 +24,6 @@ export const weatherApi = createApi({
       query: () => '/Home/Hello',
       transformResponse: (response) => response?.requestResponse ?? 'No hello response returned.',
     }),
-    getForecast: builder.query({
-      query: () => '/weatherforecast',
-    }),
     getAbout: builder.query({
       query: () => '/About',
       transformResponse: (apiRoot) => buildUiReactRoot(apiRoot),
@@ -40,7 +37,6 @@ export const weatherApi = createApi({
 
 export const {
   useGetHelloQuery,
-  useGetForecastQuery,
   useLazyGetAboutQuery,
   useLazyGetCurrentAIWeatherQuery,
 } = weatherApi;

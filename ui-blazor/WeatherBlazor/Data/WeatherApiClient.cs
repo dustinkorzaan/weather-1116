@@ -17,24 +17,15 @@ public class AIWeatherResponse
     public string Conditions { get; set; } = string.Empty;
 }
 
-public class WeatherForecastClient
+public class WeatherApiClient
 {
     private HttpClient _httpClient;
-    private ILogger<WeatherForecastClient> _logger;
+    private ILogger<WeatherApiClient> _logger;
 
-    public WeatherForecastClient(HttpClient httpClient, ILogger<WeatherForecastClient> logger)
+    public WeatherApiClient(HttpClient httpClient, ILogger<WeatherApiClient> logger)
     {
         _httpClient = httpClient;
         _logger = logger;
-    }
-
-    public async Task<WeatherForecast[]> GetForecastAsync(DateTime? startDate)
-    {
-        var route = startDate.HasValue
-            ? $"WeatherForecast?startDate={Uri.EscapeDataString(startDate.Value.ToString("O"))}"
-            : "WeatherForecast";
-
-        return await _httpClient.GetFromJsonAsync<WeatherForecast[]>(route) ?? [];
     }
 
     public async Task<HelloWorldResponse?> GetHelloAsync()

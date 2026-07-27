@@ -67,11 +67,6 @@
   font-weight: 500;
 }
 
-.forecast-title {
-  margin: 1.5rem 0 0.5rem;
-  font-size: 1.15rem;
-}
-
 .ai-weather-section {
   margin: 1.25rem 0 0.5rem;
 }
@@ -185,34 +180,13 @@
   white-space: nowrap;
 }
 
-.forecast-status {
+.status-message {
   margin: 0;
   color: #333;
 }
 
-.forecast-status.error {
+.status-message.error {
   color: #b42318;
-}
-
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.forecast-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 28rem;
-  max-width: 40rem;
-}
-
-.forecast-table th,
-.forecast-table td {
-  padding: 0.4rem 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #e5e5e5;
-  white-space: nowrap;
 }
 
 @media (max-width: 480px) {
@@ -222,12 +196,6 @@
 
   .home-content {
     padding: 0.75rem;
-  }
-
-  .forecast-table th,
-  .forecast-table td {
-    padding: 0.35rem 0.6rem;
-    font-size: 0.9rem;
   }
 }
 

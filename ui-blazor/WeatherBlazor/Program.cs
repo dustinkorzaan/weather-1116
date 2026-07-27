@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddHttpClient<WeatherForecastClient>(c =>
+builder.Services.AddHttpClient<WeatherApiClient>(c =>
 {
     var url = builder.Configuration["API_DOTNET_URL"]
         ?? throw new InvalidOperationException("API_DOTNET_URL is not set");

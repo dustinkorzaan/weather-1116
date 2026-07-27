@@ -27,7 +27,7 @@ AI Weather in API and MVC.
 ### Adjacent projects (not UI/API dependencies)
 
 These are part of the overall system map but are **not** on the critical path
-for hello/forecast/map flows in the three UIs.
+for hello/AI weather/map flows in the three UIs.
 
 | Project | Path | Role |
 | --- | --- | --- |
@@ -41,15 +41,15 @@ and each project's `.env.example`.
 
 ## Runtime Model
 
-- `WeatherAPI` provides forecast data for React UI and Blazor UI.
+- `WeatherAPI` provides hello and AI weather data for React UI and Blazor UI.
 - React UI and Blazor UI consume `WeatherAPI`.
-- MVC UI does not consume `WeatherAPI` for forecast/hello; it duplicates the
+- MVC UI does not consume `WeatherAPI` for AI weather/hello; it duplicates the
   equivalent backend logic locally via `Core`.
 - Backend logic is intentionally duplicated in MVC and API (no shared backend
   dependency between those projects), except for shared cross-cutting code
   (events/handlers) provided by `Core`, which both MVC and API reference.
 - **MCP hosts are not called by any UI or by `WeatherAPI` for standard
-  forecast/hello flows.** They are used indirectly when the hosted Foundry
+  AI weather/hello flows.** They are used indirectly when the hosted Foundry
   agent resolves a place name and fetches weather (see below).
 
 ## AI Weather and Foundry Agent
@@ -112,7 +112,7 @@ URLs are configured via `MCP_DOTNET_URL`, `MCP_FUNCTION_URL`, and
 ## Background Worker (Hangfire)
 
 [`worker-dotnet`](../worker-dotnet) is the only app that runs Hangfire servers.
-It registers recurring and queue-based workers against shared storage
+It runs queue-based Hangfire servers against shared storage
 (`DB_CONNECTION_STRING`, SQL Server in production). API and MVC register the
 same storage as Hangfire **clients** so they can enqueue jobs without running
 servers.
@@ -196,8 +196,6 @@ Shared responsive conventions kept in parity across the three sites:
   wider viewports.
 - The avatar/About menu stays reachable and usable at every width and never
   overflows the viewport.
-- The weather forecast table scrolls horizontally within its own container
-  (rather than the whole page) on viewports too narrow to show all columns.
 - Main content is centered with a max-width on large screens instead of
   stretching to full width, keeping line lengths and table density readable.
 - Base typography scales down slightly on small screens and back up at

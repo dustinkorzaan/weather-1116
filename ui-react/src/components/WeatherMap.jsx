@@ -84,12 +84,12 @@ function WeatherMap() {
   return (
     <section className="weather-map-section" aria-label="Map">
       {!apiKey && (
-        <p className="forecast-status error">
+        <p className="status-message error">
           Set <code>VITE_GOOGLE_MAPS_API_KEY</code> to enable Google Maps.
         </p>
       )}
       {status === 'error' && (
-        <p className="forecast-status error">
+        <p className="status-message error">
           Unable to load Google Maps. Check the API key and that Maps JavaScript API is enabled.
         </p>
       )}

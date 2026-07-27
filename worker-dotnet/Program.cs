@@ -72,8 +72,6 @@ builder.Services.AddHangfireServer(options =>
 	options.SchedulePollingInterval = queuePollInterval;
 });
 
-builder.Services.AddHostedService<RecurringJobScheduler>();
-
 var app = builder.Build();
 
 // Hangfire dashboard, open to all (POC — no auth). It reads the shared storage,

@@ -35,22 +35,6 @@ test('renders weather app title and loaded data', async () => {
       );
     }
 
-    if (url.endsWith('/weatherforecast')) {
-      return new Response(
-        JSON.stringify([
-          {
-            date: '2026-07-12',
-            temperatureK: 300.15,
-            summary: 'Warm',
-          },
-        ]),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
     return new Response(JSON.stringify({}), {
       status: 404,
       headers: { 'Content-Type': 'application/json' },
@@ -69,7 +53,6 @@ test('renders weather app title and loaded data', async () => {
   expect(await screen.findByText('Hello from test API.')).toBeDefined();
   expect(await screen.findByLabelText(/location:/i)).toBeDefined();
   expect(await screen.findByRole('button', { name: /get current ai weather/i })).toBeDefined();
-  expect(await screen.findByText('Warm')).toBeDefined();
 });
 
 test('renders a public message in the About tree', () => {

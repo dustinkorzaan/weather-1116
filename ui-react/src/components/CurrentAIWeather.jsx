@@ -42,7 +42,7 @@ function CurrentAIWeather() {
         </button>
       </form>
 
-      {isError && <p className="forecast-status error">{errorMessage}</p>}
+      {isError && <p className="status-message error">{errorMessage}</p>}
 
       {data && !isFetching && (
         <div className="ai-weather-results">
