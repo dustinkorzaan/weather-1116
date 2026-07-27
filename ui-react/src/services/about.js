@@ -2,7 +2,7 @@
 //   name (string), isHealthy (bool), version (string|null), buildStart (datetime|null),
 //   buildNumber (int|null), buildBranchName (string|null), children (array)
 
-function createNode(name, overrides = {}) {
+function createLeafNode(name, overrides = {}) {
   return {
     name,
     isHealthy: true,
@@ -57,14 +57,13 @@ function computeAggregateHealth(nodes) {
  * itself, followed by the API's own About tree.
  */
 export function buildUiReactRoot(apiRoot) {
-  const uiReactNode = createNode('UI React');
+  const uiReactNode = createLeafNode('UI React');
   const children = [uiReactNode, apiRoot];
 
-  return createNode('UI React Root', {
+  return {
+    name: 'UI React Root',
     isHealthy: computeAggregateHealth(children),
+    version: null,
     children,
-    buildStart: null,
-    buildNumber: null,
-    buildBranchName: null,
-  });
+  };
 }
