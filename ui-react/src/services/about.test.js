@@ -6,11 +6,10 @@ describe('buildUiReactRoot', () => {
     const apiRoot = {
       name: 'API Root',
       isHealthy: true,
-      version: null,
       buildStart: null,
       buildNumber: null,
       children: [
-        { name: 'API', isHealthy: true, version: null, buildStart: null, buildNumber: null, children: [] },
+        { name: 'API', isHealthy: true, buildStart: null, buildNumber: null, children: [] },
       ],
     };
 
@@ -26,11 +25,10 @@ describe('buildUiReactRoot', () => {
     const apiRoot = {
       name: 'API Root',
       isHealthy: true,
-      version: null,
       buildStart: null,
       buildNumber: null,
       children: [
-        { name: 'API', isHealthy: false, version: null, buildStart: null, buildNumber: null, children: [] },
+        { name: 'API', isHealthy: false, buildStart: null, buildNumber: null, children: [] },
       ],
     };
 
@@ -43,7 +41,6 @@ describe('buildUiReactRoot', () => {
     const apiRoot = {
       name: 'API Root',
       isHealthy: false,
-      version: null,
       buildStart: null,
       buildNumber: null,
       children: [],

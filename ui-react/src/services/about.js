@@ -1,5 +1,5 @@
 // Shared About node contract (mirrors Core.about.AboutNode on the .NET side):
-//   name (string), publicMessage (string|null), isHealthy (bool), version (string|null), buildStart (datetime|null),
+//   name (string), publicMessage (string|null), isHealthy (bool), buildStart (datetime|null),
 //   buildNumber (int|null), buildBranchName (string|null), children (array)
 
 function createLeafNode(name, overrides = {}) {
@@ -7,7 +7,6 @@ function createLeafNode(name, overrides = {}) {
     name,
     publicMessage: null,
     isHealthy: true,
-    version: null,
     buildStart: resolveBuildStart(),
     buildNumber: resolveBuildNumber(),
     buildBranchName: resolveBuildBranchName(),
@@ -64,7 +63,6 @@ export function buildUiReactRoot(apiRoot) {
   return {
     name: 'UI React Root',
     isHealthy: computeAggregateHealth(children),
-    version: null,
     children,
   };
 }

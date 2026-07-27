@@ -13,14 +13,13 @@ public class AboutClientTests
     [Fact]
     public async Task GetAsync_ValidNode_ReturnsRemoteNode()
     {
-        var payload = new AboutNode { Name = NodeName, IsHealthy = true, Version = "1.2.3" };
+        var payload = new AboutNode { Name = NodeName, IsHealthy = true };
         var client = CreateClient(JsonResponse(payload), out var recorded);
 
         var node = await client.GetAsync("https://example.com/about", NodeName);
 
         Assert.Equal(NodeName, node.Name);
         Assert.True(node.IsHealthy);
-        Assert.Equal("1.2.3", node.Version);
         Assert.Equal("https://example.com/about", recorded.LastRequestUri?.ToString());
     }
 

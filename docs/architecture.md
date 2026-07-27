@@ -151,7 +151,6 @@ Every runnable app can participate in a shared **About tree** contract
 | Name | `name` | Display name for the service or health check |
 | PublicMessage | `publicMessage` | Optional message safe for the anonymous About endpoint |
 | IsHealthy | `isHealthy` | Health status for this node and its monitored dependency |
-| Version | `version` | Optional application version |
 | BuildStart | `buildStart` | Optional build start timestamp |
 | BuildNumber | `buildNumber` | Optional build number |
 | BuildBranchName | `buildBranchName` | Optional source branch name |
