@@ -1,4 +1,3 @@
-using Core.about;
 using Core.weather.Handlers;
 using DotNetEnv;
 using MediatR;
@@ -13,6 +12,11 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
 	options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
+builder.Services.AddControllers()
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+	});
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
@@ -63,13 +67,6 @@ app.Use(async (context, next) =>
 });
 
 app.MapMcp("/mcp");
-
-app.MapGet("/about", (IEnumerable<McpServerTool> tools) =>
-{
-	const string expectedTool = "GetPublicWeatherData";
-	var isHealthy = !string.IsNullOrWhiteSpace(mcpApiKey) && tools.Any(t =>
-		string.Equals(t.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
-	return Results.Ok(AboutTreeBuilder.BuildMcpDotNetNode(isHealthy));
-}).AllowAnonymous();
+app.MapControllers();
 
 app.Run();
