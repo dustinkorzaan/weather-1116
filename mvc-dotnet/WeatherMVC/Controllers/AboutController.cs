@@ -14,7 +14,7 @@ public class AboutController(
     {
         var workerDotNetTask = aboutClient.GetAsync(
             $"{configuration["WORKER_DOTNET_URL"]}/About",
-            "worker-dotnet",
+            "Worker Root",
             cancellationToken);
         var mcpDotNetTask = aboutClient.GetAsync(
             $"{configuration["MCP_DOTNET_URL"]}/About",

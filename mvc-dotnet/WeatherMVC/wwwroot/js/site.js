@@ -41,20 +41,37 @@
 		row.appendChild(health);
 		li.appendChild(row);
 
+		if (node?.message) {
+			const message = document.createElement('div');
+			message.className = 'about-tree-message';
+			message.textContent = node.message;
+			li.appendChild(message);
+		}
+
 		const metadata = [];
 		if (Number.isFinite(node?.buildNumber)) {
-			metadata.push(`Build #${node.buildNumber}`);
+			metadata.push({ text: `Build #${node.buildNumber}`, value: node.buildNumber });
 		}
 		if (node?.buildStart) {
-			metadata.push(`Started ${formatBuildStart(node.buildStart)}`);
+			metadata.push({ text: `Started ${formatBuildStart(node.buildStart)}`, value: formatBuildStart(node.buildStart) });
 		}
 		if (node?.buildBranchName) {
-			metadata.push(`Branch ${node.buildBranchName}`);
+			metadata.push({ text: `Branch ${node.buildBranchName}`, value: node.buildBranchName, isBranch: true });
 		}
 		if (metadata.length > 0) {
 			const meta = document.createElement('div');
 			meta.className = 'about-tree-meta';
-			meta.textContent = metadata.join(' | ');
+			metadata.forEach((item, index) => {
+				if (index > 0) {
+					meta.appendChild(document.createTextNode(' | '));
+				}
+				const value = document.createElement('span');
+				value.textContent = item.text;
+				if (item.isBranch && item.value !== 'main') {
+					value.className = 'about-tree-branch-non-main';
+				}
+				meta.appendChild(value);
+			});
 			li.appendChild(meta);
 		}
 

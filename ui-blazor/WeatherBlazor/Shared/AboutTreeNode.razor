@@ -10,6 +10,10 @@
                 @(Node.IsHealthy ? "Healthy" : "Unhealthy")
             </span>
         </div>
+        @if (!string.IsNullOrWhiteSpace(Node.Message))
+        {
+            <div class="about-tree-message">@Node.Message</div>
+        }
         @if (Node.BuildNumber.HasValue || Node.BuildStart.HasValue || !string.IsNullOrWhiteSpace(Node.BuildBranchName))
         {
             <div class="about-tree-meta">
@@ -31,7 +35,7 @@
                     {
                         <span> | </span>
                     }
-                    <span>Branch @Node.BuildBranchName</span>
+                    <span class="@(Node.BuildBranchName == "main" ? null : "about-tree-branch-non-main")">Branch @Node.BuildBranchName</span>
                 }
             </div>
         }

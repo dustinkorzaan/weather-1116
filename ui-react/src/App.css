@@ -406,6 +406,16 @@
   color: #667085;
 }
 
+.about-tree-message {
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  color: #475467;
+}
+
+.about-tree-branch-non-main {
+  color: #d97706;
+}
+
 .about-tree-health {
   font-size: 0.82rem;
   font-weight: 600;
