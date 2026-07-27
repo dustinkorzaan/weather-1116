@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Core.AIWeather.Models;
-using Core.geo.Models;
-using Core.weather.Models;
+using Core.Geo.Models;
+using Core.Weather.Models;
 
 namespace Core.Tests.Models;
 

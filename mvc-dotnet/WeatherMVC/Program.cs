@@ -1,4 +1,4 @@
-using Core.about;
+using Core.About;
 using Core.HelloWorld.handlers;
 using DotNetEnv;
 using Hangfire;

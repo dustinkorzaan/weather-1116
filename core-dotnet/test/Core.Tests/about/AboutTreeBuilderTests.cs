@@ -1,4 +1,4 @@
-using Core.about;
+using Core.About;
 
 namespace Core.Tests.about;
 

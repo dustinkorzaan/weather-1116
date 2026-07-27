@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Core.about;
+namespace Core.About;
 
 /// <summary>
 /// Builds the nested About trees shared by the runnable apps.

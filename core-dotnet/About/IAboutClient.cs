@@ -1,4 +1,4 @@
-namespace Core.about;
+namespace Core.About;
 
 /// <summary>
 /// Fetches a remote About node from any absolute HTTP(S) URL.

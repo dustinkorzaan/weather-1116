@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Core.geo.Events;
+using Core.Geo.Events;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;

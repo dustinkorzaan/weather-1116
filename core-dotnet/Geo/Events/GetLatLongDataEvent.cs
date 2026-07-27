@@ -1,7 +1,7 @@
-using Core.geo.Models;
+using Core.Geo.Models;
 using MediatR;
 
-namespace Core.geo.Events;
+namespace Core.Geo.Events;
 
 /// <summary>
 /// Resolves a location name to latitude/longitude via the Open-Meteo geocoding API.

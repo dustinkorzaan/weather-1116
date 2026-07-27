@@ -149,7 +149,7 @@ Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler
 ## About and Health
 
 Every runnable app can participate in a shared **About tree** contract
-(`Core.about.AboutNode`): `name`, `publicMessage`, `isHealthy`, build metadata,
+(`Core.About.AboutNode`): `name`, `publicMessage`, `isHealthy`, build metadata,
 and `children`.
 
 ## Core Project
@@ -159,10 +159,10 @@ and `children`.
 and handlers, including:
 
 - `core-dotnet/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
-- `core-dotnet/geo/` — geocoding (`GetLatLongData`)
-- `core-dotnet/weather/` — public weather (`GetPublicWeatherData`)
+- `core-dotnet/Geo/` — geocoding (`GetLatLongData`)
+- `core-dotnet/Weather/` — public weather (`GetPublicWeatherData`)
 - `core-dotnet/AIWeather/` — Foundry agent integration (`GetCurrentAIWeatherHandler`)
-- `core-dotnet/about/` — About tree builder and remote about client
+- `core-dotnet/About/` — About tree builder and remote about client
 
 ## Feature Parity Contract
 

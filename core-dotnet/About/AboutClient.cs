@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 
-namespace Core.about;
+namespace Core.About;
 
 /// <summary>
 /// HTTP client that loads a remote <see cref="AboutNode"/> for inclusion in an About tree.

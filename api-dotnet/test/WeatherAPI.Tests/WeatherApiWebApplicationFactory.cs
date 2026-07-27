@@ -1,4 +1,4 @@
-using Core.about;
+using Core.About;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;

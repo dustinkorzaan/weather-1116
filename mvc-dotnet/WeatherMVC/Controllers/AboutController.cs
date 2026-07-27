@@ -1,4 +1,4 @@
-using Core.about;
+using Core.About;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

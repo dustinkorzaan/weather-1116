@@ -1,10 +1,10 @@
 using System.Text.Json;
-using Core.geo.Events;
-using Core.geo.Models;
+using Core.Geo.Events;
+using Core.Geo.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Core.geo.Handlers;
+namespace Core.Geo.Handlers;
 
 /// <summary>
 /// Geocodes a location string to latitude/longitude using Open-Meteo.

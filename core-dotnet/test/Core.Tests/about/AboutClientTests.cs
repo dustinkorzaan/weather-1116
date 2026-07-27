@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using Core.about;
+using Core.About;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.Tests.about;

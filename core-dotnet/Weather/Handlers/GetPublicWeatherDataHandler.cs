@@ -1,10 +1,10 @@
 using System.Text.Json;
-using Core.weather.Events;
-using Core.weather.Models;
+using Core.Weather.Events;
+using Core.Weather.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Core.weather.Handlers;
+namespace Core.Weather.Handlers;
 
 /// <summary>
 /// Fetches public current-weather data from Open-Meteo for a given lat/long.

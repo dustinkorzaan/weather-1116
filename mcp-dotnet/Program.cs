@@ -1,4 +1,4 @@
-using Core.weather.Handlers;
+using Core.Weather.Handlers;
 using DotNetEnv;
 using MediatR;
 using ModelContextProtocol.Server;

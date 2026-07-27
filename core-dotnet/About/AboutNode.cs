@@ -1,4 +1,4 @@
-namespace Core.about;
+namespace Core.About;
 
 /// <summary>
 /// Shared response contract for About endpoints across all apps (React host, API, MVC).

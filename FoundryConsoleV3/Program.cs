@@ -1,8 +1,8 @@
 ﻿using Core.AIWeather.Models;
 using Core.HelloWorld.handlers;
-using Core.geo.Events;
-using Core.geo.Models;
-using Core.weather.Events;
+using Core.Geo.Events;
+using Core.Geo.Models;
+using Core.Weather.Events;
 using DotNetEnv;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;

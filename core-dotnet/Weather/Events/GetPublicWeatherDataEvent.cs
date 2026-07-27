@@ -1,8 +1,8 @@
-using Core.geo.Models;
-using Core.weather.Models;
+using Core.Geo.Models;
+using Core.Weather.Models;
 using MediatR;
 
-namespace Core.weather.Events;
+namespace Core.Weather.Events;
 
 /// <summary>
 /// Fetches current weather for a latitude/longitude via the Open-Meteo forecast API.

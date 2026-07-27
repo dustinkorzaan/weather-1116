@@ -1,5 +1,5 @@
-using Core.about;
-using Core.weather.Handlers;
+using Core.About;
+using Core.Weather.Handlers;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;

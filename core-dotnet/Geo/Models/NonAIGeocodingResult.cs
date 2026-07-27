@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Core.geo.Models;
+namespace Core.Geo.Models;
 
 public class NonAIGeocodingResult
 {

@@ -1,5 +1,5 @@
 using System.Reflection;
-using Core.about;
+using Core.About;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;

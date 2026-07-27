@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Core.about;
+using Core.About;
 
 namespace WeatherAPI.Tests;
 

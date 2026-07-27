@@ -1,7 +1,7 @@
 using System.ComponentModel;
-using Core.geo.Models;
-using Core.weather.Events;
-using Core.weather.Models;
+using Core.Geo.Models;
+using Core.Weather.Events;
+using Core.Weather.Models;
 using MediatR;
 using ModelContextProtocol.Server;
 

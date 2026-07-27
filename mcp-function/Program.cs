@@ -1,4 +1,4 @@
-using Core.geo.Handlers;
+using Core.Geo.Handlers;
 using DotNetEnv;
 using MediatR;
 using Microsoft.Azure.Functions.Worker.Builder;
