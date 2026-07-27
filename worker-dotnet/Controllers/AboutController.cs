@@ -25,28 +25,11 @@ public sealed class AboutController(
         {
             var monitoringApi = JobStorage.Current.GetMonitoringApi();
             var statistics = monitoringApi.GetStatistics();
-            var processingJobs = monitoringApi.ProcessingJobs(0, int.MaxValue)
-                .Select(item => item.Value)
-                .ToList();
-            var enqueuedJobs = monitoringApi
-                .Queues()
-                .SelectMany(queue => monitoringApi.EnqueuedJobs(queue.Name, 0, int.MaxValue))
-                .Select(item => item.Value)
-                .ToList();
-
-            var now = DateTime.UtcNow;
-            var hasStaleProcessing = processingJobs.Any(job =>
-                job.StartedAt.HasValue &&
-                now - job.StartedAt.Value > TimeSpan.FromMinutes(30));
-            var hasStaleEnqueued = enqueuedJobs.Any(job =>
-                job.EnqueuedAt.HasValue &&
-                now - job.EnqueuedAt.Value > TimeSpan.FromMinutes(60));
-
             return new AboutNode
             {
                 Name = "Hangfire",
                 PublicMessage = $"{statistics.Failed} failed, {statistics.Processing} processing, {statistics.Enqueued} enqueued",
-                IsHealthy = statistics.Failed == 0 && !hasStaleProcessing && !hasStaleEnqueued,
+                IsHealthy = HangfireAboutHealth.IsHealthy(monitoringApi, statistics, DateTime.UtcNow),
             };
         }
         catch (Exception exception)
