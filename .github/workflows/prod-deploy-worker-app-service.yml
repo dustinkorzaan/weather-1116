@@ -1,5 +1,5 @@
-name: CICD weather1116-prod-worker
-run-name: CICD weather1116-prod-worker
+name: cicd-weather1116-prod-worker
+run-name: cicd-weather1116-prod-worker
 
 on:
   workflow_run:

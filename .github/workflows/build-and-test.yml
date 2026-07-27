@@ -1,5 +1,5 @@
 name: build-and-test
-run-name: Build and Test
+run-name: build-and-test
 
 on:
   push:

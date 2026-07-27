@@ -1,5 +1,5 @@
-name: CICD weather1116-prod-api
-run-name: CICD weather1116-prod-api
+name: cicd-weather1116-prod-api
+run-name: cicd-weather1116-prod-api
 
 on:
   workflow_run:

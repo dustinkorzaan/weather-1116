@@ -1,8 +1,8 @@
 # Docs for Azure Functions deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: CICD weather1116-prod-mcpfunc
-run-name: CICD weather1116-prod-mcpfunc
+name: cicd-weather1116-prod-mcpfunc
+run-name: cicd-weather1116-prod-mcpfunc
 
 on:
   workflow_run:
