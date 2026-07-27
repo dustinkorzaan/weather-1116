@@ -1,8 +1,18 @@
 name: build-and-test
 run-name: Build and Test
 
+# PR CI runs only for non-draft pull requests (including when marked ready for
+# review). Pushes to main still run so prod deploy workflows can chain on success.
 on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
   push:
+    branches:
+      - main
 
 # Newer pushes cancel older in-progress builds for the same ref.
 concurrency:
@@ -15,6 +25,7 @@ permissions:
 jobs:
   build:
     name: Build All Projects
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
 
     strategy:
@@ -50,6 +61,7 @@ jobs:
 
   test-weather-api:
     name: Test Weather API
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
 
     steps:
@@ -66,6 +78,7 @@ jobs:
 
   test-core:
     name: Test Core Library
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
 
     steps:
@@ -82,6 +95,7 @@ jobs:
 
   build-and-test-react:
     name: Build and Test React Project
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
 
     steps:
