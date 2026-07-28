@@ -18,11 +18,12 @@ AI Weather in API and MVC.
 
 | # | Project | Path | Stack | Role |
 | - | --- | --- | --- | --- |
-| 1 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
-| 2 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
-| 3 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
-| 4 | Blazor UI | [`ui-blazor/blazor`](../ui-blazor/blazor) | Blazor Server | Interactive server-rendered UI in C# |
-| 5 | Core | [`core-dotnet/core/Core.csproj`](../core-dotnet/core/Core.csproj) | .NET class library | Shared events/handlers referenced by MVC, API, and MCP hosts |
+| 1 | Blazor UI | [`ui-blazor/blazor`](../ui-blazor/blazor) | Blazor | Interactive server-rendered UI in C# |
+| 2 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
+| 3 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
+| 4 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
+| 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire servers + dashboard | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
+| 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | Shared events/handlers referenced by MVC, API, worker, and MCP hosts |
 
 ### Adjacent projects (not UI/API dependencies)
 
@@ -31,7 +32,6 @@ for hello/AI weather/map flows in the three UIs.
 
 | Project | Path | Role |
 | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
 | MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
 | MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V4 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V4`](../FoundryConsoleV4) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V4MCP`; built in CI) |
