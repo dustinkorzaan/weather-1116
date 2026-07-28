@@ -14,7 +14,7 @@ project relationships, and parity guidance.
 | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
 | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
 | Worker | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 |
-| Core | [`core-dotnet/core/Core.csproj`](core-dotnet/core/Core.csproj) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — |
+| Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
