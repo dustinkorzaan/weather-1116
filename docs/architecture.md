@@ -36,7 +36,7 @@ for hello/AI weather/map flows in the three UIs.
 | MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V4 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V4`](../FoundryConsoleV4) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V4MCP`; built in CI) |
 
-Ports, auth, and env vars for the worker, MCP, and console apps live in [`README.md`](../README.md)
+Ports, auth, and env vars for the worker and console apps live in [`README.md`](../README.md)
 and each project's `.env.example`.
 
 ## Runtime Model
@@ -95,10 +95,21 @@ Ultra-simple remote MCP servers that expose `Core` tools over the Model Context
 Protocol. They exist so a Foundry project (or MCP Inspector) can call the same
 MediatR handlers the sample uses in-process elsewhere.
 
-| Host | Tool | Endpoint | Auth |
-| --- | --- | --- | --- |
-| MCP DotNet | `GetPublicWeatherData` | `/mcp` | Bearer `MCP_API_KEY` |
-| MCP Function | `GetLatLongData` | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` |
+| Host | Path | Tool | Port | Endpoint | Auth |
+| --- | --- | --- | --- | --- | --- |
+| MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer `MCP_API_KEY` (no default — must be set by developer) |
+| MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
+
+VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
+also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
+
+Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see
+`prod-deploy-mcp-*.yml`).
+
+Auth examples:
+
+- MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/About` stays open)
+- MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 
 Each host also exposes an anonymous **`/About`** probe that returns a leaf
 `AboutNode` (`mcp-dotnet` or `mcp-function`) with tool-registration health and
