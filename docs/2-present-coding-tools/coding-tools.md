@@ -61,4 +61,4 @@ sequenceDiagram
     Function->>GetPublicWeather: GetPublicWeather(lat,long)
     GetPublicWeather-->>Function: NonAIWeatherResponse
     Function-->>Client: NonAIWeatherResponse (JSON)    
-```    
+```
