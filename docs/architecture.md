@@ -148,7 +148,7 @@ and `children`.
 
 ## Core Project
 
-`Core` (`core-dotnet/core/Core.csproj`) is a .NET class library referenced by
+`Core` (`core-dotnet/core`) is a .NET class library referenced by
 `WeatherMVC`, `WeatherAPI`, `worker-dotnet`, and both MCP hosts. It hosts shared MediatR events
 and handlers, including:
 
