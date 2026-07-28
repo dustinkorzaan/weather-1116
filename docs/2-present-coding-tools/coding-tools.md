@@ -27,38 +27,3 @@
 | **GitHub / Microsoft** | [Copilot Workspace](https://github.com) | **GitHub Copilot** *(IDE Extension)* | OpenAI GPT-5.5, customized GitHub specialized engineering models |
 | **Google** | [Google Jules](https://jules.google) *(Async GitHub Agent)* | **[Google Antigravity](https://thenewstack.io)** *(IDE / Agent Command App)* | **Gemini 3.6 Flash** (New Default), Gemini 3.5 Flash-Lite, Gemini 3.5 Flash Cyber |
 | **OpenAI** | [Codex in ChatGPT](https://openai.com) / Cloud Tasks | **[OpenAI Codex App](https://openai.com)** *(Desktop, CLI, & Extension)* | **GPT-5.5**, GPT-5, GPT-4o, Custom Agentic Models |
-
-
-
-<br>
-<br>
-<br>
-
-# x
-
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Client as MCP Client
-    participant Tool as GetPublicWeatherDataTool
-    participant GetPublicWeather
-
-    Client->>Tool: GetPublicWeatherData(lat,long)
-    Tool->>GetPublicWeather: GetPublicWeather(lat,long)
-    GetPublicWeather-->>Tool: NonAIWeatherResponse
-    Tool-->>Client: NonAIWeatherResponse (JSON)
-```
-X
-```mermaid
-sequenceDiagram
-    autonumber
-    participant GetPublicWeather
-    participant Function as GetPublicWeatherDataFunction
-    participant Client as MCP Client
-   
-    Client->>Function: GetPublicWeatherData(lat,long)
-    Function->>GetPublicWeather: GetPublicWeather(lat,long)
-    GetPublicWeather-->>Function: NonAIWeatherResponse
-    Function-->>Client: NonAIWeatherResponse (JSON)    
-```
