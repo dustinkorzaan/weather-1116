@@ -41,8 +41,8 @@ and each project's `.env.example`.
 
 ## Runtime Model
 
-- `WeatherAPI` provides hello and AI weather data for React UI and Blazor UI.
 - React UI and Blazor UI consume `WeatherAPI`.
+- `WeatherAPI` provides hello and AI weather data for React UI and Blazor UI.
 - MVC UI does not consume `WeatherAPI` for AI weather/hello; it duplicates the
   equivalent backend logic locally via `Core`.
 - Backend logic is intentionally duplicated in MVC and API (no shared backend
