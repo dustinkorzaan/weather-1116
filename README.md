@@ -1,6 +1,6 @@
 # Weather
 
-Weather sample app implemented across four runnable stacks plus one
+Weather sample app implemented across five runnable stacks plus one
 shared .NET class library.
 
 This README is intentionally brief. Use it for quick orientation, and use
@@ -9,10 +9,11 @@ project relationships, and parity guidance.
 
 | Project | Path | Stack | Port |
 | --- | --- | --- | --- |
+| Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
+| React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
 | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
 | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
-| React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
-| Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor Server | 8090 |
+| Worker | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 |
 | Core | [`core-dotnet/core/Core.csproj`](core-dotnet/core/Core.csproj) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
@@ -53,6 +54,26 @@ Examples:
 - MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/About` stays open)
 - MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 
+## Google Maps (map on all three UIs)
+
+Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
+Atlanta, Charlotte). Weather overlays will come later.
+
+**API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
+in a Google Cloud project.
+
+**API key:** Create a browser key in Google Cloud Console → APIs & Services →
+Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
+`http://localhost:8090/*`, `http://localhost:8100/*`, plus your prod hosts).
+
+| UI | Config |
+| --- | --- |
+| React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see `ui-react/.env.example`) |
+| Blazor | `GOOGLE_MAPS_API_KEY` in `ui-blazor/blazor/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see `ui-blazor/blazor/.env.example`) |
+| MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see `mvc-dotnet/mvc/.env.example`) |
+
+Without a key, the map container still renders and each UI shows a short setup hint.
+
 ## Foundry console demos
 
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
@@ -77,23 +98,3 @@ See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 |
 
 VS Code launch configs: **Foundry Console V1** … **V4**.
-
-## Google Maps (map on all three UIs)
-
-Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
-Atlanta, Charlotte). Weather overlays will come later.
-
-**API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
-in a Google Cloud project.
-
-**API key:** Create a browser key in Google Cloud Console → APIs & Services →
-Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
-`http://localhost:8090/*`, `http://localhost:8100/*`, plus your prod hosts).
-
-| UI | Config |
-| --- | --- |
-| React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see `ui-react/.env.example`) |
-| Blazor | `GOOGLE_MAPS_API_KEY` in `ui-blazor/blazor/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see `ui-blazor/blazor/.env.example`) |
-| MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see `mvc-dotnet/mvc/.env.example`) |
-
-Without a key, the map container still renders and each UI shows a short setup hint.
