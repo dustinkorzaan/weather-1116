@@ -1,3 +1,27 @@
+# Wireframes & UI Design
+
+| Vendor | Project Name | Best For | Category | Code Output |
+| :--- | :--- | :--- | :--- | :--- |
+| **Balsamiq** | [Balsamiq](https://balsamiq.com) | Low-fidelity, sketch-style wireframes | Pure wireframes | None (layout ideation only) |
+| **Figma** | [Figma](https://figma.com) | High-fidelity UI, design systems, dev handoff | Full UI design | Via plugins (Anima, Locofy, etc.) |
+| **Adobe** | [Adobe XD](https://helpx.adobe.com/xd/get-started.html) | UI/UX mockups and prototypes | Full UI design | Via Locofy and similar exporters |
+| **Sketch** | [Sketch](https://sketch.com) | Mac-native UI design and design systems | Full UI design | Via plugins and handoff tools |
+| **Anima** | [Anima](https://animaapp.com) | Figma designs → React, HTML, or Vue | Design → code | **Good** (component-level export) |
+| **Locofy** | [Locofy](https://locofy.ai) | Figma / Adobe XD → React, Next.js, HTML | Design → code | **Good** (responsive code export) |
+| **Uizard** | [Uizard](https://uizard.io) | AI-assisted wireframes from text or sketches | AI wireframes | Basic (starter UI code) |
+| **Whimsical** | [Whimsical](https://whimsical.com) | Wireframes, flowcharts, and light docs | Pure wireframes | None |
+| **Miro** | [Miro](https://miro.com) | Whiteboarding, workshops, rough layouts | Whiteboard / workshop | None |
+| **Lucid** | [Lucid](https://lucid.co) | Diagrams and simple wireframes | Whiteboard / workshop | None |
+| **Axure** | [Axure RP](https://axure.com) | Complex interactive enterprise prototypes | Full UI design | None (prototype-focused) |
+| **Penpot** | [Penpot](https://penpot.app) | Open-source Figma alternative | Full UI design | Via plugins / handoff |
+| **Excalidraw** | [Excalidraw](https://excalidraw.com) | Hand-drawn-style diagrams and wireframes | Pure wireframes | None (embeddable canvas) |
+| **MockFlow** | [MockFlow](https://mockflow.com) | Dedicated wireframing and site planning | Pure wireframes | None |
+| **Justinmind** | [Justinmind](https://justinmind.com) | Interactive mobile and web prototypes | Full UI design | None (prototype-focused) |
+
+<br>
+<br>
+<br>
+
 # Quick App Generator / Rapid Prototyping
 
 | Vendor | Project Name | Best For | Tech Stack | Database & Backend | Code Ownership & Export |
@@ -9,9 +33,6 @@
 | **StackBlitz** | [Bolt.new](https://bolt.new) | Rapid sandboxed frontends and multi-platform mobile mockups | React, Next.js, or Vite + Expo | In-browser WebContainers / External Supabase | **Good** (One-click StackBlitz workspace or instant git push) |
 | **FlutterFlow** | [FlutterFlow](https://totalum.app) | Native mobile apps destined for the iOS and Android app stores | Dart + Flutter | Firebase or Supabase | **Excellent** (Directly compiles down to real, downloadable Flutter source code) |
 | **Google** | [Google AI Studio](https://google.dev) *(Build Mode)* | Throwaway prototypes, single-page mockups, and quick ideas | Vanilla HTML/CSS/JS or baseline React | None (Client-side mocking only) | **Basic** (Requires manual copy-pasting of isolated code blocks) |
-
-
-\* Wireframes excluded like: Balsamiq, Figma, Anima, etc
 
 <br>
 <br>
