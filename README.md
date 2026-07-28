@@ -1,6 +1,6 @@
 # Weather
 
-Weather sample app implemented across five runnable stacks plus one
+Weather sample app implemented across seven runnable stacks plus one
 shared .NET class library.
 
 This README is intentionally brief. Use it for quick orientation, and use
@@ -15,6 +15,8 @@ project relationships, and parity guidance.
 | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
 | Worker | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 |
 | Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — |
+| MCP DotNet | [`mcp-dotnet/mcp`](mcp-dotnet/mcp) | ASP.NET Core MCP | 8110 |
+| MCP Function | [`mcp-function/mcp`](mcp-function/mcp) | Azure Functions MCP | 8120 |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
