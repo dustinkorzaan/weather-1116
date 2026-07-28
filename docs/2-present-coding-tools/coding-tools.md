@@ -1,22 +1,44 @@
 # Wireframes & UI Design
 
-| Vendor | Project Name | Best For | Category | Code Output |
-| :--- | :--- | :--- | :--- | :--- |
-| **Balsamiq** | [Balsamiq](https://balsamiq.com) | Low-fidelity, sketch-style wireframes | Pure wireframes | None (layout ideation only) |
-| **Figma** | [Figma](https://figma.com) | High-fidelity UI, design systems, dev handoff | Full UI design | Via plugins (Anima, Locofy, etc.) |
-| **Adobe** | [Adobe XD](https://helpx.adobe.com/xd/get-started.html) | UI/UX mockups and prototypes | Full UI design | Via Locofy and similar exporters |
-| **Sketch** | [Sketch](https://sketch.com) | Mac-native UI design and design systems | Full UI design | Via plugins and handoff tools |
-| **Anima** | [Anima](https://animaapp.com) | Figma designs → React, HTML, or Vue | Design → code | **Good** (component-level export) |
-| **Locofy** | [Locofy](https://locofy.ai) | Figma / Adobe XD → React, Next.js, HTML | Design → code | **Good** (responsive code export) |
-| **Uizard** | [Uizard](https://uizard.io) | AI-assisted wireframes from text or sketches | AI wireframes | Basic (starter UI code) |
-| **Whimsical** | [Whimsical](https://whimsical.com) | Wireframes, flowcharts, and light docs | Pure wireframes | None |
-| **Miro** | [Miro](https://miro.com) | Whiteboarding, workshops, rough layouts | Whiteboard / workshop | None |
-| **Lucid** | [Lucid](https://lucid.co) | Diagrams and simple wireframes | Whiteboard / workshop | None |
-| **Axure** | [Axure RP](https://axure.com) | Complex interactive enterprise prototypes | Full UI design | None (prototype-focused) |
-| **Penpot** | [Penpot](https://penpot.app) | Open-source Figma alternative | Full UI design | Via plugins / handoff |
-| **Excalidraw** | [Excalidraw](https://excalidraw.com) | Hand-drawn-style diagrams and wireframes | Pure wireframes | None (embeddable canvas) |
-| **MockFlow** | [MockFlow](https://mockflow.com) | Dedicated wireframing and site planning | Pure wireframes | None |
-| **Justinmind** | [Justinmind](https://justinmind.com) | Interactive mobile and web prototypes | Full UI design | None (prototype-focused) |
+## Pure wireframes
+
+| Vendor | Project Name | Best For | Code Output |
+| :--- | :--- | :--- | :--- |
+| **Balsamiq** | [Balsamiq](https://balsamiq.com) | Low-fidelity, sketch-style wireframes | None (layout ideation only) |
+| **Whimsical** | [Whimsical](https://whimsical.com) | Wireframes, flowcharts, and light docs | None |
+| **MockFlow** | [MockFlow](https://mockflow.com) | Dedicated wireframing and site planning | None |
+| **Excalidraw** | [Excalidraw](https://excalidraw.com) | Hand-drawn-style diagrams and wireframes | None (embeddable canvas) |
+
+## Full UI design
+
+| Vendor | Project Name | Best For | Code Output |
+| :--- | :--- | :--- | :--- |
+| **Figma** | [Figma](https://figma.com) | High-fidelity UI, design systems, dev handoff | Via plugins (Anima, Locofy, etc.) |
+| **Sketch** | [Sketch](https://sketch.com) | Mac-native UI design and design systems | Via plugins and handoff tools |
+| **Penpot** | [Penpot](https://penpot.app) | Open-source Figma alternative | Via plugins / handoff |
+| **Adobe** | [Adobe XD](https://helpx.adobe.com/xd/get-started.html) | UI/UX mockups and prototypes | Via Locofy and similar exporters |
+| **Axure** | [Axure RP](https://axure.com) | Complex interactive enterprise prototypes | None (prototype-focused) |
+| **Justinmind** | [Justinmind](https://justinmind.com) | Interactive mobile and web prototypes | None (prototype-focused) |
+
+## Design → code
+
+| Vendor | Project Name | Best For | Code Output |
+| :--- | :--- | :--- | :--- |
+| **Anima** | [Anima](https://animaapp.com) | Figma designs → React, HTML, or Vue | **Good** (component-level export) |
+| **Locofy** | [Locofy](https://locofy.ai) | Figma / Adobe XD → React, Next.js, HTML | **Good** (responsive code export) |
+
+## AI-assisted wireframes
+
+| Vendor | Project Name | Best For | Code Output |
+| :--- | :--- | :--- | :--- |
+| **Uizard** | [Uizard](https://uizard.io) | AI-assisted wireframes from text or sketches | Basic (starter UI code) |
+
+## Whiteboard / workshop
+
+| Vendor | Project Name | Best For | Code Output |
+| :--- | :--- | :--- | :--- |
+| **Miro** | [Miro](https://miro.com) | Whiteboarding, workshops, rough layouts | None |
+| **Lucid** | [Lucid](https://lucid.co) | Diagrams and simple wireframes | None |
 
 <br>
 <br>
