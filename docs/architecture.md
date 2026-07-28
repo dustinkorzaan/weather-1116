@@ -140,24 +140,6 @@ servers.
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
 
-## Foundry Console Demos (learning path)
-
-Four standalone console apps demonstrate how the hosted agent pattern in API/MVC
-was built up. They are **training building blocks**, not production deployables:
-
-| Console | Pattern taught |
-| --- | --- |
-| **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
-| **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | In-process injected function tools (`GetLatLongData`, `GetPublicWeatherData`) — same tools `Core` exposes, handled locally |
-| **V4** | Calls the **same hosted Foundry agent** API/MVC use; agent invokes MCP lat/long + weather tools |
-
-Run from VS Code or `dotnet run` in each folder. Settings use the
-`AZURE_FOUNDRY_PROD_EUS2_*` prefix (see [`README.md`](../README.md)).
-
-Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
-`core-dotnet/core/AIWeather`.
-
 ## About and Health
 
 Every runnable app can participate in a shared **About tree** contract
@@ -286,3 +268,21 @@ mcp-function/
 FoundryConsoleV1…V4/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```
+
+## Foundry Console Demos (learning path)
+
+Four standalone console apps demonstrate how the hosted agent pattern in API/MVC
+was built up. They are **training building blocks**, not production deployables:
+
+| Console | Pattern taught |
+| --- | --- |
+| **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
+| **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
+| **V3** | In-process injected function tools (`GetLatLongData`, `GetPublicWeatherData`) — same tools `Core` exposes, handled locally |
+| **V4** | Calls the **same hosted Foundry agent** API/MVC use; agent invokes MCP lat/long + weather tools |
+
+Run from VS Code or `dotnet run` in each folder. Settings use the
+`AZURE_FOUNDRY_PROD_EUS2_*` prefix (see [`README.md`](../README.md)).
+
+Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
+`core-dotnet/core/AIWeather`.
