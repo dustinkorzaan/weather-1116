@@ -18,6 +18,39 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   - Calls the model directly via legacy `AzureOpenAIClient` / Cognitive Services
     endpoint.
   - No agent; no MCP; demonstrates baseline chat completion against Foundry/OpenAI.
+  - **Examples 1–2:** model-only — no Core weather data (ex 1 fails; ex 2 invents an answer).
+  - **Examples 3–4:** console pre-fetches lat/long and weather from Core, injects JSON
+    into the prompt, then calls the model (string out in ex 3; `AIWeatherResponse` JSON in ex 4).
+
+  Examples 1–2 (model only):
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Console
+      participant Model as Foundry Model
+
+      Console->>Model: weather question (location)
+      Model-->>Console: unreliable text
+  ```
+
+  Examples 3–4 (console-driven Core prep, then model):
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Console
+      participant GetLatLong
+      participant GetPublicWeather
+      participant Model as Foundry Model
+
+      Console->>GetLatLong: GetLatLong(location)
+      GetLatLong-->>Console: NonAILatLongResponse
+      Console->>GetPublicWeather: GetPublicWeather(lat,long)
+      GetPublicWeather-->>Console: NonAIWeatherResponse
+      Console->>Model: prompt + weather JSON
+      Model-->>Console: text (ex 3) or AIWeatherResponse (ex 4)
+  ```
 
 - **V2 — Model-direct (unified AI endpoint)** — [`FoundryConsoleV2`](../../FoundryConsoleV2)
   (`FoundryConsoleV2ModelDirectUnifiedAI.csproj`)
