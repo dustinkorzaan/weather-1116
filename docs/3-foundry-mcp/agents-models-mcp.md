@@ -3,23 +3,6 @@
 See also [`docs/architecture.md`](../architecture.md) for runtime diagrams and production
 settings.
 
-## Production path (API / MVC)
-
-Current AI Weather in React, Blazor, and MVC ultimately calls a **hosted Foundry
-agent** (default `wx1116-agent-default`) via
-`Core.AIWeather.Handlers.GetCurrentAIWeatherHandler`. The agent resolves a
-place name and fetches weather using MCP tools that map back to this repo's
-`Core` handlers.
-
-| Host | Path | Tool | Port | Endpoint |
-| --- | --- | --- | --- | --- |
-| MCP DotNet | [`mcp-dotnet/mcp`](../../mcp-dotnet/mcp) | `GetPublicWeatherData` | 8110 | `/mcp` |
-| MCP Function | [`mcp-function/mcp`](../../mcp-function/mcp) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` |
-
-Required settings: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`, `AZURE_FOUNDRY_PROD_EUS2_KEY`,
-and optionally `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. MCP auth and prod URLs are
-documented in [`architecture.md`](../architecture.md#mcp-tool-hosts).
-
 ## Foundry console demos (learning path)
 
 Four standalone console apps in `Weather.sln` show how the production agent
