@@ -68,13 +68,16 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       autonumber
       participant UI
       participant API as WeatherAPI
-      participant MCP as GetPublicWeatherDataFunction
+      participant MCP as mcp-function
+      participant Function as GetPublicWeatherDataFunction
       participant GetPublicWeather
 
       UI->>API: GetPublicWeatherData(lat,long)
       API->>MCP: GetPublicWeatherData(lat,long)
-      MCP->>GetPublicWeather: GetPublicWeather(lat,long)
-      GetPublicWeather-->>MCP: NonAIWeatherResponse
+      MCP->>Function: GetPublicWeatherData(lat,long)
+      Function->>GetPublicWeather: GetPublicWeather(lat,long)
+      GetPublicWeather-->>Function: NonAIWeatherResponse
+      Function-->>MCP: NonAIWeatherResponse (JSON)
       MCP-->>API: NonAIWeatherResponse (JSON)
       API-->>UI: NonAIWeatherResponse (JSON)
   ```
@@ -108,13 +111,16 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       autonumber
       participant UI
       participant API as WeatherAPI
-      participant MCP as GetPublicWeatherDataTool
+      participant MCP as mcp-dotnet
+      participant Tool as GetPublicWeatherDataTool
       participant GetPublicWeather
 
       UI->>API: GetPublicWeatherData(lat,long)
       API->>MCP: GetPublicWeatherData(lat,long)
-      MCP->>GetPublicWeather: GetPublicWeather(lat,long)
-      GetPublicWeather-->>MCP: NonAIWeatherResponse
+      MCP->>Tool: GetPublicWeatherData(lat,long)
+      Tool->>GetPublicWeather: GetPublicWeather(lat,long)
+      GetPublicWeather-->>Tool: NonAIWeatherResponse
+      Tool-->>MCP: NonAIWeatherResponse (JSON)
       MCP-->>API: NonAIWeatherResponse (JSON)
       API-->>UI: NonAIWeatherResponse (JSON)
   ```
