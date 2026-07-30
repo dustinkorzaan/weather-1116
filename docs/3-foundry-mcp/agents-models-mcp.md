@@ -54,13 +54,10 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   sequenceDiagram
       autonumber
       participant GetPublicWeather
-      participant Function as GetPublicWeatherDataFunction
       participant Model as Foundry Model
 
-      Model->>Function: GetPublicWeatherData(lat,long)
-      Function->>GetPublicWeather: GetPublicWeather(lat,long)
-      GetPublicWeather-->>Function: NonAIWeatherResponse
-      Function-->>Model: NonAIWeatherResponse (JSON)
+      Model->>GetPublicWeather: GetPublicWeather(lat,long)
+      GetPublicWeather-->>Model: NonAIWeatherResponse
   ```
 
   ```mermaid
@@ -69,15 +66,12 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant UI
       participant API as WeatherAPI
       participant GetPublicWeather
-      participant Function as GetPublicWeatherDataFunction
       participant Model as Foundry Model
 
       UI->>API: GetPublicWeatherData(lat,long)
       API->>Model: GetPublicWeatherData(lat,long)
-      Model->>Function: GetPublicWeatherData(lat,long)
-      Function->>GetPublicWeather: GetPublicWeather(lat,long)
-      GetPublicWeather-->>Function: NonAIWeatherResponse
-      Function-->>Model: NonAIWeatherResponse (JSON)
+      Model->>GetPublicWeather: GetPublicWeather(lat,long)
+      GetPublicWeather-->>Model: NonAIWeatherResponse
       Model-->>API: NonAIWeatherResponse (JSON)
       API-->>UI: NonAIWeatherResponse (JSON)
   ```
