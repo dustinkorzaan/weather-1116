@@ -88,8 +88,12 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant UI
       participant API
       participant Agent as Foundry Agent
-      participant GetLatLongTool
-      participant GetPublicWeatherTool
+      box MCP Function
+          participant GetLatLongTool
+      end
+      box MCP DotNet
+          participant GetPublicWeatherTool
+      end
 
       UI->>API: GetPublicWeather(location)
       API->>Agent: GetPublicWeather(location)
