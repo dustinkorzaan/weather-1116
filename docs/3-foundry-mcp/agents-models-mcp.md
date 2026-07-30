@@ -63,6 +63,22 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       Function-->>Client: NonAIWeatherResponse (JSON)
   ```
 
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant UI
+      participant API as WeatherAPI
+      participant MCP as GetPublicWeatherDataFunction
+      participant GetPublicWeather
+
+      UI->>API: GetPublicWeatherData(lat,long)
+      API->>MCP: GetPublicWeatherData(lat,long)
+      MCP->>GetPublicWeather: GetPublicWeather(lat,long)
+      GetPublicWeather-->>MCP: NonAIWeatherResponse
+      MCP-->>API: NonAIWeatherResponse (JSON)
+      API-->>UI: NonAIWeatherResponse (JSON)
+  ```
+
 - **V4 — Hosted Foundry agent + MCP** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
   (`FoundryConsoleV4MCP.csproj`)
   - Calls the **same hosted Foundry agent** API and MVC use (`wx1116-agent-default`
@@ -85,4 +101,20 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       Tool->>GetPublicWeather: GetPublicWeather(lat,long)
       GetPublicWeather-->>Tool: NonAIWeatherResponse
       Tool-->>Client: NonAIWeatherResponse (JSON)
+  ```
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant UI
+      participant API as WeatherAPI
+      participant MCP as GetPublicWeatherDataTool
+      participant GetPublicWeather
+
+      UI->>API: GetPublicWeatherData(lat,long)
+      API->>MCP: GetPublicWeatherData(lat,long)
+      MCP->>GetPublicWeather: GetPublicWeather(lat,long)
+      GetPublicWeather-->>MCP: NonAIWeatherResponse
+      MCP-->>API: NonAIWeatherResponse (JSON)
+      API-->>UI: NonAIWeatherResponse (JSON)
   ```
