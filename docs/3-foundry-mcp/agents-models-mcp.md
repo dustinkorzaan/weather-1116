@@ -85,31 +85,20 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   ```mermaid
   sequenceDiagram
       autonumber
-      participant Client as MCP Client
-      participant Tool as GetPublicWeatherDataTool
-      participant GetPublicWeather
-
-      Client->>Tool: GetPublicWeather(lat,long)
-      Tool->>GetPublicWeather: GetPublicWeather(lat,long)
-      GetPublicWeather-->>Tool: NonAIWeatherResponse
-      Tool-->>Client: NonAIWeatherResponse (JSON)
-  ```
-
-  ```mermaid
-  sequenceDiagram
-      autonumber
       participant UI
-      participant API as WeatherAPI
-      participant MCP as mcp-dotnet
-      participant Tool as GetPublicWeatherDataTool
-      participant GetPublicWeather
+      box WeatherAPI
+          participant API as WeatherAPI
+      end
+      participant Model as Foundry Model
+      participant GetLatLongTool
+      participant GetPublicWeatherTool
 
-      UI->>API: GetPublicWeather(lat,long)
-      API->>MCP: GetPublicWeather(lat,long)
-      MCP->>Tool: GetPublicWeather(lat,long)
-      Tool->>GetPublicWeather: GetPublicWeather(lat,long)
-      GetPublicWeather-->>Tool: NonAIWeatherResponse
-      Tool-->>MCP: NonAIWeatherResponse (JSON)
-      MCP-->>API: NonAIWeatherResponse (JSON)
-      API-->>UI: NonAIWeatherResponse (JSON)
+      UI->>API: GetPublicWeather(location)
+      API->>Model: GetPublicWeather(location)
+      Model->>GetLatLongTool: GetLatLong(location)
+      GetLatLongTool-->>Model: NonAILatLongResponse
+      Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+      GetPublicWeatherTool-->>Model: NonAIWeatherResponse
+      Model-->>API: AIWeatherResponse
+      API-->>UI: AIWeatherResponse
   ```
