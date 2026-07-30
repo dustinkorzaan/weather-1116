@@ -72,8 +72,8 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       API->>Model: GetPublicWeather(lat,long)
       Model->>GetPublicWeather: GetPublicWeather(lat,long)
       GetPublicWeather-->>Model: NonAIWeatherResponse
-      Model-->>API: NonAIWeatherResponse (JSON)
-      API-->>UI: NonAIWeatherResponse (JSON)
+      Model-->>API: AIWeatherResponse
+      API-->>UI: AIWeatherResponse
   ```
 
 - **V4 — Hosted Foundry agent + MCP** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
