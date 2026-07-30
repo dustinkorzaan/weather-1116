@@ -21,6 +21,12 @@ body {
   margin-bottom: 0;
 }
 
+.page-content {
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
