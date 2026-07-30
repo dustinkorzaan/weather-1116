@@ -1,4 +1,4 @@
-# Agents, Models, and MCP
+# Demystifying Microsoft Foundry Agents and MCP
 
 See also [`docs/architecture.md`](../architecture.md) for runtime diagrams and production
 settings.
