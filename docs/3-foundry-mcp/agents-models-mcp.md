@@ -55,12 +55,12 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       autonumber
       participant GetPublicWeather
       participant Function as GetPublicWeatherDataFunction
-      participant Client as MCP Client
+      participant Model as Foundry Model
 
-      Client->>Function: GetPublicWeatherData(lat,long)
+      Model->>Function: GetPublicWeatherData(lat,long)
       Function->>GetPublicWeather: GetPublicWeather(lat,long)
       GetPublicWeather-->>Function: NonAIWeatherResponse
-      Function-->>Client: NonAIWeatherResponse (JSON)
+      Function-->>Model: NonAIWeatherResponse (JSON)
   ```
 
   ```mermaid
@@ -68,17 +68,17 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       autonumber
       participant UI
       participant API as WeatherAPI
-      participant MCP as mcp-function
-      participant Function as GetPublicWeatherDataFunction
       participant GetPublicWeather
+      participant Function as GetPublicWeatherDataFunction
+      participant Model as Foundry Model
 
       UI->>API: GetPublicWeatherData(lat,long)
-      API->>MCP: GetPublicWeatherData(lat,long)
-      MCP->>Function: GetPublicWeatherData(lat,long)
+      API->>Model: GetPublicWeatherData(lat,long)
+      Model->>Function: GetPublicWeatherData(lat,long)
       Function->>GetPublicWeather: GetPublicWeather(lat,long)
       GetPublicWeather-->>Function: NonAIWeatherResponse
-      Function-->>MCP: NonAIWeatherResponse (JSON)
-      MCP-->>API: NonAIWeatherResponse (JSON)
+      Function-->>Model: NonAIWeatherResponse (JSON)
+      Model-->>API: NonAIWeatherResponse (JSON)
       API-->>UI: NonAIWeatherResponse (JSON)
   ```
 
