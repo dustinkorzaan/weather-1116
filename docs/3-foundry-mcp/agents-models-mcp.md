@@ -53,16 +53,6 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   ```mermaid
   sequenceDiagram
       autonumber
-      participant GetPublicWeather
-      participant Model as Foundry Model
-
-      Model->>GetPublicWeather: GetPublicWeather(lat,long)
-      GetPublicWeather-->>Model: NonAIWeatherResponse
-  ```
-
-  ```mermaid
-  sequenceDiagram
-      autonumber
       participant UI
       participant API as WeatherAPI
       participant GetPublicWeather
