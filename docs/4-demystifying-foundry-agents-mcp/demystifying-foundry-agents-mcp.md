@@ -644,3 +644,11 @@ tool host** the agent already knows how to call.
 
 _Pick 3–5 diagrams per audience: executives → 11, 12, 20; engineers → 6, 8, 10,
 13; live demo → 9, 14, 22._
+
+---
+
+## Microsoft reference
+
+[Azure AI Foundry Agents overview](https://learn.microsoft.com/en-us/azure/foundry/agents/overview)
+
+![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
