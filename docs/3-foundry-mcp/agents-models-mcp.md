@@ -22,34 +22,6 @@ Required settings: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`, `AZURE_FOUNDRY_PROD_EUS2_
 and optionally `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. MCP auth and prod URLs are
 documented in [`architecture.md`](../architecture.md#mcp-tool-hosts).
 
-## MCP tool flow
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Client as MCP Client
-    participant Tool as GetPublicWeatherDataTool
-    participant GetPublicWeather
-
-    Client->>Tool: GetPublicWeatherData(lat,long)
-    Tool->>GetPublicWeather: GetPublicWeather(lat,long)
-    GetPublicWeather-->>Tool: NonAIWeatherResponse
-    Tool-->>Client: NonAIWeatherResponse (JSON)
-```
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant GetPublicWeather
-    participant Function as GetPublicWeatherDataFunction
-    participant Client as MCP Client
-
-    Client->>Function: GetPublicWeatherData(lat,long)
-    Function->>GetPublicWeather: GetPublicWeather(lat,long)
-    GetPublicWeather-->>Function: NonAIWeatherResponse
-    Function-->>Client: NonAIWeatherResponse (JSON)
-```
-
 ## Foundry console demos (learning path)
 
 Four standalone console apps in `Weather.sln` show how the production agent
@@ -78,6 +50,19 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     tools handled in-process via MediatR (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.
 
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant GetPublicWeather
+      participant Function as GetPublicWeatherDataFunction
+      participant Client as MCP Client
+
+      Client->>Function: GetPublicWeatherData(lat,long)
+      Function->>GetPublicWeather: GetPublicWeather(lat,long)
+      GetPublicWeather-->>Function: NonAIWeatherResponse
+      Function-->>Client: NonAIWeatherResponse (JSON)
+  ```
+
 - **V4 — Hosted Foundry agent + MCP** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
   (`FoundryConsoleV4MCP.csproj`)
   - Calls the **same hosted Foundry agent** API and MVC use (`wx1116-agent-default`
@@ -88,3 +73,16 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     - `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` (optional) — defaults to
       `wx1116-agent-default`.
     - `AZURE_FOUNDRY_PROD_EUS2_KEY` (required) — same API key as V1–V3.
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Client as MCP Client
+      participant Tool as GetPublicWeatherDataTool
+      participant GetPublicWeather
+
+      Client->>Tool: GetPublicWeatherData(lat,long)
+      Tool->>GetPublicWeather: GetPublicWeather(lat,long)
+      GetPublicWeather-->>Tool: NonAIWeatherResponse
+      Tool-->>Client: NonAIWeatherResponse (JSON)
+  ```
