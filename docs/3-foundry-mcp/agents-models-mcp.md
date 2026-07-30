@@ -54,9 +54,11 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   sequenceDiagram
       autonumber
       participant UI
-      participant API as WeatherAPI
-      participant GetPublicWeatherTool
-      participant GetLatLongTool
+      box WeatherAPI
+          participant API as WeatherAPI
+          participant GetPublicWeatherTool
+          participant GetLatLongTool
+      end
       participant Model as Foundry Model
 
       UI->>API: GetPublicWeather(location)
