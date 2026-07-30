@@ -56,17 +56,17 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant UI
       box API
           participant API
-          participant GetPublicWeatherTool
-          participant GetLatLongTool
+          participant GetPublicWeatherFunc
+          participant GetLatLongFunc
       end
       participant Model as Foundry Model
 
       UI->>API: GetPublicWeather(location)
       API->>Model: GetPublicWeather(location)
-      Model->>GetLatLongTool: GetLatLong(location)
-      GetLatLongTool-->>Model: NonAILatLongResponse
-      Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
-      GetPublicWeatherTool-->>Model: NonAIWeatherResponse
+      Model->>GetLatLongFunc: GetLatLong(location)
+      GetLatLongFunc-->>Model: NonAILatLongResponse
+      Model->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
+      GetPublicWeatherFunc-->>Model: NonAIWeatherResponse
       Model-->>API: AIWeatherResponse
       API-->>UI: AIWeatherResponse
   ```
