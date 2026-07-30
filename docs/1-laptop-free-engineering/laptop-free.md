@@ -1,4 +1,4 @@
-# Laptop-Free Development
+# Laptop-free Engineering
 
 Ways to work on this repo (or similar .NET + React stacks) without treating a
 personal laptop as the primary development machine.
