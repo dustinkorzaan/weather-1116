@@ -68,8 +68,8 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant GetPublicWeather
       participant Model as Foundry Model
 
-      UI->>API: GetPublicWeatherData(lat,long)
-      API->>Model: GetPublicWeatherData(lat,long)
+      UI->>API: GetPublicWeather(lat,long)
+      API->>Model: GetPublicWeather(lat,long)
       Model->>GetPublicWeather: GetPublicWeather(lat,long)
       GetPublicWeather-->>Model: NonAIWeatherResponse
       Model-->>API: NonAIWeatherResponse (JSON)
@@ -94,7 +94,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant Tool as GetPublicWeatherDataTool
       participant GetPublicWeather
 
-      Client->>Tool: GetPublicWeatherData(lat,long)
+      Client->>Tool: GetPublicWeather(lat,long)
       Tool->>GetPublicWeather: GetPublicWeather(lat,long)
       GetPublicWeather-->>Tool: NonAIWeatherResponse
       Tool-->>Client: NonAIWeatherResponse (JSON)
@@ -109,9 +109,9 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant Tool as GetPublicWeatherDataTool
       participant GetPublicWeather
 
-      UI->>API: GetPublicWeatherData(lat,long)
-      API->>MCP: GetPublicWeatherData(lat,long)
-      MCP->>Tool: GetPublicWeatherData(lat,long)
+      UI->>API: GetPublicWeather(lat,long)
+      API->>MCP: GetPublicWeather(lat,long)
+      MCP->>Tool: GetPublicWeather(lat,long)
       Tool->>GetPublicWeather: GetPublicWeather(lat,long)
       GetPublicWeather-->>Tool: NonAIWeatherResponse
       Tool-->>MCP: NonAIWeatherResponse (JSON)
