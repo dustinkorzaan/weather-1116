@@ -18,11 +18,12 @@ AI Weather in API and MVC.
 
 | # | Project | Path | Stack | Role |
 | - | --- | --- | --- | --- |
-| 1 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
-| 2 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
-| 3 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
-| 4 | Blazor UI | [`ui-blazor/blazor`](../ui-blazor/blazor) | Blazor Server | Interactive server-rendered UI in C# |
-| 5 | Core | [`core-dotnet/core/Core.csproj`](../core-dotnet/core/Core.csproj) | .NET class library | Shared events/handlers referenced by MVC, API, and MCP hosts |
+| 1 | Blazor UI | [`ui-blazor/blazor`](../ui-blazor/blazor) | Blazor | Interactive server-rendered UI in C# |
+| 2 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
+| 3 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
+| 4 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
+| 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire servers + dashboard | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
+| 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | Shared events/handlers referenced by MVC, API, worker, and MCP hosts |
 
 ### Adjacent projects (not UI/API dependencies)
 
@@ -31,18 +32,17 @@ for hello/AI weather/map flows in the three UIs.
 
 | Project | Path | Role |
 | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
 | MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
 | MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V4 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V4`](../FoundryConsoleV4) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V4MCP`; built in CI) |
 
-Ports, auth, and env vars for the worker, MCP, and console apps live in [`README.md`](../README.md)
+Ports, auth, and env vars for the worker and console apps live in [`README.md`](../README.md)
 and each project's `.env.example`.
 
 ## Runtime Model
 
-- `WeatherAPI` provides hello and AI weather data for React UI and Blazor UI.
 - React UI and Blazor UI consume `WeatherAPI`.
+- `WeatherAPI` provides hello and AI weather data for React UI and Blazor UI.
 - MVC UI does not consume `WeatherAPI` for AI weather/hello; it duplicates the
   equivalent backend logic locally via `Core`.
 - Backend logic is intentionally duplicated in MVC and API (no shared backend
@@ -95,10 +95,21 @@ Ultra-simple remote MCP servers that expose `Core` tools over the Model Context
 Protocol. They exist so a Foundry project (or MCP Inspector) can call the same
 MediatR handlers the sample uses in-process elsewhere.
 
-| Host | Tool | Endpoint | Auth |
-| --- | --- | --- | --- |
-| MCP DotNet | `GetPublicWeatherData` | `/mcp` | Bearer `MCP_API_KEY` |
-| MCP Function | `GetLatLongData` | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` |
+| Host | Path | Tool | Port | Endpoint | Auth |
+| --- | --- | --- | --- | --- | --- |
+| MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer `MCP_API_KEY` (no default — must be set by developer) |
+| MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
+
+VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
+also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
+
+Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see
+`prod-deploy-mcp-*.yml`).
+
+Auth examples:
+
+- MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/About` stays open)
+- MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 
 Each host also exposes an anonymous **`/About`** probe that returns a leaf
 `AboutNode` (`mcp-dotnet` or `mcp-function`) with tool-registration health and
@@ -129,24 +140,6 @@ servers.
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
 
-## Foundry Console Demos (learning path)
-
-Four standalone console apps demonstrate how the hosted agent pattern in API/MVC
-was built up. They are **training building blocks**, not production deployables:
-
-| Console | Pattern taught |
-| --- | --- |
-| **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
-| **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | In-process injected function tools (`GetLatLongData`, `GetPublicWeatherData`) — same tools `Core` exposes, handled locally |
-| **V4** | Calls the **same hosted Foundry agent** API/MVC use; agent invokes MCP lat/long + weather tools |
-
-Run from VS Code or `dotnet run` in each folder. Settings use the
-`AZURE_FOUNDRY_PROD_EUS2_*` prefix (see [`README.md`](../README.md)).
-
-Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
-`core-dotnet/core/AIWeather`.
-
 ## About and Health
 
 Every runnable app can participate in a shared **About tree** contract
@@ -155,7 +148,7 @@ and `children`.
 
 ## Core Project
 
-`Core` (`core-dotnet/core/Core.csproj`) is a .NET class library referenced by
+`Core` (`core-dotnet/core`) is a .NET class library referenced by
 `WeatherMVC`, `WeatherAPI`, `worker-dotnet`, and both MCP hosts. It hosts shared MediatR events
 and handlers, including:
 
@@ -275,3 +268,21 @@ mcp-function/
 FoundryConsoleV1…V4/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```
+
+## Foundry Console Demos (learning path)
+
+Four standalone console apps demonstrate how the hosted agent pattern in API/MVC
+was built up. They are **training building blocks**, not production deployables:
+
+| Console | Pattern taught |
+| --- | --- |
+| **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
+| **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
+| **V3** | In-process injected function tools (`GetLatLongData`, `GetPublicWeatherData`) — same tools `Core` exposes, handled locally |
+| **V4** | Calls the **same hosted Foundry agent** API/MVC use; agent invokes MCP lat/long + weather tools |
+
+Run from VS Code or `dotnet run` in each folder. Settings use the
+`AZURE_FOUNDRY_PROD_EUS2_*` prefix (see [`README.md`](../README.md)).
+
+Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
+`core-dotnet/core/AIWeather`.
