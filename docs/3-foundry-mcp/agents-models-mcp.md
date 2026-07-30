@@ -28,7 +28,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 - **V3 — In-process function tools** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
   (`FoundryConsoleV3InjectFunctions.csproj`)
   - Registers `GetLatLongData` and `GetPublicWeatherData` as injected function
-    tools handled in-process via MediatR (same tools `Core` exposes).
+    tools handled in-process (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.
 
   ```mermaid
