@@ -1,8 +1,6 @@
 # Agents, Models, and MCP
 
-How this sample wires **Microsoft Foundry** agents, direct model calls, and
-**Model Context Protocol (MCP)** tool hosts together. See also
-[`docs/architecture.md`](../architecture.md) for runtime diagrams and production
+See also [`docs/architecture.md`](../architecture.md) for runtime diagrams and production
 settings.
 
 ## Production path (API / MVC)
