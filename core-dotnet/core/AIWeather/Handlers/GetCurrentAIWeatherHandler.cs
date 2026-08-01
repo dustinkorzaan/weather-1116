@@ -1,7 +1,8 @@
 using System.ClientModel;
 using System.ClientModel.Primitives;
-using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Schema;
 using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
@@ -17,6 +18,8 @@ namespace Core.AIWeather.Handlers;
 /// </summary>
 public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEvent, AIWeatherResponse>
 {
+	private static readonly string DefaultLocation = "Nashville, TN";
+
 	private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
 
 	public GetCurrentAIWeatherHandler(ILogger<GetCurrentAIWeatherHandler> logger)
@@ -27,7 +30,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 	public async Task<AIWeatherResponse> Handle(GetCurrentAIWeatherEvent request, CancellationToken cancellationToken)
 	{
 		var location = string.IsNullOrWhiteSpace(request.Location)
-			? "Nashville, TN"
+			? DefaultLocation
 			: request.Location.Trim();
 
 		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
@@ -51,20 +54,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
 		var userPrompt = $"What is the current weather in: `{location}`?";
 
-		var aiOutputSchema = """
-		{
-		  "type": "object",
-		  "properties": {
-		    "fullSummary": { "type": "string" },
-		    "temperatureF": { "type": "number" },
-		    "windSpeedMPH": { "type": "number" },
-		    "windDirection": { "type": "string" },
-		    "conditions": { "type": "string" }
-		  },
-		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
-		  "additionalProperties": false
-		}
-		""";
+		var aiOutputSchema = BuildAIOutputSchema();
 
 		_logger.LogInformation("AI Weather: Project endpoint {Endpoint}, Agent {Agent}", endpoint, agentName);
 		_logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
@@ -90,16 +80,23 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 			{
 				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
 					jsonSchemaFormatName: "ai_weather_response",
-					jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+					jsonSchema: aiOutputSchema,
 					jsonSchemaIsStrict: true),
 			},
 		};
 
 		ResponseResult response = await responseClient.CreateResponseAsync(options, cancellationToken);
+
+		if (response.Status != ResponseStatus.Completed)
+		{
+			throw new InvalidOperationException(
+				$"Foundry Agent response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
+				$"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
+				$"error: {response.Error?.Message ?? "(none)"}");
+		}
+
 		var content = response.GetOutputText();
-		var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
-			content,
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+		var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
 		if (aiWeather is null)
 		{
@@ -108,5 +105,28 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		}
 
 		return aiWeather;
+	}
+
+	private static BinaryData BuildAIOutputSchema()
+	{
+		var schema = JsonSchemaExporter.GetJsonSchemaAsNode(
+			JsonSerializerOptions.Default,
+			typeof(AIWeatherResponse),
+			new JsonSchemaExporterOptions
+			{
+				TreatNullObliviousAsNonNullable = true,
+				TransformSchemaNode = static (context, schema) =>
+				{
+					if (schema is JsonObject node && node["properties"] is JsonObject properties)
+					{
+						node["required"] = new JsonArray(properties.Select(property => (JsonNode)property.Key).ToArray());
+						node["additionalProperties"] = false;
+					}
+
+					return schema;
+				},
+			});
+
+		return BinaryData.FromString(schema.ToJsonString());
 	}
 }
