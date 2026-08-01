@@ -39,12 +39,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
-		var systemPrompt = """
-		You are a helpful weather assistant.
-		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
-		Use your tools to resolve a place name to latitude/longitude and to fetch current public weather for those coordinates whenever you need real weather data.
-		""";
-
 		// Same field list / shape as V2's last example. Kept in the prompt because
 		// CreateResponseOptions.TextOptions (text.format) is rejected when an agent is specified.
 		var aiOutputSchema = """
@@ -62,27 +56,17 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		}
 		""";
 
-		var userPrompt = $"""
-		What is the current weather in the user entered location: `{location}`?
-		Use your tools to look up coordinates and current weather.
-		When your geo tool returns a location, choose whichever place name is more user-friendly for fullSummary: the user entered location (`{location}`) or the geo tool response "name" (for example prefer a clear city name over a raw ZIP or opaque code).
+		var systemPrompt = $"""
+		You are a weather assistant. Use U.S. customary units (Fahrenheit, MPH).
+		Use your tools to resolve the place name to latitude/longitude and to fetch current public weather for those coordinates.
 
-		Return valid JSON matching this schema exactly:
+		Reply with only JSON matching this schema — no text outside the JSON, no follow-up questions or offers:
 		{aiOutputSchema}
 
-		Field notes:
-		- fullSummary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
-		- temperatureF (number) in Fahrenheit
-		- windSpeedMPH (number) in MPH
-		- windDirection (string)
-		- conditions (string)
-
-		Use the more user-friendly place name as the location context in fullSummary.
-		You only return valid JSON.
-		Do not include any text outside the JSON.
-		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
-		The fullSummary field must state only the current weather facts — nothing conversational after that.
+		fullSummary: one sentence of the current weather facts only (temperature, wind speed, wind direction, conditions), using whichever place name is more user-friendly — the user entered location or the geo tool response "name" (prefer a clear city name over a raw ZIP or opaque code).
 		""";
+
+		var userPrompt = $"What is the current weather in: `{location}`?";
 
 		_logger.LogInformation("AI Weather: Project endpoint {Endpoint}, Agent {Agent}", endpoint, agentName);
 		_logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
