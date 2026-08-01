@@ -39,8 +39,7 @@ internal class Program
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
-		// Same intent as V3's system prompt. CreateResponseOptions.Instructions is rejected when an
-		// agent is specified, so this is folded into the user message (and printed for the demo).
+		// Same intent as V3's system prompt, passed as CreateResponseOptions.Instructions.
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
@@ -65,8 +64,6 @@ internal class Program
 		""";
 
 		var userPrompt = $"""
-		{systemPrompt.Trim()}
-
 		What is today's weather in {location}?
 		Use your tools to look up coordinates and current weather.
 
@@ -89,8 +86,7 @@ internal class Program
 
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
-		Console.WriteLine("\nSystem Prompt (included in user message; Instructions not allowed with agents):");
-		Console.WriteLine(systemPrompt);
+		Console.WriteLine($"\nSystem Prompt (Instructions):\n{systemPrompt}");
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
@@ -107,6 +103,7 @@ internal class Program
 
 		CreateResponseOptions options = new()
 		{
+			Instructions = systemPrompt,
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),

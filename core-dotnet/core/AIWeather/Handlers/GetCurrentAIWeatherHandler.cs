@@ -39,8 +39,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
-		// Same intent as V3's system prompt. CreateResponseOptions.Instructions is rejected when an
-		// agent is specified, so this is folded into the user message.
+		// Same intent as V3's system prompt, passed as CreateResponseOptions.Instructions.
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
@@ -65,8 +64,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		""";
 
 		var userPrompt = $"""
-		{systemPrompt.Trim()}
-
 		What is the current weather in the user entered location: `{location}`?
 		Use your tools to look up coordinates and current weather.
 		When your geo tool returns a location, choose whichever place name is more user-friendly for fullSummary: the user entered location (`{location}`) or the geo tool response "name" (for example prefer a clear city name over a raw ZIP or opaque code).
@@ -89,6 +86,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		""";
 
 		_logger.LogInformation("AI Weather: Project endpoint {Endpoint}, Agent {Agent}", endpoint, agentName);
+		_logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
 		_logger.LogInformation("AI Weather: User prompt for {Location}: {Prompt}", location, userPrompt);
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
@@ -105,6 +103,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
 		CreateResponseOptions options = new()
 		{
+			Instructions = systemPrompt,
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
