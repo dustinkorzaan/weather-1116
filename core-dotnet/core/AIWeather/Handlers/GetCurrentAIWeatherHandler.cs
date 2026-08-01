@@ -77,7 +77,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 				Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1"),
 			});
 
-		// Name only — Foundry uses the agent's current default version.
 		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
 		CreateResponseOptions options = new()
