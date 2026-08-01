@@ -40,6 +40,17 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
+		var systemPrompt = """
+		You are a weather assistant. Use U.S. customary units (Fahrenheit, MPH).
+		Use your tools to resolve the place name to latitude/longitude and to fetch current public weather for those coordinates.
+
+		Reply with only JSON — no text outside the JSON, no follow-up questions or offers.
+
+		fullSummary: one sentence of the current weather facts only (temperature, wind speed, wind direction, conditions), using whichever place name is more user-friendly — the user entered location or the geo tool response "name" (prefer a clear city name over a raw ZIP or opaque code).
+		""";
+
+		var userPrompt = $"What is the current weather in: `{location}`?";
+
 		var aiOutputSchema = """
 		{
 		  "type": "object",
@@ -54,17 +65,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		  "additionalProperties": false
 		}
 		""";
-
-		var systemPrompt = """
-		You are a weather assistant. Use U.S. customary units (Fahrenheit, MPH).
-		Use your tools to resolve the place name to latitude/longitude and to fetch current public weather for those coordinates.
-
-		Reply with only JSON — no text outside the JSON, no follow-up questions or offers.
-
-		fullSummary: one sentence of the current weather facts only (temperature, wind speed, wind direction, conditions), using whichever place name is more user-friendly — the user entered location or the geo tool response "name" (prefer a clear city name over a raw ZIP or opaque code).
-		""";
-
-		var userPrompt = $"What is the current weather in: `{location}`?";
 
 		_logger.LogInformation("AI Weather: Project endpoint {Endpoint}, Agent {Agent}", endpoint, agentName);
 		_logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
