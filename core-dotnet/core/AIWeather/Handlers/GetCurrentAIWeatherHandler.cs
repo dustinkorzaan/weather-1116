@@ -1,5 +1,6 @@
 using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.Text;
 using System.Text.Json;
 using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Events;
@@ -39,8 +40,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
-		// Same field list / shape as V2's last example. Kept in the prompt because
-		// CreateResponseOptions.TextOptions (text.format) is rejected when an agent is specified.
+		// Same field list / shape as V2's last example.
 		var aiOutputSchema = """
 		{
 		  "type": "object",
@@ -56,12 +56,11 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		}
 		""";
 
-		var systemPrompt = $"""
+		var systemPrompt = """
 		You are a weather assistant. Use U.S. customary units (Fahrenheit, MPH).
 		Use your tools to resolve the place name to latitude/longitude and to fetch current public weather for those coordinates.
 
-		Reply with only JSON matching this schema — no text outside the JSON, no follow-up questions or offers:
-		{aiOutputSchema}
+		Reply with only JSON — no text outside the JSON, no follow-up questions or offers.
 
 		fullSummary: one sentence of the current weather facts only (temperature, wind speed, wind direction, conditions), using whichever place name is more user-friendly — the user entered location or the geo tool response "name" (prefer a clear city name over a raw ZIP or opaque code).
 		""";
@@ -90,6 +89,13 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
+			},
+			TextOptions = new ResponseTextOptions
+			{
+				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+					jsonSchemaFormatName: "ai_weather_response",
+					jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+					jsonSchemaIsStrict: true),
 			},
 		};
 
