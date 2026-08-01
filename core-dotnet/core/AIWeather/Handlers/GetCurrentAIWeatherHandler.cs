@@ -70,8 +70,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		_logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
 		_logger.LogInformation("AI Weather: User prompt for {Location}: {Prompt}", location, userPrompt);
 
-		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
-		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
 		ProjectOpenAIClient projectOpenAIClient = new(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
