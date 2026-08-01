@@ -39,7 +39,6 @@ internal class Program
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
-		// Same intent as V3's system prompt, passed as CreateResponseOptions.Instructions.
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
