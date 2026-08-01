@@ -45,22 +45,6 @@ internal class Program
 		Use your tools to resolve a place name to latitude/longitude and to fetch current public weather for those coordinates whenever you need real weather data.
 		""";
 
-		// Same field list / shape as V2's last example.
-		var aiOutputSchema = """
-		{
-		  "type": "object",
-		  "properties": {
-		    "fullSummary": { "type": "string" },
-		    "temperatureF": { "type": "number" },
-		    "windSpeedMPH": { "type": "number" },
-		    "windDirection": { "type": "string" },
-		    "conditions": { "type": "string" }
-		  },
-		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
-		  "additionalProperties": false
-		}
-		""";
-
 		var userPrompt = $"""
 		What is today's weather in {location}?
 		Use your tools to look up coordinates and current weather.
@@ -77,6 +61,22 @@ internal class Program
 		Do not include any text outside the JSON.
 		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
 		The fullSummary field must state only the current weather facts — nothing conversational after that.
+		""";
+
+		// Same field list / shape as V2's last example.
+		var aiOutputSchema = """
+		{
+		  "type": "object",
+		  "properties": {
+		    "fullSummary": { "type": "string" },
+		    "temperatureF": { "type": "number" },
+		    "windSpeedMPH": { "type": "number" },
+		    "windDirection": { "type": "string" },
+		    "conditions": { "type": "string" }
+		  },
+		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
+		  "additionalProperties": false
+		}
 		""";
 
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
