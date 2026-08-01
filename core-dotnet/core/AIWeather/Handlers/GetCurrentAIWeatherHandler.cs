@@ -52,9 +52,18 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		fullSummary: one sentence of the current weather facts only (temperature, wind speed, wind direction, conditions), using whichever place name is more user-friendly — the user entered location or the geo tool response "name" (prefer a clear city name over a raw ZIP or opaque code).
 		""";
 
-		var userPrompt = $"What is the current weather in: `{location}`?";
-
 		var aiOutputSchema = BuildAIOutputSchema();
+
+		// Foundry rejects `instructions` and `text` when an agent is specified,
+		// so the system prompt and the schema travel in the user message.
+		var userPrompt = $"""
+		{systemPrompt}
+
+		What is the current weather in: `{location}`?
+
+		Return valid JSON matching this schema exactly:
+		{aiOutputSchema}
+		""";
 
 		_logger.LogInformation("AI Weather: Project endpoint {Endpoint}, Agent {Agent}", endpoint, agentName);
 		_logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
@@ -71,17 +80,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
 		CreateResponseOptions options = new()
 		{
-			Instructions = systemPrompt,
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
-			},
-			TextOptions = new ResponseTextOptions
-			{
-				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
-					jsonSchemaFormatName: "ai_weather_response",
-					jsonSchema: aiOutputSchema,
-					jsonSchemaIsStrict: true),
 			},
 		};
 
@@ -107,7 +108,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		return aiWeather;
 	}
 
-	private static BinaryData BuildAIOutputSchema()
+	private static string BuildAIOutputSchema()
 	{
 		var schema = JsonSchemaExporter.GetJsonSchemaAsNode(
 			JsonSerializerOptions.Default,
@@ -127,6 +128,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 				},
 			});
 
-		return BinaryData.FromString(schema.ToJsonString());
+		return schema.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
 	}
 }
