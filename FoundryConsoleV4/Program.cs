@@ -26,7 +26,7 @@ internal class Program
 		 - Ask Foundry Agent "What is today's weather in {location}?"
 		 - Call a hosted Microsoft Foundry Agent (not a model directly)
 		 - Agent uses its configured tools (lat/long + current weather)
-		 - JSON output from AI (prompt-shaped; Responses text.format is not allowed with agents)
+		 - JSON output from AI (Responses text.format json_schema)
 		""");
 
 		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
@@ -45,8 +45,7 @@ internal class Program
 		Use your tools to resolve a place name to latitude/longitude and to fetch current public weather for those coordinates whenever you need real weather data.
 		""";
 
-		// Same field list / shape as V2's last example. Kept in the prompt because
-		// CreateResponseOptions.TextOptions (text.format) is rejected when an agent is specified.
+		// Same field list / shape as V2's last example.
 		var aiOutputSchema = """
 		{
 		  "type": "object",
@@ -66,9 +65,6 @@ internal class Program
 		What is today's weather in {location}?
 		Use your tools to look up coordinates and current weather.
 
-		Return valid JSON matching this schema exactly:
-		{aiOutputSchema}
-
 		Field notes:
 		- fullSummary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
 		- temperatureF (number) in Fahrenheit
@@ -87,6 +83,7 @@ internal class Program
 		Console.WriteLine($"Agent: {agentName}");
 		Console.WriteLine($"\nSystem Prompt (Instructions):\n{systemPrompt}");
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
+		Console.WriteLine($"\nOutput Schema (text.format):\n{aiOutputSchema}");
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
 		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
@@ -106,6 +103,13 @@ internal class Program
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
+			},
+			TextOptions = new ResponseTextOptions
+			{
+				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+					jsonSchemaFormatName: "ai_weather_response",
+					jsonSchema: BinaryData.FromString(aiOutputSchema),
+					jsonSchemaIsStrict: true),
 			},
 		};
 
