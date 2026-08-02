@@ -90,7 +90,7 @@ See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 | `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
 | `MCP_DOTNET_URL` | Yes | Base URL for MCP DotNet (e.g. `http://localhost:8110`) |
 | `MCP_FUNCTION_URL` | Yes | Base URL for MCP Function (e.g. `http://localhost:8120`) |
-| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | No | Derives OpenAI endpoint host when set |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | No | OpenAI endpoint, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1` |
 
 **V5 settings** (agent-hosted demo only):
 

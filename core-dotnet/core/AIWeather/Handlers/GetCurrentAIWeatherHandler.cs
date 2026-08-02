@@ -48,7 +48,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var mcpDotNetUrl = Environment.GetEnvironmentVariable("MCP_DOTNET_URL")
 			?? throw new InvalidOperationException("Missing MCP_DOTNET_URL.");
 
-		var endpoint = GetOpenAiEndpoint();
+		var endpoint = new Uri(
+			Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
+			?? "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1");
 
 		var systemPrompt = """
 		You are a weather assistant. Use U.S. customary units (Fahrenheit, MPH).
@@ -129,18 +131,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		}
 
 		return aiWeather;
-	}
-
-	private static Uri GetOpenAiEndpoint()
-	{
-		var projUrl = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL");
-		if (!string.IsNullOrWhiteSpace(projUrl))
-		{
-			var baseUri = new Uri(projUrl.TrimEnd('/'));
-			return new Uri($"{baseUri.Scheme}://{baseUri.Host}/openai/v1");
-		}
-
-		return new Uri("https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1");
 	}
 
 	private static string BuildAIOutputSchema()
