@@ -1,23 +1,25 @@
 using System.ClientModel;
-using System.ClientModel.Primitives;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
-using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using OpenAI;
 using OpenAI.Responses;
 
 namespace Core.AIWeather.Handlers;
 
 /// <summary>
-/// Calls the hosted Microsoft Foundry Agent for current weather (same pattern as Foundry Console V4).
-/// The agent uses its configured geo/weather tools; this handler does not call geo directly.
+/// Calls the hosted model directly for current weather (same pattern as Foundry Console V4).
+/// MCP tools resolve geo and weather data; this handler does not call geo directly.
 /// </summary>
 public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEvent, AIWeatherResponse>
 {
+	private const string DeploymentName = "gpt-5.4-mini";
+
 	private static readonly string DefaultLocation = "Nashville, TN";
 
 	private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
@@ -33,67 +35,100 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 			? DefaultLocation
 			: request.Location.Trim();
 
-		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
-			?? throw new InvalidOperationException(
-				"Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL. " +
-				"Expected e.g. https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2");
+		var endpoint = new Uri(
+			Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
+			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL."));
 
-		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
-			?? "wx1116-agent-default";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
+		var mcpFunctionUrl = Environment.GetEnvironmentVariable("MCP_FUNCTION_URL")
+			?? throw new InvalidOperationException("Missing MCP_FUNCTION_URL.");
+		var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_FUNCTION_KEY")
+			?? throw new InvalidOperationException("Missing MCP_FUNCTION_KEY.");
+
+		var mcpDotNetUrl = Environment.GetEnvironmentVariable("MCP_DOTNET_URL")
+			?? throw new InvalidOperationException("Missing MCP_DOTNET_URL.");
+		var mcpAppKey = Environment.GetEnvironmentVariable("MCP_APP_KEY")
+			?? throw new InvalidOperationException("Missing MCP_APP_KEY.");
+
 		var systemPrompt = """
-		You are a weather assistant. Use U.S. customary units (Fahrenheit, MPH).
-		Use your tools to resolve the place name to latitude/longitude and to fetch current public weather for those coordinates.
+		# Role & Operational Rules
+		You are a dedicated weather assistant.
+		Always use U.S. customary units exclusively (Fahrenheit, MPH).
+		You have access to 3rd-party Model Context Protocol (MCP) tools for location mapping and real-time public meteorology data.
 
-		Reply with only JSON — no text outside the JSON, no follow-up questions or offers.
+		# Tool Protocol
+		1. When given a location, immediately call your coordinates resolution tool to map the location to latitude and longitude.
+		2. Use those resolved coordinates to invoke your weather fetching tool.
+		3. You must query these tools whenever real weather data is required to fulfill the request.
 
-		fullSummary: one sentence of the current weather facts only (temperature, wind speed, wind direction, conditions), using whichever place name is more user-friendly — the user entered location or the geo tool response "name" (prefer a clear city name over a raw ZIP or opaque code).
+		# Constraints
+		- Output raw JSON text only.
+		- Do not include markdown code block wrapper backticks (e.g., do not wrap in ```json).
+		- Do not include any conversational pleasantries, introductory text, explanations, or trailing remarks.
+		- Do not ask follow-up questions or offer further assistance.
+
+		# JSON Structure Properties
+		- fullSummary: Exactly one sentence capturing current weather metrics (temperature, wind speed, wind direction, and overall conditions).
+		- For the location name inside the summary sentence, dynamically evaluate and select the most human-friendly city name. Prefer a clean, recognized city name returned by your geo tool over a raw ZIP code, coordinate pair, or opaque input string provided by the user.
 		""";
 
 		var userPrompt = $"What is the current weather in: `{location}`?";
 
 		var aiOutputSchema = BuildAIOutputSchema();
 
-		// Foundry rejects `instructions` and `text` when an agent is specified,
-		// so the system prompt and the schema travel in a system input item.
-		var systemMessage = $"""
-		{systemPrompt}
-
-		Return valid JSON matching this schema exactly:
-		{aiOutputSchema}
-		""";
-
-		_logger.LogInformation("AI Weather: Project endpoint {Endpoint}, Agent {Agent}", endpoint, agentName);
+		_logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, DeploymentName);
 		_logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
 		_logger.LogInformation("AI Weather: User prompt for {Location}: {Prompt}", location, userPrompt);
 		_logger.LogInformation("AI Weather: Output schema for {Location}: {Schema}", location, aiOutputSchema);
 
-		ProjectOpenAIClient projectOpenAIClient = new(
-			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-			new ProjectOpenAIClientOptions
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new OpenAIClientOptions
 			{
-				Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1"),
+				Endpoint = endpoint,
 			});
 
-		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+		McpTool myMcpFunction = ResponseTool.CreateMcpTool(
+			serverLabel: "MyMCPFunction",
+			serverUri: new Uri($"{mcpFunctionUrl.TrimEnd('/')}/runtime/webhooks/mcp"),
+			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpFunctionKey },
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
-		CreateResponseOptions options = new()
+		McpTool myMcpApp = ResponseTool.CreateMcpTool(
+			serverLabel: "MyMCPApp",
+			serverUri: new Uri($"{mcpDotNetUrl.TrimEnd('/')}/mcp"),
+			authorizationToken: mcpAppKey,
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+
+		var inputItems = new List<ResponseItem>
 		{
-			InputItems =
+			ResponseItem.CreateSystemMessageItem(systemPrompt),
+			// Placing the dynamic query at the absolute end ensures the unchanging system instructions,
+			// response schema, and MCP tool schemas form a stable hash that qualifies for Azure OpenAI
+			// Prompt Caching (1,024+ token threshold).
+			ResponseItem.CreateUserMessageItem(userPrompt),
+		};
+
+		CreateResponseOptions options = new(DeploymentName, inputItems)
+		{
+			Tools = { myMcpFunction, myMcpApp },
+			TextOptions = new ResponseTextOptions
 			{
-				ResponseItem.CreateSystemMessageItem(systemMessage),
-				ResponseItem.CreateUserMessageItem(userPrompt),
+				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+					jsonSchemaFormatName: "ai_weather_response",
+					jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+					jsonSchemaIsStrict: true),
 			},
 		};
 
-		ResponseResult response = await responseClient.CreateResponseAsync(options, cancellationToken);
+		ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
 
 		if (response.Status != ResponseStatus.Completed)
 		{
 			throw new InvalidOperationException(
-				$"Foundry Agent response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
+				$"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
 				$"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
 				$"error: {response.Error?.Message ?? "(none)"}");
 		}
@@ -104,7 +139,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		if (aiWeather is null)
 		{
 			throw new InvalidOperationException(
-				$"Foundry Agent returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
+				$"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
 		}
 
 		return aiWeather;

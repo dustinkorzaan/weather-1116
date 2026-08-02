@@ -9,8 +9,8 @@ idiomatic for its framework.
 
 The repo also includes **MCP tool hosts** and **Foundry console demos** that
 are not called directly by the UIs, but they exercise the same `Core` weather
-and geo logic and support the hosted **Azure Foundry agent** used for Current
-AI Weather in API and MVC.
+and geo logic and support the model-direct AI weather path in API and MVC (V4
+pattern) plus the hosted-agent learning demo in Foundry Console V5.
 
 ## Projects
 
@@ -48,11 +48,11 @@ and each project's `.env.example`.
 - Backend logic is intentionally duplicated in MVC and API (no shared backend
   dependency between those projects), except for shared cross-cutting code
   (events/handlers) provided by `Core`, which both MVC and API reference.
-- **MCP hosts are not called by any UI or by `WeatherAPI` for standard
-  AI weather/hello flows.** They are used indirectly when the hosted Foundry
-  agent resolves a place name and fetches weather (see below).
+- **MCP hosts are not called by any UI for standard AI weather/hello flows.**
+  API and MVC call them indirectly through `GetCurrentAIWeatherHandler`, which
+  declares remote MCP tools on the model request (see below).
 
-## AI Weather and Foundry Agent
+## AI Weather and Foundry
 
 All three UIs expose **Current AI Weather**. The request path differs by stack:
 
@@ -60,16 +60,15 @@ All three UIs expose **Current AI Weather**. The request path differs by stack:
 - **MVC** → local `HomeController` + `Core` (same handler, no API hop)
 
 Both API and MVC route AI weather through `Core.AIWeather.Handlers.GetCurrentAIWeatherHandler`,
-which calls a **hosted Microsoft Foundry agent** (default `wx1116-agent-default`).
-The agent is configured in Azure to use MCP tools that map back to this repo's
-`Core` handlers:
+which calls the hosted model directly (same pattern as Foundry Console V4) with MCP tools
+that map back to this repo's `Core` handlers:
 
 ```mermaid
 flowchart LR
   UI[React / Blazor / MVC]
   API[MVC or WeatherAPI]
   Core[Core GetCurrentAIWeatherHandler]
-  Agent[Azure Foundry Agent]
+  Model[Azure OpenAI model]
   McpFunc[mcp-function GetLatLongData]
   McpDotNet[mcp-dotnet GetPublicWeatherData]
   CoreGeo[Core geo handlers]
@@ -77,15 +76,18 @@ flowchart LR
 
   UI --> API
   API --> Core
-  Core --> Agent
-  Agent --> McpFunc
-  Agent --> McpDotNet
+  Core --> Model
+  Model --> McpFunc
+  Model --> McpDotNet
   McpFunc --> CoreGeo
   McpDotNet --> CoreWx
 ```
 
-Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`,
-`AZURE_FOUNDRY_PROD_EUS2_KEY`, and optionally `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`.
+Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`
+(the full OpenAI endpoint URL, e.g. `.../openai/v1`), `AZURE_FOUNDRY_PROD_EUS2_KEY`,
+`MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_DOTNET_URL`, and `MCP_FUNCTION_URL`.
+V5 uses the same `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` name for the Foundry project
+URL and appends `/openai/v1` in code.
 See deploy workflows and `.env.example` files under `api-dotnet/api`,
 `mvc-dotnet/mvc`, `ui-blazor/blazor`, and `worker-dotnet/worker`.
 
@@ -155,7 +157,7 @@ and handlers, including:
 - `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
 - `core-dotnet/core/Geo/` — geocoding (`GetLatLongData`)
 - `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherData`)
-- `core-dotnet/core/AIWeather/` — Foundry agent integration (`GetCurrentAIWeatherHandler`)
+- `core-dotnet/core/AIWeather/` — model-direct AI weather (`GetCurrentAIWeatherHandler`)
 - `core-dotnet/core/About/` — About tree builder and remote about client
 
 ## Feature Parity Contract
@@ -215,7 +217,7 @@ via Run and Debug **Run All**, using `.vscode/launch.json` and port forwarding
 in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
 
 MCP hosts and Foundry consoles are optional for UI development but required to
-exercise the full agent + MCP path end-to-end. Start `WeatherAPI` (8080) before
+exercise the full model-direct + MCP path end-to-end. Start `WeatherAPI` (8080) before
 React or Blazor when testing API-dependent features.
 
 ## Build and CI
@@ -271,18 +273,20 @@ docs/                        Documentation (including this file)
 
 ## Foundry Console Demos (learning path)
 
-Four standalone console apps demonstrate how the hosted agent pattern in API/MVC
-was built up. They are **training building blocks**, not production deployables:
+Five standalone console apps demonstrate how the production AI weather path was
+built up, plus **V5** as a hosted-agent contrast. They are **training building
+blocks**, not production deployables:
 
 | Console | Pattern taught |
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
 | **V3** | In-process tool callbacks (`GetLatLongData`, `GetPublicWeatherData`) — same tools `Core` exposes, answered locally |
-| **V4** | Calls the **same hosted Foundry agent** API/MVC use; agent invokes MCP lat/long + weather tools |
+| **V4** | Model-direct via `ResponsesClient`, tools target remote MCP servers — same pattern as API/MVC production |
+| **V5** | Hosted Foundry agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
 `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see [`README.md`](../README.md)).
 
 Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
-`core-dotnet/core/AIWeather`.
+`core-dotnet/core/AIWeather` → V5 (hosted-agent contrast).
