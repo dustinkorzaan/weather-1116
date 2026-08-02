@@ -80,11 +80,9 @@ internal class Program
 		""";
 
 		// CreateResponseOptions.Instructions is rejected when an agent is specified,
-		// so the system prompt and schema travel in the user message.
-		var inputMessage = $"""
+		// so the system prompt and schema travel in a system input item.
+		var systemMessage = $"""
 		{systemPrompt}
-
-		{userPrompt}
 
 		Return valid JSON matching this schema exactly:
 		{aiOutputSchema}
@@ -92,10 +90,10 @@ internal class Program
 
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
-		Console.WriteLine("\nSystem Prompt (included in user message; Instructions not allowed with agents):");
+		Console.WriteLine("\nSystem Prompt (sent as a system message; Instructions not allowed with agents):");
 		Console.WriteLine(systemPrompt);
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
-		Console.WriteLine($"\nAI Output Schema (included in user message; text.format not allowed with agents):\n{aiOutputSchema}");
+		Console.WriteLine($"\nAI Output Schema (sent with the system message; text.format not allowed with agents):\n{aiOutputSchema}");
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
 		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
@@ -113,7 +111,8 @@ internal class Program
 		{
 			InputItems =
 			{
-				ResponseItem.CreateUserMessageItem(inputMessage),
+				ResponseItem.CreateSystemMessageItem(systemMessage),
+				ResponseItem.CreateUserMessageItem(userPrompt),
 			},
 		};
 
