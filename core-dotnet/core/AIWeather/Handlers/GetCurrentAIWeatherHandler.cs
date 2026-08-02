@@ -57,11 +57,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var aiOutputSchema = BuildAIOutputSchema();
 
 		// Foundry rejects `instructions` and `text` when an agent is specified,
-		// so the system prompt and the schema travel in the user message.
-		var inputMessage = $"""
+		// so the system prompt and the schema travel in a system input item.
+		var systemMessage = $"""
 		{systemPrompt}
-
-		{userPrompt}
 
 		Return valid JSON matching this schema exactly:
 		{aiOutputSchema}
@@ -85,7 +83,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		{
 			InputItems =
 			{
-				ResponseItem.CreateUserMessageItem(inputMessage),
+				ResponseItem.CreateSystemMessageItem(systemMessage),
+				ResponseItem.CreateUserMessageItem(userPrompt),
 			},
 		};
 
