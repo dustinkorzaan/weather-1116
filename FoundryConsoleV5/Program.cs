@@ -30,71 +30,20 @@ internal class Program
 		""");
 
 		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
-			?? throw new InvalidOperationException(
-				"Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL. " +
-				"Expected e.g. https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2");
-
+			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL.");
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
 		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
 			?? "wx1116-agent-default";
 
-		// Same intent as V3's system prompt.
-		var systemPrompt = """
-		You are a helpful weather assistant.
-		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
-		Use your tools to resolve a place name to latitude/longitude and to fetch current public weather for those coordinates whenever you need real weather data.
-
-		Field notes:
-		- fullSummary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
-		- temperatureF (number) in Fahrenheit
-		- windSpeedMPH (number) in MPH
-		- windDirection (string)
-		- conditions (string)
-
-		You only return valid JSON.
-		Do not include any text outside the JSON.
-		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
-		The fullSummary field must state only the current weather facts — nothing conversational after that.
-		""";
-
 		var userPrompt = $"""
 		What is today's weather in: {location}?
 		""";
 
-		// Same field list / shape as V2's last example. Kept in the prompt because
-		// CreateResponseOptions.TextOptions (text.format) is rejected when an agent is specified.
-		var aiOutputSchema = """
-		{
-		  "type": "object",
-		  "properties": {
-		    "fullSummary": { "type": "string" },
-		    "temperatureF": { "type": "number" },
-		    "windSpeedMPH": { "type": "number" },
-		    "windDirection": { "type": "string" },
-		    "conditions": { "type": "string" }
-		  },
-		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
-		  "additionalProperties": false
-		}
-		""";
-
-		// CreateResponseOptions.Instructions is rejected when an agent is specified,
-		// so the system prompt and schema travel in a system input item.
-		var systemMessage = $"""
-		{systemPrompt}
-
-		Return valid JSON matching this schema exactly:
-		{aiOutputSchema}
-		""";
-
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
-		Console.WriteLine("\nSystem Prompt (sent as a system message; Instructions not allowed with agents):");
-		Console.WriteLine(systemPrompt);
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
-		Console.WriteLine($"\nAI Output Schema (sent with the system message; text.format not allowed with agents):\n{aiOutputSchema}");
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
 		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
@@ -112,7 +61,6 @@ internal class Program
 		{
 			InputItems =
 			{
-				ResponseItem.CreateSystemMessageItem(systemMessage),
 				ResponseItem.CreateUserMessageItem(userPrompt),
 			},
 		};
