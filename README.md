@@ -64,7 +64,7 @@ Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
 against Core weather data (V1–V4) or a hosted Foundry Agent (V5). In
 `Weather.sln` and CI, but not a production deployable; run from VS Code or
 `dotnet run` in each folder.
-See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
+See each `Program.cs` and `.env.example` for required settings (`AZURE_FOUNDRY_PROD_EUS2_*`, plus MCP keys for V4 and API/MVC).
 
 | Project | Path | Pattern |
 | --- | --- | --- |
@@ -85,7 +85,7 @@ See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | OpenAI endpoint, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1` |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | OpenAI endpoint URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1` (used directly by the handler) |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
 | `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
 | `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
@@ -96,7 +96,7 @@ See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2` |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2` (V5 appends `/openai/v1`) |
 | `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` (project default version) |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 |
 

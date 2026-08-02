@@ -83,9 +83,11 @@ flowchart LR
   McpDotNet --> CoreWx
 ```
 
-Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`,
-`AZURE_FOUNDRY_PROD_EUS2_KEY`, `MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_DOTNET_URL`,
-and `MCP_FUNCTION_URL`.
+Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`
+(the full OpenAI endpoint URL, e.g. `.../openai/v1`), `AZURE_FOUNDRY_PROD_EUS2_KEY`,
+`MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_DOTNET_URL`, and `MCP_FUNCTION_URL`.
+V5 uses the same `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` name for the Foundry project
+URL and appends `/openai/v1` in code.
 See deploy workflows and `.env.example` files under `api-dotnet/api`,
 `mvc-dotnet/mvc`, `ui-blazor/blazor`, and `worker-dotnet/worker`.
 
@@ -215,7 +217,7 @@ via Run and Debug **Run All**, using `.vscode/launch.json` and port forwarding
 in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
 
 MCP hosts and Foundry consoles are optional for UI development but required to
-exercise the full agent + MCP path end-to-end. Start `WeatherAPI` (8080) before
+exercise the full model-direct + MCP path end-to-end. Start `WeatherAPI` (8080) before
 React or Blazor when testing API-dependent features.
 
 ## Build and CI
@@ -271,7 +273,7 @@ docs/                        Documentation (including this file)
 
 ## Foundry Console Demos (learning path)
 
-Four standalone console apps demonstrate how the production AI weather path was
+Five standalone console apps demonstrate how the production AI weather path was
 built up, plus **V5** as a hosted-agent contrast. They are **training building
 blocks**, not production deployables:
 

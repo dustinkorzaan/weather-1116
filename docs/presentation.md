@@ -15,7 +15,7 @@ Weather sample.
 
 Sections **1–3** are framing — name them, show the folder, move on. The material is
 sketched, not presentation-ready. **Section 4** is the focus: live demos, architecture,
-and the Foundry console learning path (V1 → V4).
+and the Foundry console learning path (V1 → V5).
 
 ## Sections
 

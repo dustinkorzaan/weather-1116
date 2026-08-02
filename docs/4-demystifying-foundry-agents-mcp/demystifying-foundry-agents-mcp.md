@@ -93,6 +93,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     Foundry-specific client.
   - The service calls the MCP servers itself, so V3's tool-call loop disappears.
   - Shows that MCP tooling does not require a Foundry agent.
+  - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
 
 - **V5 — Hosted Foundry agent + MCP** — [`FoundryConsoleV5`](../../FoundryConsoleV5)
   (`FoundryConsoleV5Agent.csproj`)
@@ -261,14 +262,14 @@ scaffolding.”
 
 ### 5. Same request — model-direct vs agent-hosted
 
-Side-by-side mental model (V2/V3 vs V4).
+Side-by-side mental model (V1–V4 / production vs V5).
 
 ```mermaid
 flowchart LR
-    subgraph Direct["Model-direct (V1–V3)"]
+    subgraph Direct["Model-direct (V1–V4, production)"]
         A1[App] --> M1[(Model)]
     end
-    subgraph Hosted["Agent-hosted (V4 / production)"]
+    subgraph Hosted["Agent-hosted (V5)"]
         A2[App] --> AG[Foundry Agent]
         AG --> M2[(Model)]
     end
@@ -598,18 +599,20 @@ flowchart TD
 
 ---
 
-### 20. One slide — full Weather journey V1 → V4 as maturity ladder
+### 20. One slide — full Weather journey V1 → V5 as maturity ladder
 
 ```mermaid
 flowchart LR
     V1[V1 Model only] --> V2[V2 Unified endpoint]
     V2 --> V3[V3 In-process tools]
-    V3 --> V4[V4 Agent + MCP]
+    V3 --> V4[V4 Model-direct + MCP]
     V4 --> PROD[API / MVC production handler]
+    V4 --> V5[V5 Hosted agent contrast]
 
     V1 -.->|risk| H[Ungrounded answers]
     V3 -.->|better| T[Model picks tools]
-    V4 -.->|ops| O[Hosted agent + remote MCP]
+    V4 -.->|ops| O[Remote MCP tools]
+    V5 -.->|contrast| A[Agent owns config]
 ```
 
 ---
