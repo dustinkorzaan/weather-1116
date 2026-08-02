@@ -1,4 +1,5 @@
 ﻿using Azure.AI.Extensions.OpenAI;
+using Core.AIWeather;
 using Core.AIWeather.Models;
 using DotNetEnv;
 using OpenAI.Responses;
@@ -30,8 +31,8 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
-			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL.");
+		var endpoint = FoundryOpenAiEndpoint.Resolve(Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
+			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL."));
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
@@ -54,7 +55,7 @@ internal class Program
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
-				Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1"),
+				Endpoint = endpoint,
 			});
 
 		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
