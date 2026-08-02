@@ -38,7 +38,8 @@ and the Foundry console learning path (V1 → V4).
 2. **V1 → V2** — model-direct (legacy vs unified endpoint); when the console still owns data prep.
 3. **V3** — in-process tool callbacks; model chooses tools, your console answers them.
 4. **V4** — model-direct with remote MCP tools; MCP without an agent, and the tool loop disappears.
-5. **V5 + production** — hosted Foundry agent + MCP (`mcp-function`, `mcp-dotnet`); same path as API/MVC.
-6. **Demos** — React / Blazor / API `GetCurrentAIWeather`; optional MCP inspector on 8110 / 8120.
+5. **V5** — hosted Foundry agent demo; agent owns instructions, response schema, and MCP tools; console sends only the user prompt.
+6. **Production** — V4 model-direct path in `GetCurrentAIWeatherHandler` (API/MVC).
+7. **Demos** — React / Blazor / API `GetCurrentAIWeather`; optional MCP inspector on 8110 / 8120.
 
-Adjust depth on 1–3 to taste; keep most clock time on 4–5 and hands-on paths in the repo.
+Adjust depth on 1–3 to taste; keep most clock time on 4–6 and hands-on paths in the repo.

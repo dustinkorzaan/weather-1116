@@ -5,13 +5,14 @@ settings.
 
 ## Foundry console demos (learning path)
 
-Four standalone console apps in `Weather.sln` show how the production agent
-pattern was built up. They are **training building blocks**, not deployables.
-Run from VS Code (**Foundry Console V1** … **V4**) or `dotnet run` in each
+Five standalone console apps in `Weather.sln` show how the production AI weather
+path was built up, with **V5** as a hosted-agent contrast. They are **training
+building blocks**, not deployables.
+Run from VS Code (**Foundry Console V1** … **V5**) or `dotnet run` in each
 folder. All use the `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `.env.example`).
 
 Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
-`core-dotnet/core/AIWeather`.
+`core-dotnet/core/AIWeather` **→ V5**.
 
 - **V1 — Model-direct (legacy endpoint)** — [`FoundryConsoleV1`](../../FoundryConsoleV1)
   (`FoundryConsoleV1ModelDirectLegacy.csproj`)
@@ -97,10 +98,10 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   (`FoundryConsoleV5Agent.csproj`)
   - Agent-hosted alternative to V4: calls a **hosted Foundry agent**
     (`wx1116-agent-default` by default).
-  - Agent invokes MCP lat/long and weather tools (`mcp-function`, `mcp-dotnet`).
-  - Instructions, tools, and the response schema live on the agent: the Responses
-    `instructions` and `text` fields are rejected when an agent is specified, so
-    the system prompt is sent as the first input message.
+  - Instructions, response schema, and MCP tools (`mcp-function`, `mcp-dotnet`)
+    are configured on the agent in Azure.
+  - The console sends **only the user prompt** — Responses `instructions` and
+    `text` fields are rejected when an agent is specified.
   - **V5-only settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V4):
     - `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` (required) — Foundry project URL.
     - `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` (optional) — defaults to
@@ -110,8 +111,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   ```mermaid
   sequenceDiagram
       autonumber
-      participant UI
-      participant API
+      participant Console
       participant Agent as Foundry Agent
       box MCP Function
           participant GetLatLongTool
@@ -120,14 +120,12 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
           participant GetPublicWeatherTool
       end
 
-      UI->>API: GetPublicWeather(location)
-      API->>Agent: GetPublicWeather(location)
+      Console->>Agent: user prompt only
       Agent->>GetLatLongTool: GetLatLong(location)
       GetLatLongTool-->>Agent: NonAILatLongResponse
       Agent->>GetPublicWeatherTool: GetPublicWeather(lat,long)
       GetPublicWeatherTool-->>Agent: NonAIWeatherResponse
-      Agent-->>API: AIWeatherResponse
-      API-->>UI: AIWeatherResponse
+      Agent-->>Console: AIWeatherResponse
   ```
 
 ## Brainstorm: demystifying model, agent, tools, and MCP

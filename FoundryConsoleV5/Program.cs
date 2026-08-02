@@ -24,9 +24,10 @@ internal class Program
 		Console.WriteLine($"""
 		Example 5
 		 - Ask Foundry Agent "What is today's weather in {location}?"
-		 - Call a hosted Microsoft Foundry Agent (not a model directly)
-		 - Agent uses its configured tools (lat/long + current weather)
-		 - JSON output from AI (prompt-shaped; Responses text.format is not allowed with agents)
+		 - Call a hosted Microsoft Foundry Agent (not the model directly)
+		 - Instructions, response schema, and MCP tools are configured on the agent
+		 - This console sends only the user prompt
+		 - JSON output from AI
 		""");
 
 		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
@@ -37,6 +38,7 @@ internal class Program
 		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
 			?? "wx1116-agent-default";
 
+<<<<<<< HEAD
 		var userPrompt = $"""
 		What is today's weather in: {location}?
 		""";
@@ -44,9 +46,18 @@ internal class Program
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
+=======
+		var userPrompt = $"What is today's weather in: {location}?";
 
-		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
-		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
+		Console.WriteLine($"\nProject endpoint: {endpoint}");
+		Console.WriteLine($"Agent: {agentName}");
+		Console.WriteLine("\nConfigured on the agent (not sent by this console):");
+		Console.WriteLine("- Instructions");
+		Console.WriteLine("- Response schema");
+		Console.WriteLine("- MCP tools (lat/long + current weather)");
+		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
+>>>>>>> e325f13 (Refine V5 as agent-owned config demo with user prompt only)
+
 		ProjectOpenAIClient projectOpenAIClient = new(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
@@ -54,7 +65,6 @@ internal class Program
 				Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1"),
 			});
 
-		// Name only — Foundry uses the agent's current default version.
 		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
 		CreateResponseOptions options = new()

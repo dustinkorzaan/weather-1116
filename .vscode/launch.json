@@ -154,7 +154,7 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Foundry Console V5 Agent (MCP tools)",
+            "name": "Foundry Console V5 Agent (user prompt only)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build foundry console v5",
