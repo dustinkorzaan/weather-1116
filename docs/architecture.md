@@ -83,10 +83,9 @@ flowchart LR
   McpDotNet --> CoreWx
 ```
 
-Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_KEY`,
-`MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_DOTNET_URL`, and `MCP_FUNCTION_URL`.
-Optionally `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` for the OpenAI endpoint (defaults to
-`https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1`).
+Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`,
+`AZURE_FOUNDRY_PROD_EUS2_KEY`, `MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_DOTNET_URL`,
+and `MCP_FUNCTION_URL`.
 See deploy workflows and `.env.example` files under `api-dotnet/api`,
 `mvc-dotnet/mvc`, `ui-blazor/blazor`, and `worker-dotnet/worker`.
 
