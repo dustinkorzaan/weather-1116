@@ -5,7 +5,6 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
-using static Core.AIWeather.FoundryOpenAiEndpoint;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using OpenAI;
@@ -36,7 +35,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 			? DefaultLocation
 			: request.Location.Trim();
 
-		var endpoint = Resolve(
+		var endpoint = FoundryOpenAiEndpoint.ResolveForModelDirect(
 			Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL."));
 
