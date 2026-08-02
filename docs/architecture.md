@@ -97,7 +97,7 @@ MediatR handlers the sample uses in-process elsewhere.
 
 | Host | Path | Tool | Port | Endpoint | Auth |
 | --- | --- | --- | --- | --- | --- |
-| MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer `MCP_API_KEY` (no default — must be set by developer) |
+| MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer `MCP_APP_KEY` (no default — must be set by developer) |
 | MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
 
 VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
@@ -108,7 +108,7 @@ Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see
 
 Auth examples:
 
-- MCP DotNet: `Authorization: Bearer {your MCP_API_KEY value}` (`/About` stays open)
+- MCP DotNet: `Authorization: Bearer {your MCP_APP_KEY value}` (`/About` stays open)
 - MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 
 Each host also exposes an anonymous **`/About`** probe that returns a leaf

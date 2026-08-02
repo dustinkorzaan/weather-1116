@@ -92,15 +92,22 @@ internal class Program
 				Endpoint = new Uri(endpoint),
 			});
 
-		// Placeholder — add the third party MCP servers this demo should call, e.g.
-		// mcpTools.Add(ResponseTool.CreateMcpTool(
-		//     serverLabel: "weather_mcp_dotnet",
-		//     serverUri: new Uri("https://weather1116-prod-mcpapp.azurewebsites.net/mcp"),
-		//     authorizationToken: Environment.GetEnvironmentVariable("MCP_API_KEY"),
-		//     toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval)));
-		var mcpTools = new List<ResponseTool>();
+		var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_FUNCTION_KEY") ?? throw new InvalidOperationException("MCP_FUNCTION_KEY not found in environment variables.");
+		var mcpAppKey = Environment.GetEnvironmentVariable("MCP_APP_KEY") ?? throw new InvalidOperationException("MCP_APP_KEY not found in environment variables.");
 
-		Console.WriteLine($"\nMCP tools: {mcpTools.Count}");
+		McpTool myMcpFunction = ResponseTool.CreateMcpTool(
+			serverLabel: "MyMCPFunction",
+			serverUri: new Uri("https://weather1116-prod-mcpfunc-debjddh3fthua7dy.westus2-01.azurewebsites.net/runtime/webhooks/mcp"),
+			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpFunctionKey },
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+
+		McpTool myMcpApp = ResponseTool.CreateMcpTool(
+			serverLabel: "MyMCPApp",
+			serverUri: new Uri("https://weather1116-prod-mcpapp-bcb9gnameebrgmc4.westus2-01.azurewebsites.net/mcp"),
+			authorizationToken: mcpAppKey,
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+
+		Console.WriteLine($"\nMCP Servers:\n{myMcpFunction.ServerLabel} {myMcpFunction.ServerUri}\n{myMcpApp.ServerLabel} {myMcpApp.ServerUri}");
 
 		var inputItems = new List<ResponseItem>()
 		{
@@ -110,6 +117,7 @@ internal class Program
 
 		CreateResponseOptions options = new(deploymentName, inputItems)
 		{
+			Tools = { myMcpFunction, myMcpApp },
 			TextOptions = new ResponseTextOptions
 			{
 				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
@@ -118,11 +126,6 @@ internal class Program
 					jsonSchemaIsStrict: true)
 			}
 		};
-
-		foreach (var mcpTool in mcpTools)
-		{
-			options.Tools.Add(mcpTool);
-		}
 
 		try
 		{
