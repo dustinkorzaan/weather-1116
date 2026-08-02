@@ -107,7 +107,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
           participant GetPublicWeatherTool
       end
 
-      Console->>Model: system prompt + user prompt + MCP tools
+      Console->>Model: system prompt + MCP tools, user prompt last
       Model->>GetLatLongTool: GetLatLong(location)
       GetLatLongTool-->>Model: NonAILatLongResponse
       Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
@@ -128,6 +128,26 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     - `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` (optional) — defaults to
       `wx1116-agent-default`.
     - `AZURE_FOUNDRY_PROD_EUS2_KEY` (required) — same API key as V1–V3.
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Console
+      participant Agent as Foundry Agent
+      box MCP Function
+          participant GetLatLongTool
+      end
+      box MCP DotNet
+          participant GetPublicWeatherTool
+      end
+
+      Console->>Agent: user prompt only
+      Agent->>GetLatLongTool: GetLatLong(location)
+      GetLatLongTool-->>Agent: NonAILatLongResponse
+      Agent->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+      GetPublicWeatherTool-->>Agent: NonAIWeatherResponse
+      Agent-->>Console: AIWeatherResponse
+  ```
 
 ## Brainstorm: demystifying model, agent, tools, and MCP
 
