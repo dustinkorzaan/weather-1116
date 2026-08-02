@@ -47,8 +47,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_FUNCTION_KEY")
 			?? throw new InvalidOperationException("Missing MCP_FUNCTION_KEY.");
 
-		var mcpDotNetUrl = Environment.GetEnvironmentVariable("MCP_DOTNET_URL")
-			?? throw new InvalidOperationException("Missing MCP_DOTNET_URL.");
+		var mcpAppUrl = Environment.GetEnvironmentVariable("MCP_APP_URL")
+			?? throw new InvalidOperationException("Missing MCP_APP_URL.");
 		var mcpAppKey = Environment.GetEnvironmentVariable("MCP_APP_KEY")
 			?? throw new InvalidOperationException("Missing MCP_APP_KEY.");
 
@@ -98,7 +98,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
 		McpTool myMcpApp = ResponseTool.CreateMcpTool(
 			serverLabel: "MyMCPApp",
-			serverUri: new Uri($"{mcpDotNetUrl.TrimEnd('/')}/mcp"),
+			serverUri: new Uri($"{mcpAppUrl.TrimEnd('/')}/mcp"),
 			authorizationToken: mcpAppKey,
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
