@@ -39,12 +39,28 @@ internal class Program
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
-		// Same intent as V3's system prompt. CreateResponseOptions.Instructions is rejected when an
-		// agent is specified, so this is folded into the user message (and printed for the demo).
+		// Same intent as V3's system prompt.
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
 		Use your tools to resolve a place name to latitude/longitude and to fetch current public weather for those coordinates whenever you need real weather data.
+
+		Field notes:
+		- fullSummary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
+		- temperatureF (number) in Fahrenheit
+		- windSpeedMPH (number) in MPH
+		- windDirection (string)
+		- conditions (string)
+
+		You only return valid JSON.
+		Do not include any text outside the JSON.
+		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
+		The fullSummary field must state only the current weather facts — nothing conversational after that.
+		""";
+
+		var userPrompt = $"""
+		What is today's weather in {location}?
+		Use {location} as the location context.
 		""";
 
 		// Same field list / shape as V2's last example. Kept in the prompt because
@@ -64,27 +80,15 @@ internal class Program
 		}
 		""";
 
-		var userPrompt = $"""
-		{systemPrompt.Trim()}
+		// CreateResponseOptions.Instructions is rejected when an agent is specified,
+		// so the system prompt and schema travel in the user message.
+		var inputMessage = $"""
+		{systemPrompt}
 
-		What is today's weather in {location}?
-		Use your tools to look up coordinates and current weather.
+		{userPrompt}
 
 		Return valid JSON matching this schema exactly:
 		{aiOutputSchema}
-
-		Field notes:
-		- fullSummary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
-		- temperatureF (number) in Fahrenheit
-		- windSpeedMPH (number) in MPH
-		- windDirection (string)
-		- conditions (string)
-
-		Use {location} as the location context.
-		You only return valid JSON.
-		Do not include any text outside the JSON.
-		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
-		The fullSummary field must state only the current weather facts — nothing conversational after that.
 		""";
 
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
@@ -92,6 +96,7 @@ internal class Program
 		Console.WriteLine("\nSystem Prompt (included in user message; Instructions not allowed with agents):");
 		Console.WriteLine(systemPrompt);
 		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
+		Console.WriteLine($"\nAI Output Schema (included in user message; text.format not allowed with agents):\n{aiOutputSchema}");
 
 		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
 		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
@@ -109,7 +114,7 @@ internal class Program
 		{
 			InputItems =
 			{
-				ResponseItem.CreateUserMessageItem(userPrompt),
+				ResponseItem.CreateUserMessageItem(inputMessage),
 			},
 		};
 

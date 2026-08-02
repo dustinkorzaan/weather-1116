@@ -52,14 +52,16 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		fullSummary: one sentence of the current weather facts only (temperature, wind speed, wind direction, conditions), using whichever place name is more user-friendly — the user entered location or the geo tool response "name" (prefer a clear city name over a raw ZIP or opaque code).
 		""";
 
+		var userPrompt = $"What is the current weather in: `{location}`?";
+
 		var aiOutputSchema = BuildAIOutputSchema();
 
 		// Foundry rejects `instructions` and `text` when an agent is specified,
 		// so the system prompt and the schema travel in the user message.
-		var userPrompt = $"""
+		var inputMessage = $"""
 		{systemPrompt}
 
-		What is the current weather in: `{location}`?
+		{userPrompt}
 
 		Return valid JSON matching this schema exactly:
 		{aiOutputSchema}
@@ -68,6 +70,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		_logger.LogInformation("AI Weather: Project endpoint {Endpoint}, Agent {Agent}", endpoint, agentName);
 		_logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
 		_logger.LogInformation("AI Weather: User prompt for {Location}: {Prompt}", location, userPrompt);
+		_logger.LogInformation("AI Weather: Output schema for {Location}: {Schema}", location, aiOutputSchema);
 
 		ProjectOpenAIClient projectOpenAIClient = new(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
@@ -82,7 +85,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		{
 			InputItems =
 			{
-				ResponseItem.CreateUserMessageItem(userPrompt),
+				ResponseItem.CreateUserMessageItem(inputMessage),
 			},
 		};
 
