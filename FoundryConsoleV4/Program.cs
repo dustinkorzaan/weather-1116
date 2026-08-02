@@ -1,10 +1,11 @@
-﻿using Azure.AI.Extensions.OpenAI;
-using Core.AIWeather.Models;
+﻿using Core.AIWeather.Models;
 using DotNetEnv;
+using OpenAI;
 using OpenAI.Responses;
 using System;
+using System.Collections.Generic;
 using System.ClientModel;
-using System.ClientModel.Primitives;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -15,40 +16,47 @@ internal class Program
 		Env.TraversePath().Load();
 
 		string location = "Nashville, TN";
-		await AskFoundryAgent(location);
+
+		await GetWeatherWithMcpTools(location);
 	}
 
-	private static async Task AskFoundryAgent(string location)
+
+
+
+
+	private static async Task GetWeatherWithMcpTools(string location)
 	{
 		Console.Clear();
 		Console.WriteLine($"""
 		Example 4
-		 - Ask Foundry Agent "What is today's weather in {location}?"
-		 - Call a hosted Microsoft Foundry Agent (not a model directly)
-		 - Agent uses its configured tools (lat/long + current weather)
-		 - JSON output from AI (prompt-shaped; Responses text.format is not allowed with agents)
+		 - Ask AI "What is the current weather in {location}?"
+		 - Model Direct (using ResponsesClient against unified AI services endpoint)
+		 - Tools target remote MCP servers instead of in-process tool callbacks
+		 - The service calls the MCP servers, so there is no local tool-call loop
+		 - JSON output from AI
 		""");
 
-		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
-			?? throw new InvalidOperationException(
-				"Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL. " +
-				"Expected e.g. https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2");
-
-		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
-			?? "wx1116-agent-default";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
-			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
-
-		// Same intent as V3's system prompt. CreateResponseOptions.Instructions is rejected when an
-		// agent is specified, so this is folded into the user message (and printed for the demo).
+		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
-		Use your tools to resolve a place name to latitude/longitude and to fetch current public weather for those coordinates whenever you need real weather data.
+		You can call your MCP tools to resolve a place name to latitude/longitude,
+		and to fetch current public weather for those coordinates.
+		Use those tools whenever you need real weather data.
+
+		Return valid JSON with these fields:
+		- fullSummary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
+		- temperatureF (number) in Fahrenheit
+		- windSpeedMPH (number) in MPH
+		- windDirection (string)
+		- conditions (string)
+
+		You only return valid JSON.
+		""";
+		var userPrompt = $"""
+		What is the current weather today in: {location}?
 		""";
 
-		// Same field list / shape as V2's last example. Kept in the prompt because
-		// CreateResponseOptions.TextOptions (text.format) is rejected when an agent is specified.
 		var aiOutputSchema = """
 		{
 		  "type": "object",
@@ -64,68 +72,79 @@ internal class Program
 		}
 		""";
 
-		var userPrompt = $"""
-		{systemPrompt.Trim()}
-
-		What is today's weather in {location}?
-		Use your tools to look up coordinates and current weather.
-
-		Return valid JSON matching this schema exactly:
-		{aiOutputSchema}
-
-		Field notes:
-		- fullSummary (string): full sentence of current weather including temperature, wind speed, wind direction, and conditions
-		- temperatureF (number) in Fahrenheit
-		- windSpeedMPH (number) in MPH
-		- windDirection (string)
-		- conditions (string)
-
-		Use {location} as the location context.
-		You only return valid JSON.
-		Do not include any text outside the JSON.
-		Do not ask follow-up questions or offer extra help (no "if you want", "I can also", hour-by-hour offers, etc.).
-		The fullSummary field must state only the current weather facts — nothing conversational after that.
-		""";
-
-		Console.WriteLine($"\nProject endpoint: {endpoint}");
-		Console.WriteLine($"Agent: {agentName}");
-		Console.WriteLine("\nSystem Prompt (included in user message; Instructions not allowed with agents):");
+		Console.WriteLine("\nSystem Prompt:");
 		Console.WriteLine(systemPrompt);
-		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
 
-		// Same client surface as Foundry sandbox (projectClient.OpenAI), auth with api-key like V1–V3.
-		// ApiKey client path needs /openai/v1 on the project endpoint (avoids missing api-version).
-		ProjectOpenAIClient projectOpenAIClient = new(
-			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-			new ProjectOpenAIClientOptions
+		Console.WriteLine("\nUser Prompt:");
+		Console.WriteLine(userPrompt);
+
+		Console.WriteLine("\nAI Output Schema:");
+		Console.WriteLine(aiOutputSchema);
+
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new OpenAIClientOptions()
 			{
-				Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1"),
+				Endpoint = new Uri(endpoint),
 			});
 
-		// Name only — Foundry uses the agent's current default version.
-		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+		var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_FUNCTION_KEY") ?? throw new InvalidOperationException("MCP_FUNCTION_KEY not found in environment variables.");
+		var mcpAppKey = Environment.GetEnvironmentVariable("MCP_APP_KEY") ?? throw new InvalidOperationException("MCP_APP_KEY not found in environment variables.");
 
-		CreateResponseOptions options = new()
+		McpTool myMcpFunction = ResponseTool.CreateMcpTool(
+			serverLabel: "MyMCPFunction",
+			serverUri: new Uri("https://weather1116-prod-mcpfunc-debjddh3fthua7dy.westus2-01.azurewebsites.net/runtime/webhooks/mcp"),
+			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpFunctionKey },
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+
+		McpTool myMcpApp = ResponseTool.CreateMcpTool(
+			serverLabel: "MyMCPApp",
+			serverUri: new Uri("https://weather1116-prod-mcpapp-bcb9gnameebrgmc4.westus2-01.azurewebsites.net/mcp"),
+			authorizationToken: mcpAppKey,
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+
+		Console.WriteLine($"\nMCP Servers:\n{myMcpFunction.ServerLabel} {myMcpFunction.ServerUri}\n{myMcpApp.ServerLabel} {myMcpApp.ServerUri}");
+
+		var inputItems = new List<ResponseItem>()
 		{
-			InputItems =
+			ResponseItem.CreateSystemMessageItem(systemPrompt),
+			ResponseItem.CreateUserMessageItem(userPrompt),
+		};
+
+		CreateResponseOptions options = new(deploymentName, inputItems)
+		{
+			Tools = { myMcpFunction, myMcpApp },
+			TextOptions = new ResponseTextOptions
 			{
-				ResponseItem.CreateUserMessageItem(userPrompt),
-			},
+				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+					jsonSchemaFormatName: "ai_weather_response",
+					jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+					jsonSchemaIsStrict: true)
+			}
 		};
 
 		try
 		{
-			ResponseResult response = await responseClient.CreateResponseAsync(options);
+			ResponseResult response = await client.CreateResponseAsync(options);
+
+			foreach (ResponseItem outputItem in response.OutputItems)
+			{
+				if (outputItem is McpToolCallItem mcpToolCall)
+				{
+					Console.WriteLine($"\nMCP tool call: {mcpToolCall.ServerLabel}.{mcpToolCall.ToolName}");
+				}
+			}
+
 			var content = response.GetOutputText();
-			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
-				content,
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
 			if (aiWeather is null)
 			{
 				Console.WriteLine("Received empty or invalid JSON response.");
-				Console.WriteLine("Raw output:");
-				Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty)" : content);
 			}
 			else
 			{
@@ -136,10 +155,6 @@ internal class Program
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Request failed: {ex.Message}");
-			if (ex.InnerException is not null)
-			{
-				Console.WriteLine($"Inner: {ex.InnerException.Message}");
-			}
 		}
 
 		Console.WriteLine("\nPress any key to continue.");

@@ -16,8 +16,8 @@ public sealed class AboutController(
     public ActionResult<AboutNode> Get()
     {
         const string expectedTool = "GetPublicWeatherData";
-        var mcpApiKey = configuration["MCP_API_KEY"];
-        var isHealthy = !string.IsNullOrWhiteSpace(mcpApiKey) && tools.Any(tool =>
+        var mcpAppKey = configuration["MCP_APP_KEY"];
+        var isHealthy = !string.IsNullOrWhiteSpace(mcpAppKey) && tools.Any(tool =>
             string.Equals(tool.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
 
         return Ok(AboutTreeBuilder.BuildMcpDotNetNode(isHealthy));

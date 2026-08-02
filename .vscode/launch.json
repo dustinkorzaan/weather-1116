@@ -143,13 +143,24 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Foundry Console V4 Agent (MCP tools)",
+            "name": "Foundry Console V4 Model Direct (MCP tools)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build foundry console v4",
             "program": "${workspaceFolder}/FoundryConsoleV4/bin/Debug/net10.0/FoundryConsoleV4MCP.dll",
             "args": [],
             "cwd": "${workspaceFolder}/FoundryConsoleV4",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Foundry Console V5 Agent (user prompt only)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build foundry console v5",
+            "program": "${workspaceFolder}/FoundryConsoleV5/bin/Debug/net10.0/FoundryConsoleV5Agent.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/FoundryConsoleV5",
             "stopAtEntry": false,
             "console": "integratedTerminal"
         },

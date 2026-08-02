@@ -31,14 +31,14 @@ builder.Services
 var app = builder.Build();
 
 // Shared secret for MCP clients (Foundry project connection, MCP Inspector, etc.).
-var mcpApiKey = builder.Configuration["MCP_API_KEY"];
+var mcpAppKey = builder.Configuration["MCP_APP_KEY"];
 
 // Auth filter: require a valid Bearer token for all /mcp requests.
 app.Use(async (context, next) =>
 {
 	if (context.Request.Path.StartsWithSegments("/mcp"))
 	{
-		if (string.IsNullOrWhiteSpace(mcpApiKey))
+		if (string.IsNullOrWhiteSpace(mcpAppKey))
 		{
 			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 			return;
@@ -47,7 +47,7 @@ app.Use(async (context, next) =>
 		var header = context.Request.Headers.Authorization.ToString();
 		const string prefix = "Bearer ";
 		if (!header.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-			|| !string.Equals(header[prefix.Length..].Trim(), mcpApiKey, StringComparison.Ordinal))
+			|| !string.Equals(header[prefix.Length..].Trim(), mcpAppKey, StringComparison.Ordinal))
 		{
 			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 			return;

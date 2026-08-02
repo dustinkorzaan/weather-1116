@@ -10,7 +10,7 @@ public class AboutControllerTests : IClassFixture<WeatherMcpDotNetWebApplication
 
     public AboutControllerTests(WeatherMcpDotNetWebApplicationFactory factory)
     {
-        _factory = factory.WithSetting("MCP_API_KEY", "integration-test-mcp-key");
+        _factory = factory.WithSetting("MCP_APP_KEY", "integration-test-mcp-key");
     }
 
     [Fact]

@@ -112,11 +112,13 @@ internal class Program
 		""");
 
 		// AI prep
-		var systemPrompt = "You are a helpful weather assistant.";
-		var userPrompt = $"""
-		What is the current weather today for {location}?
+		var systemPrompt = """
+		You are a helpful weather assistant.
 		- I know you don't have supporting data, so just make something up.
 		- Keep it short.
+		""";
+		var userPrompt = $"""
+		What is the current weather today for {location}?
 		""";
 
 		Console.WriteLine("\nSystem Prompt:");
@@ -259,10 +261,6 @@ internal class Program
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
-		""";
-		var userPrompt = $"""
-		You are given this WeatherConditions JSON:
-		{weatherDataJson}
 
 		Return valid JSON with these fields:
 		- fullSummary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
@@ -271,9 +269,13 @@ internal class Program
 		- windDirection (string)
 		- conditions (string)
 
-		Use {location} as the location context.
-
 		You only return valid JSON.
+		""";
+		var userPrompt = $"""
+		You are given this WeatherConditions JSON:
+		{weatherDataJson}
+
+		Use {location} as the location context.
 		""";
 
 		var aiOutputSchema = """

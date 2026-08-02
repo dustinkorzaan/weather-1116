@@ -104,7 +104,7 @@ jobs:
               --name weather1116-prod-mcpapp \
               --resource-group "$APP_RG" \
               --settings \
-                MCP_API_KEY="${{ secrets.PROD_MCP_DOTNET_API_KEY }}" \
+                MCP_APP_KEY="${{ secrets.PROD_MCP_APP_KEY }}" \
                 ASPNETCORE_ENVIRONMENT=Production \
                 ASPNETCORE_DETAILEDERRORS=false \
                 BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \

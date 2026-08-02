@@ -1,4 +1,5 @@
-﻿using Core.AIWeather.Models;
+﻿using Azure.AI.Extensions.OpenAI;
+using Core.AIWeather.Models;
 using Core.HelloWorld.handlers;
 using Core.Geo.Events;
 using Core.Geo.Models;
@@ -11,6 +12,7 @@ using OpenAI;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
@@ -43,7 +45,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - ResponsesClient with injected function tools (GetLatLongData, GetPublicWeatherData)
+		 - ResponsesClient with in-process tool callbacks (GetLatLongData, GetPublicWeatherData)
 		 - Model can call tools to derive lat/long and fetch public weather
 		 - JSON output from AI
 		""");
@@ -55,10 +57,6 @@ internal class Program
 		You can call the GetLatLongData tool to resolve a place name to latitude/longitude,
 		and the GetPublicWeatherData tool to fetch current public weather for those coordinates.
 		Use those tools whenever you need real weather data.
-		""";
-		var userPrompt = $"""
-		What is the current weather today for {location}?
-		Use the available function tools to look up coordinates and public weather data.
 
 		Return valid JSON with these fields:
 		- fullSummary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
@@ -67,9 +65,10 @@ internal class Program
 		- windDirection (string)
 		- conditions (string)
 
-		Use {location} as the location context.
-
 		You only return valid JSON.
+		""";
+		var userPrompt = $"""
+		What is the current weather today in: {location}?
 		""";
 
 		var aiOutputSchema = """
@@ -97,15 +96,17 @@ internal class Program
 		Console.WriteLine(aiOutputSchema);
 
 		const string deploymentName = "gpt-5.4-mini";
-		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2/openai/v1";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		ResponsesClient client = new(
-			credential: new ApiKeyCredential(apiKey),
-			options: new OpenAIClientOptions()
+		ProjectOpenAIClient projectOpenAIClient = new(
+			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
+			new ProjectOpenAIClientOptions
 			{
 				Endpoint = new Uri(endpoint),
 			});
+
+		ProjectResponsesClient client = projectOpenAIClient.GetProjectResponsesClientForModel(deploymentName);
 
 		FunctionTool getLatLongTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetLatLongData",
@@ -236,8 +237,7 @@ internal class Program
 			} while (requiresAction);
 
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
-				finalContent ?? throw new InvalidOperationException("Model finished without producing content."),
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+				finalContent ?? throw new InvalidOperationException("Model finished without producing content."));
 
 			if (aiWeather is null)
 			{

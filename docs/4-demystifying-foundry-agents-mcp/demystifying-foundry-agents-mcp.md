@@ -5,13 +5,14 @@ settings.
 
 ## Foundry console demos (learning path)
 
-Four standalone console apps in `Weather.sln` show how the production agent
-pattern was built up. They are **training building blocks**, not deployables.
-Run from VS Code (**Foundry Console V1** … **V4**) or `dotnet run` in each
+Five standalone console apps in `Weather.sln` show how the production AI weather
+path was built up, with **V5** as a hosted-agent contrast. They are **training
+building blocks**, not deployables.
+Run from VS Code (**Foundry Console V1** … **V5**) or `dotnet run` in each
 folder. All use the `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `.env.example`).
 
 Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
-`core-dotnet/core/AIWeather`.
+`core-dotnet/core/AIWeather` **→ V5**.
 
 - **V1 — Model-direct (legacy endpoint)** — [`FoundryConsoleV1`](../../FoundryConsoleV1)
   (`FoundryConsoleV1ModelDirectLegacy.csproj`)
@@ -58,10 +59,10 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     endpoint.
   - Shows the newer Foundry / Azure AI inference surface.
 
-- **V3 — In-process function tools** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
+- **V3 — In-process tool callbacks** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
   (`FoundryConsoleV3InjectFunctions.csproj`)
-  - Registers `GetLatLongData` and `GetPublicWeatherData` as injected function
-    tools handled in-process (same tools `Core` exposes).
+  - Registers `GetLatLongData` and `GetPublicWeatherData` as in-process tool
+    callbacks (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.
 
   ```mermaid
@@ -85,12 +86,44 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       API-->>UI: AIWeatherResponse
   ```
 
-- **V4 — Hosted Foundry agent + MCP** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
+- **V4 — Model-direct + remote MCP tools** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
   (`FoundryConsoleV4MCP.csproj`)
-  - Calls the **same hosted Foundry agent** API and MVC use (`wx1116-agent-default`
-    by default).
-  - Agent invokes MCP lat/long and weather tools (`mcp-function`, `mcp-dotnet`).
-  - **V4-only settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V3):
+  - Same model-direct call as V3, but the tools are **remote MCP servers**
+    declared on the request instead of in-process callbacks — no agent, and no
+    Foundry-specific client.
+  - The service calls the MCP servers itself, so V3's tool-call loop disappears.
+  - Shows that MCP tooling does not require a Foundry agent.
+  - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Console
+      participant Model as Foundry Model
+      box MCP Function
+          participant GetLatLongTool
+      end
+      box MCP DotNet
+          participant GetPublicWeatherTool
+      end
+
+      Console->>Model: system prompt + MCP tools, user prompt last
+      Model->>GetLatLongTool: GetLatLong(location)
+      GetLatLongTool-->>Model: NonAILatLongResponse
+      Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+      GetPublicWeatherTool-->>Model: NonAIWeatherResponse
+      Model-->>Console: AIWeatherResponse
+  ```
+
+- **V5 — Hosted Foundry agent + MCP** — [`FoundryConsoleV5`](../../FoundryConsoleV5)
+  (`FoundryConsoleV5Agent.csproj`)
+  - Agent-hosted alternative to V4: calls a **hosted Foundry agent**
+    (`wx1116-agent-default` by default).
+  - Instructions, response schema, and MCP tools (`mcp-function`, `mcp-dotnet`)
+    are configured on the agent in Azure.
+  - The console sends **only the user prompt** — Responses `instructions` and
+    `text` fields are rejected when an agent is specified.
+  - **V5-only settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V4):
     - `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` (required) — Foundry project URL.
     - `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` (optional) — defaults to
       `wx1116-agent-default`.
@@ -99,8 +132,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   ```mermaid
   sequenceDiagram
       autonumber
-      participant UI
-      participant API
+      participant Console
       participant Agent as Foundry Agent
       box MCP Function
           participant GetLatLongTool
@@ -109,14 +141,12 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
           participant GetPublicWeatherTool
       end
 
-      UI->>API: GetPublicWeather(location)
-      API->>Agent: GetPublicWeather(location)
+      Console->>Agent: user prompt only
       Agent->>GetLatLongTool: GetLatLong(location)
       GetLatLongTool-->>Agent: NonAILatLongResponse
       Agent->>GetPublicWeatherTool: GetPublicWeather(lat,long)
       GetPublicWeatherTool-->>Agent: NonAIWeatherResponse
-      Agent-->>API: AIWeatherResponse
-      API-->>UI: AIWeatherResponse
+      Agent-->>Console: AIWeatherResponse
   ```
 
 ## Brainstorm: demystifying model, agent, tools, and MCP
@@ -252,14 +282,14 @@ scaffolding.”
 
 ### 5. Same request — model-direct vs agent-hosted
 
-Side-by-side mental model (V2/V3 vs V4).
+Side-by-side mental model (V1–V4 / production vs V5).
 
 ```mermaid
 flowchart LR
-    subgraph Direct["Model-direct (V1–V3)"]
+    subgraph Direct["Model-direct (V1–V4, production)"]
         A1[App] --> M1[(Model)]
     end
-    subgraph Hosted["Agent-hosted (V4 / production)"]
+    subgraph Hosted["Agent-hosted (V5)"]
         A2[App] --> AG[Foundry Agent]
         AG --> M2[(Model)]
     end
@@ -346,17 +376,17 @@ and call them across languages and hosts.”
 
 ---
 
-### 9. Weather production path (agent + two MCP hosts)
+### 9. Weather production path (model-direct + two MCP hosts)
 
 Matches V4 and live API/MVC handler.
 
 ```mermaid
 flowchart TB
     UI[React / Blazor / MVC] --> API[Weather API or MVC]
-    API --> FA[Foundry Agent]
-    FA --> M[(Model in agent)]
-    FA --> MF[MCP Function<br/>lat/long]
-    FA --> MD[MCP DotNet<br/>public weather]
+    API --> H[GetCurrentAIWeatherHandler]
+    H --> M[Model via ResponsesClient]
+    M --> MF[MCP Function<br/>lat/long]
+    M --> MD[MCP DotNet<br/>public weather]
 ```
 
 ---
@@ -589,18 +619,20 @@ flowchart TD
 
 ---
 
-### 20. One slide — full Weather journey V1 → V4 as maturity ladder
+### 20. One slide — full Weather journey V1 → V5 as maturity ladder
 
 ```mermaid
 flowchart LR
     V1[V1 Model only] --> V2[V2 Unified endpoint]
     V2 --> V3[V3 In-process tools]
-    V3 --> V4[V4 Agent + MCP]
+    V3 --> V4[V4 Model-direct + MCP]
     V4 --> PROD[API / MVC production handler]
+    V4 --> V5[V5 Hosted agent contrast]
 
     V1 -.->|risk| H[Ungrounded answers]
     V3 -.->|better| T[Model picks tools]
-    V4 -.->|ops| O[Hosted agent + remote MCP]
+    V4 -.->|ops| O[Remote MCP tools]
+    V5 -.->|contrast| A[Agent owns config]
 ```
 
 ---
@@ -627,7 +659,7 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-    subgraph V3["V3 — function tools"]
+    subgraph V3["V3 — in-process tool callbacks"]
         M3[(Model)] --> F3[Functions in API process]
     end
     subgraph V4["V4 — MCP tools"]
