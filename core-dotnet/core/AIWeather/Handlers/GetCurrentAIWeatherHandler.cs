@@ -94,7 +94,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var inputItems = new List<ResponseItem>
 		{
 			ResponseItem.CreateSystemMessageItem(systemPrompt),
-			// Placing the dynamic query at the absolute end ensures the unchanging system instructions, response schema, and MCP tool schemas form a stable hash that qualifies for Azure OpenAI Prompt Caching (1,024+ token threshold).
+			// Placing the dynamic query at the absolute end ensures the unchanging system instructions,
+			// response schema, and MCP tool schemas form a stable hash that qualifies for Azure OpenAI
+			// Prompt Caching (1,024+ token threshold).
 			ResponseItem.CreateUserMessageItem(userPrompt),
 		};
 
