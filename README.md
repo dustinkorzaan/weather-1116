@@ -85,7 +85,7 @@ See each `Program.cs` and `.env.example` for required settings (`AZURE_FOUNDRY_P
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | OpenAI endpoint URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1` (used directly by the handler) |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
 | `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
 | `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |

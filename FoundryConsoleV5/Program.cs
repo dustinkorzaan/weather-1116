@@ -1,4 +1,5 @@
 ﻿using Azure.AI.Extensions.OpenAI;
+using Core.AIWeather;
 using Core.AIWeather.Models;
 using DotNetEnv;
 using OpenAI.Responses;
@@ -54,7 +55,7 @@ internal class Program
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
-				Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1"),
+				Endpoint = FoundryOpenAiEndpoint.Resolve(endpoint),
 			});
 
 		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
