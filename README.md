@@ -81,7 +81,18 @@ See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 | `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
 | `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
 
-**V5 settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V4):
+**API/MVC AI weather settings** (same pattern as V4):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
+| `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
+| `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
+| `MCP_DOTNET_URL` | Yes | Base URL for MCP DotNet (e.g. `http://localhost:8110`) |
+| `MCP_FUNCTION_URL` | Yes | Base URL for MCP Function (e.g. `http://localhost:8120`) |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | No | Derives OpenAI endpoint host when set |
+
+**V5 settings** (agent-hosted demo only):
 
 | Variable | Required | Purpose |
 | --- | --- | --- |

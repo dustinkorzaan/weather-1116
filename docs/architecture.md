@@ -60,16 +60,15 @@ All three UIs expose **Current AI Weather**. The request path differs by stack:
 - **MVC** → local `HomeController` + `Core` (same handler, no API hop)
 
 Both API and MVC route AI weather through `Core.AIWeather.Handlers.GetCurrentAIWeatherHandler`,
-which calls a **hosted Microsoft Foundry agent** (default `wx1116-agent-default`).
-The agent is configured in Azure to use MCP tools that map back to this repo's
-`Core` handlers:
+which calls the hosted model directly (same pattern as Foundry Console V4) with MCP tools
+that map back to this repo's `Core` handlers:
 
 ```mermaid
 flowchart LR
   UI[React / Blazor / MVC]
   API[MVC or WeatherAPI]
   Core[Core GetCurrentAIWeatherHandler]
-  Agent[Azure Foundry Agent]
+  Model[Azure OpenAI model]
   McpFunc[mcp-function GetLatLongData]
   McpDotNet[mcp-dotnet GetPublicWeatherData]
   CoreGeo[Core geo handlers]
@@ -77,15 +76,16 @@ flowchart LR
 
   UI --> API
   API --> Core
-  Core --> Agent
-  Agent --> McpFunc
-  Agent --> McpDotNet
+  Core --> Model
+  Model --> McpFunc
+  Model --> McpDotNet
   McpFunc --> CoreGeo
   McpDotNet --> CoreWx
 ```
 
-Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`,
-`AZURE_FOUNDRY_PROD_EUS2_KEY`, and optionally `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`.
+Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_KEY`,
+`MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_DOTNET_URL`, and `MCP_FUNCTION_URL`.
+Optionally `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` to derive the OpenAI endpoint host.
 See deploy workflows and `.env.example` files under `api-dotnet/api`,
 `mvc-dotnet/mvc`, `ui-blazor/blazor`, and `worker-dotnet/worker`.
 
@@ -155,7 +155,7 @@ and handlers, including:
 - `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
 - `core-dotnet/core/Geo/` — geocoding (`GetLatLongData`)
 - `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherData`)
-- `core-dotnet/core/AIWeather/` — Foundry agent integration (`GetCurrentAIWeatherHandler`)
+- `core-dotnet/core/AIWeather/` — model-direct AI weather (`GetCurrentAIWeatherHandler`)
 - `core-dotnet/core/About/` — About tree builder and remote about client
 
 ## Feature Parity Contract

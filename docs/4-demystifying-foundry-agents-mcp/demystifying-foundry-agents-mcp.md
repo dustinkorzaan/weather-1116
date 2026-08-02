@@ -95,8 +95,8 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 
 - **V5 — Hosted Foundry agent + MCP** — [`FoundryConsoleV5`](../../FoundryConsoleV5)
   (`FoundryConsoleV5Agent.csproj`)
-  - Calls the **same hosted Foundry agent** API and MVC use (`wx1116-agent-default`
-    by default).
+  - Agent-hosted alternative to V4: calls a **hosted Foundry agent**
+    (`wx1116-agent-default` by default).
   - Agent invokes MCP lat/long and weather tools (`mcp-function`, `mcp-dotnet`).
   - Instructions, tools, and the response schema live on the agent: the Responses
     `instructions` and `text` fields are rejected when an agent is specified, so
@@ -357,17 +357,17 @@ and call them across languages and hosts.”
 
 ---
 
-### 9. Weather production path (agent + two MCP hosts)
+### 9. Weather production path (model-direct + two MCP hosts)
 
 Matches V4 and live API/MVC handler.
 
 ```mermaid
 flowchart TB
     UI[React / Blazor / MVC] --> API[Weather API or MVC]
-    API --> FA[Foundry Agent]
-    FA --> M[(Model in agent)]
-    FA --> MF[MCP Function<br/>lat/long]
-    FA --> MD[MCP DotNet<br/>public weather]
+    API --> H[GetCurrentAIWeatherHandler]
+    H --> M[Model via ResponsesClient]
+    M --> MF[MCP Function<br/>lat/long]
+    M --> MD[MCP DotNet<br/>public weather]
 ```
 
 ---
