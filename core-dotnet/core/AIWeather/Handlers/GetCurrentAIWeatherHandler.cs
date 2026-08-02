@@ -120,9 +120,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		}
 
 		var content = response.GetOutputText();
-		var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
-			content,
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+		var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
 		if (aiWeather is null)
 		{
