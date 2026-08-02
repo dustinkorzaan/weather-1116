@@ -38,16 +38,9 @@ internal class Program
 		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
 			?? "wx1116-agent-default";
 
-<<<<<<< HEAD
 		var userPrompt = $"""
 		What is today's weather in: {location}?
 		""";
-
-		Console.WriteLine($"\nProject endpoint: {endpoint}");
-		Console.WriteLine($"Agent: {agentName}");
-		Console.WriteLine($"\nUser Prompt:\n{userPrompt}");
-=======
-		var userPrompt = $"What is today's weather in: {location}?";
 
 		Console.WriteLine($"\nProject endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
@@ -56,7 +49,6 @@ internal class Program
 		Console.WriteLine("- Response schema");
 		Console.WriteLine("- MCP tools (lat/long + current weather)");
 		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
->>>>>>> e325f13 (Refine V5 as agent-owned config demo with user prompt only)
 
 		ProjectOpenAIClient projectOpenAIClient = new(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
