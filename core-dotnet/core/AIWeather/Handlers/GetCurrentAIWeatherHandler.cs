@@ -94,6 +94,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var inputItems = new List<ResponseItem>
 		{
 			ResponseItem.CreateSystemMessageItem(systemPrompt),
+			// Dynamic user prompts last so Foundry thread memory keeps static system instructions anchored.
 			ResponseItem.CreateUserMessageItem(userPrompt),
 		};
 
