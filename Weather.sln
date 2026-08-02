@@ -47,9 +47,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV3", "Foundry
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoundryConsoleV3InjectFunctions", "FoundryConsoleV3\FoundryConsoleV3InjectFunctions.csproj", "{1EB58FFC-4129-4745-8DAE-275DD1ED30D1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV4", "FoundryConsoleV4", "{DE349B40-A10F-7B7E-155A-C89584ACB3F0}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV5", "FoundryConsoleV5", "{DE349B40-A10F-7B7E-155A-C89584ACB3F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoundryConsoleV4MCP", "FoundryConsoleV4\FoundryConsoleV4MCP.csproj", "{CFFFEE4B-3F86-4615-9ACA-B567E2D21D2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoundryConsoleV5Agent", "FoundryConsoleV5\FoundryConsoleV5Agent.csproj", "{CFFFEE4B-3F86-4615-9ACA-B567E2D21D2B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-blazor", "ui-blazor", "{8F463315-B67A-A694-85B4-12ACD88DB5A1}"
 EndProject
@@ -74,6 +74,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp.tests", "mcp.tests", "{9BF425AA-6E84-2D00-C9C2-CEF846ABAB1B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMcpFunction.Tests", "mcp-function\mcp.tests\WeatherMcpFunction.Tests.csproj", "{8DBB54F7-9E0C-4A7C-9ADB-34DF630C51EE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV4", "FoundryConsoleV4", "{0012149F-B1CE-45F7-DBD6-F14A33B9E099}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoundryConsoleV4MCP", "FoundryConsoleV4\FoundryConsoleV4MCP.csproj", "{BF02C070-5AE2-4426-855D-EFC5EE6F012F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -301,6 +305,18 @@ Global
 		{8DBB54F7-9E0C-4A7C-9ADB-34DF630C51EE}.Release|x64.Build.0 = Release|Any CPU
 		{8DBB54F7-9E0C-4A7C-9ADB-34DF630C51EE}.Release|x86.ActiveCfg = Release|Any CPU
 		{8DBB54F7-9E0C-4A7C-9ADB-34DF630C51EE}.Release|x86.Build.0 = Release|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Debug|x64.Build.0 = Debug|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Debug|x86.Build.0 = Debug|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Release|x64.ActiveCfg = Release|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Release|x64.Build.0 = Release|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Release|x86.ActiveCfg = Release|Any CPU
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -331,6 +347,7 @@ Global
 		{C3842665-CFDD-4247-A50F-A08892912695} = {A0AFDFE4-2DBE-6784-9E69-E803C849C803}
 		{9BF425AA-6E84-2D00-C9C2-CEF846ABAB1B} = {8B9FDB55-B235-7FC9-E677-CC22ECA932D6}
 		{8DBB54F7-9E0C-4A7C-9ADB-34DF630C51EE} = {9BF425AA-6E84-2D00-C9C2-CEF846ABAB1B}
+		{BF02C070-5AE2-4426-855D-EFC5EE6F012F} = {0012149F-B1CE-45F7-DBD6-F14A33B9E099}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DF85B17E-6D25-48D0-BA0A-4379B5462CAB}

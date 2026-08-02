@@ -32,6 +32,7 @@ jobs:
           - FoundryConsoleV2/FoundryConsoleV2ModelDirectUnifiedAI.csproj
           - FoundryConsoleV3/FoundryConsoleV3InjectFunctions.csproj
           - FoundryConsoleV4/FoundryConsoleV4MCP.csproj
+          - FoundryConsoleV5/FoundryConsoleV5Agent.csproj
 
     steps:
       - name: Checkout repository

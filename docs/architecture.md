@@ -34,7 +34,7 @@ for hello/AI weather/map flows in the three UIs.
 | --- | --- | --- |
 | MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
 | MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
-| Foundry Console V1–V4 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V4`](../FoundryConsoleV4) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V4MCP`; built in CI) |
+| Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
 Ports, auth, and env vars for the worker and console apps live in [`README.md`](../README.md)
 and each project's `.env.example`.
@@ -225,7 +225,7 @@ builds on every push:
 
 - `Core.csproj`, `WeatherAPI.csproj`, `WeatherBlazor.csproj`, `WeatherMVC.csproj`,
   `WeatherWorkerDotNet.csproj`, `WeatherMcpDotNet.csproj`, `WeatherMcpFunction.csproj`,
-  and the four Foundry console projects (`FoundryConsoleV1ModelDirectLegacy`–`V4MCP`) via `dotnet build`.
+  and the five Foundry console projects (`FoundryConsoleV1ModelDirectLegacy`–`V5Agent`) via `dotnet build`.
 - React app in `ui-react` via `npm ci && npm run build`, followed by
   `npm test -- --run` (Vitest).
 - `Core.Tests` unit tests.
@@ -265,7 +265,7 @@ mcp-dotnet/
 mcp-function/
   mcp/                       MCP Function tool host (WeatherMcpFunction.csproj)
   mcp.tests/                 MCP Function tests (WeatherMcpFunction.Tests.csproj)
-FoundryConsoleV1…V4/         Foundry learning console demos
+FoundryConsoleV1…V5/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```
 

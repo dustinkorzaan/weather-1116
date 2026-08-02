@@ -85,12 +85,23 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       API-->>UI: AIWeatherResponse
   ```
 
-- **V4 — Hosted Foundry agent + MCP** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
+- **V4 — Model-direct + remote MCP tools** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
   (`FoundryConsoleV4MCP.csproj`)
+  - Same model-direct call as V3, but the tools are **remote MCP servers**
+    declared on the request instead of in-process callbacks — no agent, and no
+    Foundry-specific client.
+  - The service calls the MCP servers itself, so V3's tool-call loop disappears.
+  - Shows that MCP tooling does not require a Foundry agent.
+
+- **V5 — Hosted Foundry agent + MCP** — [`FoundryConsoleV5`](../../FoundryConsoleV5)
+  (`FoundryConsoleV5Agent.csproj`)
   - Calls the **same hosted Foundry agent** API and MVC use (`wx1116-agent-default`
     by default).
   - Agent invokes MCP lat/long and weather tools (`mcp-function`, `mcp-dotnet`).
-  - **V4-only settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V3):
+  - Instructions, tools, and the response schema live on the agent: the Responses
+    `instructions` and `text` fields are rejected when an agent is specified, so
+    the system prompt is sent as the first input message.
+  - **V5-only settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V4):
     - `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` (required) — Foundry project URL.
     - `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` (optional) — defaults to
       `wx1116-agent-default`.
