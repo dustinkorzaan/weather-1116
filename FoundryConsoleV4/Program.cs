@@ -31,7 +31,7 @@ internal class Program
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
 		 - Model Direct (using ResponsesClient against unified AI services endpoint)
-		 - Tools come from remote MCP servers instead of in-process tool callbacks
+		 - Tools target remote MCP servers instead of in-process tool callbacks
 		 - The service calls the MCP servers, so there is no local tool-call loop
 		 - JSON output from AI
 		""");
