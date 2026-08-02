@@ -95,6 +95,26 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   - Shows that MCP tooling does not require a Foundry agent.
   - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
 
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Console
+      participant Model as Foundry Model
+      box MCP Function
+          participant GetLatLongTool
+      end
+      box MCP DotNet
+          participant GetPublicWeatherTool
+      end
+
+      Console->>Model: system prompt + user prompt + MCP tools
+      Model->>GetLatLongTool: GetLatLong(location)
+      GetLatLongTool-->>Model: NonAILatLongResponse
+      Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+      GetPublicWeatherTool-->>Model: NonAIWeatherResponse
+      Model-->>Console: AIWeatherResponse
+  ```
+
 - **V5 — Hosted Foundry agent + MCP** — [`FoundryConsoleV5`](../../FoundryConsoleV5)
   (`FoundryConsoleV5Agent.csproj`)
   - Agent-hosted alternative to V4: calls a **hosted Foundry agent**
