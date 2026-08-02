@@ -34,10 +34,11 @@ internal class Program
 				"Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL. " +
 				"Expected e.g. https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2");
 
-		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
-			?? "wx1116-agent-default";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
+
+		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
+			?? "wx1116-agent-default";
 
 		// Same intent as V3's system prompt.
 		var systemPrompt = """
