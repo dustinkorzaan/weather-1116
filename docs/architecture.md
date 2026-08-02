@@ -278,7 +278,7 @@ was built up. They are **training building blocks**, not production deployables:
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | In-process injected function tools (`GetLatLongData`, `GetPublicWeatherData`) — same tools `Core` exposes, handled locally |
+| **V3** | In-process tool callbacks (`GetLatLongData`, `GetPublicWeatherData`) — same tools `Core` exposes, answered locally |
 | **V4** | Calls the **same hosted Foundry agent** API/MVC use; agent invokes MCP lat/long + weather tools |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the

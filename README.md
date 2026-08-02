@@ -70,7 +70,7 @@ See each `Program.cs` for required `AZURE_FOUNDRY_PROD_EUS2_*` settings.
 | --- | --- | --- |
 | V1 | [`FoundryConsoleV1`](FoundryConsoleV1) (`FoundryConsoleV1ModelDirectLegacy.csproj`) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | V2 | [`FoundryConsoleV2`](FoundryConsoleV2) (`FoundryConsoleV2ModelDirectUnifiedAI.csproj`) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| V3 | [`FoundryConsoleV3`](FoundryConsoleV3) (`FoundryConsoleV3InjectFunctions.csproj`) | Injected function tools (`GetLatLongData`, `GetPublicWeatherData`) handled in-process |
+| V3 | [`FoundryConsoleV3`](FoundryConsoleV3) (`FoundryConsoleV3InjectFunctions.csproj`) | In-process tool callbacks (`GetLatLongData`, `GetPublicWeatherData`) answered by the console |
 | V4 | [`FoundryConsoleV4`](FoundryConsoleV4) (`FoundryConsoleV4MCP.csproj`) | Model-direct via `ResponsesClient`, tools supplied as remote MCP servers instead of in-process callbacks |
 | V5 | [`FoundryConsoleV5`](FoundryConsoleV5) (`FoundryConsoleV5Agent.csproj`) | Calls hosted Foundry Agent `wx1116-agent-default` (agent uses MCP lat/long + weather tools) |
 

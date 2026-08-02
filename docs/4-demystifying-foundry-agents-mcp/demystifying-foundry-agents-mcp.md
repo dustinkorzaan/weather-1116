@@ -58,10 +58,10 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     endpoint.
   - Shows the newer Foundry / Azure AI inference surface.
 
-- **V3 — In-process function tools** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
+- **V3 — In-process tool callbacks** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
   (`FoundryConsoleV3InjectFunctions.csproj`)
-  - Registers `GetLatLongData` and `GetPublicWeatherData` as injected function
-    tools handled in-process (same tools `Core` exposes).
+  - Registers `GetLatLongData` and `GetPublicWeatherData` as in-process tool
+    callbacks (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.
 
   ```mermaid
@@ -638,7 +638,7 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-    subgraph V3["V3 — function tools"]
+    subgraph V3["V3 — in-process tool callbacks"]
         M3[(Model)] --> F3[Functions in API process]
     end
     subgraph V4["V4 — MCP tools"]

@@ -45,7 +45,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - ResponsesClient with injected function tools (GetLatLongData, GetPublicWeatherData)
+		 - ResponsesClient with in-process tool callbacks (GetLatLongData, GetPublicWeatherData)
 		 - Model can call tools to derive lat/long and fetch public weather
 		 - JSON output from AI
 		""");
