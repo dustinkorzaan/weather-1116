@@ -55,11 +55,10 @@ internal class Program
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
-				Endpoint = FoundryOpenAiEndpoint.ResolveForHostedAgent(endpoint, agentName),
-				AgentName = agentName,
+				Endpoint = FoundryOpenAiEndpoint.Resolve(endpoint),
 			});
 
-		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClient();
+		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
 		CreateResponseOptions options = new()
 		{
