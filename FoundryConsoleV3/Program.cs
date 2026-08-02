@@ -68,8 +68,7 @@ internal class Program
 		You only return valid JSON.
 		""";
 		var userPrompt = $"""
-		What is the current weather today for {location}?
-		Use {location} as the location context.
+		What is the current weather today in: {location}?
 		""";
 
 		var aiOutputSchema = """

@@ -59,8 +59,7 @@ internal class Program
 		""";
 
 		var userPrompt = $"""
-		What is today's weather in {location}?
-		Use {location} as the location context.
+		What is today's weather in: {location}?
 		""";
 
 		// Same field list / shape as V2's last example. Kept in the prompt because
