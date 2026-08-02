@@ -42,15 +42,15 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
-		var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_FUNCTION_KEY")
-			?? throw new InvalidOperationException("Missing MCP_FUNCTION_KEY.");
-		var mcpAppKey = Environment.GetEnvironmentVariable("MCP_APP_KEY")
-			?? throw new InvalidOperationException("Missing MCP_APP_KEY.");
-
 		var mcpFunctionUrl = Environment.GetEnvironmentVariable("MCP_FUNCTION_URL")
 			?? throw new InvalidOperationException("Missing MCP_FUNCTION_URL.");
+		var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_FUNCTION_KEY")
+			?? throw new InvalidOperationException("Missing MCP_FUNCTION_KEY.");
+
 		var mcpDotNetUrl = Environment.GetEnvironmentVariable("MCP_DOTNET_URL")
 			?? throw new InvalidOperationException("Missing MCP_DOTNET_URL.");
+		var mcpAppKey = Environment.GetEnvironmentVariable("MCP_APP_KEY")
+			?? throw new InvalidOperationException("Missing MCP_APP_KEY.");
 
 		var systemPrompt = """
 		You are a weather assistant. Use U.S. customary units (Fahrenheit, MPH).
