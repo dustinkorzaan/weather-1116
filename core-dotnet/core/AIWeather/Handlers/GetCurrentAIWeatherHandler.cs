@@ -35,6 +35,10 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 			? DefaultLocation
 			: request.Location.Trim();
 
+		var endpoint = new Uri(
+			Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
+			?? "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1");
+
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
@@ -47,10 +51,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 			?? throw new InvalidOperationException("Missing MCP_FUNCTION_URL.");
 		var mcpDotNetUrl = Environment.GetEnvironmentVariable("MCP_DOTNET_URL")
 			?? throw new InvalidOperationException("Missing MCP_DOTNET_URL.");
-
-		var endpoint = new Uri(
-			Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
-			?? "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1");
 
 		var systemPrompt = """
 		You are a weather assistant. Use U.S. customary units (Fahrenheit, MPH).
