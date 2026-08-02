@@ -237,8 +237,7 @@ internal class Program
 			} while (requiresAction);
 
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
-				finalContent ?? throw new InvalidOperationException("Model finished without producing content."),
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+				finalContent ?? throw new InvalidOperationException("Model finished without producing content."));
 
 			if (aiWeather is null)
 			{
