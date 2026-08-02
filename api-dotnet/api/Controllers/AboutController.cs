@@ -19,7 +19,7 @@ public class AboutController(
             "Worker Root",
             cancellationToken);
         var mcpDotNetTask = aboutClient.GetAsync(
-            $"{configuration["MCP_DOTNET_URL"]}/About",
+            $"{configuration["MCP_APP_URL"]}/About",
             "mcp-dotnet",
             cancellationToken);
         var mcpFunctionTask = aboutClient.GetAsync(

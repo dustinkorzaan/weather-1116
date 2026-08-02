@@ -89,7 +89,7 @@ See each `Program.cs` and `.env.example` for required settings (`AZURE_FOUNDRY_P
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
 | `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
 | `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
-| `MCP_DOTNET_URL` | Yes | Base URL for MCP DotNet (e.g. `http://localhost:8110`) |
+| `MCP_APP_URL` | Yes | Base URL for MCP DotNet (e.g. `http://localhost:8110`) |
 | `MCP_FUNCTION_URL` | Yes | Base URL for MCP Function (e.g. `http://localhost:8120`) |
 
 **V5 settings** (agent-hosted demo only):

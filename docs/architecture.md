@@ -85,7 +85,7 @@ flowchart LR
 
 Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`
 (the full OpenAI endpoint URL, e.g. `.../openai/v1`), `AZURE_FOUNDRY_PROD_EUS2_KEY`,
-`MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_DOTNET_URL`, and `MCP_FUNCTION_URL`.
+`MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_APP_URL`, and `MCP_FUNCTION_URL`.
 V5 uses the same `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` name for the Foundry project
 URL and appends `/openai/v1` in code.
 See deploy workflows and `.env.example` files under `api-dotnet/api`,
@@ -119,8 +119,8 @@ optional `BUILD_NUMBER` / `BUILD_START` / `BUILD_BRANCH_NAME` metadata.
 
 API and MVC `/About` aggregate those remote nodes as children under their
 `API Root` subtree (see [About and health](#about-and-health)). Production base
-URLs are configured via `MCP_DOTNET_URL`, `MCP_FUNCTION_URL`, and
-`WORKER_DOTNET_URL` (GitHub variables `PROD_MCP_DOTNET_URL`,
+URLs are configured via `MCP_APP_URL`, `MCP_FUNCTION_URL`, and
+`WORKER_DOTNET_URL` (GitHub variables `PROD_MCP_APP_URL`,
 `PROD_MCP_FUNCTION_URL`, `PROD_WORKER_DOTNET_URL`); `/About` is appended in code.
 
 ## Background Worker (Hangfire)

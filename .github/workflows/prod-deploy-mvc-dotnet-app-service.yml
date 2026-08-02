@@ -65,7 +65,7 @@ jobs:
       MVC_DOTNET_URL: ${{ vars.PROD_MVC_DOTNET_URL }}
       API_DOTNET_URL: ${{ vars.PROD_API_DOTNET_URL }}
       WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
-      MCP_DOTNET_URL: ${{ vars.PROD_MCP_DOTNET_URL }}
+      MCP_APP_URL: ${{ vars.PROD_MCP_APP_URL }}
       MCP_FUNCTION_URL: ${{ vars.PROD_MCP_FUNCTION_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
@@ -117,7 +117,7 @@ jobs:
                 MVC_URL="${{ env.MVC_DOTNET_URL }}" \
                 API_DOTNET_URL="${{ env.API_DOTNET_URL }}" \
                 WORKER_DOTNET_URL="${{ env.WORKER_DOTNET_URL }}" \
-                MCP_DOTNET_URL="${{ env.MCP_DOTNET_URL }}" \
+                MCP_APP_URL="${{ env.MCP_APP_URL }}" \
                 MCP_FUNCTION_URL="${{ env.MCP_FUNCTION_URL }}" \
                 GOOGLE_MAPS_API_KEY="${{ secrets.GOOGLE_MAPS_API_KEY }}" \
                 AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
