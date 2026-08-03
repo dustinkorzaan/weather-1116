@@ -46,23 +46,6 @@ public class ConfirmNashvilleAIWeatherHandlerTests
         Assert.Contains("fullSummary", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
-    public async Task Handle_ThrowsWhenResponseIsMissingConditions()
-    {
-        var mediator = new FakeMediator(new AIWeatherResponse
-        {
-            FullSummary = "It is 72F in Nashville with light winds from the south.",
-        });
-        var handler = new ConfirmNashvilleAIWeatherHandler(
-            mediator,
-            NullLogger<ConfirmNashvilleAIWeatherHandler>.Instance);
-
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => handler.Handle(new ConfirmNashvilleAIWeatherEvent(), CancellationToken.None));
-
-        Assert.Contains("conditions", exception.Message, StringComparison.OrdinalIgnoreCase);
-    }
-
     private sealed class FakeMediator(AIWeatherResponse response) : IMediator
     {
         public string? LastLocation { get; private set; }

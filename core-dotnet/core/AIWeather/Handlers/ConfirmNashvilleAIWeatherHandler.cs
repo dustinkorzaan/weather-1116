@@ -47,10 +47,5 @@ public class ConfirmNashvilleAIWeatherHandler : IRequestHandler<ConfirmNashville
         {
             throw new InvalidOperationException("AI weather response is missing fullSummary.");
         }
-
-        if (string.IsNullOrWhiteSpace(response.Conditions))
-        {
-            throw new InvalidOperationException("AI weather response is missing conditions.");
-        }
     }
 }
