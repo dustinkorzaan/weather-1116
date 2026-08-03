@@ -1,5 +1,5 @@
 ﻿using Azure.AI.Extensions.OpenAI;
-using Core.AIWeather;
+using Core.AIWeather.Services;
 using Core.AIWeather.Models;
 using DotNetEnv;
 using OpenAI.Responses;
