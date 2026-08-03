@@ -1,4 +1,4 @@
-using Core.HelloWorld.events;
+using Core.HelloWorld.Events;
 using Core.HelloWorld.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

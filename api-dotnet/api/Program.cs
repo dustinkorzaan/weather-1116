@@ -1,5 +1,5 @@
 using Core.About;
-using Core.HelloWorld.handlers;
+using Core.HelloWorld.Handlers;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
