@@ -22,6 +22,8 @@ Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
 ## Foundry console demos
 
+Presentation reference: [`docs/presentation.md`](docs/presentation.md)
+
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
 against Core weather data (V1–V4) or a hosted Foundry Agent (V5). In
 `Weather.sln` and CI, but not a production deployable; run from VS Code or
