@@ -36,8 +36,8 @@ for hello/AI weather/map flows in the three UIs.
 | MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
-Ports, auth, and env vars for the worker and console apps live in [`README.md`](../README.md)
-and each project's `.env.example`.
+Ports for runnable apps are in [`README.md`](../README.md); worker and console
+auth/env details are in this doc and each project's `.env.example`.
 
 ## Runtime Model
 
@@ -83,12 +83,8 @@ flowchart LR
   McpDotNet --> CoreWx
 ```
 
-Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`
-(the full OpenAI endpoint URL, e.g. `.../openai/v1`), `AZURE_FOUNDRY_PROD_EUS2_KEY`,
-`AZURE_FOUNDRY_PROD_EUS2_MODEL`,
-`MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_APP_URL`, and `MCP_FUNCTION_URL`.
-V5 uses the same `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` name for the Foundry project
-URL and appends `/openai/v1` in code.
+Required settings for API/MVC in production are listed under
+[Foundry Console Demos (learning path)](#foundry-console-demos-learning-path) below.
 See deploy workflows and `.env.example` files under `api-dotnet/api`,
 `mvc-dotnet/mvc`, `ui-blazor/blazor`, and `worker-dotnet/worker`.
 
@@ -126,11 +122,14 @@ URLs are configured via `MCP_APP_URL`, `MCP_FUNCTION_URL`, and
 
 ## Background Worker (Hangfire)
 
-[`worker-dotnet`](../worker-dotnet) is the only app that runs Hangfire servers.
-It runs queue-based Hangfire servers against shared storage
-(`DB_CONNECTION_STRING`, SQL Server in production). API and MVC register the
-same storage as Hangfire **clients** so they can enqueue jobs without running
-servers.
+[`worker-dotnet/worker`](../worker-dotnet/worker) is the only host that runs
+Hangfire job servers against shared storage (`DB_CONNECTION_STRING`, SQL Server
+in production). API and MVC register the same storage as Hangfire **clients**
+so they can enqueue jobs without running servers; the worker processes them.
+
+| Project | Path | Role | Port | Endpoint |
+| --- | --- | --- | --- | --- |
+| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/About` |
 
 - **Dashboard:** `/hangfire` on the worker (POC — open to all; auth TBD).
 - **Health:** `/About` returns `Worker Root` with `worker-dotnet` and a `Hangfire`
@@ -139,9 +138,14 @@ servers.
   (default 30 minutes processing / 60 minutes enqueued; configure via
   `HangfireAboutHealth_StaleProcessingMinutes` and
   `HangfireAboutHealth_StaleEnqueuedMinutes` in `appsettings.json` or `.env`).
-  API and MVC probe this tree as the `Worker Root` child.
+  API and MVC probe this tree as the `Worker Root` child via
+  `WORKER_DOTNET_URL` (GitHub variable `PROD_WORKER_DOTNET_URL`; `/About` is
+  appended in code).
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
+- **Production:** set `DB_CONNECTION_STRING` to the same Azure SQL connection
+  string on the worker, API, and MVC. Prod app: `weather1116-prod-worker`
+  (see `prod-deploy-worker-app-service.yml`).
 
 ## About and Health
 
@@ -203,13 +207,23 @@ Shared responsive conventions kept in parity across the three sites:
 
 ## Google Maps
 
-All three UIs embed a Maps JavaScript API map with sample city coordinates.
-Configuration:
+Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
+Atlanta, Charlotte). Weather overlays will come later.
 
-- React: `VITE_GOOGLE_MAPS_API_KEY` (build-time Vite env)
-- Blazor / MVC: `GOOGLE_MAPS_API_KEY` (appsettings or `GOOGLE_MAPS_API_KEY` env)
+**API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
+in a Google Cloud project.
 
-Pins are static sample data today (ready for weather overlays later).
+**API key:** Create a browser key in Google Cloud Console → APIs & Services →
+Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
+`http://localhost:8090/*`, `http://localhost:8100/*`, plus your prod hosts).
+
+| UI | Config |
+| --- | --- |
+| React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see [`ui-react/.env.example`](../ui-react/.env.example)) |
+| Blazor | `GOOGLE_MAPS_API_KEY` in `ui-blazor/blazor/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`ui-blazor/blazor/.env.example`](../ui-blazor/blazor/.env.example)) |
+| MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`mvc-dotnet/mvc/.env.example`](../mvc-dotnet/mvc/.env.example)) |
+
+Without a key, the map container still renders and each UI shows a short setup hint.
 
 ## Local Run Model
 
@@ -287,7 +301,34 @@ blocks**, not production deployables:
 | **V5** | Hosted Foundry agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
-`AZURE_FOUNDRY_PROD_EUS2_*` prefix (see [`README.md`](../README.md)).
+`AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `Program.cs` and `.env.example`).
+
+**V4 settings** (in addition to `AZURE_FOUNDRY_PROD_EUS2_KEY`):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
+| `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
+
+**API/MVC AI weather settings** (same pattern as V4):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
+| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
+| `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes | Hosted model deployment name (e.g. `gpt-5.4-mini`) |
+| `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
+| `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
+| `MCP_APP_URL` | Yes | Base URL for MCP DotNet (e.g. `http://localhost:8110`) |
+| `MCP_FUNCTION_URL` | Yes | Base URL for MCP Function (e.g. `http://localhost:8120`) |
+
+**V5 settings** (agent-hosted demo only):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2` |
+| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` (project default version) |
+| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 |
 
 Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
 `core-dotnet/core/AIWeather` → V5 (hosted-agent contrast).
