@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -28,9 +29,9 @@ public static class ServiceCollectionExtensions
 
     private static void RegisterHandlersFromAssembly(IServiceCollection services, Assembly assembly)
     {
-        foreach (var type in assembly.GetTypes())
+        foreach (var type in GetLoadableTypes(assembly))
         {
-            if (type.IsAbstract || type.IsInterface)
+            if (type.IsAbstract || type.IsInterface || type.IsGenericTypeDefinition)
             {
                 continue;
             }
@@ -46,9 +47,21 @@ public static class ServiceCollectionExtensions
                 if (genericDefinition == typeof(MediatR.IRequestHandler<,>)
                     || genericDefinition == typeof(MediatR.IRequestHandler<>))
                 {
-                    services.AddTransient(serviceType, type);
+                    services.TryAddTransient(serviceType, type);
                 }
             }
+        }
+    }
+
+    private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+    {
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            return ex.Types.OfType<Type>();
         }
     }
 }

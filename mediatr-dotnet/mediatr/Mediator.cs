@@ -1,70 +1,80 @@
-using System.Reflection;
-using System.Runtime.ExceptionServices;
+using System.Collections.Concurrent;
 
 namespace MediatR;
 
 internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
 {
+    private static readonly ConcurrentDictionary<Type, object> Wrappers = new();
+
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var requestType = request.GetType();
-        var handlerType = typeof(IRequestHandler<,>).MakeGenericType(requestType, typeof(TResponse));
-        var handler = serviceProvider.GetService(handlerType)
-            ?? throw new InvalidOperationException($"No handler registered for request type '{requestType.Name}'.");
+        var wrapper = (RequestHandlerWrapper<TResponse>)Wrappers.GetOrAdd(
+            request.GetType(),
+            static requestType => Activator.CreateInstance(
+                typeof(RequestHandlerWrapper<,>).MakeGenericType(requestType, typeof(TResponse)))!);
 
-        var handleMethod = handlerType.GetMethod(nameof(IRequestHandler<IRequest<TResponse>, TResponse>.Handle))
-            ?? throw new InvalidOperationException($"Handler type '{handlerType.Name}' does not implement Handle.");
-
-        object? result;
-        try
-        {
-            result = handleMethod.Invoke(handler, [request, cancellationToken]);
-        }
-        catch (TargetInvocationException ex) when (ex.InnerException is not null)
-        {
-            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-            throw; // unreachable; satisfies definite assignment
-        }
-
-        if (result is Task<TResponse> task)
-        {
-            return task;
-        }
-
-        throw new InvalidOperationException($"Handler for '{requestType.Name}' did not return Task<{typeof(TResponse).Name}>.");
+        return wrapper.Handle(request, serviceProvider, cancellationToken);
     }
 
-    public async Task Send(IRequest request, CancellationToken cancellationToken = default)
+    public Task Send(IRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var requestType = request.GetType();
-        var handlerType = typeof(IRequestHandler<>).MakeGenericType(requestType);
-        var handler = serviceProvider.GetService(handlerType)
-            ?? throw new InvalidOperationException($"No handler registered for request type '{requestType.Name}'.");
+        var wrapper = (VoidRequestHandlerWrapper)Wrappers.GetOrAdd(
+            request.GetType(),
+            static requestType => Activator.CreateInstance(
+                typeof(VoidRequestHandlerWrapper<>).MakeGenericType(requestType))!);
 
-        var handleMethod = handlerType.GetMethod(nameof(IRequestHandler<IRequest>.Handle))
-            ?? throw new InvalidOperationException($"Handler type '{handlerType.Name}' does not implement Handle.");
+        return wrapper.Handle(request, serviceProvider, cancellationToken);
+    }
+}
 
-        object? result;
-        try
-        {
-            result = handleMethod.Invoke(handler, [request, cancellationToken]);
-        }
-        catch (TargetInvocationException ex) when (ex.InnerException is not null)
-        {
-            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-            throw; // unreachable; satisfies definite assignment
-        }
+internal abstract class RequestHandlerWrapper<TResponse>
+{
+    public abstract Task<TResponse> Handle(
+        IRequest<TResponse> request,
+        IServiceProvider serviceProvider,
+        CancellationToken cancellationToken);
+}
 
-        if (result is Task task)
-        {
-            await task.ConfigureAwait(false);
-            return;
-        }
+internal sealed class RequestHandlerWrapper<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
+    where TRequest : IRequest<TResponse>
+{
+    public override Task<TResponse> Handle(
+        IRequest<TResponse> request,
+        IServiceProvider serviceProvider,
+        CancellationToken cancellationToken)
+    {
+        var handler = serviceProvider.GetService(typeof(IRequestHandler<TRequest, TResponse>))
+            ?? throw new InvalidOperationException(
+                $"No handler registered for request type '{typeof(TRequest).Name}'.");
 
-        throw new InvalidOperationException($"Handler for '{requestType.Name}' did not return Task.");
+        return ((IRequestHandler<TRequest, TResponse>)handler).Handle((TRequest)request, cancellationToken);
+    }
+}
+
+internal abstract class VoidRequestHandlerWrapper
+{
+    public abstract Task Handle(
+        IRequest request,
+        IServiceProvider serviceProvider,
+        CancellationToken cancellationToken);
+}
+
+internal sealed class VoidRequestHandlerWrapper<TRequest> : VoidRequestHandlerWrapper
+    where TRequest : IRequest
+{
+    public override Task Handle(
+        IRequest request,
+        IServiceProvider serviceProvider,
+        CancellationToken cancellationToken)
+    {
+        var handler = serviceProvider.GetService(typeof(IRequestHandler<TRequest>))
+            ?? throw new InvalidOperationException(
+                $"No handler registered for request type '{typeof(TRequest).Name}'.");
+
+        return ((IRequestHandler<TRequest>)handler).Handle((TRequest)request, cancellationToken);
     }
 }
