@@ -20,26 +20,6 @@ project relationships, and parity guidance.
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
-## Google Maps (map on all three UIs)
-
-Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
-Atlanta, Charlotte). Weather overlays will come later.
-
-**API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
-in a Google Cloud project.
-
-**API key:** Create a browser key in Google Cloud Console → APIs & Services →
-Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
-`http://localhost:8090/*`, `http://localhost:8100/*`, plus your prod hosts).
-
-| UI | Config |
-| --- | --- |
-| React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see `ui-react/.env.example`) |
-| Blazor | `GOOGLE_MAPS_API_KEY` in `ui-blazor/blazor/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see `ui-blazor/blazor/.env.example`) |
-| MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see `mvc-dotnet/mvc/.env.example`) |
-
-Without a key, the map container still renders and each UI shows a short setup hint.
-
 ## Foundry console demos
 
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns

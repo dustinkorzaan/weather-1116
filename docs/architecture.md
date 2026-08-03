@@ -211,13 +211,23 @@ Shared responsive conventions kept in parity across the three sites:
 
 ## Google Maps
 
-All three UIs embed a Maps JavaScript API map with sample city coordinates.
-Configuration:
+Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
+Atlanta, Charlotte). Weather overlays will come later.
 
-- React: `VITE_GOOGLE_MAPS_API_KEY` (build-time Vite env)
-- Blazor / MVC: `GOOGLE_MAPS_API_KEY` (appsettings or `GOOGLE_MAPS_API_KEY` env)
+**API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
+in a Google Cloud project.
 
-Pins are static sample data today (ready for weather overlays later).
+**API key:** Create a browser key in Google Cloud Console → APIs & Services →
+Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
+`http://localhost:8090/*`, `http://localhost:8100/*`, plus your prod hosts).
+
+| UI | Config |
+| --- | --- |
+| React | `VITE_GOOGLE_MAPS_API_KEY` in `ui-react/.env.local` (see [`ui-react/.env.example`](../ui-react/.env.example)) |
+| Blazor | `GOOGLE_MAPS_API_KEY` in `ui-blazor/blazor/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`ui-blazor/blazor/.env.example`](../ui-blazor/blazor/.env.example)) |
+| MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`mvc-dotnet/mvc/.env.example`](../mvc-dotnet/mvc/.env.example)) |
+
+Without a key, the map container still renders and each UI shows a short setup hint.
 
 ## Local Run Model
 
