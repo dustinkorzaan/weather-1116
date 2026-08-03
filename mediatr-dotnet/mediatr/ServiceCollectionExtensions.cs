@@ -14,7 +14,9 @@ public static class ServiceCollectionExtensions
         var mediatRConfiguration = new MediatR.MediatRServiceConfiguration();
         configuration(mediatRConfiguration);
 
-        services.AddSingleton<MediatR.IMediator, MediatR.Mediator>();
+        // Transient so Mediator resolves handlers from the current request/scope,
+        // matching the NuGet MediatR lifetime and avoiding root-provider capture.
+        services.AddTransient<MediatR.IMediator, MediatR.Mediator>();
 
         foreach (var assembly in mediatRConfiguration.Assemblies)
         {

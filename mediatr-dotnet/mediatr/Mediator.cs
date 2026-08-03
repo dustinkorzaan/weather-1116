@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 
 namespace MediatR;
 
@@ -16,7 +17,17 @@ internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
         var handleMethod = handlerType.GetMethod(nameof(IRequestHandler<IRequest<TResponse>, TResponse>.Handle))
             ?? throw new InvalidOperationException($"Handler type '{handlerType.Name}' does not implement Handle.");
 
-        var result = handleMethod.Invoke(handler, [request, cancellationToken]);
+        object? result;
+        try
+        {
+            result = handleMethod.Invoke(handler, [request, cancellationToken]);
+        }
+        catch (TargetInvocationException ex) when (ex.InnerException is not null)
+        {
+            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+            throw; // unreachable; satisfies definite assignment
+        }
+
         if (result is Task<TResponse> task)
         {
             return task;
@@ -37,7 +48,17 @@ internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
         var handleMethod = handlerType.GetMethod(nameof(IRequestHandler<IRequest>.Handle))
             ?? throw new InvalidOperationException($"Handler type '{handlerType.Name}' does not implement Handle.");
 
-        var result = handleMethod.Invoke(handler, [request, cancellationToken]);
+        object? result;
+        try
+        {
+            result = handleMethod.Invoke(handler, [request, cancellationToken]);
+        }
+        catch (TargetInvocationException ex) when (ex.InnerException is not null)
+        {
+            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+            throw; // unreachable; satisfies definite assignment
+        }
+
         if (result is Task task)
         {
             await task.ConfigureAwait(false);
