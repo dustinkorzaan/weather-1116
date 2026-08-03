@@ -1,4 +1,6 @@
+using Core.AIWeather.Events;
 using Hangfire;
+using WeatherWorkerDotNet.Hangfire;
 
 namespace WeatherWorkerDotNet;
 
@@ -16,10 +18,10 @@ public class RecurringJobScheduler : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _recurringJobs.AddOrUpdate<ConfirmNashvilleAIWeatherJob>(
+        _recurringJobs.AddOrUpdateMediatREvent<ConfirmNashvilleAIWeatherEvent>(
             "confirm-nashville-ai-weather",
-            job => job.RunAsync(),
-            Cron.Daily(2));
+            Cron.Daily(2),
+            queue: "batch-multi");
 
         return Task.CompletedTask;
     }
