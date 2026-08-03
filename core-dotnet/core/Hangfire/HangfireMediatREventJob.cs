@@ -1,3 +1,4 @@
+using Hangfire;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +18,8 @@ public sealed class HangfireMediatREventJob
         _logger = logger;
     }
 
-    public async Task SendAsync(string eventTypeName, string eventJson, CancellationToken cancellationToken = default)
+    [JobDisplayName("{0}")]
+    public async Task SendAsync(string eventDisplayName, string eventTypeName, string eventJson, CancellationToken cancellationToken = default)
     {
         var request = HangfireMediatREventSerializer.Deserialize(eventTypeName, eventJson);
         _logger.LogInformation("Dispatching Hangfire MediatR event {EventType}", request.GetType().Name);

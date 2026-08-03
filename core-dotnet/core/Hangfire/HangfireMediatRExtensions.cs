@@ -19,13 +19,14 @@ public static class HangfireMediatRExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(cronExpression);
         ArgumentNullException.ThrowIfNull(@event);
 
+        var eventDisplayName = HangfireMediatREventSerializer.GetDisplayName(typeof(TEvent));
         var eventTypeName = HangfireMediatREventSerializer.GetTypeName(typeof(TEvent));
         var eventJson = HangfireMediatREventSerializer.Serialize(@event);
 
         recurringJobs.AddOrUpdate<HangfireMediatREventJob>(
             recurringJobId,
             queue,
-            job => job.SendAsync(eventTypeName, eventJson, CancellationToken.None),
+            job => job.SendAsync(eventDisplayName, eventTypeName, eventJson, CancellationToken.None),
             cronExpression);
     }
 
@@ -48,12 +49,13 @@ public static class HangfireMediatRExtensions
         ArgumentNullException.ThrowIfNull(backgroundJobs);
         ArgumentNullException.ThrowIfNull(@event);
 
+        var eventDisplayName = HangfireMediatREventSerializer.GetDisplayName(typeof(TEvent));
         var eventTypeName = HangfireMediatREventSerializer.GetTypeName(typeof(TEvent));
         var eventJson = HangfireMediatREventSerializer.Serialize(@event);
 
         return backgroundJobs.Create(
             Job.FromExpression<HangfireMediatREventJob>(
-                job => job.SendAsync(eventTypeName, eventJson, CancellationToken.None)),
+                job => job.SendAsync(eventDisplayName, eventTypeName, eventJson, CancellationToken.None)),
             new EnqueuedState(queue));
     }
 }
