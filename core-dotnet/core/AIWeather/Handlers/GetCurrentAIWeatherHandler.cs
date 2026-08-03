@@ -19,8 +19,6 @@ namespace Core.AIWeather.Handlers;
 /// </summary>
 public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEvent, AIWeatherResponse>
 {
-	private const string DeploymentName = "gpt-5.4-mini";
-
 	private static readonly string DefaultLocation = "Nashville, TN";
 
 	private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
@@ -42,6 +40,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
+
+		var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_MODEL")
+			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_MODEL.");
 
 		var mcpFunctionUrl = Environment.GetEnvironmentVariable("MCP_FUNCTION_URL")
 			?? throw new InvalidOperationException("Missing MCP_FUNCTION_URL.");
@@ -79,7 +80,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
 		var aiOutputSchema = BuildAIOutputSchema();
 
-		_logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, DeploymentName);
+		_logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, deploymentName);
 		_logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
 		_logger.LogInformation("AI Weather: User prompt for {Location}: {Prompt}", location, userPrompt);
 		_logger.LogInformation("AI Weather: Output schema for {Location}: {Schema}", location, aiOutputSchema);
@@ -112,7 +113,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 			ResponseItem.CreateUserMessageItem(userPrompt),
 		};
 
-		CreateResponseOptions options = new(DeploymentName, inputItems)
+		CreateResponseOptions options = new(deploymentName, inputItems)
 		{
 			Tools = { myMcpFunction, myMcpApp },
 			TextOptions = new ResponseTextOptions
