@@ -71,6 +71,7 @@ builder.Services.AddHangfireServer(options =>
 	options.WorkerCount = 10;
 	options.SchedulePollingInterval = queuePollInterval;
 });
+builder.Services.AddHostedService<RecurringJobScheduler>();
 
 var app = builder.Build();
 
