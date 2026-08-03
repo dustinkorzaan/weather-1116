@@ -23,7 +23,7 @@
     <ProjectReference Include="..\..\mediatr-dotnet\mediatr\MediatR.csproj" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
     <!-- Override Hangfire's vulnerable transitive Newtonsoft.Json (NU1903). -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
