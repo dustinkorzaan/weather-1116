@@ -13,30 +13,12 @@ project relationships, and parity guidance.
 | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
 | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
 | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
-| Worker | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 |
 | Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — |
 | MCP DotNet | [`mcp-dotnet/mcp`](mcp-dotnet/mcp) | ASP.NET Core MCP | 8110 |
 | MCP Function | [`mcp-function/mcp`](mcp-function/mcp) | Azure Functions MCP | 8120 |
+| Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
-
-## Background worker (Hangfire)
-
-[`worker-dotnet/worker`](worker-dotnet/worker) is the only host that runs Hangfire job servers.
-API and MVC register Hangfire client storage (shared `DB_CONNECTION_STRING`) so
-they can enqueue jobs later; the worker processes them.
-
-| Project | Path | Role | Port | Endpoint |
-| --- | --- | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/About` |
-
-Without `DB_CONNECTION_STRING`, each app falls back to in-memory Hangfire
-storage (jobs do not cross processes locally). In production, set
-`DB_CONNECTION_STRING` to the same Azure SQL connection string on the worker,
-API, and MVC.
-
-Prod app: `weather1116-prod-worker` (see `prod-deploy-worker-app-service.yml`).
-API and MVC probe the worker via `WORKER_DOTNET_URL` in their About trees.
 
 ## Google Maps (map on all three UIs)
 

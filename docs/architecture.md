@@ -36,8 +36,8 @@ for hello/AI weather/map flows in the three UIs.
 | MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
-Ports, auth, and env vars for the worker and console apps live in [`README.md`](../README.md)
-and each project's `.env.example`.
+Ports for runnable apps are in [`README.md`](../README.md); worker and console
+auth/env details are in this doc and each project's `.env.example`.
 
 ## Runtime Model
 
@@ -126,11 +126,14 @@ URLs are configured via `MCP_APP_URL`, `MCP_FUNCTION_URL`, and
 
 ## Background Worker (Hangfire)
 
-[`worker-dotnet`](../worker-dotnet) is the only app that runs Hangfire servers.
-It runs queue-based Hangfire servers against shared storage
-(`DB_CONNECTION_STRING`, SQL Server in production). API and MVC register the
-same storage as Hangfire **clients** so they can enqueue jobs without running
-servers.
+[`worker-dotnet/worker`](../worker-dotnet/worker) is the only host that runs
+Hangfire job servers against shared storage (`DB_CONNECTION_STRING`, SQL Server
+in production). API and MVC register the same storage as Hangfire **clients**
+so they can enqueue jobs without running servers; the worker processes them.
+
+| Project | Path | Role | Port | Endpoint |
+| --- | --- | --- | --- | --- |
+| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/About` |
 
 - **Dashboard:** `/hangfire` on the worker (POC — open to all; auth TBD).
 - **Health:** `/About` returns `Worker Root` with `worker-dotnet` and a `Hangfire`
@@ -139,9 +142,14 @@ servers.
   (default 30 minutes processing / 60 minutes enqueued; configure via
   `HangfireAboutHealth_StaleProcessingMinutes` and
   `HangfireAboutHealth_StaleEnqueuedMinutes` in `appsettings.json` or `.env`).
-  API and MVC probe this tree as the `Worker Root` child.
+  API and MVC probe this tree as the `Worker Root` child via
+  `WORKER_DOTNET_URL` (GitHub variable `PROD_WORKER_DOTNET_URL`; `/About` is
+  appended in code).
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
+- **Production:** set `DB_CONNECTION_STRING` to the same Azure SQL connection
+  string on the worker, API, and MVC. Prod app: `weather1116-prod-worker`
+  (see `prod-deploy-worker-app-service.yml`).
 
 ## About and Health
 
