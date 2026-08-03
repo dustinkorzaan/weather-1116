@@ -9,7 +9,7 @@ namespace Core.Tests.AIWeather.Handlers;
 public class ConfirmNashvilleAIWeatherHandlerTests
 {
     [Fact]
-    public async Task Handle_ThrowsAfterConfirmingValidResponse()
+    public async Task Handle_ReturnsConfirmedValidResponse()
     {
         var mediator = new FakeMediator(new AIWeatherResponse
         {
@@ -23,10 +23,9 @@ public class ConfirmNashvilleAIWeatherHandlerTests
             mediator,
             NullLogger<ConfirmNashvilleAIWeatherHandler>.Instance);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => handler.Handle(new ConfirmNashvilleAIWeatherEvent(), CancellationToken.None));
+        var response = await handler.Handle(new ConfirmNashvilleAIWeatherEvent(), CancellationToken.None);
 
-        Assert.Contains("failed intentionally", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("It is 72F in Nashville with light winds from the south.", response.FullSummary);
         Assert.Equal("Nashville, TN", mediator.LastLocation);
     }
 
@@ -45,6 +44,23 @@ public class ConfirmNashvilleAIWeatherHandlerTests
             () => handler.Handle(new ConfirmNashvilleAIWeatherEvent(), CancellationToken.None));
 
         Assert.Contains("fullSummary", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Handle_ThrowsWhenResponseIsMissingConditions()
+    {
+        var mediator = new FakeMediator(new AIWeatherResponse
+        {
+            FullSummary = "It is 72F in Nashville with light winds from the south.",
+        });
+        var handler = new ConfirmNashvilleAIWeatherHandler(
+            mediator,
+            NullLogger<ConfirmNashvilleAIWeatherHandler>.Instance);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(new ConfirmNashvilleAIWeatherEvent(), CancellationToken.None));
+
+        Assert.Contains("conditions", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     private sealed class FakeMediator(AIWeatherResponse response) : IMediator

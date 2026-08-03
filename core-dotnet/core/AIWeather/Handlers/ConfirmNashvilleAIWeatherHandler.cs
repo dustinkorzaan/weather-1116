@@ -6,8 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Core.AIWeather.Handlers;
 
 /// <summary>
-/// Fetches AI weather for Nashville, TN, validates the response, then fails intentionally
-/// so Hangfire records a failed job for health monitoring.
+/// Fetches AI weather for Nashville, TN and validates the response.
 /// </summary>
 public class ConfirmNashvilleAIWeatherHandler : IRequestHandler<ConfirmNashvilleAIWeatherEvent, AIWeatherResponse>
 {
@@ -39,8 +38,7 @@ public class ConfirmNashvilleAIWeatherHandler : IRequestHandler<ConfirmNashville
             Location,
             response.FullSummary);
 
-        throw new InvalidOperationException(
-            $"Nashville AI weather probe confirmed a response but failed intentionally for Hangfire health monitoring.");
+        return response;
     }
 
     private static void ConfirmResponse(AIWeatherResponse response)
