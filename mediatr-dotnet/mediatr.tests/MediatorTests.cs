@@ -95,6 +95,45 @@ public class MediatorTests
         Assert.Equal(scope.ServiceProvider.GetRequiredService<ScopedDependency>().Id.ToString(), response.Reply);
     }
 
+    [Fact]
+    public async Task Send_CachesWrappersSeparatelyForTypedAndVoidOverloads()
+    {
+        var services = BuildServices();
+        var recorder = new Recorder();
+        services.AddSingleton(recorder);
+        var mediator = services.BuildServiceProvider().GetRequiredService<IMediator>();
+
+        var dual = new DualEvent { Message = "dual" };
+
+        await mediator.Send((IRequest)dual);
+        Assert.Equal("void: dual", recorder.Value);
+
+        var response = await mediator.Send((IRequest<PingResponse>)dual);
+        Assert.Equal("typed: dual", response.Reply);
+
+        await mediator.Send((IRequest)dual);
+        Assert.Equal("void: dual", recorder.Value);
+    }
+
+    [Fact]
+    public async Task Send_CachesWrappersSeparatelyForCovariantResponseTypes()
+    {
+        var mediator = BuildMediator();
+        var evt = new PingEvent { Message = "hi" };
+
+        var response = await mediator.Send(evt);
+        Assert.Equal("pong: hi", response.Reply);
+
+        // Covariance makes PingEvent usable as IRequest<object>; that must not
+        // reuse the PingResponse wrapper entry (which would InvalidCastException).
+        IRequest<object> asObject = evt;
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => mediator.Send(asObject));
+        Assert.Contains(nameof(PingEvent), exception.Message);
+
+        response = await mediator.Send(evt);
+        Assert.Equal("pong: hi", response.Reply);
+    }
+
     private static IMediator BuildMediator()
         => BuildServices().BuildServiceProvider().GetRequiredService<IMediator>();
 
@@ -159,4 +198,24 @@ public sealed class ScopedHandler(ScopedDependency dependency) : IRequestHandler
 {
     public Task<PingResponse> Handle(ScopedEvent request, CancellationToken cancellationToken)
         => Task.FromResult(new PingResponse { Reply = dependency.Id.ToString(), Token = cancellationToken });
+}
+
+public sealed class DualEvent : IRequest, IRequest<PingResponse>
+{
+    public required string Message { get; init; }
+}
+
+public sealed class DualVoidHandler(Recorder recorder) : IRequestHandler<DualEvent>
+{
+    public Task Handle(DualEvent request, CancellationToken cancellationToken)
+    {
+        recorder.Value = $"void: {request.Message}";
+        return Task.CompletedTask;
+    }
+}
+
+public sealed class DualTypedHandler : IRequestHandler<DualEvent, PingResponse>
+{
+    public Task<PingResponse> Handle(DualEvent request, CancellationToken cancellationToken)
+        => Task.FromResult(new PingResponse { Reply = $"typed: {request.Message}", Token = cancellationToken });
 }

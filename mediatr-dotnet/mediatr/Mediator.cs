@@ -4,16 +4,21 @@ namespace MediatR;
 
 internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
 {
-    private static readonly ConcurrentDictionary<Type, object> Wrappers = new();
+    // Key by request type AND response type so void Send and Send<TResponse>
+    // (including covariant TResponse) never share a wrapper entry.
+    private static readonly ConcurrentDictionary<(Type RequestType, Type ResponseType), object> Wrappers = new();
+
+    private static readonly Type VoidResponseType = typeof(void);
 
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        var key = (request.GetType(), typeof(TResponse));
         var wrapper = (RequestHandlerWrapper<TResponse>)Wrappers.GetOrAdd(
-            request.GetType(),
-            static requestType => Activator.CreateInstance(
-                typeof(RequestHandlerWrapper<,>).MakeGenericType(requestType, typeof(TResponse)))!);
+            key,
+            static entry => Activator.CreateInstance(
+                typeof(RequestHandlerWrapper<,>).MakeGenericType(entry.RequestType, entry.ResponseType))!);
 
         return wrapper.Handle(request, serviceProvider, cancellationToken);
     }
@@ -22,10 +27,11 @@ internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        var key = (request.GetType(), VoidResponseType);
         var wrapper = (VoidRequestHandlerWrapper)Wrappers.GetOrAdd(
-            request.GetType(),
-            static requestType => Activator.CreateInstance(
-                typeof(VoidRequestHandlerWrapper<>).MakeGenericType(requestType))!);
+            key,
+            static entry => Activator.CreateInstance(
+                typeof(VoidRequestHandlerWrapper<>).MakeGenericType(entry.RequestType))!);
 
         return wrapper.Handle(request, serviceProvider, cancellationToken);
     }
