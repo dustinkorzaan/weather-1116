@@ -1,4 +1,5 @@
 using Core.AIWeather.Events;
+using Hangfire;
 using MediatR;
 
 namespace WeatherWorkerDotNet;
@@ -17,6 +18,7 @@ public class ConfirmNashvilleAIWeatherJob
         _logger = logger;
     }
 
+    [Queue("batch-multi")]
     public async Task RunAsync()
     {
         await _mediator.Send(new ConfirmNashvilleAIWeatherEvent());
