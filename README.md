@@ -38,31 +38,4 @@ See each `Program.cs` and `.env.example` for required settings (`AZURE_FOUNDRY_P
 | V4 | [`FoundryConsoleV4`](FoundryConsoleV4) (`FoundryConsoleV4MCP.csproj`) | Model-direct via `ResponsesClient`, tools target remote MCP servers instead of in-process callbacks |
 | V5 | [`FoundryConsoleV5`](FoundryConsoleV5) (`FoundryConsoleV5Agent.csproj`) | Hosted Foundry Agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
 
-**V4 settings** (in addition to `AZURE_FOUNDRY_PROD_EUS2_KEY`):
-
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
-| `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
-
-**API/MVC AI weather settings** (same pattern as V4):
-
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
-| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
-| `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes | Hosted model deployment name (e.g. `gpt-5.4-mini`) |
-| `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
-| `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
-| `MCP_APP_URL` | Yes | Base URL for MCP DotNet (e.g. `http://localhost:8110`) |
-| `MCP_FUNCTION_URL` | Yes | Base URL for MCP Function (e.g. `http://localhost:8120`) |
-
-**V5 settings** (agent-hosted demo only):
-
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2` |
-| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` (project default version) |
-| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 |
-
 VS Code launch configs: **Foundry Console V1** … **V5**.

@@ -83,12 +83,8 @@ flowchart LR
   McpDotNet --> CoreWx
 ```
 
-Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`
-(the full OpenAI endpoint URL, e.g. `.../openai/v1`), `AZURE_FOUNDRY_PROD_EUS2_KEY`,
-`AZURE_FOUNDRY_PROD_EUS2_MODEL`,
-`MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_APP_URL`, and `MCP_FUNCTION_URL`.
-V5 uses the same `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` name for the Foundry project
-URL and appends `/openai/v1` in code.
+Required settings for API/MVC in production are listed under
+[Foundry Console Demos (learning path)](#foundry-console-demos-learning-path) below.
 See deploy workflows and `.env.example` files under `api-dotnet/api`,
 `mvc-dotnet/mvc`, `ui-blazor/blazor`, and `worker-dotnet/worker`.
 
@@ -305,7 +301,34 @@ blocks**, not production deployables:
 | **V5** | Hosted Foundry agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
-`AZURE_FOUNDRY_PROD_EUS2_*` prefix (see [`README.md`](../README.md)).
+`AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `Program.cs` and `.env.example`).
+
+**V4 settings** (in addition to `AZURE_FOUNDRY_PROD_EUS2_KEY`):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
+| `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
+
+**API/MVC AI weather settings** (same pattern as V4):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
+| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
+| `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes | Hosted model deployment name (e.g. `gpt-5.4-mini`) |
+| `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
+| `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
+| `MCP_APP_URL` | Yes | Base URL for MCP DotNet (e.g. `http://localhost:8110`) |
+| `MCP_FUNCTION_URL` | Yes | Base URL for MCP Function (e.g. `http://localhost:8120`) |
+
+**V5 settings** (agent-hosted demo only):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2` |
+| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` (project default version) |
+| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 |
 
 Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
 `core-dotnet/core/AIWeather` → V5 (hosted-agent contrast).
