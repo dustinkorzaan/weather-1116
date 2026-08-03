@@ -1,6 +1,6 @@
 using Core.AIWeather.Events;
+using Core.Hangfire;
 using Hangfire;
-using WeatherWorkerDotNet.Hangfire;
 
 namespace WeatherWorkerDotNet;
 

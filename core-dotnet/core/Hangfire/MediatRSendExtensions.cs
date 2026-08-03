@@ -1,7 +1,7 @@
 using System.Reflection;
 using MediatR;
 
-namespace WeatherWorkerDotNet.Hangfire;
+namespace Core.Hangfire;
 
 internal static class MediatRSendExtensions
 {

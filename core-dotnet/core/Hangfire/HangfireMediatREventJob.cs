@@ -1,6 +1,7 @@
 using MediatR;
+using Microsoft.Extensions.Logging;
 
-namespace WeatherWorkerDotNet.Hangfire;
+namespace Core.Hangfire;
 
 /// <summary>
 /// Generic Hangfire entry point that deserializes a MediatR request and dispatches it.

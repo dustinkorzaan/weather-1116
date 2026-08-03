@@ -2,7 +2,7 @@ using Hangfire;
 using Hangfire.Common;
 using Hangfire.States;
 
-namespace WeatherWorkerDotNet.Hangfire;
+namespace Core.Hangfire;
 
 public static class HangfireMediatRExtensions
 {

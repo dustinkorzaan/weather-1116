@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace WeatherWorkerDotNet.Hangfire;
+namespace Core.Hangfire;
 
 internal static class HangfireMediatREventSerializer
 {

@@ -1,8 +1,8 @@
 using Core.AIWeather.Events;
 using Core.HelloWorld.Events;
-using WeatherWorkerDotNet.Hangfire;
+using Core.Hangfire;
 
-namespace WeatherWorkerDotNet.Tests.Hangfire;
+namespace Core.Tests.Hangfire;
 
 public class HangfireMediatREventSerializerTests
 {
