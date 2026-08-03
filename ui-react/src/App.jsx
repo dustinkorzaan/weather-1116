@@ -83,6 +83,13 @@ function SiteLinksFooter() {
           {link.label}
         </a>
       ))}
+      <a
+        href="https://github.com/dustinkorzaan/weather-1116"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        GitHub
+      </a>
     </div>
   );
 }
