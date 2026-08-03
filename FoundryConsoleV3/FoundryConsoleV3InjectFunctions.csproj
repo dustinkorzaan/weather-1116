@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.AI.Projects" Version="2.1.0-beta.4" />
     <PackageReference Include="DotNetEnv" Version="3.*" />
-    <PackageReference Include="MediatR" Version="12.5.0" />
+    <ProjectReference Include="..\mediatr-dotnet\mediatr\MediatR.csproj" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.*" />

@@ -12,7 +12,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="DotNetEnv" Version="3.*" />
-    <PackageReference Include="MediatR" Version="12.5.0" />
+    <ProjectReference Include="..\..\mediatr-dotnet\mediatr\MediatR.csproj" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.52.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.1.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Mcp" Version="1.5.1" />
