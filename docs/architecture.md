@@ -85,6 +85,7 @@ flowchart LR
 
 Required settings for API/MVC in production: `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`
 (the full OpenAI endpoint URL, e.g. `.../openai/v1`), `AZURE_FOUNDRY_PROD_EUS2_KEY`,
+`AZURE_FOUNDRY_PROD_EUS2_MODEL`,
 `MCP_FUNCTION_KEY`, `MCP_APP_KEY`, `MCP_APP_URL`, and `MCP_FUNCTION_URL`.
 V5 uses the same `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` name for the Foundry project
 URL and appends `/openai/v1` in code.

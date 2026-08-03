@@ -115,6 +115,7 @@ jobs:
                 MCP_FUNCTION_URL="${{ env.MCP_FUNCTION_URL }}" \
                 AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
                 AZURE_FOUNDRY_PROD_EUS2_KEY="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}" \
+                AZURE_FOUNDRY_PROD_EUS2_MODEL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}" \
                 MCP_FUNCTION_KEY="${{ secrets.PROD_MCP_FUNCTION_KEY }}" \
                 MCP_APP_KEY="${{ secrets.PROD_MCP_APP_KEY }}" \
                 ASPNETCORE_ENVIRONMENT=Production \
