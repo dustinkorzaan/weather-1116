@@ -1,7 +1,8 @@
-using Core.HelloWorld.events;
+using Core.HelloWorld.Events;
+using Core.HelloWorld.Models;
 using MediatR;
 
-namespace Core.HelloWorld.handlers;
+namespace Core.HelloWorld.Handlers;
 
 /// <summary>
 /// Sample handler used to demonstrate the event/handler pattern for the Core project.

@@ -1,7 +1,7 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
 using Core.AIWeather.Models;
-using Core.HelloWorld.handlers;
+using Core.HelloWorld.Handlers;
 using Core.Geo.Events;
 using Core.Weather.Events;
 using DotNetEnv;

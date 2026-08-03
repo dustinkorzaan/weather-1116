@@ -1,7 +1,7 @@
-namespace Core.HelloWorld.handlers;
+namespace Core.HelloWorld.Models;
 
 /// <summary>
-/// Response returned by <see cref="HelloWorldHandler"/> after handling a <see cref="Core.HelloWorld.events.HelloWorldEvent"/>.
+/// Response returned by <see cref="Core.HelloWorld.Handlers.HelloWorldHandler"/> after handling a <see cref="Core.HelloWorld.Events.HelloWorldEvent"/>.
 /// </summary>
 public class HelloWorldResponse
 {

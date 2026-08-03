@@ -8,5 +8,5 @@ namespace Core.AIWeather.Events;
 /// </summary>
 public class GetCurrentAIWeatherEvent : IRequest<AIWeatherResponse>
 {
-	public required string Location { get; set; }
+    public required string Location { get; set; }
 }
