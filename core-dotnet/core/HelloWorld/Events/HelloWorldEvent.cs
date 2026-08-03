@@ -1,4 +1,4 @@
-using Core.HelloWorld.handlers;
+using Core.HelloWorld.Models;
 using MediatR;
 
 namespace Core.HelloWorld.events;

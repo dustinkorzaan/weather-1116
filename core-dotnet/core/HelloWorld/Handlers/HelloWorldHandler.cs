@@ -1,4 +1,5 @@
 using Core.HelloWorld.events;
+using Core.HelloWorld.Models;
 using MediatR;
 
 namespace Core.HelloWorld.handlers;
