@@ -21,6 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         project:
+          - mediatr-dotnet/mediatr/MediatR.csproj
           - core-dotnet/core/Core.csproj
           - api-dotnet/api/WeatherAPI.csproj
           - ui-blazor/blazor/WeatherBlazor.csproj
@@ -48,6 +49,22 @@ jobs:
 
       - name: Build project
         run: dotnet build ${{ matrix.project }} --no-restore --configuration Release
+
+  test-mediatr:
+    name: Test MediatR Library
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run MediatR tests
+        run: dotnet test mediatr-dotnet/mediatr.tests/MediatR.Tests.csproj --configuration Release --verbosity normal
 
   test-weather-api:
     name: Test Weather API
