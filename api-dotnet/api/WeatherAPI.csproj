@@ -14,7 +14,7 @@
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.20" />
     <ProjectReference Include="..\..\mediatr-dotnet\mediatr\MediatR.csproj" />
     <!-- Override Hangfire's vulnerable transitive Newtonsoft.Json (NU1903). -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <ProjectReference Include="..\..\core-dotnet\core\Core.csproj" />
   </ItemGroup>
 

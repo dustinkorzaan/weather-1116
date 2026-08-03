@@ -72,6 +72,14 @@ builder.Services.AddHangfireServer(options =>
 	options.SchedulePollingInterval = queuePollInterval;
 });
 
+// Recurring jobs use Hangfire's explicit queue overload, which MemoryStorage
+// does not support. Only register the scheduler when durable SQL storage is
+// configured via DB_CONNECTION_STRING.
+if (!string.IsNullOrWhiteSpace(dbConnectionString))
+{
+	builder.Services.AddHostedService<RecurringJobScheduler>();
+}
+
 var app = builder.Build();
 
 // Drop legacy recurring job from shared SQL storage (handler removed with forecast demo).
