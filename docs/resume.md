@@ -12,7 +12,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 - Azure, Blob Storage, Service Bus, Foundry, MSSQL, SSMS, SSIS, SSRS, Trinisys Convergence, Qlik Sense, Tableau SQL, MS Excel (Model Design/Decision Analysis), MS Access, API Design (REST, SOAP), AJAX, JSON
 - GitHub Actions, Azure DevOps, TFS, CI/CD, Git
 - OAuth, Azure B2C, PING, Auth0, JWT, Cookie Auth
-- Agile, Scrum, MVP, Lean, Pareto, Collaborative/Pair Programming, Continuous Delivery, Continuous Feedback
+- Agile, Scrum, MVP, Lean, Pareto, Continuous Delivery, Continuous Feedback, Pair Programming
 - Copilot, Cursor, Devin, Claude, Postman, Visual Studio, VS Code
 
 ## Professional Experience
