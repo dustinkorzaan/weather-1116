@@ -1,4 +1,5 @@
 using Core.About;
+using Core.Hangfire;
 using Core.HelloWorld.Handlers;
 using DotNetEnv;
 using Hangfire;
@@ -16,6 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 var dbConnectionString = builder.Configuration["DB_CONNECTION_STRING"];
 builder.Services.AddHangfire(config =>
 {
+    config.UseDefaultAutomaticRetry();
+
     if (string.IsNullOrWhiteSpace(dbConnectionString))
     {
         config.UseMemoryStorage();
