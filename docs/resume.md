@@ -82,12 +82,10 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ## Education
 
-### Master of Science, Information Systems (Overall GPA 4.0)
+### Master of Science, Information Systems (Overall GPA 4.0) — 2008
 
-**Middle Tennessee State University** — Murfreesboro, TN  
-*2008*
+**Middle Tennessee State University** — Murfreesboro, TN
 
-### Bachelor of Science, Information Systems (Overall GPA 3.4)
+### Bachelor of Science, Information Systems (Overall GPA 3.4) — 2002
 
-**John Brown University** — Siloam Springs, AR  
-*2002*
+**John Brown University** — Siloam Springs, AR
