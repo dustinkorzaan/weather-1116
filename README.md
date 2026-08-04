@@ -18,6 +18,26 @@ project relationships, and parity guidance.
 | MCP Function | [`mcp-function/mcp`](mcp-function/mcp) | Azure Functions MCP | 8120 |
 | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 |
 
+```mermaid
+flowchart LR
+  UI[React / Blazor / MVC]
+  API[MVC or WeatherAPI]
+  Core[Core GetCurrentAIWeatherHandler]
+  Model[Azure OpenAI model]
+  McpFunc[mcp-function GetLatLongData]
+  McpDotNet[mcp-dotnet GetPublicWeatherData]
+  CoreGeo[Core geo handlers]
+  CoreWx[Core weather handlers]
+
+  UI --> API
+  API --> Core
+  Core --> Model
+  Model --> McpFunc
+  Model --> McpDotNet
+  McpFunc --> CoreGeo
+  McpDotNet --> CoreWx
+```
+
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
 ## Foundry console demos
