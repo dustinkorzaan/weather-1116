@@ -22,7 +22,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 **Schneider Electric** - Franklin, TN - April 2019 - May 2026
 
-- Designed and engineered an integrated, data-driven full-stack platform using React, .NET API, C#, MSSQL, Foundry, and Azure Cloud services (App Services, Blob Storage, Service Bus).
+- Designed and engineered an integrated, data-driven full-stack platform using React, .NET API, C#, MSSQL, Foundry, and Azure Cloud services (App Services, Blob Storage, Service Bus, Event Grid).
 - Partnered closely within an internal team of 2–4 and a nearshore Acklen Avenue team (totaling 8–12), actively practicing pair programming and mutual code ownership to accelerate delivery.
 - Implemented third-party integrations with DocuSign, Airtable, Procore, Avetta, Dynamics SQL, and Tableau SQL to optimize business operational workflows.
 - Practiced Agile, Scrum, MVP, Lean, Pareto, Continuous Delivery, and Continuous Feedback, with 2–4 hours of backlog refinement four days per week.
