@@ -20,8 +20,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ### Senior Developer / Architect
 
-**Schneider Electric** - Franklin, TN  
-*April 2019 – May 2026*
+**Schneider Electric** - Franklin, TN - April 2019 - May 2026
 
 - Designed and engineered an integrated, data-driven full-stack platform using a React SPA, .NET API, C#, MSSQL, Foundry, and Azure Cloud services (App Services, Blob Storage, Service Bus).
 - Partnered closely within an internal team of 2–4 and a nearshore Acklen Avenue team (totaling 8–12), actively practicing pair programming and mutual code ownership to accelerate delivery.
@@ -31,8 +30,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ### Senior Developer / Team Lead
 
-**Quorum Health Resources** - Brentwood, TN  
-*January 2010 – March 2019*
+**Quorum Health Resources** - Brentwood, TN - January 2010 - March 2019
 
 - Led development of data-driven applications using Web Forms, MVC/Razor, React, and Angular, modernizing the technology stack while maintaining business continuity.
 - Led the ground-up development of the Vantage external product suite (Benchmarking, Labor Productivity, Supply Chain, Operations, Compliance, Reimbursement), followed by migration from on-prem hardware to Azure.
@@ -42,30 +40,26 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ### Application Developer
 
-**EFC Systems** - Nashville, TN  
-*November 2008 – December 2009*
+**EFC Systems** - Nashville, TN - November 2008 - December 2009
 
 - Built and maintained VB.NET client applications focused on Employee Benefits and Student Information Systems.
 
 ### Adjunct Instructor
 
-**Middle Tennessee State University** - Murfreesboro, TN  
-*August 2009 – December 2009*
+**Middle Tennessee State University** - Murfreesboro, TN - August 2009 - December 2009
 
 - Taught INFS 4300 - Security Assurance and Information Systems Auditing
 
 ### Graduate Assistant & Tutor
 
-**Middle Tennessee State University** - Murfreesboro, TN  
-*2007 – 2008*
+**Middle Tennessee State University** - Murfreesboro, TN - 2007 - 2008
 
 - Tutored students in Statistics Lab for both beginning and advanced business statistics
 - Coached undergraduate CIS students with Web development capstone projects (ASP.NET, C#.NET)
 
 ### Information Systems Specialist
 
-**University of Arkansas Human Resources** - Fayetteville, AR  
-*2000 – 2007*
+**University of Arkansas Human Resources** - Fayetteville, AR - 2000 - 2007
 
 - Streamlined campus-wide HR business processes by developing client-server and web applications using ASP.NET, VB.NET, SQL Server, ASP, and MS Access.
 - Filled data requests from data warehouses, PeopleSoft, and internal databases.
@@ -74,8 +68,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ### Information Systems Specialist
 
-**Prime, Inc.** - Springfield, MO  
-*1996 – 2000*
+**Prime, Inc.** - Springfield, MO - 1996 - 2000
 
 - Developed client-server applications bridging AS400 and PC infrastructure.
 - Planned, implemented, and maintained LAN/WAN hardware and enterprise software licensing.
