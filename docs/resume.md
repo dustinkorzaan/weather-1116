@@ -1,48 +1,91 @@
-Dustin Korzaan
-dustin@korzaan.com | (615) 427-2618 | LinkedIn | 2949 Thompson Rd, Murfreesboro, TN 37128
-Summary
+# Dustin Korzaan
+
+dustin@korzaan.com · (615) 427-2618 · LinkedIn · 2949 Thompson Rd, Murfreesboro, TN 37128
+
+## Summary
+
 Collaborative Senior Developer and Architect with 30 years of experience designing, scaling, and delivering data-driven solutions across energy, healthcare, higher education, HR, and transportation sectors. A practitioner of continuous feedback and modern development practices who thrives in collaborative pairing environments, valuing the mutual learning that comes from solving complex problems alongside teammates. Focused on delivering operational efficiency, continuous delivery, and robust business continuity through modern cloud architectures and AI-assisted development.
-Technical Skills and Tools
-Languages & Frameworks: C#, ASP.NET (MVC, Core, Web Forms), JavaScript, React (SPA, CRA, RTK, Redux), Angular, T-SQL, PL/SQL, HTML, CSS, Bootstrap, VB.NET, VBA, ASP
-Cloud, DevSecOps & Architecture: Azure (App Services, Blob Storage, Service Bus, B2C), GitHub Actions, Azure DevOps, TFS, CI/CD, API Design (REST, SOAP), AJAX, JSON, Git
-Data & Analytics: MSSQL, SSMS, SSIS, SSRS, Trinisys Convergence, Qlik Sense, Tableau SQL, MS Excel (Model Design/Decision Analysis), MS Access
-Identity & Security: OAuth, PING, Auth0, JWT, Cookie Auth, HIPAA Compliance
-AI & Modern Tools: Copilot, Cursor, Devin, Claude, Postman, Visual Studio, VS Code
-Methodologies: Agile, Scrum, MVP, Lean, Pareto, Collaborative/Pair Programming, Continuous Delivery, Continuous Feedback
-Professional Experience
-Senior Developer / Architect | April 2019 – May 2026
-Schneider Electric – Franklin, TN
-Designed and engineered an integrated, data-driven full-stack platform using a React SPA, .NET API, C#, MSSQL, Foundry, and Azure Cloud services (App Services, Blob Storage, Service Bus).
-Partnered closely within an internal team of 2–4 and a nearshore Acklen Avenue team (totaling 8–12), actively practicing pair programming and mutual code ownership to accelerate delivery.
-Architected and implemented seamless third-party integrations with DocuSign, Airtable, Procore, Avetta, Dynamics SQL, and Tableau SQL to optimize business operational workflows.
-Senior Developer / Team Lead | January 2010 – March 2019
-Quorum Health Resources – Brentwood, TN
-Developed data-driven applications spanning on-prem Web Forms to Azure-hosted MVC/Razor, successfully introducing React and Angular to establish new modern company standards.
-Led the ground-up development and cloud migration of the "Vantage" external product suite (Benchmarking, Labor Productivity, Supply Chain, Operations, Compliance, Reimbursement) from on-prem hardware to Azure.
-Managed data integrations between complex internal and external ecosystems, including CRM (Salesforce via DBAmp, Dynamics via KingswaySoft), Accounting (Epicor, Workday), and hospital databases using SQL, CSV, SFTP, and Trinisys Convergence.
-Collaborated directly with cross-functional stakeholders (VP, PO, PM, BA, QA, BI) to align technical delivery with customer success, frequently wearing multiple hats to ensure MVP success.
-Championed the transition from on-prem TFS to cloud-based Git with automated CI/CD pipelines in Azure DevOps.
-Fostered an inclusive onboarding environment, welcoming and setting up new team members for immediate success through side-by-side pairing.
-Application Developer | November 2008 – December 2009
-EFC Systems – Nashville, TN
-Built and maintained VB.NET client applications focused on Employee Benefits and Student Information Systems.
-Adjunct Instructor | August 2009 – December 2009
-Middle Tennessee State University – Murfreesboro, TN
-Taught INFS 4300 (Security Assurance and Information Systems Auditing), encouraging interactive, peer-to-peer discussion on security baselines.
-Graduate Assistant & Tutor | 2007 – 2008
-Middle Tennessee State University – Murfreesboro, TN
-Partnered with students in the Statistics Lab for introductory and advanced business statistics, adopting a collaborative approach to solving data problems.
-Coached undergraduate CIS students on their capstone web development senior projects using ASP.NET and C#.
-Information Systems Specialist | 2000 – 2007
-University of Arkansas Human Resources – Fayetteville, AR
-Streamlined campus-wide HR business processes by developing client-server and web applications using ASP.NET, VB.NET, SQL Server, ASP, and MS Access.
-Served as HIPAA Security Officer and resolved complex data inquiries via optimized SQL queries across data warehouses, PeopleSoft, and internal databases.
-Maintained a highly productive, trusted telecommuting arrangement for 3 years after relocating out of state.
-Recipient of the University of Arkansas Employee of the Year Award (2002).
-Information Systems Specialist | 1996 – 2000
-Prime, Inc. – Springfield, MO
-Developed client-server applications bridging AS400 and PC infrastructure.
-Planned, implemented, and maintained LAN/WAN hardware and enterprise software licensing.
-Education
-Master of Science in Information Systems (GPA: 4.0/4.0) | Middle Tennessee State University
-Bachelor of Science in Information Systems (GPA: 3.4/4.0) | John Brown University
+
+## Technical Skills and Tools
+
+| Area | Technologies |
+| --- | --- |
+| **Languages & Frameworks** | C#, ASP.NET (MVC, Core, Web Forms), JavaScript, React (SPA, CRA, RTK, Redux), Angular, T-SQL, PL/SQL, HTML, CSS, Bootstrap, VB.NET, VBA, ASP |
+| **Cloud, DevSecOps & Architecture** | Azure (App Services, Blob Storage, Service Bus, B2C), GitHub Actions, Azure DevOps, TFS, CI/CD, API Design (REST, SOAP), AJAX, JSON, Git |
+| **Data & Analytics** | MSSQL, SSMS, SSIS, SSRS, Trinisys Convergence, Qlik Sense, Tableau SQL, MS Excel (Model Design/Decision Analysis), MS Access |
+| **Identity & Security** | OAuth, PING, Auth0, JWT, Cookie Auth, HIPAA Compliance |
+| **AI & Modern Tools** | Copilot, Cursor, Devin, Claude, Postman, Visual Studio, VS Code |
+| **Methodologies** | Agile, Scrum, MVP, Lean, Pareto, Collaborative/Pair Programming, Continuous Delivery, Continuous Feedback |
+
+## Professional Experience
+
+### Senior Developer / Architect
+
+**Schneider Electric** — Franklin, TN  
+*April 2019 – May 2026*
+
+- Designed and engineered an integrated, data-driven full-stack platform using a React SPA, .NET API, C#, MSSQL, Foundry, and Azure Cloud services (App Services, Blob Storage, Service Bus).
+- Partnered closely within an internal team of 2–4 and a nearshore Acklen Avenue team (totaling 8–12), actively practicing pair programming and mutual code ownership to accelerate delivery.
+- Architected and implemented seamless third-party integrations with DocuSign, Airtable, Procore, Avetta, Dynamics SQL, and Tableau SQL to optimize business operational workflows.
+
+### Senior Developer / Team Lead
+
+**Quorum Health Resources** — Brentwood, TN  
+*January 2010 – March 2019*
+
+- Developed data-driven applications spanning on-prem Web Forms to Azure-hosted MVC/Razor, successfully introducing React and Angular to establish new modern company standards.
+- Led the ground-up development and cloud migration of the "Vantage" external product suite (Benchmarking, Labor Productivity, Supply Chain, Operations, Compliance, Reimbursement) from on-prem hardware to Azure.
+- Managed data integrations between complex internal and external ecosystems, including CRM (Salesforce via DBAmp, Dynamics via KingswaySoft), Accounting (Epicor, Workday), and hospital databases using SQL, CSV, SFTP, and Trinisys Convergence.
+- Collaborated directly with cross-functional stakeholders (VP, PO, PM, BA, QA, BI) to align technical delivery with customer success, frequently wearing multiple hats to ensure MVP success.
+- Championed the transition from on-prem TFS to cloud-based Git with automated CI/CD pipelines in Azure DevOps.
+- Fostered an inclusive onboarding environment, welcoming and setting up new team members for immediate success through side-by-side pairing.
+
+### Application Developer
+
+**EFC Systems** — Nashville, TN  
+*November 2008 – December 2009*
+
+- Built and maintained VB.NET client applications focused on Employee Benefits and Student Information Systems.
+
+### Adjunct Instructor
+
+**Middle Tennessee State University** — Murfreesboro, TN  
+*August 2009 – December 2009*
+
+- Taught INFS 4300 (Security Assurance and Information Systems Auditing), encouraging interactive, peer-to-peer discussion on security baselines.
+
+### Graduate Assistant & Tutor
+
+**Middle Tennessee State University** — Murfreesboro, TN  
+*2007 – 2008*
+
+- Partnered with students in the Statistics Lab for introductory and advanced business statistics, adopting a collaborative approach to solving data problems.
+- Coached undergraduate CIS students on their capstone web development senior projects using ASP.NET and C#.
+
+### Information Systems Specialist
+
+**University of Arkansas Human Resources** — Fayetteville, AR  
+*2000 – 2007*
+
+- Streamlined campus-wide HR business processes by developing client-server and web applications using ASP.NET, VB.NET, SQL Server, ASP, and MS Access.
+- Served as HIPAA Security Officer and resolved complex data inquiries via optimized SQL queries across data warehouses, PeopleSoft, and internal databases.
+- Maintained a highly productive, trusted telecommuting arrangement for 3 years after relocating out of state.
+- Recipient of the University of Arkansas Employee of the Year Award (2002).
+
+### Information Systems Specialist
+
+**Prime, Inc.** — Springfield, MO  
+*1996 – 2000*
+
+- Developed client-server applications bridging AS400 and PC infrastructure.
+- Planned, implemented, and maintained LAN/WAN hardware and enterprise software licensing.
+
+## Education
+
+### Master of Science in Information Systems
+
+**Middle Tennessee State University** — GPA: 4.0/4.0
+
+### Bachelor of Science in Information Systems
+
+**John Brown University** — GPA: 3.4/4.0
