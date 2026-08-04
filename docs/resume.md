@@ -8,14 +8,9 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ## Technical Skills and Tools
 
-| Area | Technologies |
-| --- | --- |
-| **Languages & Frameworks** | C#, ASP.NET (MVC, Core, Web Forms), JavaScript, React (SPA, CRA, RTK, Redux), Angular, T-SQL, PL/SQL, HTML, CSS, Bootstrap, VB.NET, VBA, ASP |
-| **Cloud, DevSecOps & Architecture** | Azure (App Services, Blob Storage, Service Bus, B2C), GitHub Actions, Azure DevOps, TFS, CI/CD, API Design (REST, SOAP), AJAX, JSON, Git |
-| **Data & Analytics** | MSSQL, SSMS, SSIS, SSRS, Trinisys Convergence, Qlik Sense, Tableau SQL, MS Excel (Model Design/Decision Analysis), MS Access |
-| **Identity & Security** | OAuth, PING, Auth0, JWT, Cookie Auth, HIPAA Compliance |
-| **AI & Modern Tools** | Copilot, Cursor, Devin, Claude, Postman, Visual Studio, VS Code |
-| **Methodologies** | Agile, Scrum, MVP, Lean, Pareto, Collaborative/Pair Programming, Continuous Delivery, Continuous Feedback |
+- **Languages & Frameworks:** C#, ASP.NET (MVC, Core, Web Forms), JavaScript, React (SPA, CRA, RTK, Redux), Angular, T-SQL, PL/SQL, HTML, CSS, Bootstrap, VB.NET, VBA, ASP
+- **Cloud, Data & DevOps:** Azure (App Services, Blob Storage, Service Bus), MSSQL, SSMS, SSIS, SSRS, Trinisys Convergence, Qlik Sense, Tableau SQL, MS Excel (Model Design/Decision Analysis), MS Access, GitHub Actions, Azure DevOps, TFS, CI/CD, API Design (REST, SOAP), AJAX, JSON, Git
+- **Identity, Tools & Practices:** OAuth, Azure B2C, PING, Auth0, JWT, Cookie Auth, Copilot, Cursor, Devin, Claude, Postman, Visual Studio, VS Code, Agile, Scrum, MVP, Lean, Pareto, Collaborative/Pair Programming, Continuous Delivery, Continuous Feedback
 
 ## Professional Experience
 
