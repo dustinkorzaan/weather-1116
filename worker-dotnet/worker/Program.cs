@@ -1,4 +1,5 @@
 using Core.About;
+using Core.Hangfire;
 using Core.Weather.Handlers;
 using DotNetEnv;
 using Hangfire;
@@ -28,6 +29,8 @@ var queuePollInterval = TimeSpan.FromSeconds(60);
 
 builder.Services.AddHangfire(config =>
 {
+	config.UseDefaultAutomaticRetry();
+
 	if (string.IsNullOrWhiteSpace(dbConnectionString))
 	{
 		config.UseMemoryStorage();
