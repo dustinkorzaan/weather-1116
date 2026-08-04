@@ -27,18 +27,13 @@ flowchart LR
   Model[Azure OpenAI model]
   McpFunc[mcp-function GetLatLongData]
   McpDotNet[mcp-dotnet GetPublicWeatherData]
-  CoreGeo[Core geo handlers]
-  CoreWx[Core weather handlers]
 
   UI --> API
   API --> Core
-  API --> Worker
   Worker --> Core
   Core --> Model
   Model --> McpFunc
   Model --> McpDotNet
-  McpFunc --> CoreGeo
-  McpDotNet --> CoreWx
 ```
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
