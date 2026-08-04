@@ -27,6 +27,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 - Partnered closely within an internal team of 2–4 and a nearshore Acklen Avenue team (totaling 8–12), actively practicing pair programming and mutual code ownership to accelerate delivery.
 - Implemented third-party integrations with DocuSign, Airtable, Procore, Avetta, Dynamics SQL, and Tableau SQL to optimize business operational workflows.
 - Practiced Agile, Scrum, MVP, Lean, Pareto, Continuous Delivery, and Continuous Feedback, with 2–4 hours of backlog refinement four days per week.
+- Shifted over three years toward AI-assisted development using Copilot and Cursor, embedding AI tools into daily coding, review, and delivery workflows.
 
 ### Senior Developer / Team Lead
 
