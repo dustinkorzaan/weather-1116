@@ -60,7 +60,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 *2007 – 2008*
 
 - Tutored students in Statistics Lab for both beginning and advanced business statistics
-- Coached undergraduate CIS students on their capstone web development senior projects using ASP.NET and C#.
+- Coached undergraduate CIS students with Web development capstone projects (ASP.NET, C#.NET)
 
 ### Information Systems Specialist
 
