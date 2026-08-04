@@ -10,7 +10,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 - C#, ASP.NET (MVC, API, Web Forms), EF Code First, JavaScript, React (Vite, CRA, RTK, Redux), Angular, T-SQL, HTML, CSS, Ant Design, Bootstrap, VB.NET
 - Azure, Blob Storage, Service Bus, Event Grid, Foundry, MSSQL, SSMS, SSIS, SSRS, MS Excel (Model Design/Decision Analysis), API Design (REST, SOAP), JSON
-- DocuSign, Airtable, Procore, Avetta, Qmerit, Dynamics, Salesforce, Workday, Epicor, Trinisys Convergence, Qlik Sense, Tableau
+- Integrations with DocuSign, Airtable, Procore, Avetta, Qmerit, Dynamics, Salesforce, Workday, Epicor, Trinisys Convergence, Qlik Sense, Tableau
 - GitHub Actions, Azure DevOps, TFS, CI/CD, Git
 - OAuth, Azure B2C, PING, Auth0, JWT, Cookie Auth
 - Agile, Scrum, MVP, Lean, Pareto, Continuous Delivery, Continuous Feedback, Pair Programming
