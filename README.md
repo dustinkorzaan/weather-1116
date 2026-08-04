@@ -23,6 +23,7 @@ flowchart LR
   UI[React / Blazor / MVC]
   API[MVC or WeatherAPI]
   Core[Core GetCurrentAIWeatherHandler]
+  Worker[worker-dotnet Hangfire]
   Model[Azure OpenAI model]
   McpFunc[mcp-function GetLatLongData]
   McpDotNet[mcp-dotnet GetPublicWeatherData]
@@ -31,6 +32,8 @@ flowchart LR
 
   UI --> API
   API --> Core
+  API --> Worker
+  Worker --> Core
   Core --> Model
   Model --> McpFunc
   Model --> McpDotNet
