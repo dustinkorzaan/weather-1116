@@ -59,7 +59,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 **Middle Tennessee State University** — Murfreesboro, TN  
 *2007 – 2008*
 
-- Partnered with students in the Statistics Lab for introductory and advanced business statistics, adopting a collaborative approach to solving data problems.
+- Tutored students in Statistics Lab for both beginning and advanced business statistics
 - Coached undergraduate CIS students on their capstone web development senior projects using ASP.NET and C#.
 
 ### Information Systems Specialist
