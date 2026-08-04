@@ -68,7 +68,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 *2000 – 2007*
 
 - Streamlined campus-wide HR business processes by developing client-server and web applications using ASP.NET, VB.NET, SQL Server, ASP, and MS Access.
-- Resolved complex data inquiries via optimized SQL queries across data warehouses, PeopleSoft, and internal databases.
+- Filled data requests via optimized SQL queries across data warehouses, PeopleSoft, and internal databases.
 - Maintained a highly productive, trusted telecommuting arrangement for 3 years after relocating out of state.
 - Recipient of the University of Arkansas Employee of the Year Award (2002).
 
