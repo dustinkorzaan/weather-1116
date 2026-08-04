@@ -9,7 +9,7 @@ dustin@korzaan.com · (615) 427-2618 · LinkedIn
 
 Dear [Hiring Manager Name / Hiring Team],
 
-I'm interested in the [Job Title] role at [Company Name]. I want to continue using my experience to help teams design and deliver data-driven products across energy, healthcare, education, HR, and transportation—and I'm still most motivated by solving complex problems with simple, maintainable solutions.
+I'm interested in the [Job Title] role at [Company Name]. I want to continue using my experience to design and deliver data-driven products—working independently or with a team—across energy, healthcare, education, HR, and transportation. I'm still most motivated by solving complex problems with simple, maintainable solutions.
 
 At Schneider Electric, I've enjoyed working with an internal product owner and systems analyst, together with a nearshore Acklen Avenue team, over the last seven years to build an integrated full-stack platform using React, .NET API, C#, MSSQL, Foundry, and Azure (Blob Storage, Service Bus, Event Grid). We paired often, shared code ownership, and delivered as a team of 8-12 across internal and nearshore groups. I designed authentication against PING with OAuth and JWT, implemented integrations with DocuSign, Airtable, Procore, Avetta, Dynamics, and Tableau, and over the past three years have leaned into AI-assisted development with Copilot and Cursor in daily coding, peer reviews, and delivery. Our rhythm is Agile and lean—continuous feedback, MVP thinking, and 2-4 hours of backlog refinement four days a week.
 
