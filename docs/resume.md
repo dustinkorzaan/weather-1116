@@ -52,7 +52,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 **Middle Tennessee State University** — Murfreesboro, TN  
 *August 2009 – December 2009*
 
-- INFS 4300 - Security Assurance and Information Systems Auditing
+- Taught INFS 4300 - Security Assurance and Information Systems Auditing
 
 ### Graduate Assistant & Tutor
 
