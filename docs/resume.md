@@ -36,8 +36,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 - Led the ground-up development and cloud migration of the "Vantage" external product suite (Benchmarking, Labor Productivity, Supply Chain, Operations, Compliance, Reimbursement) from on-prem hardware to Azure.
 - Managed data integrations between complex internal and external ecosystems, including CRM (Salesforce via DBAmp, Dynamics via KingswaySoft), Accounting (Epicor, Workday), and hospital databases using SQL, CSV, SFTP, and Trinisys Convergence.
 - Collaborated directly with cross-functional stakeholders (VP, PO, PM, BA, QA, BI) to align technical delivery with customer success, frequently wearing multiple hats to ensure MVP success.
-- Championed the transition from on-prem TFS to cloud-based Git with automated CI/CD pipelines in Azure DevOps.
-- Fostered an inclusive onboarding environment, welcoming and setting up new team members for immediate success through side-by-side pairing.
+- Transition from on-prem TFS to cloud-based Git with automated CI/CD pipelines in Azure DevOps.
 
 ### Application Developer
 
