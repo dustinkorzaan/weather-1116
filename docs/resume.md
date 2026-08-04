@@ -4,7 +4,7 @@ dustin@korzaan.com · (615) 427-2618 · LinkedIn · 2949 Thompson Rd, Murfreesbo
 
 ## Summary
 
-Collaborative Senior Developer and Architect with 30 years of experience designing, scaling, and delivering data-driven solutions across energy, healthcare, higher education, HR, and transportation sectors. A practitioner of continuous feedback and modern development practices who thrives in collaborative pairing environments, valuing the mutual learning that comes from solving complex problems alongside teammates. Focused on delivering operational efficiency, continuous delivery, and robust business continuity through modern cloud architectures and AI-assisted development.
+Senior Developer and Architect with 30 years of experience designing, scaling, and delivering data-driven products, solutions, and process improvement across energy, healthcare, higher education, HR, and transportation. A practitioner of continuous feedback and modern development practices who solves complex problems with simple, maintainable solutions. Focused on operational efficiency, continuous delivery, and business continuity through modern cloud architectures and AI-assisted development.
 
 ## Technical Skills and Tools
 
