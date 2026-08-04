@@ -20,7 +20,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ### Senior Developer / Architect
 
-**Schneider Electric** — Franklin, TN  
+**Schneider Electric** - Franklin, TN  
 *April 2019 – May 2026*
 
 - Designed and engineered an integrated, data-driven full-stack platform using a React SPA, .NET API, C#, MSSQL, Foundry, and Azure Cloud services (App Services, Blob Storage, Service Bus).
@@ -31,7 +31,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ### Senior Developer / Team Lead
 
-**Quorum Health Resources** — Brentwood, TN  
+**Quorum Health Resources** - Brentwood, TN  
 *January 2010 – March 2019*
 
 - Led development of data-driven applications using Web Forms, MVC/Razor, React, and Angular, modernizing the technology stack while maintaining business continuity.
@@ -42,21 +42,21 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ### Application Developer
 
-**EFC Systems** — Nashville, TN  
+**EFC Systems** - Nashville, TN  
 *November 2008 – December 2009*
 
 - Built and maintained VB.NET client applications focused on Employee Benefits and Student Information Systems.
 
 ### Adjunct Instructor
 
-**Middle Tennessee State University** — Murfreesboro, TN  
+**Middle Tennessee State University** - Murfreesboro, TN  
 *August 2009 – December 2009*
 
 - Taught INFS 4300 - Security Assurance and Information Systems Auditing
 
 ### Graduate Assistant & Tutor
 
-**Middle Tennessee State University** — Murfreesboro, TN  
+**Middle Tennessee State University** - Murfreesboro, TN  
 *2007 – 2008*
 
 - Tutored students in Statistics Lab for both beginning and advanced business statistics
@@ -64,7 +64,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ### Information Systems Specialist
 
-**University of Arkansas Human Resources** — Fayetteville, AR  
+**University of Arkansas Human Resources** - Fayetteville, AR  
 *2000 – 2007*
 
 - Streamlined campus-wide HR business processes by developing client-server and web applications using ASP.NET, VB.NET, SQL Server, ASP, and MS Access.
@@ -74,7 +74,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ### Information Systems Specialist
 
-**Prime, Inc.** — Springfield, MO  
+**Prime, Inc.** - Springfield, MO  
 *1996 – 2000*
 
 - Developed client-server applications bridging AS400 and PC infrastructure.
@@ -82,10 +82,10 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ## Education
 
-### Master of Science in Information Systems (Overall GPA 4.0) — 2008
+### Master of Science in Information Systems (Overall GPA 4.0) - 2008
 
-**Middle Tennessee State University** — Murfreesboro, TN
+**Middle Tennessee State University** - Murfreesboro, TN
 
-### Bachelor of Science in Information Systems (Overall GPA 3.4) — 2002
+### Bachelor of Science in Information Systems (Overall GPA 3.4) - 2002
 
-**John Brown University** — Siloam Springs, AR
+**John Brown University** - Siloam Springs, AR
