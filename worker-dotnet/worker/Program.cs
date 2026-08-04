@@ -14,8 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
-builder.Services.Configure<HangfireAboutHealthOptions>(
-	_ => HangfireAboutHealthOptions.Bind(builder.Configuration));
+builder.Services.Configure<HangfireAboutHealthOptions>(options =>
+	HangfireAboutHealthOptions.Configure(options, builder.Configuration));
 builder.Services.AddControllers();
 
 // Durable SQL Server storage wherever a connection string is provided
