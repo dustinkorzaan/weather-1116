@@ -14,7 +14,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 - GitHub Actions, Azure DevOps, TFS, CI/CD, Git
 - OAuth, Azure B2C, PING, Auth0, JWT, Cookie Auth
 - Agile, Scrum, MVP, Lean, Pareto, Continuous Delivery, Continuous Feedback, Pair Programming
-- Copilot, Cursor, Devin, Claude, Postman, Visual Studio, VS Code
+- Copilot, Cursor, Postman, Visual Studio, VS Code
 
 ## Professional Experience
 
@@ -23,9 +23,9 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 **Schneider Electric** - Franklin, TN - April 2019 - May 2026
 
 - Designed and engineered an integrated, data-driven full-stack platform using React, .NET API, C#, MSSQL, Foundry, and Azure Cloud services (App Services, Blob Storage, Service Bus, Event Grid).
-- Partnered closely within an internal team of 2–4 and a nearshore Acklen Avenue team (totaling 8–12), actively practicing pair programming and mutual code ownership to accelerate delivery.
-- Implemented third-party integrations with DocuSign, Airtable, Procore, Avetta, Dynamics SQL, and Tableau SQL to optimize business operational workflows.
-- Practiced Agile, Scrum, MVP, Lean, Pareto, Continuous Delivery, and Continuous Feedback, with 2–4 hours of backlog refinement four days per week.
+- Partnered closely with an internal team of 2-4 and a nearshore Acklen Avenue team (totaling 8-12), actively practicing pair programming and mutual code ownership to accelerate delivery.
+- Implemented third-party integrations with DocuSign, Airtable, Procore, Avetta, Dynamics, and Tableau to optimize business operational workflows.
+- Practiced Agile, Scrum, MVP, Lean, Pareto, Continuous Delivery, and Continuous Feedback, with 2-4 hours of backlog refinement four days per week.
 - Three-year shift toward AI-assisted development using Copilot and Cursor, embedding AI tools into daily coding, peer reviews, and delivery workflows.
 
 ### Senior Developer / Team Lead
@@ -36,7 +36,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 - Led the ground-up development of the Vantage external product suite (Benchmarking, Labor Productivity, Supply Chain, Operations, Compliance, Reimbursement), followed by migration from on-prem hardware to Azure.
 - Managed data integrations between complex internal and external ecosystems, including CRM (Salesforce via DBAmp, Dynamics via KingswaySoft), Accounting (Epicor, Workday), and hospital databases using SQL, CSV, SFTP, and Trinisys Convergence.
 - Collaborated directly with cross-functional stakeholders (VP, PO, PM, BA, QA, BI) to align technical delivery with customer success, frequently wearing multiple hats to ensure MVP success.
-- Transition from on-prem TFS to cloud-based Git with automated CI/CD pipelines in Azure DevOps.
+- Led transition from on-prem TFS to cloud-based Git with automated CI/CD pipelines in Azure DevOps.
 
 ### Application Developer
 
