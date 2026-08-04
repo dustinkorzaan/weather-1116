@@ -25,7 +25,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 - Designed and engineered an integrated, data-driven full-stack platform using a React SPA, .NET API, C#, MSSQL, Foundry, and Azure Cloud services (App Services, Blob Storage, Service Bus).
 - Partnered closely within an internal team of 2–4 and a nearshore Acklen Avenue team (totaling 8–12), actively practicing pair programming and mutual code ownership to accelerate delivery.
-- Architected and implemented seamless third-party integrations with DocuSign, Airtable, Procore, Avetta, Dynamics SQL, and Tableau SQL to optimize business operational workflows.
+- Implemented third-party integrations with DocuSign, Airtable, Procore, Avetta, Dynamics SQL, and Tableau SQL to optimize business operational workflows.
 
 ### Senior Developer / Team Lead
 
