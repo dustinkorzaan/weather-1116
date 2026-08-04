@@ -9,6 +9,8 @@ internal static class HangfireMediatREventSerializer
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
+    public static string GetDisplayName(Type eventType) => eventType.Name;
+
     public static string GetTypeName(Type eventType) => eventType.AssemblyQualifiedName
         ?? throw new InvalidOperationException($"Could not resolve assembly-qualified name for '{eventType.FullName}'.");
 

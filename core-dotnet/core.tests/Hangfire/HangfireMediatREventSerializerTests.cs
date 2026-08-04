@@ -7,6 +7,14 @@ namespace Core.Tests.Hangfire;
 public class HangfireMediatREventSerializerTests
 {
     [Fact]
+    public void GetDisplayName_ReturnsShortEventTypeName()
+    {
+        Assert.Equal(
+            nameof(ConfirmNashvilleAIWeatherEvent),
+            HangfireMediatREventSerializer.GetDisplayName(typeof(ConfirmNashvilleAIWeatherEvent)));
+    }
+
+    [Fact]
     public void SerializeAndDeserialize_RoundTripsEventPayload()
     {
         var @event = new GetCurrentAIWeatherEvent { Location = "Nashville, TN" };
