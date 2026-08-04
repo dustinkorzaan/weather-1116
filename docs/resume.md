@@ -8,7 +8,7 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 
 ## Technical Skills and Tools
 
-- C#, ASP.NET (MVC, API, Web Forms), EF Code First, JavaScript, React (Vite, CRA, RTK, Redux), Angular, T-SQL, PL/SQL, HTML, CSS, Ant Design, Bootstrap, VB.NET, VBA, ASP
+- C#, ASP.NET (MVC, API, Web Forms), EF Code First, JavaScript, React (Vite, CRA, RTK, Redux), Angular, T-SQL, HTML, CSS, Ant Design, Bootstrap, VB.NET, VBA, ASP
 - Azure, Blob Storage, Service Bus, Foundry, MSSQL, SSMS, SSIS, SSRS, MS Excel (Model Design/Decision Analysis), MS Access, API Design (REST, SOAP), JSON
 - DocuSign, Airtable, Procore, Avetta, Qmerit, Dynamics, Salesforce, Workday, Epicor, Trinisys Convergence, Qlik Sense, Tableau
 - GitHub Actions, Azure DevOps, TFS, CI/CD, Git
