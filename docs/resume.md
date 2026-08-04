@@ -32,8 +32,8 @@ Senior Developer and Architect with 30 years of experience designing, scaling, a
 **Quorum Health Resources** — Brentwood, TN  
 *January 2010 – March 2019*
 
-- Developed data-driven applications spanning on-prem Web Forms to Azure-hosted MVC/Razor, successfully introducing React and Angular to establish new modern company standards.
-- Led the ground-up development and cloud migration of the "Vantage" external product suite (Benchmarking, Labor Productivity, Supply Chain, Operations, Compliance, Reimbursement) from on-prem hardware to Azure.
+- Led development of data-driven applications using Web Forms, MVC/Razor, React, and Angular, modernizing the technology stack while maintaining business continuity.
+- Led the ground-up development of the Vantage external product suite (Benchmarking, Labor Productivity, Supply Chain, Operations, Compliance, Reimbursement), followed by migration from on-prem hardware to Azure.
 - Managed data integrations between complex internal and external ecosystems, including CRM (Salesforce via DBAmp, Dynamics via KingswaySoft), Accounting (Epicor, Workday), and hospital databases using SQL, CSV, SFTP, and Trinisys Convergence.
 - Collaborated directly with cross-functional stakeholders (VP, PO, PM, BA, QA, BI) to align technical delivery with customer success, frequently wearing multiple hats to ensure MVP success.
 - Transition from on-prem TFS to cloud-based Git with automated CI/CD pipelines in Azure DevOps.
