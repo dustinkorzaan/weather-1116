@@ -344,14 +344,15 @@ and call them across languages and hosts.”
 
 ---
 
-### 8. Agent contains model; model never talks to MCP directly
+### 8. Agent contains model; model never talks to MCP directly ("Agent" is your code when calling Model directly)
 
-Clarifies who owns the loop.
+Clarifies who owns the loop — a hosted agent runtime, or **your app** when you
+call the model directly (V3/V4 / production).
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Agent as Agent loop
+    participant Agent as Agent/App
     participant Model as Model
     participant MCP as MCP tools
 
