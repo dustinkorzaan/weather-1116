@@ -676,7 +676,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Console
-    participant AppLoop as Loop
+    participant AppLoop as Agent/Loop
     participant Model as Foundry Model
     box MCP Function
         participant GetLatLongTool
@@ -685,7 +685,8 @@ sequenceDiagram
         participant GetPublicWeatherTool
     end
 
-    Console->>Model: system prompt + MCP tools, user prompt last
+    Console->>AppLoop: system prompt + MCP tools, user prompt last
+    AppLoop->>Model: system prompt + MCP tools, user prompt last
     Model->>AppLoop: GetLatLong(location)
     AppLoop->>GetLatLongTool: GetLatLong(location)
     GetLatLongTool-->>AppLoop: NonAILatLongResponse
@@ -694,5 +695,6 @@ sequenceDiagram
     AppLoop->>GetPublicWeatherTool: GetPublicWeather(lat,long)
     GetPublicWeatherTool-->>AppLoop: NonAIWeatherResponse
     AppLoop-->>Model: NonAIWeatherResponse
-    Model-->>Console: AIWeatherResponse
+    Model-->>AppLoop: AIWeatherResponse
+    AppLoop-->>Console: AIWeatherResponse
 ```
