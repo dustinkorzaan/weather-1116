@@ -60,7 +60,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   - Shows the newer Foundry / Azure AI inference surface.
 
 - **V3 — In-process tool callbacks** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
-  (`FoundryConsoleV3InjectFunctions.csproj`)
+  (`FoundryConsoleV3InProcessToolCallbacks.csproj`)
   - Registers `GetLatLongData` and `GetPublicWeatherData` as in-process tool
     callbacks (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.

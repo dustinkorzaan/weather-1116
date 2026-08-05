@@ -132,11 +132,11 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Foundry Console V3 Inject Functions",
+            "name": "Foundry Console V3 In Process Tool Callbacks",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build foundry console v3",
-            "program": "${workspaceFolder}/FoundryConsoleV3/bin/Debug/net10.0/FoundryConsoleV3InjectFunctions.dll",
+            "program": "${workspaceFolder}/FoundryConsoleV3/bin/Debug/net10.0/FoundryConsoleV3InProcessToolCallbacks.dll",
             "args": [],
             "cwd": "${workspaceFolder}/FoundryConsoleV3",
             "stopAtEntry": false,
