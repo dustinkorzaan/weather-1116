@@ -279,7 +279,7 @@ flowchart LR
 
 ---
 
-### 6. Model with tools — in-process (no MCP yet)
+### 6. Model with tools in-process (no MCP yet) (looping is actually in the app instead of model)
 
 Function calling: the model **requests** a tool; your process **executes** it (V3).
 
