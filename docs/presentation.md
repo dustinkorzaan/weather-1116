@@ -1,17 +1,4 @@
-# Presentation — AI Development Journey
-
-**Mid June → late July 2026**
-
-This repo's `docs/` folders mirror four sections of a summary journey. The arc is
-intentional: each step sets up the next, even when a section is only introduced in
-the talk.
-
-## The Journey
-
-The timeline is real. Over roughly six weeks the work moved from *where* development
-happens, through *how* autonomous agents fit a sprint rhythm, into the broader *tooling
-landscape*, and finally into a concrete *Foundry + MCP* implementation in this
-Weather sample.
+# Presentation: The Journey
 
 Sections **1–3** are framing — name them, show the folder, move on. The material is
 sketched, not presentation-ready. **Section 4** is the focus: live demos, architecture,
