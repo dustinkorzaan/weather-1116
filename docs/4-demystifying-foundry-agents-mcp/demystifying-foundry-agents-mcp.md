@@ -640,7 +640,7 @@ _Pick 3–5 diagrams per audience: executives → 9, 10, 18; engineers → 6, 7,
 
 ---
 
-## V3 diagram (copy)
+## V3 Diagram (with looping)
 
 ```mermaid
 sequenceDiagram
@@ -648,6 +648,7 @@ sequenceDiagram
     participant UI
     box API
         participant API
+        participant Loop
         participant GetPublicWeatherFunc
         participant GetLatLongFunc
     end
@@ -655,20 +656,25 @@ sequenceDiagram
 
     UI->>API: GetPublicWeather(location)
     API->>Model: GetPublicWeather(location)
-    Model->>GetLatLongFunc: GetLatLong(location)
-    GetLatLongFunc-->>Model: NonAILatLongResponse
-    Model->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
-    GetPublicWeatherFunc-->>Model: NonAIWeatherResponse
+    Model->>Loop: GetLatLong(location)
+    Loop->>GetLatLongFunc: GetLatLong(location)
+    GetLatLongFunc-->>Loop: NonAILatLongResponse
+    Loop-->>Model: NonAILatLongResponse
+    Model->>Loop: GetPublicWeather(lat,long)
+    Loop->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
+    GetPublicWeatherFunc-->>Loop: NonAIWeatherResponse
+    Loop-->>Model: NonAIWeatherResponse
     Model-->>API: AIWeatherResponse
     API-->>UI: AIWeatherResponse
 ```
 
-## V4 diagram (copy)
+## V4 Diagram (with looping)
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant Console
+    participant Loop
     participant Model as Foundry Model
     box MCP Function
         participant GetLatLongTool
@@ -678,9 +684,13 @@ sequenceDiagram
     end
 
     Console->>Model: system prompt + MCP tools, user prompt last
-    Model->>GetLatLongTool: GetLatLong(location)
-    GetLatLongTool-->>Model: NonAILatLongResponse
-    Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
-    GetPublicWeatherTool-->>Model: NonAIWeatherResponse
+    Model->>Loop: GetLatLong(location)
+    Loop->>GetLatLongTool: GetLatLong(location)
+    GetLatLongTool-->>Loop: NonAILatLongResponse
+    Loop-->>Model: NonAILatLongResponse
+    Model->>Loop: GetPublicWeather(lat,long)
+    Loop->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+    GetPublicWeatherTool-->>Loop: NonAIWeatherResponse
+    Loop-->>Model: NonAIWeatherResponse
     Model-->>Console: AIWeatherResponse
 ```
