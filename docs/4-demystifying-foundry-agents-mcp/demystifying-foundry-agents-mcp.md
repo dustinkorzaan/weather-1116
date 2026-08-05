@@ -150,6 +150,12 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       Agent-->>Console: AIWeatherResponse
   ```
 
+## Microsoft reference
+
+[Azure AI Foundry Agents overview](https://learn.microsoft.com/en-us/azure/foundry/agents/overview)
+
+![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
+
 ## Brainstorm: demystifying model, agent, tools, and MCP (AI generated, use at your own risk)
 
 Scratchpad for presentation ideas. Diagrams progress from **model-only** → **agent
@@ -631,11 +637,3 @@ tool host** the agent already knows how to call.
 
 _Pick 3–5 diagrams per audience: executives → 9, 10, 18; engineers → 6, 7, 8,
 11; live demo → 12, 20._
-
----
-
-## Microsoft reference
-
-[Azure AI Foundry Agents overview](https://learn.microsoft.com/en-us/azure/foundry/agents/overview)
-
-![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
