@@ -92,6 +92,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     declared on the request instead of in-process callbacks — no agent, and no
     Foundry-specific client.
   - The service calls the MCP servers itself, so V3's tool-call loop disappears.
+    ("kind of", more details later)
   - Shows that MCP tooling does not require a Foundry agent.
   - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
 
