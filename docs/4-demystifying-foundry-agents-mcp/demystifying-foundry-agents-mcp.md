@@ -640,7 +640,7 @@ _Pick 3–5 diagrams per audience: executives → 9, 10, 18; engineers → 6, 7,
 
 ---
 
-## V3 Diagram (with looping)
+## Tool Callback Diagram (With looping)
 
 ```mermaid
 sequenceDiagram
@@ -670,7 +670,7 @@ sequenceDiagram
     API-->>UI: AIWeatherResponse
 ```
 
-## V4 Diagram (with looping)
+## Agent to MCP (With looping)
 
 ```mermaid
 sequenceDiagram
