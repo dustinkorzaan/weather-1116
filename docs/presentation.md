@@ -11,12 +11,11 @@ and the Foundry console learning path (V1 → V5).
 | 1 | Laptop-free Engineering | [`1-laptop-free-engineering/laptop-free.md`](1-laptop-free-engineering/laptop-free.md) | Introduce — context for cloud / Codespaces / VPC |
 | 2 | Autonomous Sprint Board AI Development | [`2-autonomous-sprint-board-ai-development/autonomous-sprint-board.md`](2-autonomous-sprint-board-ai-development/autonomous-sprint-board.md) | Introduce — placeholder for sprint-board + agents story |
 | 3 | AI Development Ecosystem | [`3-ai-development-ecosystem/ai-development-ecosystem.md`](3-ai-development-ecosystem/ai-development-ecosystem.md) | Introduce — landscape of tools (wireframes, rapid app gen, IDEs) |
-| 4 | Demystifying Microsoft Foundry Agents and MCP | [`4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
+| 4 | Demystifying Microsoft Foundry Agents and MCP | [`demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md), [`brainstorm-demystifying-model-agent-tools-mcp.md`](4-demystifying-foundry-agents-mcp/brainstorm-demystifying-model-agent-tools-mcp.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
 
 ## Supporting material
 
 - [`architecture.md`](architecture.md) — runtime diagrams, ports, production settings (pair with section 4)
-- [`4-demystifying-foundry-agents-mcp/brainstorm-demystifying-model-agent-tools-mcp.md`](4-demystifying-foundry-agents-mcp/brainstorm-demystifying-model-agent-tools-mcp.md) — AI-generated brainstorm diagrams (use at your own risk)
 - [`../README.md`](../README.md) — how to run the Weather sample locally or in Codespaces
 - [`../AGENTS.md`](../AGENTS.md) — Cursor Cloud / agent environment notes
 
