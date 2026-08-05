@@ -637,3 +637,50 @@ tool host** the agent already knows how to call.
 
 _Pick 3–5 diagrams per audience: executives → 9, 10, 18; engineers → 6, 7, 8,
 11; live demo → 12, 20._
+
+---
+
+## V3 diagram (copy)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI
+    box API
+        participant API
+        participant GetPublicWeatherFunc
+        participant GetLatLongFunc
+    end
+    participant Model as Foundry Model
+
+    UI->>API: GetPublicWeather(location)
+    API->>Model: GetPublicWeather(location)
+    Model->>GetLatLongFunc: GetLatLong(location)
+    GetLatLongFunc-->>Model: NonAILatLongResponse
+    Model->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
+    GetPublicWeatherFunc-->>Model: NonAIWeatherResponse
+    Model-->>API: AIWeatherResponse
+    API-->>UI: AIWeatherResponse
+```
+
+## V4 diagram (copy)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Console
+    participant Model as Foundry Model
+    box MCP Function
+        participant GetLatLongTool
+    end
+    box MCP DotNet
+        participant GetPublicWeatherTool
+    end
+
+    Console->>Model: system prompt + MCP tools, user prompt last
+    Model->>GetLatLongTool: GetLatLong(location)
+    GetLatLongTool-->>Model: NonAILatLongResponse
+    Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+    GetPublicWeatherTool-->>Model: NonAIWeatherResponse
+    Model-->>Console: AIWeatherResponse
+```
