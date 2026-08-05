@@ -344,22 +344,7 @@ and call them across languages and hosts.”
 
 ---
 
-### 8. Weather production path (model-direct + two MCP hosts)
-
-Matches V4 and live API/MVC handler.
-
-```mermaid
-flowchart TB
-    UI[React / Blazor / MVC] --> API[Weather API or MVC]
-    API --> H[GetCurrentAIWeatherHandler]
-    H --> M[Model via ResponsesClient]
-    M --> MF[MCP Function<br/>lat/long]
-    M --> MD[MCP DotNet<br/>public weather]
-```
-
----
-
-### 9. Agent contains model; model never talks to MCP directly
+### 8. Agent contains model; model never talks to MCP directly
 
 Clarifies who owns the loop.
 
@@ -380,7 +365,7 @@ sequenceDiagram
 
 ---
 
-### 10. Layers stack — where each concept sits
+### 9. Layers stack — where each concept sits
 
 Good single-slide “onion” for executives.
 
@@ -395,7 +380,7 @@ flowchart BT
 
 ---
 
-### 11. Terminology map — same words, different boxes
+### 10. Terminology map — same words, different boxes
 
 ```mermaid
 flowchart LR
@@ -409,7 +394,7 @@ flowchart LR
 
 ---
 
-### 12. Specialist agents — one orchestrator, many models
+### 11. Specialist agents — one orchestrator, many models
 
 Copilot-style pattern: router agent picks a sub-agent; each sub-agent has its own
 model and toolset.
@@ -446,7 +431,7 @@ just another chat window.”
 
 ---
 
-### 13. Agent calls agent calls agent (depth limit in practice)
+### 12. Agent calls agent calls agent (depth limit in practice)
 
 Recursive delegation — platforms usually cap depth and add tracing.
 
@@ -478,7 +463,7 @@ sequenceDiagram
 
 ---
 
-### 14. Map tool **references** to real MCP endpoints
+### 13. Map tool **references** to real MCP endpoints
 
 How configuration binds abstract names to servers (Foundry agent tool list).
 
@@ -496,7 +481,7 @@ flowchart LR
 
 ---
 
-### 15. Worker in the picture
+### 14. Worker in the picture
 
 Background job enqueues work; agent runs outside the browser request (Hangfire /
 worker-dotnet angle).
@@ -529,7 +514,7 @@ flowchart LR
 
 ---
 
-### 16. Human in the loop
+### 15. Human in the loop
 
 Agent proposes; human approves before dangerous tools run.
 
@@ -557,7 +542,7 @@ sequenceDiagram
 
 ---
 
-### 17. RAG + agent + tools (three different “knowledge” sources)
+### 16. RAG + agent + tools (three different “knowledge” sources)
 
 ```mermaid
 flowchart TD
@@ -574,7 +559,7 @@ flowchart TD
 
 ---
 
-### 18. Failure modes — what breaks each layer
+### 17. Failure modes — what breaks each layer
 
 ```mermaid
 flowchart TD
@@ -587,7 +572,7 @@ flowchart TD
 
 ---
 
-### 19. One slide — full Weather journey V1 → V5 as maturity ladder
+### 18. One slide — full Weather journey V1 → V5 as maturity ladder
 
 ```mermaid
 flowchart LR
@@ -605,7 +590,7 @@ flowchart LR
 
 ---
 
-### 20. Optional: “Copilot workspace” style — many MCP tool families
+### 19. Optional: “Copilot workspace” style — many MCP tool families
 
 ```mermaid
 flowchart TB
@@ -623,7 +608,7 @@ flowchart TB
 
 ---
 
-### 21. Optional: compare **function** vs **MCP tool** (same capability, two hosts)
+### 20. Optional: compare **function** vs **MCP tool** (same capability, two hosts)
 
 ```mermaid
 flowchart TD
@@ -642,8 +627,8 @@ tool host** the agent already knows how to call.
 
 ---
 
-_Pick 3–5 diagrams per audience: executives → 10, 11, 19; engineers → 6, 7, 9,
-12; live demo → 8, 13, 21._
+_Pick 3–5 diagrams per audience: executives → 9, 10, 18; engineers → 6, 7, 8,
+11; live demo → 12, 20._
 
 ---
 
