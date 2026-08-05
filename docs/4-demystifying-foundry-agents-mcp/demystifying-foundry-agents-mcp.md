@@ -329,7 +329,7 @@ MCP is the **wire** between agent runtime and tool hosts (this repo: `mcp-functi
 
 ```mermaid
 flowchart TD
-    AG[Agent] --> MC[MCP client]
+    M[Model] --> MC[MCP client]
     MC <-->|MCP protocol| S1[MCP server A]
     MC <-->|MCP protocol| S2[MCP server B]
     S1 --> T1[GetLatLong tool]
@@ -339,17 +339,17 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Agent
+    participant Model
     participant MCP as MCP client
     participant Srv as MCP server
     participant Tool as Tool implementation
 
-    Agent->>MCP: invoke tool
+    Model->>MCP: invoke tool
     MCP->>Srv: MCP request
     Srv->>Tool: handler
     Tool-->>Srv: result
     Srv-->>MCP: MCP response
-    MCP-->>Agent: structured result
+    MCP-->>Model: structured result
 ```
 
 **Talk track:** “MCP doesn’t replace tools — it **standardizes** how agents discover
