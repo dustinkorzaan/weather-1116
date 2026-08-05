@@ -309,20 +309,7 @@ name. Your code still runs them.”
 
 ---
 
-### 7. Tool registry vs tool execution
-
-Demystify “the model has tools” — it only has **schemas** until something executes.
-
-```mermaid
-flowchart LR
-    REG[Tool registry<br/>names + JSON schema] -.->|describes| M[(Model)]
-    M -->|tool call intent| EXEC[Executor<br/>your code / MCP client]
-    EXEC --> API[Real APIs & data]
-```
-
----
-
-### 8. MCP enters — tools live on another server
+### 7. MCP enters — tools live on another server
 
 MCP is the **wire** between agent runtime and tool hosts (this repo: `mcp-function`,
 `mcp-dotnet`).
@@ -357,7 +344,7 @@ and call them across languages and hosts.”
 
 ---
 
-### 9. Weather production path (model-direct + two MCP hosts)
+### 8. Weather production path (model-direct + two MCP hosts)
 
 Matches V4 and live API/MVC handler.
 
@@ -372,7 +359,7 @@ flowchart TB
 
 ---
 
-### 10. Agent contains model; model never talks to MCP directly
+### 9. Agent contains model; model never talks to MCP directly
 
 Clarifies who owns the loop.
 
@@ -393,7 +380,7 @@ sequenceDiagram
 
 ---
 
-### 11. Layers stack — where each concept sits
+### 10. Layers stack — where each concept sits
 
 Good single-slide “onion” for executives.
 
@@ -408,7 +395,7 @@ flowchart BT
 
 ---
 
-### 12. Terminology map — same words, different boxes
+### 11. Terminology map — same words, different boxes
 
 ```mermaid
 flowchart LR
@@ -422,7 +409,7 @@ flowchart LR
 
 ---
 
-### 13. Specialist agents — one orchestrator, many models
+### 12. Specialist agents — one orchestrator, many models
 
 Copilot-style pattern: router agent picks a sub-agent; each sub-agent has its own
 model and toolset.
@@ -459,7 +446,7 @@ just another chat window.”
 
 ---
 
-### 14. Agent calls agent calls agent (depth limit in practice)
+### 13. Agent calls agent calls agent (depth limit in practice)
 
 Recursive delegation — platforms usually cap depth and add tracing.
 
@@ -491,7 +478,7 @@ sequenceDiagram
 
 ---
 
-### 15. Map tool **references** to real MCP endpoints
+### 14. Map tool **references** to real MCP endpoints
 
 How configuration binds abstract names to servers (Foundry agent tool list).
 
@@ -509,7 +496,7 @@ flowchart LR
 
 ---
 
-### 16. Worker in the picture
+### 15. Worker in the picture
 
 Background job enqueues work; agent runs outside the browser request (Hangfire /
 worker-dotnet angle).
@@ -542,7 +529,7 @@ flowchart LR
 
 ---
 
-### 17. Human in the loop
+### 16. Human in the loop
 
 Agent proposes; human approves before dangerous tools run.
 
@@ -570,7 +557,7 @@ sequenceDiagram
 
 ---
 
-### 18. RAG + agent + tools (three different “knowledge” sources)
+### 17. RAG + agent + tools (three different “knowledge” sources)
 
 ```mermaid
 flowchart TD
@@ -587,7 +574,7 @@ flowchart TD
 
 ---
 
-### 19. Failure modes — what breaks each layer
+### 18. Failure modes — what breaks each layer
 
 ```mermaid
 flowchart TD
@@ -600,7 +587,7 @@ flowchart TD
 
 ---
 
-### 20. One slide — full Weather journey V1 → V5 as maturity ladder
+### 19. One slide — full Weather journey V1 → V5 as maturity ladder
 
 ```mermaid
 flowchart LR
@@ -618,7 +605,7 @@ flowchart LR
 
 ---
 
-### 21. Optional: “Copilot workspace” style — many MCP tool families
+### 20. Optional: “Copilot workspace” style — many MCP tool families
 
 ```mermaid
 flowchart TB
@@ -636,7 +623,7 @@ flowchart TB
 
 ---
 
-### 22. Optional: compare **function** vs **MCP tool** (same capability, two hosts)
+### 21. Optional: compare **function** vs **MCP tool** (same capability, two hosts)
 
 ```mermaid
 flowchart TD
@@ -655,8 +642,8 @@ tool host** the agent already knows how to call.
 
 ---
 
-_Pick 3–5 diagrams per audience: executives → 11, 12, 20; engineers → 6, 8, 10,
-13; live demo → 9, 14, 22._
+_Pick 3–5 diagrams per audience: executives → 10, 11, 19; engineers → 6, 7, 9,
+12; live demo → 8, 13, 21._
 
 ---
 
