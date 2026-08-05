@@ -6,7 +6,7 @@ This repo's `docs/` folders mirror four sections of a summary journey. The arc i
 intentional: each step sets up the next, even when a section is only introduced in
 the talk.
 
-## Why "journey"?
+## The Journey
 
 The timeline is real. Over roughly six weeks the work moved from *where* development
 happens, through *how* autonomous agents fit a sprint rhythm, into the broader *tooling
