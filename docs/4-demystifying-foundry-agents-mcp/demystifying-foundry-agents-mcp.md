@@ -181,18 +181,6 @@ sequenceDiagram
     Model-->>App: generated text
 ```
 
-```mermaid
-flowchart LR
-    A[Your app] -->|HTTP / SDK| M[(Model)]
-    M -->|tokens| A
-```
-
-```mermaid
-flowchart TD
-    IN[Prompt + history] --> M[Model inference]
-    M --> OUT[Completion text]
-```
-
 **Talk track:** “This is just the model. It only knows what you put in the prompt.”
 
 ---
@@ -212,13 +200,6 @@ sequenceDiagram
     App->>Model: question (no lat/long, no API data)
     Model-->>App: plausible but unverified text
     App-->>User: maybe wrong
-```
-
-```mermaid
-flowchart TD
-    Q[User question] --> M[Model guesses from training data]
-    M --> H[Hallucination risk]
-    style H fill:#fdd,stroke:#c00
 ```
 
 ---
@@ -282,7 +263,7 @@ scaffolding.”
 
 ### 5. Same request — model-direct vs agent-hosted
 
-Side-by-side mental model (V1–V4 / production vs V5).
+Side-by-side mental model (Console V1–V4 / production vs V5).
 
 ```mermaid
 flowchart LR
