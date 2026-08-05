@@ -648,7 +648,7 @@ sequenceDiagram
     participant UI
     box API
         participant API
-        participant Loop
+        participant AppLoop as Loop
         participant GetPublicWeatherFunc
         participant GetLatLongFunc
     end
@@ -656,14 +656,14 @@ sequenceDiagram
 
     UI->>API: GetPublicWeather(location)
     API->>Model: GetPublicWeather(location)
-    Model->>Loop: GetLatLong(location)
-    Loop->>GetLatLongFunc: GetLatLong(location)
-    GetLatLongFunc-->>Loop: NonAILatLongResponse
-    Loop-->>Model: NonAILatLongResponse
-    Model->>Loop: GetPublicWeather(lat,long)
-    Loop->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
-    GetPublicWeatherFunc-->>Loop: NonAIWeatherResponse
-    Loop-->>Model: NonAIWeatherResponse
+    Model->>AppLoop: GetLatLong(location)
+    AppLoop->>GetLatLongFunc: GetLatLong(location)
+    GetLatLongFunc-->>AppLoop: NonAILatLongResponse
+    AppLoop-->>Model: NonAILatLongResponse
+    Model->>AppLoop: GetPublicWeather(lat,long)
+    AppLoop->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
+    GetPublicWeatherFunc-->>AppLoop: NonAIWeatherResponse
+    AppLoop-->>Model: NonAIWeatherResponse
     Model-->>API: AIWeatherResponse
     API-->>UI: AIWeatherResponse
 ```
@@ -674,7 +674,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Console
-    participant Loop
+    participant AppLoop as Loop
     participant Model as Foundry Model
     box MCP Function
         participant GetLatLongTool
@@ -684,13 +684,13 @@ sequenceDiagram
     end
 
     Console->>Model: system prompt + MCP tools, user prompt last
-    Model->>Loop: GetLatLong(location)
-    Loop->>GetLatLongTool: GetLatLong(location)
-    GetLatLongTool-->>Loop: NonAILatLongResponse
-    Loop-->>Model: NonAILatLongResponse
-    Model->>Loop: GetPublicWeather(lat,long)
-    Loop->>GetPublicWeatherTool: GetPublicWeather(lat,long)
-    GetPublicWeatherTool-->>Loop: NonAIWeatherResponse
-    Loop-->>Model: NonAIWeatherResponse
+    Model->>AppLoop: GetLatLong(location)
+    AppLoop->>GetLatLongTool: GetLatLong(location)
+    GetLatLongTool-->>AppLoop: NonAILatLongResponse
+    AppLoop-->>Model: NonAILatLongResponse
+    Model->>AppLoop: GetPublicWeather(lat,long)
+    AppLoop->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+    GetPublicWeatherTool-->>AppLoop: NonAIWeatherResponse
+    AppLoop-->>Model: NonAIWeatherResponse
     Model-->>Console: AIWeatherResponse
 ```
