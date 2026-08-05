@@ -150,7 +150,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       Agent-->>Console: AIWeatherResponse
   ```
 
-## Brainstorm: demystifying model, agent, tools, and MCP
+## Brainstorm: demystifying model, agent, tools, and MCP (AI generated, use at your own risk)
 
 Scratchpad for presentation ideas. Diagrams progress from **model-only** → **agent
 wraps model** → **tools (local or MCP)** → **agents calling agents**. Mix of
