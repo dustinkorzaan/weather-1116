@@ -16,6 +16,7 @@ and the Foundry console learning path (V1 → V5).
 ## Supporting material
 
 - [`architecture.md`](architecture.md) — runtime diagrams, ports, production settings (pair with section 4)
+- [`4-demystifying-foundry-agents-mcp/brainstorm-demystifying-model-agent-tools-mcp.md`](4-demystifying-foundry-agents-mcp/brainstorm-demystifying-model-agent-tools-mcp.md) — AI-generated brainstorm diagrams (use at your own risk)
 - [`../README.md`](../README.md) — how to run the Weather sample locally or in Codespaces
 - [`../AGENTS.md`](../AGENTS.md) — Cursor Cloud / agent environment notes
 
