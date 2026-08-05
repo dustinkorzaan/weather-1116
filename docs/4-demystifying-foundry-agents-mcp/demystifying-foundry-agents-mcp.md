@@ -156,4 +156,4 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 
 ![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
 
-See also [More Brainstorming](demystifying-model-agent-tools-mcp-brainstorming.md).
+See also [brainstorming](demystifying-model-agent-tools-mcp-brainstorming.md).
