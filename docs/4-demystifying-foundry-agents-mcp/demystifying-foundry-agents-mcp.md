@@ -648,14 +648,15 @@ sequenceDiagram
     participant UI
     box API
         participant API
-        participant AppLoop as Loop
+        participant AppLoop as Agent/Loop
         participant GetPublicWeatherFunc
         participant GetLatLongFunc
     end
     participant Model as Foundry Model
 
     UI->>API: GetPublicWeather(location)
-    API->>Model: GetPublicWeather(location)
+    API->>AppLoop: GetPublicWeather(location)
+    AppLoop->>Model: GetPublicWeather(location)
     Model->>AppLoop: GetLatLong(location)
     AppLoop->>GetLatLongFunc: GetLatLong(location)
     GetLatLongFunc-->>AppLoop: NonAILatLongResponse
@@ -664,7 +665,8 @@ sequenceDiagram
     AppLoop->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
     GetPublicWeatherFunc-->>AppLoop: NonAIWeatherResponse
     AppLoop-->>Model: NonAIWeatherResponse
-    Model-->>API: AIWeatherResponse
+    Model-->>AppLoop: AIWeatherResponse
+    AppLoop-->>API: AIWeatherResponse
     API-->>UI: AIWeatherResponse
 ```
 
