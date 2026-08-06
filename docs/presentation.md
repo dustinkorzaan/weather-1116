@@ -1,9 +1,7 @@
 # Presentation: The Journey
 
 <p align="center">
-  <span style="display:inline-block; background:#fff; padding:12px; border-radius:8px;">
-    <img src="qr-code.svg" alt="QR code — GitHub repo" width="200" />
-  </span>
+  <img src="qr-code.svg" alt="QR code — GitHub repo" width="200" />
 </p>
 
 Sections **1–3** are framing — name them, show the folder, move on. The material is
