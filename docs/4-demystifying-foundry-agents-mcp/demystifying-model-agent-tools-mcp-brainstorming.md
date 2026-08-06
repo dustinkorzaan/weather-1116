@@ -2,7 +2,7 @@
 
 Companion scratchpad for [`demystifying-foundry-agents-mcp.md`](demystifying-foundry-agents-mcp.md).
 See also [`demystifying-model-agent-tools-mcp-looping.md`](demystifying-model-agent-tools-mcp-looping.md)
-for the full in-process tool-callback loop sequence.
+for full tool-callback and agent-to-MCP loop sequences.
 
 Scratchpad for presentation ideas. Diagrams progress from **model-only** → **agent
 wraps model** → **tools (local or MCP)** → **agents calling agents**. Mix of
@@ -483,34 +483,3 @@ tool host** the agent already knows how to call.
 
 _Pick 3–5 diagrams per audience: executives → 9, 10, 18; engineers → 6, 7, 8,
 11; live demo → 12, 20._
-
----
-
-## Agent to MCP (With looping)
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Console
-    participant AppLoop as Agent/Loop
-    participant Model as Foundry Model
-    box MCP Function
-        participant GetLatLongTool
-    end
-    box MCP DotNet
-        participant GetPublicWeatherTool
-    end
-
-    Console->>AppLoop: system prompt + MCP tools, user prompt last
-    AppLoop->>Model: system prompt + MCP tools, user prompt last
-    Model->>AppLoop: GetLatLong(location)
-    AppLoop->>GetLatLongTool: GetLatLong(location)
-    GetLatLongTool-->>AppLoop: NonAILatLongResponse
-    AppLoop-->>Model: NonAILatLongResponse
-    Model->>AppLoop: GetPublicWeather(lat,long)
-    AppLoop->>GetPublicWeatherTool: GetPublicWeather(lat,long)
-    GetPublicWeatherTool-->>AppLoop: NonAIWeatherResponse
-    AppLoop-->>Model: NonAIWeatherResponse
-    Model-->>AppLoop: AIWeatherResponse
-    AppLoop-->>Console: AIWeatherResponse
-```
