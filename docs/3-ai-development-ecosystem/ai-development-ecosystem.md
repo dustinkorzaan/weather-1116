@@ -50,3 +50,9 @@
 | **GitHub / Microsoft** | [Copilot Workspace](https://github.com) | **GitHub Copilot** *(IDE Extension)* | OpenAI GPT-5.5, customized GitHub specialized engineering models |
 | **Google** | [Google Jules](https://jules.google) *(Async GitHub Agent)* | **[Google Antigravity](https://thenewstack.io)** *(IDE / Agent Command App)* | **Gemini 3.6 Flash** (New Default), Gemini 3.5 Flash-Lite, Gemini 3.5 Flash Cyber |
 | **OpenAI** | [Codex in ChatGPT](https://openai.com) / Cloud Tasks | **[OpenAI Codex App](https://openai.com)** *(Desktop, CLI, & Extension)* | **GPT-5.5**, GPT-5, GPT-4o, Custom Agentic Models |
+
+<br>
+<br>
+<br>
+
+# Devin
