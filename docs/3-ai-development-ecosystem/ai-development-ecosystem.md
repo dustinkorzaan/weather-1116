@@ -56,3 +56,11 @@
 <br>
 
 # Devin
+
+- Built in Devin or in Repo
+- Onboarding Tasks:
+  devin/onboarding-tasks.jpg
+- Example DeepWiki Flow:
+  devin/request-flow-1.png
+- Example DeepWiki Flow:
+  devin/request-flow-2.png
