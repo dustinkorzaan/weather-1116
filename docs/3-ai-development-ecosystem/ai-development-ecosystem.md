@@ -57,12 +57,14 @@
 
 # Devin
 
-https://app.devin.ai/org/dustinkorzaan/wiki/dustinkorzaan/weather-1116?branch=main
+[Weather-1116 DeepWiki on Devin](https://app.devin.ai/org/dustinkorzaan/wiki/dustinkorzaan/weather-1116?branch=main) — built in Devin or in repo.
 
-- Built in Devin or in Repo
-- Onboarding Tasks:
-  devin/onboarding-tasks.jpg
-- Example DeepWiki Flow:
-  devin/request-flow-1.png
-- Example DeepWiki Flow:
-  devin/request-flow-2.png
+### Onboarding Tasks
+
+![Devin onboarding tasks](devin/onboarding-tasks.jpg)
+
+### Example DeepWiki Flow
+
+![Devin DeepWiki request flow (1 of 2)](devin/request-flow-1.png)
+
+![Devin DeepWiki request flow (2 of 2)](devin/request-flow-2.png)
