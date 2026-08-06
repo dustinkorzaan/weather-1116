@@ -1,5 +1,9 @@
 # Presentation: The Journey
 
+<p align="center">
+  <img src="qr-code.svg" alt="QR code — GitHub repo" width="200" />
+</p>
+
 Sections **1–3** are framing — name them, show the folder, move on. The material is
 sketched, not presentation-ready. **Section 4** is the focus: live demos, architecture,
 and the Foundry console learning path (V1 → V5).
