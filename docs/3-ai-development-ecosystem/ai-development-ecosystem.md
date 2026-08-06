@@ -57,6 +57,8 @@
 
 # Devin
 
+https://app.devin.ai/org/dustinkorzaan/wiki/dustinkorzaan/weather-1116?branch=main
+
 - Built in Devin or in Repo
 - Onboarding Tasks:
   devin/onboarding-tasks.jpg
