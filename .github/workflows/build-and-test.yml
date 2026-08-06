@@ -3,6 +3,7 @@ run-name: Build and Test
 
 on:
   push:
+  workflow_dispatch:
 
 # Newer pushes cancel older in-progress builds for the same ref.
 concurrency:
