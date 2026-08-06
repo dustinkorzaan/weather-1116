@@ -1,17 +1,4 @@
-# Presentation — AI Development Journey
-
-**Mid June → late July 2026**
-
-This repo's `docs/` folders mirror four sections of a summary journey. The arc is
-intentional: each step sets up the next, even when a section is only introduced in
-the talk.
-
-## Why "journey"?
-
-The timeline is real. Over roughly six weeks the work moved from *where* development
-happens, through *how* autonomous agents fit a sprint rhythm, into the broader *tooling
-landscape*, and finally into a concrete *Foundry + MCP* implementation in this
-Weather sample.
+# Presentation: The Journey
 
 Sections **1–3** are framing — name them, show the folder, move on. The material is
 sketched, not presentation-ready. **Section 4** is the focus: live demos, architecture,
@@ -21,10 +8,10 @@ and the Foundry console learning path (V1 → V5).
 
 | # | Title | Doc | Role in the talk |
 | --- | --- | --- | --- |
-| 1 | Laptop-free Engineering | [`1-laptop-free-engineering/laptop-free.md`](1-laptop-free-engineering/laptop-free.md) | Introduce — context for cloud / Codespaces / VPC |
-| 2 | Autonomous Sprint Board AI Development | [`2-autonomous-sprint-board-ai-development/autonomous-sprint-board.md`](2-autonomous-sprint-board-ai-development/autonomous-sprint-board.md) | Introduce — placeholder for sprint-board + agents story |
-| 3 | AI Development Ecosystem | [`3-ai-development-ecosystem/ai-development-ecosystem.md`](3-ai-development-ecosystem/ai-development-ecosystem.md) | Introduce — landscape of tools (wireframes, rapid app gen, IDEs) |
-| 4 | Demystifying Microsoft Foundry Agents and MCP | [`4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
+| 1 | Laptop-free Engineering | [`laptop-free.md`](1-laptop-free-engineering/laptop-free.md) | Introduce — context for cloud / Codespaces / VPC |
+| 2 | Autonomous Sprint Board AI Development | [`autonomous-sprint-board.md`](2-autonomous-sprint-board-ai-development/autonomous-sprint-board.md) | Introduce — placeholder for sprint-board + agents story |
+| 3 | AI Development Ecosystem | [`ai-development-ecosystem.md`](3-ai-development-ecosystem/ai-development-ecosystem.md) | Introduce — landscape of tools (wireframes, rapid app gen, IDEs) |
+| 4 | Demystifying Microsoft Foundry Agents and MCP | [`demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md), [brainstorming](4-demystifying-foundry-agents-mcp/demystifying-model-agent-tools-mcp-brainstorming.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
 
 ## Supporting material
 

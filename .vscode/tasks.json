@@ -222,7 +222,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FoundryConsoleV3/FoundryConsoleV3InjectFunctions.csproj",
+                "${workspaceFolder}/FoundryConsoleV3/FoundryConsoleV3InProcessToolCallbacks.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

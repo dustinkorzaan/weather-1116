@@ -31,7 +31,7 @@ jobs:
           - mcp-dotnet/mcp/WeatherMcpDotNet.csproj
           - FoundryConsoleV1/FoundryConsoleV1ModelDirectLegacy.csproj
           - FoundryConsoleV2/FoundryConsoleV2ModelDirectUnifiedAI.csproj
-          - FoundryConsoleV3/FoundryConsoleV3InjectFunctions.csproj
+          - FoundryConsoleV3/FoundryConsoleV3InProcessToolCallbacks.csproj
           - FoundryConsoleV4/FoundryConsoleV4MCP.csproj
           - FoundryConsoleV5/FoundryConsoleV5Agent.csproj
 
