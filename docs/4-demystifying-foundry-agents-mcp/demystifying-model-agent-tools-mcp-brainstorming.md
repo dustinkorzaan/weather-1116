@@ -1,6 +1,8 @@
 # Brainstorm: demystifying model, agent, tools, and MCP (AI generated, use at your own risk)
 
 Companion scratchpad for [`demystifying-foundry-agents-mcp.md`](demystifying-foundry-agents-mcp.md).
+See also [`demystifying-model-agent-tools-mcp-looping.md`](demystifying-model-agent-tools-mcp-looping.md)
+for the full in-process tool-callback loop sequence.
 
 Scratchpad for presentation ideas. Diagrams progress from **model-only** → **agent
 wraps model** → **tools (local or MCP)** → **agents calling agents**. Mix of
@@ -483,36 +485,6 @@ _Pick 3–5 diagrams per audience: executives → 9, 10, 18; engineers → 6, 7,
 11; live demo → 12, 20._
 
 ---
-
-## Tool Callback Diagram (With looping)
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant UI
-    box API
-        participant API
-        participant AppLoop as Agent/Loop
-        participant GetPublicWeatherFunc
-        participant GetLatLongFunc
-    end
-    participant Model as Foundry Model
-
-    UI->>API: GetPublicWeather(location)
-    API->>AppLoop: GetPublicWeather(location)
-    AppLoop->>Model: GetPublicWeather(location)
-    Model->>AppLoop: GetLatLong(location)
-    AppLoop->>GetLatLongFunc: GetLatLong(location)
-    GetLatLongFunc-->>AppLoop: NonAILatLongResponse
-    AppLoop-->>Model: NonAILatLongResponse
-    Model->>AppLoop: GetPublicWeather(lat,long)
-    AppLoop->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
-    GetPublicWeatherFunc-->>AppLoop: NonAIWeatherResponse
-    AppLoop-->>Model: NonAIWeatherResponse
-    Model-->>AppLoop: AIWeatherResponse
-    AppLoop-->>API: AIWeatherResponse
-    API-->>UI: AIWeatherResponse
-```
 
 ## Agent to MCP (With looping)
 
