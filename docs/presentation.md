@@ -1,5 +1,9 @@
 # Presentation: The Journey
 
+<p align="center">
+  <img src="qr-code-white-circle-background.svg" alt="QR code — GitHub repo" width="200" />
+</p>
+
 Sections **1–3** are framing — name them, show the folder, move on. The material is
 sketched, not presentation-ready. **Section 4** is the focus: live demos, architecture,
 and the Foundry console learning path (V1 → V5).
@@ -29,4 +33,4 @@ and the Foundry console learning path (V1 → V5).
 6. **Production** — V4 model-direct path in `GetCurrentAIWeatherHandler` (API/MVC).
 7. **Demos** — React / Blazor / API `GetCurrentAIWeather`; optional MCP inspector on 8110 / 8120.
 
-Adjust depth on 1–3 to taste; keep most clock time on 4–6 and hands-on paths in the repo.
+Adjust 1–3 to taste, keep the main pallet focused on 4–6, and finish the menu with hands-on paths in the repo.

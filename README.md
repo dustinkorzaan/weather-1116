@@ -7,16 +7,16 @@ This README is intentionally brief. Use it for quick orientation, and use
 [`docs/architecture.md`](docs/architecture.md) for architecture constraints,
 project relationships, and parity guidance.
 
-| Project | Path | Stack | Port |
-| --- | --- | --- | --- |
-| Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
-| React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
-| MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
-| API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
-| Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — |
-| MCP DotNet | [`mcp-dotnet/mcp`](mcp-dotnet/mcp) | ASP.NET Core MCP | 8110 |
-| MCP Function | [`mcp-function/mcp`](mcp-function/mcp) | Azure Functions MCP | 8120 |
-| Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 |
+| Project | Path | Stack | Port | PROD |
+| --- | --- | --- | --- | --- |
+| Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 | <a href="https://weather1116-prod-blazor.azurewebsites.net" target="_blank" rel="noopener noreferrer">Blazor</a> |
+| React UI | [`ui-react`](ui-react) | React + Vite | 3000 | <a href="https://nice-glacier-08fd44e1e.7.azurestaticapps.net" target="_blank" rel="noopener noreferrer">React</a> |
+| MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 | <a href="https://weather1116-prod-mvc.azurewebsites.net" target="_blank" rel="noopener noreferrer">MVC</a> |
+| API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 | — |
+| Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — | — |
+| MCP DotNet | [`mcp-dotnet/mcp`](mcp-dotnet/mcp) | ASP.NET Core MCP | 8110 | — |
+| MCP Function | [`mcp-function/mcp`](mcp-function/mcp) | Azure Functions MCP | 8120 | — |
+| Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | — |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
