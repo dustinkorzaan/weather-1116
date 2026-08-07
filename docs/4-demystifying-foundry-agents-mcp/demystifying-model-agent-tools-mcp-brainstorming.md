@@ -482,3 +482,14 @@ tool host** the agent already knows how to call.
 
 _Pick 3–5 diagrams per audience: executives → 9, 10, 18; engineers → 6, 7, 8,
 11; live demo → 12, 20._
+
+---
+
+CROA/RPG
+Create Agent: What tools do you have?
+Refactor API to use Console V5 / Foundry Agent
+
+Misc Prompts:
+Is MCP basically the same as REST with Swagger?
+I get it, but I was just drawing a parallel... HTTP client calls REST, same as MCP client calls MCP server... Swagger is a way to surface what is in an endpoint, the same way MCP server surfaces tools
+
