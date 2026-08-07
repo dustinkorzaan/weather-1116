@@ -131,14 +131,6 @@ internal class Program
 		{
 			ResponseResult response = await client.CreateResponseAsync(options);
 
-			foreach (ResponseItem outputItem in response.OutputItems)
-			{
-				if (outputItem is McpToolCallItem mcpToolCall)
-				{
-					Console.WriteLine($"\nMCP tool call: {mcpToolCall.ServerLabel}.{mcpToolCall.ToolName}");
-				}
-			}
-
 			var content = response.GetOutputText();
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
