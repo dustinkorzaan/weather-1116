@@ -1,5 +1,13 @@
 # Demystifying Microsoft Foundry Agents and MCP
 
+## Microsoft reference
+
+[Azure AI Foundry Agents overview](https://learn.microsoft.com/en-us/azure/foundry/agents/overview)
+
+![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
+
+See also [brainstorming](demystifying-model-agent-tools-mcp-brainstorming.md).
+
 See also [`docs/architecture.md`](../architecture.md) for runtime diagrams and production
 settings.
 
@@ -235,11 +243,3 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       Model-->>Agent: AIWeatherResponse
       Agent-->>Console: AIWeatherResponse
   ```
-
-## Microsoft reference
-
-[Azure AI Foundry Agents overview](https://learn.microsoft.com/en-us/azure/foundry/agents/overview)
-
-![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
-
-See also [brainstorming](demystifying-model-agent-tools-mcp-brainstorming.md).
