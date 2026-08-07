@@ -14,8 +14,8 @@ project relationships, and parity guidance.
 | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 | <a href="https://weather1116-prod-mvc.azurewebsites.net" target="_blank" rel="noopener noreferrer">MVC</a> |
 | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 | — |
 | Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — | — |
-| MCP DotNet | [`mcp-dotnet/mcp`](mcp-dotnet/mcp) | ASP.NET Core MCP | 8110 | — |
-| MCP Function | [`mcp-function/mcp`](mcp-function/mcp) | Azure Functions MCP | 8120 | — |
+| MCP DotNet | [`mcp-dotnet/mcp`](mcp-dotnet/mcp) | ASP.NET Core MCP server | 8110 | — |
+| MCP Function | [`mcp-function/mcp`](mcp-function/mcp) | Azure Functions MCP server | 8120 | — |
 | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | — |
 
 Architecture reference: [`docs/architecture.md`](docs/architecture.md)
