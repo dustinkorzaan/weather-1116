@@ -15,7 +15,7 @@ and the Foundry console learning path (V1 → V5).
 | 1 | Laptop-free Engineering | [`laptop-free.md`](1-laptop-free-engineering/laptop-free.md) | Introduce — context for cloud / Codespaces / VPC |
 | 2 | Autonomous Sprint Board AI Development | [`autonomous-sprint-board.md`](2-autonomous-sprint-board-ai-development/autonomous-sprint-board.md) | Introduce — placeholder for sprint-board + agents story |
 | 3 | AI Development Ecosystem | [`ai-development-ecosystem.md`](3-ai-development-ecosystem/ai-development-ecosystem.md) | Introduce — landscape of tools (wireframes, rapid app gen, IDEs) |
-| 4 | Demystifying Microsoft Foundry Agents and MCP | [`demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md), [brainstorming](4-demystifying-foundry-agents-mcp/demystifying-model-agent-tools-mcp-brainstorming.md), [looping](4-demystifying-foundry-agents-mcp/demystifying-model-agent-tools-mcp-looping.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
+| 4 | Demystifying Microsoft Foundry Agents and MCP | [`demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md), [brainstorming](4-demystifying-foundry-agents-mcp/demystifying-model-agent-tools-mcp-brainstorming.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
 
 ## Supporting material
 
@@ -26,6 +26,10 @@ and the Foundry console learning path (V1 → V5).
 ## Suggested flow (section 4)
 
 1. **Problem** — AI weather needs real lat/long and public weather data, not hallucination.
+   - "Nashville TN" is a location
+   - `GetLatLongDataEvent(location)` returns Lat/Long
+   - `GetPublicWeatherDataEvent(Lat/Long)` returns Non AI Public Weather Data
+   - AI returns weather summary
 2. **V1 → V2** — model-direct (legacy vs unified endpoint); when the console still owns data prep.
 3. **V3** — in-process tool callbacks; model chooses tools, your console answers them.
 4. **V4** — model-direct with remote MCP tools; MCP without an agent, and the tool loop disappears.

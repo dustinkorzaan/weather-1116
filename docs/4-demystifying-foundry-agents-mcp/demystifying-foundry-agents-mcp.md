@@ -1,7 +1,13 @@
 # Demystifying Microsoft Foundry Agents and MCP
 
-See also [`docs/architecture.md`](../architecture.md) for runtime diagrams and production
-settings.
+## Microsoft reference
+
+[Azure AI Foundry Agents overview](https://learn.microsoft.com/en-us/azure/foundry/agents/overview)
+
+![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
+
+See also [`docs/architecture.md`](../architecture.md) and
+[`docs/.../...brainstorming.md`](demystifying-model-agent-tools-mcp-brainstorming.md).
 
 ## Foundry console demos (learning path)
 
@@ -65,6 +71,8 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     callbacks (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.
 
+  **Simple Diagram without Agent/Loop**
+
   ```mermaid
   sequenceDiagram
       autonumber
@@ -86,15 +94,44 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       API-->>UI: AIWeatherResponse
   ```
 
+  **Diagram with Agent/Looping**
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant UI
+      box API
+          participant API
+          participant AppLoop as Agent/Loop
+          participant GetPublicWeatherFunc
+          participant GetLatLongFunc
+      end
+      participant Model as Foundry Model
+
+      UI->>API: GetPublicWeather(location)
+      API->>AppLoop: GetPublicWeather(location)
+      AppLoop->>Model: GetPublicWeather(location)
+      Model->>AppLoop: GetLatLong(location)
+      AppLoop->>GetLatLongFunc: GetLatLong(location)
+      GetLatLongFunc-->>AppLoop: NonAILatLongResponse
+      AppLoop-->>Model: NonAILatLongResponse
+      Model->>AppLoop: GetPublicWeather(lat,long)
+      AppLoop->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
+      GetPublicWeatherFunc-->>AppLoop: NonAIWeatherResponse
+      AppLoop-->>Model: NonAIWeatherResponse
+      Model-->>AppLoop: AIWeatherResponse
+      AppLoop-->>API: AIWeatherResponse
+      API-->>UI: AIWeatherResponse
+  ```
+
 - **V4 — Model-direct + remote MCP tools** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
   (`FoundryConsoleV4MCP.csproj`)
   - Same model-direct call as V3, but the tools are **remote MCP servers**
-    declared on the request instead of in-process callbacks — no agent, and no
-    Foundry-specific client.
-  - The service calls the MCP servers itself, so V3's tool-call loop disappears.
-    ("kind of", more details later)
+    declared on the request instead of in-process callbacks.
   - Shows that MCP tooling does not require a Foundry agent.
   - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
+
+  **Simple Diagram without Agent/Loop**
 
   ```mermaid
   sequenceDiagram
@@ -116,6 +153,35 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       Model-->>Console: AIWeatherResponse
   ```
 
+  **Diagram with Agent/Looping**
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Console
+      participant AppLoop as Agent/Loop
+      participant Model as Foundry Model
+      box MCP Function
+          participant GetLatLongTool
+      end
+      box MCP DotNet
+          participant GetPublicWeatherTool
+      end
+
+      Console->>AppLoop: system prompt + MCP tools, user prompt last
+      AppLoop->>Model: system prompt + MCP tools, user prompt last
+      Model->>AppLoop: GetLatLong(location)
+      AppLoop->>GetLatLongTool: GetLatLong(location)
+      GetLatLongTool-->>AppLoop: NonAILatLongResponse
+      AppLoop-->>Model: NonAILatLongResponse
+      Model->>AppLoop: GetPublicWeather(lat,long)
+      AppLoop->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+      GetPublicWeatherTool-->>AppLoop: NonAIWeatherResponse
+      AppLoop-->>Model: NonAIWeatherResponse
+      Model-->>AppLoop: AIWeatherResponse
+      AppLoop-->>Console: AIWeatherResponse
+  ```
+
 - **V5 — Hosted Foundry agent + MCP** — [`FoundryConsoleV5`](../../FoundryConsoleV5)
   (`FoundryConsoleV5Agent.csproj`)
   - Agent-hosted alternative to V4: calls a **hosted Foundry agent**
@@ -124,11 +190,8 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     are configured on the agent in Azure.
   - The console sends **only the user prompt** — Responses `instructions` and
     `text` fields are rejected when an agent is specified.
-  - **V5-only settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V4):
-    - `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` (required) — Foundry project URL.
-    - `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` (optional) — defaults to
-      `wx1116-agent-default`.
-    - `AZURE_FOUNDRY_PROD_EUS2_KEY` (required) — same API key as V1–V3.
+
+  **Simple Diagram without Agent/Loop**
 
   ```mermaid
   sequenceDiagram
@@ -150,11 +213,31 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       Agent-->>Console: AIWeatherResponse
   ```
 
-## Microsoft reference
+  **Diagram with Agent/Looping**
 
-[Azure AI Foundry Agents overview](https://learn.microsoft.com/en-us/azure/foundry/agents/overview)
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Console
+      participant Agent as Foundry Agent
+      participant Model as Foundry Model
+      box MCP Function
+          participant GetLatLongTool
+      end
+      box MCP DotNet
+          participant GetPublicWeatherTool
+      end
 
-![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
-
-See also [brainstorming](demystifying-model-agent-tools-mcp-brainstorming.md) and
-[tool callback looping](demystifying-model-agent-tools-mcp-looping.md).
+      Console->>Agent: user prompt only
+      Agent->>Model: user prompt only
+      Model->>Agent: GetLatLong(location)
+      Agent->>GetLatLongTool: GetLatLong(location)
+      GetLatLongTool-->>Agent: NonAILatLongResponse
+      Agent-->>Model: NonAILatLongResponse
+      Model->>Agent: GetPublicWeather(lat,long)
+      Agent->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+      GetPublicWeatherTool-->>Agent: NonAIWeatherResponse
+      Agent-->>Model: NonAIWeatherResponse
+      Model-->>Agent: AIWeatherResponse
+      Agent-->>Console: AIWeatherResponse
+  ```
