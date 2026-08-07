@@ -1,8 +1,7 @@
 # Brainstorm: demystifying model, agent, tools, and MCP (AI generated, use at your own risk)
 
 Companion scratchpad for [`demystifying-foundry-agents-mcp.md`](demystifying-foundry-agents-mcp.md).
-See also [`demystifying-model-agent-tools-mcp-looping.md`](demystifying-model-agent-tools-mcp-looping.md)
-for full tool-callback and agent-to-MCP loop sequences.
+The main doc includes full tool-callback and agent-to-MCP loop sequences in the V3–V5 diagrams.
 
 Scratchpad for presentation ideas. Diagrams progress from **model-only** → **agent
 wraps model** → **tools (local or MCP)** → **agents calling agents**. Mix of

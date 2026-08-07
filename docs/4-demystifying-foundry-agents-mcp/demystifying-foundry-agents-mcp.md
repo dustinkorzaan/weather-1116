@@ -71,18 +71,25 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant UI
       box API
           participant API
+          participant AppLoop as Agent/Loop
           participant GetPublicWeatherFunc
           participant GetLatLongFunc
       end
       participant Model as Foundry Model
 
       UI->>API: GetPublicWeather(location)
-      API->>Model: GetPublicWeather(location)
-      Model->>GetLatLongFunc: GetLatLong(location)
-      GetLatLongFunc-->>Model: NonAILatLongResponse
-      Model->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
-      GetPublicWeatherFunc-->>Model: NonAIWeatherResponse
-      Model-->>API: AIWeatherResponse
+      API->>AppLoop: GetPublicWeather(location)
+      AppLoop->>Model: GetPublicWeather(location)
+      Model->>AppLoop: GetLatLong(location)
+      AppLoop->>GetLatLongFunc: GetLatLong(location)
+      GetLatLongFunc-->>AppLoop: NonAILatLongResponse
+      AppLoop-->>Model: NonAILatLongResponse
+      Model->>AppLoop: GetPublicWeather(lat,long)
+      AppLoop->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
+      GetPublicWeatherFunc-->>AppLoop: NonAIWeatherResponse
+      AppLoop-->>Model: NonAIWeatherResponse
+      Model-->>AppLoop: AIWeatherResponse
+      AppLoop-->>API: AIWeatherResponse
       API-->>UI: AIWeatherResponse
   ```
 
@@ -100,6 +107,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   sequenceDiagram
       autonumber
       participant Console
+      participant AppLoop as Agent/Loop
       participant Model as Foundry Model
       box MCP Function
           participant GetLatLongTool
@@ -108,12 +116,18 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
           participant GetPublicWeatherTool
       end
 
-      Console->>Model: system prompt + MCP tools, user prompt last
-      Model->>GetLatLongTool: GetLatLong(location)
-      GetLatLongTool-->>Model: NonAILatLongResponse
-      Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
-      GetPublicWeatherTool-->>Model: NonAIWeatherResponse
-      Model-->>Console: AIWeatherResponse
+      Console->>AppLoop: system prompt + MCP tools, user prompt last
+      AppLoop->>Model: system prompt + MCP tools, user prompt last
+      Model->>AppLoop: GetLatLong(location)
+      AppLoop->>GetLatLongTool: GetLatLong(location)
+      GetLatLongTool-->>AppLoop: NonAILatLongResponse
+      AppLoop-->>Model: NonAILatLongResponse
+      Model->>AppLoop: GetPublicWeather(lat,long)
+      AppLoop->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+      GetPublicWeatherTool-->>AppLoop: NonAIWeatherResponse
+      AppLoop-->>Model: NonAIWeatherResponse
+      Model-->>AppLoop: AIWeatherResponse
+      AppLoop-->>Console: AIWeatherResponse
   ```
 
 - **V5 — Hosted Foundry agent + MCP** — [`FoundryConsoleV5`](../../FoundryConsoleV5)
@@ -135,6 +149,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       autonumber
       participant Console
       participant Agent as Foundry Agent
+      participant Model as Foundry Model
       box MCP Function
           participant GetLatLongTool
       end
@@ -143,10 +158,16 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       end
 
       Console->>Agent: user prompt only
+      Agent->>Model: user prompt only
+      Model->>Agent: GetLatLong(location)
       Agent->>GetLatLongTool: GetLatLong(location)
       GetLatLongTool-->>Agent: NonAILatLongResponse
+      Agent-->>Model: NonAILatLongResponse
+      Model->>Agent: GetPublicWeather(lat,long)
       Agent->>GetPublicWeatherTool: GetPublicWeather(lat,long)
       GetPublicWeatherTool-->>Agent: NonAIWeatherResponse
+      Agent-->>Model: NonAIWeatherResponse
+      Model-->>Agent: AIWeatherResponse
       Agent-->>Console: AIWeatherResponse
   ```
 
@@ -156,5 +177,4 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 
 ![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
 
-See also [brainstorming](demystifying-model-agent-tools-mcp-brainstorming.md) and
-[tool callback looping](demystifying-model-agent-tools-mcp-looping.md).
+See also [brainstorming](demystifying-model-agent-tools-mcp-brainstorming.md).
