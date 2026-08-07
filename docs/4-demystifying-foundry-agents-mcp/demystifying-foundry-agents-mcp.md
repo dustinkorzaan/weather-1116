@@ -65,7 +65,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     callbacks (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.
 
-  **Simple Diagram**
+  **Simple Diagram without Agent/Loop**
 
   ```mermaid
   sequenceDiagram
@@ -125,7 +125,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   - Shows that MCP tooling does not require a Foundry agent.
   - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
 
-  **Simple Diagram**
+  **Simple Diagram without Agent/Loop**
 
   ```mermaid
   sequenceDiagram
@@ -185,7 +185,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   - The console sends **only the user prompt** — Responses `instructions` and
     `text` fields are rejected when an agent is specified.
 
-  **Simple Diagram**
+  **Simple Diagram without Agent/Loop**
 
   ```mermaid
   sequenceDiagram
