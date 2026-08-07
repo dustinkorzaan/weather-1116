@@ -25,12 +25,11 @@ and the Foundry console learning path (V1 → V5).
 
 ## Suggested flow (section 4)
 
-- "Nashville TN" is a location
-- `GetLatLongDataEvent(location)` returns Lat/Long
-- `GetPublicWeatherDataEvent(Lat/Long)` returns Non AI Public Weather Data
-- AI returns weather summary
-
 1. **Problem** — AI weather needs real lat/long and public weather data, not hallucination.
+   - "Nashville TN" is a location
+   - `GetLatLongDataEvent(location)` returns Lat/Long
+   - `GetPublicWeatherDataEvent(Lat/Long)` returns Non AI Public Weather Data
+   - AI returns weather summary
 2. **V1 → V2** — model-direct (legacy vs unified endpoint); when the console still owns data prep.
 3. **V3** — in-process tool callbacks; model chooses tools, your console answers them.
 4. **V4** — model-direct with remote MCP tools; MCP without an agent, and the tool loop disappears.
