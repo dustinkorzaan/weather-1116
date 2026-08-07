@@ -493,3 +493,9 @@ Misc Prompts:
 Is MCP basically the same as REST with Swagger?
 I get it, but I was just drawing a parallel... HTTP client calls REST, same as MCP client calls MCP server... Swagger is a way to surface what is in an endpoint, the same way MCP server surfaces tools
 
+---
+
+Microsoft Agent Framework
+
+https://learn.microsoft.com/en-us/agent-framework/overview
+
