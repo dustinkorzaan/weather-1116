@@ -65,6 +65,31 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     callbacks (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.
 
+  **Simple Diagram**
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant UI
+      box API
+          participant API
+          participant GetPublicWeatherFunc
+          participant GetLatLongFunc
+      end
+      participant Model as Foundry Model
+
+      UI->>API: GetPublicWeather(location)
+      API->>Model: GetPublicWeather(location)
+      Model->>GetLatLongFunc: GetLatLong(location)
+      GetLatLongFunc-->>Model: NonAILatLongResponse
+      Model->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
+      GetPublicWeatherFunc-->>Model: NonAIWeatherResponse
+      Model-->>API: AIWeatherResponse
+      API-->>UI: AIWeatherResponse
+  ```
+
+  **Diagram with Agent/Looping**
+
   ```mermaid
   sequenceDiagram
       autonumber
@@ -99,6 +124,30 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     declared on the request instead of in-process callbacks.
   - Shows that MCP tooling does not require a Foundry agent.
   - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
+
+  **Simple Diagram**
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Console
+      participant Model as Foundry Model
+      box MCP Function
+          participant GetLatLongTool
+      end
+      box MCP DotNet
+          participant GetPublicWeatherTool
+      end
+
+      Console->>Model: system prompt + MCP tools, user prompt last
+      Model->>GetLatLongTool: GetLatLong(location)
+      GetLatLongTool-->>Model: NonAILatLongResponse
+      Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+      GetPublicWeatherTool-->>Model: NonAIWeatherResponse
+      Model-->>Console: AIWeatherResponse
+  ```
+
+  **Diagram with Agent/Looping**
 
   ```mermaid
   sequenceDiagram
@@ -135,6 +184,30 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     are configured on the agent in Azure.
   - The console sends **only the user prompt** — Responses `instructions` and
     `text` fields are rejected when an agent is specified.
+
+  **Simple Diagram**
+
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      participant Console
+      participant Agent as Foundry Agent
+      box MCP Function
+          participant GetLatLongTool
+      end
+      box MCP DotNet
+          participant GetPublicWeatherTool
+      end
+
+      Console->>Agent: user prompt only
+      Agent->>GetLatLongTool: GetLatLong(location)
+      GetLatLongTool-->>Agent: NonAILatLongResponse
+      Agent->>GetPublicWeatherTool: GetPublicWeather(lat,long)
+      GetPublicWeatherTool-->>Agent: NonAIWeatherResponse
+      Agent-->>Console: AIWeatherResponse
+  ```
+
+  **Diagram with Agent/Looping**
 
   ```mermaid
   sequenceDiagram
