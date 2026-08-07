@@ -7,7 +7,7 @@
 ![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
 
 See also [`docs/architecture.md`](../architecture.md) and
-[`4-demystifying-foundry-agents-mcp/demystifying-model-agent-tools-mcp-brainstorming.md`](demystifying-model-agent-tools-mcp-brainstorming.md).
+[`docs/.../...brainstorming.md`](demystifying-model-agent-tools-mcp-brainstorming.md).
 
 ## Foundry console demos (learning path)
 
