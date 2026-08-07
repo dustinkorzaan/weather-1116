@@ -1,7 +1,9 @@
 # Presentation: The Journey
 
 <p align="center">
-  <img src="qr-code-white-circle-background.svg" alt="QR code — GitHub repo" width="200" />
+  <a href="https://github.com/dustinkorzaan/weather-1116">
+    <img src="qr-code-white-circle-background.svg" alt="QR code — GitHub repo" width="200" />
+  </a>
 </p>
 
 Sections **1–3** are framing — name them, show the folder, move on. The material is
