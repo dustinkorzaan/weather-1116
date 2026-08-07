@@ -495,7 +495,5 @@ I get it, but I was just drawing a parallel... HTTP client calls REST, same as M
 
 ---
 
-Microsoft Agent Framework
-
-https://learn.microsoft.com/en-us/agent-framework/overview
-
+Microsoft Agent Framework https://learn.microsoft.com/en-us/agent-framework/overview
+- IOC, Memory, Middleware, Streaming
