@@ -96,10 +96,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 - **V4 — Model-direct + remote MCP tools** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
   (`FoundryConsoleV4MCP.csproj`)
   - Same model-direct call as V3, but the tools are **remote MCP servers**
-    declared on the request instead of in-process callbacks — no agent, and no
-    Foundry-specific client.
-  - The service calls the MCP servers itself, so V3's tool-call loop disappears.
-    ("kind of", more details later)
+    declared on the request instead of in-process callbacks.
   - Shows that MCP tooling does not require a Foundry agent.
   - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
 
@@ -138,11 +135,6 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     are configured on the agent in Azure.
   - The console sends **only the user prompt** — Responses `instructions` and
     `text` fields are rejected when an agent is specified.
-  - **V5-only settings** (same `AZURE_FOUNDRY_PROD_EUS2_*` prefix as V1–V4):
-    - `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` (required) — Foundry project URL.
-    - `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` (optional) — defaults to
-      `wx1116-agent-default`.
-    - `AZURE_FOUNDRY_PROD_EUS2_KEY` (required) — same API key as V1–V3.
 
   ```mermaid
   sequenceDiagram
