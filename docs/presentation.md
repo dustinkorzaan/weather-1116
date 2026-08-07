@@ -15,7 +15,7 @@ and the Foundry console learning path (V1 → V5).
 | 1 | Laptop-free Engineering | [`laptop-free.md`](1-laptop-free-engineering/laptop-free.md) | Introduce — context for cloud / Codespaces / VPC |
 | 2 | Autonomous Sprint Board AI Development | [`autonomous-sprint-board.md`](2-autonomous-sprint-board-ai-development/autonomous-sprint-board.md) | Introduce — placeholder for sprint-board + agents story |
 | 3 | AI Development Ecosystem | [`ai-development-ecosystem.md`](3-ai-development-ecosystem/ai-development-ecosystem.md) | Introduce — landscape of tools (wireframes, rapid app gen, IDEs) |
-| 4 | Demystifying Microsoft Foundry Agents and MCP | [`demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md), [brainstorming](4-demystifying-foundry-agents-mcp/demystifying-model-agent-tools-mcp-brainstorming.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
+| 4 | Demystifying Microsoft Foundry Agents and MCP | [`demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md), [`brainstorming`](4-demystifying-foundry-agents-mcp/demystifying-model-agent-tools-mcp-brainstorming.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
 
 ## Supporting material
 
