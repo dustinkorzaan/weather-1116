@@ -12,7 +12,9 @@ internal static class ChatResponsesSessionHelper
 
     public static string ResolveSessionId(IChatSessionStore sessionStore, string chatKind, string? requestedSessionId)
     {
-        if (!string.IsNullOrWhiteSpace(requestedSessionId) && sessionStore.SessionExists(requestedSessionId))
+        if (!string.IsNullOrWhiteSpace(requestedSessionId)
+            && requestedSessionId.StartsWith($"{chatKind}:", StringComparison.Ordinal)
+            && sessionStore.SessionExists(requestedSessionId))
         {
             return requestedSessionId;
         }

@@ -75,8 +75,6 @@
     let assistantItem = null;
     let assistantText = '';
 
-    window.chatHistory[activeTab].push({ role: 'user', content: message });
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -119,6 +117,9 @@
 
     input.value = '';
     sendButton.disabled = true;
+
+    window.chatHistory[activeTab].push({ role: 'user', content: message });
+    appendMessage('user', message);
 
     try {
       await streamChat(message);
