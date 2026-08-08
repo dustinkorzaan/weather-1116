@@ -16,6 +16,14 @@ builder.Services.AddHttpClient<WeatherApiClient>(c =>
     c.BaseAddress = new(url);
 });
 
+builder.Services.AddHttpClient<ChatApiClient>(c =>
+{
+    var url = builder.Configuration["API_DOTNET_URL"]
+        ?? throw new InvalidOperationException("API_DOTNET_URL is not set");
+
+    c.BaseAddress = new(url);
+});
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

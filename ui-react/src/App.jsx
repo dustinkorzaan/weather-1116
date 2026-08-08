@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { siteLinks } from './config/siteLinks';
 import HomePage from './pages/HomePage';
+import ChatPage from './pages/ChatPage';
 import {
   useLazyGetAboutQuery,
 } from './services/weatherApi';
@@ -149,6 +150,11 @@ function App() {
             <h1 className="title">Weather React</h1>
           </Link>
 
+          <nav className="top-nav-links" aria-label="Primary">
+            <Link className="top-nav-link" to="/">Home</Link>
+            <Link className="top-nav-link" to="/chat">Chat</Link>
+          </nav>
+
           <div className="avatar-menu" ref={avatarMenuRef}>
             <button
               type="button"
@@ -196,6 +202,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/chat" element={<ChatPage />} />
       </Routes>
 
       {isAboutOpen && (

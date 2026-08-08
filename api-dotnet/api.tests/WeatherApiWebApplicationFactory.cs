@@ -18,7 +18,7 @@ public class WeatherApiWebApplicationFactory : WebApplicationFactory<Program>
         });
     }
 
-    private sealed class StubAboutClient : IAboutClient
+    internal sealed class StubAboutClient : IAboutClient
     {
         public Task<AboutNode> GetAsync(
             string? url,

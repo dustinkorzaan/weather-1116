@@ -104,7 +104,7 @@ internal class Program
 		McpTool myMcpApp = ResponseTool.CreateMcpTool(
 			serverLabel: "MyMCPApp",
 			serverUri: new Uri("https://weather1116-prod-mcpapp-bcb9gnameebrgmc4.westus2-01.azurewebsites.net/mcp"),
-			authorizationToken: mcpAppKey,
+			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpAppKey}" },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		Console.WriteLine($"\nMCP Servers:\n{myMcpFunction.ServerLabel} {myMcpFunction.ServerUri}\n{myMcpApp.ServerLabel} {myMcpApp.ServerUri}");

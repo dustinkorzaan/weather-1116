@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WeatherMVC.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
@@ -30,6 +31,7 @@
                     <img src="~/logo.svg" alt="Weather logo" class="site-logo" />
                     <span class="fw-semibold text-dark">Weather MVC</span>
                 </a>
+                <a class="nav-link ms-3" asp-controller="Chat" asp-action="Index">Chat</a>
                 <div class="dropdown avatar-menu ms-auto">
                     <button class="btn avatar-button" type="button" id="avatarMenuButton" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open user menu">
                         <svg viewBox="0 0 24 24" class="avatar-icon" aria-hidden="true" focusable="false">
