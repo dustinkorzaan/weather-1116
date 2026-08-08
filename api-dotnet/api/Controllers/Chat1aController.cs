@@ -1,6 +1,7 @@
-using Core.Chat.Chat1a;
 using Core.Chat.Models;
+using Core.Chat.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WeatherAPI.Controllers;
 
@@ -8,9 +9,9 @@ namespace WeatherAPI.Controllers;
 [Route("[controller]")]
 public class Chat1aController : ChatStreamControllerBase
 {
-    private readonly Chat1aService _chatService;
+    private readonly IChatClientService _chatService;
 
-    public Chat1aController(Chat1aService chatService)
+    public Chat1aController([FromKeyedServices("Chat1a")] IChatClientService chatService)
     {
         _chatService = chatService;
     }

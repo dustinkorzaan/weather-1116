@@ -47,10 +47,19 @@ function createEmptySessions() {
   };
 }
 
+function createEmptySendingState() {
+  return {
+    Chat1a: false,
+    Chat1b: false,
+    Chat2a: false,
+    Chat2b: false,
+  };
+}
+
 function ChatPanel() {
   const [activeTab, setActiveTab] = useState('Chat1a');
   const [input, setInput] = useState('');
-  const [isSending, setIsSending] = useState(false);
+  const [sendingTabs, setSendingTabs] = useState(createEmptySendingState);
   const [histories, setHistories] = useState(createEmptyHistory);
   const sessionsRef = useRef(createEmptySessions());
   const streamingAssistantRef = useRef('');
@@ -59,17 +68,18 @@ function ChatPanel() {
     () => TAB_CONFIG.find((tab) => tab.id === activeTab) ?? TAB_CONFIG[0],
     [activeTab],
   );
+  const isActiveTabSending = sendingTabs[activeTab];
 
   const onSubmit = async (event) => {
     event.preventDefault();
     const message = input.trim();
-    if (!message || isSending) return;
+    if (!message || sendingTabs[activeTab]) return;
 
     // The active tab can change while the stream is in flight.
     const tabId = activeTab;
 
     setInput('');
-    setIsSending(true);
+    setSendingTabs((current) => ({ ...current, [tabId]: true }));
     streamingAssistantRef.current = '';
 
     setHistories((current) => ({
@@ -160,7 +170,7 @@ function ChatPanel() {
       }));
     } finally {
       streamingAssistantRef.current = '';
-      setIsSending(false);
+      setSendingTabs((current) => ({ ...current, [tabId]: false }));
     }
   };
 
@@ -206,10 +216,10 @@ function ChatPanel() {
             value={input}
             placeholder="Ask about weather in a city…"
             onChange={(event) => setInput(event.target.value)}
-            disabled={isSending}
+            disabled={isActiveTabSending}
           />
-          <button className="chat-send" type="submit" disabled={isSending}>
-            {isSending ? 'Sending…' : 'Send'}
+          <button className="chat-send" type="submit" disabled={isActiveTabSending}>
+            {isActiveTabSending ? 'Sending…' : 'Send'}
           </button>
         </form>
       </section>

@@ -21,6 +21,20 @@
     Chat2b: [],
   };
 
+  const sendingTabs = {
+    Chat1a: false,
+    Chat1b: false,
+    Chat2a: false,
+    Chat2b: false,
+  };
+
+  function updateSendingControls() {
+    const isSending = sendingTabs[activeTab];
+    sendButton.disabled = isSending;
+    sendButton.textContent = isSending ? 'Sending…' : 'Send';
+    input.disabled = isSending;
+  }
+
   function setActiveTab(tabId) {
     activeTab = tabId;
     tabs.forEach((tab) => {
@@ -32,6 +46,7 @@
       desc.classList.toggle('active', desc.dataset.chatDescription === tabId);
     });
     renderMessages();
+    updateSendingControls();
   }
 
   function renderMessages() {
@@ -144,13 +159,14 @@
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = input.value.trim();
-    if (!message) return;
+    if (!message || sendingTabs[activeTab]) return;
 
     // The active tab can change while the stream is in flight.
     const tabId = activeTab;
 
     input.value = '';
-    sendButton.disabled = true;
+    sendingTabs[tabId] = true;
+    updateSendingControls();
 
     addEntry(tabId, { role: 'user', content: message });
 
@@ -159,7 +175,8 @@
     } catch (error) {
       addEntry(tabId, { role: 'error', content: error.message || 'Chat failed.' });
     } finally {
-      sendButton.disabled = false;
+      sendingTabs[tabId] = false;
+      updateSendingControls();
       input.focus();
     }
   });

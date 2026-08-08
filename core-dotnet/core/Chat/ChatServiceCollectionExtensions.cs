@@ -18,10 +18,10 @@ public static class ChatServiceCollectionExtensions
         services.AddSingleton<ChatAgentSessionStore>();
         services.AddScoped<ChatToolExecutor>();
 
-        services.AddScoped<Chat1aService>();
-        services.AddScoped<Chat1bService>();
-        services.AddScoped<Chat2aService>();
-        services.AddScoped<Chat2bService>();
+        services.AddKeyedScoped<IChatClientService, Chat1aService>("Chat1a");
+        services.AddKeyedScoped<IChatClientService, Chat1bService>("Chat1b");
+        services.AddKeyedScoped<IChatClientService, Chat2aService>("Chat2a");
+        services.AddKeyedScoped<IChatClientService, Chat2bService>("Chat2b");
 
         return services;
     }

@@ -116,6 +116,10 @@ All four tabs expose the same two weather tools (no web search):
 - **MCP (Chat1b, Chat2b):** Remote MCP hosts (`mcp-function`, `mcp-dotnet`) — platform invokes
   tools; no local function-call loop in Chat1b.
 
+**Chat2a/Chat2b memory:** `IChatSessionStore` only tracks session ids and a display audit trail
+(user/assistant text). Multi-turn context for Agent Framework tabs comes from `AgentSession`
+(`ChatAgentSessionStore`), not from replaying `IChatSessionStore` history.
+
 ## Configuration
 
 Same Foundry settings as AI Weather and Foundry consoles:
