@@ -82,6 +82,7 @@ public sealed class Chat2aService : IChatClientService
         }
 
         var assistantBuilder = new StringBuilder();
+        var pendingToolCalls = new Dictionary<string, string>();
 
         IAsyncEnumerable<AgentResponseUpdate>? updates = null;
         string? streamError = null;
@@ -111,10 +112,16 @@ public sealed class Chat2aService : IChatClientService
 
             foreach (var content in update.Contents)
             {
-                if (content is FunctionCallContent functionCall)
+                switch (content)
                 {
-                    yield return ChatStreamEvent.ToolStart(functionCall.Name);
-                    yield return ChatStreamEvent.ToolEnd(functionCall.Name);
+                    case FunctionCallContent functionCall:
+                        pendingToolCalls[functionCall.CallId] = functionCall.Name;
+                        yield return ChatStreamEvent.ToolStart(functionCall.Name);
+                        break;
+                    case FunctionResultContent functionResult
+                        when pendingToolCalls.Remove(functionResult.CallId, out var toolName):
+                        yield return ChatStreamEvent.ToolEnd(toolName);
+                        break;
                 }
             }
         }

@@ -85,6 +85,8 @@
     {
         public required string Role { get; set; }
         public required string Content { get; set; }
+        public string? ToolName { get; set; }
+        public bool Running { get; set; }
     }
 
     private void SetActiveTab(string tabId) => _activeTab = tabId;
@@ -97,54 +99,74 @@
             return;
         }
 
+        // The active tab can change while the stream is in flight.
+        var tabId = _activeTab;
+        var history = _histories[tabId];
+
         _input = string.Empty;
         _isSending = true;
-        _histories[_activeTab].Add(new ChatEntry { Role = "user", Content = message });
+        history.Add(new ChatEntry { Role = "user", Content = message });
 
         var assistantBuilder = new System.Text.StringBuilder();
-        int? assistantIndex = null;
+        ChatEntry? assistantEntry = null;
 
         try
         {
             await foreach (var streamEvent in ChatClient.StreamMessageAsync(
-                _activeTab,
-                new ChatSendMessageRequest { SessionId = _sessions[_activeTab], Message = message },
+                tabId,
+                new ChatSendMessageRequest { SessionId = _sessions[tabId], Message = message },
                 CancellationToken.None))
             {
                 if (streamEvent.Type == "session" && !string.IsNullOrWhiteSpace(streamEvent.SessionId))
                 {
-                    _sessions[_activeTab] = streamEvent.SessionId;
+                    _sessions[tabId] = streamEvent.SessionId;
                 }
                 else if (streamEvent.Type == "token" && !string.IsNullOrEmpty(streamEvent.Text))
                 {
                     assistantBuilder.Append(streamEvent.Text);
-                    if (assistantIndex is null)
+                    if (assistantEntry is null)
                     {
-                        _histories[_activeTab].Add(new ChatEntry { Role = "assistant", Content = assistantBuilder.ToString() });
-                        assistantIndex = _histories[_activeTab].Count - 1;
+                        assistantEntry = new ChatEntry { Role = "assistant", Content = assistantBuilder.ToString() };
+                        history.Add(assistantEntry);
                     }
                     else
                     {
-                        _histories[_activeTab][assistantIndex.Value].Content = assistantBuilder.ToString();
+                        assistantEntry.Content = assistantBuilder.ToString();
                     }
 
                     StateHasChanged();
                 }
                 else if (streamEvent.Type == "tool_start" && !string.IsNullOrEmpty(streamEvent.ToolName))
                 {
-                    _histories[_activeTab].Add(new ChatEntry { Role = "tool", Content = $"Running {streamEvent.ToolName}…" });
+                    history.Add(new ChatEntry
+                    {
+                        Role = "tool",
+                        Content = $"Running {streamEvent.ToolName}…",
+                        ToolName = streamEvent.ToolName,
+                        Running = true,
+                    });
                     StateHasChanged();
+                }
+                else if (streamEvent.Type == "tool_end" && !string.IsNullOrEmpty(streamEvent.ToolName))
+                {
+                    var pending = history.LastOrDefault(entry => entry.Running && entry.ToolName == streamEvent.ToolName);
+                    if (pending is not null)
+                    {
+                        pending.Running = false;
+                        pending.Content = $"Ran {streamEvent.ToolName}";
+                        StateHasChanged();
+                    }
                 }
                 else if (streamEvent.Type == "error" && !string.IsNullOrEmpty(streamEvent.ErrorMessage))
                 {
-                    _histories[_activeTab].Add(new ChatEntry { Role = "error", Content = streamEvent.ErrorMessage });
+                    history.Add(new ChatEntry { Role = "error", Content = streamEvent.ErrorMessage });
                     StateHasChanged();
                 }
             }
         }
         catch (Exception ex)
         {
-            _histories[_activeTab].Add(new ChatEntry { Role = "error", Content = ex.Message });
+            history.Add(new ChatEntry { Role = "error", Content = ex.Message });
         }
         finally
         {

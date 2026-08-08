@@ -5,20 +5,26 @@ namespace Core.Chat;
 
 public sealed class ChatAgentSessionStore
 {
-    private readonly ConcurrentDictionary<string, AgentSession> _sessions = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, Lazy<Task<AgentSession>>> _sessions = new(StringComparer.Ordinal);
 
     public async Task<AgentSession> GetOrCreateAsync(
         AIAgent agent,
         string sessionId,
         CancellationToken cancellationToken)
     {
-        if (_sessions.TryGetValue(sessionId, out var existing))
-        {
-            return existing;
-        }
+        var lazySession = _sessions.GetOrAdd(
+            sessionId,
+            _ => new Lazy<Task<AgentSession>>(() => agent.CreateSessionAsync(cancellationToken: cancellationToken).AsTask()));
 
-        var created = await agent.CreateSessionAsync(cancellationToken: cancellationToken);
-        _sessions[sessionId] = created;
-        return created;
+        try
+        {
+            return await lazySession.Value;
+        }
+        catch
+        {
+            // Do not cache a failed creation attempt.
+            _sessions.TryRemove(new KeyValuePair<string, Lazy<Task<AgentSession>>>(sessionId, lazySession));
+            throw;
+        }
     }
 }

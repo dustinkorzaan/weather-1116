@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Core.Chat.Models;
 using Core.Chat.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +8,7 @@ public abstract class ChatStreamControllerBase : Controller
 {
     protected static async Task WriteSseEventAsync(HttpResponse response, ChatStreamEvent streamEvent, CancellationToken cancellationToken)
     {
-        var json = JsonSerializer.Serialize(streamEvent);
+        var json = ChatStreamEventSerializer.Serialize(streamEvent);
         await response.WriteAsync($"data: {json}\n\n", cancellationToken);
         await response.Body.FlushAsync(cancellationToken);
     }
@@ -23,9 +22,16 @@ public abstract class ChatStreamControllerBase : Controller
         Response.Headers.Connection = "keep-alive";
         Response.ContentType = "text/event-stream";
 
-        await foreach (var streamEvent in chatService.SendMessageAsync(request, cancellationToken))
+        try
         {
-            await WriteSseEventAsync(Response, streamEvent, cancellationToken);
+            await foreach (var streamEvent in chatService.SendMessageAsync(request, cancellationToken))
+            {
+                await WriteSseEventAsync(Response, streamEvent, cancellationToken);
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Client disconnected mid-stream.
         }
     }
 }

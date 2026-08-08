@@ -1,18 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { buildUiReactRoot } from './about';
-
-function resolveApiBaseUrl() {
-  const configuredBaseUrl = import.meta.env.VITE_API_DOTNET_URL?.replace(/\/$/, '');
-  if (configuredBaseUrl) {
-    return configuredBaseUrl;
-  }
-
-  if (typeof window !== 'undefined' && window.location?.origin) {
-    return window.location.origin;
-  }
-
-  return '';
-}
+import { resolveApiBaseUrl } from './apiBaseUrl';
 
 const apiBaseUrl = resolveApiBaseUrl();
 

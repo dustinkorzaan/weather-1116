@@ -1,3 +1,6 @@
+using System.Text;
+using System.Text.Json;
+
 namespace WeatherBlazor.Data;
 
 public class ChatSendMessageRequest
@@ -18,6 +21,8 @@ public class ChatStreamEvent
 
 public class ChatApiClient
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
+
     private readonly HttpClient _httpClient;
 
     public ChatApiClient(HttpClient httpClient)
@@ -45,12 +50,31 @@ public class ChatApiClient
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var reader = new StreamReader(stream);
 
+        // An SSE frame is any number of field lines terminated by a blank line.
+        var dataBuilder = new StringBuilder();
+
         while (true)
         {
             var line = await reader.ReadLineAsync(cancellationToken);
-            if (line is null)
+
+            if (line is null || line.Length == 0)
             {
-                break;
+                if (dataBuilder.Length > 0)
+                {
+                    var streamEvent = JsonSerializer.Deserialize<ChatStreamEvent>(dataBuilder.ToString(), SerializerOptions);
+                    dataBuilder.Clear();
+                    if (streamEvent is not null)
+                    {
+                        yield return streamEvent;
+                    }
+                }
+
+                if (line is null)
+                {
+                    break;
+                }
+
+                continue;
             }
 
             if (!line.StartsWith("data:", StringComparison.Ordinal))
@@ -58,22 +82,7 @@ public class ChatApiClient
                 continue;
             }
 
-            var json = line["data:".Length..].Trim();
-            if (string.IsNullOrWhiteSpace(json))
-            {
-                continue;
-            }
-
-            var streamEvent = System.Text.Json.JsonSerializer.Deserialize<ChatStreamEvent>(json);
-            if (streamEvent is not null)
-            {
-                yield return streamEvent;
-            }
-
-            if (await reader.ReadLineAsync(cancellationToken) is null)
-            {
-                break;
-            }
+            dataBuilder.Append(line["data:".Length..].Trim());
         }
     }
 }

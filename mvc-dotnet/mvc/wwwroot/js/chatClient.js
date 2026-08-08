@@ -14,6 +14,13 @@
     Chat2b: null,
   };
 
+  window.chatHistory = window.chatHistory || {
+    Chat1a: [],
+    Chat1b: [],
+    Chat2a: [],
+    Chat2b: [],
+  };
+
   function setActiveTab(tabId) {
     activeTab = tabId;
     tabs.forEach((tab) => {
@@ -29,40 +36,45 @@
 
   function renderMessages() {
     messagesEl.innerHTML = '';
-    const history = window.chatHistory?.[activeTab] ?? [];
-    history.forEach((entry) => appendMessage(entry.role, entry.content, entry.toolStatus));
+    const history = window.chatHistory[activeTab] ?? [];
+    history.forEach((entry) => renderEntry(entry));
+    messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  function appendMessage(role, content, toolStatus) {
+  function renderEntry(entry) {
     const item = document.createElement('div');
-    item.className = `chat-message chat-message-${role}`;
-    if (toolStatus) {
-      item.textContent = toolStatus;
-    } else {
-      item.textContent = content;
-    }
+    item.className = `chat-message chat-message-${entry.role}`;
+    item.textContent = entry.content;
     messagesEl.appendChild(item);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
     return item;
   }
 
-  window.chatHistory = window.chatHistory || {
-    Chat1a: [],
-    Chat1b: [],
-    Chat2a: [],
-    Chat2b: [],
-  };
+  // History is the single source of truth so tab switches never lose messages.
+  function addEntry(tabId, entry) {
+    window.chatHistory[tabId].push(entry);
+    if (tabId === activeTab) {
+      renderEntry(entry);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    return entry;
+  }
+
+  function updateEntry(tabId, entry, content) {
+    entry.content = content;
+    if (tabId === activeTab) {
+      renderMessages();
+    }
+  }
 
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => setActiveTab(tab.dataset.chatTab));
   });
 
-  async function streamChat(message) {
-    const endpoint = `/${activeTab}/Messages`;
-    const response = await fetch(endpoint, {
+  async function streamChat(tabId, message) {
+    const response = await fetch(`/${tabId}/Messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: sessions[activeTab], message }),
+      body: JSON.stringify({ sessionId: sessions[tabId], message }),
     });
 
     if (!response.ok || !response.body) {
@@ -72,7 +84,7 @@
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-    let assistantItem = null;
+    let assistantEntry = null;
     let assistantText = '';
 
     while (true) {
@@ -89,24 +101,34 @@
         const payload = JSON.parse(line.slice(5).trim());
 
         if (payload.type === 'session' && payload.sessionId) {
-          sessions[activeTab] = payload.sessionId;
+          sessions[tabId] = payload.sessionId;
         } else if (payload.type === 'token' && payload.text) {
-          if (!assistantItem) {
-            assistantItem = appendMessage('assistant', '');
-          }
           assistantText += payload.text;
-          assistantItem.textContent = assistantText;
-          messagesEl.scrollTop = messagesEl.scrollHeight;
+          if (!assistantEntry) {
+            assistantEntry = addEntry(tabId, { role: 'assistant', content: assistantText });
+          } else {
+            updateEntry(tabId, assistantEntry, assistantText);
+          }
         } else if (payload.type === 'tool_start' && payload.toolName) {
-          appendMessage('tool', '', `Running ${payload.toolName}…`);
+          addEntry(tabId, {
+            role: 'tool',
+            content: `Running ${payload.toolName}…`,
+            toolName: payload.toolName,
+            running: true,
+          });
+        } else if (payload.type === 'tool_end' && payload.toolName) {
+          const history = window.chatHistory[tabId];
+          const pending = history.findLast(
+            (entry) => entry.role === 'tool' && entry.running && entry.toolName === payload.toolName,
+          );
+          if (pending) {
+            pending.running = false;
+            updateEntry(tabId, pending, `Ran ${payload.toolName}`);
+          }
         } else if (payload.type === 'error' && payload.errorMessage) {
-          appendMessage('error', payload.errorMessage);
+          addEntry(tabId, { role: 'error', content: payload.errorMessage });
         }
       }
-    }
-
-    if (assistantText) {
-      window.chatHistory[activeTab].push({ role: 'assistant', content: assistantText });
     }
   }
 
@@ -115,16 +137,18 @@
     const message = input.value.trim();
     if (!message) return;
 
+    // The active tab can change while the stream is in flight.
+    const tabId = activeTab;
+
     input.value = '';
     sendButton.disabled = true;
 
-    window.chatHistory[activeTab].push({ role: 'user', content: message });
-    appendMessage('user', message);
+    addEntry(tabId, { role: 'user', content: message });
 
     try {
-      await streamChat(message);
+      await streamChat(tabId, message);
     } catch (error) {
-      appendMessage('error', error.message || 'Chat failed.');
+      addEntry(tabId, { role: 'error', content: error.message || 'Chat failed.' });
     } finally {
       sendButton.disabled = false;
       input.focus();

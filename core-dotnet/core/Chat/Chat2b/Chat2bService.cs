@@ -51,18 +51,20 @@ public sealed class Chat2bService : IChatClientService
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
         var responsesClient = _settings.CreateResponsesClient();
-        IList<AITool> mcpTools = _hostedMcpToolFactory.CreateTools();
 
-        AIAgent agent = responsesClient.AsAIAgent(
-            name: "Chat2b",
-            instructions: ChatSystemInstructions.WeatherAssistant,
-            model: _settings.DeploymentName,
-            tools: mcpTools);
-
+        AIAgent? agent = null;
         AgentSession? agentSession = null;
         string? sessionError = null;
         try
         {
+            IList<AITool> mcpTools = _hostedMcpToolFactory.CreateTools();
+
+            agent = responsesClient.AsAIAgent(
+                name: "Chat2b",
+                instructions: ChatSystemInstructions.WeatherAssistant,
+                model: _settings.DeploymentName,
+                tools: mcpTools);
+
             agentSession = await _agentSessionStore.GetOrCreateAsync(agent, sessionId, cancellationToken);
         }
         catch (Exception ex)
@@ -78,12 +80,13 @@ public sealed class Chat2bService : IChatClientService
         }
 
         var assistantBuilder = new StringBuilder();
+        var pendingToolCalls = new Dictionary<string, string>();
 
         IAsyncEnumerable<AgentResponseUpdate>? updates = null;
         string? streamError = null;
         try
         {
-            updates = agent.RunStreamingAsync(userMessage, agentSession, cancellationToken: cancellationToken);
+            updates = agent!.RunStreamingAsync(userMessage, agentSession, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
@@ -107,10 +110,16 @@ public sealed class Chat2bService : IChatClientService
 
             foreach (var content in update.Contents)
             {
-                if (content is FunctionCallContent functionCall)
+                switch (content)
                 {
-                    yield return ChatStreamEvent.ToolStart(functionCall.Name);
-                    yield return ChatStreamEvent.ToolEnd(functionCall.Name);
+                    case FunctionCallContent functionCall:
+                        pendingToolCalls[functionCall.CallId] = functionCall.Name;
+                        yield return ChatStreamEvent.ToolStart(functionCall.Name);
+                        break;
+                    case FunctionResultContent functionResult
+                        when pendingToolCalls.Remove(functionResult.CallId, out var toolName):
+                        yield return ChatStreamEvent.ToolEnd(toolName);
+                        break;
                 }
             }
         }

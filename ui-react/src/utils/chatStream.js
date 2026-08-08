@@ -1,5 +1,7 @@
+import { resolveApiBaseUrl } from '../services/apiBaseUrl';
+
 export async function streamChatMessage({ endpoint, sessionId, message, onEvent }) {
-  const response = await fetch(endpoint, {
+  const response = await fetch(`${resolveApiBaseUrl()}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sessionId, message }),
@@ -24,8 +26,7 @@ export async function streamChatMessage({ endpoint, sessionId, message, onEvent 
     for (const part of parts) {
       const line = part.trim();
       if (!line.startsWith('data:')) continue;
-      const payload = JSON.parse(line.slice(5).trim());
-      onEvent(payload);
+      onEvent(JSON.parse(line.slice(5).trim()));
     }
   }
 }

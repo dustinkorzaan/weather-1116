@@ -49,13 +49,6 @@ public sealed class Chat1bService : IChatClientService
         var inputItems = ChatResponsesSessionHelper.BuildInputItems(history.Take(history.Count - 1).ToList(), userMessage);
 
         var client = _settings.CreateResponsesClient();
-        var (latLongTool, weatherTool) = _mcpToolFactory.CreateTools();
-
-        CreateResponseOptions options = new(_settings.DeploymentName, inputItems)
-        {
-            Tools = { latLongTool, weatherTool },
-            StreamingEnabled = true,
-        };
 
         var assistantBuilder = new StringBuilder();
 
@@ -63,6 +56,14 @@ public sealed class Chat1bService : IChatClientService
         string? errorOnStart = null;
         try
         {
+            var (latLongTool, weatherTool) = _mcpToolFactory.CreateTools();
+
+            CreateResponseOptions options = new(_settings.DeploymentName, inputItems)
+            {
+                Tools = { latLongTool, weatherTool },
+                StreamingEnabled = true,
+            };
+
             updates = client.CreateResponseStreamingAsync(options, cancellationToken);
         }
         catch (Exception ex)
@@ -85,11 +86,13 @@ public sealed class Chat1bService : IChatClientService
                 yield return ChatStreamEvent.Token(textDelta.Delta);
             }
 
+            // Remote MCP calls are executed by the model host, so the call is only
+            // observable once the item completes.
             if (update is StreamingResponseOutputItemDoneUpdate itemDone
-                && itemDone.Item is FunctionCallResponseItem functionCall)
+                && itemDone.Item is McpToolCallItem mcpCall)
             {
-                yield return ChatStreamEvent.ToolStart(functionCall.FunctionName);
-                yield return ChatStreamEvent.ToolEnd(functionCall.FunctionName);
+                yield return ChatStreamEvent.ToolStart(mcpCall.ToolName);
+                yield return ChatStreamEvent.ToolEnd(mcpCall.ToolName);
             }
         }
 

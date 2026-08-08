@@ -18,19 +18,29 @@ public sealed class InMemoryChatSessionStore : IChatSessionStore
 
     public IReadOnlyList<ChatMessage> GetMessages(string sessionId)
     {
-        return _sessions.TryGetValue(sessionId, out var messages)
-            ? messages.AsReadOnly()
-            : Array.Empty<ChatMessage>();
+        if (!_sessions.TryGetValue(sessionId, out var messages))
+        {
+            return Array.Empty<ChatMessage>();
+        }
+
+        // The list is mutated by concurrent requests, so hand back a snapshot.
+        lock (messages)
+        {
+            return messages.ToArray();
+        }
     }
 
     public void AppendMessage(string sessionId, ChatMessage message)
     {
-        if (!_sessions.ContainsKey(sessionId))
+        if (!_sessions.TryGetValue(sessionId, out var messages))
         {
             throw new KeyNotFoundException($"Chat session '{sessionId}' was not found.");
         }
 
-        _sessions[sessionId].Add(message);
+        lock (messages)
+        {
+            messages.Add(message);
+        }
     }
 
     public bool SessionExists(string sessionId) => _sessions.ContainsKey(sessionId);

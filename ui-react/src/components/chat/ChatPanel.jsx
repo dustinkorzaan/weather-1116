@@ -64,23 +64,26 @@ function ChatPanel() {
     const message = input.trim();
     if (!message || isSending) return;
 
+    // The active tab can change while the stream is in flight.
+    const tabId = activeTab;
+
     setInput('');
     setIsSending(true);
     streamingAssistantRef.current = '';
 
     setHistories((current) => ({
       ...current,
-      [activeTab]: [...current[activeTab], { role: 'user', content: message }],
+      [tabId]: [...current[tabId], { role: 'user', content: message }],
     }));
 
     try {
       await streamChatMessage({
         endpoint: activeConfig.endpoint,
-        sessionId: sessionsRef.current[activeTab],
+        sessionId: sessionsRef.current[tabId],
         message,
         onEvent: (payload) => {
           if (payload.type === 'session' && payload.sessionId) {
-            sessionsRef.current[activeTab] = payload.sessionId;
+            sessionsRef.current[tabId] = payload.sessionId;
             return;
           }
 
@@ -88,30 +91,48 @@ function ChatPanel() {
             streamingAssistantRef.current += payload.text;
             const snapshot = streamingAssistantRef.current;
             setHistories((current) => {
-              const tabHistory = [...current[activeTab]];
+              const tabHistory = [...current[tabId]];
               const last = tabHistory[tabHistory.length - 1];
               if (last?.role === 'assistant' && last.streaming) {
                 tabHistory[tabHistory.length - 1] = { role: 'assistant', content: snapshot, streaming: true };
               } else {
                 tabHistory.push({ role: 'assistant', content: snapshot, streaming: true });
               }
-              return { ...current, [activeTab]: tabHistory };
+              return { ...current, [tabId]: tabHistory };
             });
             return;
           }
 
           if (payload.type === 'tool_start' && payload.toolName) {
+            const { toolName } = payload;
             setHistories((current) => ({
               ...current,
-              [activeTab]: [...current[activeTab], { role: 'tool', content: `Running ${payload.toolName}…` }],
+              [tabId]: [
+                ...current[tabId],
+                { role: 'tool', content: `Running ${toolName}…`, toolName, running: true },
+              ],
             }));
+            return;
+          }
+
+          if (payload.type === 'tool_end' && payload.toolName) {
+            const { toolName } = payload;
+            setHistories((current) => {
+              const tabHistory = [...current[tabId]];
+              const index = tabHistory.findLastIndex(
+                (entry) => entry.role === 'tool' && entry.running && entry.toolName === toolName,
+              );
+              if (index === -1) return current;
+              tabHistory[index] = { role: 'tool', content: `Ran ${toolName}`, toolName };
+              return { ...current, [tabId]: tabHistory };
+            });
             return;
           }
 
           if (payload.type === 'error' && payload.errorMessage) {
             setHistories((current) => ({
               ...current,
-              [activeTab]: [...current[activeTab], { role: 'error', content: payload.errorMessage }],
+              [tabId]: [...current[tabId], { role: 'error', content: payload.errorMessage }],
             }));
           }
         },
@@ -120,20 +141,20 @@ function ChatPanel() {
       const finalText = streamingAssistantRef.current;
       if (finalText) {
         setHistories((current) => {
-          const tabHistory = [...current[activeTab]];
+          const tabHistory = [...current[tabId]];
           const last = tabHistory[tabHistory.length - 1];
           if (last?.role === 'assistant' && last.streaming) {
             tabHistory[tabHistory.length - 1] = { role: 'assistant', content: finalText };
           } else {
             tabHistory.push({ role: 'assistant', content: finalText });
           }
-          return { ...current, [activeTab]: tabHistory };
+          return { ...current, [tabId]: tabHistory };
         });
       }
     } catch (error) {
       setHistories((current) => ({
         ...current,
-        [activeTab]: [...current[activeTab], { role: 'error', content: error.message || 'Chat failed.' }],
+        [tabId]: [...current[tabId], { role: 'error', content: error.message || 'Chat failed.' }],
       }));
     } finally {
       streamingAssistantRef.current = '';
