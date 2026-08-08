@@ -23,13 +23,11 @@ public class GetPublicWeatherDataHandler : IRequestHandler<GetPublicWeatherDataE
         var client = new HttpClient();
         var currentWeatherPath = "forecast";
 
-        string url = $"https://api.open-meteo.com/v1/{currentWeatherPath}?latitude={request.LatLong.Latitude}&longitude={request.LatLong.Longitude}&current_weather=true";
-        // Public Open-Meteo lookup URL; lat/long here are query params for a weather API, not private PII storage.
-        // codeql[cs/exposure-of-sensitive-information]
-        _logger.LogInformation("Non-AI: Fetching weather data from: {Url}", url);
+        string endpoint = $"https://api.open-meteo.com/v1/{currentWeatherPath}?latitude={request.LatLong.Latitude}&longitude={request.LatLong.Longitude}&current_weather=true";
+        // _logger.LogInformation("Non-AI: Fetching weather data from: {endpoint}", endpoint);
 
         // 1. Fetch raw JSON string from API
-        string jsonResponse = await client.GetStringAsync(url, cancellationToken);
+        string jsonResponse = await client.GetStringAsync(endpoint, cancellationToken);
 
         // 2. Options to format the console output nicely
         var options = new JsonSerializerOptions { WriteIndented = true };
