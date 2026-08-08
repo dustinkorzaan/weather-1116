@@ -1,3 +1,4 @@
+import ChatPanel from '../components/chat/ChatPanel';
 import CurrentAIWeather from '../components/CurrentAIWeather';
 import WeatherMap from '../components/WeatherMap';
 import { useGetHelloQuery } from '../services/weatherApi';
@@ -14,6 +15,8 @@ function HomePage() {
       <CurrentAIWeather />
 
       <WeatherMap />
+
+      <ChatPanel />
     </main>
   );
 }

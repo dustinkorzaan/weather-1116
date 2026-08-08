@@ -1,9 +1,8 @@
 import './App.css';
 import { useEffect, useRef, useState } from 'react';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { siteLinks } from './config/siteLinks';
 import HomePage from './pages/HomePage';
-import ChatPage from './pages/ChatPage';
 import {
   useLazyGetAboutQuery,
 } from './services/weatherApi';
@@ -152,7 +151,6 @@ function App() {
 
           <nav className="top-nav-links" aria-label="Primary">
             <Link className="top-nav-link" to="/">Home</Link>
-            <Link className="top-nav-link" to="/chat">Chat</Link>
           </nav>
 
           <div className="avatar-menu" ref={avatarMenuRef}>
@@ -202,7 +200,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/chat" element={<Navigate to="/" replace />} />
       </Routes>
 
       {isAboutOpen && (

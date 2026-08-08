@@ -4,5 +4,5 @@ namespace WeatherMVC.Controllers;
 
 public class ChatController : Controller
 {
-    public IActionResult Index() => View();
+    public IActionResult Index() => RedirectToAction("Index", "Home");
 }
