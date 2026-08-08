@@ -24,7 +24,8 @@ public class GetPublicWeatherDataHandler : IRequestHandler<GetPublicWeatherDataE
         var currentWeatherPath = "forecast";
 
         string url = $"https://api.open-meteo.com/v1/{currentWeatherPath}?latitude={request.LatLong.Latitude}&longitude={request.LatLong.Longitude}&current_weather=true";
-        _logger.LogInformation("Non-AI: Fetching weather data from: {Url}", url);
+        // Do not log lat/long (or a URL that embeds them) — CodeQL treats coordinates as private data.
+        _logger.LogInformation("Non-AI: Fetching weather data from Open-Meteo {Path}", currentWeatherPath);
 
         // 1. Fetch raw JSON string from API
         string jsonResponse = await client.GetStringAsync(url, cancellationToken);
