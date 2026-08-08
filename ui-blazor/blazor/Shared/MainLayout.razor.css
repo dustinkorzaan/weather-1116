@@ -26,8 +26,9 @@ main {
     box-sizing: border-box;
 }
 
-/* ::deep: NavLink renders as a child <a>, so scoped selectors alone do not match. */
-::deep(.site-brand) {
+/* ::deep: NavLink renders as a child <a>, so scoped selectors alone do not match.
+   Global site.css also styles .site-brand for production reliability. */
+::deep .site-brand {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -36,21 +37,21 @@ main {
     min-width: 0;
 }
 
-::deep(.site-brand:hover),
-::deep(.site-brand:focus),
-::deep(.site-brand:focus-visible) {
+::deep .site-brand:hover,
+::deep .site-brand:focus,
+::deep .site-brand:focus-visible {
     color: #212529;
     text-decoration: none;
 }
 
-::deep(.site-logo) {
+::deep .site-logo {
     display: inline-block;
     width: 1.375rem;
     height: 1.375rem;
     flex-shrink: 0;
 }
 
-::deep(.site-title) {
+::deep .site-title {
     margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
