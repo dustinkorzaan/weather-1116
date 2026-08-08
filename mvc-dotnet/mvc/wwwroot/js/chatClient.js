@@ -70,6 +70,17 @@
     tab.addEventListener('click', () => setActiveTab(tab.dataset.chatTab));
   });
 
+  function findLastRunningTool(history, toolName) {
+    for (let index = history.length - 1; index >= 0; index -= 1) {
+      const entry = history[index];
+      if (entry.role === 'tool' && entry.running && entry.toolName === toolName) {
+        return entry;
+      }
+    }
+
+    return null;
+  }
+
   async function streamChat(tabId, message) {
     const response = await fetch(`/${tabId}/Messages`, {
       method: 'POST',
@@ -118,9 +129,7 @@
           });
         } else if (payload.type === 'tool_end' && payload.toolName) {
           const history = window.chatHistory[tabId];
-          const pending = history.findLast(
-            (entry) => entry.role === 'tool' && entry.running && entry.toolName === payload.toolName,
-          );
+          const pending = findLastRunningTool(history, payload.toolName);
           if (pending) {
             pending.running = false;
             updateEntry(tabId, pending, `Ran ${payload.toolName}`);

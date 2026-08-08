@@ -25,7 +25,7 @@ public sealed class ChatMcpToolFactory
         McpTool weather = ResponseTool.CreateMcpTool(
             serverLabel: "MyMCPApp",
             serverUri: new Uri($"{mcpAppUrl.TrimEnd('/')}/mcp"),
-            authorizationToken: mcpAppKey,
+            headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpAppKey}" },
             toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
         return (latLong, weather);

@@ -37,7 +37,7 @@ public sealed class Chat1aService : IChatClientService
 
         yield return ChatStreamEvent.Session(sessionId);
 
-        var userMessage = request.Message.Trim();
+        var userMessage = request.Message?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(userMessage))
         {
             yield return ChatStreamEvent.Error("Message cannot be empty.");

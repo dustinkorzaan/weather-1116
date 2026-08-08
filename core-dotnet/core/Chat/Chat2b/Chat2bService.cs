@@ -41,7 +41,7 @@ public sealed class Chat2bService : IChatClientService
 
         yield return ChatStreamEvent.Session(sessionId);
 
-        var userMessage = request.Message.Trim();
+        var userMessage = request.Message?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(userMessage))
         {
             yield return ChatStreamEvent.Error("Message cannot be empty.");
@@ -112,13 +112,13 @@ public sealed class Chat2bService : IChatClientService
             {
                 switch (content)
                 {
-                    case FunctionCallContent functionCall:
-                        pendingToolCalls[functionCall.CallId] = functionCall.Name;
-                        yield return ChatStreamEvent.ToolStart(functionCall.Name);
+                    case McpServerToolCallContent mcpCall:
+                        pendingToolCalls[mcpCall.CallId] = mcpCall.Name;
+                        yield return ChatStreamEvent.ToolStart(mcpCall.Name);
                         break;
-                    case FunctionResultContent functionResult
-                        when pendingToolCalls.Remove(functionResult.CallId, out var toolName):
-                        yield return ChatStreamEvent.ToolEnd(toolName);
+                    case McpServerToolResultContent mcpResult
+                        when pendingToolCalls.Remove(mcpResult.CallId, out var mcpToolName):
+                        yield return ChatStreamEvent.ToolEnd(mcpToolName);
                         break;
                 }
             }

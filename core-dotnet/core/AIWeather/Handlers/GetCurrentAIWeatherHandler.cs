@@ -101,7 +101,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         McpTool myMcpApp = ResponseTool.CreateMcpTool(
             serverLabel: "MyMCPApp",
             serverUri: new Uri($"{mcpAppUrl.TrimEnd('/')}/mcp"),
-            authorizationToken: mcpAppKey,
+            headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpAppKey}" },
             toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
         var inputItems = new List<ResponseItem>

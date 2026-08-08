@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import { findLastIndex } from '../../utils/array';
 import { streamChatMessage } from '../../utils/chatStream';
 
 const TAB_CONFIG = [
@@ -119,7 +120,8 @@ function ChatPanel() {
             const { toolName } = payload;
             setHistories((current) => {
               const tabHistory = [...current[tabId]];
-              const index = tabHistory.findLastIndex(
+              const index = findLastIndex(
+                tabHistory,
                 (entry) => entry.role === 'tool' && entry.running && entry.toolName === toolName,
               );
               if (index === -1) return current;
