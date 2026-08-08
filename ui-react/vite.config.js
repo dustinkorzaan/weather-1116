@@ -18,6 +18,22 @@ export default defineConfig({
         target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
+      '/Chat1a': {
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/Chat1b': {
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/Chat2a': {
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/Chat2b': {
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
   test: {

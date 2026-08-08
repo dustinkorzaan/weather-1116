@@ -39,3 +39,11 @@ See each `Program.cs` and `.env.example` for required settings (`AZURE_FOUNDRY_P
 | V5 | [`FoundryConsoleV5`](FoundryConsoleV5) (`FoundryConsoleV5Agent.csproj`) | Hosted Foundry Agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
 
 VS Code launch configs: **Foundry Console V1** … **V5**.
+
+## Chat clients
+
+Presentation reference: [`docs/5-chat-clients/5-chat-clients.md`](docs/5-chat-clients/5-chat-clients.md)
+
+Standalone multi-turn chat in React (`/chat`), MVC (`/Chat`), and Blazor (`/chat`) with four tabs:
+**Chat1a** (Responses + in-process), **Chat1b** (Responses + MCP), **Chat2a** (Agent Framework +
+in-process), **Chat2b** (Agent Framework + MCP). Separate from the Current AI Weather widget on Home.

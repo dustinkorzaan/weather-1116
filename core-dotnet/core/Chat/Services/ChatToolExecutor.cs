@@ -1,0 +1,56 @@
+using System.Text.Json;
+using Core.Geo.Events;
+using Core.Geo.Models;
+using Core.Weather.Events;
+using MediatR;
+using OpenAI.Responses;
+
+namespace Core.Chat.Services;
+
+public sealed class ChatToolExecutor
+{
+    private readonly IMediator _mediator;
+
+    public ChatToolExecutor(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    public async Task<string> ExecuteAsync(FunctionCallResponseItem functionCall, CancellationToken cancellationToken)
+    {
+        return functionCall.FunctionName switch
+        {
+            "GetLatLongData" => await ExecuteGetLatLongAsync(functionCall.FunctionArguments, cancellationToken),
+            "GetPublicWeatherData" => await ExecuteGetPublicWeatherAsync(functionCall.FunctionArguments, cancellationToken),
+            _ => throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}"),
+        };
+    }
+
+    private async Task<string> ExecuteGetLatLongAsync(BinaryData arguments, CancellationToken cancellationToken)
+    {
+        using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
+        string location = argumentsJson.RootElement.GetProperty("location").GetString()
+            ?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
+
+        var latLong = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
+        return JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    private async Task<string> ExecuteGetPublicWeatherAsync(BinaryData arguments, CancellationToken cancellationToken)
+    {
+        using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
+        double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+        double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+
+        var weatherData = await _mediator.Send(new GetPublicWeatherDataEvent
+        {
+            LatLong = new NonAILatLongResponse
+            {
+                Latitude = latitude,
+                Longitude = longitude,
+            },
+        }, cancellationToken);
+
+        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+    }
+}

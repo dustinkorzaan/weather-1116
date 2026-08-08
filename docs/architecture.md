@@ -59,9 +59,37 @@ All three UIs expose **Current AI Weather**. The request path differs by stack:
 - **React / Blazor** → `WeatherAPI` (`/AIWeather/Current`)
 - **MVC** → local `HomeController` + `Core` (same handler, no API hop)
 
-Both API and MVC route AI weather through `Core.AIWeather.Handlers.GetCurrentAIWeatherHandler`,
-which calls the hosted model directly (same pattern as Foundry Console V4) with MCP tools
-that map back to this repo's `Core` handlers:
+## Chat Clients (Chat1a–Chat2b)
+
+Separate from **Current AI Weather**. All three UIs expose a dedicated chat page with four tabs:
+
+| Tab | Stack | Tools |
+| --- | --- | --- |
+| Chat1a | Responses API | In-process (V3) |
+| Chat1b | Responses API | Remote MCP (V4) |
+| Chat2a | Agent Framework | In-process |
+| Chat2b | Agent Framework | Remote MCP |
+
+- **React / Blazor** → `POST /Chat1a/messages` … `/Chat2b/messages` on Weather API (SSE stream)
+- **MVC** → same routes locally via `Chat1aController` … `Chat2bController` + Core services
+
+Full detail: [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)
+
+```mermaid
+flowchart LR
+  UI[React / Blazor / MVC chat page]
+  API[MVC or WeatherAPI Chat controllers]
+  Core[Core.Chat1a…2b services]
+  Model[Azure OpenAI Responses]
+  Tools[In-process or MCP]
+
+  UI --> API
+  API --> Core
+  Core --> Model
+  Core --> Tools
+```
+
+## AI Weather handler (production path)
 
 ```mermaid
 flowchart LR

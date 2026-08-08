@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Chat Clients";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+}
+
+<div class="chat-page">
+    <h1 class="chat-page-title">Chat Clients</h1>
+    <p class="chat-page-lead">
+        Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
+    </p>
+
+    <div class="chat-tabs" role="tablist" aria-label="Chat client tabs">
+        <button type="button" class="chat-tab active" data-chat-tab="Chat1a" role="tab" aria-selected="true">Chat1a</button>
+        <button type="button" class="chat-tab" data-chat-tab="Chat1b" role="tab" aria-selected="false">Chat1b</button>
+        <button type="button" class="chat-tab" data-chat-tab="Chat2a" role="tab" aria-selected="false">Chat2a</button>
+        <button type="button" class="chat-tab" data-chat-tab="Chat2b" role="tab" aria-selected="false">Chat2b</button>
+    </div>
+
+    <div class="chat-tab-descriptions">
+        <p class="chat-tab-description active" data-chat-description="Chat1a">Responses API · in-process tools (V3 loop)</p>
+        <p class="chat-tab-description" data-chat-description="Chat1b">Responses API · remote MCP tools (V4)</p>
+        <p class="chat-tab-description" data-chat-description="Chat2a">Agent Framework · in-process tools</p>
+        <p class="chat-tab-description" data-chat-description="Chat2b">Agent Framework · remote MCP tools</p>
+    </div>
+
+    <section class="chat-panel" aria-label="Chat conversation">
+        <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
+        <form id="chat-form" class="chat-form">
+            <label class="visually-hidden" for="chat-input">Message</label>
+            <textarea id="chat-input" class="chat-input" rows="3" placeholder="Ask about weather in a city…"></textarea>
+            <button id="chat-send" class="chat-send" type="submit">Send</button>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/chatClient.js" asp-append-version="true"></script>
+}

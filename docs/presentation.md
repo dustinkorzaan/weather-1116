@@ -18,6 +18,7 @@ and the Foundry console learning path (V1 → V5).
 | 2 | Autonomous Sprint Board AI Development | [`autonomous-sprint-board.md`](2-autonomous-sprint-board-ai-development/autonomous-sprint-board.md) | Introduce — placeholder for sprint-board + agents story |
 | 3 | AI Development Ecosystem | [`ai-development-ecosystem.md`](3-ai-development-ecosystem/ai-development-ecosystem.md) | Introduce — landscape of tools (wireframes, rapid app gen, IDEs) |
 | 4 | Demystifying Microsoft Foundry Agents and MCP | [`demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md), [`brainstorming`](4-demystifying-foundry-agents-mcp/demystifying-model-agent-tools-mcp-brainstorming.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
+| 5 | Chat Clients (Chat1a–Chat2b) | [`5-chat-clients.md`](5-chat-clients/5-chat-clients.md) | **Hands-on** — four chat tabs in React/MVC/Blazor |
 
 ## Supporting material
 
@@ -38,5 +39,6 @@ and the Foundry console learning path (V1 → V5).
 5. **V5** — hosted Foundry agent demo; agent owns instructions, response schema, and MCP tools; console sends only the user prompt.
 6. **Production** — V4 model-direct path in `GetCurrentAIWeatherHandler` (API/MVC).
 7. **Demos** — React / Blazor / API `GetCurrentAIWeather`; optional MCP inspector on 8110 / 8120.
+8. **Chat clients** — `/chat` in React and Blazor, `/Chat` in MVC; compare Chat1a–Chat2b side by side.
 
 Adjust 1–3 to taste, keep the main pallet focused on 4–6, and finish the menu with hands-on paths in the repo.
