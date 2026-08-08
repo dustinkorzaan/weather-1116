@@ -1,17 +1,34 @@
 window.chatInput = (function () {
+  function isEnterToSend(event) {
+    return event.key === 'Enter'
+      && !event.shiftKey
+      && !event.isComposing
+      && event.keyCode !== 229;
+  }
+
   function attachEnterToSend(textarea) {
     if (!textarea || textarea.dataset.enterToSendAttached === 'true') {
       return;
     }
 
     textarea.dataset.enterToSendAttached = 'true';
-    textarea.addEventListener('keydown', function (event) {
-      if (event.key === 'Enter' && !event.shiftKey) {
+    const form = textarea.closest('form');
+    if (form && form.dataset.enterToSendSubmitGuarded !== 'true') {
+      // Block native navigation if Enter fires before the Blazor circuit attaches.
+      form.dataset.enterToSendSubmitGuarded = 'true';
+      form.addEventListener('submit', function (event) {
         event.preventDefault();
-        const form = textarea.closest('form');
-        if (form) {
-          form.requestSubmit();
-        }
+      });
+    }
+
+    textarea.addEventListener('keydown', function (event) {
+      if (!isEnterToSend(event)) {
+        return;
+      }
+
+      event.preventDefault();
+      if (form) {
+        form.requestSubmit();
       }
     });
   }
