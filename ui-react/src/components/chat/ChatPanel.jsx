@@ -62,7 +62,6 @@ function ChatPanel() {
   const [sendingTabs, setSendingTabs] = useState(createEmptySendingState);
   const [histories, setHistories] = useState(createEmptyHistory);
   const sessionsRef = useRef(createEmptySessions());
-  const streamingAssistantRef = useRef('');
 
   const activeConfig = useMemo(
     () => TAB_CONFIG.find((tab) => tab.id === activeTab) ?? TAB_CONFIG[0],
@@ -75,12 +74,13 @@ function ChatPanel() {
     const message = input.trim();
     if (!message || sendingTabs[activeTab]) return;
 
-    // The active tab can change while the stream is in flight.
+    // Capture per-request so concurrent tabs do not share stream state.
     const tabId = activeTab;
+    const endpoint = activeConfig.endpoint;
+    let assistantText = '';
 
     setInput('');
     setSendingTabs((current) => ({ ...current, [tabId]: true }));
-    streamingAssistantRef.current = '';
 
     setHistories((current) => ({
       ...current,
@@ -89,7 +89,7 @@ function ChatPanel() {
 
     try {
       await streamChatMessage({
-        endpoint: activeConfig.endpoint,
+        endpoint,
         sessionId: sessionsRef.current[tabId],
         message,
         onEvent: (payload) => {
@@ -99,8 +99,8 @@ function ChatPanel() {
           }
 
           if (payload.type === 'token' && payload.text) {
-            streamingAssistantRef.current += payload.text;
-            const snapshot = streamingAssistantRef.current;
+            assistantText += payload.text;
+            const snapshot = assistantText;
             setHistories((current) => {
               const tabHistory = [...current[tabId]];
               const last = tabHistory[tabHistory.length - 1];
@@ -150,15 +150,14 @@ function ChatPanel() {
         },
       });
 
-      const finalText = streamingAssistantRef.current;
-      if (finalText) {
+      if (assistantText) {
         setHistories((current) => {
           const tabHistory = [...current[tabId]];
           const last = tabHistory[tabHistory.length - 1];
           if (last?.role === 'assistant' && last.streaming) {
-            tabHistory[tabHistory.length - 1] = { role: 'assistant', content: finalText };
+            tabHistory[tabHistory.length - 1] = { role: 'assistant', content: assistantText };
           } else {
-            tabHistory.push({ role: 'assistant', content: finalText });
+            tabHistory.push({ role: 'assistant', content: assistantText });
           }
           return { ...current, [tabId]: tabHistory };
         });
@@ -169,7 +168,6 @@ function ChatPanel() {
         [tabId]: [...current[tabId], { role: 'error', content: error.message || 'Chat failed.' }],
       }));
     } finally {
-      streamingAssistantRef.current = '';
       setSendingTabs((current) => ({ ...current, [tabId]: false }));
     }
   };
