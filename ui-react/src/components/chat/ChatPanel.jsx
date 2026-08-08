@@ -69,8 +69,7 @@ function ChatPanel() {
   );
   const isActiveTabSending = sendingTabs[activeTab];
 
-  const onSubmit = async (event) => {
-    event.preventDefault();
+  const sendMessage = async () => {
     const message = input.trim();
     if (!message || sendingTabs[activeTab]) return;
 
@@ -172,6 +171,18 @@ function ChatPanel() {
     }
   };
 
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    await sendMessage();
+  };
+
+  const onKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
+      event.preventDefault();
+      void sendMessage();
+    }
+  };
+
   return (
     <div className="chat-page">
       <h2 className="chat-page-title">Chat Clients</h2>
@@ -214,6 +225,7 @@ function ChatPanel() {
             value={input}
             placeholder="Ask about weather in a city…"
             onChange={(event) => setInput(event.target.value)}
+            onKeyDown={onKeyDown}
             disabled={isActiveTabSending}
           />
           <button className="chat-send" type="submit" disabled={isActiveTabSending}>

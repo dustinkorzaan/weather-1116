@@ -156,6 +156,13 @@
     }
   }
 
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = input.value.trim();

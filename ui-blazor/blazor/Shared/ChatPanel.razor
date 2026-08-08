@@ -39,6 +39,7 @@
                       rows="3"
                       placeholder="Ask about weather in a city…"
                       @bind="_input"
+                      @bind:event="oninput"
                       disabled="@IsActiveTabSending"></textarea>
             <button class="chat-send" type="submit" disabled="@IsActiveTabSending">
                 @(IsActiveTabSending ? "Sending…" : "Send")

@@ -418,9 +418,8 @@
 }
 
 .chat-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
+  margin: 1.5rem 0 3rem;
+  padding: 0;
 }
 
 .chat-page-title {
@@ -448,8 +447,8 @@
 }
 
 .chat-tab.active {
-  background: #0f766e;
-  border-color: #0f766e;
+  background: #1b6ec2;
+  border-color: #1861ac;
   color: #fff;
 }
 
@@ -526,10 +525,14 @@
   align-self: flex-end;
   border: none;
   border-radius: 8px;
-  background: #0f766e;
+  background: #1b6ec2;
   color: #fff;
   padding: 0.65rem 1rem;
   cursor: pointer;
+}
+
+.chat-send:hover:not(:disabled) {
+  background: #185ca9;
 }
 
 .chat-send:disabled {
