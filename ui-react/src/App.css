@@ -417,24 +417,6 @@
   text-decoration: underline;
 }
 
-.top-nav-links {
-  display: flex;
-  gap: 1rem;
-  margin-left: auto;
-  margin-right: 1rem;
-}
-
-.top-nav-link {
-  color: #185ca9;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.top-nav-link:hover,
-.top-nav-link:focus-visible {
-  text-decoration: underline;
-}
-
 .chat-page {
   max-width: 960px;
   margin: 0 auto;

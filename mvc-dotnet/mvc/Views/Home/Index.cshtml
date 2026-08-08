@@ -66,9 +66,16 @@
     <div id="weather-map" class="weather-map" data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"></div>
 </section>
 
+<partial name="_ChatPanel" />
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+}
+
 @section Scripts {
     <script src="~/js/currentAIWeather.js" asp-append-version="true"></script>
     <script src="~/js/weatherMap.js" asp-append-version="true"></script>
+    <script src="~/js/chatClient.js" asp-append-version="true"></script>
     <script>
         currentAIWeather.init({
             formId: 'ai-weather-form',

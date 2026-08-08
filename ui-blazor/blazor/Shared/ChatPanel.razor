@@ -1,0 +1,181 @@
+@using WeatherBlazor.Data
+@inject ChatApiClient ChatClient
+
+<link href="css/chat.css" rel="stylesheet" />
+
+<div class="chat-page">
+    <h2 class="chat-page-title">Chat Clients</h2>
+    <p class="chat-page-lead">
+        Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
+    </p>
+
+    <div class="chat-tabs" role="tablist" aria-label="Chat client tabs">
+        @foreach (var tab in _tabs)
+        {
+            <button type="button"
+                    class="chat-tab @(tab.Id == _activeTab ? "active" : string.Empty)"
+                    role="tab"
+                    aria-selected="@(tab.Id == _activeTab)"
+                    @onclick="() => SetActiveTab(tab.Id)">
+                @tab.Label
+            </button>
+        }
+    </div>
+
+    <p class="chat-tab-description">@_tabs.First(tab => tab.Id == _activeTab).Description</p>
+
+    <section class="chat-panel" aria-label="Chat conversation">
+        <div class="chat-messages">
+            @foreach (var entry in _histories[_activeTab])
+            {
+                <div class="chat-message chat-message-@entry.Role">@entry.Content</div>
+            }
+        </div>
+
+        <form class="chat-form" @onsubmit="OnSubmit" @onsubmit:preventDefault="true">
+            <label class="visually-hidden" for="chat-input">Message</label>
+            <textarea id="chat-input"
+                      class="chat-input"
+                      rows="3"
+                      placeholder="Ask about weather in a city…"
+                      @bind="_input"
+                      disabled="@IsActiveTabSending"></textarea>
+            <button class="chat-send" type="submit" disabled="@IsActiveTabSending">
+                @(IsActiveTabSending ? "Sending…" : "Send")
+            </button>
+        </form>
+    </section>
+</div>
+
+@code {
+    private sealed record ChatTab(string Id, string Label, string Description);
+
+    private readonly ChatTab[] _tabs =
+    [
+        new("Chat1a", "Chat1a", "Responses API · in-process tools (V3 loop)"),
+        new("Chat1b", "Chat1b", "Responses API · remote MCP tools (V4)"),
+        new("Chat2a", "Chat2a", "Agent Framework · in-process tools"),
+        new("Chat2b", "Chat2b", "Agent Framework · remote MCP tools"),
+    ];
+
+    private readonly Dictionary<string, string?> _sessions = new()
+    {
+        ["Chat1a"] = null,
+        ["Chat1b"] = null,
+        ["Chat2a"] = null,
+        ["Chat2b"] = null,
+    };
+
+    private readonly Dictionary<string, List<ChatEntry>> _histories = new()
+    {
+        ["Chat1a"] = [],
+        ["Chat1b"] = [],
+        ["Chat2a"] = [],
+        ["Chat2b"] = [],
+    };
+
+    private string _activeTab = "Chat1a";
+    private string _input = string.Empty;
+    private readonly Dictionary<string, bool> _isSendingByTab = new()
+    {
+        ["Chat1a"] = false,
+        ["Chat1b"] = false,
+        ["Chat2a"] = false,
+        ["Chat2b"] = false,
+    };
+
+    private bool IsActiveTabSending => _isSendingByTab[_activeTab];
+
+    private sealed class ChatEntry
+    {
+        public required string Role { get; set; }
+        public required string Content { get; set; }
+        public string? ToolName { get; set; }
+        public bool Running { get; set; }
+    }
+
+    private void SetActiveTab(string tabId) => _activeTab = tabId;
+
+    private async Task OnSubmit()
+    {
+        var message = _input.Trim();
+        if (string.IsNullOrWhiteSpace(message) || _isSendingByTab[_activeTab])
+        {
+            return;
+        }
+
+        // The active tab can change while the stream is in flight.
+        var tabId = _activeTab;
+        var history = _histories[tabId];
+
+        _input = string.Empty;
+        _isSendingByTab[tabId] = true;
+        history.Add(new ChatEntry { Role = "user", Content = message });
+
+        var assistantBuilder = new System.Text.StringBuilder();
+        ChatEntry? assistantEntry = null;
+
+        try
+        {
+            await foreach (var streamEvent in ChatClient.StreamMessageAsync(
+                tabId,
+                new ChatSendMessageRequest { SessionId = _sessions[tabId], Message = message },
+                CancellationToken.None))
+            {
+                if (streamEvent.Type == "session" && !string.IsNullOrWhiteSpace(streamEvent.SessionId))
+                {
+                    _sessions[tabId] = streamEvent.SessionId;
+                }
+                else if (streamEvent.Type == "token" && !string.IsNullOrEmpty(streamEvent.Text))
+                {
+                    assistantBuilder.Append(streamEvent.Text);
+                    if (assistantEntry is null)
+                    {
+                        assistantEntry = new ChatEntry { Role = "assistant", Content = assistantBuilder.ToString() };
+                        history.Add(assistantEntry);
+                    }
+                    else
+                    {
+                        assistantEntry.Content = assistantBuilder.ToString();
+                    }
+
+                    StateHasChanged();
+                }
+                else if (streamEvent.Type == "tool_start" && !string.IsNullOrEmpty(streamEvent.ToolName))
+                {
+                    history.Add(new ChatEntry
+                    {
+                        Role = "tool",
+                        Content = $"Running {streamEvent.ToolName}…",
+                        ToolName = streamEvent.ToolName,
+                        Running = true,
+                    });
+                    StateHasChanged();
+                }
+                else if (streamEvent.Type == "tool_end" && !string.IsNullOrEmpty(streamEvent.ToolName))
+                {
+                    var pending = history.LastOrDefault(entry => entry.Running && entry.ToolName == streamEvent.ToolName);
+                    if (pending is not null)
+                    {
+                        pending.Running = false;
+                        pending.Content = $"Ran {streamEvent.ToolName}";
+                        StateHasChanged();
+                    }
+                }
+                else if (streamEvent.Type == "error" && !string.IsNullOrEmpty(streamEvent.ErrorMessage))
+                {
+                    history.Add(new ChatEntry { Role = "error", Content = streamEvent.ErrorMessage });
+                    StateHasChanged();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            history.Add(new ChatEntry { Role = "error", Content = ex.Message });
+        }
+        finally
+        {
+            _isSendingByTab[tabId] = false;
+        }
+    }
+}
