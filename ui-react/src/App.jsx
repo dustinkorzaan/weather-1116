@@ -149,10 +149,6 @@ function App() {
             <h1 className="title">Weather React</h1>
           </Link>
 
-          <nav className="top-nav-links" aria-label="Primary">
-            <Link className="top-nav-link" to="/">Home</Link>
-          </nav>
-
           <div className="avatar-menu" ref={avatarMenuRef}>
             <button
               type="button"
