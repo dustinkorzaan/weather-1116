@@ -22,6 +22,40 @@ a, .btn-link {
     color: #0071c1;
 }
 
+/* Header brand: NavLink is a child component, so scoped CSS needs ::deep; keep globals too
+   so production does not depend on scoped CSS ordering/caching (same as About modal). */
+a.site-brand,
+a.site-brand:hover,
+a.site-brand:focus,
+a.site-brand:focus-visible {
+    color: #212529;
+    text-decoration: none;
+}
+
+.site-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.site-logo {
+    display: inline-block;
+    width: 1.375rem;
+    height: 1.375rem;
+    flex-shrink: 0;
+}
+
+.site-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
