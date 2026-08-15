@@ -16,8 +16,8 @@ public sealed class AboutController(
     public ActionResult<AboutNode> Get()
     {
         const string expectedTool = "GetPublicWeatherData";
-        var mcpAppKey = configuration["MCP_SRV_APP_SERVICE_KEY"];
-        var isHealthy = !string.IsNullOrWhiteSpace(mcpAppKey) && tools.Any(tool =>
+        var mcpSrvAppServiceKey = configuration["MCP_SRV_APP_SERVICE_KEY"];
+        var isHealthy = !string.IsNullOrWhiteSpace(mcpSrvAppServiceKey) && tools.Any(tool =>
             string.Equals(tool.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
 
         return Ok(AboutTreeBuilder.BuildMcpSrvAppServiceNode(isHealthy));

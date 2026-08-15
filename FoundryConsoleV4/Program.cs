@@ -92,22 +92,22 @@ internal class Program
 				Endpoint = new Uri(endpoint),
 			});
 
-		var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_KEY") ?? throw new InvalidOperationException("MCP_SRV_FUNC_APP_KEY not found in environment variables.");
-		var mcpAppKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY") ?? throw new InvalidOperationException("MCP_SRV_APP_SERVICE_KEY not found in environment variables.");
+		var mcpSrvFuncAppKey = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_KEY") ?? throw new InvalidOperationException("MCP_SRV_FUNC_APP_KEY not found in environment variables.");
+		var mcpSrvAppServiceKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY") ?? throw new InvalidOperationException("MCP_SRV_APP_SERVICE_KEY not found in environment variables.");
 
-		McpTool myMcpFunction = ResponseTool.CreateMcpTool(
+		McpTool myMcpSrvFuncApp = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvFuncApp",
 			serverUri: new Uri("https://weather1116-prod-mcp-srv-func-app-debjddh3fthua7dy.westus2-01.azurewebsites.net/runtime/webhooks/mcp"),
-			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpFunctionKey },
+			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
-		McpTool myMcpApp = ResponseTool.CreateMcpTool(
+		McpTool myMcpSrvAppService = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvAppService",
 			serverUri: new Uri("https://weather1116-prod-mcp-srv-app-service-bcb9gnameebrgmc4.westus2-01.azurewebsites.net/mcp"),
-			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpAppKey}" },
+			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
-		Console.WriteLine($"\nMCP Servers:\n{myMcpFunction.ServerLabel} {myMcpFunction.ServerUri}\n{myMcpApp.ServerLabel} {myMcpApp.ServerUri}");
+		Console.WriteLine($"\nMCP Servers:\n{myMcpSrvFuncApp.ServerLabel} {myMcpSrvFuncApp.ServerUri}\n{myMcpSrvAppService.ServerLabel} {myMcpSrvAppService.ServerUri}");
 
 		var inputItems = new List<ResponseItem>()
 		{
@@ -117,7 +117,7 @@ internal class Program
 
 		CreateResponseOptions options = new(deploymentName, inputItems)
 		{
-			Tools = { myMcpFunction, myMcpApp },
+			Tools = { myMcpSrvFuncApp, myMcpSrvAppService },
 			TextOptions = new ResponseTextOptions
 			{
 				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
