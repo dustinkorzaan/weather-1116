@@ -7,7 +7,7 @@ namespace WeatherMcpSrvFuncApp.Tests;
 public class AboutFunctionTests
 {
     [Fact]
-    public void About_ReturnsHealthyMcpFunctionNode()
+    public void About_ReturnsHealthyMcpSrvFuncAppNode()
     {
         var function = new AboutFunction();
         var context = new DefaultHttpContext();

@@ -126,7 +126,7 @@ public class AboutTreeBuilderTests
     }
 
     [Fact]
-    public void BuildMcpNodes_DefaultToHealthy()
+    public void BuildMcpSrvNodes_DefaultToHealthy()
     {
         Assert.True(AboutTreeBuilder.BuildMcpSrvAppServiceNode().IsHealthy);
         Assert.True(AboutTreeBuilder.BuildMcpSrvFuncAppNode().IsHealthy);

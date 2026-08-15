@@ -97,18 +97,18 @@ flowchart LR
   API[MVC or WeatherAPI]
   Core[Core GetCurrentAIWeatherHandler]
   Model[Azure OpenAI model]
-  McpFunc[mcp-srv-func-app GetLatLongData]
-  McpDotNet[mcp-srv-app-service GetPublicWeatherData]
+  McpSrvFuncApp[mcp-srv-func-app GetLatLongData]
+  McpSrvAppService[mcp-srv-app-service GetPublicWeatherData]
   CoreGeo[Core geo handlers]
   CoreWx[Core weather handlers]
 
   UI --> API
   API --> Core
   Core --> Model
-  Model --> McpFunc
-  Model --> McpDotNet
-  McpFunc --> CoreGeo
-  McpDotNet --> CoreWx
+  Model --> McpSrvFuncApp
+  Model --> McpSrvAppService
+  McpSrvFuncApp --> CoreGeo
+  McpSrvAppService --> CoreWx
 ```
 
 Required settings for API/MVC in production are listed under

@@ -14,7 +14,7 @@ public class AboutControllerTests : IClassFixture<WeatherMcpSrvAppServiceWebAppl
     }
 
     [Fact]
-    public async Task Get_ReturnsHealthyMcpDotNetNode_WhenKeyAndToolConfigured()
+    public async Task Get_ReturnsHealthyMcpSrvAppServiceNode_WhenKeyAndToolConfigured()
     {
         using var client = _factory.CreateClient();
         var response = await client.GetAsync("/About");
@@ -29,7 +29,7 @@ public class AboutControllerTests : IClassFixture<WeatherMcpSrvAppServiceWebAppl
     }
 
     [Fact]
-    public async Task Get_ReturnsUnhealthyNode_WhenMcpApiKeyMissing()
+    public async Task Get_ReturnsUnhealthyNode_WhenMcpSrvAppServiceKeyMissing()
     {
         using var factory = new WeatherMcpSrvAppServiceWebApplicationFactory();
         using var client = factory.CreateClient();
