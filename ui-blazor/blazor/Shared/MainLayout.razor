@@ -111,7 +111,7 @@
 
         try
         {
-            _aboutRoot = await WeatherClient.GetAboutAsync();
+            _aboutRoot = await WeatherClient.GetAbout();
             if (_aboutRoot is null)
             {
                 _aboutError = "Unable to load About information.";

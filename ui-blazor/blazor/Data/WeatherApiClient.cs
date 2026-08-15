@@ -28,16 +28,16 @@ public class WeatherApiClient
         _logger = logger;
     }
 
-    public async Task<HelloWorldResponse?> GetHelloAsync()
+    public async Task<HelloWorldResponse?> GetHello()
         => await _httpClient.GetFromJsonAsync<HelloWorldResponse>("Home/Hello");
 
-    public async Task<AIWeatherResponse?> GetCurrentAIWeatherAsync(string location)
+    public async Task<AIWeatherResponse?> GetCurrentAIWeather(string location)
     {
         var route = $"AIWeather/Current?location={Uri.EscapeDataString(location)}";
         return await _httpClient.GetFromJsonAsync<AIWeatherResponse>(route);
     }
 
-    public async Task<AboutNode> GetAboutAsync()
+    public async Task<AboutNode> GetAbout()
     {
         AboutNode apiRoot;
 

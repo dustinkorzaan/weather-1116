@@ -17,7 +17,7 @@
         <MudCardContent>
             <MudText Typo="Typo.h6" Class="mb-3">Current AI Weather</MudText>
 
-            <EditForm Model="this" OnValidSubmit="GetCurrentAIWeatherAsync" @onsubmit:preventDefault="true">
+            <EditForm Model="this" OnValidSubmit="GetCurrentAIWeather" @onsubmit:preventDefault="true">
                 <div class="d-flex flex-wrap align-end gap-4">
                     <MudTextField @bind-Value="location"
                                   Label="Location"
@@ -86,7 +86,7 @@
     {
         try
         {
-            var helloResponse = await WeatherClient.GetHelloAsync();
+            var helloResponse = await WeatherClient.GetHello();
             helloMessage = helloResponse?.RequestResponse ?? "No hello response returned.";
         }
         catch
@@ -96,7 +96,7 @@
         }
     }
 
-    private async Task GetCurrentAIWeatherAsync()
+    private async Task GetCurrentAIWeather()
     {
         isAiWeatherLoading = true;
         aiWeatherError = null;
@@ -106,7 +106,7 @@
         {
             var trimmed = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location.Trim();
             location = trimmed;
-            aiWeather = await WeatherClient.GetCurrentAIWeatherAsync(trimmed);
+            aiWeather = await WeatherClient.GetCurrentAIWeather(trimmed);
             if (aiWeather is null)
             {
                 aiWeatherError = "Unable to load AI weather.";
