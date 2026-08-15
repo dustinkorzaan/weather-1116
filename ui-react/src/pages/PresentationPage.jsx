@@ -7,7 +7,7 @@ function PresentationPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto p-4">
-      <p className="text-base font-medium">
+      <p className="text-base leading-normal text-gray-800">
         {isHelloError ? 'Unable to load hello message from API.' : (helloMessage ?? 'Loading hello message...')}
       </p>
 
