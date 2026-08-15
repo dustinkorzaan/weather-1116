@@ -71,6 +71,11 @@ body {
     stroke: currentColor;
 }
 
+fluent-menu-item a {
+    color: inherit;
+    text-decoration: none;
+}
+
 .presentation-page {
     max-width: 64rem;
     margin: 0 auto;
