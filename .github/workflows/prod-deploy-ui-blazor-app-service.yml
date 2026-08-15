@@ -105,6 +105,12 @@ jobs:
               exit 1
             fi
 
+            # Blazor Server needs WebSockets on Windows App Service (default is Off).
+            az webapp config set \
+              --name weather1116-prod-blazor \
+              --resource-group "$APP_RG" \
+              --web-sockets-enabled true
+
             az webapp config appsettings set \
               --name weather1116-prod-blazor \
               --resource-group "$APP_RG" \

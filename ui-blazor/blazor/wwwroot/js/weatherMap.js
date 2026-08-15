@@ -163,8 +163,27 @@ window.weatherMap = (function () {
 
       mapByElement.set(current, map);
       current.setAttribute('data-status', 'ready');
+      observeMapSize(current, map);
       return map;
     });
+  }
+
+  function observeMapSize(element, map) {
+    if (!window.ResizeObserver || !element || !map) {
+      return;
+    }
+
+    const observer = new ResizeObserver(function () {
+      if (
+        element.offsetWidth > 0 &&
+        element.offsetHeight > 0 &&
+        window.google &&
+        window.google.maps
+      ) {
+        window.google.maps.event.trigger(map, 'resize');
+      }
+    });
+    observer.observe(element);
   }
 
   function parseCities(raw) {
