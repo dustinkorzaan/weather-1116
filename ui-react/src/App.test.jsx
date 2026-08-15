@@ -58,7 +58,16 @@ test('user menu is a gray outline control instead of a solid blue button', () =>
 
   const button = screen.getByRole('button', { name: /open user menu/i });
   expect(button.className).not.toMatch(/bg-blue/);
-  expect(button.className).toMatch(/border/);
+  expect(button.className).toMatch(/border-2/);
+});
+
+test('header uses the MVC bar height and a bold person icon', () => {
+  mockHelloFetch();
+  renderApp('/');
+
+  const title = screen.getByRole('heading', { name: /weather react/i });
+  expect(title.closest('header')?.firstElementChild?.className).toMatch(/h-\[52px\]/);
+  expect(title.closest('header')?.querySelector('svg')?.getAttribute('stroke-width')).toBe('2.25');
 });
 
 test('renders the map on the home route without presentation content', () => {

@@ -16,11 +16,11 @@
 }
 
 <FluentLayout Class="weather-shell">
-    <FluentHeader Height="48" Class="weather-header">
-        <FluentAnchor Href="/" Appearance="Appearance.Hypertext" Class="brand-link" Style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
-            <img src="logo.svg" alt="Weather logo" width="22" height="22" />
-            <span class="brand-title">Weather Blazor</span>
-        </FluentAnchor>
+    <FluentHeader Height="53" Class="weather-header">
+        <a href="/" class="brand-link">
+            <img src="logo.svg" alt="Weather logo" width="24" height="24" class="brand-logo" />
+            <h1 class="brand-title">Weather Blazor</h1>
+        </a>
 
         <FluentSpacer />
 
@@ -30,7 +30,7 @@
                       Title="Open user menu"
                       aria-label="Open user menu">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true" focusable="false">
+                 stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true" focusable="false">
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
             </svg>

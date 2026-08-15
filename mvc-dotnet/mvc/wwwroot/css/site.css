@@ -128,6 +128,8 @@ code {
 
 .site-nav {
   display: flex;
+  height: 52px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
@@ -168,7 +170,7 @@ code {
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid var(--color-border-strong);
+  border: 2px solid var(--color-border-strong);
   border-radius: 9999px;
   background: var(--color-bg);
   color: #6b7280;
