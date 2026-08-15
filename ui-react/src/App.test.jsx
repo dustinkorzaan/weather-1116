@@ -1,5 +1,6 @@
 import { afterEach, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -125,9 +126,10 @@ test('redirects the old presentation route to hello world', async () => {
 
 test('user menu lists login and the three split pages instead of presentation', async () => {
   mockHelloFetch();
+  const user = userEvent.setup();
   renderApp('/');
 
-  screen.getByRole('button', { name: /open user menu/i }).click();
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
 
   expect(await screen.findByRole('menuitem', { name: 'Login/Logout' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Hello World' })).toBeDefined();

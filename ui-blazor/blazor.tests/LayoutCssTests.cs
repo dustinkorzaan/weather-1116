@@ -51,15 +51,38 @@ public sealed class LayoutCssTests
         Assert.Contains("<a href=\"/\" class=\"brand-link\">", rendered.Markup);
         Assert.Contains("<h1 class=\"brand-title\">Weather Blazor</h1>", rendered.Markup);
         Assert.Contains("stroke-width=\"2.25\"", rendered.Markup);
-        Assert.Contains("Login/Logout", rendered.Markup);
-        Assert.Contains("Hello World", rendered.Markup);
-        Assert.Contains("Current AI Weather", rendered.Markup);
-        Assert.Contains("Chat Clients", rendered.Markup);
         Assert.Contains("class=\"about-modal", rendered.Markup);
         Assert.Contains("class=\"about-close\"", rendered.Markup);
         Assert.Contains("aria-label=\"Close\"", rendered.Markup);
-        Assert.DoesNotContain(">Presentation<", rendered.Markup);
         Assert.DoesNotContain("<a href=\"/presentation\"", rendered.Markup);
+
+        var layoutSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/MainLayout.razor"));
+        Assert.Contains("Login/Logout", layoutSource);
+        Assert.Contains("Hello World", layoutSource);
+        Assert.Contains("Current AI Weather", layoutSource);
+        Assert.Contains("Chat Clients", layoutSource);
+        Assert.Contains("NavigateTo(\"/hello-world\")", layoutSource);
+        Assert.Contains("NavigateTo(\"/current-ai-weather\")", layoutSource);
+        Assert.Contains("NavigateTo(\"/chat-clients\")", layoutSource);
+        Assert.Contains("OpenExternalAsync", layoutSource);
+        Assert.DoesNotContain("href=\"/presentation\"", layoutSource);
+    }
+
+    private static string FindRepoFile(string relativePath)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            var candidate = Path.Combine(dir.FullName, relativePath);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            dir = dir.Parent;
+        }
+
+        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
     }
 
     [Fact]
