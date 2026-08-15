@@ -34,9 +34,11 @@
             }
         </div>
 
-        <EditForm Model="this" OnValidSubmit="OnSubmit" class="mt-3">
+        <EditForm Model="this" OnValidSubmit="OnSubmit" class="mt-3" @onsubmit:preventDefault="true">
             <div class="d-flex flex-column flex-sm-row align-end gap-3">
+                @* Class="chat-input" lets chatInput.js bind the inner textarea for Enter-to-send. *@
                 <MudTextField @bind-Value="_input"
+                              Class="chat-input"
                               Label="Message"
                               Placeholder="Ask about weather in a city…"
                               Variant="Variant.Outlined"

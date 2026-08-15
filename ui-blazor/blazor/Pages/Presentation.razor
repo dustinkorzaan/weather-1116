@@ -17,7 +17,7 @@
         <MudCardContent>
             <MudText Typo="Typo.h6" Class="mb-3">Current AI Weather</MudText>
 
-            <EditForm Model="this" OnValidSubmit="GetCurrentAIWeatherAsync">
+            <EditForm Model="this" OnValidSubmit="GetCurrentAIWeatherAsync" @onsubmit:preventDefault="true">
                 <div class="d-flex flex-wrap align-end gap-4">
                     <MudTextField @bind-Value="location"
                                   Label="Location"

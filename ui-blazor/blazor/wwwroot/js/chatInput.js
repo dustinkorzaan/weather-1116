@@ -34,7 +34,7 @@ window.chatInput = (function () {
   }
 
   function tryAutoInit(root) {
-    root.querySelectorAll('textarea.chat-input').forEach(attachEnterToSend);
+    root.querySelectorAll('textarea.chat-input, .chat-input textarea').forEach(attachEnterToSend);
   }
 
   function startAutoInit() {
