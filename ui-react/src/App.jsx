@@ -145,9 +145,9 @@ function App() {
                 variant="outline"
                 size="icon"
                 aria-label="Open user menu"
-                className="size-9 rounded-full border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                className="size-9 rounded-full border-2 border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700"
               >
-                <User className="size-5" strokeWidth={1.75} aria-hidden="true" />
+                <User className="size-5" strokeWidth={2.25} aria-hidden="true" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-44">

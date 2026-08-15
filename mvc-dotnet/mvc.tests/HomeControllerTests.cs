@@ -64,6 +64,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("class=\"site-header\"", html);
         Assert.Contains("class=\"avatar-menu\"", html);
         Assert.Contains("class=\"site-main\"", html);
+        Assert.Contains("stroke-width=\"2.25\"", html);
         Assert.DoesNotContain("bg-blue-800", html);
         Assert.DoesNotContain("flex-1", html);
         Assert.DoesNotContain("rounded-xl", html);
@@ -95,6 +96,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var css = await response.Content.ReadAsStringAsync();
         Assert.Contains(".site-header", css);
+        Assert.Contains("border: 2px solid var(--color-border-strong)", css);
         Assert.Contains("#weather-map", css);
         Assert.Contains("[hidden]", css);
         Assert.DoesNotContain("tailwindcss", css, StringComparison.OrdinalIgnoreCase);

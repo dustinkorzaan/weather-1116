@@ -34,12 +34,39 @@ body {
     padding: 0;
 }
 
-.brand-title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    white-space: nowrap;
+/* Plain <a> + <h1>: FluentAnchor Hypertext hydrates as an underlined
+   link and can wrap the title onto a second line after first paint. */
+.layout.weather-shell a.brand-link,
+.layout.weather-shell a.brand-link:link,
+.layout.weather-shell a.brand-link:visited,
+.layout.weather-shell a.brand-link:hover,
+.layout.weather-shell a.brand-link:focus,
+.layout.weather-shell a.brand-link:focus-visible,
+.layout.weather-shell a.brand-link:active {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.5rem;
+    color: #111827;
+    text-decoration: none;
+}
+
+.layout.weather-shell .brand-logo {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+}
+
+.layout.weather-shell h1.brand-title,
+.layout.weather-shell .brand-title {
+    margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.5;
+    font-family: inherit;
     color: inherit;
 }
 
@@ -51,12 +78,14 @@ body {
 
 .layout.weather-shell .avatar-button,
 .layout.weather-shell #user-menu-button {
+    box-sizing: border-box;
     min-width: 2.25rem;
+    width: 2.25rem;
     height: 2.25rem;
     padding: 0;
     color: #6b7280;
     background: #ffffff;
-    border: 1px solid #d1d5db;
+    border: 2px solid #d1d5db;
     border-radius: 9999px;
 }
 
@@ -66,9 +95,11 @@ body {
     background: #f9fafb;
 }
 
-.layout.weather-shell .avatar-button svg {
+.layout.weather-shell .avatar-button svg,
+.layout.weather-shell #user-menu-button svg {
     fill: none;
     stroke: currentColor;
+    stroke-width: 2.25;
 }
 
 fluent-menu-item a {
