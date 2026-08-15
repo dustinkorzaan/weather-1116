@@ -18,7 +18,7 @@ function CurrentAIWeather() {
       : 'Unable to load AI weather.';
 
   return (
-    <section className="mt-5" aria-labelledby="current-ai-weather-heading">
+    <section aria-labelledby="current-ai-weather-heading">
       <h2 id="current-ai-weather-heading" className="mb-3 text-xl font-semibold">
         Current AI Weather
       </h2>

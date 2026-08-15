@@ -1,17 +1,8 @@
-﻿@{
-    ViewData["Title"] = "Presentation";
-    var helloResponse = ViewData["HelloResponse"] as string;
+@{
+    ViewData["Title"] = "Current AI Weather";
 }
 
 <div class="page-shell">
-    <section class="hello-section" aria-labelledby="hello-world-heading">
-        <h2 id="hello-world-heading" class="section-heading">Hello World</h2>
-        @if (!string.IsNullOrWhiteSpace(helloResponse))
-        {
-            <p class="hello-message">@helloResponse</p>
-        }
-    </section>
-
     <section class="weather-card" aria-labelledby="current-ai-weather-heading">
         <h2 id="current-ai-weather-heading" class="section-heading">Current AI Weather</h2>
         <form id="ai-weather-form" class="weather-form">
@@ -51,13 +42,10 @@
             </dl>
         </div>
     </section>
-
-    <partial name="_ChatPanel" />
 </div>
 
 @section Scripts {
     <script src="~/js/currentAIWeather.js" asp-append-version="true"></script>
-    <script src="~/js/chatClient.js" asp-append-version="true"></script>
     <script>
         currentAIWeather.init({
             formId: 'ai-weather-form',

@@ -1,0 +1,93 @@
+@page "/current-ai-weather"
+@using WeatherBlazor.Data
+@inject WeatherApiClient WeatherClient
+
+<PageTitle>Weather Razor - Current AI Weather</PageTitle>
+
+<div class="content-page">
+    <FluentCard Class="weather-card">
+        <h2 class="section-title">Current AI Weather</h2>
+
+        <EditForm Model="this" OnValidSubmit="GetCurrentAIWeather" @onsubmit:preventDefault="true">
+            <div class="form-row">
+                <FluentTextField @bind-Value="location"
+                                 Label="Location"
+                                 Disabled="isAiWeatherLoading"
+                                 Style="flex: 1 1 12rem; max-width: 20rem;" />
+                <FluentButton Type="ButtonType.Submit"
+                              Appearance="Appearance.Outline"
+                              Disabled="isAiWeatherLoading">
+                    @if (isAiWeatherLoading)
+                    {
+                        <FluentProgressRing Width="16px" Stroke="ProgressStroke.Small" Style="margin-inline-end: 0.5rem;" />
+                    }
+                    <span>Get Current AI Weather</span>
+                </FluentButton>
+            </div>
+        </EditForm>
+
+        @if (!string.IsNullOrWhiteSpace(aiWeatherError))
+        {
+            <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@aiWeatherError</FluentMessageBar>
+        }
+
+        @if (aiWeather is not null && !isAiWeatherLoading)
+        {
+            <div class="weather-results">
+                <p>@aiWeather.FullSummary</p>
+                <FluentGrid Spacing="2">
+                    <FluentGridItem xs="12" sm="6">
+                        <div class="stat-label">Temperature F</div>
+                        <div>@aiWeather.TemperatureF</div>
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="6">
+                        <div class="stat-label">Wind Speed MPH</div>
+                        <div>@aiWeather.WindSpeedMPH</div>
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="6">
+                        <div class="stat-label">Wind Direction</div>
+                        <div>@aiWeather.WindDirection</div>
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="6">
+                        <div class="stat-label">Conditions</div>
+                        <div>@aiWeather.Conditions</div>
+                    </FluentGridItem>
+                </FluentGrid>
+            </div>
+        }
+    </FluentCard>
+</div>
+
+@code {
+    private string location = "Nashville, TN";
+    private bool isAiWeatherLoading;
+    private string? aiWeatherError;
+    private AIWeatherResponse? aiWeather;
+
+    private async Task GetCurrentAIWeather()
+    {
+        isAiWeatherLoading = true;
+        aiWeatherError = null;
+        aiWeather = null;
+
+        try
+        {
+            var trimmed = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location.Trim();
+            location = trimmed;
+            aiWeather = await WeatherClient.GetCurrentAIWeather(trimmed);
+            if (aiWeather is null)
+            {
+                aiWeatherError = "Unable to load AI weather.";
+            }
+        }
+        catch
+        {
+            aiWeather = null;
+            aiWeatherError = "Unable to load AI weather.";
+        }
+        finally
+        {
+            isAiWeatherLoading = false;
+        }
+    }
+}

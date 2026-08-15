@@ -107,11 +107,17 @@ fluent-menu-item a {
     text-decoration: none;
 }
 
+.content-page,
 .presentation-page {
     max-width: 64rem;
     margin: 0 auto;
     padding: 1rem 1.25rem 2rem;
     width: 100%;
+}
+
+.content-page > .weather-card,
+.content-page > .chat-section {
+    margin-top: 0;
 }
 
 .page-title,
@@ -177,6 +183,67 @@ fluent-menu-item a {
 .footer-links fluent-anchor,
 .footer-links a {
     color: #374151;
+}
+
+.about-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 4rem 1rem 1rem;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.about-modal.is-open {
+    display: flex;
+}
+
+.about-dialog {
+    display: flex;
+    width: 100%;
+    max-width: 42rem;
+    max-height: calc(100vh - 5rem);
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.about-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.about-dialog-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.about-close {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #4b5563;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.about-close:hover {
+    color: #111827;
+}
+
+.about-dialog-body {
+    min-height: 4rem;
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
 }
 
 .about-tree-list {

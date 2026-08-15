@@ -61,7 +61,7 @@ All three UIs expose **Current AI Weather**. The request path differs by stack:
 
 ## Chat Clients (Chat1a–Chat2b)
 
-Separate from **Current AI Weather**. All three UIs expose a chat panel on `/presentation` with four tabs:
+Separate from **Current AI Weather**. All three UIs expose a chat panel on `/chat-clients` with four tabs:
 
 | Tab | Stack | Tools |
 | --- | --- | --- |
@@ -77,7 +77,7 @@ Full detail: [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-cli
 
 ```mermaid
 flowchart LR
-  UI[React / Blazor / MVC /presentation chat panel]
+  UI[React / Blazor / MVC /chat-clients chat panel]
   API[MVC or WeatherAPI Chat controllers]
   Core[Core.Chat1a…2b services]
   Model[Azure OpenAI Responses]
@@ -224,16 +224,20 @@ and layout code instead of sharing it.
 | Route | Contents |
 | --- | --- |
 | `/` | Top bar (logo left, person/avatar menu right) above a full-viewport Google Map |
-| `/presentation` | Same top bar, then the hello message, the Current AI Weather widget, and the chat clients (ChatPanel) — no map |
+| `/hello-world` | Same top bar, then the hello message — no map |
+| `/current-ai-weather` | Same top bar, then the Current AI Weather widget — no map |
+| `/chat-clients` | Same top bar, then the chat clients (ChatPanel) — no map |
 
-The former `/chat` route is removed from all three UIs (the chat backends
-`Chat1a`/`Chat1b`/`Chat2a`/`Chat2b` are unchanged; chat now lives on
-`/presentation`).
+The former `/presentation` route redirects to `/hello-world` in all three UIs.
+The former `/chat` route is removed (the chat backends `Chat1a`/`Chat1b`/`Chat2a`/`Chat2b`
+are unchanged; chat now lives on `/chat-clients`).
 
 The avatar menu is a person icon (lucide `user` in React/MVC,
 Fluent `Person` in Blazor) and its items are ordered:
+**Login/Logout** (placeholder, no-op) → divider →
 cross-UI external links (UI React / UI Blazor / MVC, API About, Worker Hangfire)
-→ divider → **Presentation** (internal link to `/presentation`) → divider →
+→ divider → **Hello World** (`/hello-world`) → **Current AI Weather**
+(`/current-ai-weather`) → **Chat Clients** (`/chat-clients`) → divider →
 **About** (dialog/modal).
 
 ## Responsive Design Contract
@@ -252,8 +256,8 @@ differs by library; the behavior does not:
 - Primary navigation is a top bar with the logo on the left and the person menu
   on the right; it stays reachable and never overflows the viewport.
 - On `/`, the map fills the remaining viewport height below the top bar at every
-  width; on `/presentation` content is centered with a max width on large
-  screens.
+  width; on `/hello-world`, `/current-ai-weather`, and `/chat-clients` content is
+  centered with a max width on large screens.
 - Multi-value blocks (e.g. AI weather stats) collapse to a single column on
   small screens and expand into a grid at larger breakpoints.
 

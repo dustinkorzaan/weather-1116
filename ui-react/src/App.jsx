@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,8 +16,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { siteLinks } from './config/siteLinks';
+import ChatClientsPage from './pages/ChatClientsPage';
+import CurrentAIWeatherPage from './pages/CurrentAIWeatherPage';
+import HelloWorldPage from './pages/HelloWorldPage';
 import MapPage from './pages/MapPage';
-import PresentationPage from './pages/PresentationPage';
 import {
   useLazyGetAboutQuery,
 } from './services/weatherApi';
@@ -151,6 +153,8 @@ function App() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-44">
+              <DropdownMenuItem>Login/Logout</DropdownMenuItem>
+              <DropdownMenuSeparator />
               {siteLinks.map((link) => (
                 <DropdownMenuItem key={link.label} asChild>
                   <a href={link.href} target="_blank" rel="noopener noreferrer">
@@ -160,7 +164,13 @@ function App() {
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to="/presentation">Presentation</Link>
+                <Link to="/hello-world">Hello World</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/current-ai-weather">Current AI Weather</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/chat-clients">Chat Clients</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={handleAboutClick}>About</DropdownMenuItem>
@@ -172,7 +182,10 @@ function App() {
       <div className="flex min-h-0 flex-1 flex-col">
         <Routes>
           <Route path="/" element={<MapPage />} />
-          <Route path="/presentation" element={<PresentationPage />} />
+          <Route path="/hello-world" element={<HelloWorldPage />} />
+          <Route path="/current-ai-weather" element={<CurrentAIWeatherPage />} />
+          <Route path="/chat-clients" element={<ChatClientsPage />} />
+          <Route path="/presentation" element={<Navigate to="/hello-world" replace />} />
         </Routes>
       </div>
 

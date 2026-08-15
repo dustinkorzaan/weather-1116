@@ -14,7 +14,7 @@ namespace WeatherBlazor.Tests;
 public sealed class PageSplitTests
 {
     [Fact]
-    public void Index_RendersMapWithoutPresentationContent()
+    public void Index_RendersMapWithoutSplitPageContent()
     {
         using var context = CreateContext();
         var rendered = context.Render<WeatherBlazor.Pages.Index>();
@@ -27,21 +27,60 @@ public sealed class PageSplitTests
     }
 
     [Fact]
-    public void Presentation_RendersHelloAndChatWithoutMap()
+    public void HelloWorld_RendersHelloWithoutWeatherChatOrMap()
     {
         using var context = CreateContext();
-        var rendered = context.Render<WeatherBlazor.Pages.Presentation>();
+        var rendered = context.Render<WeatherBlazor.Pages.HelloWorld>();
 
         rendered.WaitForAssertion(() =>
         {
             Assert.Contains("Hello from test API.", rendered.Markup);
         });
 
-        Assert.Contains("Chat Clients", rendered.Markup);
-        Assert.Contains("Current AI Weather", rendered.Markup);
         Assert.Contains("Hello World", rendered.Markup);
-        Assert.Contains("chat-input", rendered.Markup);
+        Assert.DoesNotContain("Chat Clients", rendered.Markup);
+        Assert.DoesNotContain("Current AI Weather", rendered.Markup);
+        Assert.DoesNotContain("chat-input", rendered.Markup);
         Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
+    }
+
+    [Fact]
+    public void CurrentAIWeather_RendersWeatherFormWithoutHelloChatOrMap()
+    {
+        using var context = CreateContext();
+        var rendered = context.Render<WeatherBlazor.Pages.CurrentAIWeather>();
+
+        Assert.Contains("Current AI Weather", rendered.Markup);
+        Assert.Contains("Get Current AI Weather", rendered.Markup);
+        Assert.DoesNotContain("Hello World", rendered.Markup);
+        Assert.DoesNotContain("Chat Clients", rendered.Markup);
+        Assert.DoesNotContain("chat-input", rendered.Markup);
+        Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
+    }
+
+    [Fact]
+    public void ChatClients_RendersChatWithoutHelloWeatherOrMap()
+    {
+        using var context = CreateContext();
+        var rendered = context.Render<WeatherBlazor.Pages.ChatClients>();
+
+        Assert.Contains("Chat Clients", rendered.Markup);
+        Assert.Contains("chat-input", rendered.Markup);
+        Assert.DoesNotContain("Hello World", rendered.Markup);
+        Assert.DoesNotContain("Current AI Weather", rendered.Markup);
+        Assert.DoesNotContain("Loading hello message", rendered.Markup);
+        Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
+    }
+
+    [Fact]
+    public void Presentation_RedirectsToHelloWorld()
+    {
+        using var context = CreateContext();
+        var navigation = context.Services.GetRequiredService<Bunit.TestDoubles.BunitNavigationManager>();
+
+        context.Render<WeatherBlazor.Pages.Presentation>();
+
+        Assert.EndsWith("/hello-world", navigation.Uri, StringComparison.Ordinal);
     }
 
     private static BunitContext CreateContext()

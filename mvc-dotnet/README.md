@@ -10,8 +10,8 @@ cd mvc-dotnet/mvc
 ASPNETCORE_ENVIRONMENT=Development dotnet run
 ```
 
-Pages: `/` (top bar + full-viewport Google Map) and `/presentation` (hello
-message, Current AI Weather widget, chat clients).
+Pages: `/` (top bar + full-viewport Google Map), `/hello-world`,
+`/current-ai-weather`, and `/chat-clients`.
 
 ## Styling: hand-written CSS + vanilla JS
 
