@@ -18,7 +18,10 @@ function CurrentAIWeather() {
       : 'Unable to load AI weather.';
 
   return (
-    <section className="mt-5" aria-label="Current AI weather">
+    <section className="mt-5" aria-labelledby="current-ai-weather-heading">
+      <h2 id="current-ai-weather-heading" className="mb-3 text-xl font-semibold">
+        Current AI Weather
+      </h2>
       <form className="flex flex-wrap items-center gap-x-3 gap-y-2" onSubmit={onSubmit}>
         <label className="font-semibold" htmlFor="ai-weather-location">
           Location:

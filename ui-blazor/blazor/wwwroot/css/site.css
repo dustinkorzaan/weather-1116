@@ -83,16 +83,15 @@ fluent-menu-item a {
     width: 100%;
 }
 
-.page-title {
-    margin: 0 0 0.35rem;
+.page-title,
+.section-title {
+    margin: 0 0 0.5rem;
     font-size: 1.35rem;
     font-weight: 600;
 }
 
-.section-title {
-    margin: 0 0 0.75rem;
-    font-size: 1.15rem;
-    font-weight: 600;
+.hello-section {
+    margin: 0 0 1.25rem;
 }
 
 .muted {

@@ -18,6 +18,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("href=\"/presentation\"", html);
         Assert.DoesNotContain("Hello, from WeatherMVC", html);
         Assert.DoesNotContain("Chat Clients", html);
+        Assert.DoesNotContain("Hello World", html);
+        Assert.DoesNotContain("Current AI Weather", html);
     }
 
     [Fact]
@@ -29,6 +31,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("Hello, from WeatherMVC", html);
+        Assert.Contains("Hello World", html);
+        Assert.Contains("Current AI Weather", html);
         Assert.Contains("Chat Clients", html);
         Assert.DoesNotContain("id=\"weather-map\"", html);
     }
@@ -42,6 +46,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("Hello, from WeatherMVC", html);
+        Assert.Contains("Hello World", html);
+        Assert.Contains("Current AI Weather", html);
         Assert.Contains("Chat Clients", html);
         Assert.DoesNotContain("id=\"weather-map\"", html);
     }
