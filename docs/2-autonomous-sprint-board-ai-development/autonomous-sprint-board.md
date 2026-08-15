@@ -14,8 +14,8 @@ planning, execution, and review without a traditional "you type every line" loop
 ## Reflection / Out of Scope / V2 Notes
 
 - Not intended for production, only designed for learning
-- Too synchronous — GitHub Actions runs the full length of the request
-- Use Copilot agent instead of Copilot CLI
+- Too synchronous - GitHub Actions runs the full length of the request
+- Use Copilot Agent instead of Copilot CLI
 
 ## Trello Rule Details
 
