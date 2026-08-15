@@ -40,6 +40,35 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: inherit;
+}
+
+.layout.weather-shell > .header.weather-header {
+    background-color: #ffffff;
+    color: #111827;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.layout.weather-shell .avatar-button,
+.layout.weather-shell #user-menu-button {
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: #6b7280;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 9999px;
+}
+
+.layout.weather-shell .avatar-button:hover,
+.layout.weather-shell #user-menu-button:hover {
+    color: #374151;
+    background: #f9fafb;
+}
+
+.layout.weather-shell .avatar-button svg {
+    fill: none;
+    stroke: currentColor;
 }
 
 .presentation-page {
@@ -108,6 +137,11 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+}
+
+.footer-links fluent-anchor,
+.footer-links a {
+    color: #374151;
 }
 
 .about-tree-list {
@@ -212,7 +246,7 @@ body {
 
 .chat-message.user {
     align-self: flex-end;
-    background: #0f6cbd;
+    background: #1f2937;
     color: #fff;
 }
 

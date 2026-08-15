@@ -52,6 +52,15 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+test('user menu is a gray outline control instead of a solid blue button', () => {
+  mockHelloFetch();
+  renderApp('/');
+
+  const button = screen.getByRole('button', { name: /open user menu/i });
+  expect(button.className).not.toMatch(/bg-blue/);
+  expect(button.className).toMatch(/border/);
+});
+
 test('renders the map on the home route without presentation content', () => {
   mockHelloFetch();
   renderApp('/');

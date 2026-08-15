@@ -74,6 +74,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("class=\"page-shell\"", html);
         Assert.Contains("class=\"weather-card\"", html);
         Assert.Contains("class=\"chat-tab is-active\"", html);
+        Assert.Contains("class=\"btn\"", html);
+        Assert.DoesNotContain("btn-primary", html);
         Assert.DoesNotContain("bg-blue-700", html);
         Assert.DoesNotContain("grid-cols-1", html);
     }

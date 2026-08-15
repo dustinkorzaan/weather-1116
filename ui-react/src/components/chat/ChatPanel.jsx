@@ -31,7 +31,7 @@ const TAB_CONFIG = [
 ];
 
 const MESSAGE_CLASSES = {
-  user: 'self-end max-w-[85%] rounded-2xl bg-blue-600 px-3 py-2 text-white whitespace-pre-wrap',
+  user: 'self-end max-w-[85%] rounded-2xl bg-gray-800 px-3 py-2 text-white whitespace-pre-wrap',
   assistant: 'self-start max-w-[85%] rounded-2xl border bg-gray-100 px-3 py-2 text-gray-900 whitespace-pre-wrap',
   tool: 'self-center max-w-[85%] rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-900',
   error: 'w-full rounded-md bg-red-100 px-3 py-2 text-red-800',
@@ -212,7 +212,7 @@ function ChatPanel() {
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="h-auto flex-none rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 after:hidden hover:bg-gray-100 hover:text-gray-700 data-active:border-blue-600 data-active:bg-blue-600 data-active:text-white data-active:shadow-none data-active:hover:bg-blue-600 data-active:hover:text-white"
+              className="h-auto flex-none rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 after:hidden hover:bg-gray-100 hover:text-gray-700 data-active:border-gray-800 data-active:bg-gray-100 data-active:text-gray-900 data-active:shadow-none data-active:hover:bg-gray-100 data-active:hover:text-gray-900"
             >
               {tab.label}
             </TabsTrigger>
@@ -235,7 +235,7 @@ function ChatPanel() {
               <label className="sr-only" htmlFor="chat-input">Message</label>
               <textarea
                 id="chat-input"
-                className="w-full flex-1 resize-y rounded-md border border-gray-300 px-2.5 py-2 focus:border-blue-600 focus:outline-none disabled:bg-gray-100"
+                className="w-full flex-1 resize-y rounded-md border border-gray-300 px-2.5 py-2 focus:border-gray-800 focus:outline-none disabled:bg-gray-100"
                 rows={3}
                 value={input}
                 placeholder="Ask about weather in a city…"
@@ -244,7 +244,7 @@ function ChatPanel() {
                 disabled={isActiveTabSending}
               />
               <button
-                className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-60"
                 type="submit"
                 disabled={isActiveTabSending}
               >
