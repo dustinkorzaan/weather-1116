@@ -6,6 +6,15 @@
   const input = document.getElementById('chat-input');
   const sendButton = document.getElementById('chat-send');
 
+  const TAB_ACTIVE_CLASSES = ['border-blue-700', 'bg-blue-700', 'text-white'];
+  const TAB_INACTIVE_CLASSES = ['border-gray-300', 'bg-white', 'text-gray-800'];
+  const MESSAGE_CLASSES = {
+    user: 'self-end max-w-[85%] whitespace-pre-wrap rounded-2xl bg-blue-600 px-3 py-2 text-white',
+    assistant: 'self-start max-w-[85%] whitespace-pre-wrap rounded-2xl border bg-gray-100 px-3 py-2 text-gray-900',
+    tool: 'self-center max-w-[85%] rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-900',
+    error: 'w-full rounded-md bg-red-100 px-3 py-2 text-red-800',
+  };
+
   let activeTab = 'Chat1a';
   const sessions = {
     Chat1a: null,
@@ -39,11 +48,12 @@
     activeTab = tabId;
     tabs.forEach((tab) => {
       const isActive = tab.dataset.chatTab === tabId;
-      tab.classList.toggle('active', isActive);
+      tab.classList.remove(...(isActive ? TAB_INACTIVE_CLASSES : TAB_ACTIVE_CLASSES));
+      tab.classList.add(...(isActive ? TAB_ACTIVE_CLASSES : TAB_INACTIVE_CLASSES));
       tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
     descriptions.forEach((desc) => {
-      desc.classList.toggle('active', desc.dataset.chatDescription === tabId);
+      desc.classList.toggle('hidden', desc.dataset.chatDescription !== tabId);
     });
     renderMessages();
     updateSendingControls();
@@ -58,7 +68,7 @@
 
   function renderEntry(entry) {
     const item = document.createElement('div');
-    item.className = `chat-message chat-message-${entry.role}`;
+    item.className = MESSAGE_CLASSES[entry.role] ?? MESSAGE_CLASSES.assistant;
     item.textContent = entry.content;
     messagesEl.appendChild(item);
     return item;

@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Presentation";
+    var helloResponse = ViewData["HelloResponse"] as string;
+}
+
+<div class="mx-auto w-full max-w-5xl px-3 py-4 sm:px-4">
+    @if (!string.IsNullOrWhiteSpace(helloResponse))
+    {
+        <p class="mb-4 text-lg text-gray-700">@helloResponse</p>
+    }
+
+    <section class="mb-8 rounded-xl border border-gray-200 p-4 shadow-sm" aria-label="Current AI weather">
+        <form id="ai-weather-form" class="flex flex-wrap items-center gap-3">
+            <label class="text-sm font-medium text-gray-700" for="ai-weather-location">Location:</label>
+            <input id="ai-weather-location"
+                   class="min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-600 focus:outline-none"
+                   type="text"
+                   value="Nashville, TN"
+                   autocomplete="address-level2" />
+            <button id="ai-weather-button"
+                    type="submit"
+                    class="inline-flex items-center gap-2 rounded-md bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 disabled:opacity-60">
+                <span id="ai-weather-spinner" class="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" hidden aria-hidden="true"></span>
+                <span>Get Current AI Weather</span>
+            </button>
+        </form>
+        <p id="ai-weather-error" class="mt-3 text-red-700" hidden></p>
+        <div id="ai-weather-results" class="mt-4" hidden>
+            <p id="ai-weather-summary" class="mb-3 text-gray-800"></p>
+            <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">Temperature F</dt>
+                    <dd id="ai-weather-temperature" class="text-lg font-semibold text-gray-900"></dd>
+                </div>
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">Wind Speed MPH</dt>
+                    <dd id="ai-weather-wind-speed" class="text-lg font-semibold text-gray-900"></dd>
+                </div>
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">Wind Direction</dt>
+                    <dd id="ai-weather-wind-direction" class="text-lg font-semibold text-gray-900"></dd>
+                </div>
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">Conditions</dt>
+                    <dd id="ai-weather-conditions" class="text-lg font-semibold text-gray-900"></dd>
+                </div>
+            </dl>
+        </div>
+    </section>
+
+    <partial name="_ChatPanel" />
+</div>
+
+@section Scripts {
+    <script src="~/js/currentAIWeather.js" asp-append-version="true"></script>
+    <script src="~/js/chatClient.js" asp-append-version="true"></script>
+    <script>
+        currentAIWeather.init({
+            formId: 'ai-weather-form',
+            locationId: 'ai-weather-location',
+            buttonId: 'ai-weather-button',
+            spinnerId: 'ai-weather-spinner',
+            errorId: 'ai-weather-error',
+            resultsId: 'ai-weather-results',
+            summaryId: 'ai-weather-summary',
+            temperatureId: 'ai-weather-temperature',
+            windSpeedId: 'ai-weather-wind-speed',
+            windDirectionId: 'ai-weather-wind-direction',
+            conditionsId: 'ai-weather-conditions',
+            endpoint: '@Url.Action("GetCurrentAIWeather", "Home")'
+        });
+    </script>
+}

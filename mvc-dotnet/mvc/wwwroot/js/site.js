@@ -23,18 +23,18 @@
 
 	function createNode(node) {
 		const li = document.createElement('li');
-		li.className = 'about-tree-item';
+		li.className = 'mt-2';
 
 		const row = document.createElement('div');
-		row.className = 'about-tree-row';
+		row.className = 'flex flex-wrap items-center gap-2';
 
 		const name = document.createElement('span');
-		name.className = 'about-tree-name';
+		name.className = 'font-semibold text-gray-900';
 		name.textContent = node?.name ?? 'Unnamed node';
 
 		const health = document.createElement('span');
 		const isHealthy = !!node?.isHealthy;
-		health.className = `about-tree-health ${isHealthy ? 'healthy' : 'unhealthy'}`;
+		health.className = `rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${isHealthy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
 		health.textContent = isHealthy ? 'Healthy' : 'Unhealthy';
 
 		row.appendChild(name);
@@ -43,7 +43,7 @@
 
 		if (node?.publicMessage) {
 			const message = document.createElement('div');
-			message.className = 'about-tree-public-message';
+			message.className = 'text-sm text-gray-700';
 			message.textContent = node.publicMessage;
 			li.appendChild(message);
 		}
@@ -60,7 +60,7 @@
 		}
 		if (metadata.length > 0) {
 			const meta = document.createElement('div');
-			meta.className = 'about-tree-meta';
+			meta.className = 'text-xs text-gray-500';
 			metadata.forEach((item, index) => {
 				if (index > 0) {
 					meta.appendChild(document.createTextNode(' | '));
@@ -68,7 +68,7 @@
 				const value = document.createElement('span');
 				value.textContent = item.text;
 				if (item.isBranch && item.value !== 'main') {
-					value.className = 'about-tree-branch-non-main';
+					value.className = 'font-bold text-red-700';
 				}
 				meta.appendChild(value);
 			});
@@ -77,7 +77,7 @@
 
 		if (Array.isArray(node?.children) && node.children.length > 0) {
 			const childList = document.createElement('ul');
-			childList.className = 'about-tree-list';
+			childList.className = 'ml-4 border-l border-gray-200 pl-4';
 
 			node.children.forEach((child) => {
 				childList.appendChild(createNode(child));
@@ -96,10 +96,9 @@
 			return;
 		}
 
-		status.innerHTML = '<span class="about-spinner" aria-hidden="true"></span><span>Loading About information...</span>';
-		status.classList.remove('d-none', 'about-status-error');
-		status.classList.add('loading');
-		container.classList.add('d-none');
+		status.innerHTML = '<span class="size-4 animate-spin rounded-full border-2 border-blue-200 border-t-blue-800" aria-hidden="true"></span><span>Loading About information...</span>';
+		status.className = 'inline-flex items-center gap-2 text-gray-700';
+		container.classList.add('hidden');
 		container.textContent = '';
 
 		try {
@@ -110,26 +109,95 @@
 
 			const root = await response.json();
 			const rootList = document.createElement('ul');
-			rootList.className = 'about-tree-list root';
+			rootList.className = 'list-none';
 			rootList.appendChild(createNode(root));
 
 			container.appendChild(rootList);
-			container.classList.remove('d-none');
-			status.classList.remove('loading');
-			status.classList.add('d-none');
+			container.classList.remove('hidden');
+			status.classList.add('hidden');
 		} catch {
 			status.textContent = 'Unable to load About information.';
-			status.classList.remove('loading');
-			status.classList.add('about-status-error');
+			status.className = 'text-red-700';
 		}
 	}
 
 	document.addEventListener('DOMContentLoaded', () => {
+		const menuButton = document.getElementById('avatarMenuButton');
+		const menu = document.getElementById('avatarMenu');
+		const aboutMenuItem = document.getElementById('aboutMenuItem');
 		const aboutModal = document.getElementById('aboutModal');
-		if (!aboutModal) {
-			return;
+		const aboutModalClose = document.getElementById('aboutModalClose');
+
+		function closeMenu() {
+			menu?.classList.add('hidden');
+			menuButton?.setAttribute('aria-expanded', 'false');
 		}
 
-		aboutModal.addEventListener('show.bs.modal', loadAbout);
+		function openMenu() {
+			menu?.classList.remove('hidden');
+			menuButton?.setAttribute('aria-expanded', 'true');
+		}
+
+		function isModalOpen() {
+			return !!aboutModal && !aboutModal.classList.contains('hidden');
+		}
+
+		function closeModal() {
+			if (!aboutModal) {
+				return;
+			}
+
+			aboutModal.classList.add('hidden');
+			aboutModal.classList.remove('flex');
+		}
+
+		function openModal() {
+			if (!aboutModal) {
+				return;
+			}
+
+			aboutModal.classList.remove('hidden');
+			aboutModal.classList.add('flex');
+			loadAbout();
+		}
+
+		menuButton?.addEventListener('click', (event) => {
+			event.stopPropagation();
+			if (menu?.classList.contains('hidden')) {
+				openMenu();
+			} else {
+				closeMenu();
+			}
+		});
+
+		menu?.addEventListener('click', () => closeMenu());
+
+		document.addEventListener('click', (event) => {
+			if (menu && !menu.contains(event.target) && event.target !== menuButton) {
+				closeMenu();
+			}
+		});
+
+		aboutMenuItem?.addEventListener('click', openModal);
+		aboutModalClose?.addEventListener('click', closeModal);
+
+		// Backdrop click closes; clicks inside the dialog do not bubble to the backdrop element itself.
+		aboutModal?.addEventListener('click', (event) => {
+			if (event.target === aboutModal) {
+				closeModal();
+			}
+		});
+
+		document.addEventListener('keydown', (event) => {
+			if (event.key !== 'Escape') {
+				return;
+			}
+
+			if (isModalOpen()) {
+				closeModal();
+			} else {
+				closeMenu();
+			}
+		});
 	});
 })();

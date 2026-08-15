@@ -197,19 +197,46 @@ and handlers, including:
 
 ## Feature Parity Contract
 
-For developers and AI agents, parity means the three UI projects (MVC, React,
-Blazor) should remain behaviorally aligned from a user perspective.
+Parity is **behavioral/feature parity only**: the three UI projects (MVC, React,
+Blazor) expose the same routes, pages, features, data, and interactions. They are
+**not** required to look alike — each is styled independently with its own
+framework-native library:
+
+| UI | Styling / component library |
+| --- | --- |
+| React (`ui-react`) | Tailwind CSS v4 (Vite plugin) + shadcn/ui (Radix primitives) + lucide-react |
+| Blazor (`ui-blazor`) | MudBlazor (Material Design) |
+| MVC (`mvc-dotnet`) | Tailwind CSS v4 via the standalone Tailwind CLI + vanilla JS |
+
+React and MVC both use Tailwind, but they share **no** CSS, Tailwind config, or
+component source: each UI is implemented as if it were a standalone repo.
+Bootstrap is no longer used anywhere.
 
 For backend changes, keep MVC and API implementations aligned by duplicating
 equivalent backend logic in both projects.
 
-For UI changes, keep MVC, React, and Blazor implementations aligned by
-duplicating equivalent UI behavior in all three projects.
+For UI changes, keep MVC, React, and Blazor aligned on behavior — same routes,
+same data, same interactions — by duplicating equivalent behavior in all three.
 
-It is acceptable for React and Blazor to repeat equivalent frontend
-models instead of sharing code. These projects are intentionally framework-
-native and independently maintainable; parity is behavioral and API-contract
-based, not enforced through shared frontend model artifacts.
+It is acceptable (and expected) for the UIs to repeat equivalent frontend models
+and layout code instead of sharing it.
+
+### Pages and routes (all three UIs)
+
+| Route | Contents |
+| --- | --- |
+| `/` | Top bar (logo left, person/avatar menu right) above a full-viewport Google Map |
+| `/presentation` | Same top bar, then the hello message, the Current AI Weather widget, and the chat clients (ChatPanel) — no map |
+
+The former `/chat` route is removed from all three UIs (the chat backends
+`Chat1a`/`Chat1b`/`Chat2a`/`Chat2b` are unchanged; chat now lives on
+`/presentation`).
+
+The avatar menu is a person icon (lucide `user` in React/MVC,
+`Icons.Material.Filled.Person` in Blazor) and its items are ordered:
+cross-UI external links (UI React / UI Blazor / MVC, API About, Worker Hangfire)
+→ divider → **Presentation** (internal link to `/presentation`) → divider →
+**About** (dialog/modal).
 
 ## Responsive Design Contract
 
@@ -218,27 +245,25 @@ site must render cleanly from small mobile browser widths (~320px) up through
 full desktop/full-screen widths, without relying on a separate mobile-only
 experience.
 
-Shared responsive conventions kept in parity across the three sites:
+Responsive behavior is satisfied per library (Tailwind flex/grid utilities in
+React and MVC, `MudGrid`/Mud layout in Blazor). The visual result differs by
+library; the behavior does not:
 
 - A single fluid layout adapts at breakpoints rather than branching into
   distinct mobile/desktop templates.
-- Primary navigation uses a top bar with an avatar/About menu on all three UIs
-  (MVC navbar, Blazor top row, React top bar); layout stays fluid at narrow widths
-  without separate mobile-only templates.
-- The avatar/About menu stays reachable and usable at every width and never
-  overflows the viewport.
-- Main content is centered with a max-width on large screens instead of
-  stretching to full width, keeping line lengths and table density readable.
-- Base typography scales down slightly on small screens and back up at
-  tablet/desktop breakpoints for comfortable readability at every size.
-- The map section (Google Maps) appears on the home page of each UI with
-  the same sample pins and dark styling; map height stays usable on narrow
-  viewports.
+- Primary navigation is a top bar with the logo on the left and the person menu
+  on the right; it stays reachable and never overflows the viewport.
+- On `/`, the map fills the remaining viewport height below the top bar at every
+  width; on `/presentation` content is centered with a max width on large
+  screens.
+- Multi-value blocks (e.g. AI weather stats) collapse to a single column on
+  small screens and expand into a grid at larger breakpoints.
 
 ## Google Maps
 
 Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
-Atlanta, Charlotte). Weather overlays will come later.
+Atlanta, Charlotte) filling the landing page (`/`) below the top bar. Weather
+overlays will come later.
 
 **API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
 in a Google Cloud project.
