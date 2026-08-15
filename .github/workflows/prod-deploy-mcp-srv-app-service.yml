@@ -1,5 +1,5 @@
-name: cicd-weather1116-prod-mcp-srv-app-service
-run-name: CICD weather1116-prod-mcp-srv-app-service
+name: cicd-weather1116-prod-mcpsrv-appservice
+run-name: CICD weather1116-prod-mcpsrv-appservice
 
 on:
   workflow_run:
@@ -94,14 +94,14 @@ jobs:
         uses: azure/cli@v3
         with:
           inlineScript: |
-            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-mcp-srv-app-service'].resourceGroup | [0]" -o tsv)
+            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-mcpsrv-appservice'].resourceGroup | [0]" -o tsv)
             if [ -z "$APP_RG" ]; then
-              echo "Could not resolve resource group for weather1116-prod-mcp-srv-app-service" >&2
+              echo "Could not resolve resource group for weather1116-prod-mcpsrv-appservice" >&2
               exit 1
             fi
 
             az webapp config appsettings set \
-              --name weather1116-prod-mcp-srv-app-service \
+              --name weather1116-prod-mcpsrv-appservice \
               --resource-group "$APP_RG" \
               --settings \
                 MCP_SRV_APP_SERVICE_KEY="${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}" \
@@ -115,6 +115,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'weather1116-prod-mcp-srv-app-service'
+          app-name: 'weather1116-prod-mcpsrv-appservice'
           slot-name: 'Production'
           package: ${{ github.workspace }}/publish/mcp-srv-app-service

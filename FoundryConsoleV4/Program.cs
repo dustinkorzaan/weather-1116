@@ -97,13 +97,13 @@ internal class Program
 
 		McpTool myMcpSrvFuncApp = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvFuncApp",
-			serverUri: new Uri("https://weather1116-prod-mcp-srv-func-app-debjddh3fthua7dy.westus2-01.azurewebsites.net/runtime/webhooks/mcp"),
+			serverUri: new Uri("https://weather1116-prod-mcpsrv-funcapp.azurewebsites.net/runtime/webhooks/mcp"),
 			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		McpTool myMcpSrvAppService = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvAppService",
-			serverUri: new Uri("https://weather1116-prod-mcp-srv-app-service-bcb9gnameebrgmc4.westus2-01.azurewebsites.net/mcp"),
+			serverUri: new Uri("https://weather1116-prod-mcpsrv-appservice.azurewebsites.net/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
