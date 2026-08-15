@@ -19,7 +19,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-test('renders weather app title and loaded data', async () => {
+test('renders weather app title and loaded data on the presentation page', async () => {
   const store = createTestStore();
 
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
@@ -43,7 +43,7 @@ test('renders weather app title and loaded data', async () => {
 
   render(
     <Provider store={store}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/presentation']}>
         <App />
       </MemoryRouter>
     </Provider>

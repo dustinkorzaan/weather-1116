@@ -1,8 +1,23 @@
-import './App.css';
-import { useEffect, useRef, useState } from 'react';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, Route, Routes } from 'react-router-dom';
+import { User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { siteLinks } from './config/siteLinks';
-import HomePage from './pages/HomePage';
+import MapPage from './pages/MapPage';
+import PresentationPage from './pages/PresentationPage';
 import {
   useLazyGetAboutQuery,
 } from './services/weatherApi';
@@ -43,20 +58,24 @@ export function AboutTreeNode({ node }) {
   }
 
   return (
-    <li className="about-tree-item">
-      <div className="about-tree-row">
-        <span className="about-tree-name">{node.name ?? 'Unnamed node'}</span>
-        <span className={`about-tree-health ${node.isHealthy ? 'healthy' : 'unhealthy'}`}>
+    <li className="my-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-semibold text-gray-900">{node.name ?? 'Unnamed node'}</span>
+        <span
+          className={`rounded-full px-2 py-0.5 text-[0.7rem] font-bold tracking-wide uppercase ${
+            node.isHealthy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}
+        >
           {node.isHealthy ? 'Healthy' : 'Unhealthy'}
         </span>
       </div>
-      {node.publicMessage && <div className="about-tree-public-message">{node.publicMessage}</div>}
+      {node.publicMessage && <div className="mt-1 text-xs text-gray-600">{node.publicMessage}</div>}
       {metadata.length > 0 && (
-        <div className="about-tree-meta">
+        <div className="mt-1 text-xs text-gray-500">
           {metadata.map((item, index) => (
             <span key={`${item.text}-${index}`}>
               {index > 0 && ' | '}
-              <span className={item.isBranch && item.value !== 'main' ? 'about-tree-branch-non-main' : undefined}>
+              <span className={item.isBranch && item.value !== 'main' ? 'text-amber-600' : undefined}>
                 {item.text}
               </span>
             </span>
@@ -65,7 +84,7 @@ export function AboutTreeNode({ node }) {
       )}
 
       {hasChildren && (
-        <ul className="about-tree-list">
+        <ul className="mt-1 list-disc pl-5">
           {node.children.map((child, index) => (
             <AboutTreeNode key={`${child.name ?? 'node'}-${index}`} node={child} />
           ))}
@@ -77,13 +96,20 @@ export function AboutTreeNode({ node }) {
 
 function SiteLinksFooter() {
   return (
-    <div className="site-links-footer">
+    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-3 border-t border-gray-200 pt-3 text-sm">
       {siteLinks.map((link) => (
-        <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer">
+        <a
+          key={link.label}
+          className="text-blue-700 hover:underline"
+          href={link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           {link.label}
         </a>
       ))}
       <a
+        className="text-blue-700 hover:underline"
         href="https://github.com/dustinkorzaan/weather-1116"
         target="_blank"
         rel="noopener noreferrer"
@@ -95,150 +121,87 @@ function SiteLinksFooter() {
 }
 
 function App() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const avatarMenuRef = useRef(null);
   const [loadAbout, aboutQuery] = useLazyGetAboutQuery();
 
-  useEffect(() => {
-    if (!isMenuOpen) {
-      return undefined;
-    }
-
-    const handleClickOutside = (event) => {
-      if (avatarMenuRef.current && !avatarMenuRef.current.contains(event.target)) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isMenuOpen]);
-
-  const handleAvatarClick = () => {
-    setIsMenuOpen((open) => !open);
-  };
-
   const handleAboutClick = () => {
-    setIsMenuOpen(false);
     setIsAboutOpen(true);
     loadAbout();
   };
 
-  const closeAboutModal = () => {
-    setIsAboutOpen(false);
-  };
-
   return (
-    <div className="app">
-      <header className="top-bar">
-        <div className="top-bar-inner">
-          <Link className="site-brand" to="/">
-            <img src="/logo.svg" alt="Weather logo" className="site-logo" />
-            <h1 className="title">Weather React</h1>
+    <div className="flex h-screen flex-col bg-white text-gray-900">
+      <header className="border-b border-gray-200 bg-white shadow-sm">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3">
+          <Link className="flex min-w-0 items-center gap-2 text-inherit no-underline" to="/">
+            <img src="/logo.svg" alt="Weather logo" className="h-6 w-6 shrink-0" />
+            <h1 className="truncate text-xl font-semibold">Weather React</h1>
           </Link>
 
-          <div className="avatar-menu" ref={avatarMenuRef}>
-            <button
-              type="button"
-              className="avatar-button"
-              aria-haspopup="true"
-              aria-expanded={isMenuOpen}
-              aria-label="Open user menu"
-              onClick={handleAvatarClick}
-            >
-              <svg viewBox="0 0 24 24" className="avatar-icon" aria-hidden="true" focusable="false">
-                <circle cx="12" cy="8" r="4" fill="currentColor" />
-                <path
-                  d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"
-                  fill="currentColor"
-                />
-              </svg>
-            </button>
-
-            {isMenuOpen && (
-              <ul className="avatar-dropdown" role="menu">
-                {siteLinks.map((link) => (
-                  <li key={link.label} role="none">
-                    <a
-                      className="avatar-dropdown-item"
-                      role="menuitem"
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-                <li role="separator" className="avatar-dropdown-divider" />
-                <li role="none">
-                  <button type="button" role="menuitem" className="avatar-dropdown-item" onClick={handleAboutClick}>
-                    About
-                  </button>
-                </li>
-              </ul>
-            )}
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                size="icon"
+                aria-label="Open user menu"
+                className="size-9 rounded-full bg-blue-800 text-white hover:bg-blue-900"
+              >
+                <User className="size-5" aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-44">
+              {siteLinks.map((link) => (
+                <DropdownMenuItem key={link.label} asChild>
+                  <a href={link.href} target="_blank" rel="noopener noreferrer">
+                    {link.label}
+                  </a>
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/presentation">Presentation</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={handleAboutClick}>About</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/chat" element={<Navigate to="/" replace />} />
-      </Routes>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <Routes>
+          <Route path="/" element={<MapPage />} />
+          <Route path="/presentation" element={<PresentationPage />} />
+        </Routes>
+      </div>
 
-      {isAboutOpen && (
-        <div className="modal-backdrop" role="presentation" onClick={closeAboutModal}>
-          <div
-            className="modal-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="about-modal-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="modal-header">
-              <h2 id="about-modal-title" className="modal-title">About</h2>
-              <button
-                type="button"
-                className="modal-close"
-                aria-label="Close"
-                onClick={closeAboutModal}
-              >
-                &times;
-              </button>
-            </div>
-            <div className="modal-body">
-              {aboutQuery.isFetching && (
-                <p className="about-status loading">
-                  <span className="about-spinner" aria-hidden="true"></span>
-                  <span>Loading About information...</span>
-                </p>
-              )}
-              {!aboutQuery.isFetching && aboutQuery.isError && (
-                <p className="about-status error">Unable to load About information.</p>
-              )}
-              {!aboutQuery.isFetching && !aboutQuery.isError && aboutQuery.data && (
-                <ul className="about-tree-list root">
-                  <AboutTreeNode node={aboutQuery.data} />
-                </ul>
-              )}
-              <SiteLinksFooter />
-            </div>
+      <Dialog open={isAboutOpen} onOpenChange={setIsAboutOpen}>
+        <DialogContent className="max-h-[calc(100vh-5rem)] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>About</DialogTitle>
+          </DialogHeader>
+          <div className="min-h-16">
+            {aboutQuery.isFetching && (
+              <p className="inline-flex items-center gap-2 text-gray-700">
+                <span
+                  className="size-4 animate-spin rounded-full border-2 border-blue-200 border-t-blue-800"
+                  aria-hidden="true"
+                />
+                <span>Loading About information...</span>
+              </p>
+            )}
+            {!aboutQuery.isFetching && aboutQuery.isError && (
+              <p className="text-red-700">Unable to load About information.</p>
+            )}
+            {!aboutQuery.isFetching && !aboutQuery.isError && aboutQuery.data && (
+              <ul className="list-disc pl-5">
+                <AboutTreeNode node={aboutQuery.data} />
+              </ul>
+            )}
+            <SiteLinksFooter />
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
