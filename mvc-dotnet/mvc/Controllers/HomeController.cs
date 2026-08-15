@@ -16,7 +16,14 @@ public class HomeController : Controller
         _mediator = mediator;
     }
 
-    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [Route("presentation")]
+    [Route("Home/Presentation")]
+    public async Task<IActionResult> Presentation(CancellationToken cancellationToken)
     {
         var helloResponse = await _mediator.Send(new HelloWorldEvent { Message = "from WeatherMVC" }, cancellationToken);
         ViewData["HelloResponse"] = helloResponse.RequestResponse;

@@ -1,51 +1,48 @@
 @using WeatherBlazor.Data
 @inject ChatApiClient ChatClient
 
-<link href="css/chat.css" rel="stylesheet" />
-
-<div class="chat-page">
-    <h2 class="chat-page-title">Chat Clients</h2>
-    <p class="chat-page-lead">
+<div class="chat-section">
+    <h2 class="section-title">Chat Clients</h2>
+    <p class="muted">
         Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
     </p>
 
-    <div class="chat-tabs" role="tablist" aria-label="Chat client tabs">
+    <FluentTabs @bind-ActiveTabId="_activeTab">
         @foreach (var tab in _tabs)
         {
-            <button type="button"
-                    class="chat-tab @(tab.Id == _activeTab ? "active" : string.Empty)"
-                    role="tab"
-                    aria-selected="@(tab.Id == _activeTab)"
-                    @onclick="() => SetActiveTab(tab.Id)">
-                @tab.Label
-            </button>
+            <FluentTab Id="@tab.Id" Label="@tab.Label"></FluentTab>
         }
-    </div>
+    </FluentTabs>
 
-    <p class="chat-tab-description">@_tabs.First(tab => tab.Id == _activeTab).Description</p>
+    <p class="muted tab-description">@_tabs.First(tab => tab.Id == _activeTab).Description</p>
 
-    <section class="chat-panel" aria-label="Chat conversation">
+    <FluentCard Class="chat-card" aria-label="Chat conversation">
         <div class="chat-messages">
             @foreach (var entry in _histories[_activeTab])
             {
-                <div class="chat-message chat-message-@entry.Role">@entry.Content</div>
+                <div class="@MessageClass(entry.Role)">@entry.Content</div>
             }
         </div>
 
-        <form class="chat-form" @onsubmit="OnSubmit" @onsubmit:preventDefault="true">
-            <label class="visually-hidden" for="chat-input">Message</label>
-            <textarea id="chat-input"
-                      class="chat-input"
-                      rows="3"
-                      placeholder="Ask about weather in a city…"
-                      @bind="_input"
-                      @bind:event="oninput"
-                      disabled="@IsActiveTabSending"></textarea>
-            <button class="chat-send" type="submit" disabled="@IsActiveTabSending">
-                @(IsActiveTabSending ? "Sending…" : "Send")
-            </button>
-        </form>
-    </section>
+        <EditForm Model="this" OnValidSubmit="OnSubmit" class="chat-form" @onsubmit:preventDefault="true">
+            <div class="form-row form-row-end">
+                @* Class="chat-input" lets chatInput.js bind the inner textarea (including shadow DOM). *@
+                <FluentTextArea @bind-Value="_input"
+                                Class="chat-input"
+                                Label="Message"
+                                Placeholder="Ask about weather in a city…"
+                                Rows="3"
+                                Immediate="true"
+                                Disabled="IsActiveTabSending"
+                                Style="flex: 1 1 12rem;" />
+                <FluentButton Type="ButtonType.Submit"
+                              Appearance="Appearance.Accent"
+                              Disabled="IsActiveTabSending">
+                    @(IsActiveTabSending ? "Sending…" : "Send")
+                </FluentButton>
+            </div>
+        </EditForm>
+    </FluentCard>
 </div>
 
 @code {
@@ -95,7 +92,13 @@
         public bool Running { get; set; }
     }
 
-    private void SetActiveTab(string tabId) => _activeTab = tabId;
+    private static string MessageClass(string role) => role switch
+    {
+        "user" => "chat-message user",
+        "tool" => "chat-message tool",
+        "error" => "chat-message error",
+        _ => "chat-message assistant",
+    };
 
     private async Task OnSubmit()
     {

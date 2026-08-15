@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Presentation";
+    var helloResponse = ViewData["HelloResponse"] as string;
+}
+
+<div class="page-shell">
+    @if (!string.IsNullOrWhiteSpace(helloResponse))
+    {
+        <p class="hello-message">@helloResponse</p>
+    }
+
+    <section class="weather-card" aria-label="Current AI weather">
+        <form id="ai-weather-form" class="weather-form">
+            <label class="field-label" for="ai-weather-location">Location:</label>
+            <input id="ai-weather-location"
+                   class="text-input"
+                   type="text"
+                   value="Nashville, TN"
+                   autocomplete="address-level2" />
+            <button id="ai-weather-button"
+                    type="submit"
+                    class="btn-primary">
+                <span id="ai-weather-spinner" class="spinner spinner-on-primary" hidden aria-hidden="true"></span>
+                <span>Get Current AI Weather</span>
+            </button>
+        </form>
+        <p id="ai-weather-error" class="form-error" hidden></p>
+        <div id="ai-weather-results" class="weather-results" hidden>
+            <p id="ai-weather-summary" class="weather-summary"></p>
+            <dl class="weather-stats">
+                <div class="weather-stat">
+                    <dt>Temperature F</dt>
+                    <dd id="ai-weather-temperature"></dd>
+                </div>
+                <div class="weather-stat">
+                    <dt>Wind Speed MPH</dt>
+                    <dd id="ai-weather-wind-speed"></dd>
+                </div>
+                <div class="weather-stat">
+                    <dt>Wind Direction</dt>
+                    <dd id="ai-weather-wind-direction"></dd>
+                </div>
+                <div class="weather-stat">
+                    <dt>Conditions</dt>
+                    <dd id="ai-weather-conditions"></dd>
+                </div>
+            </dl>
+        </div>
+    </section>
+
+    <partial name="_ChatPanel" />
+</div>
+
+@section Scripts {
+    <script src="~/js/currentAIWeather.js" asp-append-version="true"></script>
+    <script src="~/js/chatClient.js" asp-append-version="true"></script>
+    <script>
+        currentAIWeather.init({
+            formId: 'ai-weather-form',
+            locationId: 'ai-weather-location',
+            buttonId: 'ai-weather-button',
+            spinnerId: 'ai-weather-spinner',
+            errorId: 'ai-weather-error',
+            resultsId: 'ai-weather-results',
+            summaryId: 'ai-weather-summary',
+            temperatureId: 'ai-weather-temperature',
+            windSpeedId: 'ai-weather-wind-speed',
+            windDirectionId: 'ai-weather-wind-direction',
+            conditionsId: 'ai-weather-conditions',
+            endpoint: '@Url.Action("GetCurrentAIWeather", "Home")'
+        });
+    </script>
+}

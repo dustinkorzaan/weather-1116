@@ -14,127 +14,110 @@
     var workerHangfireUrl = $"{workerUrl}/hangfire";
 }
 
-<div class="page">
-    <header class="top-row">
-        <NavLink class="site-brand" href="" Match="NavLinkMatch.All">
-            <img src="logo.svg" alt="Weather logo" class="site-logo" />
-            <h1 class="site-title">Weather Blazor</h1>
-        </NavLink>
+<FluentLayout Class="weather-shell">
+    <FluentHeader Height="48">
+        <FluentAnchor Href="/" Appearance="Appearance.Hypertext" Class="brand-link" Style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
+            <img src="logo.svg" alt="Weather logo" width="22" height="22" />
+            <span class="brand-title">Weather Blazor</span>
+        </FluentAnchor>
 
-        <div class="avatar-menu" @onclick:stopPropagation="true">
-            <button type="button"
-                    class="avatar-button"
-                    aria-haspopup="true"
-                    aria-expanded="@_isMenuOpen.ToString().ToLowerInvariant()"
-                    aria-label="Open user menu"
-                    @onclick="ToggleMenu">
-                <svg viewBox="0 0 24 24" class="avatar-icon" aria-hidden="true" focusable="false">
-                    <circle cx="12" cy="8" r="4" fill="currentColor" />
-                    <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" fill="currentColor" />
-                </svg>
-            </button>
+        <FluentSpacer />
 
-            @if (_isMenuOpen)
-            {
-                <div class="avatar-dropdown-backdrop" role="presentation" @onclick="CloseMenu"></div>
-                <ul class="avatar-dropdown" role="menu">
-                    <li role="none">
-                        <a class="avatar-dropdown-item" role="menuitem" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
-                    </li>
-                    <li role="none">
-                        <a class="avatar-dropdown-item" role="menuitem" href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
-                    </li>
-                    <li role="none">
-                        <a class="avatar-dropdown-item" role="menuitem" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
-                    </li>
-                    <li role="none">
-                        <a class="avatar-dropdown-item" role="menuitem" href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
-                    </li>
-                    <li role="separator" class="avatar-dropdown-divider"></li>
-                    <li role="none">
-                        <button type="button" role="menuitem" class="avatar-dropdown-item" @onclick="OpenAboutModal">
-                            About
-                        </button>
-                    </li>
-                </ul>
-            }
+        <FluentButton Id="user-menu-button"
+                      Appearance="Appearance.Accent"
+                      Title="Open user menu"
+                      aria-label="Open user menu">
+            <FluentIcon Value="@(new Icons.Regular.Size20.Person())" />
+        </FluentButton>
+        <FluentMenu Anchor="user-menu-button"
+                    Trigger="MouseButton.Left"
+                    HorizontalPosition="HorizontalPosition.Right">
+            <FluentMenuItem>
+                <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
+            </FluentMenuItem>
+            <FluentMenuItem>
+                <a href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
+            </FluentMenuItem>
+            <FluentMenuItem>
+                <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
+            </FluentMenuItem>
+            <FluentMenuItem>
+                <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
+            </FluentMenuItem>
+            <FluentDivider />
+            <FluentMenuItem>
+                <a href="/presentation">Presentation</a>
+            </FluentMenuItem>
+            <FluentDivider />
+            <FluentMenuItem OnClick="OpenAboutModal">About</FluentMenuItem>
+        </FluentMenu>
+    </FluentHeader>
+
+    <FluentBodyContent Class="weather-body">
+        @Body
+    </FluentBodyContent>
+</FluentLayout>
+
+<FluentDialog @bind-Hidden="_aboutDialogHidden"
+              Modal="true"
+              TrapFocus="true"
+              AriaLabel="About"
+              Style="width: min(42rem, calc(100vw - 2rem));">
+    <FluentDialogHeader>
+        <FluentLabel Typo="Typography.PaneHeader">About</FluentLabel>
+    </FluentDialogHeader>
+    <FluentDialogBody>
+        @if (_isAboutLoading)
+        {
+            <div class="inline-row">
+                <FluentProgressRing Width="20px" Stroke="ProgressStroke.Small" />
+                <span>Loading About information...</span>
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_aboutError))
+        {
+            <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false">@_aboutError</FluentMessageBar>
+        }
+        else if (_aboutRoot is not null)
+        {
+            <ul class="about-tree-list root">
+                <AboutTreeNode Node="_aboutRoot" />
+            </ul>
+        }
+
+        <FluentDivider Style="margin: 1rem 0;" />
+
+        <div class="footer-links">
+            <FluentAnchor Href="@uiReactUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">UI React</FluentAnchor>
+            <FluentAnchor Href="@mvcUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MVC</FluentAnchor>
+            <FluentAnchor Href="@apiAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">API About</FluentAnchor>
+            <FluentAnchor Href="@workerHangfireUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">Worker Hangfire</FluentAnchor>
+            <FluentAnchor Href="https://github.com/dustinkorzaan/weather-1116" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">GitHub</FluentAnchor>
         </div>
-    </header>
+    </FluentDialogBody>
+    <FluentDialogFooter>
+        <FluentButton Appearance="Appearance.Accent" OnClick="CloseAboutModal">Close</FluentButton>
+    </FluentDialogFooter>
+</FluentDialog>
 
-    <main>
-        <article class="content px-4">
-            <div class="content-inner">
-                @Body
-            </div>
-        </article>
-    </main>
-</div>
-
-@if (_isAboutModalOpen)
-{
-    <div class="about-modal-backdrop" role="presentation" @onclick="CloseAboutModal">
-        <div class="about-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="about-modal-title" @onclick:stopPropagation="true">
-            <div class="about-modal-header">
-                <h2 id="about-modal-title" class="about-modal-title">About</h2>
-                <button type="button" class="about-modal-close" aria-label="Close" @onclick="CloseAboutModal">&times;</button>
-            </div>
-            <div class="about-modal-body">
-                @if (_isAboutLoading)
-                {
-                    <p class="about-status loading">
-                        <span class="about-spinner" aria-hidden="true"></span>
-                        <span>Loading About information...</span>
-                    </p>
-                }
-                else if (!string.IsNullOrWhiteSpace(_aboutError))
-                {
-                    <p class="about-status error">@_aboutError</p>
-                }
-                else if (_aboutRoot is not null)
-                {
-                    <ul class="about-tree-list root">
-                        <AboutTreeNode Node="_aboutRoot" />
-                    </ul>
-                }
-                <div class="site-links-footer">
-                    <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
-                    <a href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
-                    <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
-                    <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
-                    <a href="https://github.com/dustinkorzaan/weather-1116" target="_blank" rel="noopener noreferrer">GitHub</a>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+<FluentDialogProvider />
+<FluentMenuProvider />
 
 @code {
-    private bool _isMenuOpen;
-    private bool _isAboutModalOpen;
+    private bool _aboutDialogHidden = true;
     private bool _isAboutLoading;
     private string _aboutError = string.Empty;
     private AboutNode? _aboutRoot;
 
-    private void ToggleMenu()
-    {
-        _isMenuOpen = !_isMenuOpen;
-    }
-
-    private void CloseMenu()
-    {
-        _isMenuOpen = false;
-    }
-
     private async Task OpenAboutModal()
     {
-        _isMenuOpen = false;
-        _isAboutModalOpen = true;
+        _aboutDialogHidden = false;
         _isAboutLoading = true;
         _aboutError = string.Empty;
 
         try
         {
-            _aboutRoot = await WeatherClient.GetAboutAsync();
+            _aboutRoot = await WeatherClient.GetAbout();
             if (_aboutRoot is null)
             {
                 _aboutError = "Unable to load About information.";
@@ -153,6 +136,6 @@
 
     private void CloseAboutModal()
     {
-        _isAboutModalOpen = false;
+        _aboutDialogHidden = true;
     }
 }

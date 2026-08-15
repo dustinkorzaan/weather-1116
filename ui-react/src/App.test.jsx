@@ -15,13 +15,19 @@ function createTestStore() {
   });
 }
 
-afterEach(() => {
-  vi.restoreAllMocks();
-});
-
-test('renders weather app title and loaded data', async () => {
+function renderApp(path) {
   const store = createTestStore();
 
+  return render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={[path]}>
+        <App />
+      </MemoryRouter>
+    </Provider>
+  );
+}
+
+function mockHelloFetch() {
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
     const url = input instanceof Request ? input.url : String(input);
 
@@ -40,19 +46,32 @@ test('renders weather app title and loaded data', async () => {
       headers: { 'Content-Type': 'application/json' },
     });
   });
+}
 
-  render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>
-    </Provider>
-  );
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+test('renders the map on the home route without presentation content', () => {
+  mockHelloFetch();
+  renderApp('/');
+
+  expect(screen.getByRole('region', { name: /map/i })).toBeDefined();
+  expect(screen.queryByText('Hello from test API.')).toBeNull();
+  expect(screen.queryByRole('heading', { name: /chat clients/i })).toBeNull();
+});
+
+test('renders weather app title and loaded data on the presentation page', async () => {
+  mockHelloFetch();
+  renderApp('/presentation');
 
   expect(await screen.findByRole('heading', { name: /weather react/i })).toBeDefined();
   expect(await screen.findByText('Hello from test API.')).toBeDefined();
   expect(await screen.findByLabelText(/location:/i)).toBeDefined();
   expect(await screen.findByRole('button', { name: /get current ai weather/i })).toBeDefined();
+  expect(await screen.findByRole('heading', { name: /chat clients/i })).toBeDefined();
+  expect(screen.getByRole('tab', { name: 'Chat1a' })).toBeDefined();
+  expect(screen.queryByRole('region', { name: /map/i })).toBeNull();
 });
 
 test('renders a public message in the About tree', () => {

@@ -1,4 +1,5 @@
 using DotNetEnv;
+using Microsoft.FluentUI.AspNetCore.Components;
 using WeatherBlazor.Data;
 
 Env.TraversePath().Load();
@@ -7,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddHttpClient();
+builder.Services.AddFluentUIComponents();
 
 builder.Services.AddHttpClient<WeatherApiClient>(c =>
 {

@@ -18,72 +18,84 @@
     <link rel="apple-touch-icon" href="~/apple-touch-icon.png" asp-append-version="true" />
     <link rel="manifest" href="~/manifest.webmanifest" asp-append-version="true" />
     <script type="importmap"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/WeatherMVC.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid px-3 px-sm-4">
-                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/logo.svg" alt="Weather logo" class="site-logo" />
-                    <span class="fw-semibold text-dark">Weather MVC</span>
-                </a>
-                <div class="dropdown avatar-menu ms-auto">
-                    <button class="btn avatar-button" type="button" id="avatarMenuButton" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open user menu">
-                        <svg viewBox="0 0 24 24" class="avatar-icon" aria-hidden="true" focusable="false">
-                            <circle cx="12" cy="8" r="4" fill="currentColor" />
-                            <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" fill="currentColor" />
-                        </svg>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="avatarMenuButton">
-                        <li><a class="dropdown-item" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a></li>
-                        <li><a class="dropdown-item" href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a></li>
-                        <li><a class="dropdown-item" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a></li>
-                        <li><a class="dropdown-item" href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li>
-                            <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#aboutModal">About</button>
-                        </li>
-                    </ul>
-                </div>
+    <header class="site-header">
+        <nav class="site-nav">
+            <a class="brand-link" asp-area="" asp-controller="Home" asp-action="Index">
+                <img src="~/logo.svg" alt="Weather logo" class="brand-logo" />
+                <span class="brand-title">Weather MVC</span>
+            </a>
+
+            <div class="avatar-wrap">
+                <button id="avatarMenuButton"
+                        type="button"
+                        class="avatar-button"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-controls="avatarMenu"
+                        aria-label="Open user menu">
+                    @* Lucide "user" icon (inline so the MVC app needs no icon package). *@
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="avatar-icon" aria-hidden="true" focusable="false">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </button>
+
+                <ul id="avatarMenu"
+                    class="avatar-menu"
+                    role="menu"
+                    aria-labelledby="avatarMenuButton">
+                    <li role="none"><a class="menu-item" role="menuitem" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a></li>
+                    <li role="none"><a class="menu-item" role="menuitem" href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a></li>
+                    <li role="none"><a class="menu-item" role="menuitem" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a></li>
+                    <li role="none"><a class="menu-item" role="menuitem" href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a></li>
+                    <li role="separator"><hr class="menu-separator" /></li>
+                    <li role="none">
+                        <a class="menu-item" role="menuitem" href="/presentation">Presentation</a>
+                    </li>
+                    <li role="separator"><hr class="menu-separator" /></li>
+                    <li role="none">
+                        <button id="aboutMenuItem" class="menu-item" type="button" role="menuitem">About</button>
+                    </li>
+                </ul>
             </div>
         </nav>
     </header>
-    <div class="page-content">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable about-modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="aboutModalLabel">About</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="about-status loading" id="aboutStatus">
-                        <span class="about-spinner" aria-hidden="true"></span>
-                        <span>Loading About information...</span>
-                    </p>
-                    <div id="aboutTreeContainer" class="d-none"></div>
-                    <div class="site-links-footer">
-                        <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
-                        <a href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
-                        <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
-                        <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
-                        <a href="https://github.com/dustinkorzaan/weather-1116" target="_blank" rel="noopener noreferrer">GitHub</a>
-                    </div>
+    <main role="main" class="site-main">
+        @RenderBody()
+    </main>
+
+    <div id="aboutModal" class="about-modal" role="presentation">
+        <div class="about-dialog"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="aboutModalLabel">
+            <div class="about-dialog-header">
+                <h5 id="aboutModalLabel" class="about-dialog-title">About</h5>
+                <button id="aboutModalClose" type="button" class="about-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="about-dialog-body">
+                <p id="aboutStatus" class="about-status">
+                    <span class="spinner spinner-on-muted" aria-hidden="true"></span>
+                    <span>Loading About information...</span>
+                </p>
+                <div id="aboutTreeContainer" hidden></div>
+                <div class="about-links">
+                    <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
+                    <a href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
+                    <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
+                    <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
+                    <a href="https://github.com/dustinkorzaan/weather-1116" target="_blank" rel="noopener noreferrer">GitHub</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

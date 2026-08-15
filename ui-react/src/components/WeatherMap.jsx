@@ -62,7 +62,7 @@ function WeatherMap() {
               color: '#e4e4e7',
               fontSize: '12px',
               fontWeight: '500',
-              className: 'weather-map-label',
+              className: 'relative left-[0.35rem] -top-[0.1rem] whitespace-nowrap',
             },
           });
         });
@@ -82,23 +82,25 @@ function WeatherMap() {
   }, []);
 
   return (
-    <section className="weather-map-section" aria-label="Map">
+    <section className="flex min-h-0 w-full flex-1 flex-col" aria-label="Map">
       {!apiKey && (
-        <p className="status-message error">
+        <p className="px-4 py-2 text-red-700">
           Set <code>VITE_GOOGLE_MAPS_API_KEY</code> to enable Google Maps.
         </p>
       )}
       {status === 'error' && (
-        <p className="status-message error">
+        <p className="px-4 py-2 text-red-700">
           Unable to load Google Maps. Check the API key and that Maps JavaScript API is enabled.
         </p>
       )}
-      <div
-        ref={mapRef}
-        className="weather-map"
-        role="presentation"
-        data-status={status}
-      />
+      <div className="min-h-0 w-full flex-1">
+        <div
+          ref={mapRef}
+          className="h-full w-full bg-[#0b111d]"
+          role="presentation"
+          data-status={status}
+        />
+      </div>
     </section>
   );
 }

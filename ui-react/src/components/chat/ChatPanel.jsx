@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
 import { streamChatMessage } from '../../utils/chatStream';
 
@@ -28,6 +29,17 @@ const TAB_CONFIG = [
     endpoint: '/Chat2b/messages',
   },
 ];
+
+const MESSAGE_CLASSES = {
+  user: 'self-end max-w-[85%] rounded-2xl bg-blue-600 px-3 py-2 text-white whitespace-pre-wrap',
+  assistant: 'self-start max-w-[85%] rounded-2xl border bg-gray-100 px-3 py-2 text-gray-900 whitespace-pre-wrap',
+  tool: 'self-center max-w-[85%] rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-900',
+  error: 'w-full rounded-md bg-red-100 px-3 py-2 text-red-800',
+};
+
+function messageClasses(role) {
+  return MESSAGE_CLASSES[role] ?? MESSAGE_CLASSES.assistant;
+}
 
 function createEmptyHistory() {
   return {
@@ -184,55 +196,64 @@ function ChatPanel() {
   };
 
   return (
-    <div className="chat-page">
-      <h2 className="chat-page-title">Chat Clients</h2>
-      <p className="chat-page-lead">
+    <div className="mt-6">
+      <h2 className="text-xl font-semibold">Chat Clients</h2>
+      <p className="mt-1 text-sm text-gray-600">
         Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
       </p>
 
-      <div className="chat-tabs" role="tablist" aria-label="Chat client tabs">
-        {TAB_CONFIG.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            className={`chat-tab${activeTab === tab.id ? ' active' : ''}`}
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <p className="chat-tab-description">{activeConfig.description}</p>
-
-      <section className="chat-panel" aria-label="Chat conversation">
-        <div className="chat-messages">
-          {histories[activeTab].map((entry, index) => (
-            <div key={`${activeTab}-${index}`} className={`chat-message chat-message-${entry.role}`}>
-              {entry.content}
-            </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3 gap-0">
+        <TabsList
+          variant="line"
+          aria-label="Chat client tabs"
+          className="flex h-auto w-full flex-wrap justify-start gap-2 bg-transparent p-0"
+        >
+          {TAB_CONFIG.map((tab) => (
+            <TabsTrigger
+              key={tab.id}
+              value={tab.id}
+              className="h-auto flex-none rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 after:hidden hover:bg-gray-100 hover:text-gray-700 data-active:border-blue-600 data-active:bg-blue-600 data-active:text-white data-active:shadow-none data-active:hover:bg-blue-600 data-active:hover:text-white"
+            >
+              {tab.label}
+            </TabsTrigger>
           ))}
-        </div>
+        </TabsList>
 
-        <form className="chat-form" onSubmit={onSubmit}>
-          <label className="visually-hidden" htmlFor="chat-input">Message</label>
-          <textarea
-            id="chat-input"
-            className="chat-input"
-            rows={3}
-            value={input}
-            placeholder="Ask about weather in a city…"
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={onKeyDown}
-            disabled={isActiveTabSending}
-          />
-          <button className="chat-send" type="submit" disabled={isActiveTabSending}>
-            {isActiveTabSending ? 'Sending…' : 'Send'}
-          </button>
-        </form>
-      </section>
+        <p className="mt-2 text-sm text-gray-600">{activeConfig.description}</p>
+
+        <TabsContent value={activeTab} className="mt-3">
+          <section className="rounded-lg border border-gray-300 bg-white p-3" aria-label="Chat conversation">
+            <div className="flex max-h-96 min-h-40 flex-col gap-2 overflow-y-auto p-1">
+              {histories[activeTab].map((entry, index) => (
+                <div key={`${activeTab}-${index}`} className={messageClasses(entry.role)}>
+                  {entry.content}
+                </div>
+              ))}
+            </div>
+
+            <form className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end" onSubmit={onSubmit}>
+              <label className="sr-only" htmlFor="chat-input">Message</label>
+              <textarea
+                id="chat-input"
+                className="w-full flex-1 resize-y rounded-md border border-gray-300 px-2.5 py-2 focus:border-blue-600 focus:outline-none disabled:bg-gray-100"
+                rows={3}
+                value={input}
+                placeholder="Ask about weather in a city…"
+                onChange={(event) => setInput(event.target.value)}
+                onKeyDown={onKeyDown}
+                disabled={isActiveTabSending}
+              />
+              <button
+                className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                type="submit"
+                disabled={isActiveTabSending}
+              >
+                {isActiveTabSending ? 'Sending…' : 'Send'}
+              </button>
+            </form>
+          </section>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -6,6 +6,8 @@
   const input = document.getElementById('chat-input');
   const sendButton = document.getElementById('chat-send');
 
+  const MESSAGE_ROLES = ['user', 'assistant', 'tool', 'error'];
+
   let activeTab = 'Chat1a';
   const sessions = {
     Chat1a: null,
@@ -39,11 +41,15 @@
     activeTab = tabId;
     tabs.forEach((tab) => {
       const isActive = tab.dataset.chatTab === tabId;
-      tab.classList.toggle('active', isActive);
+      tab.classList.toggle('is-active', isActive);
       tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
     descriptions.forEach((desc) => {
-      desc.classList.toggle('active', desc.dataset.chatDescription === tabId);
+      if (desc.dataset.chatDescription === tabId) {
+        desc.removeAttribute('hidden');
+      } else {
+        desc.setAttribute('hidden', '');
+      }
     });
     renderMessages();
     updateSendingControls();
@@ -58,7 +64,8 @@
 
   function renderEntry(entry) {
     const item = document.createElement('div');
-    item.className = `chat-message chat-message-${entry.role}`;
+    const role = MESSAGE_ROLES.includes(entry.role) ? entry.role : 'assistant';
+    item.className = `chat-message ${role}`;
     item.textContent = entry.content;
     messagesEl.appendChild(item);
     return item;
