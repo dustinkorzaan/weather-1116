@@ -21,20 +21,31 @@
 		return `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${period} UTC`;
 	}
 
+	function setHidden(el, hidden) {
+		if (!el) {
+			return;
+		}
+		if (hidden) {
+			el.setAttribute('hidden', '');
+		} else {
+			el.removeAttribute('hidden');
+		}
+	}
+
 	function createNode(node) {
 		const li = document.createElement('li');
-		li.className = 'mt-2';
+		li.className = 'about-node';
 
 		const row = document.createElement('div');
-		row.className = 'flex flex-wrap items-center gap-2';
+		row.className = 'about-node-row';
 
 		const name = document.createElement('span');
-		name.className = 'font-semibold text-gray-900';
+		name.className = 'about-node-name';
 		name.textContent = node?.name ?? 'Unnamed node';
 
 		const health = document.createElement('span');
 		const isHealthy = !!node?.isHealthy;
-		health.className = `rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${isHealthy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+		health.className = `about-health ${isHealthy ? 'is-healthy' : 'is-unhealthy'}`;
 		health.textContent = isHealthy ? 'Healthy' : 'Unhealthy';
 
 		row.appendChild(name);
@@ -43,7 +54,7 @@
 
 		if (node?.publicMessage) {
 			const message = document.createElement('div');
-			message.className = 'text-sm text-gray-700';
+			message.className = 'about-node-message';
 			message.textContent = node.publicMessage;
 			li.appendChild(message);
 		}
@@ -60,7 +71,7 @@
 		}
 		if (metadata.length > 0) {
 			const meta = document.createElement('div');
-			meta.className = 'text-xs text-gray-500';
+			meta.className = 'about-node-meta';
 			metadata.forEach((item, index) => {
 				if (index > 0) {
 					meta.appendChild(document.createTextNode(' | '));
@@ -68,7 +79,7 @@
 				const value = document.createElement('span');
 				value.textContent = item.text;
 				if (item.isBranch && item.value !== 'main') {
-					value.className = 'font-bold text-red-700';
+					value.className = 'is-non-main-branch';
 				}
 				meta.appendChild(value);
 			});
@@ -77,7 +88,7 @@
 
 		if (Array.isArray(node?.children) && node.children.length > 0) {
 			const childList = document.createElement('ul');
-			childList.className = 'ml-4 border-l border-gray-200 pl-4';
+			childList.className = 'about-children';
 
 			node.children.forEach((child) => {
 				childList.appendChild(createNode(child));
@@ -96,9 +107,9 @@
 			return;
 		}
 
-		status.innerHTML = '<span class="size-4 animate-spin rounded-full border-2 border-blue-200 border-t-blue-800" aria-hidden="true"></span><span>Loading About information...</span>';
-		status.className = 'inline-flex items-center gap-2 text-gray-700';
-		container.classList.add('hidden');
+		status.innerHTML = '<span class="spinner spinner-on-muted" aria-hidden="true"></span><span>Loading About information...</span>';
+		status.className = 'about-status';
+		setHidden(container, true);
 		container.textContent = '';
 
 		try {
@@ -109,15 +120,16 @@
 
 			const root = await response.json();
 			const rootList = document.createElement('ul');
-			rootList.className = 'list-none';
+			rootList.className = 'about-tree';
 			rootList.appendChild(createNode(root));
 
 			container.appendChild(rootList);
-			container.classList.remove('hidden');
-			status.classList.add('hidden');
+			setHidden(container, false);
+			setHidden(status, true);
 		} catch {
 			status.textContent = 'Unable to load About information.';
-			status.className = 'text-red-700';
+			status.className = 'about-status is-error';
+			setHidden(status, false);
 		}
 	}
 
@@ -129,26 +141,21 @@
 		const aboutModalClose = document.getElementById('aboutModalClose');
 
 		function closeMenu() {
-			menu?.classList.add('hidden');
+			menu?.classList.remove('is-open');
 			menuButton?.setAttribute('aria-expanded', 'false');
 		}
 
 		function openMenu() {
-			menu?.classList.remove('hidden');
+			menu?.classList.add('is-open');
 			menuButton?.setAttribute('aria-expanded', 'true');
 		}
 
 		function isModalOpen() {
-			return !!aboutModal && !aboutModal.classList.contains('hidden');
+			return !!aboutModal && aboutModal.classList.contains('is-open');
 		}
 
 		function closeModal() {
-			if (!aboutModal) {
-				return;
-			}
-
-			aboutModal.classList.add('hidden');
-			aboutModal.classList.remove('flex');
+			aboutModal?.classList.remove('is-open');
 		}
 
 		function openModal() {
@@ -156,17 +163,16 @@
 				return;
 			}
 
-			aboutModal.classList.remove('hidden');
-			aboutModal.classList.add('flex');
+			aboutModal.classList.add('is-open');
 			loadAbout();
 		}
 
 		menuButton?.addEventListener('click', (event) => {
 			event.stopPropagation();
-			if (menu?.classList.contains('hidden')) {
-				openMenu();
-			} else {
+			if (menu?.classList.contains('is-open')) {
 				closeMenu();
+			} else {
+				openMenu();
 			}
 		});
 

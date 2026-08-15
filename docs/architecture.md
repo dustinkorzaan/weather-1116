@@ -199,18 +199,16 @@ and handlers, including:
 
 Parity is **behavioral/feature parity only**: the three UI projects (MVC, React,
 Blazor) expose the same routes, pages, features, data, and interactions. They are
-**not** required to look alike — each is styled independently with its own
-framework-native library:
+**not** required to look alike — each is styled independently:
 
 | UI | Styling / component library |
 | --- | --- |
 | React (`ui-react`) | Tailwind CSS v4 (Vite plugin) + shadcn/ui (Radix primitives) + lucide-react |
 | Blazor (`ui-blazor`) | Fluent UI Blazor |
-| MVC (`mvc-dotnet`) | Tailwind CSS v4 via the standalone Tailwind CLI + vanilla JS |
+| MVC (`mvc-dotnet`) | Hand-written CSS (`wwwroot/css/site.css`) + vanilla JS |
 
-React and MVC both use Tailwind, but they share **no** CSS, Tailwind config, or
-component source: each UI is implemented as if it were a standalone repo.
-Bootstrap is no longer used anywhere.
+Each UI is implemented as if it were a standalone repo: they share **no** CSS,
+component source, or frontend toolchain. Bootstrap is not used anywhere.
 
 For backend changes, keep MVC and API implementations aligned by duplicating
 equivalent backend logic in both projects.
@@ -245,9 +243,9 @@ site must render cleanly from small mobile browser widths (~320px) up through
 full desktop/full-screen widths, without relying on a separate mobile-only
 experience.
 
-Responsive behavior is satisfied per library (Tailwind flex/grid utilities in
-React and MVC, Fluent layout/`FluentGrid` in Blazor). The visual result differs by
-library; the behavior does not:
+Responsive behavior is satisfied per library (Tailwind flex/grid in React, Fluent
+layout/`FluentGrid` in Blazor, semantic CSS flex/grid in MVC). The visual result
+differs by library; the behavior does not:
 
 - A single fluid layout adapts at breakpoints rather than branching into
   distinct mobile/desktop templates.

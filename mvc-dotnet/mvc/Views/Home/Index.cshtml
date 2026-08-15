@@ -13,15 +13,14 @@
     var citiesJson = JsonSerializer.Serialize(mapCities);
 }
 
-<section class="flex min-h-0 w-full flex-1 flex-col" aria-label="Map">
+<section class="map-section" aria-label="Map">
     @if (string.IsNullOrWhiteSpace(mapsApiKey))
     {
-        <p class="px-4 py-2 text-red-700">
+        <p class="map-key-hint">
             Set <code>GOOGLE_MAPS_API_KEY</code> in appsettings (or env <code>GOOGLE_MAPS_API_KEY</code>) to enable Google Maps.
         </p>
     }
     <div id="weather-map"
-         class="min-h-0 w-full flex-1"
          data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"></div>
 </section>
 

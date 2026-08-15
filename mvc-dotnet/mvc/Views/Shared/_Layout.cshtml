@@ -8,7 +8,7 @@
     var workerHangfireUrl = $"{workerUrl}/hangfire";
 }
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,76 +21,76 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="flex h-full flex-col bg-white text-gray-900">
-    <header class="border-b border-gray-200 bg-white shadow-sm">
-        <nav class="flex items-center justify-between gap-3 px-3 py-2 sm:px-4">
-            <a class="flex min-w-0 items-center gap-2 no-underline" asp-area="" asp-controller="Home" asp-action="Index">
-                <img src="~/logo.svg" alt="Weather logo" class="h-6 w-6 shrink-0" />
-                <span class="truncate text-xl font-semibold text-gray-900">Weather MVC</span>
+<body>
+    <header class="site-header">
+        <nav class="site-nav">
+            <a class="brand-link" asp-area="" asp-controller="Home" asp-action="Index">
+                <img src="~/logo.svg" alt="Weather logo" class="brand-logo" />
+                <span class="brand-title">Weather MVC</span>
             </a>
 
-            <div class="relative">
+            <div class="avatar-wrap">
                 <button id="avatarMenuButton"
                         type="button"
-                        class="flex size-9 items-center justify-center rounded-full bg-blue-800 text-white hover:bg-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                        class="avatar-button"
                         aria-haspopup="true"
                         aria-expanded="false"
                         aria-controls="avatarMenu"
                         aria-label="Open user menu">
                     @* Lucide "user" icon (inline so the MVC app needs no icon package). *@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true" focusable="false">
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="avatar-icon" aria-hidden="true" focusable="false">
                         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                         <circle cx="12" cy="7" r="4" />
                     </svg>
                 </button>
 
                 <ul id="avatarMenu"
-                    class="absolute right-0 z-40 mt-2 hidden min-w-48 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+                    class="avatar-menu"
                     role="menu"
                     aria-labelledby="avatarMenuButton">
-                    <li role="none"><a class="block px-3 py-2 text-sm text-gray-800 no-underline hover:bg-gray-100" role="menuitem" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a></li>
-                    <li role="none"><a class="block px-3 py-2 text-sm text-gray-800 no-underline hover:bg-gray-100" role="menuitem" href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a></li>
-                    <li role="none"><a class="block px-3 py-2 text-sm text-gray-800 no-underline hover:bg-gray-100" role="menuitem" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a></li>
-                    <li role="none"><a class="block px-3 py-2 text-sm text-gray-800 no-underline hover:bg-gray-100" role="menuitem" href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a></li>
-                    <li role="separator"><hr class="my-1 border-gray-200" /></li>
+                    <li role="none"><a class="menu-item" role="menuitem" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a></li>
+                    <li role="none"><a class="menu-item" role="menuitem" href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a></li>
+                    <li role="none"><a class="menu-item" role="menuitem" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a></li>
+                    <li role="none"><a class="menu-item" role="menuitem" href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a></li>
+                    <li role="separator"><hr class="menu-separator" /></li>
                     <li role="none">
-                        <a class="block px-3 py-2 text-sm text-gray-800 no-underline hover:bg-gray-100" role="menuitem" href="/presentation">Presentation</a>
+                        <a class="menu-item" role="menuitem" href="/presentation">Presentation</a>
                     </li>
-                    <li role="separator"><hr class="my-1 border-gray-200" /></li>
+                    <li role="separator"><hr class="menu-separator" /></li>
                     <li role="none">
-                        <button id="aboutMenuItem" class="block w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100" type="button" role="menuitem">About</button>
+                        <button id="aboutMenuItem" class="menu-item" type="button" role="menuitem">About</button>
                     </li>
                 </ul>
             </div>
         </nav>
     </header>
 
-    <main role="main" class="flex min-h-0 flex-1 flex-col">
+    <main role="main" class="site-main">
         @RenderBody()
     </main>
 
-    <div id="aboutModal" class="fixed inset-0 z-50 hidden items-start justify-center bg-black/50 p-4 pt-16" role="presentation">
-        <div class="flex max-h-[calc(100vh-5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl"
+    <div id="aboutModal" class="about-modal" role="presentation">
+        <div class="about-dialog"
              role="dialog"
              aria-modal="true"
              aria-labelledby="aboutModalLabel">
-            <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-                <h5 id="aboutModalLabel" class="text-lg font-semibold">About</h5>
-                <button id="aboutModalClose" type="button" class="text-2xl leading-none text-gray-600 hover:text-gray-900" aria-label="Close">&times;</button>
+            <div class="about-dialog-header">
+                <h5 id="aboutModalLabel" class="about-dialog-title">About</h5>
+                <button id="aboutModalClose" type="button" class="about-close" aria-label="Close">&times;</button>
             </div>
-            <div class="min-h-16 overflow-y-auto px-5 py-4">
-                <p id="aboutStatus" class="inline-flex items-center gap-2 text-gray-700">
-                    <span class="size-4 animate-spin rounded-full border-2 border-blue-200 border-t-blue-800" aria-hidden="true"></span>
+            <div class="about-dialog-body">
+                <p id="aboutStatus" class="about-status">
+                    <span class="spinner spinner-on-muted" aria-hidden="true"></span>
                     <span>Loading About information...</span>
                 </p>
-                <div id="aboutTreeContainer" class="hidden"></div>
-                <div class="mt-4 flex flex-wrap gap-x-4 gap-y-3 border-t border-gray-200 pt-3 text-sm">
-                    <a class="text-blue-700 hover:underline" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
-                    <a class="text-blue-700 hover:underline" href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
-                    <a class="text-blue-700 hover:underline" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
-                    <a class="text-blue-700 hover:underline" href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
-                    <a class="text-blue-700 hover:underline" href="https://github.com/dustinkorzaan/weather-1116" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <div id="aboutTreeContainer" hidden></div>
+                <div class="about-links">
+                    <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
+                    <a href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
+                    <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
+                    <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
+                    <a href="https://github.com/dustinkorzaan/weather-1116" target="_blank" rel="noopener noreferrer">GitHub</a>
                 </div>
             </div>
         </div>

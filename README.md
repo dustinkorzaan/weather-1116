@@ -34,7 +34,7 @@ framework-native library (no shared CSS, config, or components):
 | --- | --- |
 | React | Tailwind CSS v4 (`@tailwindcss/vite`) + shadcn/ui (Radix) + lucide-react |
 | Blazor | Fluent UI Blazor |
-| MVC | Tailwind CSS v4 via the standalone Tailwind CLI ([`mvc-dotnet/README.md`](mvc-dotnet/README.md)) |
+| MVC | Hand-written CSS + vanilla JS ([`mvc-dotnet/README.md`](mvc-dotnet/README.md)) |
 
 ## Foundry console demos
 
