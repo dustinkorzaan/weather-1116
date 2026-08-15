@@ -5,6 +5,11 @@
 
 <PageTitle>Weather Razor</PageTitle>
 
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
 @{
     var uiReactUrl = Configuration["UI_REACT_URL"] ?? "http://localhost:3000";
     var mvcUrl = Configuration["MVC_URL"] ?? "http://localhost:8100";
@@ -14,120 +19,92 @@
     var workerHangfireUrl = $"{workerUrl}/hangfire";
 }
 
-<div class="page">
-    <header class="top-row">
-        <NavLink class="site-brand" href="" Match="NavLinkMatch.All">
-            <img src="logo.svg" alt="Weather logo" class="site-logo" />
-            <h1 class="site-title">Weather Blazor</h1>
-        </NavLink>
+<MudLayout>
+    <MudAppBar Color="Color.Surface" Elevation="1" Dense="true">
+        <MudLink Href="" Underline="Underline.None" Class="d-flex align-center gap-2 mud-inherit-text">
+            <img src="logo.svg" alt="Weather logo" width="22" height="22" />
+            <MudText Typo="Typo.h6" Class="text-truncate">Weather Blazor</MudText>
+        </MudLink>
 
-        <div class="avatar-menu" @onclick:stopPropagation="true">
-            <button type="button"
-                    class="avatar-button"
-                    aria-haspopup="true"
-                    aria-expanded="@_isMenuOpen.ToString().ToLowerInvariant()"
-                    aria-label="Open user menu"
-                    @onclick="ToggleMenu">
-                <svg viewBox="0 0 24 24" class="avatar-icon" aria-hidden="true" focusable="false">
-                    <circle cx="12" cy="8" r="4" fill="currentColor" />
-                    <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" fill="currentColor" />
-                </svg>
-            </button>
+        <MudSpacer />
 
-            @if (_isMenuOpen)
-            {
-                <div class="avatar-dropdown-backdrop" role="presentation" @onclick="CloseMenu"></div>
-                <ul class="avatar-dropdown" role="menu">
-                    <li role="none">
-                        <a class="avatar-dropdown-item" role="menuitem" href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
-                    </li>
-                    <li role="none">
-                        <a class="avatar-dropdown-item" role="menuitem" href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
-                    </li>
-                    <li role="none">
-                        <a class="avatar-dropdown-item" role="menuitem" href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
-                    </li>
-                    <li role="none">
-                        <a class="avatar-dropdown-item" role="menuitem" href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
-                    </li>
-                    <li role="separator" class="avatar-dropdown-divider"></li>
-                    <li role="none">
-                        <button type="button" role="menuitem" class="avatar-dropdown-item" @onclick="OpenAboutModal">
-                            About
-                        </button>
-                    </li>
-                </ul>
-            }
+        <MudMenu Icon="@Icons.Material.Filled.Person"
+                 Color="Color.Primary"
+                 Variant="Variant.Filled"
+                 Size="Size.Medium"
+                 AriaLabel="Open user menu"
+                 AnchorOrigin="Origin.BottomRight"
+                 TransformOrigin="Origin.TopRight">
+            <MudMenuItem Href="@uiReactUrl" Target="_blank">UI React</MudMenuItem>
+            <MudMenuItem Href="@mvcUrl" Target="_blank">MVC</MudMenuItem>
+            <MudMenuItem Href="@apiAboutUrl" Target="_blank">API About</MudMenuItem>
+            <MudMenuItem Href="@workerHangfireUrl" Target="_blank">Worker Hangfire</MudMenuItem>
+            <MudDivider />
+            <MudMenuItem Href="/presentation">Presentation</MudMenuItem>
+            <MudDivider />
+            <MudMenuItem OnClick="OpenAboutModal">About</MudMenuItem>
+        </MudMenu>
+    </MudAppBar>
+
+    <MudMainContent Class="d-flex flex-column" Style="height: 100vh; overflow-y: auto;">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+<MudDialog @bind-Visible="_isAboutModalOpen" Options="_aboutDialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">About</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_isAboutLoading)
+        {
+            <div class="d-flex align-center gap-3">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true" />
+                <MudText>Loading About information...</MudText>
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_aboutError))
+        {
+            <MudAlert Severity="Severity.Error">@_aboutError</MudAlert>
+        }
+        else if (_aboutRoot is not null)
+        {
+            <ul class="about-tree-list root">
+                <AboutTreeNode Node="_aboutRoot" />
+            </ul>
+        }
+
+        <MudDivider Class="my-4" />
+
+        <div class="d-flex flex-wrap gap-4">
+            <MudLink Href="@uiReactUrl" Target="_blank">UI React</MudLink>
+            <MudLink Href="@mvcUrl" Target="_blank">MVC</MudLink>
+            <MudLink Href="@apiAboutUrl" Target="_blank">API About</MudLink>
+            <MudLink Href="@workerHangfireUrl" Target="_blank">Worker Hangfire</MudLink>
+            <MudLink Href="https://github.com/dustinkorzaan/weather-1116" Target="_blank">GitHub</MudLink>
         </div>
-    </header>
-
-    <main>
-        <article class="content px-4">
-            <div class="content-inner">
-                @Body
-            </div>
-        </article>
-    </main>
-</div>
-
-@if (_isAboutModalOpen)
-{
-    <div class="about-modal-backdrop" role="presentation" @onclick="CloseAboutModal">
-        <div class="about-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="about-modal-title" @onclick:stopPropagation="true">
-            <div class="about-modal-header">
-                <h2 id="about-modal-title" class="about-modal-title">About</h2>
-                <button type="button" class="about-modal-close" aria-label="Close" @onclick="CloseAboutModal">&times;</button>
-            </div>
-            <div class="about-modal-body">
-                @if (_isAboutLoading)
-                {
-                    <p class="about-status loading">
-                        <span class="about-spinner" aria-hidden="true"></span>
-                        <span>Loading About information...</span>
-                    </p>
-                }
-                else if (!string.IsNullOrWhiteSpace(_aboutError))
-                {
-                    <p class="about-status error">@_aboutError</p>
-                }
-                else if (_aboutRoot is not null)
-                {
-                    <ul class="about-tree-list root">
-                        <AboutTreeNode Node="_aboutRoot" />
-                    </ul>
-                }
-                <div class="site-links-footer">
-                    <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
-                    <a href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
-                    <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
-                    <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
-                    <a href="https://github.com/dustinkorzaan/weather-1116" target="_blank" rel="noopener noreferrer">GitHub</a>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseAboutModal">Close</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    private bool _isMenuOpen;
+    private static readonly DialogOptions _aboutDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true,
+        CloseOnEscapeKey = true,
+    };
+
     private bool _isAboutModalOpen;
     private bool _isAboutLoading;
     private string _aboutError = string.Empty;
     private AboutNode? _aboutRoot;
 
-    private void ToggleMenu()
-    {
-        _isMenuOpen = !_isMenuOpen;
-    }
-
-    private void CloseMenu()
-    {
-        _isMenuOpen = false;
-    }
-
     private async Task OpenAboutModal()
     {
-        _isMenuOpen = false;
         _isAboutModalOpen = true;
         _isAboutLoading = true;
         _aboutError = string.Empty;

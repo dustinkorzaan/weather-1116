@@ -1,4 +1,5 @@
 using DotNetEnv;
+using MudBlazor.Services;
 using WeatherBlazor.Data;
 
 Env.TraversePath().Load();
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddMudServices();
 
 builder.Services.AddHttpClient<WeatherApiClient>(c =>
 {
