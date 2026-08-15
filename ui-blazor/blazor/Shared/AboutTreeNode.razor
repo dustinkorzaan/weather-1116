@@ -3,20 +3,20 @@
 
 @if (Node is not null)
 {
-    <li class="my-2">
-        <div class="d-flex flex-wrap align-center gap-2">
-            <MudText Typo="Typo.body1" Class="fw-bold">@(Node.Name ?? "Unnamed node")</MudText>
-            <span class="about-tree-health rounded-pill px-2 @(Node.IsHealthy ? "mud-theme-success" : "mud-theme-error")">
+    <li class="about-tree-item">
+        <div class="about-tree-row">
+            <strong>@(Node.Name ?? "Unnamed node")</strong>
+            <span class="about-tree-health @(Node.IsHealthy ? "healthy" : "unhealthy")">
                 @(Node.IsHealthy ? "Healthy" : "Unhealthy")
             </span>
         </div>
         @if (!string.IsNullOrWhiteSpace(Node.PublicMessage))
         {
-            <MudText Typo="Typo.caption" Class="mud-text-secondary">@Node.PublicMessage</MudText>
+            <div class="muted">@Node.PublicMessage</div>
         }
         @if (Node.BuildNumber.HasValue || Node.BuildStart.HasValue || !string.IsNullOrWhiteSpace(Node.BuildBranchName))
         {
-            <MudText Typo="Typo.caption" Class="d-block mud-text-secondary">
+            <div class="muted">
                 @if (Node.BuildNumber.HasValue)
                 {
                     <span>Build #@Node.BuildNumber</span>
@@ -35,9 +35,9 @@
                     {
                         <span> | </span>
                     }
-                    <span class="@(Node.BuildBranchName == "main" ? null : "mud-warning-text")">Branch @Node.BuildBranchName</span>
+                    <span class="@(Node.BuildBranchName == "main" ? null : "branch-warn")">Branch @Node.BuildBranchName</span>
                 }
-            </MudText>
+            </div>
         }
 
         @if (Node.Children.Count > 0)

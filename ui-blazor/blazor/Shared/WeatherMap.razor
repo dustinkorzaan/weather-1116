@@ -4,9 +4,9 @@
 <section class="weather-map-section" aria-label="Map">
     @if (string.IsNullOrWhiteSpace(_apiKey))
     {
-        <MudAlert Severity="Severity.Warning" Square="true" Dense="true">
+        <FluentMessageBar Intent="MessageIntent.Warning" AllowDismiss="false">
             Set GOOGLE_MAPS_API_KEY in appsettings (or env GOOGLE_MAPS_API_KEY) to enable Google Maps.
-        </MudAlert>
+        </FluentMessageBar>
     }
 
     @* Map is initialized by wwwroot/js/weatherMap.js from these data attributes.

@@ -5,7 +5,7 @@ using Bunit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using MudBlazor.Services;
+using Microsoft.FluentUI.AspNetCore.Components;
 using WeatherBlazor.Data;
 using WeatherBlazor.Shared;
 
@@ -46,7 +46,8 @@ public sealed class PageSplitTests
     {
         var context = new BunitContext();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
-        context.Services.AddMudServices();
+        context.Services.AddHttpClient();
+        context.Services.AddFluentUIComponents();
         context.Services.AddSingleton<IConfiguration>(
             new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>

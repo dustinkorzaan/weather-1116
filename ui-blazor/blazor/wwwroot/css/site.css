@@ -1,4 +1,100 @@
-/* Blazor UI is styled with MudBlazor. Only styles MudBlazor does not cover live here. */
+/* Blazor UI is styled with Fluent UI Blazor. Only styles Fluent does not cover live here. */
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.weather-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.weather-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: auto;
+    padding: 0;
+}
+
+.brand-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.presentation-page {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 1rem 1.25rem 2rem;
+    width: 100%;
+}
+
+.page-title {
+    margin: 0 0 0.35rem;
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+.section-title {
+    margin: 0 0 0.75rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.muted {
+    color: var(--neutral-foreground-hint, #616161);
+    font-size: 0.9rem;
+}
+
+.stack-gap {
+    margin: 0.75rem 0;
+}
+
+.weather-card,
+.chat-card {
+    margin-top: 1.25rem;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.form-row-end {
+    align-items: flex-end;
+}
+
+.weather-results {
+    margin-top: 1rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--neutral-foreground-hint, #616161);
+}
+
+.inline-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
 
 .about-tree-list {
     margin: 0.4rem 0 0;
@@ -10,11 +106,39 @@
     padding: 0.25rem 0 0 1.25rem;
 }
 
+.about-tree-item {
+    margin: 0.5rem 0;
+}
+
+.about-tree-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .about-tree-health {
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    border-radius: 999px;
+    padding: 0.15rem 0.5rem;
+}
+
+.about-tree-health.healthy {
+    background: #dff6dd;
+    color: #0e700e;
+}
+
+.about-tree-health.unhealthy {
+    background: #fde7e9;
+    color: #a4262c;
+}
+
+.branch-warn {
+    color: #8a6116;
+    font-weight: 600;
 }
 
 /* Map fills the viewport below the app bar. */
@@ -39,7 +163,18 @@
     white-space: nowrap;
 }
 
-/* Chat transcript: MudBlazor has no bubble list primitive. */
+.chat-section {
+    margin-top: 1.5rem;
+}
+
+.tab-description {
+    margin: 0.5rem 0 0;
+}
+
+.chat-form {
+    margin-top: 0.75rem;
+}
+
 .chat-messages {
     display: flex;
     flex-direction: column;
@@ -52,10 +187,41 @@
 
 .chat-message {
     max-width: 85%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    white-space: pre-wrap;
 }
 
-.chat-message-full {
+.chat-message.user {
+    align-self: flex-end;
+    background: #0f6cbd;
+    color: #fff;
+}
+
+.chat-message.assistant {
+    align-self: flex-start;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+}
+
+.chat-message.tool {
+    align-self: center;
+    background: #fff4ce;
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.chat-message.error {
     width: 100%;
+    max-width: none;
+    background: #fde7e9;
+    color: #a4262c;
+    border-radius: 0.4rem;
+}
+
+.error-title {
+    color: #a4262c;
 }
 
 #blazor-error-ui {

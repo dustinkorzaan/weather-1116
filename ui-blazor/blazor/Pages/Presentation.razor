@@ -4,75 +4,69 @@
 
 <PageTitle>Weather Razor - Presentation</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
-    <MudText Typo="Typo.h5" Class="mb-1">Weather Razor</MudText>
-    <MudText Typo="Typo.body1"><strong>@helloMessage</strong></MudText>
+<div class="presentation-page">
+    <h1 class="page-title">Weather Razor</h1>
+    <p><strong>@helloMessage</strong></p>
 
     @if (!string.IsNullOrWhiteSpace(errorMessage))
     {
-        <MudAlert Severity="Severity.Error" Class="my-3">@errorMessage</MudAlert>
+        <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@errorMessage</FluentMessageBar>
     }
 
-    <MudCard Class="my-4" Outlined="true">
-        <MudCardContent>
-            <MudText Typo="Typo.h6" Class="mb-3">Current AI Weather</MudText>
+    <FluentCard Class="weather-card">
+        <h2 class="section-title">Current AI Weather</h2>
 
-            <EditForm Model="this" OnValidSubmit="GetCurrentAIWeather" @onsubmit:preventDefault="true">
-                <div class="d-flex flex-wrap align-end gap-4">
-                    <MudTextField @bind-Value="location"
-                                  Label="Location"
-                                  Variant="Variant.Outlined"
-                                  Margin="Margin.Dense"
-                                  Disabled="isAiWeatherLoading"
-                                  Style="flex: 1 1 12rem; max-width: 20rem;" />
-                    <MudButton ButtonType="ButtonType.Submit"
-                               Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               Disabled="isAiWeatherLoading"
-                               StartIcon="@(isAiWeatherLoading ? null : Icons.Material.Filled.Cloud)">
-                        @if (isAiWeatherLoading)
-                        {
-                            <MudProgressCircular Color="Color.Inherit" Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                        }
-                        <span>Get Current AI Weather</span>
-                    </MudButton>
-                </div>
-            </EditForm>
+        <EditForm Model="this" OnValidSubmit="GetCurrentAIWeather" @onsubmit:preventDefault="true">
+            <div class="form-row">
+                <FluentTextField @bind-Value="location"
+                                 Label="Location"
+                                 Disabled="isAiWeatherLoading"
+                                 Style="flex: 1 1 12rem; max-width: 20rem;" />
+                <FluentButton Type="ButtonType.Submit"
+                              Appearance="Appearance.Accent"
+                              Disabled="isAiWeatherLoading">
+                    @if (isAiWeatherLoading)
+                    {
+                        <FluentProgressRing Width="16px" Stroke="ProgressStroke.Small" Style="margin-inline-end: 0.5rem;" />
+                    }
+                    <span>Get Current AI Weather</span>
+                </FluentButton>
+            </div>
+        </EditForm>
 
-            @if (!string.IsNullOrWhiteSpace(aiWeatherError))
-            {
-                <MudAlert Severity="Severity.Error" Class="mt-3">@aiWeatherError</MudAlert>
-            }
+        @if (!string.IsNullOrWhiteSpace(aiWeatherError))
+        {
+            <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@aiWeatherError</FluentMessageBar>
+        }
 
-            @if (aiWeather is not null && !isAiWeatherLoading)
-            {
-                <div class="mt-4">
-                    <MudText Typo="Typo.body1" Class="mb-3">@aiWeather.FullSummary</MudText>
-                    <MudGrid Spacing="2">
-                        <MudItem xs="12" sm="6">
-                            <MudText Typo="Typo.caption">Temperature F</MudText>
-                            <MudText Typo="Typo.body1">@aiWeather.TemperatureF</MudText>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudText Typo="Typo.caption">Wind Speed MPH</MudText>
-                            <MudText Typo="Typo.body1">@aiWeather.WindSpeedMPH</MudText>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudText Typo="Typo.caption">Wind Direction</MudText>
-                            <MudText Typo="Typo.body1">@aiWeather.WindDirection</MudText>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudText Typo="Typo.caption">Conditions</MudText>
-                            <MudText Typo="Typo.body1">@aiWeather.Conditions</MudText>
-                        </MudItem>
-                    </MudGrid>
-                </div>
-            }
-        </MudCardContent>
-    </MudCard>
+        @if (aiWeather is not null && !isAiWeatherLoading)
+        {
+            <div class="weather-results">
+                <p>@aiWeather.FullSummary</p>
+                <FluentGrid Spacing="2">
+                    <FluentGridItem xs="12" sm="6">
+                        <div class="stat-label">Temperature F</div>
+                        <div>@aiWeather.TemperatureF</div>
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="6">
+                        <div class="stat-label">Wind Speed MPH</div>
+                        <div>@aiWeather.WindSpeedMPH</div>
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="6">
+                        <div class="stat-label">Wind Direction</div>
+                        <div>@aiWeather.WindDirection</div>
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="6">
+                        <div class="stat-label">Conditions</div>
+                        <div>@aiWeather.Conditions</div>
+                    </FluentGridItem>
+                </FluentGrid>
+            </div>
+        }
+    </FluentCard>
 
     <ChatPanel />
-</MudContainer>
+</div>
 
 @code {
     private string helloMessage = "Loading hello message...";

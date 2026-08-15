@@ -205,7 +205,7 @@ framework-native library:
 | UI | Styling / component library |
 | --- | --- |
 | React (`ui-react`) | Tailwind CSS v4 (Vite plugin) + shadcn/ui (Radix primitives) + lucide-react |
-| Blazor (`ui-blazor`) | MudBlazor (Material Design) |
+| Blazor (`ui-blazor`) | Fluent UI Blazor |
 | MVC (`mvc-dotnet`) | Tailwind CSS v4 via the standalone Tailwind CLI + vanilla JS |
 
 React and MVC both use Tailwind, but they share **no** CSS, Tailwind config, or
@@ -233,7 +233,7 @@ The former `/chat` route is removed from all three UIs (the chat backends
 `/presentation`).
 
 The avatar menu is a person icon (lucide `user` in React/MVC,
-`Icons.Material.Filled.Person` in Blazor) and its items are ordered:
+Fluent `Person` in Blazor) and its items are ordered:
 cross-UI external links (UI React / UI Blazor / MVC, API About, Worker Hangfire)
 → divider → **Presentation** (internal link to `/presentation`) → divider →
 **About** (dialog/modal).
@@ -246,7 +246,7 @@ full desktop/full-screen widths, without relying on a separate mobile-only
 experience.
 
 Responsive behavior is satisfied per library (Tailwind flex/grid utilities in
-React and MVC, `MudGrid`/Mud layout in Blazor). The visual result differs by
+React and MVC, Fluent layout/`FluentGrid` in Blazor). The visual result differs by
 library; the behavior does not:
 
 - A single fluid layout adapts at breakpoints rather than branching into

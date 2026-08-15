@@ -1,59 +1,48 @@
 @using WeatherBlazor.Data
 @inject ChatApiClient ChatClient
 
-<div class="mt-6">
-    <MudText Typo="Typo.h6">Chat Clients</MudText>
-    <MudText Typo="Typo.body2" Class="mb-3 mud-text-secondary">
+<div class="chat-section">
+    <h2 class="section-title">Chat Clients</h2>
+    <p class="muted">
         Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
-    </MudText>
+    </p>
 
-    <MudButtonGroup Variant="Variant.Outlined" Color="Color.Primary" OverrideStyles="false" role="tablist" aria-label="Chat client tabs">
+    <FluentTabs @bind-ActiveTabId="_activeTab">
         @foreach (var tab in _tabs)
         {
-            <MudButton Variant="@(tab.Id == _activeTab ? Variant.Filled : Variant.Outlined)"
-                       Color="Color.Primary"
-                       role="tab"
-                       aria-selected="@(tab.Id == _activeTab)"
-                       OnClick="@(() => SetActiveTab(tab.Id))">
-                @tab.Label
-            </MudButton>
+            <FluentTab Id="@tab.Id" Label="@tab.Label"></FluentTab>
         }
-    </MudButtonGroup>
+    </FluentTabs>
 
-    <MudText Typo="Typo.body2" Class="mt-2 mud-text-secondary">@_tabs.First(tab => tab.Id == _activeTab).Description</MudText>
+    <p class="muted tab-description">@_tabs.First(tab => tab.Id == _activeTab).Description</p>
 
-    <MudPaper Outlined="true" Class="mt-3 pa-3" aria-label="Chat conversation">
+    <FluentCard Class="chat-card" aria-label="Chat conversation">
         <div class="chat-messages">
             @foreach (var entry in _histories[_activeTab])
             {
-                <MudPaper Elevation="0"
-                          Class="@MessageClass(entry.Role)"
-                          Style="white-space: pre-wrap;">
-                    @entry.Content
-                </MudPaper>
+                <div class="@MessageClass(entry.Role)">@entry.Content</div>
             }
         </div>
 
-        <EditForm Model="this" OnValidSubmit="OnSubmit" class="mt-3" @onsubmit:preventDefault="true">
-            <div class="d-flex flex-column flex-sm-row align-end gap-3">
-                @* Class="chat-input" lets chatInput.js bind the inner textarea for Enter-to-send. *@
-                <MudTextField @bind-Value="_input"
-                              Class="chat-input"
-                              Label="Message"
-                              Placeholder="Ask about weather in a city…"
-                              Variant="Variant.Outlined"
-                              Lines="3"
-                              Immediate="true"
-                              Disabled="IsActiveTabSending" />
-                <MudButton ButtonType="ButtonType.Submit"
-                           Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Disabled="IsActiveTabSending">
+        <EditForm Model="this" OnValidSubmit="OnSubmit" class="chat-form" @onsubmit:preventDefault="true">
+            <div class="form-row form-row-end">
+                @* Class="chat-input" lets chatInput.js bind the inner textarea (including shadow DOM). *@
+                <FluentTextArea @bind-Value="_input"
+                                Class="chat-input"
+                                Label="Message"
+                                Placeholder="Ask about weather in a city…"
+                                Rows="3"
+                                Immediate="true"
+                                Disabled="IsActiveTabSending"
+                                Style="flex: 1 1 12rem;" />
+                <FluentButton Type="ButtonType.Submit"
+                              Appearance="Appearance.Accent"
+                              Disabled="IsActiveTabSending">
                     @(IsActiveTabSending ? "Sending…" : "Send")
-                </MudButton>
+                </FluentButton>
             </div>
         </EditForm>
-    </MudPaper>
+    </FluentCard>
 </div>
 
 @code {
@@ -103,14 +92,12 @@
         public bool Running { get; set; }
     }
 
-    private void SetActiveTab(string tabId) => _activeTab = tabId;
-
     private static string MessageClass(string role) => role switch
     {
-        "user" => "chat-message align-self-end mud-theme-primary py-2 px-3 rounded-lg",
-        "tool" => "chat-message align-self-center mud-theme-warning py-1 px-3 rounded-pill",
-        "error" => "chat-message-full mud-theme-error py-2 px-3 rounded",
-        _ => "chat-message align-self-start mud-border-lines-default border-solid border-2 py-2 px-3 rounded-lg",
+        "user" => "chat-message user",
+        "tool" => "chat-message tool",
+        "error" => "chat-message error",
+        _ => "chat-message assistant",
     };
 
     private async Task OnSubmit()
