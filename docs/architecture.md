@@ -61,7 +61,7 @@ All three UIs expose **Current AI Weather**. The request path differs by stack:
 
 ## Chat Clients (Chat1a–Chat2b)
 
-Separate from **Current AI Weather**. All three UIs expose a dedicated chat page with four tabs:
+Separate from **Current AI Weather**. All three UIs expose a chat panel on `/presentation` with four tabs:
 
 | Tab | Stack | Tools |
 | --- | --- | --- |
@@ -77,7 +77,7 @@ Full detail: [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-cli
 
 ```mermaid
 flowchart LR
-  UI[React / Blazor / MVC chat page]
+  UI[React / Blazor / MVC /presentation chat panel]
   API[MVC or WeatherAPI Chat controllers]
   Core[Core.Chat1a…2b services]
   Model[Azure OpenAI Responses]
