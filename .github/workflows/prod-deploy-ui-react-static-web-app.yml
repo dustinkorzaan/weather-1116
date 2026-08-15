@@ -26,7 +26,9 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Record build start time
-        run: echo "BUILD_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+        id: build_start
+        shell: bash
+        run: echo "build_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v7
         with:
@@ -49,7 +51,7 @@ jobs:
           VITE_WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           VITE_BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
-          VITE_BUILD_START: ${{ env.BUILD_START }}
+          VITE_BUILD_START: ${{ steps.build_start.outputs.build_start }}
           VITE_BUILD_BRANCH_NAME: ${{ env.BUILD_BRANCH_NAME }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_UI_REACT_TOKEN }}
