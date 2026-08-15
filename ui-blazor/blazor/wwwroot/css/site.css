@@ -5,17 +5,31 @@ html, body {
     margin: 0;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+}
+
 .weather-shell {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
     height: 100%;
+    width: 100%;
 }
 
-.weather-body {
+/* FluentBodyContent sets align-items: flex-start and height: 100% (specificity
+   .body-content[b-*]). flex-start + a child with width: 100% collapses the map
+   to 0px wide, which is why prod home looked like an empty white page. */
+.layout.weather-shell > .body-content.weather-body {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
+    align-items: stretch;
     min-height: 0;
+    height: auto;
+    width: 100%;
     overflow: auto;
     padding: 0;
 }
@@ -146,13 +160,17 @@ html, body {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
+    align-self: stretch;
     min-height: 0;
+    width: 100%;
 }
 
 .weather-map {
     flex: 1 1 auto;
+    align-self: stretch;
     min-height: 0;
     width: 100%;
+    height: 100%;
     background-color: #0b111d;
 }
 

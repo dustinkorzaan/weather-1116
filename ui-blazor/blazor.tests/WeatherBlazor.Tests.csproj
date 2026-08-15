@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\blazor\WeatherBlazor.csproj" />
+    <Content Include="..\blazor\wwwroot\css\site.css" CopyToOutputDirectory="PreserveNewest" Link="site.css" />
   </ItemGroup>
 
 </Project>
