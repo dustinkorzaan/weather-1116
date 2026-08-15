@@ -48,8 +48,8 @@ public sealed class LayoutCssTests
         Assert.Contains("class=\"layout weather-shell\"", rendered.Markup);
         Assert.Contains("body-content weather-body", rendered.Markup);
         Assert.Contains("class=\"brand-title\"", rendered.Markup);
+        Assert.Contains("<a href=\"/\" class=\"brand-link\">", rendered.Markup);
         Assert.Contains("<h1 class=\"brand-title\">Weather Blazor</h1>", rendered.Markup);
-        Assert.DoesNotContain("fluent-anchor", rendered.Markup);
         Assert.Contains("stroke-width=\"2.25\"", rendered.Markup);
     }
 
