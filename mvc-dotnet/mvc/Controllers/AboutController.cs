@@ -18,21 +18,21 @@ public class AboutController(
             $"{configuration["WORKER_DOTNET_URL"]}/About",
             "Worker Root",
             cancellationToken);
-        var mcpDotNetTask = aboutClient.GetAsync(
-            $"{configuration["MCP_APP_URL"]}/About",
-            "mcp-dotnet",
+        var mcpSrvAppServiceTask = aboutClient.GetAsync(
+            $"{configuration["MCP_SRV_APP_SERVICE_URL"]}/About",
+            "mcp-srv-app-service",
             cancellationToken);
-        var mcpFunctionTask = aboutClient.GetAsync(
-            $"{configuration["MCP_FUNCTION_URL"]}/About",
-            "mcp-function",
+        var mcpSrvFuncAppTask = aboutClient.GetAsync(
+            $"{configuration["MCP_SRV_FUNC_APP_URL"]}/About",
+            "mcp-srv-func-app",
             cancellationToken);
 
-        await Task.WhenAll(workerDotNetTask, mcpDotNetTask, mcpFunctionTask);
+        await Task.WhenAll(workerDotNetTask, mcpSrvAppServiceTask, mcpSrvFuncAppTask);
 
         var root = AboutTreeBuilder.BuildMvcRoot(
             await workerDotNetTask,
-            await mcpDotNetTask,
-            await mcpFunctionTask);
+            await mcpSrvAppServiceTask,
+            await mcpSrvFuncAppTask);
         return Ok(root);
     }
 }

@@ -1,4 +1,4 @@
-# mcp-dotnet .gitignore
+# mcp-srv-app-service .gitignore
 
 # Build results
 bin/

@@ -5,7 +5,7 @@ using Core.Weather.Models;
 using MediatR;
 using ModelContextProtocol.Server;
 
-namespace WeatherMcpDotNet;
+namespace WeatherMcpSrvAppService;
 
 /// <summary>
 /// MCP tool that fetches public current weather via Core/MediatR.

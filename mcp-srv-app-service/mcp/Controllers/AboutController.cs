@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ModelContextProtocol.Server;
 
-namespace WeatherMcpDotNet.Controllers;
+namespace WeatherMcpSrvAppService.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -16,10 +16,10 @@ public sealed class AboutController(
     public ActionResult<AboutNode> Get()
     {
         const string expectedTool = "GetPublicWeatherData";
-        var mcpAppKey = configuration["MCP_APP_KEY"];
-        var isHealthy = !string.IsNullOrWhiteSpace(mcpAppKey) && tools.Any(tool =>
+        var mcpSrvAppServiceKey = configuration["MCP_SRV_APP_SERVICE_KEY"];
+        var isHealthy = !string.IsNullOrWhiteSpace(mcpSrvAppServiceKey) && tools.Any(tool =>
             string.Equals(tool.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
 
-        return Ok(AboutTreeBuilder.BuildMcpDotNetNode(isHealthy));
+        return Ok(AboutTreeBuilder.BuildMcpSrvAppServiceNode(isHealthy));
     }
 }

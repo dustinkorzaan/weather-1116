@@ -18,21 +18,21 @@ public static class AboutTreeBuilder
         => BuildRoot("MVC Root", BuildMvcNode(), BuildApiRoot(dependencyNodes));
 
     /// <summary>
-    /// Single leaf node for the MCP DotNet host (no children).
+    /// Single leaf node for the MCP Server on App Service host (no children).
     /// </summary>
-    public static AboutNode BuildMcpDotNetNode(bool isHealthy = true)
+    public static AboutNode BuildMcpSrvAppServiceNode(bool isHealthy = true)
     {
-        var node = CreateNode("mcp-dotnet");
+        var node = CreateNode("mcp-srv-app-service");
         node.IsHealthy = isHealthy;
         return node;
     }
 
     /// <summary>
-    /// Single leaf node for the MCP Function host (no children).
+    /// Single leaf node for the MCP Server on Functions App host (no children).
     /// </summary>
-    public static AboutNode BuildMcpFunctionNode(bool isHealthy = true)
+    public static AboutNode BuildMcpSrvFuncAppNode(bool isHealthy = true)
     {
-        var node = CreateNode("mcp-function");
+        var node = CreateNode("mcp-srv-func-app");
         node.IsHealthy = isHealthy;
         return node;
     }

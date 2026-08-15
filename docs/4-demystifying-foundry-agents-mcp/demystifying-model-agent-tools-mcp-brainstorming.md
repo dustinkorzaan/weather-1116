@@ -163,8 +163,8 @@ name. Your code still runs them.”
 
 ### 7. MCP enters — tools live on another server
 
-MCP is the **wire** between agent runtime and tool hosts (this repo: `mcp-function`,
-`mcp-dotnet`).
+MCP is the **wire** between agent runtime and tool hosts (this repo: `mcp-srv-func-app`,
+`mcp-srv-app-service`).
 
 ```mermaid
 flowchart TD
@@ -327,8 +327,8 @@ flowchart LR
         R2[tool ref: weather]
     end
     subgraph Runtime["At runtime"]
-        R1 --> S1[mcp-function host]
-        R2 --> S2[mcp-dotnet host]
+        R1 --> S1[mcp-srv-func-app host]
+        R2 --> S2[mcp-srv-app-service host]
     end
 ```
 

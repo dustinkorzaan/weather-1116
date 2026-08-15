@@ -122,24 +122,24 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build mcp function",
+            "label": "build mcp srv func app",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/mcp-function/mcp/WeatherMcpFunction.csproj",
+                "${workspaceFolder}/mcp-srv-func-app/mcp/WeatherMcpSrvFuncApp.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish mcp function",
+            "label": "publish mcp srv func app",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/mcp-function/mcp/WeatherMcpFunction.csproj",
+                "${workspaceFolder}/mcp-srv-func-app/mcp/WeatherMcpSrvFuncApp.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -150,45 +150,45 @@
             "label": "func: host start",
             "command": "host start --port 8120",
             "options": {
-                "cwd": "${workspaceFolder}/mcp-function/mcp/bin/Debug/net10.0"
+                "cwd": "${workspaceFolder}/mcp-srv-func-app/mcp/bin/Debug/net10.0"
             },
             "isBackground": true,
-            "dependsOn": "build mcp function",
+            "dependsOn": "build mcp srv func app",
             "problemMatcher": "$func-dotnet-watch"
         },
         {
-            "label": "build mcp dotnet",
+            "label": "build mcp srv app service",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/mcp-dotnet/mcp/WeatherMcpDotNet.csproj",
+                "${workspaceFolder}/mcp-srv-app-service/mcp/WeatherMcpSrvAppService.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish mcp dotnet",
+            "label": "publish mcp srv app service",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/mcp-dotnet/mcp/WeatherMcpDotNet.csproj",
+                "${workspaceFolder}/mcp-srv-app-service/mcp/WeatherMcpSrvAppService.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "watch mcp dotnet",
+            "label": "watch mcp srv app service",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/mcp-dotnet/mcp/WeatherMcpDotNet.csproj"
+                "${workspaceFolder}/mcp-srv-app-service/mcp/WeatherMcpSrvAppService.csproj"
             ],
             "problemMatcher": "$msCompile"
         },

@@ -17,13 +17,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api.tests", "api.tests", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherAPI.Tests", "api-dotnet\api.tests\WeatherAPI.Tests.csproj", "{DFF4E329-4BC4-4A02-B1F1-67153CF7CFEB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp-function", "mcp-function", "{8B9FDB55-B235-7FC9-E677-CC22ECA932D6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp-srv-func-app", "mcp-srv-func-app", "{8B9FDB55-B235-7FC9-E677-CC22ECA932D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMcpFunction", "mcp-function\mcp\WeatherMcpFunction.csproj", "{5962B838-3248-4190-8626-F643A95D52B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMcpSrvFuncApp", "mcp-srv-func-app\mcp\WeatherMcpSrvFuncApp.csproj", "{5962B838-3248-4190-8626-F643A95D52B9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp-dotnet", "mcp-dotnet", "{8B400B21-9EDA-E0E5-5A84-5119AB2EF6E8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp-srv-app-service", "mcp-srv-app-service", "{8B400B21-9EDA-E0E5-5A84-5119AB2EF6E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMcpDotNet", "mcp-dotnet\mcp\WeatherMcpDotNet.csproj", "{DD9CDF0F-584C-4439-9357-0AB7CFB098D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMcpSrvAppService", "mcp-srv-app-service\mcp\WeatherMcpSrvAppService.csproj", "{DD9CDF0F-584C-4439-9357-0AB7CFB098D4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core-dotnet", "core-dotnet", "{1CAA8A21-A73B-64F8-E408-65F262DF1FF4}"
 EndProject
@@ -69,11 +69,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMVC.Tests", "mvc-dot
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp.tests", "mcp.tests", "{A0AFDFE4-2DBE-6784-9E69-E803C849C803}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMcpDotNet.Tests", "mcp-dotnet\mcp.tests\WeatherMcpDotNet.Tests.csproj", "{C3842665-CFDD-4247-A50F-A08892912695}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMcpSrvAppService.Tests", "mcp-srv-app-service\mcp.tests\WeatherMcpSrvAppService.Tests.csproj", "{C3842665-CFDD-4247-A50F-A08892912695}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp.tests", "mcp.tests", "{9BF425AA-6E84-2D00-C9C2-CEF846ABAB1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMcpFunction.Tests", "mcp-function\mcp.tests\WeatherMcpFunction.Tests.csproj", "{8DBB54F7-9E0C-4A7C-9ADB-34DF630C51EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherMcpSrvFuncApp.Tests", "mcp-srv-func-app\mcp.tests\WeatherMcpSrvFuncApp.Tests.csproj", "{8DBB54F7-9E0C-4A7C-9ADB-34DF630C51EE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV4", "FoundryConsoleV4", "{0012149F-B1CE-45F7-DBD6-F14A33B9E099}"
 EndProject

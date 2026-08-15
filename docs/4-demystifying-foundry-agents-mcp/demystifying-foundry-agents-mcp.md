@@ -138,10 +138,10 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       autonumber
       participant Console
       participant Model as Foundry Model
-      box MCP Function
+      box MCP Server on Functions App
           participant GetLatLongTool
       end
-      box MCP DotNet
+      box MCP Server on App Service
           participant GetPublicWeatherTool
       end
 
@@ -161,10 +161,10 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant Console
       participant AppLoop as Agent/Loop
       participant Model as Foundry Model
-      box MCP Function
+      box MCP Server on Functions App
           participant GetLatLongTool
       end
-      box MCP DotNet
+      box MCP Server on App Service
           participant GetPublicWeatherTool
       end
 
@@ -186,7 +186,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   (`FoundryConsoleV5Agent.csproj`)
   - Agent-hosted alternative to V4: calls a **hosted Foundry agent**
     (`wx1116-agent-default` by default).
-  - Instructions, response schema, and MCP tools (`mcp-function`, `mcp-dotnet`)
+  - Instructions, response schema, and MCP tools (`mcp-srv-func-app`, `mcp-srv-app-service`)
     are configured on the agent in Azure.
   - The console sends **only the user prompt** — Responses `instructions` and
     `text` fields are rejected when an agent is specified.
@@ -198,10 +198,10 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       autonumber
       participant Console
       participant Agent as Foundry Agent
-      box MCP Function
+      box MCP Server on Functions App
           participant GetLatLongTool
       end
-      box MCP DotNet
+      box MCP Server on App Service
           participant GetPublicWeatherTool
       end
 
@@ -221,10 +221,10 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant Console
       participant Agent as Foundry Agent
       participant Model as Foundry Model
-      box MCP Function
+      box MCP Server on Functions App
           participant GetLatLongTool
       end
-      box MCP DotNet
+      box MCP Server on App Service
           participant GetPublicWeatherTool
       end
 

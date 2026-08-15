@@ -1,9 +1,9 @@
 {
-    "azureFunctions.projectSubpath": "mcp-function/mcp",
+    "azureFunctions.projectSubpath": "mcp-srv-func-app/mcp",
     "azureFunctions.projectLanguage": "C#",
     "azureFunctions.projectRuntime": "~4",
-    "azureFunctions.preDeployTask": "publish mcp function",
-    "azureFunctions.deploySubpath": "mcp-function/mcp/bin/Release/net10.0/publish"
+    "azureFunctions.preDeployTask": "publish mcp srv func app",
+    "azureFunctions.deploySubpath": "mcp-srv-func-app/mcp/bin/Release/net10.0/publish"
     // "dotnet.defaultSolution": "Weather.sln",
     // "@azure.argTenant": "",
     // "chat.tools.terminal.autoApprove": {
