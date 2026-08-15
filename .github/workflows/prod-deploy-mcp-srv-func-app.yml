@@ -1,5 +1,5 @@
-name: cicd-weather1116-prod-mcpsrv-funcapp
-run-name: CICD weather1116-prod-mcpsrv-funcapp
+name: cicd-weather1116-prod-mcp-srv-func-app
+run-name: CICD weather1116-prod-mcp-srv-func-app
 
 on:
   workflow_run:
@@ -110,14 +110,14 @@ jobs:
         uses: azure/cli@v3
         with:
           inlineScript: |
-            APP_RG=$(az functionapp list --query "[?name=='weather1116-prod-mcpsrv-funcapp'].resourceGroup | [0]" -o tsv)
+            APP_RG=$(az functionapp list --query "[?name=='weather1116-prod-mcp-srv-func-app'].resourceGroup | [0]" -o tsv)
             if [ -z "$APP_RG" ]; then
-              echo "Could not resolve resource group for weather1116-prod-mcpsrv-funcapp" >&2
+              echo "Could not resolve resource group for weather1116-prod-mcp-srv-func-app" >&2
               exit 1
             fi
 
             az functionapp config appsettings set \
-              --name weather1116-prod-mcpsrv-funcapp \
+              --name weather1116-prod-mcp-srv-func-app \
               --resource-group "$APP_RG" \
               --settings \
                 AZURE_FUNCTIONS_ENVIRONMENT=Production \
@@ -129,7 +129,7 @@ jobs:
         id: deploy-to-functionapp
         uses: Azure/functions-action@v1
         with:
-          app-name: 'weather1116-prod-mcpsrv-funcapp'
+          app-name: 'weather1116-prod-mcp-srv-func-app'
           slot-name: 'Production'
           package: ${{ github.workspace }}/publish/mcp-srv-func-app
           

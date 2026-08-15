@@ -130,9 +130,9 @@ MediatR handlers the sample uses in-process elsewhere.
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
 
-Prod apps: `weather1116-prod-mcpsrv-appservice`, `weather1116-prod-mcpsrv-funcapp`
-(`weather1116-prod-mcpsrv-appservice-a2ejcbfah9dsf8dj.westus2-01.azurewebsites.net`,
-`weather1116-prod-mcpsrv-funcapp-e6dhhhbfhuatfvbh.westus2-01.azurewebsites.net`; see
+Prod apps: `weather1116-prod-mcp-srv-app-service`, `weather1116-prod-mcp-srv-func-app`
+(`weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3du.westus2-01.azurewebsites.net`,
+`weather1116-prod-mcp-srv-func-app-b3a6f0cmhqcya3bw.westus2-01.azurewebsites.net`; see
 `prod-deploy-mcp-*.yml`).
 
 Auth examples:
