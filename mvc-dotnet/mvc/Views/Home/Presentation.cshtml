@@ -4,12 +4,16 @@
 }
 
 <div class="page-shell">
-    @if (!string.IsNullOrWhiteSpace(helloResponse))
-    {
-        <p class="hello-message">@helloResponse</p>
-    }
+    <section class="hello-section" aria-labelledby="hello-world-heading">
+        <h2 id="hello-world-heading" class="section-heading">Hello World</h2>
+        @if (!string.IsNullOrWhiteSpace(helloResponse))
+        {
+            <p class="hello-message">@helloResponse</p>
+        }
+    </section>
 
-    <section class="weather-card" aria-label="Current AI weather">
+    <section class="weather-card" aria-labelledby="current-ai-weather-heading">
+        <h2 id="current-ai-weather-heading" class="section-heading">Current AI Weather</h2>
         <form id="ai-weather-form" class="weather-form">
             <label class="field-label" for="ai-weather-location">Location:</label>
             <input id="ai-weather-location"
@@ -19,8 +23,8 @@
                    autocomplete="address-level2" />
             <button id="ai-weather-button"
                     type="submit"
-                    class="btn-primary">
-                <span id="ai-weather-spinner" class="spinner spinner-on-primary" hidden aria-hidden="true"></span>
+                    class="btn">
+                <span id="ai-weather-spinner" class="spinner spinner-on-muted" hidden aria-hidden="true"></span>
                 <span>Get Current AI Weather</span>
             </button>
         </form>

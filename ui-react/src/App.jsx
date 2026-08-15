@@ -100,7 +100,7 @@ function SiteLinksFooter() {
       {siteLinks.map((link) => (
         <a
           key={link.label}
-          className="text-blue-700 hover:underline"
+          className="text-gray-700 hover:underline"
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
@@ -109,7 +109,7 @@ function SiteLinksFooter() {
         </a>
       ))}
       <a
-        className="text-blue-700 hover:underline"
+        className="text-gray-700 hover:underline"
         href="https://github.com/dustinkorzaan/weather-1116"
         target="_blank"
         rel="noopener noreferrer"
@@ -142,11 +142,12 @@ function App() {
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
+                variant="outline"
                 size="icon"
                 aria-label="Open user menu"
-                className="size-9 rounded-full bg-blue-800 text-white hover:bg-blue-900"
+                className="size-9 rounded-full border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700"
               >
-                <User className="size-5" aria-hidden="true" />
+                <User className="size-5" strokeWidth={1.75} aria-hidden="true" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-44">
@@ -184,7 +185,7 @@ function App() {
             {aboutQuery.isFetching && (
               <p className="inline-flex items-center gap-2 text-gray-700">
                 <span
-                  className="size-4 animate-spin rounded-full border-2 border-blue-200 border-t-blue-800"
+                  className="size-4 animate-spin rounded-full border-2 border-gray-200 border-t-gray-600"
                   aria-hidden="true"
                 />
                 <span>Loading About information...</span>

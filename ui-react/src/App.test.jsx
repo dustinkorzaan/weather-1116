@@ -52,6 +52,15 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+test('user menu is a gray outline control instead of a solid blue button', () => {
+  mockHelloFetch();
+  renderApp('/');
+
+  const button = screen.getByRole('button', { name: /open user menu/i });
+  expect(button.className).not.toMatch(/bg-blue/);
+  expect(button.className).toMatch(/border/);
+});
+
 test('renders the map on the home route without presentation content', () => {
   mockHelloFetch();
   renderApp('/');
@@ -59,6 +68,8 @@ test('renders the map on the home route without presentation content', () => {
   expect(screen.getByRole('region', { name: /map/i })).toBeDefined();
   expect(screen.queryByText('Hello from test API.')).toBeNull();
   expect(screen.queryByRole('heading', { name: /chat clients/i })).toBeNull();
+  expect(screen.queryByRole('heading', { name: /^hello world$/i })).toBeNull();
+  expect(screen.queryByRole('heading', { name: /current ai weather/i })).toBeNull();
 });
 
 test('renders weather app title and loaded data on the presentation page', async () => {
@@ -66,7 +77,9 @@ test('renders weather app title and loaded data on the presentation page', async
   renderApp('/presentation');
 
   expect(await screen.findByRole('heading', { name: /weather react/i })).toBeDefined();
+  expect(await screen.findByRole('heading', { name: /^hello world$/i })).toBeDefined();
   expect(await screen.findByText('Hello from test API.')).toBeDefined();
+  expect(await screen.findByRole('heading', { name: /current ai weather/i })).toBeDefined();
   expect(await screen.findByLabelText(/location:/i)).toBeDefined();
   expect(await screen.findByRole('button', { name: /get current ai weather/i })).toBeDefined();
   expect(await screen.findByRole('heading', { name: /chat clients/i })).toBeDefined();

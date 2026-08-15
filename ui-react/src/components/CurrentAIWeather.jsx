@@ -18,14 +18,17 @@ function CurrentAIWeather() {
       : 'Unable to load AI weather.';
 
   return (
-    <section className="mt-5" aria-label="Current AI weather">
+    <section className="mt-5" aria-labelledby="current-ai-weather-heading">
+      <h2 id="current-ai-weather-heading" className="mb-3 text-xl font-semibold">
+        Current AI Weather
+      </h2>
       <form className="flex flex-wrap items-center gap-x-3 gap-y-2" onSubmit={onSubmit}>
         <label className="font-semibold" htmlFor="ai-weather-location">
           Location:
         </label>
         <input
           id="ai-weather-location"
-          className="min-w-40 max-w-80 flex-1 rounded-md border border-gray-300 px-2.5 py-1.5 focus:border-blue-600 focus:outline-none disabled:bg-gray-100"
+          className="min-w-40 max-w-80 flex-1 rounded-md border border-gray-300 px-2.5 py-1.5 focus:border-gray-800 focus:outline-none disabled:bg-gray-100"
           type="text"
           value={location}
           onChange={(event) => setLocation(event.target.value)}
@@ -34,14 +37,15 @@ function CurrentAIWeather() {
         />
         <Button
           type="submit"
+          variant="outline"
           size="lg"
-          className="bg-blue-600 text-white hover:bg-blue-700"
+          className="border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
           disabled={isFetching}
           aria-busy={isFetching}
         >
           {isFetching && (
             <span
-              className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+              className="size-4 animate-spin rounded-full border-2 border-gray-200 border-t-gray-600"
               aria-hidden="true"
             />
           )}

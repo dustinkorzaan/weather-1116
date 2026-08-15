@@ -4,6 +4,7 @@
 @inject IConfiguration Configuration
 
 <PageTitle>Weather Razor</PageTitle>
+<FluentDesignTheme CustomColor="#6b7280" Mode="DesignThemeModes.Light" />
 
 @{
     var uiReactUrl = Configuration["UI_REACT_URL"] ?? "http://localhost:3000";
@@ -15,7 +16,7 @@
 }
 
 <FluentLayout Class="weather-shell">
-    <FluentHeader Height="48">
+    <FluentHeader Height="48" Class="weather-header">
         <FluentAnchor Href="/" Appearance="Appearance.Hypertext" Class="brand-link" Style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
             <img src="logo.svg" alt="Weather logo" width="22" height="22" />
             <span class="brand-title">Weather Blazor</span>
@@ -24,10 +25,15 @@
         <FluentSpacer />
 
         <FluentButton Id="user-menu-button"
-                      Appearance="Appearance.Accent"
+                      Appearance="Appearance.Stealth"
+                      Class="avatar-button"
                       Title="Open user menu"
                       aria-label="Open user menu">
-            <FluentIcon Value="@(new Icons.Regular.Size20.Person())" />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true" focusable="false">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+            </svg>
         </FluentButton>
         <FluentMenu Anchor="user-menu-button"
                     Trigger="MouseButton.Left"
@@ -96,7 +102,7 @@
         </div>
     </FluentDialogBody>
     <FluentDialogFooter>
-        <FluentButton Appearance="Appearance.Accent" OnClick="CloseAboutModal">Close</FluentButton>
+        <FluentButton Appearance="Appearance.Outline" OnClick="CloseAboutModal">Close</FluentButton>
     </FluentDialogFooter>
 </FluentDialog>
 

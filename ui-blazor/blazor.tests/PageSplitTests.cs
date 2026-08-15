@@ -22,6 +22,7 @@ public sealed class PageSplitTests
         Assert.Contains("id=\"weather-map\"", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
         Assert.DoesNotContain("Current AI Weather", rendered.Markup);
+        Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
     }
 
@@ -38,6 +39,7 @@ public sealed class PageSplitTests
 
         Assert.Contains("Chat Clients", rendered.Markup);
         Assert.Contains("Current AI Weather", rendered.Markup);
+        Assert.Contains("Hello World", rendered.Markup);
         Assert.Contains("chat-input", rendered.Markup);
         Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
     }

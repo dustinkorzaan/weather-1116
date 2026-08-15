@@ -5,8 +5,10 @@
 <PageTitle>Weather Razor - Presentation</PageTitle>
 
 <div class="presentation-page">
-    <h1 class="page-title">Weather Razor</h1>
-    <p><strong>@helloMessage</strong></p>
+    <section class="hello-section" aria-labelledby="hello-world-heading">
+        <h2 id="hello-world-heading" class="section-title">Hello World</h2>
+        <p>@helloMessage</p>
+    </section>
 
     @if (!string.IsNullOrWhiteSpace(errorMessage))
     {
@@ -23,7 +25,7 @@
                                  Disabled="isAiWeatherLoading"
                                  Style="flex: 1 1 12rem; max-width: 20rem;" />
                 <FluentButton Type="ButtonType.Submit"
-                              Appearance="Appearance.Accent"
+                              Appearance="Appearance.Outline"
                               Disabled="isAiWeatherLoading">
                     @if (isAiWeatherLoading)
                     {
