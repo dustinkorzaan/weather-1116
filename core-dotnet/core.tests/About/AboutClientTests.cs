@@ -8,7 +8,7 @@ namespace Core.Tests.About;
 
 public class AboutClientTests
 {
-    private const string NodeName = "mcp-dotnet";
+    private const string NodeName = "mcp-srv-app-service";
 
     [Fact]
     public async Task GetAsync_ValidNode_ReturnsRemoteNode()

@@ -2,15 +2,15 @@ using System.Net;
 using System.Net.Http.Json;
 using Core.About;
 
-namespace WeatherMcpDotNet.Tests;
+namespace WeatherMcpSrvAppService.Tests;
 
-public class AboutControllerTests : IClassFixture<WeatherMcpDotNetWebApplicationFactory>
+public class AboutControllerTests : IClassFixture<WeatherMcpSrvAppServiceWebApplicationFactory>
 {
-    private readonly WeatherMcpDotNetWebApplicationFactory _factory;
+    private readonly WeatherMcpSrvAppServiceWebApplicationFactory _factory;
 
-    public AboutControllerTests(WeatherMcpDotNetWebApplicationFactory factory)
+    public AboutControllerTests(WeatherMcpSrvAppServiceWebApplicationFactory factory)
     {
-        _factory = factory.WithSetting("MCP_APP_KEY", "integration-test-mcp-key");
+        _factory = factory.WithSetting("MCP_SRV_APP_SERVICE_KEY", "integration-test-mcp-key");
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public class AboutControllerTests : IClassFixture<WeatherMcpDotNetWebApplication
 
         var node = await response.Content.ReadFromJsonAsync<AboutNode>();
         Assert.NotNull(node);
-        Assert.Equal("mcp-dotnet", node.Name);
+        Assert.Equal("mcp-srv-app-service", node.Name);
         Assert.True(node.IsHealthy);
         Assert.Empty(node.Children);
     }
@@ -31,7 +31,7 @@ public class AboutControllerTests : IClassFixture<WeatherMcpDotNetWebApplication
     [Fact]
     public async Task Get_ReturnsUnhealthyNode_WhenMcpApiKeyMissing()
     {
-        using var factory = new WeatherMcpDotNetWebApplicationFactory();
+        using var factory = new WeatherMcpSrvAppServiceWebApplicationFactory();
         using var client = factory.CreateClient();
 
         var response = await client.GetAsync("/About");
@@ -40,7 +40,7 @@ public class AboutControllerTests : IClassFixture<WeatherMcpDotNetWebApplication
 
         var node = await response.Content.ReadFromJsonAsync<AboutNode>();
         Assert.NotNull(node);
-        Assert.Equal("mcp-dotnet", node.Name);
+        Assert.Equal("mcp-srv-app-service", node.Name);
         Assert.False(node.IsHealthy);
     }
 

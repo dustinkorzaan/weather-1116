@@ -2,7 +2,7 @@ using Core.About;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WeatherMcpFunction.Tests;
+namespace WeatherMcpSrvFuncApp.Tests;
 
 public class AboutFunctionTests
 {
@@ -16,7 +16,7 @@ public class AboutFunctionTests
 
         var ok = Assert.IsType<OkObjectResult>(result);
         var node = Assert.IsType<AboutNode>(ok.Value);
-        Assert.Equal("mcp-function", node.Name);
+        Assert.Equal("mcp-srv-func-app", node.Name);
         Assert.True(node.IsHealthy);
         Assert.Empty(node.Children);
     }

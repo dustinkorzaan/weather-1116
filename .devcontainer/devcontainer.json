@@ -68,9 +68,9 @@
         8090,
         // mvc-dotnet
         8100,
-        // mcp-dotnet (ASP.NET Core MCP)
+        // mcp-srv-app-service (ASP.NET Core MCP)
         8110,
-        // mcp-function (Azure Functions MCP)
+        // mcp-srv-func-app (Azure Functions MCP)
         8120,
         // worker-dotnet
         8130
@@ -105,11 +105,11 @@
             "onAutoForward": "ignore"
         },
         "8110": {
-            "label": "Weather MCP DotNet",
+            "label": "Weather MCP Server on App Service",
             "onAutoForward": "ignore"
         },
         "8120": {
-            "label": "Weather MCP Function",
+            "label": "Weather MCP Server on Functions App",
             "onAutoForward": "ignore"
         },
         "8130": {

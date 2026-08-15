@@ -6,7 +6,7 @@
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>WeatherMcpFunction</RootNamespace>
+    <RootNamespace>WeatherMcpSrvFuncApp</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="WeatherMcpFunction.Tests" />
+    <InternalsVisibleTo Include="WeatherMcpSrvFuncApp.Tests" />
   </ItemGroup>
 
   <ItemGroup>

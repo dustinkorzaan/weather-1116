@@ -92,18 +92,18 @@ internal class Program
 				Endpoint = new Uri(endpoint),
 			});
 
-		var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_FUNCTION_KEY") ?? throw new InvalidOperationException("MCP_FUNCTION_KEY not found in environment variables.");
-		var mcpAppKey = Environment.GetEnvironmentVariable("MCP_APP_KEY") ?? throw new InvalidOperationException("MCP_APP_KEY not found in environment variables.");
+		var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_KEY") ?? throw new InvalidOperationException("MCP_SRV_FUNC_APP_KEY not found in environment variables.");
+		var mcpAppKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY") ?? throw new InvalidOperationException("MCP_SRV_APP_SERVICE_KEY not found in environment variables.");
 
 		McpTool myMcpFunction = ResponseTool.CreateMcpTool(
-			serverLabel: "MyMCPFunction",
-			serverUri: new Uri("https://weather1116-prod-mcpfunc-debjddh3fthua7dy.westus2-01.azurewebsites.net/runtime/webhooks/mcp"),
+			serverLabel: "McpSrvFuncApp",
+			serverUri: new Uri("https://weather1116-prod-mcp-srv-func-app-debjddh3fthua7dy.westus2-01.azurewebsites.net/runtime/webhooks/mcp"),
 			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpFunctionKey },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		McpTool myMcpApp = ResponseTool.CreateMcpTool(
-			serverLabel: "MyMCPApp",
-			serverUri: new Uri("https://weather1116-prod-mcpapp-bcb9gnameebrgmc4.westus2-01.azurewebsites.net/mcp"),
+			serverLabel: "McpSrvAppService",
+			serverUri: new Uri("https://weather1116-prod-mcp-srv-app-service-bcb9gnameebrgmc4.westus2-01.azurewebsites.net/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpAppKey}" },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 

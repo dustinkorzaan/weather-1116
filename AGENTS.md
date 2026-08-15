@@ -37,8 +37,8 @@ hot reload); React uses `npm start`. Ports come from each project's
 | Weather MVC | `mvc-dotnet/mvc` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8100 |
 | React UI | `ui-react` | `npm start` | 3000 |
 | Worker DotNet | `worker-dotnet/worker` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8130 |
-| MCP DotNet | `mcp-dotnet/mcp` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8110 |
-| MCP Function | `mcp-function/mcp` | `func start` from `mcp-function/mcp` (or VS Code **WeatherMcpFunction**) | 8120 |
+| MCP Server on App Service | `mcp-srv-app-service/mcp` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8110 |
+| MCP Server on Functions App | `mcp-srv-func-app/mcp` | `func start` from `mcp-srv-func-app/mcp` (or VS Code **WeatherMcpSrvFuncApp**) | 8120 |
 
 ### Non-obvious caveats
 
@@ -69,7 +69,7 @@ hot reload); React uses `npm start`. Ports come from each project's
 - React: `npm run build`, and `npm test -- --run` (Vitest).
 - .NET test projects: `core-dotnet/core.tests`, `api-dotnet/api.tests`,
   `mvc-dotnet/mvc.tests`, `worker-dotnet/worker.tests`, `ui-blazor/blazor.tests`,
-  `mcp-dotnet/mcp.tests`, and `mcp-function/mcp.tests` (see CI
+  `mcp-srv-app-service/mcp.tests`, and `mcp-srv-func-app/mcp.tests` (see CI
   `build-and-test.yml`).
 - The `prod-deploy-*.yml` workflows auto-deploy when `build-and-test` completes
   successfully on `main` (e.g. after a merged PR). Each workflow can also be run

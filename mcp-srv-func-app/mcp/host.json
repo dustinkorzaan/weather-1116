@@ -5,7 +5,7 @@
       "routePrefix": ""
     },
     "mcp": {
-      "serverName": "WeatherMcpFunction",
+      "serverName": "WeatherMcpSrvFuncApp",
       "serverVersion": "1.0.0"
     }
   }

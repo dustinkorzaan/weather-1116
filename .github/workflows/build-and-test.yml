@@ -28,8 +28,8 @@ jobs:
           - ui-blazor/blazor/WeatherBlazor.csproj
           - mvc-dotnet/mvc/WeatherMVC.csproj
           - worker-dotnet/worker/WeatherWorkerDotNet.csproj
-          - mcp-function/mcp/WeatherMcpFunction.csproj
-          - mcp-dotnet/mcp/WeatherMcpDotNet.csproj
+          - mcp-srv-func-app/mcp/WeatherMcpSrvFuncApp.csproj
+          - mcp-srv-app-service/mcp/WeatherMcpSrvAppService.csproj
           - FoundryConsoleV1/FoundryConsoleV1ModelDirectLegacy.csproj
           - FoundryConsoleV2/FoundryConsoleV2ModelDirectUnifiedAI.csproj
           - FoundryConsoleV3/FoundryConsoleV3InProcessToolCallbacks.csproj
@@ -147,8 +147,8 @@ jobs:
       - name: Run MVC tests
         run: dotnet test mvc-dotnet/mvc.tests/WeatherMVC.Tests.csproj --configuration Release --verbosity normal
 
-  test-mcp-dotnet:
-    name: Test MCP DotNet
+  test-mcp-srv-app-service:
+    name: Test MCP Server on App Service
     runs-on: ubuntu-latest
 
     steps:
@@ -160,11 +160,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Run MCP DotNet tests
-        run: dotnet test mcp-dotnet/mcp.tests/WeatherMcpDotNet.Tests.csproj --configuration Release --verbosity normal
+      - name: Run MCP Server on App Service tests
+        run: dotnet test mcp-srv-app-service/mcp.tests/WeatherMcpSrvAppService.Tests.csproj --configuration Release --verbosity normal
 
-  test-mcp-function:
-    name: Test MCP Function
+  test-mcp-srv-func-app:
+    name: Test MCP Server on Functions App
     runs-on: ubuntu-latest
 
     steps:
@@ -176,8 +176,8 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Run MCP Function tests
-        run: dotnet test mcp-function/mcp.tests/WeatherMcpFunction.Tests.csproj --configuration Release --verbosity normal
+      - name: Run MCP Server on Functions App tests
+        run: dotnet test mcp-srv-func-app/mcp.tests/WeatherMcpSrvFuncApp.Tests.csproj --configuration Release --verbosity normal
 
   build-and-test-react:
     name: Build and Test React Project

@@ -17,7 +17,7 @@ builder.Services
 	{
 		options.ServerInfo = new()
 		{
-			Name = "WeatherMcpDotNet",
+			Name = "WeatherMcpSrvAppService",
 			Version = "1.0.0",
 		};
 	})
@@ -31,7 +31,7 @@ builder.Services
 var app = builder.Build();
 
 // Shared secret for MCP clients (Foundry project connection, MCP Inspector, etc.).
-var mcpAppKey = builder.Configuration["MCP_APP_KEY"];
+var mcpAppKey = builder.Configuration["MCP_SRV_APP_SERVICE_KEY"];
 
 // Auth filter: require a valid Bearer token for all /mcp requests.
 app.Use(async (context, next) =>

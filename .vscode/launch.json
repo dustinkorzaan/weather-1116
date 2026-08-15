@@ -86,13 +86,13 @@
             }
         },
         {
-            "name": "WeatherMcpDotNet",
+            "name": "WeatherMcpSrvAppService",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build mcp dotnet",
-            "program": "${workspaceFolder}/mcp-dotnet/mcp/bin/Debug/net10.0/WeatherMcpDotNet.dll",
+            "preLaunchTask": "build mcp srv app service",
+            "program": "${workspaceFolder}/mcp-srv-app-service/mcp/bin/Debug/net10.0/WeatherMcpSrvAppService.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/mcp-dotnet/mcp",
+            "cwd": "${workspaceFolder}/mcp-srv-app-service/mcp",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
@@ -104,7 +104,7 @@
             }
         },
         {
-            "name": "WeatherMcpFunction",
+            "name": "WeatherMcpSrvFuncApp",
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:azureFunctions.pickProcess}"

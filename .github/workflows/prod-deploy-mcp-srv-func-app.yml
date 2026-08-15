@@ -1,5 +1,5 @@
-name: cicd-weather1116-prod-mcpapp
-run-name: CICD weather1116-prod-mcpapp
+name: cicd-weather1116-prod-mcp-srv-func-app
+run-name: CICD weather1116-prod-mcp-srv-func-app
 
 on:
   workflow_run:
@@ -12,10 +12,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: prod-deploy-mcp-dotnet
+  group: prod-deploy-mcp-srv-func-app
   cancel-in-progress: true
 
 env:
+  DOTNET_VERSION: '10.x'
   BUILD_NUMBER: ${{ github.run_number }}
   BUILD_BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
 
@@ -41,19 +42,22 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Build with dotnet
-        run: dotnet build ./mcp-dotnet/mcp/WeatherMcpDotNet.csproj --configuration Release
+        run: dotnet build ./mcp-srv-func-app/mcp/WeatherMcpSrvFuncApp.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ./mcp-dotnet/mcp/WeatherMcpDotNet.csproj -c Release -o "${{ github.workspace }}/publish/mcp-dotnet"
+        run: dotnet publish ./mcp-srv-func-app/mcp/WeatherMcpSrvFuncApp.csproj -c Release -o "${{ github.workspace }}/publish/mcp-srv-func-app"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v7
         with:
           name: .net-app
-          path: ${{ github.workspace }}/publish/mcp-dotnet
+          path: ${{ github.workspace }}/publish/mcp-srv-func-app
+          # Flex Consumption OneDeploy requires .azurefunctions at package root.
+          # upload-artifact@v4+ excludes hidden (dot) files/dirs by default.
+          include-hidden-files: true
 
   deploy:
     runs-on: ubuntu-latest
@@ -70,7 +74,19 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: .net-app
-          path: ${{ github.workspace }}/publish/mcp-dotnet
+          path: ${{ github.workspace }}/publish/mcp-srv-func-app
+
+      - name: Verify Flex Consumption package contents
+        shell: bash
+        run: |
+          PACKAGE_DIR="${{ github.workspace }}/publish/mcp-srv-func-app"
+          if [ ! -d "$PACKAGE_DIR/.azurefunctions" ]; then
+            echo "Missing required .azurefunctions directory in publish package:" >&2
+            ls -la "$PACKAGE_DIR" >&2
+            exit 1
+          fi
+          echo "Found .azurefunctions package content:"
+          ls -la "$PACKAGE_DIR/.azurefunctions"
 
       - name: Debug Azure OIDC secret lengths
         shell: bash
@@ -90,31 +106,30 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
-      - name: Set App Service settings
+      - name: Set Function App settings
         uses: azure/cli@v3
         with:
           inlineScript: |
-            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-mcpapp'].resourceGroup | [0]" -o tsv)
+            APP_RG=$(az functionapp list --query "[?name=='weather1116-prod-mcp-srv-func-app'].resourceGroup | [0]" -o tsv)
             if [ -z "$APP_RG" ]; then
-              echo "Could not resolve resource group for weather1116-prod-mcpapp" >&2
+              echo "Could not resolve resource group for weather1116-prod-mcp-srv-func-app" >&2
               exit 1
             fi
 
-            az webapp config appsettings set \
-              --name weather1116-prod-mcpapp \
+            az functionapp config appsettings set \
+              --name weather1116-prod-mcp-srv-func-app \
               --resource-group "$APP_RG" \
               --settings \
-                MCP_APP_KEY="${{ secrets.PROD_MCP_APP_KEY }}" \
-                ASPNETCORE_ENVIRONMENT=Production \
-                ASPNETCORE_DETAILEDERRORS=false \
+                AZURE_FUNCTIONS_ENVIRONMENT=Production \
                 BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \
                 BUILD_START="${{ env.BUILD_START }}" \
                 BUILD_BRANCH_NAME="${{ env.BUILD_BRANCH_NAME }}"
 
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
+      - name: Deploy to Azure Function App
+        id: deploy-to-functionapp
+        uses: Azure/functions-action@v1
         with:
-          app-name: 'weather1116-prod-mcpapp'
+          app-name: 'weather1116-prod-mcp-srv-func-app'
           slot-name: 'Production'
-          package: ${{ github.workspace }}/publish/mcp-dotnet
+          package: ${{ github.workspace }}/publish/mcp-srv-func-app
+          

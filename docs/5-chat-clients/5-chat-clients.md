@@ -9,7 +9,7 @@ one-shot structured JSON response.
 | Tab | Stack | Tools | Maps to console demo |
 | --- | --- | --- | --- |
 | **Chat1a** | Responses API (model-direct) | In-process (`GetLatLongData`, `GetPublicWeatherData`) | Foundry Console **V3** |
-| **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-function`, `mcp-dotnet`) | Foundry Console **V4** |
+| **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-srv-func-app`, `mcp-srv-app-service`) | Foundry Console **V4** |
 | **Chat2a** | Microsoft Agent Framework | In-process tools via `AIFunctionFactory` | V3 orchestration style |
 | **Chat2b** | Microsoft Agent Framework | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
 
@@ -113,7 +113,7 @@ All four tabs expose the same two weather tools (no web search):
 
 - **In-process (Chat1a, Chat2a):** Core `ChatToolExecutor` runs MediatR handlers when the model
   emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a).
-- **MCP (Chat1b, Chat2b):** Remote MCP hosts (`mcp-function`, `mcp-dotnet`) — platform invokes
+- **MCP (Chat1b, Chat2b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`) — platform invokes
   tools; no local function-call loop in Chat1b.
 
 **Chat2a/Chat2b memory:** `IChatSessionStore` only tracks session ids and a display audit trail
@@ -129,8 +129,8 @@ Same Foundry settings as AI Weather and Foundry consoles:
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | All chat tabs |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | All chat tabs |
 | `AZURE_FOUNDRY_PROD_EUS2_MODEL` | All chat tabs |
-| `MCP_FUNCTION_URL`, `MCP_FUNCTION_KEY` | Chat1b, Chat2b |
-| `MCP_APP_URL`, `MCP_APP_KEY` | Chat1b, Chat2b |
+| `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b |
+| `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b |
 
 Chat1a and Chat2a do **not** require MCP URLs.
 

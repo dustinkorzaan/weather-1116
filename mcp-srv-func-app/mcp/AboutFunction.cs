@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
 
-namespace WeatherMcpFunction;
+namespace WeatherMcpSrvFuncApp;
 
 /// <summary>
-/// Anonymous About probe — leaf AboutNode named mcp-function (no children).
+/// Anonymous About probe — leaf AboutNode named mcp-srv-func-app (no children).
 /// </summary>
 public class AboutFunction
 {
@@ -20,13 +20,13 @@ public class AboutFunction
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "about")] HttpRequest _)
 	{
 		return new OkObjectResult(
-			AboutTreeBuilder.BuildMcpFunctionNode(HasExpectedTool.Value));
+			AboutTreeBuilder.BuildMcpSrvFuncAppNode(HasExpectedTool.Value));
 	}
 
 	/// <summary>
 	/// The Functions MCP extension puts <see cref="McpToolTriggerAttribute"/> on a
 	/// parameter (not the method), and does not expose an injectable tool list like
-	/// mcp-dotnet's <c>IEnumerable&lt;McpServerTool&gt;</c>. Scanning this assembly is
+	/// mcp-srv-app-service's <c>IEnumerable&lt;McpServerTool&gt;</c>. Scanning this assembly is
 	/// enough to confirm the expected tool is present.
 	/// </summary>
 	internal static bool HasMcpTool(string toolName)

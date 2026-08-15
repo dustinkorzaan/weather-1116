@@ -44,15 +44,15 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_MODEL")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_MODEL.");
 
-        var mcpFunctionUrl = Environment.GetEnvironmentVariable("MCP_FUNCTION_URL")
-            ?? throw new InvalidOperationException("Missing MCP_FUNCTION_URL.");
-        var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_FUNCTION_KEY")
-            ?? throw new InvalidOperationException("Missing MCP_FUNCTION_KEY.");
+        var mcpFunctionUrl = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_URL")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_FUNC_APP_URL.");
+        var mcpFunctionKey = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_KEY")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_FUNC_APP_KEY.");
 
-        var mcpAppUrl = Environment.GetEnvironmentVariable("MCP_APP_URL")
-            ?? throw new InvalidOperationException("Missing MCP_APP_URL.");
-        var mcpAppKey = Environment.GetEnvironmentVariable("MCP_APP_KEY")
-            ?? throw new InvalidOperationException("Missing MCP_APP_KEY.");
+        var mcpAppUrl = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_URL")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_APP_SERVICE_URL.");
+        var mcpAppKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_APP_SERVICE_KEY.");
 
         var systemPrompt = """
         # Role & Operational Rules
@@ -93,13 +93,13 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             });
 
         McpTool myMcpFunction = ResponseTool.CreateMcpTool(
-            serverLabel: "MyMCPFunction",
+            serverLabel: "McpSrvFuncApp",
             serverUri: new Uri($"{mcpFunctionUrl.TrimEnd('/')}/runtime/webhooks/mcp"),
             headers: new Dictionary<string, string> { ["x-functions-key"] = mcpFunctionKey },
             toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
         McpTool myMcpApp = ResponseTool.CreateMcpTool(
-            serverLabel: "MyMCPApp",
+            serverLabel: "McpSrvAppService",
             serverUri: new Uri($"{mcpAppUrl.TrimEnd('/')}/mcp"),
             headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpAppKey}" },
             toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));

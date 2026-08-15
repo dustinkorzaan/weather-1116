@@ -5,7 +5,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
 using Microsoft.Extensions.Logging;
 
-namespace WeatherMcpFunction;
+namespace WeatherMcpSrvFuncApp;
 
 /// <summary>
 /// MCP tool that resolves a location name to latitude/longitude via Core/MediatR.

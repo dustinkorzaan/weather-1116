@@ -32,14 +32,14 @@ public class AboutTreeBuilderTests
     [Fact]
     public void BuildApiRoot_PutsApiNodeFirstThenDependencies()
     {
-        var dependency = AboutTreeBuilder.BuildMcpDotNetNode();
+        var dependency = AboutTreeBuilder.BuildMcpSrvAppServiceNode();
 
         var root = AboutTreeBuilder.BuildApiRoot(dependency);
 
         Assert.Equal("API Root", root.Name);
         Assert.Equal(2, root.Children.Count);
         Assert.Equal("API", root.Children[0].Name);
-        Assert.Equal("mcp-dotnet", root.Children[1].Name);
+        Assert.Equal("mcp-srv-app-service", root.Children[1].Name);
         Assert.True(root.IsHealthy);
     }
 
@@ -56,7 +56,7 @@ public class AboutTreeBuilderTests
     [Fact]
     public void BuildMvcRoot_NestsApiRootAsSecondChild()
     {
-        var dependency = AboutTreeBuilder.BuildMcpFunctionNode();
+        var dependency = AboutTreeBuilder.BuildMcpSrvFuncAppNode();
 
         var root = AboutTreeBuilder.BuildMvcRoot(dependency);
 
@@ -67,18 +67,18 @@ public class AboutTreeBuilderTests
         var apiRoot = root.Children[1];
         Assert.Equal("API Root", apiRoot.Name);
         Assert.Equal("API", apiRoot.Children[0].Name);
-        Assert.Contains(apiRoot.Children, child => child.Name == "mcp-function");
+        Assert.Contains(apiRoot.Children, child => child.Name == "mcp-srv-func-app");
         Assert.True(root.IsHealthy);
     }
 
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void BuildMcpDotNetNode_ReflectsHealthArgument(bool isHealthy)
+    public void BuildMcpSrvAppServiceNode_ReflectsHealthArgument(bool isHealthy)
     {
-        var node = AboutTreeBuilder.BuildMcpDotNetNode(isHealthy);
+        var node = AboutTreeBuilder.BuildMcpSrvAppServiceNode(isHealthy);
 
-        Assert.Equal("mcp-dotnet", node.Name);
+        Assert.Equal("mcp-srv-app-service", node.Name);
         Assert.Equal(isHealthy, node.IsHealthy);
         Assert.Empty(node.Children);
     }
@@ -86,11 +86,11 @@ public class AboutTreeBuilderTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void BuildMcpFunctionNode_ReflectsHealthArgument(bool isHealthy)
+    public void BuildMcpSrvFuncAppNode_ReflectsHealthArgument(bool isHealthy)
     {
-        var node = AboutTreeBuilder.BuildMcpFunctionNode(isHealthy);
+        var node = AboutTreeBuilder.BuildMcpSrvFuncAppNode(isHealthy);
 
-        Assert.Equal("mcp-function", node.Name);
+        Assert.Equal("mcp-srv-func-app", node.Name);
         Assert.Equal(isHealthy, node.IsHealthy);
         Assert.Empty(node.Children);
     }
@@ -128,15 +128,15 @@ public class AboutTreeBuilderTests
     [Fact]
     public void BuildMcpNodes_DefaultToHealthy()
     {
-        Assert.True(AboutTreeBuilder.BuildMcpDotNetNode().IsHealthy);
-        Assert.True(AboutTreeBuilder.BuildMcpFunctionNode().IsHealthy);
+        Assert.True(AboutTreeBuilder.BuildMcpSrvAppServiceNode().IsHealthy);
+        Assert.True(AboutTreeBuilder.BuildMcpSrvFuncAppNode().IsHealthy);
         Assert.True(AboutTreeBuilder.BuildWorkerDotNetNode().IsHealthy);
     }
 
     [Fact]
     public void BuildRoot_UnhealthyDependency_MakesRootUnhealthy()
     {
-        var unhealthy = AboutTreeBuilder.BuildMcpDotNetNode(isHealthy: false);
+        var unhealthy = AboutTreeBuilder.BuildMcpSrvAppServiceNode(isHealthy: false);
 
         var root = AboutTreeBuilder.BuildApiRoot(unhealthy);
 

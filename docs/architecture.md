@@ -32,8 +32,8 @@ for hello/AI weather/map flows in the three UIs.
 
 | Project | Path | Role |
 | --- | --- | --- |
-| MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
-| MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
+| MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
+| MCP Server on Functions App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
 Ports for runnable apps are in [`README.md`](../README.md); worker and console
@@ -97,8 +97,8 @@ flowchart LR
   API[MVC or WeatherAPI]
   Core[Core GetCurrentAIWeatherHandler]
   Model[Azure OpenAI model]
-  McpFunc[mcp-function GetLatLongData]
-  McpDotNet[mcp-dotnet GetPublicWeatherData]
+  McpFunc[mcp-srv-func-app GetLatLongData]
+  McpDotNet[mcp-srv-app-service GetPublicWeatherData]
   CoreGeo[Core geo handlers]
   CoreWx[Core weather handlers]
 
@@ -124,29 +124,29 @@ MediatR handlers the sample uses in-process elsewhere.
 
 | Host | Path | Tool | Port | Endpoint | Auth |
 | --- | --- | --- | --- | --- | --- |
-| MCP DotNet | [`mcp-dotnet/mcp`](../mcp-dotnet/mcp) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer `MCP_APP_KEY` (no default — must be set by developer) |
-| MCP Function | [`mcp-function/mcp`](../mcp-function/mcp) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
+| MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer `MCP_SRV_APP_SERVICE_KEY` (no default — must be set by developer) |
+| MCP Server on Functions App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
 
-VS Code launch configs: **WeatherMcpDotNet**, **WeatherMcpFunction**. Ports are
+VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
 
-Prod apps: `weather1116-prod-mcpapp`, `weather1116-prod-mcpfunc` (see
+Prod apps: `weather1116-prod-mcp-srv-app-service`, `weather1116-prod-mcp-srv-func-app` (see
 `prod-deploy-mcp-*.yml`).
 
 Auth examples:
 
-- MCP DotNet: `Authorization: Bearer {your MCP_APP_KEY value}` (`/About` stays open)
-- MCP Function (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
+- MCP Server on App Service: `Authorization: Bearer {your MCP_SRV_APP_SERVICE_KEY value}` (`/About` stays open)
+- MCP Server on Functions App (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 
 Each host also exposes an anonymous **`/About`** probe that returns a leaf
-`AboutNode` (`mcp-dotnet` or `mcp-function`) with tool-registration health and
+`AboutNode` (`mcp-srv-app-service` or `mcp-srv-func-app`) with tool-registration health and
 optional `BUILD_NUMBER` / `BUILD_START` / `BUILD_BRANCH_NAME` metadata.
 
 API and MVC `/About` aggregate those remote nodes as children under their
 `API Root` subtree (see [About and health](#about-and-health)). Production base
-URLs are configured via `MCP_APP_URL`, `MCP_FUNCTION_URL`, and
-`WORKER_DOTNET_URL` (GitHub variables `PROD_MCP_APP_URL`,
-`PROD_MCP_FUNCTION_URL`, `PROD_WORKER_DOTNET_URL`); `/About` is appended in code.
+URLs are configured via `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_FUNC_APP_URL`, and
+`WORKER_DOTNET_URL` (GitHub variables `PROD_MCP_SRV_APP_SERVICE_URL`,
+`PROD_MCP_SRV_FUNC_APP_URL`, `PROD_WORKER_DOTNET_URL`); `/About` is appended in code.
 
 ## Background Worker (Hangfire)
 
@@ -269,7 +269,7 @@ The workflow [`build-and-test.yml`](../.github/workflows/build-and-test.yml)
 builds on every push:
 
 - `Core.csproj`, `WeatherAPI.csproj`, `WeatherBlazor.csproj`, `WeatherMVC.csproj`,
-  `WeatherWorkerDotNet.csproj`, `WeatherMcpDotNet.csproj`, `WeatherMcpFunction.csproj`,
+  `WeatherWorkerDotNet.csproj`, `WeatherMcpSrvAppService.csproj`, `WeatherMcpSrvFuncApp.csproj`,
   and the five Foundry console projects (`FoundryConsoleV1ModelDirectLegacy`–`V5Agent`) via `dotnet build`.
 - React app in `ui-react` via `npm ci && npm run build`, followed by
   `npm test -- --run` (Vitest).
@@ -278,7 +278,7 @@ builds on every push:
 - `WeatherMVC.Tests` integration tests.
 - `WeatherWorkerDotNet.Tests` unit tests.
 - `WeatherBlazor.Tests` component tests.
-- `WeatherMcpDotNet.Tests` and `WeatherMcpFunction.Tests` About/tool-registration tests.
+- `WeatherMcpSrvAppService.Tests` and `WeatherMcpSrvFuncApp.Tests` About/tool-registration tests.
 
 Production deploy workflows (`prod-deploy-*.yml`) auto-deploy when **build-and-test**
 completes successfully on `main`. Each deploy workflow can also be triggered manually
@@ -304,12 +304,12 @@ core-dotnet/
 worker-dotnet/
   worker/                    Hangfire background worker (WeatherWorkerDotNet.csproj)
   worker.tests/              Worker unit tests (WeatherWorkerDotNet.Tests.csproj)
-mcp-dotnet/
-  mcp/                       MCP DotNet tool host (WeatherMcpDotNet.csproj)
-  mcp.tests/                 MCP DotNet tests (WeatherMcpDotNet.Tests.csproj)
-mcp-function/
-  mcp/                       MCP Function tool host (WeatherMcpFunction.csproj)
-  mcp.tests/                 MCP Function tests (WeatherMcpFunction.Tests.csproj)
+mcp-srv-app-service/
+  mcp/                       MCP Server on App Service tool host (WeatherMcpSrvAppService.csproj)
+  mcp.tests/                 MCP Server on App Service tests (WeatherMcpSrvAppService.Tests.csproj)
+mcp-srv-func-app/
+  mcp/                       MCP Server on Functions App tool host (WeatherMcpSrvFuncApp.csproj)
+  mcp.tests/                 MCP Server on Functions App tests (WeatherMcpSrvFuncApp.Tests.csproj)
 FoundryConsoleV1…V5/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```
@@ -335,8 +335,8 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
-| `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
+| `MCP_SRV_FUNC_APP_KEY` | Yes | `mcp_extension` system key for the `McpSrvFuncApp` server (`x-functions-key`) |
+| `MCP_SRV_APP_SERVICE_KEY` | Yes | Bearer token for the `McpSrvAppService` server |
 
 **API/MVC AI weather settings** (same pattern as V4):
 
@@ -345,10 +345,10 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
 | `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes | Hosted model deployment name (e.g. `gpt-5.4-mini`) |
-| `MCP_FUNCTION_KEY` | Yes | `mcp_extension` system key for the `MyMCPFunction` server (`x-functions-key`) |
-| `MCP_APP_KEY` | Yes | Bearer token for the `MyMCPApp` server |
-| `MCP_APP_URL` | Yes | Base URL for MCP DotNet (e.g. `http://localhost:8110`) |
-| `MCP_FUNCTION_URL` | Yes | Base URL for MCP Function (e.g. `http://localhost:8120`) |
+| `MCP_SRV_FUNC_APP_KEY` | Yes | `mcp_extension` system key for the `McpSrvFuncApp` server (`x-functions-key`) |
+| `MCP_SRV_APP_SERVICE_KEY` | Yes | Bearer token for the `McpSrvAppService` server |
+| `MCP_SRV_APP_SERVICE_URL` | Yes | Base URL for MCP Server on App Service (e.g. `http://localhost:8110`) |
+| `MCP_SRV_FUNC_APP_URL` | Yes | Base URL for MCP Server on Functions App (e.g. `http://localhost:8120`) |
 
 **V5 settings** (agent-hosted demo only):
 
