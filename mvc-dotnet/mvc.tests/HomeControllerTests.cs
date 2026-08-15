@@ -88,6 +88,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         var css = await response.Content.ReadAsStringAsync();
         Assert.Contains(".site-header", css);
         Assert.Contains("#weather-map", css);
+        Assert.Contains("[hidden]", css);
         Assert.DoesNotContain("tailwindcss", css, StringComparison.OrdinalIgnoreCase);
     }
 }

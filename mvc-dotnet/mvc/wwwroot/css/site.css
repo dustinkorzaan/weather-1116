@@ -91,6 +91,11 @@ code {
   border: 0;
 }
 
+/* Author display rules (e.g. .about-status, .spinner) must not override [hidden]. */
+[hidden] {
+  display: none !important;
+}
+
 .spinner {
   display: inline-block;
   width: 1rem;
