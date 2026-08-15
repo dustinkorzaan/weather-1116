@@ -61,12 +61,11 @@ test('user menu is a gray outline control instead of a solid blue button', () =>
   expect(button.className).toMatch(/border-2/);
 });
 
-test('header uses the MVC bar height and a bold person icon', () => {
+test('header person icon uses a bolder stroke', () => {
   mockHelloFetch();
   renderApp('/');
 
   const title = screen.getByRole('heading', { name: /weather react/i });
-  expect(title.closest('header')?.firstElementChild?.className).toMatch(/h-\[52px\]/);
   expect(title.closest('header')?.querySelector('svg')?.getAttribute('stroke-width')).toBe('2.25');
 });
 

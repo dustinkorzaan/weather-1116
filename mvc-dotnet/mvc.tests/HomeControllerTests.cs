@@ -96,7 +96,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var css = await response.Content.ReadAsStringAsync();
         Assert.Contains(".site-header", css);
-        Assert.Contains("height: 52px", css);
         Assert.Contains("border: 2px solid var(--color-border-strong)", css);
         Assert.Contains("#weather-map", css);
         Assert.Contains("[hidden]", css);

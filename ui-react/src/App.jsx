@@ -132,10 +132,10 @@ function App() {
   return (
     <div className="flex h-screen flex-col bg-white text-gray-900">
       <header className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="flex h-[52px] w-full items-center justify-between gap-3 px-3 py-2 sm:px-4">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link className="flex min-w-0 items-center gap-2 text-inherit no-underline" to="/">
             <img src="/logo.svg" alt="Weather logo" className="h-6 w-6 shrink-0" />
-            <h1 className="truncate text-xl font-semibold leading-normal">Weather React</h1>
+            <h1 className="truncate text-xl font-semibold">Weather React</h1>
           </Link>
 
           <DropdownMenu>

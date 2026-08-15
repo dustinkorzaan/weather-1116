@@ -128,8 +128,6 @@ code {
 
 .site-nav {
   display: flex;
-  height: 52px;
-  box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
