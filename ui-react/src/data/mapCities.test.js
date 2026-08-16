@@ -2,6 +2,8 @@ import { afterEach, expect, test } from 'vitest';
 import {
   MAP_CITIES,
   MAP_CITIES_STORAGE_KEY,
+  MAP_DEFAULT_CENTER,
+  MAP_DEFAULT_ZOOM,
   cityFromLatLongSearch,
   cityFromReverseLookup,
   loadMapCities,
@@ -22,6 +24,11 @@ test('map pins use city and state labels', () => {
     'Atlanta, GA',
     'Charlotte, NC',
   ]);
+});
+
+test('default map view is Nashville at zoom 4', () => {
+  expect(MAP_DEFAULT_CENTER).toEqual({ lat: 36.16, lng: -86.78 });
+  expect(MAP_DEFAULT_ZOOM).toBe(4);
 });
 
 test('default map cities use GUID ids', () => {

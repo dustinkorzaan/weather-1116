@@ -10,8 +10,8 @@ window.weatherMap = (function () {
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
   const PLUS_ICON_SVG =
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
-  const DEFAULT_CENTER = { lat: 39.5, lng: -77.5 };
-  const DEFAULT_ZOOM = 5;
+  const DEFAULT_CENTER = { lat: 36.16, lng: -86.78 };
+  const DEFAULT_ZOOM = 4;
 
   const DARK_MAP_STYLES = [
     { elementType: 'geometry', stylers: [{ color: '#0b111d' }] },
