@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import AddLocationControl from './components/AddLocationControl';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import ChatClientsPage from './pages/ChatClientsPage';
 import CurrentAIWeatherPage from './pages/CurrentAIWeatherPage';
 import HelloWorldPage from './pages/HelloWorldPage';
 import MapPage from './pages/MapPage';
+import { MapPinsProvider } from './map/mapPinsContext';
 import {
   useLazyGetAboutQuery,
 } from './services/weatherApi';
@@ -127,7 +129,7 @@ function SiteLinksFooter() {
   );
 }
 
-function App() {
+function AppShell() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [loadAbout, aboutQuery] = useLazyGetAboutQuery();
   const { preference, setPreference } = useTheme();
@@ -146,7 +148,9 @@ function App() {
             <h1 className="truncate text-xl font-semibold">Weather React</h1>
           </Link>
 
-          <DropdownMenu>
+          <div className="flex items-center gap-2">
+            <AddLocationControl />
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
@@ -189,6 +193,7 @@ function App() {
               <DropdownMenuItem onSelect={handleAboutClick}>About</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </div>
       </header>
 
@@ -229,6 +234,14 @@ function App() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <MapPinsProvider>
+      <AppShell />
+    </MapPinsProvider>
   );
 }
 

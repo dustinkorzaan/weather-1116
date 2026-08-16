@@ -17,6 +17,51 @@
 
         <FluentSpacer />
 
+        <div class="header-actions">
+            <div class="add-location-wrap">
+                <button type="button"
+                        class="add-location-button"
+                        title="Add location"
+                        aria-label="Add location"
+                        aria-expanded="@_addLocationOpen.ToString().ToLowerInvariant()"
+                        aria-controls="add-location-panel"
+                        @onclick="ToggleAddLocation">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 5v14" />
+                        <path d="M5 12h14" />
+                    </svg>
+                </button>
+                @if (_addLocationOpen)
+                {
+                    <div class="add-location-backdrop" @onclick="CloseAddLocation"></div>
+                    <form id="add-location-panel"
+                          class="add-location-panel"
+                          @onsubmit="SubmitAddLocationAsync"
+                          @onsubmit:preventDefault="true">
+                        <label class="add-location-label" for="add-location-input">Location</label>
+                        <input id="add-location-input"
+                               class="add-location-input"
+                               type="text"
+                               value="@_addLocation"
+                               disabled="@_addLocationLoading"
+                               autocomplete="address-level2"
+                               placeholder="Nashville, TN"
+                               @oninput="OnAddLocationInput" />
+                        <button type="submit" class="add-location-submit" disabled="@_addLocationLoading">
+                            @if (_addLocationLoading)
+                            {
+                                <span class="add-location-spinner" aria-hidden="true"></span>
+                            }
+                            @(_addLocationLoading ? "Looking up location…" : "Add to map")
+                        </button>
+                        @if (!string.IsNullOrWhiteSpace(_addLocationError))
+                        {
+                            <p class="add-location-error">@_addLocationError</p>
+                        }
+                    </form>
+                }
+            </div>
+
         <button id="user-menu-button"
                 type="button"
                 class="avatar-button"
@@ -44,6 +89,7 @@
             <FluentDivider />
             <FluentMenuItem Label="About" OnClick="OpenAboutModal" />
         </FluentMenu>
+        </div>
     </FluentHeader>
 
     <FluentBodyContent Class="weather-body">
@@ -109,6 +155,10 @@
     private string _aboutError = string.Empty;
     private AboutNode? _aboutRoot;
     private string _themePreference = "system";
+    private bool _addLocationOpen;
+    private bool _addLocationLoading;
+    private string _addLocation = "Nashville, TN";
+    private string _addLocationError = string.Empty;
 
     private DesignThemeModes FluentMode => _themePreference switch
     {
@@ -210,5 +260,78 @@
     private void CloseAboutModal()
     {
         _aboutDialogHidden = true;
+    }
+
+    private void ToggleAddLocation()
+    {
+        if (_addLocationLoading)
+        {
+            _addLocationOpen = true;
+            return;
+        }
+
+        _addLocationOpen = !_addLocationOpen;
+        _addLocationError = string.Empty;
+    }
+
+    private void CloseAddLocation()
+    {
+        if (_addLocationLoading)
+        {
+            return;
+        }
+
+        _addLocationOpen = false;
+    }
+
+    private void OnAddLocationInput(ChangeEventArgs args)
+    {
+        _addLocation = args.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task SubmitAddLocationAsync()
+    {
+        var trimmed = string.IsNullOrWhiteSpace(_addLocation) ? "Nashville, TN" : _addLocation.Trim();
+        _addLocation = trimmed;
+        _addLocationLoading = true;
+        _addLocationError = string.Empty;
+
+        try
+        {
+            var match = await WeatherClient.SearchLocation(trimmed);
+            if (match is null || (match.Latitude == 0 && match.Longitude == 0))
+            {
+                _addLocationError = "Unable to find that location.";
+                return;
+            }
+
+            var nameParts = new[] { match.Name, match.State }
+                .Where(part => !string.IsNullOrWhiteSpace(part));
+            var name = string.Join(", ", nameParts);
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = trimmed;
+            }
+
+            var city = new
+            {
+                id = Guid.NewGuid().ToString(),
+                name,
+                lat = match.Latitude,
+                lng = match.Longitude,
+            };
+
+            await JS.InvokeVoidAsync("weatherMap.addCity", city);
+            _addLocationOpen = false;
+            _addLocation = "Nashville, TN";
+        }
+        catch
+        {
+            _addLocationError = "Unable to find that location.";
+        }
+        finally
+        {
+            _addLocationLoading = false;
+        }
     }
 }

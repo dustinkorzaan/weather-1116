@@ -23,12 +23,30 @@ public sealed class PageSplitTests
         Assert.Contains("id=\"weather-map\"", rendered.Markup);
         Assert.Contains("Atlanta, GA", rendered.Markup);
         Assert.Contains("New York, NY", rendered.Markup);
+        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", rendered.Markup);
+        Assert.DoesNotContain("\"nyc\"", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
         Assert.DoesNotContain("<h2 class=\"section-title\">Current AI Weather</h2>", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
         Assert.Contains("Get Current AI Weather", rendered.Markup);
         Assert.Contains("weather-map-pin-card-preview", rendered.Markup);
+        Assert.Contains("weather-map-pin-card-delete", rendered.Markup);
+        Assert.Contains("weather-map-pin-card-header", rendered.Markup);
+    }
+
+    [Fact]
+    public void WeatherMapScript_ShowsDeleteControlAndMutatesPinList()
+    {
+        var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
+        Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("Get Current AI Weather", script);
+        Assert.Contains("weather-map-pin-card-delete", script);
+        Assert.Contains("addCity", script);
+        Assert.Contains("removeCity", script);
+        Assert.Contains("weather-map-cities", script);
+        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", script);
+        Assert.DoesNotContain("id: 'nyc'", script);
     }
 
     [Fact]
@@ -198,11 +216,30 @@ public sealed class PageSplitTests
                 };
             }
 
-            if (path.Contains("AIWeather/Current", StringComparison.OrdinalIgnoreCase))
+            if (path.Contains("AIWeather/Current", StringComparison.OrdinalIgnoreCase)
+                || path.Contains("/Geo", StringComparison.OrdinalIgnoreCase)
+                || path.Equals("/Geo", StringComparison.OrdinalIgnoreCase))
             {
                 if (holdWeather)
                 {
                     await Task.Delay(Timeout.Infinite, cancellationToken);
+                }
+
+                if (path.Contains("/Geo", StringComparison.OrdinalIgnoreCase)
+                    || path.Equals("/Geo", StringComparison.OrdinalIgnoreCase))
+                {
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = JsonContent.Create(new LatLongResponse
+                        {
+                            Rank = 1,
+                            Name = "Nashville",
+                            State = "Tennessee",
+                            Country = "United States",
+                            Latitude = 36.1627,
+                            Longitude = -86.7816,
+                        }),
+                    };
                 }
 
                 return new HttpResponseMessage(HttpStatusCode.OK)

@@ -20,6 +20,9 @@ export const weatherApi = createApi({
       query: (location) =>
         `/AIWeather/Current?location=${encodeURIComponent(location || 'Nashville, TN')}`,
     }),
+    searchLocation: builder.query({
+      query: (location) => `/Geo?location=${encodeURIComponent(location || '')}`,
+    }),
   }),
 });
 
@@ -27,4 +30,5 @@ export const {
   useGetHelloQuery,
   useLazyGetAboutQuery,
   useLazyGetCurrentAIWeatherQuery,
+  useLazySearchLocationQuery,
 } = weatherApi;

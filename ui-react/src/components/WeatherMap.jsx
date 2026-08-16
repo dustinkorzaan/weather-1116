@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  MAP_CITIES,
-  MAP_DEFAULT_CENTER,
-  MAP_DEFAULT_ZOOM,
-} from '../data/mapCities';
+import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from '../data/mapCities';
 import { applyMapColorSchemeCss, createMapOptions } from '../map/darkMapStyles';
 import { loadGoogleMaps } from '../map/loadGoogleMaps';
 import {
@@ -12,6 +8,7 @@ import {
   logoPinSpinOffsetSec,
   logoPinUrl,
 } from '../map/logoPinOverlay';
+import { useMapPins } from '../map/mapPinsContext';
 import { bindPinHoverCard } from '../map/pinHoverCard';
 import { THEME_CHANGE_EVENT, resolveTheme } from '../theme/theme';
 import { currentAiWeatherPath } from '../utils/currentAiWeatherLocation';
@@ -21,14 +18,21 @@ const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 function WeatherMap() {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const mapsApiRef = useRef(null);
   const markersRef = useRef([]);
   const viewStateRef = useRef({
     center: MAP_DEFAULT_CENTER,
     zoom: MAP_DEFAULT_ZOOM,
   });
+  const citiesRef = useRef([]);
+  const removeCityRef = useRef(() => {});
   const navigate = useNavigate();
+  const { cities, removeCity } = useMapPins();
   const [status, setStatus] = useState(apiKey ? 'loading' : 'missing-key');
   const [resolvedTheme, setResolvedTheme] = useState(() => resolveTheme());
+
+  citiesRef.current = cities;
+  removeCityRef.current = removeCity;
 
   useEffect(() => {
     const syncMapTheme = (event) => {
@@ -45,7 +49,6 @@ function WeatherMap() {
     }
 
     let cancelled = false;
-    let pins = [];
     applyMapColorSchemeCss(mapRef.current, resolvedTheme);
 
     loadGoogleMaps(apiKey)
@@ -63,35 +66,11 @@ function WeatherMap() {
           })
         );
 
-        const logoUrl = logoPinUrl(resolvedTheme);
-        const markers = MAP_CITIES.map((city, index) => {
-          const overlay = createLogoPinOverlay(maps, {
-            lat: city.lat,
-            lng: city.lng,
-            cityName: city.name,
-            logoUrl,
-            spinOffsetSec: logoPinSpinOffsetSec(index),
-          });
-          overlay.setMap(map);
-
-          bindPinHoverCard({
-            maps,
-            map,
-            marker: overlay,
-            cityName: city.name,
-            onGetWeather: (cityName) => {
-              navigate(currentAiWeatherPath(cityName));
-            },
-          });
-
-          return overlay;
-        });
-
-        pins = markers;
+        mapsApiRef.current = maps;
         mapInstanceRef.current = map;
-        markersRef.current = markers;
+        paintMarkers(maps, map, resolvedTheme, navigate, citiesRef, markersRef, removeCityRef);
         if (cancelled) {
-          pins.forEach((pin) => pin.setMap(null));
+          markersRef.current.forEach((pin) => pin.setMap(null));
           return;
         }
         setStatus('ready');
@@ -115,11 +94,28 @@ function WeatherMap() {
           };
         }
       }
-      pins.forEach((pin) => pin.setMap(null));
-      mapInstanceRef.current = null;
+      markersRef.current.forEach((pin) => pin.setMap(null));
       markersRef.current = [];
+      mapInstanceRef.current = null;
+      mapsApiRef.current = null;
     };
   }, [navigate, resolvedTheme]);
+
+  useEffect(() => {
+    const maps = mapsApiRef.current;
+    const map = mapInstanceRef.current;
+    if (!maps || !map) {
+      return;
+    }
+
+    const previousIds = new Set(markersRef.current.map((pin) => pin.cityId));
+    paintMarkers(maps, map, resolvedTheme, navigate, citiesRef, markersRef, removeCityRef);
+
+    const added = citiesRef.current.filter((city) => !previousIds.has(city.id));
+    if (added.length === 1 && typeof map.panTo === 'function') {
+      map.panTo({ lat: added[0].lat, lng: added[0].lng });
+    }
+  }, [cities, navigate]);
 
   return (
     <section className="flex min-h-0 w-full flex-1 flex-col" aria-label="Map">
@@ -147,8 +143,32 @@ function WeatherMap() {
               role="dialog"
               aria-label="Atlanta, GA"
             >
-              <div className="weather-map-pin-card-name text-sm font-semibold text-foreground">
-                Atlanta, GA
+              <div className="weather-map-pin-card-header flex items-start justify-between gap-2">
+                <div className="weather-map-pin-card-name text-sm font-semibold text-foreground">
+                  Atlanta, GA
+                </div>
+                <span
+                  className="weather-map-pin-card-delete inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground"
+                  aria-hidden="true"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    <line x1="10" x2="10" y1="11" y2="17" />
+                    <line x1="14" x2="14" y1="11" y2="17" />
+                  </svg>
+                </span>
               </div>
               <button
                 type="button"
@@ -162,6 +182,40 @@ function WeatherMap() {
       </div>
     </section>
   );
+}
+
+function paintMarkers(maps, map, resolvedTheme, navigate, citiesRef, markersRef, removeCityRef) {
+  markersRef.current.forEach((pin) => pin.setMap(null));
+
+  const logoUrl = logoPinUrl(resolvedTheme);
+  const markers = citiesRef.current.map((city, index) => {
+    const overlay = createLogoPinOverlay(maps, {
+      lat: city.lat,
+      lng: city.lng,
+      cityName: city.name,
+      logoUrl,
+      spinOffsetSec: logoPinSpinOffsetSec(index),
+    });
+    overlay.cityId = city.id;
+    overlay.setMap(map);
+
+    bindPinHoverCard({
+      maps,
+      map,
+      marker: overlay,
+      cityName: city.name,
+      onGetWeather: (cityName) => {
+        navigate(currentAiWeatherPath(cityName));
+      },
+      onDelete: () => {
+        removeCityRef.current(city.id);
+      },
+    });
+
+    return overlay;
+  });
+
+  markersRef.current = markers;
 }
 
 export default WeatherMap;

@@ -1,12 +1,23 @@
 export const PIN_HOVER_CARD_BUTTON_LABEL = 'Get Current AI Weather';
 export const PIN_HOVER_CARD_CLOSE_DELAY_MS = 200;
+export const PIN_HOVER_CARD_DELETE_LABEL = 'Remove from map';
+
+const DELETE_ICON_SVG = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M3 6h18" />
+    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    <line x1="10" x2="10" y1="11" y2="17" />
+    <line x1="14" x2="14" y1="11" y2="17" />
+  </svg>
+`;
 
 let activeCloseCard = null;
 
 /**
- * Builds the floating pin card: city name, then a Get Current AI Weather button.
+ * Builds the floating pin card: city name, delete, then Get Current AI Weather.
  * @param {string} cityName
- * @returns {{ card: HTMLDivElement, button: HTMLButtonElement }}
+ * @returns {{ card: HTMLDivElement, button: HTMLButtonElement, deleteButton: HTMLButtonElement }}
  */
 export function createPinHoverCard(cityName) {
   const card = document.createElement('div');
@@ -14,9 +25,21 @@ export function createPinHoverCard(cityName) {
   card.setAttribute('role', 'dialog');
   card.setAttribute('aria-label', cityName);
 
+  const header = document.createElement('div');
+  header.className = 'weather-map-pin-card-header flex items-start justify-between gap-2';
+
   const name = document.createElement('div');
   name.className = 'weather-map-pin-card-name text-sm font-semibold text-foreground';
   name.textContent = cityName;
+
+  const deleteButton = document.createElement('button');
+  deleteButton.type = 'button';
+  deleteButton.className =
+    'weather-map-pin-card-delete inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive';
+  deleteButton.setAttribute('aria-label', `Remove ${cityName} from the map`);
+  deleteButton.innerHTML = DELETE_ICON_SVG;
+
+  header.append(name, deleteButton);
 
   const button = document.createElement('button');
   button.type = 'button';
@@ -24,22 +47,23 @@ export function createPinHoverCard(cityName) {
     'weather-map-pin-card-button cursor-pointer rounded-md bg-primary px-2.5 py-1.5 text-left text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/80';
   button.textContent = PIN_HOVER_CARD_BUTTON_LABEL;
 
-  card.append(name, button);
-  return { card, button };
+  card.append(header, button);
+  return { card, button, deleteButton };
 }
 
 /**
- * Shows the pin card on hover (and tap). Only the button navigates.
+ * Shows the pin card on hover (and tap). Weather and delete are explicit actions.
  * @param {{
  *   maps: { InfoWindow: new (opts: object) => object },
  *   map: object,
  *   marker: { addListener: (eventName: string, handler: Function) => void },
  *   cityName: string,
  *   onGetWeather: (cityName: string) => void,
+ *   onDelete?: (cityName: string) => void,
  * }} options
  */
-export function bindPinHoverCard({ maps, map, marker, cityName, onGetWeather }) {
-  const { card, button } = createPinHoverCard(cityName);
+export function bindPinHoverCard({ maps, map, marker, cityName, onGetWeather, onDelete }) {
+  const { card, button, deleteButton } = createPinHoverCard(cityName);
   const infoWindowOptions = {
     content: card,
     disableAutoPan: true,
@@ -104,9 +128,16 @@ export function bindPinHoverCard({ maps, map, marker, cityName, onGetWeather }) 
     onGetWeather(cityName);
   });
 
+  deleteButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    closeCard();
+    onDelete?.(cityName);
+  });
+
   if (map && typeof map.addListener === 'function') {
     map.addListener('click', closeCard);
   }
 
-  return { infoWindow, card, button, openCard, closeCard };
+  return { infoWindow, card, button, deleteButton, openCard, closeCard };
 }

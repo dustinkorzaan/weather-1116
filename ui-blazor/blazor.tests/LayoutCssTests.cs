@@ -53,6 +53,7 @@ public sealed class LayoutCssTests
         Assert.Contains("<a href=\"/\" class=\"brand-link\">", rendered.Markup);
         Assert.Contains("<h1 class=\"brand-title\">Weather Blazor</h1>", rendered.Markup);
         Assert.Contains("id=\"user-menu-button\"", rendered.Markup);
+        Assert.Contains("aria-label=\"Add location\"", rendered.Markup);
         Assert.Contains("src=\"avatar.svg\"", rendered.Markup);
         Assert.Contains("class=\"avatar-icon\"", rendered.Markup);
         Assert.Contains("class=\"about-modal", rendered.Markup);
@@ -72,6 +73,9 @@ public sealed class LayoutCssTests
         Assert.Contains("NavigateTo(\"/chat-clients\")", layoutSource);
         Assert.Contains("OpenExternalAsync", layoutSource);
         Assert.Contains("avatar.svg", layoutSource);
+        Assert.Contains("Add location", layoutSource);
+        Assert.Contains("weatherMap.addCity", layoutSource);
+        Assert.Contains("SearchLocation", layoutSource);
         Assert.DoesNotContain("FluentButton", layoutSource);
 
         var avatarSvg = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/avatar.svg"));
@@ -126,6 +130,8 @@ public sealed class LayoutCssTests
         Assert.Contains("html.dark", css);
         Assert.Contains("--wx-map", css);
         Assert.Contains(".avatar-icon", css);
+        Assert.Contains(".add-location-button", css);
+        Assert.Contains(".weather-map-pin-card-delete", css);
         Assert.Contains(".about-modal.is-open", css);
         Assert.Contains(".about-close", css);
     }

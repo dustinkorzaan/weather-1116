@@ -34,7 +34,6 @@ public class GetLatLongDataHandler : IRequestHandler<GetLatLongDataEvent, NonAIL
         {
             string encodedLocation = Uri.EscapeDataString(query);
             string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedLocation}&count={count}&language=en&format=json";
-            _logger.LogInformation("Non-AI: Fetching geocoding data from: {Url}", url);
             string jsonResponse = await client.GetStringAsync(url, cancellationToken);
             var geoData = JsonSerializer.Deserialize<NonAIGeocodingResponse>(jsonResponse);
 
