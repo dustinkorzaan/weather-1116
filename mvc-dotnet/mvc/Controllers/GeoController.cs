@@ -25,7 +25,7 @@ public class GeoController : Controller
 		try
 		{
 			var response = await _mediator.Send(
-				new GetLatLongDataEvent
+				new GetLatLongEvent
 				{
 					Location = location.Trim(),
 					Count = 1,

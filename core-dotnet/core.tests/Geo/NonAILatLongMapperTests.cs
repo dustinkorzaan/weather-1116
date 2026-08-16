@@ -19,12 +19,12 @@ public class NonAILatLongMapperTests
     }
 
     [Fact]
-    public void GetLatLongDataEvent_DefaultsCountToFive()
+    public void GetLatLongEvent_DefaultsCountToFive()
     {
-        var request = new GetLatLongDataEvent { Location = "Paris" };
+        var request = new GetLatLongEvent { Location = "Paris" };
 
         Assert.Equal(5, request.Count);
-        Assert.Equal(GetLatLongDataEvent.DefaultCount, request.Count);
+        Assert.Equal(GetLatLongEvent.DefaultCount, request.Count);
     }
 
     [Fact]

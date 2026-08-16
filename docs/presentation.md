@@ -30,7 +30,7 @@ and the Foundry console learning path (V1 → V5).
 
 1. **Problem** — AI weather needs real lat/long and public weather data, not hallucination.
    - "Nashville TN" is a location
-   - `GetLatLongDataEvent(location)` returns ranked lat/long matches (default 5; V1/V2 use top 1)
+   - `GetLatLongEvent(location)` returns ranked lat/long matches (default 5; V1/V2 use top 1)
    - `GetPublicWeatherCurrentEvent(Lat/Long)` returns Non AI Public Weather Data
    - AI returns weather summary
 2. **V1 → V2** — model-direct (legacy vs unified endpoint); when the console still owns data prep.

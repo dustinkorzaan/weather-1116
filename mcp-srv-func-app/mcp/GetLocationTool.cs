@@ -10,12 +10,12 @@ namespace WeatherMcpSrvFuncApp;
 /// <summary>
 /// MCP tool that reverse-geocodes lat/long to a simple place label via Core/MediatR.
 /// </summary>
-public class GetLocationDataTool(IMediator mediator, ILogger<GetLocationDataTool> logger)
+public class GetLocationTool(IMediator mediator, ILogger<GetLocationTool> logger)
 {
-	[Function(nameof(GetLocationData))]
-	public async Task<string> GetLocationData(
+	[Function(nameof(GetLocation))]
+	public async Task<string> GetLocation(
 		[McpToolTrigger(
-			"GetLocationData",
+			"GetLocation",
 			"Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.")]
 		ToolInvocationContext context,
 		[McpToolProperty(
@@ -29,13 +29,13 @@ public class GetLocationDataTool(IMediator mediator, ILogger<GetLocationDataTool
 			true)]
 		double longitude)
 	{
-		var result = await mediator.Send(new GetLocationDataEvent
+		var result = await mediator.Send(new GetLocationEvent
 		{
 			Latitude = latitude,
 			Longitude = longitude,
 		});
 
-		logger.LogInformation("MCP tool GetLocationData returned {Location}", result.Location);
+		logger.LogInformation("MCP tool GetLocation returned {Location}", result.Location);
 
 		return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
 	}

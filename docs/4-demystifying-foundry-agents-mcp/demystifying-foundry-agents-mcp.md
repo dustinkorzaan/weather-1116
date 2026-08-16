@@ -67,7 +67,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 
 - **V3 — In-process tool callbacks** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
   (`FoundryConsoleV3InProcessToolCallbacks.csproj`)
-  - Registers `GetLatLongData`, `GetLocationData`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as in-process tool
+  - Registers `GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as in-process tool
     callbacks (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.
 

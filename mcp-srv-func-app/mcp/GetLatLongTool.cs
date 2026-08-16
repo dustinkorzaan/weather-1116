@@ -10,12 +10,12 @@ namespace WeatherMcpSrvFuncApp;
 /// <summary>
 /// MCP tool that resolves a location name to ranked latitude/longitude matches via Core/MediatR.
 /// </summary>
-public class GetLatLongDataTool(IMediator mediator, ILogger<GetLatLongDataTool> logger)
+public class GetLatLongTool(IMediator mediator, ILogger<GetLatLongTool> logger)
 {
-	[Function(nameof(GetLatLongData))]
-	public async Task<string> GetLatLongData(
+	[Function(nameof(GetLatLong))]
+	public async Task<string> GetLatLong(
 		[McpToolTrigger(
-			"GetLatLongData",
+			"GetLatLong",
 			"Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.")]
 		ToolInvocationContext context,
 		[McpToolProperty(
@@ -24,9 +24,9 @@ public class GetLatLongDataTool(IMediator mediator, ILogger<GetLatLongDataTool> 
 			true)]
 		string location)
 	{
-		logger.LogInformation("MCP tool GetLatLongData invoked for location: {Location}", location);
+		logger.LogInformation("MCP tool GetLatLong invoked for location: {Location}", location);
 
-		var result = await mediator.Send(new GetLatLongDataEvent { Location = location });
+		var result = await mediator.Send(new GetLatLongEvent { Location = location });
 
 		return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
 	}

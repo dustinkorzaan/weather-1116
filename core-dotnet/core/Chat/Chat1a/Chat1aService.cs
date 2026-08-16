@@ -51,7 +51,7 @@ public sealed class Chat1aService : IChatClientService
 
         var client = _settings.CreateResponsesClient();
         var getLatLongTool = ChatToolDefinitions.CreateGetLatLongTool();
-        var getLocationTool = ChatToolDefinitions.CreateGetLocationDataTool();
+        var getLocationTool = ChatToolDefinitions.CreateGetLocationTool();
         var getPublicWeatherCurrentTool = ChatToolDefinitions.CreateGetPublicWeatherCurrentTool();
         var getPublicWeatherForecastTool = ChatToolDefinitions.CreateGetPublicWeatherForecastTool();
         var getPublicWeatherHistoryTool = ChatToolDefinitions.CreateGetPublicWeatherHistoryTool();

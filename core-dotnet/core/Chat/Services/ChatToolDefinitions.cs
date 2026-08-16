@@ -6,7 +6,7 @@ namespace Core.Chat.Services;
 public static class ChatToolDefinitions
 {
     public static FunctionTool CreateGetLatLongTool() => ResponseTool.CreateFunctionTool(
-        functionName: "GetLatLongData",
+        functionName: "GetLatLong",
         functionDescription: "Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.",
         functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
         {
@@ -23,8 +23,8 @@ public static class ChatToolDefinitions
         """)),
         strictModeEnabled: true);
 
-    public static FunctionTool CreateGetLocationDataTool() => ResponseTool.CreateFunctionTool(
-        functionName: "GetLocationData",
+    public static FunctionTool CreateGetLocationTool() => ResponseTool.CreateFunctionTool(
+        functionName: "GetLocation",
         functionDescription: "Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.",
         functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
         {

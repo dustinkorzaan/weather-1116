@@ -61,12 +61,12 @@ test('shows tool arguments and result on hover', async () => {
   streamChatMessage.mockImplementation(async ({ onEvent }) => {
     onEvent({
       type: 'tool_start',
-      toolName: 'GetLatLongData',
+      toolName: 'GetLatLong',
       toolArguments: '{\n  "location": "Nashville, TN"\n}',
     });
     onEvent({
       type: 'tool_end',
-      toolName: 'GetLatLongData',
+      toolName: 'GetLatLong',
       toolArguments: '{\n  "location": "Nashville, TN"\n}',
       toolResult: '[\n  {\n    "name": "Nashville"\n  }\n]',
     });
@@ -80,7 +80,7 @@ test('shows tool arguments and result on hover', async () => {
   await user.type(screen.getByLabelText(/message/i), 'weather in nashville');
   await user.click(screen.getByRole('button', { name: /^send$/i }));
 
-  const chip = await screen.findByText('Ran GetLatLongData …');
+  const chip = await screen.findByText('Ran GetLatLong …');
   await user.hover(chip);
 
   await waitFor(() => {

@@ -2,12 +2,12 @@ using Core.Geo.Handlers;
 
 namespace Core.Tests.Geo;
 
-public class GetLocationDataHandlerTests
+public class GetLocationHandlerTests
 {
     [Fact]
     public void BuildReverseGeocodeUrl_UsesInvariantCoordinates()
     {
-        var url = GetLocationDataHandler.BuildReverseGeocodeUrl(36.1627, -86.7816);
+        var url = GetLocationHandler.BuildReverseGeocodeUrl(36.1627, -86.7816);
 
         Assert.StartsWith("https://nominatim.openstreetmap.org/reverse?", url);
         Assert.Contains("lat=36.1627", url);

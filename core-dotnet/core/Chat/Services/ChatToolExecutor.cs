@@ -19,8 +19,8 @@ public sealed class ChatToolExecutor
     {
         return functionCall.FunctionName switch
         {
-            "GetLatLongData" => await ExecuteGetLatLong(functionCall.FunctionArguments, cancellationToken),
-            "GetLocationData" => await ExecuteGetLocation(functionCall.FunctionArguments, cancellationToken),
+            "GetLatLong" => await ExecuteGetLatLong(functionCall.FunctionArguments, cancellationToken),
+            "GetLocation" => await ExecuteGetLocation(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherCurrent" => await ExecuteGetPublicWeatherCurrent(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherForecast" => await ExecuteGetPublicWeatherForecast(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherHistory" => await ExecuteGetPublicWeatherHistory(functionCall.FunctionArguments, cancellationToken),
@@ -32,9 +32,9 @@ public sealed class ChatToolExecutor
     {
         using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
         string location = argumentsJson.RootElement.GetProperty("location").GetString()
-            ?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
+            ?? throw new InvalidOperationException("GetLatLong requires a location argument.");
 
-        var latLongMatches = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
+        var latLongMatches = await _mediator.Send(new GetLatLongEvent { Location = location }, cancellationToken);
         return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
     }
 
@@ -44,7 +44,7 @@ public sealed class ChatToolExecutor
         double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
         double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 
-        var locationData = await _mediator.Send(new GetLocationDataEvent
+        var locationData = await _mediator.Send(new GetLocationEvent
         {
             Latitude = latitude,
             Longitude = longitude,

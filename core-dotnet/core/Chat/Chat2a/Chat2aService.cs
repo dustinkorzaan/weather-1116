@@ -142,29 +142,29 @@ public sealed class Chat2aService : IChatClientService
 
     private IList<AITool> CreateTools() =>
     [
-        AIFunctionFactory.Create(GetLatLongData),
-        AIFunctionFactory.Create(GetLocationData),
+        AIFunctionFactory.Create(GetLatLong),
+        AIFunctionFactory.Create(GetLocation),
         AIFunctionFactory.Create(GetPublicWeatherCurrent),
         AIFunctionFactory.Create(GetPublicWeatherForecast),
         AIFunctionFactory.Create(GetPublicWeatherHistory),
     ];
 
     [Description("Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.")]
-    private async Task<string> GetLatLongData(
+    private async Task<string> GetLatLong(
         [Description("City and optional region/country, e.g. Nashville, TN")] string location,
         CancellationToken cancellationToken)
     {
-        var latLongMatches = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
+        var latLongMatches = await _mediator.Send(new GetLatLongEvent { Location = location }, cancellationToken);
         return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
     }
 
     [Description("Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.")]
-    private async Task<string> GetLocationData(
+    private async Task<string> GetLocation(
         [Description("Latitude in decimal degrees")] double latitude,
         [Description("Longitude in decimal degrees")] double longitude,
         CancellationToken cancellationToken)
     {
-        var locationData = await _mediator.Send(new GetLocationDataEvent
+        var locationData = await _mediator.Send(new GetLocationEvent
         {
             Latitude = latitude,
             Longitude = longitude,

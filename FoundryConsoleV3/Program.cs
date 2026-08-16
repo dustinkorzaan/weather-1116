@@ -44,7 +44,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - ResponsesClient with in-process tool callbacks (GetLatLongData, GetLocationData, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory)
+		 - ResponsesClient with in-process tool callbacks (GetLatLong, GetLocation, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory)
 		 - Model can call tools to derive lat/long, label a coordinate, and fetch public weather
 		 - JSON output from AI
 		""");
@@ -53,9 +53,9 @@ internal class Program
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
-		You can call the GetLatLongData tool to resolve a place name to ranked latitude/longitude
+		You can call the GetLatLong tool to resolve a place name to ranked latitude/longitude
 		matches (up to 5; rank 1 is the best match). Use name, state, and country to pick the
-		right place — you may skip rank 1. Call GetLocationData to turn latitude/longitude into
+		right place — you may skip rank 1. Call GetLocation to turn latitude/longitude into
 		a City, State label (City, State, Country outside the US). Then call GetPublicWeatherCurrent
 		for conditions now, GetPublicWeatherForecast for upcoming weather, or GetPublicWeatherHistory
 		for the recent past.
@@ -112,7 +112,7 @@ internal class Program
 		ProjectResponsesClient client = projectOpenAIClient.GetProjectResponsesClientForModel(deploymentName);
 
 		FunctionTool getLatLongTool = ResponseTool.CreateFunctionTool(
-			functionName: "GetLatLongData",
+			functionName: "GetLatLong",
 			functionDescription: "Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
@@ -130,7 +130,7 @@ internal class Program
 			strictModeEnabled: true);
 
 		FunctionTool getLocationTool = ResponseTool.CreateFunctionTool(
-			functionName: "GetLocationData",
+			functionName: "GetLocation",
 			functionDescription: "Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
@@ -266,28 +266,28 @@ internal class Program
 					{
 						switch (functionCall.FunctionName)
 						{
-							case "GetLatLongData":
+							case "GetLatLong":
 								{
 									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
 									string toolLocation = argumentsJson.RootElement.GetProperty("location").GetString()
-										?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
+										?? throw new InvalidOperationException("GetLatLong requires a location argument.");
 
-									Console.WriteLine($"\nTool call: GetLatLongData({toolLocation})");
-									var latLongMatches = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
+									Console.WriteLine($"\nTool call: GetLatLong({toolLocation})");
+									var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = toolLocation });
 									string functionOutput = JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
 								}
 
-							case "GetLocationData":
+							case "GetLocation":
 								{
 									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
 									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
 									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 
-									Console.WriteLine($"\nTool call: GetLocationData({latitude}, {longitude})");
-									var locationData = await mediator.Send(new GetLocationDataEvent
+									Console.WriteLine($"\nTool call: GetLocation({latitude}, {longitude})");
+									var locationData = await mediator.Send(new GetLocationEvent
 									{
 										Latitude = latitude,
 										Longitude = longitude,
