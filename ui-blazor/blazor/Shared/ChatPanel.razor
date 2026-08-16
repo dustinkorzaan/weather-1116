@@ -25,7 +25,7 @@
         </div>
 
         <EditForm Model="this" OnValidSubmit="OnSubmit" class="chat-form" @onsubmit:preventDefault="true">
-            <div class="form-row form-row-end">
+            <div class="form-row form-row-start">
                 @* Class="chat-input" lets chatInput.js bind the inner textarea (including shadow DOM). *@
                 <FluentTextArea @bind-Value="_input"
                                 Class="chat-input"

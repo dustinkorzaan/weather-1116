@@ -159,6 +159,10 @@ test('chat tabs and send use clickable gray controls instead of blue', () => {
   mockHelloFetch();
   renderApp('/chat-clients');
 
+  expect(screen.getByRole('textbox', { name: /message/i }).closest('form')?.className).toMatch(
+    /items-start/
+  );
+
   const tab = screen.getByRole('tab', { name: 'Chat1a' });
   expect(tab.className).toMatch(/cursor-pointer/);
   expect(tab.className).toMatch(/border-2/);

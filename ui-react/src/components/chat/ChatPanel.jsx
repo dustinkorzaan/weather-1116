@@ -232,7 +232,7 @@ function ChatPanel() {
               ))}
             </div>
 
-            <form className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end" onSubmit={onSubmit}>
+            <form className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start" onSubmit={onSubmit}>
               <label className="sr-only" htmlFor="chat-input">Message</label>
               <textarea
                 id="chat-input"

@@ -153,8 +153,8 @@ fluent-menu-item a {
     gap: 1rem;
 }
 
-.form-row-end {
-    align-items: flex-end;
+.form-row-start {
+    align-items: flex-start;
 }
 
 .weather-results {
