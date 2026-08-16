@@ -6,9 +6,9 @@ export const MAP_CITIES = [
   { id: '04f5d22f-ca31-4d29-ac9e-a1c4f0127ed1', name: 'Charlotte, NC', lat: 35.2271, lng: -80.8431 },
 ];
 
-/** Default map center (Eastern US / SE Canada). */
-export const MAP_DEFAULT_CENTER = { lat: 39.5, lng: -77.5 };
-export const MAP_DEFAULT_ZOOM = 5;
+/** Default map center (Nashville, TN / south-central US). */
+export const MAP_DEFAULT_CENTER = { lat: 36.16, lng: -86.78 };
+export const MAP_DEFAULT_ZOOM = 4;
 
 export const MAP_CITIES_STORAGE_KEY = 'weather-map-cities';
 
