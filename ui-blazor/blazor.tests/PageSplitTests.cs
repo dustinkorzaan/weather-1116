@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using Bunit;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -59,6 +60,34 @@ public sealed class PageSplitTests
     }
 
     [Fact]
+    public void CurrentAIWeather_LocationQuery_FillsSearchClearsUrlAndFetches()
+    {
+        using var context = CreateContext();
+        context.Services.GetRequiredService<NavigationManager>()
+            .NavigateTo("/current-ai-weather?location=nashville%20tn");
+
+        var rendered = context.Render<WeatherBlazor.Pages.CurrentAIWeather>(parameters =>
+            parameters.Add(page => page.LocationQuery, "nashville tn"));
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("Sunny in Nashville.", rendered.Markup);
+        });
+
+        Assert.Contains("nashville tn", rendered.Markup);
+        Assert.DoesNotContain("location=nashville", context.Services.GetRequiredService<NavigationManager>().Uri);
+    }
+
+    [Fact]
+    public void WeatherMapScript_NavigatesToCurrentAiWeatherWithLocationQuery()
+    {
+        var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
+        Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("/current-ai-weather?location=", script);
+        Assert.Contains("marker.addListener('click'", script);
+    }
+
+    [Fact]
     public void ChatClients_RendersChatWithoutHelloWeatherOrMap()
     {
         using var context = CreateContext();
@@ -70,6 +99,23 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("Current AI Weather", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
         Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
+    }
+
+    private static string FindRepoFile(string relativePath)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            var candidate = Path.Combine(dir.FullName, relativePath);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            dir = dir.Parent;
+        }
+
+        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
     }
 
     private static BunitContext CreateContext()
@@ -113,6 +159,21 @@ public sealed class PageSplitTests
                     {
                         RequestMessage = "from test",
                         RequestResponse = "Hello from test API.",
+                    }),
+                });
+            }
+
+            if (path.Contains("AIWeather/Current", StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = JsonContent.Create(new AIWeatherResponse
+                    {
+                        FullSummary = "Sunny in Nashville.",
+                        TemperatureF = 72,
+                        WindSpeedMPH = 5,
+                        WindDirection = "S",
+                        Conditions = "Clear",
                     }),
                 });
             }

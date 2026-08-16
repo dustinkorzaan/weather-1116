@@ -6,6 +6,23 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 {
     private readonly HttpClient _client = factory.CreateClient();
 
+    private static string FindRepoFile(string relativePath)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            var candidate = Path.Combine(dir.FullName, relativePath);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            dir = dir.Parent;
+        }
+
+        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
+    }
+
     [Fact]
     public async Task Index_ReturnsOkWithMapAndWithoutSplitPageContent()
     {
@@ -59,6 +76,38 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.DoesNotContain("btn-primary", html);
         Assert.DoesNotContain("bg-blue-700", html);
         Assert.DoesNotContain("grid-cols-1", html);
+    }
+
+    [Fact]
+    public async Task CurrentAIWeather_ReturnsOkWithLocationQuery()
+    {
+        var response = await _client.GetAsync("/current-ai-weather?location=nashville%20tn");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains("id=\"ai-weather-form\"", html);
+        Assert.Contains("id=\"ai-weather-location\"", html);
+        Assert.Contains("currentAIWeather.js", html);
+    }
+
+    [Fact]
+    public void WeatherMapScript_NavigatesToCurrentAiWeatherWithLocationQuery()
+    {
+        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
+        Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("/current-ai-weather?location=", script);
+        Assert.Contains("marker.addListener('click'", script);
+    }
+
+    [Fact]
+    public void CurrentAIWeatherScript_ConsumesLocationQueryAndClearsUrl()
+    {
+        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/currentAIWeather.js"));
+        Assert.Contains("consumeLocationQuery", script);
+        Assert.Contains("params.get('location')", script);
+        Assert.Contains("history.replaceState", script);
+        Assert.Contains("requestWeather()", script);
     }
 
     [Fact]

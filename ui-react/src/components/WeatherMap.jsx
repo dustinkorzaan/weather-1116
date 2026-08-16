@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   MAP_CITIES,
   MAP_DEFAULT_CENTER,
@@ -6,6 +7,7 @@ import {
 } from '../data/mapCities';
 import { DARK_MAP_STYLES } from '../map/darkMapStyles';
 import { loadGoogleMaps } from '../map/loadGoogleMaps';
+import { currentAiWeatherPath } from '../utils/currentAiWeatherLocation';
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
@@ -23,6 +25,7 @@ function createWhiteDotIcon(maps) {
 function WeatherMap() {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const navigate = useNavigate();
   const [status, setStatus] = useState(apiKey ? 'loading' : 'missing-key');
 
   useEffect(() => {
@@ -52,11 +55,13 @@ function WeatherMap() {
 
         const icon = createWhiteDotIcon(maps);
         MAP_CITIES.forEach((city) => {
-          new maps.Marker({
+          const marker = new maps.Marker({
             map,
             position: { lat: city.lat, lng: city.lng },
             title: city.name,
             icon,
+            clickable: true,
+            cursor: 'pointer',
             label: {
               text: city.name,
               color: '#e4e4e7',
@@ -64,6 +69,10 @@ function WeatherMap() {
               fontWeight: '500',
               className: 'relative left-[0.35rem] -top-[0.1rem] whitespace-nowrap',
             },
+          });
+
+          marker.addListener('click', () => {
+            navigate(currentAiWeatherPath(city.name));
           });
         });
 
@@ -79,7 +88,7 @@ function WeatherMap() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <section className="flex min-h-0 w-full flex-1 flex-col" aria-label="Map">
