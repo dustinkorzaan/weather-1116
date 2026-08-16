@@ -51,7 +51,7 @@ public class GeoController : ControllerBase
 	}
 
 	[HttpGet("GetLocation")]
-	public async Task<ActionResult<NominatimLocationResponse>> GetLocation(
+	public async Task<ActionResult<NonAILocationResponse>> GetLocation(
 		[FromQuery] double? latitude,
 		[FromQuery] double? longitude,
 		CancellationToken cancellationToken)

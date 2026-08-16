@@ -71,13 +71,13 @@ public class GeoControllerTests
 	[Fact]
 	public async Task GetLocation_ReturnsPlaceLabel()
 	{
-		var mediator = new FakeMediator(new NominatimLocationResponse { Location = "Nashville, Tennessee" });
+		var mediator = new FakeMediator(new NonAILocationResponse { Location = "Nashville, Tennessee" });
 		var controller = new GeoController(mediator);
 
 		var result = await controller.GetLocation(36.1627, -86.7816, CancellationToken.None);
 
 		var ok = Assert.IsType<OkObjectResult>(result.Result);
-		var body = Assert.IsType<NominatimLocationResponse>(ok.Value);
+		var body = Assert.IsType<NonAILocationResponse>(ok.Value);
 		Assert.Equal("Nashville, Tennessee", body.Location);
 		Assert.Equal(36.1627, mediator.LastLatitude);
 		Assert.Equal(-86.7816, mediator.LastLongitude);
@@ -86,7 +86,7 @@ public class GeoControllerTests
 	[Fact]
 	public async Task GetLocation_ReturnsBadRequestWhenCoordinatesAreMissing()
 	{
-		var controller = new GeoController(new FakeMediator(new NominatimLocationResponse()));
+		var controller = new GeoController(new FakeMediator(new NonAILocationResponse()));
 
 		var result = await controller.GetLocation(null, -86.7816, CancellationToken.None);
 
@@ -96,7 +96,7 @@ public class GeoControllerTests
 	[Fact]
 	public async Task GetLocation_ReturnsBadRequestWhenCoordinatesAreOutOfRange()
 	{
-		var controller = new GeoController(new FakeMediator(new NominatimLocationResponse()));
+		var controller = new GeoController(new FakeMediator(new NonAILocationResponse()));
 
 		var result = await controller.GetLocation(91, 0, CancellationToken.None);
 
@@ -146,7 +146,7 @@ public class GeoControllerTests
 					throw new InvalidOperationException("Nominatim: No location found for the given coordinates.");
 				}
 
-				return Task.FromResult((TResponse)(object)(response ?? new NominatimLocationResponse()));
+				return Task.FromResult((TResponse)(object)(response ?? new NonAILocationResponse()));
 			}
 
 			throw new NotSupportedException();
