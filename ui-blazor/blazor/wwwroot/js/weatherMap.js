@@ -124,19 +124,42 @@ window.weatherMap = (function () {
     element.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
   }
 
+  function defaultMapTypeId(maps, mapTypeId) {
+    if (mapTypeId) {
+      return mapTypeId;
+    }
+    return (maps && maps.MapTypeId && maps.MapTypeId.ROADMAP) || 'roadmap';
+  }
+
+  function createMapTypeControlOptions(maps) {
+    const ids = maps && maps.MapTypeId;
+    const options = {
+      mapTypeIds: [(ids && ids.ROADMAP) || 'roadmap', (ids && ids.SATELLITE) || 'satellite'],
+    };
+    if (maps && maps.MapTypeControlStyle && maps.MapTypeControlStyle.HORIZONTAL_BAR) {
+      options.style = maps.MapTypeControlStyle.HORIZONTAL_BAR;
+    }
+    if (maps && maps.ControlPosition && maps.ControlPosition.TOP_LEFT) {
+      options.position = maps.ControlPosition.TOP_LEFT;
+    }
+    return options;
+  }
+
   /**
    * Vector maps ignore JSON styles, and colorScheme is init-only. Raster + an
    * explicit LIGHT/DARK scheme keeps the canvas on the site theme.
    */
-  function createThemedMap(maps, element, appearance, center, zoom) {
+  function createThemedMap(maps, element, appearance, center, zoom, mapTypeId) {
     applyMapColorSchemeCss(element, appearance.colorScheme === 'DARK' ? 'dark' : 'light');
     const options = {
       center: center || DEFAULT_CENTER,
       zoom: zoom == null ? DEFAULT_ZOOM : zoom,
+      mapTypeId: defaultMapTypeId(maps, mapTypeId),
+      mapTypeControl: true,
+      mapTypeControlOptions: createMapTypeControlOptions(maps),
       styles: appearance.styles,
       disableDefaultUI: true,
       zoomControl: true,
-      mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
       backgroundColor: appearance.backgroundColor,
@@ -541,6 +564,7 @@ window.weatherMap = (function () {
     const appearance = mapAppearance(resolved);
     let center = DEFAULT_CENTER;
     let zoom = DEFAULT_ZOOM;
+    let mapTypeId = entry.mapTypeId;
     if (entry.map && typeof entry.map.getCenter === 'function') {
       const current = entry.map.getCenter();
       if (current) {
@@ -548,6 +572,9 @@ window.weatherMap = (function () {
       }
       if (typeof entry.map.getZoom === 'function' && entry.map.getZoom() != null) {
         zoom = entry.map.getZoom();
+      }
+      if (typeof entry.map.getMapTypeId === 'function') {
+        mapTypeId = entry.map.getMapTypeId() || mapTypeId;
       }
     }
 
@@ -559,10 +586,11 @@ window.weatherMap = (function () {
       });
     }
 
-    const map = createThemedMap(entry.maps, entry.element, appearance, center, zoom);
+    const map = createThemedMap(entry.maps, entry.element, appearance, center, zoom, mapTypeId);
     entry.map = map;
     entry.markers = createCityMarkers(entry.maps, map, entry.cities, appearance);
     entry.theme = resolved;
+    entry.mapTypeId = mapTypeId;
     if (entry.element) {
       mapByElement.set(entry.element, map);
     }
@@ -828,7 +856,6 @@ window.weatherMap = (function () {
       const map = createThemedMap(maps, current, appearance, DEFAULT_CENTER, DEFAULT_ZOOM);
       const markers = createCityMarkers(maps, map, resolvedCities, appearance);
       const getLocationUrl = resolveGetLocationUrl(current);
-      bindRightClickAddLocation(maps, map, getLocationUrl);
       const entry = {
         maps: maps,
         map: map,
@@ -838,6 +865,7 @@ window.weatherMap = (function () {
         theme: resolvedTheme(),
         getLocationUrl: getLocationUrl,
       };
+      bindRightClickAddLocation(maps, map, getLocationUrl);
 
       themedMaps.push(entry);
       mapByElement.set(current, map);

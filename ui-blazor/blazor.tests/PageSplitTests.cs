@@ -152,6 +152,9 @@ public sealed class PageSplitTests
         Assert.Contains("bindPinHoverCard", script);
         Assert.Contains("bindRightClickAddLocation", script);
         Assert.Contains("Add Location", script);
+        Assert.Contains("mapTypeControl: true", script);
+        Assert.Contains("SATELLITE", script);
+        Assert.Contains("ROADMAP", script);
         Assert.Contains("LIGHT_MAP_STYLES", script);
         Assert.Contains("weather-theme-change", script);
         Assert.Contains("colorScheme", script);

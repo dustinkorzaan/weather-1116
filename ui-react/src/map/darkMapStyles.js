@@ -1,4 +1,5 @@
 import { logoPinUrl } from './logoPinOverlay';
+import { createMapTypeControlOptions, defaultMapTypeId } from './mapTypeToggle';
 
 export const DARK_MAP_BACKGROUND = '#0b111d';
 export const LIGHT_MAP_BACKGROUND = '#e8eef4';
@@ -138,10 +139,12 @@ export function createMapOptions(maps, resolvedTheme, extras = {}) {
   return {
     center: extras.center,
     zoom: extras.zoom,
+    mapTypeId: defaultMapTypeId(maps, extras.mapTypeId),
+    mapTypeControl: true,
+    mapTypeControlOptions: createMapTypeControlOptions(maps),
     styles: appearance.styles,
     disableDefaultUI: true,
     zoomControl: true,
-    mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
     backgroundColor: appearance.backgroundColor,

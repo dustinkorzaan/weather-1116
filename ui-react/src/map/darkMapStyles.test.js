@@ -41,6 +41,9 @@ test('createMapOptions forces raster rendering and LIGHT colorScheme for the lig
   const maps = {
     ColorScheme: { LIGHT: 'LIGHT', DARK: 'DARK' },
     RenderingType: { RASTER: 'RASTER', VECTOR: 'VECTOR' },
+    MapTypeId: { ROADMAP: 'roadmap', SATELLITE: 'satellite' },
+    MapTypeControlStyle: { HORIZONTAL_BAR: 'HORIZONTAL_BAR' },
+    ControlPosition: { TOP_LEFT: 'TOP_LEFT' },
   };
 
   const options = createMapOptions(maps, 'light', {
@@ -54,6 +57,13 @@ test('createMapOptions forces raster rendering and LIGHT colorScheme for the lig
   expect(options.backgroundColor).toBe(LIGHT_MAP_BACKGROUND);
   expect(options.center).toEqual({ lat: 1, lng: 2 });
   expect(options.zoom).toBe(4);
+  expect(options.mapTypeId).toBe('roadmap');
+  expect(options.mapTypeControl).toBe(true);
+  expect(options.mapTypeControlOptions).toEqual({
+    style: 'HORIZONTAL_BAR',
+    position: 'TOP_LEFT',
+    mapTypeIds: ['roadmap', 'satellite'],
+  });
 });
 
 test('mapColorScheme and mapRenderingType fall back to strings without the Maps enums', () => {

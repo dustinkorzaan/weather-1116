@@ -134,6 +134,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("bindPinHoverCard", script);
         Assert.Contains("bindRightClickAddLocation", script);
         Assert.Contains("Add Location", script);
+        Assert.Contains("mapTypeControl: true", script);
+        Assert.Contains("SATELLITE", script);
+        Assert.Contains("ROADMAP", script);
         Assert.Contains("weather-map-pin-card-delete", script);
         Assert.Contains("addCity", script);
         Assert.Contains("removeCity", script);
