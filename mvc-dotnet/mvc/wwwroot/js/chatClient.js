@@ -55,11 +55,21 @@
     updateSendingControls();
   }
 
+  function scrollToBottom() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function requestScrollToBottom(tabId) {
+    if (tabId === activeTab) {
+      scrollToBottom();
+    }
+  }
+
   function renderMessages() {
     messagesEl.innerHTML = '';
     const history = window.chatHistory[activeTab] ?? [];
     history.forEach((entry) => renderEntry(entry));
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    scrollToBottom();
   }
 
   function renderEntry(entry) {
@@ -76,7 +86,7 @@
     window.chatHistory[tabId].push(entry);
     if (tabId === activeTab) {
       renderEntry(entry);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+      scrollToBottom();
     }
     return entry;
   }
@@ -158,6 +168,8 @@
           }
         } else if (payload.type === 'error' && payload.errorMessage) {
           addEntry(tabId, { role: 'error', content: payload.errorMessage });
+        } else if (payload.type === 'done') {
+          requestScrollToBottom(tabId);
         }
       }
     }
@@ -191,6 +203,7 @@
     } finally {
       sendingTabs[tabId] = false;
       updateSendingControls();
+      requestScrollToBottom(tabId);
       input.focus();
     }
   });

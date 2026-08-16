@@ -1,5 +1,6 @@
 @using WeatherBlazor.Data
 @inject ChatApiClient ChatClient
+@inject IJSRuntime JS
 
 <div class="chat-section">
     <h2 class="section-title">Chat Clients</h2>
@@ -7,7 +8,7 @@
         Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
     </p>
 
-    <FluentTabs @bind-ActiveTabId="_activeTab">
+    <FluentTabs @bind-ActiveTabId="ActiveTab">
         @foreach (var tab in _tabs)
         {
             <FluentTab Id="@tab.Id" Label="@tab.Label"></FluentTab>
@@ -17,7 +18,7 @@
     <p class="muted tab-description">@_tabs.First(tab => tab.Id == _activeTab).Description</p>
 
     <FluentCard Class="chat-card" aria-label="Chat conversation">
-        <div class="chat-messages">
+        <div @ref="_messagesElement" class="chat-messages">
             @foreach (var entry in _histories[_activeTab])
             {
                 <div class="@MessageClass(entry.Role)">@entry.Content</div>
@@ -74,6 +75,24 @@
 
     private string _activeTab = "Chat1a";
     private string _input = string.Empty;
+    private ElementReference _messagesElement;
+    private bool _scrollMessagesPending;
+
+    private string ActiveTab
+    {
+        get => _activeTab;
+        set
+        {
+            if (_activeTab == value)
+            {
+                return;
+            }
+
+            _activeTab = value;
+            _scrollMessagesPending = true;
+        }
+    }
+
     private readonly Dictionary<string, bool> _isSendingByTab = new()
     {
         ["Chat1a"] = false,
@@ -99,6 +118,25 @@
         "error" => "chat-message error",
         _ => "chat-message assistant",
     };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_scrollMessagesPending)
+        {
+            return;
+        }
+
+        _scrollMessagesPending = false;
+        await JS.InvokeVoidAsync("chatInput.scrollToBottom", _messagesElement);
+    }
+
+    private void RequestScrollToBottom(string tabId)
+    {
+        if (tabId == _activeTab)
+        {
+            _scrollMessagesPending = true;
+        }
+    }
 
     private async Task OnSubmit()
     {
@@ -171,6 +209,11 @@
                     history.Add(new ChatEntry { Role = "error", Content = streamEvent.ErrorMessage });
                     StateHasChanged();
                 }
+                else if (streamEvent.Type == "done")
+                {
+                    RequestScrollToBottom(tabId);
+                    StateHasChanged();
+                }
             }
         }
         catch (Exception ex)
@@ -180,6 +223,7 @@
         finally
         {
             _isSendingByTab[tabId] = false;
+            RequestScrollToBottom(tabId);
         }
     }
 }

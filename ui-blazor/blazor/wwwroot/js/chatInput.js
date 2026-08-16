@@ -90,5 +90,17 @@ window.chatInput = (function () {
     startAutoInit();
   }
 
-  return { attachEnterToSend: attachEnterToSend, tryAutoInit: tryAutoInit };
+  function scrollToBottom(element) {
+    if (!element) {
+      return;
+    }
+
+    element.scrollTop = element.scrollHeight;
+  }
+
+  return {
+    attachEnterToSend: attachEnterToSend,
+    tryAutoInit: tryAutoInit,
+    scrollToBottom: scrollToBottom,
+  };
 })();

@@ -152,6 +152,15 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("Current AI Weather", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
         Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
+
+        var panelSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/ChatPanel.razor"));
+        Assert.Contains("chatInput.scrollToBottom", panelSource);
+        Assert.Contains("Type == \"done\"", panelSource);
+        Assert.Contains("RequestScrollToBottom", panelSource);
+
+        var chatInput = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
+        Assert.Contains("function scrollToBottom(element)", chatInput);
+        Assert.Contains("element.scrollTop = element.scrollHeight", chatInput);
     }
 
     private static string FindRepoFile(string relativePath)

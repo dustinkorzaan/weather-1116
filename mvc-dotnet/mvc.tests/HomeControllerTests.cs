@@ -157,6 +157,12 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.DoesNotContain("Hello World</h2>", html);
         Assert.DoesNotContain("Current AI Weather</h2>", html);
         Assert.DoesNotContain("id=\"weather-map\"", html);
+
+        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatClient.js"));
+        Assert.Contains("function scrollToBottom()", script);
+        Assert.Contains("function requestScrollToBottom(tabId)", script);
+        Assert.Contains("payload.type === 'done'", script);
+        Assert.Contains("requestScrollToBottom(tabId)", script);
     }
 
     [Fact]
