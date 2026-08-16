@@ -8,16 +8,16 @@ outline. UI pages, styling stacks, theme, architecture constraints, project
 relationships, and parity guidance live in
 [`docs/architecture.md`](docs/architecture.md).
 
-| Project | Path | Stack | Port | PROD |
+| PROD | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
-| Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 | <a href="https://weather1116-prod-blazor.azurewebsites.net" target="_blank" rel="noopener noreferrer">Blazor</a> |
-| React UI | [`ui-react`](ui-react) | React + Vite | 3000 | <a href="https://nice-glacier-08fd44e1e.7.azurestaticapps.net" target="_blank" rel="noopener noreferrer">React</a> |
-| MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 | <a href="https://weather1116-prod-mvc.azurewebsites.net" target="_blank" rel="noopener noreferrer">MVC</a> |
-| API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 | — |
-| Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts | — | — |
-| MCP Server on App Service | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 | — |
-| MCP Server on Functions App | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 | — |
-| Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | — |
+| <a href="https://weather1116-prod-blazor.azurewebsites.net" target="_blank" rel="noopener noreferrer">View</a> | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
+| <a href="https://nice-glacier-08fd44e1e.7.azurestaticapps.net" target="_blank" rel="noopener noreferrer">View</a> | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
+| <a href="https://weather1116-prod-mvc.azurewebsites.net" target="_blank" rel="noopener noreferrer">View</a> | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
+|  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
+|  | Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts |  |
+|  | MCP Server on App Service | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
+|  | MCP Server on Functions App | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |
+|  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 |
 
 ## Foundry console demos
 
