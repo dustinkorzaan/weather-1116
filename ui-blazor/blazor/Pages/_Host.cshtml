@@ -8,7 +8,27 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#111827" />
+    <meta name="theme-color" content="#ffffff" />
+    <script>
+        (function () {
+            var key = 'weather-theme';
+            var stored;
+            try { stored = localStorage.getItem(key); } catch (e) { stored = null; }
+            var preference = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+            var resolved = preference === 'system'
+                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : preference;
+            var root = document.documentElement;
+            root.classList.toggle('dark', resolved === 'dark');
+            root.setAttribute('data-theme', resolved);
+            root.setAttribute('data-theme-preference', preference);
+            root.style.colorScheme = resolved;
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) {
+                meta.setAttribute('content', resolved === 'dark' ? '#111827' : '#ffffff');
+            }
+        })();
+    </script>
     <base href="~/" />
     <link href="_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css" rel="stylesheet" />
     <link href="css/site.css" rel="stylesheet" asp-append-version="true" />
@@ -32,6 +52,7 @@
         <a class="dismiss">🗙</a>
     </div>
 
+    <script src="js/theme.js"></script>
     <script src="js/weatherMap.js"></script>
     <script src="js/chatInput.js"></script>
     <script src="_framework/blazor.server.js"></script>

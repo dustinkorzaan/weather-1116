@@ -80,6 +80,7 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+    --map-canvas: #e8eef4;
 }
 
 .dark {
@@ -114,6 +115,7 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+    --map-canvas: #0b111d;
 }
 
 @layer base {
@@ -137,6 +139,15 @@
 .weather-map .gm-style-iw-c {
   padding: 0.75rem 0.85rem !important;
   border-radius: 0.5rem !important;
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.25) !important;
+}
+
+.weather-map .gm-style-iw-tc::after,
+.weather-map .gm-style-iw-t::after {
+  background: var(--background) !important;
+  background-color: var(--background) !important;
 }
 
 .weather-map .gm-style-iw-d {

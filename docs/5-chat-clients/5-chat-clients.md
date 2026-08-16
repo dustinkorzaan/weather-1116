@@ -10,8 +10,8 @@ one-shot structured JSON response.
 | --- | --- | --- | --- |
 | **Chat1a** | Responses API (model-direct) | In-process (`GetLatLongData`, `GetPublicWeatherData`) | Foundry Console **V3** |
 | **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-srv-func-app`, `mcp-srv-app-service`) | Foundry Console **V4** |
-| **Chat2a** | Microsoft Agent Framework | In-process tools via `AIFunctionFactory` | V3 orchestration style |
-| **Chat2b** | Microsoft Agent Framework | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
+| **Chat2a** | Microsoft Agent Framework (model-direct) | In-process tools via `AIFunctionFactory` | V3 orchestration style |
+| **Chat2b** | Microsoft Agent Framework (model-direct) | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
 
 Each tab has its **own controller**, **own Core service**, and **own session namespace**
 (`Chat1a:…`, `Chat1b:…`, etc.) so implementations do not collide.

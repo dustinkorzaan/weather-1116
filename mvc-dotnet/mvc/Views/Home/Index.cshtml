@@ -20,8 +20,19 @@
             Set <code>GOOGLE_MAPS_API_KEY</code> in appsettings (or env <code>GOOGLE_MAPS_API_KEY</code>) to enable Google Maps.
         </p>
     }
-    <div id="weather-map"
-         data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"></div>
+    <div class="map-canvas-wrap">
+        <div id="weather-map"
+             data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"></div>
+        @if (string.IsNullOrWhiteSpace(mapsApiKey))
+        {
+            <div class="weather-map-pin-card-preview" role="dialog" aria-label="Atlanta, GA">
+                <div class="weather-map-pin-card">
+                    <div class="weather-map-pin-card-name">Atlanta, GA</div>
+                    <button type="button" class="weather-map-pin-card-button">Get Current AI Weather</button>
+                </div>
+            </div>
+        }
+    </div>
 </section>
 
 @section Scripts {

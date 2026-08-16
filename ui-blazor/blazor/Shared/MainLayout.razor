@@ -6,7 +6,7 @@
 @inject IJSRuntime JS
 
 <PageTitle>Weather Razor</PageTitle>
-<FluentDesignTheme CustomColor="#6b7280" Mode="DesignThemeModes.Light" />
+<FluentDesignTheme CustomColor="#6b7280" Mode="@FluentMode" />
 
 <FluentLayout Class="weather-shell">
     <FluentHeader Height="48" Class="weather-header">
@@ -41,6 +41,10 @@
             <FluentMenuItem Label="Hello World" OnClick="@(() => NavigateTo("/hello-world"))" />
             <FluentMenuItem Label="Current AI Weather" OnClick="@(() => NavigateTo("/current-ai-weather"))" />
             <FluentMenuItem Label="Chat Clients" OnClick="@(() => NavigateTo("/chat-clients"))" />
+            <FluentDivider />
+            <FluentMenuItem Label="@ThemeItemLabel("light", "Light")" OnClick="@(() => SetThemeAsync("light"))" />
+            <FluentMenuItem Label="@ThemeItemLabel("dark", "Dark")" OnClick="@(() => SetThemeAsync("dark"))" />
+            <FluentMenuItem Label="@ThemeItemLabel("system", "System")" OnClick="@(() => SetThemeAsync("system"))" />
             <FluentDivider />
             <FluentMenuItem Label="About" OnClick="OpenAboutModal" />
         </FluentMenu>
@@ -108,6 +112,14 @@
     private bool _isAboutLoading;
     private string _aboutError = string.Empty;
     private AboutNode? _aboutRoot;
+    private string _themePreference = "system";
+
+    private DesignThemeModes FluentMode => _themePreference switch
+    {
+        "light" => DesignThemeModes.Light,
+        "dark" => DesignThemeModes.Dark,
+        _ => DesignThemeModes.System,
+    };
 
     protected override void OnInitialized()
     {
@@ -117,6 +129,46 @@
         _apiAboutUrl = $"{apiUrl}/About";
         var workerUrl = (Configuration["WORKER_DOTNET_URL"] ?? "http://localhost:8130").TrimEnd('/');
         _workerHangfireUrl = $"{workerUrl}/hangfire";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            var stored = await JS.InvokeAsync<string>("weatherTheme.getPreference");
+            if (!string.IsNullOrWhiteSpace(stored) && stored != _themePreference)
+            {
+                _themePreference = stored;
+                StateHasChanged();
+            }
+        }
+        catch
+        {
+            // Tests and missing script keep System.
+        }
+    }
+
+    private string ThemeItemLabel(string value, string label) =>
+        string.Equals(_themePreference, value, StringComparison.Ordinal)
+            ? $"{label} ✓"
+            : label;
+
+    private async Task SetThemeAsync(string preference)
+    {
+        _themePreference = preference;
+        try
+        {
+            await JS.InvokeVoidAsync("weatherTheme.setPreference", preference);
+        }
+        catch
+        {
+            // Theme script is optional in component tests.
+        }
     }
 
     private void NoOpLoginLogout()

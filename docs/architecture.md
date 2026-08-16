@@ -22,7 +22,7 @@ pattern) plus the hosted-agent learning demo in Foundry Console V5.
 | 2 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
 | 3 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
 | 4 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
-| 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire servers + dashboard | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
+| 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire dashboard and servers | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
 | 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | Shared events/handlers referenced by MVC, API, worker, and MCP hosts |
 
 ### Adjacent projects (not UI/API dependencies)
@@ -159,7 +159,7 @@ so they can enqueue jobs without running servers; the worker processes them.
 
 | Project | Path | Role | Port | Endpoint |
 | --- | --- | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/About` |
+| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire dashboard and servers | 8130 | `/hangfire` (POC — no auth), `/About` |
 
 - **Dashboard:** `/hangfire` on the worker (POC — open to all; auth TBD).
 - **Health:** `/About` returns `Worker Root` with `worker-dotnet` and a `Hangfire`
@@ -199,13 +199,14 @@ and handlers, including:
 
 Parity is **behavioral/feature parity only**: the three UI projects (MVC, React,
 Blazor) expose the same routes, pages, features, data, and interactions. They are
-**not** required to look alike — each is styled independently:
+**not** required to look alike — each is styled independently (no shared CSS,
+config, or components):
 
 | UI | Styling / component library |
 | --- | --- |
-| React (`ui-react`) | Tailwind CSS v4 (Vite plugin) + shadcn/ui (Radix primitives) + lucide-react |
+| React (`ui-react`) | Tailwind CSS v4 (`@tailwindcss/vite`) + shadcn/ui (Radix primitives) + lucide-react |
 | Blazor (`ui-blazor`) | Fluent UI Blazor |
-| MVC (`mvc-dotnet`) | Hand-written CSS (`wwwroot/css/site.css`) + vanilla JS |
+| MVC (`mvc-dotnet`) | Hand-written CSS + vanilla JS ([`mvc-dotnet/README.md`](../mvc-dotnet/README.md)) |
 
 Each UI is implemented as if it were a standalone repo: they share **no** CSS,
 component source, or frontend toolchain. Bootstrap is not used anywhere.
@@ -234,7 +235,19 @@ Fluent `Person` in Blazor) and its items are ordered:
 cross-UI external links (UI React / UI Blazor / MVC, API About, Worker Hangfire)
 → divider → **Hello World** (`/hello-world`) → **Current AI Weather**
 (`/current-ai-weather`) → **Chat Clients** (`/chat-clients`) → divider →
+**Light** / **Dark** / **System** (theme) → divider →
 **About** (dialog/modal).
+
+## Theme contract
+
+All three UIs expose the same Light / Dark / System preference in the avatar
+menu. React labels that group **Theme**; Blazor and MVC mark the selected item
+with a checkmark. The choice is stored in `localStorage` (`weather-theme`) per
+origin and defaults to **System** (`prefers-color-scheme`). The resolved theme
+applies to chrome, content pages, chat, About, the Google Map canvas, pins, and
+the pin hover card. Each UI implements this with its own tokens (Tailwind/shadcn
+in React, Fluent `DesignThemeModes` plus custom CSS variables in Blazor,
+`:root` / `html.dark` variables in MVC).
 
 ## Responsive Design Contract
 
@@ -259,9 +272,10 @@ differs by library; the behavior does not:
 
 ## Google Maps
 
-Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
-Atlanta, Charlotte) filling the landing page (`/`) below the top bar. Weather
-overlays will come later.
+Each UI shows a Google Map with sample city pins (New York, Toronto,
+Atlanta, Charlotte) filling the landing page (`/`) below the top bar. The map
+canvas, pin color, labels, and hover card follow the resolved Light/Dark theme.
+Weather overlays will come later.
 
 **API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
 in a Google Cloud project.
@@ -276,7 +290,9 @@ Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
 | Blazor | `GOOGLE_MAPS_API_KEY` in `ui-blazor/blazor/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`ui-blazor/blazor/.env.example`](../ui-blazor/blazor/.env.example)) |
 | MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`mvc-dotnet/mvc/.env.example`](../mvc-dotnet/mvc/.env.example)) |
 
-Without a key, the map container still renders and each UI shows a short setup hint.
+Without a key, the map container still renders. Each UI shows a short setup
+hint plus a sample Atlanta pin hover card (themed) so the card layout can be
+reviewed without Maps credentials.
 
 ## Local Run Model
 

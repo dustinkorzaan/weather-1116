@@ -16,10 +16,16 @@ Pages: `/` (top bar + full-viewport Google Map), `/hello-world`,
 ## Styling: hand-written CSS + vanilla JS
 
 The MVC project has **no Node dependency** and **no CSS framework**. Layout and
-theme live in `mvc/wwwroot/css/site.css` (semantic classes, referenced by
-`_Layout.cshtml`). Interactive behavior (avatar dropdown, About modal) is
-vanilla JS in `mvc/wwwroot/js/site.js`. Bootstrap, Tailwind, and component
-libraries are not used — `dotnet run` is the whole frontend toolchain.
+theme tokens live in `mvc/wwwroot/css/site.css` (semantic classes, referenced by
+`_Layout.cshtml`). Interactive behavior is vanilla JS:
+
+- `mvc/wwwroot/js/site.js` — avatar dropdown, About modal
+- `mvc/wwwroot/js/theme.js` — Light / Dark / System preference (`localStorage`
+  key `weather-theme`)
+- `mvc/wwwroot/js/weatherMap.js` — map, pins, and themed hover cards
+
+Bootstrap, Tailwind, and component libraries are not used — `dotnet run` is the
+whole frontend toolchain.
 
 ## Tests
 
