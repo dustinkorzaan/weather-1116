@@ -56,9 +56,9 @@
 
         <EditForm Model="this" OnValidSubmit="OnSubmit" class="chat-form" @onsubmit:preventDefault="true">
             <div class="form-row form-row-start">
-                @* Uncontrolled textarea: Immediate @bind on FluentTextArea round-trips every
-                   keystroke through the Blazor Server circuit and writes value back, which
-                   jumps the caret. chatInput.js owns the draft until submit. *@
+                @* Uncontrolled textarea: Immediate @bind sent every keystroke through the
+                   Blazor Server circuit and wrote a stale value back, which jumped the caret
+                   and dropped characters. chatInput.js owns the draft until submit. *@
                 <textarea @ref="_inputElement"
                           class="chat-input"
                           rows="3"
