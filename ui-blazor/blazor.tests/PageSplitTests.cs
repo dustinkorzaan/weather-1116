@@ -106,6 +106,7 @@ public sealed class PageSplitTests
         var rendered = context.Render<WeatherBlazor.Pages.ChatClients>();
 
         Assert.Contains("Chat Clients", rendered.Markup);
+        Assert.Contains("In-process · Responses API · Like Foundry Console V3", rendered.Markup);
         Assert.Contains("chat-input", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Current AI Weather", rendered.Markup);
