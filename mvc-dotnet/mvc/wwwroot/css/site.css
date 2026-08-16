@@ -858,6 +858,19 @@ html[data-theme="dark"] .weather-map-logo-pin {
   font-weight: 600;
 }
 
+.wind-direction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.wind-direction-arrow {
+  display: inline-block;
+  font-size: 1.15em;
+  line-height: 1;
+  transform-origin: center;
+}
+
 /* Chat */
 
 .chat-panel {

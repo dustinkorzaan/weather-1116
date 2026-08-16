@@ -14,7 +14,10 @@ public class AIWeatherResponse
     public double TemperatureF { get; set; }
     public double WindSpeedMPH { get; set; }
     public string WindDirection { get; set; } = string.Empty;
+    public int WindDirectionDegrees { get; set; }
     public string Conditions { get; set; } = string.Empty;
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
 }
 
 public class LatLongResponse

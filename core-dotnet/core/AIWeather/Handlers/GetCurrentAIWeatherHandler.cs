@@ -73,8 +73,15 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         - Do not ask follow-up questions or offer further assistance.
 
         # JSON Structure Properties
-        - fullSummary: One or two friendly sentences describing the current weather. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields.
+        - fullSummary: One or two friendly sentences describing the current weather. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields. Do not include latitude or longitude in fullSummary.
         - For the place name, prefer a clean, human-friendly city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
+        - temperatureF: Current temperature in Fahrenheit from the weather tool.
+        - windSpeedMPH: Current wind speed in miles per hour from the weather tool.
+        - windDirection: Compass point such as N, NE, or SW.
+        - windDirectionDegrees: Meteorological wind direction in degrees from the weather tool (0–360).
+        - conditions: Short current conditions phrase from the weather tool.
+        - latitude: Decimal degrees from your coordinates tool (positive north, negative south).
+        - longitude: Decimal degrees from your coordinates tool (positive east, negative west).
         """;
 
         var userPrompt = $"What is the current weather in: `{location}`?";

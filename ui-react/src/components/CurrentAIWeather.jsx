@@ -3,6 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import SafeGfmMarkdown from './markdown/SafeGfmMarkdown';
 import { useLazyGetCurrentAIWeatherQuery } from '../services/weatherApi';
+import {
+  formatLatLong,
+  formatTemperatureF,
+  formatWindDirection,
+  formatWindSpeedMph,
+  WIND_DIRECTION_ARROW,
+  windArrowRotationDeg,
+} from '../utils/aiWeatherDisplay';
 import { locationFromSearchParams } from '../utils/currentAiWeatherLocation';
 
 function CurrentAIWeather() {
@@ -43,6 +51,8 @@ function CurrentAIWeather() {
     error && typeof error === 'object' && 'data' in error && error.data?.title
       ? error.data.title
       : 'Unable to load AI weather.';
+
+  const windRotationDeg = windArrowRotationDeg(data?.windDirectionDegrees);
 
   return (
     <section aria-labelledby="current-ai-weather-heading">
@@ -88,20 +98,35 @@ function CurrentAIWeather() {
           </div>
           <dl className="grid gap-x-4 gap-y-1.5">
             <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
-              <dt className="font-semibold">Temperature F</dt>
-              <dd>{data.temperatureF}</dd>
+              <dt className="font-semibold">Temperature</dt>
+              <dd>{formatTemperatureF(data.temperatureF)}</dd>
             </div>
             <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
-              <dt className="font-semibold">Wind Speed MPH</dt>
-              <dd>{data.windSpeedMPH}</dd>
+              <dt className="font-semibold">Wind Speed</dt>
+              <dd>{formatWindSpeedMph(data.windSpeedMPH)}</dd>
             </div>
-            <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
+            <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
               <dt className="font-semibold">Wind Direction</dt>
-              <dd>{data.windDirection}</dd>
+              <dd className="inline-flex items-center gap-2">
+                {windRotationDeg != null && (
+                  <span
+                    aria-hidden="true"
+                    className="inline-block origin-center text-[1.15em] leading-none"
+                    style={{ transform: `rotate(${windRotationDeg}deg)` }}
+                  >
+                    {WIND_DIRECTION_ARROW}
+                  </span>
+                )}
+                <span>{formatWindDirection(data.windDirection, data.windDirectionDegrees)}</span>
+              </dd>
             </div>
             <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
               <dt className="font-semibold">Conditions</dt>
               <dd>{data.conditions}</dd>
+            </div>
+            <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
+              <dt className="font-semibold">Lat/Long</dt>
+              <dd>{formatLatLong(data.latitude, data.longitude)}</dd>
             </div>
           </dl>
         </div>

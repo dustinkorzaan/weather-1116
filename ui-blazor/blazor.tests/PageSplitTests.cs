@@ -90,6 +90,18 @@ public sealed class PageSplitTests
         Assert.Contains("SafeGfmMarkdown.ToHtml", pageSource);
         Assert.Contains("MarkupString", pageSource);
         Assert.Contains("OnAfterRenderAsync", pageSource);
+        Assert.Contains("stat-label\">Temperature<", pageSource);
+        Assert.Contains("stat-label\">Wind Speed<", pageSource);
+        Assert.Contains("stat-label\">Lat/Long<", pageSource);
+        Assert.Contains("FormatTemperatureF", pageSource);
+        Assert.Contains("FormatWindSpeedMph", pageSource);
+        Assert.Contains("FormatWindDirection", pageSource);
+        Assert.Contains("FormatLatLong", pageSource);
+        Assert.Contains("wind-direction-arrow", pageSource);
+        Assert.Contains("&#x27A4;", pageSource);
+        Assert.Contains("WindDirectionDegrees - 90", pageSource);
+        Assert.DoesNotContain("Temperature F", pageSource);
+        Assert.DoesNotContain("Wind Speed MPH", pageSource);
         Assert.DoesNotContain("protected override async Task OnParametersSetAsync", pageSource);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
@@ -130,6 +142,18 @@ public sealed class PageSplitTests
             Assert.Contains("<strong>Sunny</strong>", rendered.Markup);
             Assert.Contains("in Nashville.", rendered.Markup);
             Assert.DoesNotContain("**Sunny**", rendered.Markup);
+            Assert.Contains("Temperature", rendered.Markup);
+            Assert.Contains("72 °F", rendered.Markup);
+            Assert.Contains("Wind Speed", rendered.Markup);
+            Assert.Contains("5 mph", rendered.Markup);
+            Assert.Contains("S (180°)", rendered.Markup);
+            Assert.Contains("wind-direction-arrow", rendered.Markup);
+            Assert.Contains("rotate(90deg)", rendered.Markup);
+            Assert.Contains("\u27A4", rendered.Markup);
+            Assert.Contains("Lat/Long", rendered.Markup);
+            Assert.Contains("36.16° N, 86.78° W", rendered.Markup);
+            Assert.DoesNotContain("Temperature F", rendered.Markup);
+            Assert.DoesNotContain("Wind Speed MPH", rendered.Markup);
         });
 
         Assert.Contains("nashville tn", rendered.Markup);
@@ -333,7 +357,10 @@ public sealed class PageSplitTests
                         TemperatureF = 72,
                         WindSpeedMPH = 5,
                         WindDirection = "S",
+                        WindDirectionDegrees = 180,
                         Conditions = "Clear",
+                        Latitude = 36.1627,
+                        Longitude = -86.7816,
                     }),
                 };
             }

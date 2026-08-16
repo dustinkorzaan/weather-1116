@@ -87,6 +87,7 @@ function mockHelloFetch(weather = {}) {
           temperatureF: 72,
           windSpeedMPH: 5,
           windDirection: 'S',
+          windDirectionDegrees: 180,
           conditions: 'Clear',
           locationName: 'Nashville, TN',
           latitude: 36.1627,
@@ -264,6 +265,20 @@ test('current AI weather reads location query, clears it, and fetches', async ()
   expect(weatherUrl).toContain('location=nashville');
   expect(router.state.location.pathname).toBe('/current-ai-weather');
   expect(router.state.location.search).toBe('');
+
+  expect(screen.getByText('Temperature')).toBeDefined();
+  expect(screen.getByText('72 °F')).toBeDefined();
+  expect(screen.getByText('Wind Speed')).toBeDefined();
+  expect(screen.getByText('5 mph')).toBeDefined();
+  expect(screen.getByText('Wind Direction')).toBeDefined();
+  expect(screen.getByText('S (180°)')).toBeDefined();
+  const windValue = screen.getByText('S (180°)').closest('dd');
+  expect(windValue?.textContent).toContain('\u27A4');
+  expect(windValue?.querySelector('[aria-hidden="true"]')?.style.transform).toBe('rotate(90deg)');
+  expect(screen.getByText('Lat/Long')).toBeDefined();
+  expect(screen.getByText('36.16° N, 86.78° W')).toBeDefined();
+  expect(screen.queryByText('Temperature F')).toBeNull();
+  expect(screen.queryByText('Wind Speed MPH')).toBeNull();
 });
 
 test('current AI weather renders the full summary as GitHub-flavored Markdown', async () => {

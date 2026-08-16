@@ -12,6 +12,74 @@
     }
   }
 
+  function formatHemisphereDegrees(value, positiveLabel, negativeLabel) {
+    var numeric = Number(value);
+    var hemisphere = numeric >= 0 ? positiveLabel : negativeLabel;
+    return Math.abs(numeric).toFixed(2) + '\u00B0 ' + hemisphere;
+  }
+
+  function formatLatLong(lat, lng) {
+    if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
+      return '';
+    }
+    return formatHemisphereDegrees(lat, 'N', 'S') + ', ' + formatHemisphereDegrees(lng, 'E', 'W');
+  }
+
+  function formatTemperatureF(value) {
+    if (!Number.isFinite(Number(value))) {
+      return '';
+    }
+    return value + ' \u00B0F';
+  }
+
+  function formatWindSpeedMph(value) {
+    if (!Number.isFinite(Number(value))) {
+      return '';
+    }
+    return value + ' mph';
+  }
+
+  function formatWindDirection(compass, degrees) {
+    var label = String(compass || '').trim();
+    var numeric = Number(degrees);
+    if (!Number.isFinite(numeric)) {
+      return label;
+    }
+    var withDegrees = '(' + Math.round(numeric) + '\u00B0)';
+    return label ? label + ' ' + withDegrees : withDegrees;
+  }
+
+  var WIND_DIRECTION_ARROW = '\u27A4';
+
+  function windArrowRotationDeg(degrees) {
+    var numeric = Number(degrees);
+    if (!Number.isFinite(numeric)) {
+      return null;
+    }
+    return Math.round(numeric) - 90;
+  }
+
+  function renderWindDirection(el, compass, degrees) {
+    if (!el) {
+      return;
+    }
+
+    el.replaceChildren();
+    var rotation = windArrowRotationDeg(degrees);
+    if (rotation !== null) {
+      var arrow = document.createElement('span');
+      arrow.className = 'wind-direction-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = WIND_DIRECTION_ARROW;
+      arrow.style.transform = 'rotate(' + rotation + 'deg)';
+      el.appendChild(arrow);
+    }
+
+    var label = document.createElement('span');
+    label.textContent = formatWindDirection(compass, degrees);
+    el.appendChild(label);
+  }
+
   function init(config) {
     var form = document.getElementById(config.formId);
     var locationInput = document.getElementById(config.locationId);
@@ -24,6 +92,7 @@
     var windSpeedEl = document.getElementById(config.windSpeedId);
     var windDirectionEl = document.getElementById(config.windDirectionId);
     var conditionsEl = document.getElementById(config.conditionsId);
+    var latLongEl = document.getElementById(config.latLongId);
 
     if (!form || !locationInput || !button) {
       return;
@@ -56,10 +125,13 @@
           } else {
             summaryEl.textContent = data.fullSummary || '';
           }
-          temperatureEl.textContent = data.temperatureF;
-          windSpeedEl.textContent = data.windSpeedMPH;
-          windDirectionEl.textContent = data.windDirection || '';
+          temperatureEl.textContent = formatTemperatureF(data.temperatureF);
+          windSpeedEl.textContent = formatWindSpeedMph(data.windSpeedMPH);
+          renderWindDirection(windDirectionEl, data.windDirection, data.windDirectionDegrees);
           conditionsEl.textContent = data.conditions || '';
+          if (latLongEl) {
+            latLongEl.textContent = formatLatLong(data.latitude, data.longitude);
+          }
           setHidden(resultsEl, false);
         })
         .catch(function () {
