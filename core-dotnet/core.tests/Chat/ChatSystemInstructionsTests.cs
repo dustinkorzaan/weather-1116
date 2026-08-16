@@ -19,8 +19,6 @@ public class ChatSystemInstructionsTests
         Assert.Contains("GetPublicWeatherForecast", prompt);
         Assert.Contains("GetPublicWeatherHistory", prompt);
         Assert.Contains("Do not emit raw HTML", prompt);
-        Assert.Contains("Fahrenheit, MPH, inches", prompt);
-        Assert.Contains("Write inches with the inch mark, e.g. 1\"", prompt);
-        Assert.Contains("Do not use C, KPH, or MM", prompt);
+        Assert.Contains("Use U.S. customary units only: °F, mph, and \" (e.g. 72°F, 8 mph, 1\"). Do not use C, KPH, or MM.", prompt);
     }
 }
