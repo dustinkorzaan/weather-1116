@@ -62,8 +62,8 @@ public class GeoController : Controller
 			var response = await _mediator.Send(
 				new GetLocationEvent
 				{
-					Latitude = latitude.Value,
-					Longitude = longitude.Value,
+					Latitude = latitude!.Value,
+					Longitude = longitude!.Value,
 				},
 				cancellationToken);
 
