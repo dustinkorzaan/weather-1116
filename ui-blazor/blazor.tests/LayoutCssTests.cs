@@ -94,6 +94,7 @@ public sealed class LayoutCssTests
         Assert.Contains("font-size: 1.25rem", css);
         Assert.Contains("font-weight: 600", css);
         Assert.Contains("text-decoration: none", css);
+        Assert.Contains("outline: none", css);
         Assert.Contains("border: 2px solid #d1d5db", css);
         Assert.Contains("stroke-width: 2.25", css);
         Assert.Contains(".about-modal.is-open", css);

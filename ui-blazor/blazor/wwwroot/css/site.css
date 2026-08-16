@@ -49,6 +49,7 @@ body {
     gap: 0.5rem;
     color: #111827;
     text-decoration: none;
+    outline: none;
 }
 
 .layout.weather-shell .brand-logo {
