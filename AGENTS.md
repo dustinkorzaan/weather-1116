@@ -61,6 +61,15 @@ hot reload); React uses `npm start`. Ports come from each project's
   - Blazor / MVC: `GOOGLE_MAPS_API_KEY` or env `GOOGLE_MAPS_API_KEY`
   Without a key the UIs still run; the map section shows a setup hint.
 
+### Screenshots and videos
+
+Do **not** record screen videos, take walkthrough screenshots, or drive the
+UI with computer-use unless the user explicitly asks for that, or asks you
+to review a pull request and visual evidence is needed for that review.
+
+Prefer automated tests and command output. Skip GUI walkthrough artifacts
+for ordinary implementation work.
+
 ### Lint / test / build
 
 - Build everything: `dotnet build Weather.sln` (CI in
