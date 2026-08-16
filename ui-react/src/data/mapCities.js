@@ -1,9 +1,9 @@
 /** Sample city pins for the weather map. Temperature reserved for a later pass. */
 export const MAP_CITIES = [
-  { id: 'nyc', name: 'New York, NY', lat: 40.7128, lng: -74.006 },
-  { id: 'toronto', name: 'Toronto, ON', lat: 43.6532, lng: -79.3832 },
-  { id: 'atlanta', name: 'Atlanta, GA', lat: 33.749, lng: -84.388 },
-  { id: 'charlotte', name: 'Charlotte, NC', lat: 35.2271, lng: -80.8431 },
+  { id: '59e2459a-b25d-44a7-bcb0-2a4f2e444272', name: 'New York, NY', lat: 40.7128, lng: -74.006 },
+  { id: '329735f1-cfc0-42b4-a48f-0d41677145e8', name: 'Toronto, ON', lat: 43.6532, lng: -79.3832 },
+  { id: '9daab691-7885-400f-8aed-5e21a63f9a7a', name: 'Atlanta, GA', lat: 33.749, lng: -84.388 },
+  { id: '04f5d22f-ca31-4d29-ac9e-a1c4f0127ed1', name: 'Charlotte, NC', lat: 35.2271, lng: -80.8431 },
 ];
 
 /** Default map center (Eastern US / SE Canada). */

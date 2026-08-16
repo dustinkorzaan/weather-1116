@@ -24,6 +24,19 @@ test('map pins use city and state labels', () => {
   ]);
 });
 
+test('default map cities use GUID ids', () => {
+  const guid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  expect(MAP_CITIES.map((city) => city.id)).toEqual([
+    '59e2459a-b25d-44a7-bcb0-2a4f2e444272',
+    '329735f1-cfc0-42b4-a48f-0d41677145e8',
+    '9daab691-7885-400f-8aed-5e21a63f9a7a',
+    '04f5d22f-ca31-4d29-ac9e-a1c4f0127ed1',
+  ]);
+  for (const city of MAP_CITIES) {
+    expect(city.id).toMatch(guid);
+  }
+});
+
 test('map pin labels encode into the location query', () => {
   expect(currentAiWeatherPath('Atlanta, GA')).toBe(
     '/current-ai-weather?location=Atlanta%2C%20GA'

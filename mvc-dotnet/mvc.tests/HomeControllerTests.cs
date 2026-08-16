@@ -102,6 +102,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("New York, NY", view);
         Assert.Contains("Toronto, ON", view);
         Assert.Contains("Charlotte, NC", view);
+        Assert.Contains("new Guid(\"", view);
+        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", view);
+        Assert.DoesNotContain("id = \"nyc\"", view);
+        Assert.DoesNotContain("id = \"atlanta\"", view);
     }
 
     [Fact]
@@ -123,6 +127,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("colorScheme", script);
         Assert.Contains("RenderingType.RASTER", script);
         Assert.Contains("createThemedMap", script);
+        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", script);
+        Assert.DoesNotContain("id: 'nyc'", script);
     }
 
     [Fact]

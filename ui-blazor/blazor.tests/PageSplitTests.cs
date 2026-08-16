@@ -23,6 +23,8 @@ public sealed class PageSplitTests
         Assert.Contains("id=\"weather-map\"", rendered.Markup);
         Assert.Contains("Atlanta, GA", rendered.Markup);
         Assert.Contains("New York, NY", rendered.Markup);
+        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", rendered.Markup);
+        Assert.DoesNotContain("\"nyc\"", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
         Assert.DoesNotContain("<h2 class=\"section-title\">Current AI Weather</h2>", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
@@ -43,6 +45,8 @@ public sealed class PageSplitTests
         Assert.Contains("addCity", script);
         Assert.Contains("removeCity", script);
         Assert.Contains("weather-map-cities", script);
+        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", script);
+        Assert.DoesNotContain("id: 'nyc'", script);
     }
 
     [Fact]
