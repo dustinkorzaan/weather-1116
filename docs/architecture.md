@@ -240,11 +240,12 @@ cross-UI external links (UI React / UI Blazor / MVC, API About, Worker Hangfire)
 ## Theme contract
 
 All three UIs expose the same Light / Dark / System preference in the avatar
-menu. The choice is stored in `localStorage` (`weather-theme`) per origin and
-defaults to **System** (`prefers-color-scheme`). The resolved theme applies to
-chrome, content pages, chat, About, the Google Map canvas, pins, and the pin
-hover card. Each UI implements this with its own tokens (Tailwind/shadcn in
-React, Fluent `DesignThemeModes` plus custom CSS variables in Blazor,
+menu. React labels that group **Theme**; Blazor and MVC mark the selected item
+with a checkmark. The choice is stored in `localStorage` (`weather-theme`) per
+origin and defaults to **System** (`prefers-color-scheme`). The resolved theme
+applies to chrome, content pages, chat, About, the Google Map canvas, pins, and
+the pin hover card. Each UI implements this with its own tokens (Tailwind/shadcn
+in React, Fluent `DesignThemeModes` plus custom CSS variables in Blazor,
 `:root` / `html.dark` variables in MVC).
 
 ## Responsive Design Contract
@@ -288,7 +289,9 @@ Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
 | Blazor | `GOOGLE_MAPS_API_KEY` in `ui-blazor/blazor/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`ui-blazor/blazor/.env.example`](../ui-blazor/blazor/.env.example)) |
 | MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`mvc-dotnet/mvc/.env.example`](../mvc-dotnet/mvc/.env.example)) |
 
-Without a key, the map container still renders and each UI shows a short setup hint.
+Without a key, the map container still renders. Each UI shows a short setup
+hint plus a sample Atlanta pin hover card (themed) so the card layout can be
+reviewed without Maps credentials.
 
 ## Local Run Model
 
