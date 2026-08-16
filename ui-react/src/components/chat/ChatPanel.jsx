@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
 import { streamChatMessage } from '../../utils/chatStream';
@@ -212,7 +213,7 @@ function ChatPanel() {
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="h-auto flex-none rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 after:hidden hover:bg-gray-100 hover:text-gray-700 data-active:border-gray-800 data-active:bg-gray-100 data-active:text-gray-900 data-active:shadow-none data-active:hover:bg-gray-100 data-active:hover:text-gray-900"
+              className="h-auto flex-none cursor-pointer rounded-md border-2 border-gray-400 bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-800 shadow-sm after:hidden hover:border-gray-500 hover:bg-gray-200 hover:text-gray-900 data-active:border-gray-800 data-active:bg-gray-800 data-active:text-white data-active:shadow-none data-active:hover:bg-gray-900 data-active:hover:text-white"
             >
               {tab.label}
             </TabsTrigger>
@@ -243,13 +244,13 @@ function ChatPanel() {
                 onKeyDown={onKeyDown}
                 disabled={isActiveTabSending}
               />
-              <button
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-60"
+              <Button
+                className="bg-gray-800 px-4 py-2 text-white shadow-sm hover:bg-gray-900"
                 type="submit"
                 disabled={isActiveTabSending}
               >
                 {isActiveTabSending ? 'Sending…' : 'Send'}
-              </button>
+              </Button>
             </form>
           </section>
         </TabsContent>
