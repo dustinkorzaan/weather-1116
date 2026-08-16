@@ -154,6 +154,7 @@ public sealed class PageSplitTests
         Assert.Contains("Chat Clients", rendered.Markup);
         Assert.Contains("In-process · Responses API · Like Foundry Console V3", rendered.Markup);
         Assert.Contains("chat-input", rendered.Markup);
+        Assert.Contains("Enter fullscreen", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Current AI Weather", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
@@ -170,6 +171,9 @@ public sealed class PageSplitTests
         Assert.Contains("ChatMarkdown.ToHtml", panelSource);
         Assert.Contains("MarkupString", panelSource);
         Assert.Contains("Streaming", panelSource);
+        Assert.Contains("chat-fullscreen-button", panelSource);
+        Assert.Contains("Enter fullscreen", panelSource);
+        Assert.Contains("chat-window", panelSource);
 
         var markdown = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Data/ChatMarkdown.cs"));
         Assert.Contains("UseAdvancedExtensions", markdown);
@@ -184,6 +188,11 @@ public sealed class PageSplitTests
         Assert.Contains("chat-tool-hover-wrap", chatInput);
         Assert.Contains("scheduleHide", chatInput);
         Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", chatInput);
+
+        var fullscreen = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatFullscreen.js"));
+        Assert.Contains("data-chat-fullscreen-button", fullscreen);
+        Assert.Contains("requestFullscreen", fullscreen);
+        Assert.Contains("is-css-fullscreen", fullscreen);
     }
 
     private static string FindRepoFile(string relativePath)

@@ -1,11 +1,13 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import ChatMarkdown from './ChatMarkdown';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
 import { formatToolHoverText, TOOL_HOVER_CLOSE_DELAY_MS } from '../../utils/chatToolHover';
 import { streamChatMessage } from '../../utils/chatStream';
+import { useChatFullscreen } from './useChatFullscreen';
 
 const TAB_CONFIG = [
   {
@@ -187,6 +189,8 @@ function ChatPanel() {
   const [scrollNonce, setScrollNonce] = useState(0);
   const sessionsRef = useRef(createEmptySessions());
   const messagesRef = useRef(null);
+  const windowRef = useRef(null);
+  const { isFullscreen, isCssFullscreen, toggle: toggleFullscreen } = useChatFullscreen(windowRef);
   const activeTabRef = useRef(activeTab);
   activeTabRef.current = activeTab;
 
@@ -366,11 +370,33 @@ function ChatPanel() {
         <p className="mt-2 text-sm text-muted-foreground">{activeConfig.description}</p>
 
         <TabsContent value={activeTab} className="mt-3">
-          <section className="rounded-lg border border-border bg-card p-3" aria-label="Chat conversation">
+          <section
+            ref={windowRef}
+            className={`chat-window relative flex flex-col rounded-lg border border-border bg-card p-3 ${
+              isCssFullscreen ? 'is-css-fullscreen' : ''
+            }`}
+            aria-label="Chat conversation"
+          >
+            <div className="mb-1 flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                aria-pressed={isFullscreen}
+                onClick={() => {
+                  void toggleFullscreen();
+                }}
+              >
+                {isFullscreen ? <Minimize2 className="size-5" /> : <Maximize2 className="size-5" />}
+              </Button>
+            </div>
             <div
               ref={messagesRef}
               data-chat-messages
-              className="flex max-h-96 min-h-40 flex-col gap-2 overflow-y-auto p-1"
+              className={`flex min-h-40 flex-col gap-2 overflow-y-auto p-1 ${
+                isFullscreen ? 'min-h-0 flex-1 max-h-none' : 'max-h-96'
+              }`}
             >
               {histories[activeTab].map((entry, index) => (
                 entry.role === 'tool' ? (

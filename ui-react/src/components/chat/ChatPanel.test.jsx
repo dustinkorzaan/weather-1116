@@ -129,6 +129,23 @@ test('keeps tool details open and scrollable when the pointer moves onto the pop
   expect(body?.textContent).toContain('"elevation": 113');
 });
 
+test('chat window has a fullscreen control that expands the conversation', async () => {
+  const user = userEvent.setup();
+  const { container } = render(<ChatPanel />);
+
+  const button = screen.getByRole('button', { name: /enter fullscreen/i });
+  expect(button).toBeDefined();
+
+  await user.click(button);
+
+  expect(container.querySelector('.chat-window')?.classList.contains('is-css-fullscreen')).toBe(true);
+  expect(screen.getByRole('button', { name: /exit fullscreen/i })).toBeDefined();
+
+  await user.click(screen.getByRole('button', { name: /exit fullscreen/i }));
+  expect(container.querySelector('.chat-window')?.classList.contains('is-css-fullscreen')).toBe(false);
+  expect(screen.getByRole('button', { name: /enter fullscreen/i })).toBeDefined();
+});
+
 test('does not close tool details until the pointer leaves the popup', async () => {
   const user = userEvent.setup();
   const chip = await renderFinishedToolChip(user);

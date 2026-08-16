@@ -161,6 +161,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Remote MCP · Agent Framework · Like Foundry Console V4", html);
         Assert.Contains("class=\"page-shell\"", html);
         Assert.Contains("class=\"chat-tab is-active\"", html);
+        Assert.Contains("aria-label=\"Enter fullscreen\"", html);
+        Assert.Contains("chatFullscreen.js", html);
         Assert.Contains("chatMarkdown.js", html);
         Assert.Contains("marked.min.js", html);
         Assert.Contains("purify.min.js", html);
@@ -189,6 +191,11 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("marked.parse", markdown);
         Assert.Contains("gfm: true", markdown);
         Assert.Contains("DOMPurify.sanitize", markdown);
+
+        var fullscreen = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatFullscreen.js"));
+        Assert.Contains("data-chat-fullscreen-button", fullscreen);
+        Assert.Contains("requestFullscreen", fullscreen);
+        Assert.Contains("is-css-fullscreen", fullscreen);
     }
 
     [Fact]
@@ -240,6 +247,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
         Assert.Contains(".chat-markdown", css);
+        Assert.Contains(".chat-fullscreen-button", css);
         Assert.Contains("html.dark", css);
         Assert.Contains("color-scheme: light", css);
         Assert.Contains("html[data-theme=\"dark\"] #weather-map", css);

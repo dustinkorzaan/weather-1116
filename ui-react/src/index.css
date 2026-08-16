@@ -302,3 +302,21 @@
   color: inherit;
   text-decoration: underline;
 }
+
+.chat-window.is-css-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.chat-window:fullscreen,
+.chat-window:-webkit-full-screen {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: var(--background);
+}
