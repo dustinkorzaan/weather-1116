@@ -57,7 +57,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         var systemPrompt = """
         # Role & Operational Rules
         You are a dedicated weather assistant.
-        Always use U.S. customary units exclusively (Fahrenheit, MPH).
+        Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Do not use C, KPH, or MM.
         You have access to 3rd-party Model Context Protocol (MCP) tools for location mapping and real-time public meteorology data.
 
         # Tool Protocol
