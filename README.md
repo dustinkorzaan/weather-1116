@@ -40,9 +40,9 @@ Presentation reference: [`docs/5-chat-clients/5-chat-clients.md`](docs/5-chat-cl
 
 Standalone multi-turn chat page with four tabs:
 
-| Tab | Pattern |
-| --- | --- |
-| Chat1a | Responses + in-process |
-| Chat1b | Responses + MCP |
-| Chat2a | Agent Framework + in-process |
-| Chat2b | Agent Framework + MCP |
+| Tab | Pattern | Stack |
+| --- | --- | --- |
+| Chat1a | In-process | Azure OpenAI / Foundry ResponsesClient model-direct |
+| Chat1b | MCP | Azure OpenAI / Foundry ResponsesClient model-direct |
+| Chat2a | In-process | Agent Framework |
+| Chat2b | MCP | Agent Framework |
