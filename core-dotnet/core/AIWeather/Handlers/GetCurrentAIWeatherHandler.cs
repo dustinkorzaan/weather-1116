@@ -73,8 +73,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         - Do not ask follow-up questions or offer further assistance.
 
         # JSON Structure Properties
-        - fullSummary: One or two sentences that are easy to read. Include the place name, latitude, longitude, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields.
-        - For the place name, prefer a clean city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
+        - fullSummary: One or two friendly sentences that are easy to read. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields.
+        - For the place name, prefer a clean, human-friendly city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
         """;
 
         var userPrompt = $"What is the current weather in: `{location}`?";

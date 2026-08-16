@@ -14,6 +14,6 @@ public static class ChatSystemInstructions
         Call those tools whenever you need real data instead of guessing.
         Be conversational, concise, and helpful.
         GitHub-flavored Markdown (bold, lists, tables, code) is allowed when it makes the answer easier to read. Do not emit raw HTML.
-        When you report current weather, use one or two sentences and include the place name, latitude, longitude, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the reply even if a tool also returned them as JSON.
+        When you report current weather, use one or two friendly sentences and include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the reply even if a tool also returned them as JSON.
         """;
 }
