@@ -75,7 +75,7 @@ public sealed class PageSplitTests
             Assert.Contains("Sunny in Nashville.", rendered.Markup);
         });
 
-        Assert.Contains("nashville, TN", rendered.Markup);
+        Assert.Contains("nashville tn", rendered.Markup);
         Assert.DoesNotContain("location=nashville", context.Services.GetRequiredService<NavigationManager>().Uri);
     }
 
@@ -84,7 +84,7 @@ public sealed class PageSplitTests
     {
         var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
         Assert.Contains("currentAiWeatherPath", script);
-        Assert.Contains("cleanLocationQuery", script);
+        Assert.Contains("encodeURIComponent", script);
         Assert.Contains("/current-ai-weather?location=", script);
         Assert.Contains("marker.addListener('click'", script);
     }

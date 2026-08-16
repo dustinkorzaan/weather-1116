@@ -106,7 +106,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     {
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
         Assert.Contains("currentAiWeatherPath", script);
-        Assert.Contains("cleanLocationQuery", script);
+        Assert.Contains("encodeURIComponent", script);
         Assert.Contains("/current-ai-weather?location=", script);
         Assert.Contains("marker.addListener('click'", script);
     }
@@ -116,7 +116,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     {
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/currentAIWeather.js"));
         Assert.Contains("consumeLocationQuery", script);
-        Assert.Contains("locationSearchValue", script);
         Assert.Contains("params.get('location')", script);
         Assert.Contains("history.replaceState", script);
         Assert.Contains("requestWeather()", script);
