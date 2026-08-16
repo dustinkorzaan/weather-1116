@@ -3,16 +3,19 @@ using System.Net.Sockets;
 namespace Core.Http;
 
 /// <summary>
-/// GET helper for Open-Meteo and Nominatim with three retries on transient HTTPS failures.
+/// GET helper for Open-Meteo and Nominatim with five retries on transient HTTPS failures.
+/// Backoff starts at 200ms and doubles after each retry.
 /// </summary>
 internal static class ThirdPartyHttp
 {
-    internal static readonly TimeSpan[] RetryDelays =
-    [
-        TimeSpan.FromMilliseconds(500),
-        TimeSpan.FromMilliseconds(1000),
-        TimeSpan.FromMilliseconds(2000),
-    ];
+    internal const int RetryCount = 5;
+    internal static readonly TimeSpan InitialRetryDelay = TimeSpan.FromMilliseconds(200);
+
+    internal static TimeSpan DelayBeforeRetry(int retryIndex)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(retryIndex);
+        return TimeSpan.FromMilliseconds(InitialRetryDelay.TotalMilliseconds * Math.Pow(2, retryIndex));
+    }
 
     internal static Task<string> GetStringWithRetryAsync(
         HttpClient client,
@@ -36,9 +39,9 @@ internal static class ThirdPartyHttp
                 return await client.GetStringAsync(requestUri, cancellationToken);
             }
             catch (Exception exception) when (
-                IsTransient(exception, cancellationToken) && attempt < RetryDelays.Length)
+                IsTransient(exception, cancellationToken) && attempt < RetryCount)
             {
-                await delayAsync(RetryDelays[attempt], cancellationToken);
+                await delayAsync(DelayBeforeRetry(attempt), cancellationToken);
             }
         }
     }

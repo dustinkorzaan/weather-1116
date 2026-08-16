@@ -10,16 +10,23 @@ public class ThirdPartyHttpTests
     private const string RequestUri = "https://api.open-meteo.com/v1/forecast";
     private const string SslFailure = "The SSL connection could not be established, see inner exception.";
 
+    private static readonly TimeSpan[] ExpectedRetryDelays =
+    [
+        TimeSpan.FromMilliseconds(200),
+        TimeSpan.FromMilliseconds(400),
+        TimeSpan.FromMilliseconds(800),
+        TimeSpan.FromMilliseconds(1600),
+        TimeSpan.FromMilliseconds(3200),
+    ];
+
     [Fact]
-    public void RetryDelays_AreFiveHundredThenOneThenTwoSeconds()
+    public void DelayBeforeRetry_StartsAt200MsAndDoublesFiveTimes()
     {
+        Assert.Equal(5, ThirdPartyHttp.RetryCount);
+        Assert.Equal(TimeSpan.FromMilliseconds(200), ThirdPartyHttp.InitialRetryDelay);
         Assert.Equal(
-            [
-                TimeSpan.FromMilliseconds(500),
-                TimeSpan.FromMilliseconds(1000),
-                TimeSpan.FromMilliseconds(2000),
-            ],
-            ThirdPartyHttp.RetryDelays);
+            ExpectedRetryDelays,
+            Enumerable.Range(0, ThirdPartyHttp.RetryCount).Select(ThirdPartyHttp.DelayBeforeRetry));
     }
 
     [Fact]
@@ -41,10 +48,12 @@ public class ThirdPartyHttpTests
     }
 
     [Fact]
-    public async Task GetStringWithRetryAsync_RetriesSslFailureThreeTimesThenSucceeds()
+    public async Task GetStringWithRetryAsync_RetriesSslFailureFiveTimesThenSucceeds()
     {
         var handler = new SequenceHandler(
             [
+                new HttpRequestException(SslFailure),
+                new HttpRequestException(SslFailure),
                 new HttpRequestException(SslFailure),
                 new HttpRequestException(SslFailure),
                 new HttpRequestException(SslFailure),
@@ -60,18 +69,20 @@ public class ThirdPartyHttpTests
             CancellationToken.None);
 
         Assert.Equal("{\"ok\":true}", body);
-        Assert.Equal(4, handler.Attempts);
-        Assert.Equal(ThirdPartyHttp.RetryDelays, delays);
+        Assert.Equal(6, handler.Attempts);
+        Assert.Equal(ExpectedRetryDelays, delays);
     }
 
     [Fact]
-    public async Task GetStringWithRetryAsync_ThrowsAfterThreeRetries()
+    public async Task GetStringWithRetryAsync_ThrowsAfterFiveRetries()
     {
         var handler = new SequenceHandler(
             [
                 new HttpRequestException("first"),
                 new IOException("second"),
                 new SocketException(),
+                new HttpRequestException(SslFailure),
+                new HttpRequestException("fourth"),
                 new HttpRequestException(SslFailure),
             ]);
         var delays = new List<TimeSpan>();
@@ -85,8 +96,8 @@ public class ThirdPartyHttpTests
                 CancellationToken.None));
 
         Assert.Equal(SslFailure, thrown.Message);
-        Assert.Equal(4, handler.Attempts);
-        Assert.Equal(ThirdPartyHttp.RetryDelays, delays);
+        Assert.Equal(6, handler.Attempts);
+        Assert.Equal(ExpectedRetryDelays, delays);
     }
 
     [Fact]
