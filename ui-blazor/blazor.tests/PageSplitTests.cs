@@ -66,8 +66,7 @@ public sealed class PageSplitTests
         context.Services.GetRequiredService<NavigationManager>()
             .NavigateTo("/current-ai-weather?location=nashville%20tn");
 
-        var rendered = context.Render<WeatherBlazor.Pages.CurrentAIWeather>(parameters =>
-            parameters.Add(page => page.LocationQuery, "nashville tn"));
+        var rendered = context.Render<WeatherBlazor.Pages.CurrentAIWeather>();
 
         rendered.WaitForAssertion(() =>
         {

@@ -147,11 +147,10 @@ test('current AI weather reads location query, clears it, and fetches', async ()
   const fetchMock = mockHelloFetch();
   const { router } = renderAppWithRouter('/current-ai-weather?location=nashville%20tn');
 
-  expect(screen.getByLabelText(/location:/i)).toHaveValue('nashville tn');
+  expect(screen.getByLabelText(/location:/i).value).toBe('nashville tn');
 
   await waitFor(() => {
-    expect(screen.getByRole('button', { name: /get current ai weather/i })).toHaveAttribute(
-      'aria-busy',
+    expect(screen.getByRole('button', { name: /get current ai weather/i }).getAttribute('aria-busy')).toBe(
       'true'
     );
   });
