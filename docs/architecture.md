@@ -276,8 +276,9 @@ Each UI shows a Google Map with sample city pins (New York, Toronto,
 Atlanta, Charlotte) filling the landing page (`/`) below the top bar. Pins
 use a filled site logo (`logo-solid.svg` / `logo-black-solid.svg`) with no
 city-name label on the map; names appear on the hover card. Logos slowly
-spin. Google's **Map / Satellite** type control (top-left) switches the
-canvas between the themed roadmap (default) and aerial satellite imagery.
+spin. Google's built-in type control (top-left) offers the four native map
+types: **Map** (themed roadmap, default), **Satellite**, **Hybrid**
+(satellite with labels), and **Terrain**.
 The selected view is kept when Light/Dark theme changes. The map canvas,
 logo contrast, and hover card follow the resolved Light/Dark theme. Header
 chrome keeps the outline `logo.svg`. Weather overlays will come later.

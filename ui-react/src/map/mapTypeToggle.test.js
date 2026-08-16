@@ -1,7 +1,10 @@
 import { expect, test } from 'vitest';
 import {
+  HYBRID_MAP_TYPE,
   ROADMAP_MAP_TYPE,
   SATELLITE_MAP_TYPE,
+  TERRAIN_MAP_TYPE,
+  builtInMapTypeIds,
   createMapTypeControlOptions,
   defaultMapTypeId,
 } from './mapTypeToggle';
@@ -12,17 +15,20 @@ const maps = {
   ControlPosition: { TOP_LEFT: 'TOP_LEFT' },
 };
 
+const ALL_BUILT_IN_TYPES = [ROADMAP_MAP_TYPE, SATELLITE_MAP_TYPE, HYBRID_MAP_TYPE, TERRAIN_MAP_TYPE];
+
 test('roadmap is the default map type', () => {
   expect(defaultMapTypeId(maps)).toBe(ROADMAP_MAP_TYPE);
   expect(defaultMapTypeId({})).toBe(ROADMAP_MAP_TYPE);
   expect(defaultMapTypeId(maps, SATELLITE_MAP_TYPE)).toBe(SATELLITE_MAP_TYPE);
 });
 
-test('type control offers roadmap and satellite (aerial)', () => {
+test('type control offers Google\'s four built-in map types', () => {
+  expect(builtInMapTypeIds(maps)).toEqual(ALL_BUILT_IN_TYPES);
   expect(createMapTypeControlOptions(maps)).toEqual({
     style: 'HORIZONTAL_BAR',
     position: 'TOP_LEFT',
-    mapTypeIds: [ROADMAP_MAP_TYPE, SATELLITE_MAP_TYPE],
+    mapTypeIds: ALL_BUILT_IN_TYPES,
   });
-  expect(createMapTypeControlOptions({}).mapTypeIds).toEqual([ROADMAP_MAP_TYPE, SATELLITE_MAP_TYPE]);
+  expect(createMapTypeControlOptions({}).mapTypeIds).toEqual(ALL_BUILT_IN_TYPES);
 });
