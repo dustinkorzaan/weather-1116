@@ -24,10 +24,7 @@ relationships, and parity guidance live in
 Presentation reference: [`docs/presentation.md`](docs/presentation.md)
 
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
-against Core weather data (V1–V4) or a hosted Foundry Agent (V5). In
-`Weather.sln` and CI, but not a production deployable; run from VS Code or
-`dotnet run` in each folder.
-See each `Program.cs` and `.env.example` for required settings (`AZURE_FOUNDRY_PROD_EUS2_*`, plus MCP keys for V4 and API/MVC).
+against Core weather data (V1–V4) or a hosted Foundry Agent (V5).
 
 | Project | Path | Pattern |
 | --- | --- | --- |
