@@ -190,10 +190,15 @@ public sealed class PageSplitTests
         Assert.Contains("chat-window", panelSource);
 
         var markdown = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Markdown/SafeGfmMarkdown.cs"));
-        Assert.Contains("UseAdvancedExtensions", markdown);
+        Assert.Contains("UsePipeTables", markdown);
+        Assert.Contains("UseEmphasisExtras", markdown);
+        Assert.Contains("UseAutoLinks", markdown);
+        Assert.Contains("UseTaskLists", markdown);
+        Assert.DoesNotContain("UseAdvancedExtensions", markdown);
+        Assert.DoesNotContain("UseMediaLinks", markdown);
         Assert.Contains("Markdig.Markdown.ToHtml", markdown);
         Assert.Contains("DisableHtml", markdown);
-        Assert.Contains("UnsafeUrlAttribute", markdown);
+        Assert.Contains("IsSafeUrl", markdown);
 
         var chatInput = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
         Assert.Contains("function scrollToBottom(element)", chatInput);
