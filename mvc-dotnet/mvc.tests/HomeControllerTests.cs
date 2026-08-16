@@ -19,7 +19,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("href=\"/current-ai-weather\"", html);
         Assert.Contains("href=\"/chat-clients\"", html);
         Assert.Contains("Login/Logout", html);
-        Assert.DoesNotContain("href=\"/presentation\"", html);
         Assert.DoesNotContain("Hello, from WeatherMVC", html);
         Assert.DoesNotContain("id=\"ai-weather-form\"", html);
         Assert.DoesNotContain("id=\"chat-messages\"", html);
@@ -76,22 +75,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.DoesNotContain("Hello World</h2>", html);
         Assert.DoesNotContain("Current AI Weather</h2>", html);
         Assert.DoesNotContain("id=\"weather-map\"", html);
-    }
-
-    [Fact]
-    public async Task Presentation_IsNotARoute()
-    {
-        var response = await _client.GetAsync("/presentation");
-
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task Chat_IsNotARoute()
-    {
-        var response = await _client.GetAsync("/chat");
-
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]

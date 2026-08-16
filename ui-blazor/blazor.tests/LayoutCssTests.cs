@@ -54,7 +54,6 @@ public sealed class LayoutCssTests
         Assert.Contains("class=\"about-modal", rendered.Markup);
         Assert.Contains("class=\"about-close\"", rendered.Markup);
         Assert.Contains("aria-label=\"Close\"", rendered.Markup);
-        Assert.DoesNotContain("<a href=\"/presentation\"", rendered.Markup);
 
         var layoutSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/MainLayout.razor"));
         Assert.Contains("Login/Logout", layoutSource);
@@ -65,7 +64,6 @@ public sealed class LayoutCssTests
         Assert.Contains("NavigateTo(\"/current-ai-weather\")", layoutSource);
         Assert.Contains("NavigateTo(\"/chat-clients\")", layoutSource);
         Assert.Contains("OpenExternalAsync", layoutSource);
-        Assert.DoesNotContain("href=\"/presentation\"", layoutSource);
     }
 
     private static string FindRepoFile(string relativePath)

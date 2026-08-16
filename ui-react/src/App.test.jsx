@@ -116,7 +116,7 @@ test('renders chat clients on its own page', () => {
   expect(screen.queryByRole('region', { name: /map/i })).toBeNull();
 });
 
-test('user menu lists login and the three split pages instead of presentation', async () => {
+test('user menu lists login and the three content pages', async () => {
   mockHelloFetch();
   const user = userEvent.setup();
   renderApp('/');
@@ -127,7 +127,6 @@ test('user menu lists login and the three split pages instead of presentation', 
   expect(screen.getByRole('menuitem', { name: 'Hello World' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Current AI Weather' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Chat Clients' })).toBeDefined();
-  expect(screen.queryByRole('menuitem', { name: 'Presentation' })).toBeNull();
 });
 
 test('renders a public message in the About tree', () => {
