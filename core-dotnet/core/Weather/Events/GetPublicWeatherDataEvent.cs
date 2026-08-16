@@ -1,4 +1,3 @@
-using Core.Geo.Models;
 using Core.Weather.Models;
 using MediatR;
 
@@ -9,5 +8,7 @@ namespace Core.Weather.Events;
 /// </summary>
 public class GetPublicWeatherDataEvent : IRequest<NonAIWeatherResponse>
 {
-    public required NonAILatLongResponse LatLong { get; set; }
+    public required double Latitude { get; set; }
+
+    public required double Longitude { get; set; }
 }

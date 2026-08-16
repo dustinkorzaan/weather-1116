@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Core.Geo.Models;
 using Core.Weather.Events;
 using Core.Weather.Models;
 using MediatR;
@@ -23,11 +22,8 @@ public class GetPublicWeatherDataTool(IMediator mediator)
 		return await mediator.Send(
 			new GetPublicWeatherDataEvent
 			{
-				LatLong = new NonAILatLongResponse
-				{
-					Latitude = latitude,
-					Longitude = longitude,
-				},
+				Latitude = latitude,
+				Longitude = longitude,
 			},
 			cancellationToken);
 	}

@@ -2,7 +2,6 @@
 using Core.AIWeather.Models;
 using Core.HelloWorld.Handlers;
 using Core.Geo.Events;
-using Core.Geo.Models;
 using Core.Weather.Events;
 using DotNetEnv;
 using MediatR;
@@ -211,11 +210,8 @@ internal class Program
 									Console.WriteLine($"\nTool call: GetPublicWeatherData({latitude}, {longitude})");
 									var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
 									{
-										LatLong = new NonAILatLongResponse
-										{
-											Latitude = latitude,
-											Longitude = longitude,
-										}
+										Latitude = latitude,
+										Longitude = longitude,
 									});
 									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
 									Console.WriteLine($"Tool output: {functionOutput}");
