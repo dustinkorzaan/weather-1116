@@ -39,7 +39,7 @@ internal class Program
 		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
-		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
+		You provide weather and climate data using U.S. customary units (Fahrenheit, MPH, and inches). Do not use C, KPH, or MM.
 		You can call your MCP tools to resolve a place name to latitude/longitude,
 		and to fetch current public weather for those coordinates.
 		Use those tools whenever you need real weather data.

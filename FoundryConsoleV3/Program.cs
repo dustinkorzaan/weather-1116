@@ -52,7 +52,7 @@ internal class Program
 		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
-		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
+		You provide weather and climate data using U.S. customary units (Fahrenheit, MPH, and inches). Do not use C, KPH, or MM.
 		You can call the GetLatLong tool to resolve a place name to ranked latitude/longitude
 		matches (up to 5; rank 1 is the best match). Use name, state, and country to pick the
 		right place — you may skip rank 1. Call GetLocation to turn latitude/longitude into

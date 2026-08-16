@@ -19,5 +19,7 @@ public class ChatSystemInstructionsTests
         Assert.Contains("GetPublicWeatherForecast", prompt);
         Assert.Contains("GetPublicWeatherHistory", prompt);
         Assert.Contains("Do not emit raw HTML", prompt);
+        Assert.Contains("Fahrenheit, MPH, inches", prompt);
+        Assert.Contains("Do not use C, KPH, or MM", prompt);
     }
 }

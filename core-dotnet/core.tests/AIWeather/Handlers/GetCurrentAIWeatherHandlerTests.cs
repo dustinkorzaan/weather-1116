@@ -20,6 +20,8 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.Contains("also JSON fields", prompt);
         Assert.DoesNotContain("Exactly one sentence", prompt, StringComparison.Ordinal);
         Assert.DoesNotContain("AIWeatherSystemInstructions", prompt, StringComparison.Ordinal);
+        Assert.Contains("Fahrenheit, MPH, inches", prompt);
+        Assert.Contains("Do not use C, KPH, or MM", prompt);
     }
 
     private static string FindRepoFile(string relativePath)
