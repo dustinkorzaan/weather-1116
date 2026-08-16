@@ -21,6 +21,8 @@ public sealed class PageSplitTests
         var rendered = context.Render<WeatherBlazor.Pages.Index>();
 
         Assert.Contains("id=\"weather-map\"", rendered.Markup);
+        Assert.Contains("Atlanta, GA", rendered.Markup);
+        Assert.Contains("New York, NY", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
         Assert.DoesNotContain("Current AI Weather", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
@@ -73,7 +75,7 @@ public sealed class PageSplitTests
             Assert.Contains("Sunny in Nashville.", rendered.Markup);
         });
 
-        Assert.Contains("nashville tn", rendered.Markup);
+        Assert.Contains("nashville, TN", rendered.Markup);
         Assert.DoesNotContain("location=nashville", context.Services.GetRequiredService<NavigationManager>().Uri);
     }
 
@@ -82,6 +84,7 @@ public sealed class PageSplitTests
     {
         var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
         Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("cleanLocationQuery", script);
         Assert.Contains("/current-ai-weather?location=", script);
         Assert.Contains("marker.addListener('click'", script);
     }

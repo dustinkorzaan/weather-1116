@@ -1,6 +1,23 @@
 (function (window) {
   'use strict';
 
+  function locationParts(location) {
+    return String(location || '')
+      .split(/[,\s]+/)
+      .map(function (part) {
+        return part.trim();
+      })
+      .filter(Boolean);
+  }
+
+  function locationSearchValue(location) {
+    var parts = locationParts(location);
+    if (parts.length >= 2 && parts[parts.length - 1].length === 2) {
+      return parts.slice(0, -1).join(' ') + ', ' + parts[parts.length - 1].toUpperCase();
+    }
+    return parts.join(' ');
+  }
+
   function setHidden(el, hidden) {
     if (!el) {
       return;
@@ -72,7 +89,7 @@
 
     function consumeLocationQuery() {
       var params = new URLSearchParams(window.location.search);
-      var fromQuery = (params.get('location') || '').trim();
+      var fromQuery = locationSearchValue(params.get('location'));
       if (!fromQuery) {
         return false;
       }

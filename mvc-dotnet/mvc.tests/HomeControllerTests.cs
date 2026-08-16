@@ -32,6 +32,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("id=\"weather-map\"", html);
+        Assert.Contains("Atlanta, GA", html);
+        Assert.Contains("New York, NY", html);
         Assert.Contains("href=\"/hello-world\"", html);
         Assert.Contains("href=\"/current-ai-weather\"", html);
         Assert.Contains("href=\"/chat-clients\"", html);
@@ -96,6 +98,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     {
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
         Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("cleanLocationQuery", script);
         Assert.Contains("/current-ai-weather?location=", script);
         Assert.Contains("marker.addListener('click'", script);
     }
@@ -105,6 +108,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     {
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/currentAIWeather.js"));
         Assert.Contains("consumeLocationQuery", script);
+        Assert.Contains("locationSearchValue", script);
         Assert.Contains("params.get('location')", script);
         Assert.Contains("history.replaceState", script);
         Assert.Contains("requestWeather()", script);

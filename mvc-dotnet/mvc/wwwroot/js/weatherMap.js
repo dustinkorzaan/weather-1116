@@ -79,8 +79,33 @@ window.weatherMap = (function () {
     return loadPromise;
   }
 
+  function locationParts(location) {
+    return String(location || '')
+      .split(/[,\s]+/)
+      .map(function (part) {
+        return part.trim();
+      })
+      .filter(Boolean);
+  }
+
+  function cleanLocationQuery(location) {
+    return locationParts(location).join(' ');
+  }
+
+  function locationSearchValue(location) {
+    var parts = locationParts(location);
+    if (parts.length >= 2 && parts[parts.length - 1].length === 2) {
+      return parts.slice(0, -1).join(' ') + ', ' + parts[parts.length - 1].toUpperCase();
+    }
+    return parts.join(' ');
+  }
+
   function currentAiWeatherPath(location) {
-    return '/current-ai-weather?location=' + encodeURIComponent(location || '');
+    var cleaned = cleanLocationQuery(location);
+    if (!cleaned) {
+      return '/current-ai-weather';
+    }
+    return '/current-ai-weather?location=' + encodeURIComponent(cleaned);
   }
 
   function createWhiteDotIcon(maps) {
@@ -160,5 +185,10 @@ window.weatherMap = (function () {
     });
   }
 
-  return { init: init, currentAiWeatherPath: currentAiWeatherPath };
+  return {
+    init: init,
+    cleanLocationQuery: cleanLocationQuery,
+    locationSearchValue: locationSearchValue,
+    currentAiWeatherPath: currentAiWeatherPath,
+  };
 })();
