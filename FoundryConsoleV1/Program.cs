@@ -181,7 +181,7 @@ internal class Program
 		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
-		You provide weather and climate data using U.S. customary units (Fahrenheit, MPH, and inches). Do not use C, KPH, or MM.
+		You provide weather and climate data using U.S. customary units (Fahrenheit, MPH, and inches). Write inches with the inch mark, e.g. 1". Do not use C, KPH, or MM.
 		GitHub-flavored Markdown is allowed when it makes the answer easier to read. Do not emit raw HTML.
 		Use one or two friendly sentences of the current weather and include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts even if they also appear in JSON.
 		""";
@@ -257,7 +257,7 @@ internal class Program
 		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
-		You provide weather and climate data using U.S. customary units (Fahrenheit, MPH, and inches). Do not use C, KPH, or MM.
+		You provide weather and climate data using U.S. customary units (Fahrenheit, MPH, and inches). Write inches with the inch mark, e.g. 1". Do not use C, KPH, or MM.
 
 		Return valid JSON with these fields:
 		- fullSummary (string) (one or two friendly sentences of the current weather including place name, temperature, wind speed, wind direction, and overall conditions — keep those facts even though some are also JSON fields; GitHub-flavored Markdown is allowed when it helps readability)

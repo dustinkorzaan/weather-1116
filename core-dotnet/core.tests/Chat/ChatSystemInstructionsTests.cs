@@ -20,6 +20,7 @@ public class ChatSystemInstructionsTests
         Assert.Contains("GetPublicWeatherHistory", prompt);
         Assert.Contains("Do not emit raw HTML", prompt);
         Assert.Contains("Fahrenheit, MPH, inches", prompt);
+        Assert.Contains("Write inches with the inch mark, e.g. 1\"", prompt);
         Assert.Contains("Do not use C, KPH, or MM", prompt);
     }
 }

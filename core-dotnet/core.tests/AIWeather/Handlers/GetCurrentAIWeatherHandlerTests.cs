@@ -21,6 +21,7 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.DoesNotContain("Exactly one sentence", prompt, StringComparison.Ordinal);
         Assert.DoesNotContain("AIWeatherSystemInstructions", prompt, StringComparison.Ordinal);
         Assert.Contains("Fahrenheit, MPH, inches", prompt);
+        Assert.Contains("Write inches with the inch mark, e.g. 1\"", prompt);
         Assert.Contains("Do not use C, KPH, or MM", prompt);
     }
 
