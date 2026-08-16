@@ -51,7 +51,11 @@
           return response.json();
         })
         .then(function (data) {
-          summaryEl.textContent = data.fullSummary || '';
+          if (window.chatMarkdown) {
+            summaryEl.innerHTML = window.chatMarkdown.render(data.fullSummary || '');
+          } else {
+            summaryEl.textContent = data.fullSummary || '';
+          }
           temperatureEl.textContent = data.temperatureF;
           windSpeedEl.textContent = data.windSpeedMPH;
           windDirectionEl.textContent = data.windDirection || '';

@@ -82,6 +82,9 @@ public sealed class PageSplitTests
         var pageSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Pages/CurrentAIWeather.razor"));
         Assert.Contains("Class=\"ai-weather-submit\"", pageSource);
         Assert.Contains("Slot=\"start\"", pageSource);
+        Assert.Contains("chat-markdown", pageSource);
+        Assert.Contains("ChatMarkdown.ToHtml", pageSource);
+        Assert.Contains("MarkupString", pageSource);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
         Assert.DoesNotContain("chat-input", rendered.Markup);
@@ -117,7 +120,10 @@ public sealed class PageSplitTests
 
         rendered.WaitForAssertion(() =>
         {
-            Assert.Contains("Sunny in Nashville.", rendered.Markup);
+            Assert.Contains("chat-markdown", rendered.Markup);
+            Assert.Contains("<strong>Sunny</strong>", rendered.Markup);
+            Assert.Contains("in Nashville.", rendered.Markup);
+            Assert.DoesNotContain("**Sunny**", rendered.Markup);
         });
 
         Assert.Contains("nashville tn", rendered.Markup);
@@ -287,7 +293,7 @@ public sealed class PageSplitTests
                 {
                     Content = JsonContent.Create(new AIWeatherResponse
                     {
-                        FullSummary = "Sunny in Nashville.",
+                        FullSummary = "**Sunny** in Nashville.",
                         TemperatureF = 72,
                         WindSpeedMPH = 5,
                         WindDirection = "S",

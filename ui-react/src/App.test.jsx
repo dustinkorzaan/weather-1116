@@ -36,7 +36,7 @@ function requestUrl(input) {
   return input instanceof Request ? input.url : String(input);
 }
 
-function mockHelloFetch() {
+function mockHelloFetch(weather = {}) {
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
     const url = requestUrl(input);
 
@@ -84,6 +84,7 @@ function mockHelloFetch() {
           locationName: 'Nashville, TN',
           latitude: 36.1627,
           longitude: -86.7816,
+          ...weather,
         }),
         {
           status: 200,
@@ -235,7 +236,40 @@ test('current AI weather reads location query, clears it, and fetches', async ()
   });
 
   await waitFor(() => {
-    expect(screen.getByText('Sunny in Nashville.')).toBeDefined();
+    const summary = screen.getByText('Sunny in Nashville.');
+    expect(summary.tagName).toBe('P');
+    expect(summary.closest('.chat-markdown')).toBeTruthy();
+  });
+
+  const weatherUrl = fetchMock.mock.calls
+    .map(([input]) => requestUrl(input))
+    .find((url) => url.includes('/AIWeather/Current'));
+
+  expect(weatherUrl).toBeDefined();
+  expect(weatherUrl).toContain('location=nashville');
+  expect(router.state.location.pathname).toBe('/current-ai-weather');
+  expect(router.state.location.search).toBe('');
+});
+
+test('current AI weather renders the full summary as GitHub-flavored Markdown', async () => {
+  mockHelloFetch({
+    fullSummary: `**Sunny** in Nashville.
+
+| Metric | Value |
+| --- | --- |
+| Temp | 72 |
+`,
+  });
+  const user = userEvent.setup();
+  renderApp('/current-ai-weather');
+
+  await user.click(screen.getByRole('button', { name: /get current ai weather/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText('Sunny').tagName).toBe('STRONG');
+    expect(screen.getByRole('table')).toBeDefined();
+    expect(screen.getByText('Temp')).toBeDefined();
+    expect(screen.getByText('72')).toBeDefined();
   });
 
   const weatherUrl = fetchMock.mock.calls

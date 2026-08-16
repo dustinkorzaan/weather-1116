@@ -75,6 +75,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Current AI Weather", html);
         Assert.Contains("class=\"weather-card\"", html);
         Assert.Contains("class=\"btn\"", html);
+        Assert.Contains("chat-markdown", html);
+        Assert.Contains("chatMarkdown.js", html);
+        Assert.Contains("marked.min.js", html);
+        Assert.Contains("purify.min.js", html);
         Assert.DoesNotContain("aria-label=\"Add location\"", html);
         Assert.DoesNotContain("Hello World</h2>", html);
         Assert.DoesNotContain("Chat Clients</h2>", html);
@@ -146,6 +150,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("params.get('location')", script);
         Assert.Contains("history.replaceState", script);
         Assert.Contains("requestWeather()", script);
+        Assert.Contains("chatMarkdown.render", script);
+        Assert.Contains("summaryEl.innerHTML", script);
     }
 
     [Fact]

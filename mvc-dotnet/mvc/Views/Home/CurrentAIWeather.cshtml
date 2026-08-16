@@ -21,7 +21,7 @@
         </form>
         <p id="ai-weather-error" class="form-error" hidden></p>
         <div id="ai-weather-results" class="weather-results" hidden>
-            <p id="ai-weather-summary" class="weather-summary"></p>
+            <div id="ai-weather-summary" class="weather-summary chat-markdown"></div>
             <dl class="weather-stats">
                 <div class="weather-stat">
                     <dt>Temperature F</dt>
@@ -45,6 +45,9 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/lib/marked.min.js" asp-append-version="true"></script>
+    <script src="~/js/lib/purify.min.js" asp-append-version="true"></script>
+    <script src="~/js/chatMarkdown.js" asp-append-version="true"></script>
     <script src="~/js/currentAIWeather.js" asp-append-version="true"></script>
     <script>
         currentAIWeather.init({

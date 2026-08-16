@@ -37,7 +37,7 @@
         @if (aiWeather is not null && !isAiWeatherLoading)
         {
             <div class="weather-results">
-                <p>@aiWeather.FullSummary</p>
+                <div class="chat-markdown">@((MarkupString)ChatMarkdown.ToHtml(aiWeather.FullSummary))</div>
                 <FluentGrid Spacing="2">
                     <FluentGridItem xs="12" sm="6">
                         <div class="stat-label">Temperature F</div>
