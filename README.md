@@ -31,11 +31,11 @@ See each `Program.cs` and `.env.example` for required settings (`AZURE_FOUNDRY_P
 
 | Project | Path | Pattern |
 | --- | --- | --- |
-| V1 | [`FoundryConsoleV1`](FoundryConsoleV1) (`FoundryConsoleV1ModelDirectLegacy.csproj`) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
-| V2 | [`FoundryConsoleV2`](FoundryConsoleV2) (`FoundryConsoleV2ModelDirectUnifiedAI.csproj`) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| V3 | [`FoundryConsoleV3`](FoundryConsoleV3) (`FoundryConsoleV3InProcessToolCallbacks.csproj`) | In-process tool callbacks (`GetLatLongData`, `GetPublicWeatherData`) answered by the console |
-| V4 | [`FoundryConsoleV4`](FoundryConsoleV4) (`FoundryConsoleV4MCP.csproj`) | Model-direct via `ResponsesClient`, tools target remote MCP servers instead of in-process callbacks |
-| V5 | [`FoundryConsoleV5`](FoundryConsoleV5) (`FoundryConsoleV5Agent.csproj`) | Hosted Foundry Agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
+| V1 | [`Foundry Console V1 Model Direct Legacy`](FoundryConsoleV1) (`FoundryConsoleV1ModelDirectLegacy.csproj`) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
+| V2 | [`Foundry Console V2 Model Direct Unified AI`](FoundryConsoleV2) (`FoundryConsoleV2ModelDirectUnifiedAI.csproj`) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
+| V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) (`FoundryConsoleV3InProcessToolCallbacks.csproj`) | In-process tool callbacks (`GetLatLongData`, `GetPublicWeatherData`) answered by the console |
+| V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) (`FoundryConsoleV4MCP.csproj`) | Model-direct via `ResponsesClient`, tools target remote MCP servers instead of in-process callbacks |
+| V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) (`FoundryConsoleV5Agent.csproj`) | Hosted Foundry Agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
 
 ## Chat clients
 
