@@ -1,20 +1,10 @@
-﻿@page "/presentation"
+@page "/current-ai-weather"
 @using WeatherBlazor.Data
 @inject WeatherApiClient WeatherClient
 
-<PageTitle>Weather Razor - Presentation</PageTitle>
+<PageTitle>Weather Razor - Current AI Weather</PageTitle>
 
-<div class="presentation-page">
-    <section class="hello-section" aria-labelledby="hello-world-heading">
-        <h2 id="hello-world-heading" class="section-title">Hello World</h2>
-        <p>@helloMessage</p>
-    </section>
-
-    @if (!string.IsNullOrWhiteSpace(errorMessage))
-    {
-        <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@errorMessage</FluentMessageBar>
-    }
-
+<div class="content-page">
     <FluentCard Class="weather-card">
         <h2 class="section-title">Current AI Weather</h2>
 
@@ -66,31 +56,13 @@
             </div>
         }
     </FluentCard>
-
-    <ChatPanel />
 </div>
 
 @code {
-    private string helloMessage = "Loading hello message...";
-    private string? errorMessage;
     private string location = "Nashville, TN";
     private bool isAiWeatherLoading;
     private string? aiWeatherError;
     private AIWeatherResponse? aiWeather;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            var helloResponse = await WeatherClient.GetHello();
-            helloMessage = helloResponse?.RequestResponse ?? "No hello response returned.";
-        }
-        catch
-        {
-            helloMessage = "Unable to load hello message from API.";
-            errorMessage ??= "Unable to load data from the weather API.";
-        }
-    }
 
     private async Task GetCurrentAIWeather()
     {

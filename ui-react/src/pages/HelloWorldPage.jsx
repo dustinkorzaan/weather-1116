@@ -1,13 +1,11 @@
-import ChatPanel from '../components/chat/ChatPanel';
-import CurrentAIWeather from '../components/CurrentAIWeather';
 import { useGetHelloQuery } from '../services/weatherApi';
 
-function PresentationPage() {
+function HelloWorldPage() {
   const { data: helloMessage, isError: isHelloError } = useGetHelloQuery();
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto p-4">
-      <section className="mb-6" aria-labelledby="hello-world-heading">
+      <section aria-labelledby="hello-world-heading">
         <h2 id="hello-world-heading" className="mb-2 text-xl font-semibold">
           Hello World
         </h2>
@@ -15,12 +13,8 @@ function PresentationPage() {
           {isHelloError ? 'Unable to load hello message from API.' : (helloMessage ?? 'Loading hello message...')}
         </p>
       </section>
-
-      <CurrentAIWeather />
-
-      <ChatPanel />
     </main>
   );
 }
 
-export default PresentationPage;
+export default HelloWorldPage;

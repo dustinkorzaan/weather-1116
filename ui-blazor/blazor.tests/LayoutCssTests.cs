@@ -51,6 +51,36 @@ public sealed class LayoutCssTests
         Assert.Contains("<a href=\"/\" class=\"brand-link\">", rendered.Markup);
         Assert.Contains("<h1 class=\"brand-title\">Weather Blazor</h1>", rendered.Markup);
         Assert.Contains("stroke-width=\"2.25\"", rendered.Markup);
+        Assert.Contains("class=\"about-modal", rendered.Markup);
+        Assert.Contains("class=\"about-close\"", rendered.Markup);
+        Assert.Contains("aria-label=\"Close\"", rendered.Markup);
+
+        var layoutSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/MainLayout.razor"));
+        Assert.Contains("Login/Logout", layoutSource);
+        Assert.Contains("Hello World", layoutSource);
+        Assert.Contains("Current AI Weather", layoutSource);
+        Assert.Contains("Chat Clients", layoutSource);
+        Assert.Contains("NavigateTo(\"/hello-world\")", layoutSource);
+        Assert.Contains("NavigateTo(\"/current-ai-weather\")", layoutSource);
+        Assert.Contains("NavigateTo(\"/chat-clients\")", layoutSource);
+        Assert.Contains("OpenExternalAsync", layoutSource);
+    }
+
+    private static string FindRepoFile(string relativePath)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            var candidate = Path.Combine(dir.FullName, relativePath);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            dir = dir.Parent;
+        }
+
+        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
     }
 
     [Fact]
@@ -66,5 +96,7 @@ public sealed class LayoutCssTests
         Assert.Contains("text-decoration: none", css);
         Assert.Contains("border: 2px solid #d1d5db", css);
         Assert.Contains("stroke-width: 2.25", css);
+        Assert.Contains(".about-modal.is-open", css);
+        Assert.Contains(".about-close", css);
     }
 }

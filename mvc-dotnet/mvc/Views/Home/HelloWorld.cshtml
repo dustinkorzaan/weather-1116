@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Hello World";
+    var helloResponse = ViewData["HelloResponse"] as string;
+}
+
+<div class="page-shell">
+    <section class="hello-section" aria-labelledby="hello-world-heading">
+        <h2 id="hello-world-heading" class="section-heading">Hello World</h2>
+        @if (!string.IsNullOrWhiteSpace(helloResponse))
+        {
+            <p class="hello-message">@helloResponse</p>
+        }
+    </section>
+</div>

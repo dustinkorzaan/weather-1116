@@ -21,9 +21,9 @@ Each tab has its **own controller**, **own Core service**, and **own session nam
 ```mermaid
 flowchart TB
     subgraph ui [UIs]
-        React[ui-react /presentation]
-        MVC[mvc-dotnet /presentation]
-        Blazor[ui-blazor /presentation]
+        React[ui-react /chat-clients]
+        MVC[mvc-dotnet /chat-clients]
+        Blazor[ui-blazor /chat-clients]
     end
 
     subgraph api [API or MVC host]
@@ -79,13 +79,12 @@ flowchart TB
 
 | UI | Chat page | Backend |
 | --- | --- | --- |
-| React | `/presentation` | Proxies to Weather API (`VITE_API_DOTNET_URL`) |
-| Blazor | `/presentation` | `ChatApiClient` → Weather API |
-| MVC | `/presentation` | Local controllers + Core (same as API handlers) |
+| React | `/chat-clients` | Proxies to Weather API (`VITE_API_DOTNET_URL`) |
+| Blazor | `/chat-clients` | `ChatApiClient` → Weather API |
+| MVC | `/chat-clients` | Local controllers + Core (same as API handlers) |
 
-The dedicated `/chat` route was removed from all three UIs; the chat panel now
-lives on the `/presentation` page alongside the hello message and the Current AI
-Weather widget.
+The chat panel lives on `/chat-clients`. Hello and Current AI Weather are
+separate pages (`/hello-world`, `/current-ai-weather`).
 
 ## Core layout
 
@@ -145,7 +144,7 @@ Chat1a and Chat2a do **not** require MCP URLs.
 | Endpoint | `GET /AIWeather/Current` | `POST /Chat1a/messages`, etc. |
 | Output | Strict `AIWeatherResponse` JSON | Conversational text (streamed) |
 | Memory | None (single shot) | Per-tab session history |
-| UI | `/presentation` section | `/presentation` chat panel (four tabs, per-tab session) |
+| UI | `/current-ai-weather` page | `/chat-clients` chat panel (four tabs, per-tab session) |
 
 ## Learning goals
 

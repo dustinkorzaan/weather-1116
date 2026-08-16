@@ -1,5 +1,6 @@
 import { afterEach, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -69,7 +70,7 @@ test('header person icon uses a bolder stroke', () => {
   expect(title.closest('header')?.querySelector('svg')?.getAttribute('stroke-width')).toBe('2.25');
 });
 
-test('renders the map on the home route without presentation content', () => {
+test('renders the map on the home route without split page content', () => {
   mockHelloFetch();
   renderApp('/');
 
@@ -80,19 +81,52 @@ test('renders the map on the home route without presentation content', () => {
   expect(screen.queryByRole('heading', { name: /current ai weather/i })).toBeNull();
 });
 
-test('renders weather app title and loaded data on the presentation page', async () => {
+test('renders hello world on its own page', async () => {
   mockHelloFetch();
-  renderApp('/presentation');
+  renderApp('/hello-world');
 
   expect(await screen.findByRole('heading', { name: /weather react/i })).toBeDefined();
   expect(await screen.findByRole('heading', { name: /^hello world$/i })).toBeDefined();
   expect(await screen.findByText('Hello from test API.')).toBeDefined();
-  expect(await screen.findByRole('heading', { name: /current ai weather/i })).toBeDefined();
-  expect(await screen.findByLabelText(/location:/i)).toBeDefined();
-  expect(await screen.findByRole('button', { name: /get current ai weather/i })).toBeDefined();
-  expect(await screen.findByRole('heading', { name: /chat clients/i })).toBeDefined();
-  expect(screen.getByRole('tab', { name: 'Chat1a' })).toBeDefined();
+  expect(screen.queryByRole('heading', { name: /current ai weather/i })).toBeNull();
+  expect(screen.queryByRole('heading', { name: /chat clients/i })).toBeNull();
   expect(screen.queryByRole('region', { name: /map/i })).toBeNull();
+});
+
+test('renders current AI weather on its own page', () => {
+  mockHelloFetch();
+  renderApp('/current-ai-weather');
+
+  expect(screen.getByRole('heading', { name: /current ai weather/i })).toBeDefined();
+  expect(screen.getByLabelText(/location:/i)).toBeDefined();
+  expect(screen.getByRole('button', { name: /get current ai weather/i })).toBeDefined();
+  expect(screen.queryByRole('heading', { name: /^hello world$/i })).toBeNull();
+  expect(screen.queryByRole('heading', { name: /chat clients/i })).toBeNull();
+  expect(screen.queryByRole('region', { name: /map/i })).toBeNull();
+});
+
+test('renders chat clients on its own page', () => {
+  mockHelloFetch();
+  renderApp('/chat-clients');
+
+  expect(screen.getByRole('heading', { name: /chat clients/i })).toBeDefined();
+  expect(screen.getByRole('tab', { name: 'Chat1a' })).toBeDefined();
+  expect(screen.queryByRole('heading', { name: /^hello world$/i })).toBeNull();
+  expect(screen.queryByRole('heading', { name: /current ai weather/i })).toBeNull();
+  expect(screen.queryByRole('region', { name: /map/i })).toBeNull();
+});
+
+test('user menu lists login and the three content pages', async () => {
+  mockHelloFetch();
+  const user = userEvent.setup();
+  renderApp('/');
+
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
+
+  expect(await screen.findByRole('menuitem', { name: 'Login/Logout' })).toBeDefined();
+  expect(screen.getByRole('menuitem', { name: 'Hello World' })).toBeDefined();
+  expect(screen.getByRole('menuitem', { name: 'Current AI Weather' })).toBeDefined();
+  expect(screen.getByRole('menuitem', { name: 'Chat Clients' })).toBeDefined();
 });
 
 test('renders a public message in the About tree', () => {

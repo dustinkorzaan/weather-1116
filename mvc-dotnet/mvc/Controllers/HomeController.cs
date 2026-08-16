@@ -21,13 +21,27 @@ public class HomeController : Controller
         return View();
     }
 
-    [Route("presentation")]
-    [Route("Home/Presentation")]
-    public async Task<IActionResult> Presentation(CancellationToken cancellationToken)
+    [Route("hello-world")]
+    [Route("Home/HelloWorld")]
+    public async Task<IActionResult> HelloWorld(CancellationToken cancellationToken)
     {
         var helloResponse = await _mediator.Send(new HelloWorldEvent { Message = "from WeatherMVC" }, cancellationToken);
         ViewData["HelloResponse"] = helloResponse.RequestResponse;
 
+        return View();
+    }
+
+    [Route("current-ai-weather")]
+    [Route("Home/CurrentAIWeather")]
+    public IActionResult CurrentAIWeather()
+    {
+        return View();
+    }
+
+    [Route("chat-clients")]
+    [Route("Home/ChatClients")]
+    public IActionResult ChatClients()
+    {
         return View();
     }
 

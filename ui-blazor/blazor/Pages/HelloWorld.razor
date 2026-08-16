@@ -1,0 +1,36 @@
+@page "/hello-world"
+@using WeatherBlazor.Data
+@inject WeatherApiClient WeatherClient
+
+<PageTitle>Weather Razor - Hello World</PageTitle>
+
+<div class="content-page">
+    <section class="hello-section" aria-labelledby="hello-world-heading">
+        <h2 id="hello-world-heading" class="section-title">Hello World</h2>
+        <p>@helloMessage</p>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@errorMessage</FluentMessageBar>
+    }
+</div>
+
+@code {
+    private string helloMessage = "Loading hello message...";
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var helloResponse = await WeatherClient.GetHello();
+            helloMessage = helloResponse?.RequestResponse ?? "No hello response returned.";
+        }
+        catch
+        {
+            helloMessage = "Unable to load hello message from API.";
+            errorMessage ??= "Unable to load data from the weather API.";
+        }
+    }
+}

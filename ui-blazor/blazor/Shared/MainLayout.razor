@@ -2,18 +2,11 @@
 @using WeatherBlazor.Data
 @inject WeatherApiClient WeatherClient
 @inject IConfiguration Configuration
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Weather Razor</PageTitle>
 <FluentDesignTheme CustomColor="#6b7280" Mode="DesignThemeModes.Light" />
-
-@{
-    var uiReactUrl = Configuration["UI_REACT_URL"] ?? "http://localhost:3000";
-    var mvcUrl = Configuration["MVC_URL"] ?? "http://localhost:8100";
-    var apiUrl = (Configuration["API_DOTNET_URL"] ?? "http://localhost:8080").TrimEnd('/');
-    var apiAboutUrl = $"{apiUrl}/About";
-    var workerUrl = (Configuration["WORKER_DOTNET_URL"] ?? "http://localhost:8130").TrimEnd('/');
-    var workerHangfireUrl = $"{workerUrl}/hangfire";
-}
 
 <FluentLayout Class="weather-shell">
     <FluentHeader Height="48" Class="weather-header">
@@ -38,24 +31,18 @@
         <FluentMenu Anchor="user-menu-button"
                     Trigger="MouseButton.Left"
                     HorizontalPosition="HorizontalPosition.Right">
-            <FluentMenuItem>
-                <a href="@uiReactUrl" target="_blank" rel="noopener noreferrer">UI React</a>
-            </FluentMenuItem>
-            <FluentMenuItem>
-                <a href="@mvcUrl" target="_blank" rel="noopener noreferrer">MVC</a>
-            </FluentMenuItem>
-            <FluentMenuItem>
-                <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
-            </FluentMenuItem>
-            <FluentMenuItem>
-                <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
-            </FluentMenuItem>
+            <FluentMenuItem Label="Login/Logout" OnClick="NoOpLoginLogout" />
             <FluentDivider />
-            <FluentMenuItem>
-                <a href="/presentation">Presentation</a>
-            </FluentMenuItem>
+            <FluentMenuItem Label="UI React" OnClick="@(() => OpenExternalAsync(_uiReactUrl))" />
+            <FluentMenuItem Label="MVC" OnClick="@(() => OpenExternalAsync(_mvcUrl))" />
+            <FluentMenuItem Label="API About" OnClick="@(() => OpenExternalAsync(_apiAboutUrl))" />
+            <FluentMenuItem Label="Worker Hangfire" OnClick="@(() => OpenExternalAsync(_workerHangfireUrl))" />
             <FluentDivider />
-            <FluentMenuItem OnClick="OpenAboutModal">About</FluentMenuItem>
+            <FluentMenuItem Label="Hello World" OnClick="@(() => NavigateTo("/hello-world"))" />
+            <FluentMenuItem Label="Current AI Weather" OnClick="@(() => NavigateTo("/current-ai-weather"))" />
+            <FluentMenuItem Label="Chat Clients" OnClick="@(() => NavigateTo("/chat-clients"))" />
+            <FluentDivider />
+            <FluentMenuItem Label="About" OnClick="OpenAboutModal" />
         </FluentMenu>
     </FluentHeader>
 
@@ -64,56 +51,88 @@
     </FluentBodyContent>
 </FluentLayout>
 
-<FluentDialog @bind-Hidden="_aboutDialogHidden"
-              Modal="true"
-              TrapFocus="true"
-              AriaLabel="About"
-              Style="width: min(42rem, calc(100vw - 2rem));">
-    <FluentDialogHeader>
-        <FluentLabel Typo="Typography.PaneHeader">About</FluentLabel>
-    </FluentDialogHeader>
-    <FluentDialogBody>
-        @if (_isAboutLoading)
-        {
-            <div class="inline-row">
-                <FluentProgressRing Width="20px" Stroke="ProgressStroke.Small" />
-                <span>Loading About information...</span>
-            </div>
-        }
-        else if (!string.IsNullOrWhiteSpace(_aboutError))
-        {
-            <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false">@_aboutError</FluentMessageBar>
-        }
-        else if (_aboutRoot is not null)
-        {
-            <ul class="about-tree-list root">
-                <AboutTreeNode Node="_aboutRoot" />
-            </ul>
-        }
-
-        <FluentDivider Style="margin: 1rem 0;" />
-
-        <div class="footer-links">
-            <FluentAnchor Href="@uiReactUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">UI React</FluentAnchor>
-            <FluentAnchor Href="@mvcUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MVC</FluentAnchor>
-            <FluentAnchor Href="@apiAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">API About</FluentAnchor>
-            <FluentAnchor Href="@workerHangfireUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">Worker Hangfire</FluentAnchor>
-            <FluentAnchor Href="https://github.com/dustinkorzaan/weather-1116" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">GitHub</FluentAnchor>
+<div class="about-modal @(_aboutDialogHidden ? null : "is-open")"
+     role="presentation"
+     @onclick="CloseAboutModal">
+    <div class="about-dialog"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="about-dialog-title"
+         @onclick:stopPropagation="true">
+        <div class="about-dialog-header">
+            <h2 id="about-dialog-title" class="about-dialog-title">About</h2>
+            <button type="button" class="about-close" aria-label="Close" @onclick="CloseAboutModal">&times;</button>
         </div>
-    </FluentDialogBody>
-    <FluentDialogFooter>
-        <FluentButton Appearance="Appearance.Outline" OnClick="CloseAboutModal">Close</FluentButton>
-    </FluentDialogFooter>
-</FluentDialog>
+        <div class="about-dialog-body">
+            @if (_isAboutLoading)
+            {
+                <div class="inline-row">
+                    <FluentProgressRing Width="20px" Stroke="ProgressStroke.Small" />
+                    <span>Loading About information...</span>
+                </div>
+            }
+            else if (!string.IsNullOrWhiteSpace(_aboutError))
+            {
+                <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false">@_aboutError</FluentMessageBar>
+            }
+            else if (_aboutRoot is not null)
+            {
+                <ul class="about-tree-list root">
+                    <AboutTreeNode Node="_aboutRoot" />
+                </ul>
+            }
+
+            <FluentDivider Style="margin: 1rem 0;" />
+
+            <div class="footer-links">
+                <FluentAnchor Href="@_uiReactUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">UI React</FluentAnchor>
+                <FluentAnchor Href="@_mvcUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MVC</FluentAnchor>
+                <FluentAnchor Href="@_apiAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">API About</FluentAnchor>
+                <FluentAnchor Href="@_workerHangfireUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">Worker Hangfire</FluentAnchor>
+                <FluentAnchor Href="https://github.com/dustinkorzaan/weather-1116" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">GitHub</FluentAnchor>
+            </div>
+        </div>
+    </div>
+</div>
 
 <FluentDialogProvider />
 <FluentMenuProvider />
 
 @code {
+    private string _uiReactUrl = "http://localhost:3000";
+    private string _mvcUrl = "http://localhost:8100";
+    private string _apiAboutUrl = "http://localhost:8080/About";
+    private string _workerHangfireUrl = "http://localhost:8130/hangfire";
+
     private bool _aboutDialogHidden = true;
     private bool _isAboutLoading;
     private string _aboutError = string.Empty;
     private AboutNode? _aboutRoot;
+
+    protected override void OnInitialized()
+    {
+        _uiReactUrl = Configuration["UI_REACT_URL"] ?? "http://localhost:3000";
+        _mvcUrl = Configuration["MVC_URL"] ?? "http://localhost:8100";
+        var apiUrl = (Configuration["API_DOTNET_URL"] ?? "http://localhost:8080").TrimEnd('/');
+        _apiAboutUrl = $"{apiUrl}/About";
+        var workerUrl = (Configuration["WORKER_DOTNET_URL"] ?? "http://localhost:8130").TrimEnd('/');
+        _workerHangfireUrl = $"{workerUrl}/hangfire";
+    }
+
+    private void NoOpLoginLogout()
+    {
+        // Placeholder until authentication is implemented.
+    }
+
+    private void NavigateTo(string path)
+    {
+        Navigation.NavigateTo(path);
+    }
+
+    private async Task OpenExternalAsync(string url)
+    {
+        await JS.InvokeVoidAsync("open", url, "_blank", "noopener,noreferrer");
+    }
 
     private async Task OpenAboutModal()
     {

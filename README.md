@@ -22,13 +22,15 @@ Architecture reference: [`docs/architecture.md`](docs/architecture.md)
 
 ## UI pages and styling
 
-All three UIs implement the same two pages (behavioral parity), each styled with its own
+All three UIs implement the same pages (behavioral parity), each styled with its own
 framework-native library (no shared CSS, config, or components):
 
 | Route | Contents |
 | --- | --- |
 | `/` | Top bar (logo left, person menu right) above a full-viewport Google Map |
-| `/presentation` | Same top bar, then hello message + Current AI Weather + chat clients |
+| `/hello-world` | Same top bar, then the hello message |
+| `/current-ai-weather` | Same top bar, then the Current AI Weather widget |
+| `/chat-clients` | Same top bar, then the chat clients |
 
 | UI | Styling |
 | --- | --- |
@@ -60,7 +62,7 @@ VS Code launch configs: **Foundry Console V1** … **V5**.
 
 Presentation reference: [`docs/5-chat-clients/5-chat-clients.md`](docs/5-chat-clients/5-chat-clients.md)
 
-Standalone multi-turn chat on the `/presentation` page of React, Blazor, and MVC with four tabs:
+Standalone multi-turn chat on the `/chat-clients` page of React, Blazor, and MVC with four tabs:
 **Chat1a** (Responses + in-process), **Chat1b** (Responses + MCP), **Chat2a** (Agent Framework +
 in-process), **Chat2b** (Agent Framework + MCP). Separate from the Current AI Weather widget on
 the same page.

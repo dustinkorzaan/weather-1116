@@ -196,7 +196,7 @@ function ChatPanel() {
   };
 
   return (
-    <div className="mt-6">
+    <div>
       <h2 className="text-xl font-semibold">Chat Clients</h2>
       <p className="mt-1 text-sm text-gray-600">
         Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
