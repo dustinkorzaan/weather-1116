@@ -184,6 +184,9 @@ test('assistant replies grow with their text instead of shrinking inside the tra
   });
 
   expect(bubble.className).toContain('shrink-0');
+  expect(bubble.className).toContain('h-max');
+  expect(bubble.className).toContain('min-h-min');
+  expect(bubble.className).toContain('overflow-visible');
   expect(bubble.className).not.toMatch(/\bmax-h-/);
   expect(container.querySelector('[data-chat-messages]')?.className).toContain('overflow-y-auto');
 });
