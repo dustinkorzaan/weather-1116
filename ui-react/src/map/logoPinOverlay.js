@@ -1,6 +1,6 @@
 export const LOGO_PIN_SPIN_DURATION_SEC = 16;
-export const LOGO_PIN_DARK_URL = '/logo.svg';
-export const LOGO_PIN_LIGHT_URL = '/logo-black.svg';
+export const LOGO_PIN_DARK_URL = '/logo-solid.svg';
+export const LOGO_PIN_LIGHT_URL = '/logo-black-solid.svg';
 
 const MARKER_TO_DOM_EVENT = {
   mouseover: 'mouseenter',
@@ -9,7 +9,8 @@ const MARKER_TO_DOM_EVENT = {
 };
 
 /**
- * Site logo used as the map pin. Dark maps use the gray mark; light maps use black.
+ * Solid site logo used as the map pin. Dark maps use the filled gray mark;
+ * light maps use the filled black mark. Header logos stay the outline versions.
  * @param {string} resolvedTheme
  * @returns {string}
  */

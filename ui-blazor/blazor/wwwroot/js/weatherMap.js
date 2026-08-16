@@ -138,7 +138,7 @@ window.weatherMap = (function () {
   }
 
   function logoPinUrl(theme) {
-    return theme === 'dark' ? '/logo.svg' : '/logo-black.svg';
+    return theme === 'dark' ? '/logo-solid.svg' : '/logo-black-solid.svg';
   }
 
   function logoPinSpinOffsetSec(index) {

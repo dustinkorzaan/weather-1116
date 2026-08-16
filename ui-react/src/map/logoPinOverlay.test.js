@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { expect, test, vi } from 'vitest';
 import {
   LOGO_PIN_DARK_URL,
@@ -7,6 +10,8 @@ import {
   logoPinSpinOffsetSec,
   logoPinUrl,
 } from './logoPinOverlay';
+
+const publicDir = resolve(dirname(fileURLToPath(import.meta.url)), '../../public');
 
 class FakeOverlayView {
   constructor() {
@@ -52,9 +57,21 @@ function createMaps(pane) {
   return { OverlayView, LatLng };
 }
 
-test('dark theme uses the gray logo and light theme uses the black logo', () => {
+test('dark theme uses the filled gray logo and light theme uses the filled black logo', () => {
   expect(logoPinUrl('dark')).toBe(LOGO_PIN_DARK_URL);
   expect(logoPinUrl('light')).toBe(LOGO_PIN_LIGHT_URL);
+  expect(LOGO_PIN_DARK_URL).toBe('/logo-solid.svg');
+  expect(LOGO_PIN_LIGHT_URL).toBe('/logo-black-solid.svg');
+});
+
+test('solid pin logos fill the sun disk; header logo stays an outline', () => {
+  const gray = readFileSync(resolve(publicDir, 'logo-solid.svg'), 'utf8');
+  const black = readFileSync(resolve(publicDir, 'logo-black-solid.svg'), 'utf8');
+  const outline = readFileSync(resolve(publicDir, 'logo.svg'), 'utf8');
+
+  expect(gray).toMatch(/<path fill="#9ca3af"/);
+  expect(black).toMatch(/<path fill="#000000"/);
+  expect(outline).toContain('<g fill="none"');
 });
 
 test('spin offsets stagger within one revolution', () => {
