@@ -162,10 +162,19 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("class=\"site-header\"", html);
         Assert.Contains("class=\"avatar-menu\"", html);
         Assert.Contains("class=\"site-main\"", html);
-        Assert.Contains("stroke-width=\"2.25\"", html);
+        Assert.Contains("avatar.svg", html);
+        Assert.Contains("class=\"avatar-icon\"", html);
         Assert.DoesNotContain("bg-blue-800", html);
         Assert.DoesNotContain("flex-1", html);
         Assert.DoesNotContain("rounded-xl", html);
+
+        var layoutSource = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/Views/Shared/_Layout.cshtml"));
+        Assert.Contains("avatar.svg", layoutSource);
+        Assert.DoesNotContain("stroke-width=\"2.25\"", layoutSource);
+
+        var avatarSvg = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/avatar.svg"));
+        Assert.Contains("<path ", avatarSvg);
+        Assert.DoesNotContain("<circle ", avatarSvg);
     }
 
     [Fact]
