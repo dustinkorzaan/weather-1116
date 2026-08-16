@@ -35,9 +35,10 @@ test('hovering a pin opens the card; only the button requests weather', () => {
     open: vi.fn(),
     close: vi.fn(),
   };
-  const maps = {
-    InfoWindow: vi.fn(() => infoWindow),
-  };
+  function InfoWindow() {
+    return infoWindow;
+  }
+  const maps = { InfoWindow };
   const onGetWeather = vi.fn();
 
   const { button } = bindPinHoverCard({
@@ -76,9 +77,10 @@ test('opening another pin closes the previous card', () => {
   };
   const firstWindow = { open: vi.fn(), close: vi.fn() };
   const secondWindow = { open: vi.fn(), close: vi.fn() };
-  const InfoWindow = vi.fn()
-    .mockImplementationOnce(() => firstWindow)
-    .mockImplementationOnce(() => secondWindow);
+  const windows = [firstWindow, secondWindow];
+  function InfoWindow() {
+    return windows.shift();
+  }
   const maps = { InfoWindow };
   const map = { addListener: vi.fn() };
 
@@ -118,8 +120,12 @@ test('leaving a pin closes the card after a short delay', () => {
     close: vi.fn(),
   };
 
+  function InfoWindow() {
+    return infoWindow;
+  }
+
   bindPinHoverCard({
-    maps: { InfoWindow: vi.fn(() => infoWindow) },
+    maps: { InfoWindow },
     map: { addListener: vi.fn() },
     marker,
     cityName: 'Charlotte, NC',
