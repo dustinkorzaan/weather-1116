@@ -15,7 +15,6 @@
     --wx-chat-user-fg: #ffffff;
     --wx-assistant-bg: #f5f5f5;
     --wx-assistant-border: #e0e0e0;
-    --wx-tool-bg: #fff4ce;
     --wx-error-bg: #fde7e9;
     --wx-error-fg: #a4262c;
     --wx-healthy-bg: #dff6dd;
@@ -36,7 +35,6 @@ html[data-theme="dark"] {
     --wx-chat-user-fg: #111827;
     --wx-assistant-bg: #111827;
     --wx-assistant-border: #4b5563;
-    --wx-tool-bg: #78350f;
     --wx-error-bg: #7f1d1d;
     --wx-error-fg: #fecaca;
     --wx-healthy-bg: #14532d;
@@ -729,10 +727,12 @@ html[data-theme="dark"] .weather-map-logo-pin {
 
 .chat-message.tool {
     align-self: center;
-    background: var(--wx-tool-bg);
-    border-radius: 999px;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.9rem;
+    max-width: none;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--wx-muted);
+    font-size: 0.75rem;
     cursor: help;
 }
 

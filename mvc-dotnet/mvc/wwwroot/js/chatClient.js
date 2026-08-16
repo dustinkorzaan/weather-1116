@@ -176,7 +176,7 @@
         } else if (payload.type === 'tool_start' && payload.toolName) {
           addEntry(tabId, {
             role: 'tool',
-            content: `Running ${payload.toolName}…`,
+            content: `Running ${payload.toolName} …`,
             toolName: payload.toolName,
             toolArguments: payload.toolArguments,
             running: true,
@@ -188,7 +188,7 @@
             pending.running = false;
             pending.toolArguments = payload.toolArguments || pending.toolArguments;
             pending.toolResult = payload.toolResult;
-            updateEntry(tabId, pending, `Ran ${payload.toolName}`);
+            updateEntry(tabId, pending, `Ran ${payload.toolName} …`);
           }
         } else if (payload.type === 'error' && payload.errorMessage) {
           addEntry(tabId, { role: 'error', content: payload.errorMessage });
