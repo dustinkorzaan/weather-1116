@@ -5,13 +5,13 @@ import {
   MAP_DEFAULT_CENTER,
   MAP_DEFAULT_ZOOM,
 } from '../data/mapCities';
-import {
-  applyMapColorSchemeCss,
-  createMapOptions,
-  createPinIcon,
-  getMapAppearance,
-} from '../map/darkMapStyles';
+import { applyMapColorSchemeCss, createMapOptions } from '../map/darkMapStyles';
 import { loadGoogleMaps } from '../map/loadGoogleMaps';
+import {
+  createLogoPinOverlay,
+  logoPinSpinOffsetSec,
+  logoPinUrl,
+} from '../map/logoPinOverlay';
 import { bindPinHoverCard } from '../map/pinHoverCard';
 import { THEME_CHANGE_EVENT, resolveTheme } from '../theme/theme';
 import { currentAiWeatherPath } from '../utils/currentAiWeatherLocation';
@@ -45,6 +45,7 @@ function WeatherMap() {
     }
 
     let cancelled = false;
+    let pins = [];
     applyMapColorSchemeCss(mapRef.current, resolvedTheme);
 
     loadGoogleMaps(apiKey)
@@ -53,7 +54,6 @@ function WeatherMap() {
           return;
         }
 
-        const appearance = getMapAppearance(resolvedTheme);
         applyMapColorSchemeCss(mapRef.current, resolvedTheme);
         const map = new maps.Map(
           mapRef.current,
@@ -63,38 +63,37 @@ function WeatherMap() {
           })
         );
 
-        const icon = createPinIcon(maps, appearance.pinFill);
-        const markers = MAP_CITIES.map((city) => {
-          const marker = new maps.Marker({
-            map,
-            position: { lat: city.lat, lng: city.lng },
-            icon,
-            clickable: true,
-            cursor: 'pointer',
-            label: {
-              text: city.name,
-              color: appearance.labelColor,
-              fontSize: '12px',
-              fontWeight: '500',
-              className: 'relative left-[0.35rem] -top-[0.1rem] whitespace-nowrap',
-            },
+        const logoUrl = logoPinUrl(resolvedTheme);
+        const markers = MAP_CITIES.map((city, index) => {
+          const overlay = createLogoPinOverlay(maps, {
+            lat: city.lat,
+            lng: city.lng,
+            cityName: city.name,
+            logoUrl,
+            spinOffsetSec: logoPinSpinOffsetSec(index),
           });
+          overlay.setMap(map);
 
           bindPinHoverCard({
             maps,
             map,
-            marker,
+            marker: overlay,
             cityName: city.name,
             onGetWeather: (cityName) => {
               navigate(currentAiWeatherPath(cityName));
             },
           });
 
-          return marker;
+          return overlay;
         });
 
+        pins = markers;
         mapInstanceRef.current = map;
         markersRef.current = markers;
+        if (cancelled) {
+          pins.forEach((pin) => pin.setMap(null));
+          return;
+        }
         setStatus('ready');
       })
       .catch(() => {
@@ -116,6 +115,7 @@ function WeatherMap() {
           };
         }
       }
+      pins.forEach((pin) => pin.setMap(null));
       mapInstanceRef.current = null;
       markersRef.current = [];
     };

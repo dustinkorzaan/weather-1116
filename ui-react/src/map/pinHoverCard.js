@@ -40,11 +40,15 @@ export function createPinHoverCard(cityName) {
  */
 export function bindPinHoverCard({ maps, map, marker, cityName, onGetWeather }) {
   const { card, button } = createPinHoverCard(cityName);
-  const infoWindow = new maps.InfoWindow({
+  const infoWindowOptions = {
     content: card,
     disableAutoPan: true,
     headerDisabled: true,
-  });
+  };
+  if (typeof maps.Size === 'function') {
+    infoWindowOptions.pixelOffset = new maps.Size(0, -18);
+  }
+  const infoWindow = new maps.InfoWindow(infoWindowOptions);
 
   let closeTimer = null;
   let isOpen = false;
