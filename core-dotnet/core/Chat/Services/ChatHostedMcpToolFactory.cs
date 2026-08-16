@@ -20,17 +20,23 @@ public sealed class ChatHostedMcpToolFactory
         [
             new HostedMcpServerTool(
                 "McpSrvFuncApp",
-                new Uri($"{mcpSrvFuncAppUrl.TrimEnd('/')}/runtime/webhooks/mcp"),
-                new Dictionary<string, object?> { ["x-functions-key"] = mcpSrvFuncAppKey })
+                new Uri($"{mcpSrvFuncAppUrl.TrimEnd('/')}/runtime/webhooks/mcp"))
             {
                 ApprovalMode = HostedMcpServerToolApprovalMode.NeverRequire,
+                Headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["x-functions-key"] = mcpSrvFuncAppKey,
+                },
             },
             new HostedMcpServerTool(
                 "McpSrvAppService",
-                new Uri($"{mcpSrvAppServiceUrl.TrimEnd('/')}/mcp"),
-                new Dictionary<string, object?> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" })
+                new Uri($"{mcpSrvAppServiceUrl.TrimEnd('/')}/mcp"))
             {
                 ApprovalMode = HostedMcpServerToolApprovalMode.NeverRequire,
+                Headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}",
+                },
             },
         ];
     }
