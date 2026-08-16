@@ -27,6 +27,7 @@ public sealed class LayoutCssTests
         Assert.Contains(".chat-message.tool", css);
         Assert.Contains(".chat-markdown", css);
         Assert.Contains(".chat-fullscreen-button", css);
+        Assert.Contains(".chat-form textarea.chat-input", css);
     }
 
     [Fact]
@@ -176,5 +177,6 @@ public sealed class LayoutCssTests
         Assert.Contains(".about-close", css);
         Assert.Contains(".chat-markdown", css);
         Assert.Contains(".chat-fullscreen-button", css);
+        Assert.Contains(".chat-form textarea.chat-input", css);
     }
 }

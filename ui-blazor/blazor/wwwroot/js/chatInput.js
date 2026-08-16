@@ -98,10 +98,41 @@ window.chatInput = (function () {
     element.scrollTop = element.scrollHeight;
   }
 
+  function resolveTextarea(element) {
+    if (element && element.tagName === 'TEXTAREA') {
+      return element;
+    }
+
+    const found = collectTextareas(element || document);
+    return found[0] || null;
+  }
+
+  function getValue(element) {
+    const textarea = resolveTextarea(element);
+    return textarea ? textarea.value : '';
+  }
+
+  function setValue(element, value) {
+    const textarea = resolveTextarea(element);
+    if (!textarea) {
+      return;
+    }
+
+    const text = value == null ? '' : String(value);
+    textarea.value = text;
+    const root = textarea.getRootNode && textarea.getRootNode();
+    const host = root && root.host;
+    if (host && 'value' in host) {
+      host.value = text;
+    }
+  }
+
   return {
     attachEnterToSend: attachEnterToSend,
     tryAutoInit: tryAutoInit,
     scrollToBottom: scrollToBottom,
+    getValue: getValue,
+    setValue: setValue,
   };
 })();
 

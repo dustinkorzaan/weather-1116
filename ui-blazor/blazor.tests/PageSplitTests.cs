@@ -168,6 +168,12 @@ public sealed class PageSplitTests
 
         var panelSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/ChatPanel.razor"));
         Assert.Contains("chatInput.scrollToBottom", panelSource);
+        Assert.Contains("chatInput.getValue", panelSource);
+        Assert.Contains("chatInput.setValue", panelSource);
+        Assert.Contains("textarea", panelSource);
+        Assert.DoesNotContain("Immediate=\"true\"", panelSource);
+        Assert.DoesNotContain("@bind-Value=\"_input\"", panelSource);
+        Assert.DoesNotContain("@oninput", panelSource);
         Assert.Contains("Type == \"done\"", panelSource);
         Assert.Contains("RequestScrollToBottom", panelSource);
         Assert.Contains("data-tool-details", panelSource);
@@ -190,6 +196,8 @@ public sealed class PageSplitTests
         var chatInput = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
         Assert.Contains("function scrollToBottom(element)", chatInput);
         Assert.Contains("element.scrollTop = element.scrollHeight", chatInput);
+        Assert.Contains("function getValue(element)", chatInput);
+        Assert.Contains("function setValue(element, value)", chatInput);
         Assert.Contains("data-tool-details", chatInput);
         Assert.Contains("chat-tool-hover-card", chatInput);
         Assert.Contains("chat-tool-hover-wrap", chatInput);
