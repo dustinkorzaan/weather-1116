@@ -55,3 +55,37 @@ test('scrolls to the bottom when switching among the four chats', async () => {
     expect(container.querySelector('[data-chat-messages]').scrollTop).toBe(640);
   }
 });
+
+test('shows tool arguments and result on hover', async () => {
+  streamChatMessage.mockImplementation(async ({ onEvent }) => {
+    onEvent({
+      type: 'tool_start',
+      toolName: 'GetLatLongData',
+      toolArguments: '{\n  "location": "Nashville, TN"\n}',
+    });
+    onEvent({
+      type: 'tool_end',
+      toolName: 'GetLatLongData',
+      toolArguments: '{\n  "location": "Nashville, TN"\n}',
+      toolResult: '[\n  {\n    "name": "Nashville"\n  }\n]',
+    });
+    onEvent({ type: 'token', text: 'Nashville looks clear.' });
+    onEvent({ type: 'done' });
+  });
+
+  const user = userEvent.setup();
+  render(<ChatPanel />);
+
+  await user.type(screen.getByLabelText(/message/i), 'weather in nashville');
+  await user.click(screen.getByRole('button', { name: /^send$/i }));
+
+  const chip = await screen.findByText('Ran GetLatLongData');
+  await user.hover(chip);
+
+  await waitFor(() => {
+    expect(screen.getByRole('tooltip').textContent).toContain('Arguments');
+    expect(screen.getByRole('tooltip').textContent).toContain('Nashville, TN');
+    expect(screen.getByRole('tooltip').textContent).toContain('Result');
+    expect(screen.getByRole('tooltip').textContent).toContain('"name": "Nashville"');
+  });
+});

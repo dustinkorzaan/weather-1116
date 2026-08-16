@@ -157,10 +157,16 @@ public sealed class PageSplitTests
         Assert.Contains("chatInput.scrollToBottom", panelSource);
         Assert.Contains("Type == \"done\"", panelSource);
         Assert.Contains("RequestScrollToBottom", panelSource);
+        Assert.Contains("data-tool-details", panelSource);
+        Assert.Contains("ToolHoverAttributes", panelSource);
+        Assert.Contains("ToolArguments", panelSource);
+        Assert.Contains("ToolResult", panelSource);
 
         var chatInput = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
         Assert.Contains("function scrollToBottom(element)", chatInput);
         Assert.Contains("element.scrollTop = element.scrollHeight", chatInput);
+        Assert.Contains("data-tool-details", chatInput);
+        Assert.Contains("chat-tool-hover-card", chatInput);
     }
 
     private static string FindRepoFile(string relativePath)

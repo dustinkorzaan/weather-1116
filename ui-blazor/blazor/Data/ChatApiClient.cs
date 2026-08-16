@@ -16,6 +16,8 @@ public class ChatStreamEvent
     public string? SessionId { get; set; }
     public string? Text { get; set; }
     public string? ToolName { get; set; }
+    public string? ToolArguments { get; set; }
+    public string? ToolResult { get; set; }
     public string? ErrorMessage { get; set; }
 }
 

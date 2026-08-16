@@ -81,7 +81,8 @@ public sealed class Chat1aService : IChatClientService
 
                     if (itemDone.Item is FunctionCallResponseItem functionCall)
                     {
-                        yield return ChatStreamEvent.ToolStart(functionCall.FunctionName);
+                        var toolArguments = ChatToolPayload.Format(functionCall.FunctionArguments);
+                        yield return ChatStreamEvent.ToolStart(functionCall.FunctionName, toolArguments);
 
                         string functionOutput;
                         try
@@ -96,7 +97,10 @@ public sealed class Chat1aService : IChatClientService
                         }
 
                         inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
-                        yield return ChatStreamEvent.ToolEnd(functionCall.FunctionName);
+                        yield return ChatStreamEvent.ToolEnd(
+                            functionCall.FunctionName,
+                            toolArguments,
+                            ChatToolPayload.Format(functionOutput));
                         requiresAction = true;
                     }
                 }

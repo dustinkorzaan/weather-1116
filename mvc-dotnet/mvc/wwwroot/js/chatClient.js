@@ -72,11 +72,32 @@
     scrollToBottom();
   }
 
+  function formatToolHoverText(entry) {
+    const sections = [];
+    if (entry.toolArguments) {
+      sections.push(`Arguments\n${entry.toolArguments}`);
+    }
+    if (entry.toolResult) {
+      sections.push(`Result\n${entry.toolResult}`);
+    }
+    if (sections.length === 0) {
+      return entry.running ? 'Waiting for tool output…' : '';
+    }
+    return sections.join('\n\n');
+  }
+
   function renderEntry(entry) {
     const item = document.createElement('div');
     const role = MESSAGE_ROLES.includes(entry.role) ? entry.role : 'assistant';
     item.className = `chat-message ${role}`;
     item.textContent = entry.content;
+    if (role === 'tool') {
+      const details = formatToolHoverText(entry);
+      if (details) {
+        item.dataset.toolDetails = details;
+        item.tabIndex = 0;
+      }
+    }
     messagesEl.appendChild(item);
     return item;
   }
@@ -157,6 +178,7 @@
             role: 'tool',
             content: `Running ${payload.toolName}…`,
             toolName: payload.toolName,
+            toolArguments: payload.toolArguments,
             running: true,
           });
         } else if (payload.type === 'tool_end' && payload.toolName) {
@@ -164,6 +186,8 @@
           const pending = findLastRunningTool(history, payload.toolName);
           if (pending) {
             pending.running = false;
+            pending.toolArguments = payload.toolArguments || pending.toolArguments;
+            pending.toolResult = payload.toolResult;
             updateEntry(tabId, pending, `Ran ${payload.toolName}`);
           }
         } else if (payload.type === 'error' && payload.errorMessage) {
@@ -174,6 +198,72 @@
       }
     }
   }
+
+  function showToolHover(anchor) {
+    const text = anchor && anchor.getAttribute('data-tool-details');
+    if (!text) {
+      return;
+    }
+
+    let card = document.getElementById('chat-tool-hover-card');
+    if (!card) {
+      card = document.createElement('pre');
+      card.id = 'chat-tool-hover-card';
+      card.className = 'chat-tool-hover-card';
+      card.setAttribute('role', 'tooltip');
+      document.body.appendChild(card);
+    }
+
+    card.textContent = text;
+    card.hidden = false;
+    const rect = anchor.getBoundingClientRect();
+    card.style.left = `${rect.left + (rect.width / 2)}px`;
+    card.style.top = `${rect.bottom + 8}px`;
+
+    const cardRect = card.getBoundingClientRect();
+    if (cardRect.bottom > window.innerHeight - 8) {
+      card.style.top = `${Math.max(8, rect.top - cardRect.height - 8)}px`;
+    }
+    if (cardRect.right > window.innerWidth - 8) {
+      card.style.left = `${window.innerWidth - 8 - (cardRect.width / 2)}px`;
+    }
+    if (cardRect.left < 8) {
+      card.style.left = `${8 + (cardRect.width / 2)}px`;
+    }
+  }
+
+  function hideToolHover() {
+    const card = document.getElementById('chat-tool-hover-card');
+    if (card) {
+      card.hidden = true;
+    }
+  }
+
+  messagesEl.addEventListener('mouseover', (event) => {
+    const chip = event.target.closest('[data-tool-details]');
+    if (chip) {
+      showToolHover(chip);
+    }
+  });
+  messagesEl.addEventListener('mouseout', (event) => {
+    const chip = event.target.closest('[data-tool-details]');
+    if (!chip) {
+      return;
+    }
+    const related = event.relatedTarget;
+    if (related && chip.contains(related)) {
+      return;
+    }
+    hideToolHover();
+  });
+  messagesEl.addEventListener('focusin', (event) => {
+    const chip = event.target.closest('[data-tool-details]');
+    if (chip) {
+      showToolHover(chip);
+    }
+  });
+  messagesEl.addEventListener('focusout', hideToolHover);
+  messagesEl.addEventListener('scroll', hideToolHover);
 
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {

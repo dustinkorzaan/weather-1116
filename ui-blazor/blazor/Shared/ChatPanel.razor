@@ -21,7 +21,7 @@
         <div @ref="_messagesElement" class="chat-messages">
             @foreach (var entry in _histories[_activeTab])
             {
-                <div class="@MessageClass(entry.Role)">@entry.Content</div>
+                <div class="@MessageClass(entry.Role)" @attributes="ToolHoverAttributes(entry)">@entry.Content</div>
             }
         </div>
 
@@ -108,6 +108,8 @@
         public required string Role { get; set; }
         public required string Content { get; set; }
         public string? ToolName { get; set; }
+        public string? ToolArguments { get; set; }
+        public string? ToolResult { get; set; }
         public bool Running { get; set; }
     }
 
@@ -136,6 +138,47 @@
         {
             _scrollMessagesPending = true;
         }
+    }
+
+    private static string? ToolHoverText(ChatEntry entry)
+    {
+        if (entry.Role != "tool")
+        {
+            return null;
+        }
+
+        var sections = new List<string>();
+        if (!string.IsNullOrWhiteSpace(entry.ToolArguments))
+        {
+            sections.Add($"Arguments\n{entry.ToolArguments}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(entry.ToolResult))
+        {
+            sections.Add($"Result\n{entry.ToolResult}");
+        }
+
+        if (sections.Count == 0)
+        {
+            return entry.Running ? "Waiting for tool output…" : null;
+        }
+
+        return string.Join("\n\n", sections);
+    }
+
+    private static Dictionary<string, object>? ToolHoverAttributes(ChatEntry entry)
+    {
+        var hoverText = ToolHoverText(entry);
+        if (string.IsNullOrEmpty(hoverText))
+        {
+            return null;
+        }
+
+        return new Dictionary<string, object>
+        {
+            ["data-tool-details"] = hoverText,
+            ["tabindex"] = 0,
+        };
     }
 
     private async Task OnSubmit()
@@ -190,6 +233,7 @@
                         Role = "tool",
                         Content = $"Running {streamEvent.ToolName}…",
                         ToolName = streamEvent.ToolName,
+                        ToolArguments = streamEvent.ToolArguments,
                         Running = true,
                     });
                     StateHasChanged();
@@ -201,6 +245,8 @@
                     {
                         pending.Running = false;
                         pending.Content = $"Ran {streamEvent.ToolName}";
+                        pending.ToolArguments = streamEvent.ToolArguments ?? pending.ToolArguments;
+                        pending.ToolResult = streamEvent.ToolResult;
                         StateHasChanged();
                     }
                 }
