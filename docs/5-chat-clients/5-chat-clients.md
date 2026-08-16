@@ -83,9 +83,8 @@ flowchart TB
 | Blazor | `/chat-clients` | `ChatApiClient` → Weather API |
 | MVC | `/chat-clients` | Local controllers + Core (same as API handlers) |
 
-The dedicated `/chat` route was removed from all three UIs; the chat panel now
-lives on `/chat-clients`. Hello and Current AI Weather are separate pages
-(`/hello-world`, `/current-ai-weather`).
+The chat panel lives on `/chat-clients`. Hello and Current AI Weather are
+separate pages (`/hello-world`, `/current-ai-weather`).
 
 ## Core layout
 

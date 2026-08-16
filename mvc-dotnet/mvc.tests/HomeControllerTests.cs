@@ -87,6 +87,14 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
+    public async Task Chat_IsNotARoute()
+    {
+        var response = await _client.GetAsync("/chat");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Layout_UsesHandWrittenCssAndSemanticClasses()
     {
         var response = await _client.GetAsync("/");

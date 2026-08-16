@@ -228,9 +228,6 @@ and layout code instead of sharing it.
 | `/current-ai-weather` | Same top bar, then the Current AI Weather widget — no map |
 | `/chat-clients` | Same top bar, then the chat clients (ChatPanel) — no map |
 
-The former `/chat` route is removed (the chat backends `Chat1a`/`Chat1b`/`Chat2a`/`Chat2b`
-are unchanged; chat now lives on `/chat-clients`).
-
 The avatar menu is a person icon (lucide `user` in React/MVC,
 Fluent `Person` in Blazor) and its items are ordered:
 **Login/Logout** (placeholder, no-op) → divider →
