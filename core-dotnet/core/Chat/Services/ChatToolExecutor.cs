@@ -19,14 +19,14 @@ public sealed class ChatToolExecutor
     {
         return functionCall.FunctionName switch
         {
-            "GetLatLongData" => await ExecuteGetLatLongAsync(functionCall.FunctionArguments, cancellationToken),
-            "GetLocationData" => await ExecuteGetLocationAsync(functionCall.FunctionArguments, cancellationToken),
-            "GetPublicWeatherData" => await ExecuteGetPublicWeatherAsync(functionCall.FunctionArguments, cancellationToken),
+            "GetLatLongData" => await ExecuteGetLatLong(functionCall.FunctionArguments, cancellationToken),
+            "GetLocationData" => await ExecuteGetLocation(functionCall.FunctionArguments, cancellationToken),
+            "GetPublicWeatherData" => await ExecuteGetPublicWeather(functionCall.FunctionArguments, cancellationToken),
             _ => throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}"),
         };
     }
 
-    private async Task<string> ExecuteGetLatLongAsync(BinaryData arguments, CancellationToken cancellationToken)
+    private async Task<string> ExecuteGetLatLong(BinaryData arguments, CancellationToken cancellationToken)
     {
         using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
         string location = argumentsJson.RootElement.GetProperty("location").GetString()
@@ -36,7 +36,7 @@ public sealed class ChatToolExecutor
         return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
     }
 
-    private async Task<string> ExecuteGetLocationAsync(BinaryData arguments, CancellationToken cancellationToken)
+    private async Task<string> ExecuteGetLocation(BinaryData arguments, CancellationToken cancellationToken)
     {
         using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
         double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
@@ -50,7 +50,7 @@ public sealed class ChatToolExecutor
         return JsonSerializer.Serialize(locationData, new JsonSerializerOptions { WriteIndented = true });
     }
 
-    private async Task<string> ExecuteGetPublicWeatherAsync(BinaryData arguments, CancellationToken cancellationToken)
+    private async Task<string> ExecuteGetPublicWeather(BinaryData arguments, CancellationToken cancellationToken)
     {
         using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
         double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();

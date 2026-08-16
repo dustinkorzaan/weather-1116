@@ -142,13 +142,13 @@ public sealed class Chat2aService : IChatClientService
 
     private IList<AITool> CreateTools() =>
     [
-        AIFunctionFactory.Create(GetLatLongDataAsync),
-        AIFunctionFactory.Create(GetLocationDataAsync),
-        AIFunctionFactory.Create(GetPublicWeatherDataAsync),
+        AIFunctionFactory.Create(GetLatLongData),
+        AIFunctionFactory.Create(GetLocationData),
+        AIFunctionFactory.Create(GetPublicWeatherData),
     ];
 
     [Description("Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.")]
-    private async Task<string> GetLatLongDataAsync(
+    private async Task<string> GetLatLongData(
         [Description("City and optional region/country, e.g. Nashville, TN")] string location,
         CancellationToken cancellationToken)
     {
@@ -157,7 +157,7 @@ public sealed class Chat2aService : IChatClientService
     }
 
     [Description("Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.")]
-    private async Task<string> GetLocationDataAsync(
+    private async Task<string> GetLocationData(
         [Description("Latitude in decimal degrees")] double latitude,
         [Description("Longitude in decimal degrees")] double longitude,
         CancellationToken cancellationToken)
@@ -171,7 +171,7 @@ public sealed class Chat2aService : IChatClientService
     }
 
     [Description("Get current public weather conditions for a latitude and longitude.")]
-    private async Task<string> GetPublicWeatherDataAsync(
+    private async Task<string> GetPublicWeatherData(
         [Description("Latitude in decimal degrees")] double latitude,
         [Description("Longitude in decimal degrees")] double longitude,
         CancellationToken cancellationToken)
