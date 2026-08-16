@@ -12,8 +12,9 @@ namespace WeatherMcpSrvFuncApp;
 /// </summary>
 public class AboutFunction
 {
-	private const string ExpectedTool = "GetLatLongData";
-	private static readonly Lazy<bool> HasExpectedTool = new(() => HasMcpTool(ExpectedTool));
+	private static readonly string[] ExpectedTools = ["GetLatLongData", "GetLocationData"];
+	private static readonly Lazy<bool> HasExpectedTool = new(() =>
+		ExpectedTools.All(HasMcpTool));
 
 	[Function(nameof(About))]
 	public IActionResult About(

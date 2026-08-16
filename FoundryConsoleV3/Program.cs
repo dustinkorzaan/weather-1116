@@ -44,8 +44,8 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - ResponsesClient with in-process tool callbacks (GetLatLongData, GetPublicWeatherData)
-		 - Model can call tools to derive lat/long and fetch public weather
+		 - ResponsesClient with in-process tool callbacks (GetLatLongData, GetLocationData, GetPublicWeatherData)
+		 - Model can call tools to derive lat/long, label a coordinate, and fetch public weather
 		 - JSON output from AI
 		""");
 
@@ -55,7 +55,9 @@ internal class Program
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
 		You can call the GetLatLongData tool to resolve a place name to ranked latitude/longitude
 		matches (up to 5; rank 1 is the best match). Use name, state, and country to pick the
-		right place — you may skip rank 1. Then call GetPublicWeatherData with those coordinates.
+		right place — you may skip rank 1. Call GetLocationData to turn latitude/longitude into
+		a City, State label (City, State, Country outside the US). Then call GetPublicWeatherData
+		with those coordinates.
 		Use those tools whenever you need real weather data.
 
 		Return valid JSON with these fields:
@@ -126,6 +128,28 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
+		FunctionTool getLocationTool = ResponseTool.CreateFunctionTool(
+			functionName: "GetLocationData",
+			functionDescription: "Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.",
+			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+			{
+			  "type": "object",
+			  "properties": {
+			    "latitude": {
+			      "type": "number",
+			      "description": "Latitude in decimal degrees"
+			    },
+			    "longitude": {
+			      "type": "number",
+			      "description": "Longitude in decimal degrees"
+			    }
+			  },
+			  "required": ["latitude", "longitude"],
+			  "additionalProperties": false
+			}
+			""")),
+			strictModeEnabled: true);
+
 		FunctionTool getPublicWeatherTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetPublicWeatherData",
 			functionDescription: "Get current public weather conditions for a latitude and longitude.",
@@ -165,7 +189,7 @@ internal class Program
 				CreateResponseOptions options = new(deploymentName, inputItems)
 				{
 					Instructions = systemPrompt,
-					Tools = { getLatLongTool, getPublicWeatherTool },
+					Tools = { getLatLongTool, getLocationTool, getPublicWeatherTool },
 					TextOptions = new ResponseTextOptions
 					{
 						TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
@@ -196,6 +220,24 @@ internal class Program
 									Console.WriteLine($"\nTool call: GetLatLongData({toolLocation})");
 									var latLongMatches = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
 									string functionOutput = JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
+									Console.WriteLine($"Tool output: {functionOutput}");
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
+								}
+
+							case "GetLocationData":
+								{
+									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+
+									Console.WriteLine($"\nTool call: GetLocationData({latitude}, {longitude})");
+									var locationData = await mediator.Send(new GetLocationDataEvent
+									{
+										Latitude = latitude,
+										Longitude = longitude,
+									});
+									string functionOutput = JsonSerializer.Serialize(locationData, new JsonSerializerOptions { WriteIndented = true });
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
