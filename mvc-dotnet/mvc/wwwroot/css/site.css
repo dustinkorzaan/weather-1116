@@ -482,11 +482,91 @@ html[data-theme="dark"] #weather-map {
   pointer-events: none;
 }
 
-.weather-map-label {
-  position: relative;
-  left: 0.35rem;
-  top: -0.1rem;
-  white-space: nowrap;
+.weather-map-logo-pin {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #111827;
+  cursor: pointer;
+}
+
+html.dark .weather-map-logo-pin,
+html[data-theme="dark"] .weather-map-logo-pin {
+  color: #ffffff;
+}
+
+.weather-map-logo-pin-spin,
+.weather-map-logo-pin-pulse,
+.weather-map-logo-pin-image {
+  grid-area: 1 / 1;
+}
+
+.weather-map-logo-pin-spin {
+  display: block;
+  width: 28px;
+  height: 28px;
+  animation: weather-map-logo-spin 16s linear infinite;
+}
+
+.weather-map-logo-pin-image {
+  display: block;
+  width: 28px;
+  height: 28px;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.45));
+  transition: transform 160ms ease;
+}
+
+.weather-map-logo-pin-pulse {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  pointer-events: none;
+  opacity: 0.35;
+  animation: weather-map-logo-pulse 2.8s ease-out infinite;
+}
+
+.weather-map-logo-pin.is-paused .weather-map-logo-pin-spin,
+.weather-map-logo-pin:hover .weather-map-logo-pin-spin,
+.weather-map-logo-pin.is-paused .weather-map-logo-pin-pulse,
+.weather-map-logo-pin:hover .weather-map-logo-pin-pulse {
+  animation-play-state: paused;
+}
+
+.weather-map-logo-pin:hover .weather-map-logo-pin-image,
+.weather-map-logo-pin.is-paused .weather-map-logo-pin-image {
+  transform: scale(1.18);
+}
+
+@keyframes weather-map-logo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes weather-map-logo-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.85);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-map-logo-pin-spin,
+  .weather-map-logo-pin-pulse {
+    animation: none;
+  }
 }
 
 .weather-map-pin-card {

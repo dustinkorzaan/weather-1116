@@ -1,15 +1,17 @@
-import { afterEach, expect, test } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
 import {
   DARK_MAP_BACKGROUND,
   DARK_MAP_STYLES,
   LIGHT_MAP_BACKGROUND,
   LIGHT_MAP_STYLES,
+  applyMapAppearance,
   applyMapColorSchemeCss,
   createMapOptions,
   getMapAppearance,
   mapColorScheme,
   mapRenderingType,
 } from './darkMapStyles';
+import { LOGO_PIN_DARK_URL, LOGO_PIN_LIGHT_URL } from './logoPinOverlay';
 
 afterEach(() => {
   document.documentElement.style.colorScheme = '';
@@ -68,4 +70,19 @@ test('applyMapColorSchemeCss follows the resolved site theme, not the OS', () =>
 
   applyMapColorSchemeCss(element, 'dark');
   expect(element.style.colorScheme).toBe('dark');
+});
+
+test('applyMapAppearance swaps logo pin artwork with the site theme', () => {
+  const map = {
+    setOptions: vi.fn(),
+  };
+  const pin = {
+    setLogoUrl: vi.fn(),
+  };
+
+  applyMapAppearance({}, map, [pin], 'dark');
+  expect(pin.setLogoUrl).toHaveBeenCalledWith(LOGO_PIN_DARK_URL);
+
+  applyMapAppearance({}, map, [pin], 'light');
+  expect(pin.setLogoUrl).toHaveBeenCalledWith(LOGO_PIN_LIGHT_URL);
 });

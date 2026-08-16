@@ -64,6 +64,34 @@ test('hovering a pin opens the card; only the button requests weather', () => {
   expect(onGetWeather).toHaveBeenCalledWith('Toronto, ON');
 });
 
+test('hovering a pin reports hover so the logo spin can pause', () => {
+  vi.useFakeTimers();
+
+  const listeners = {};
+  const marker = {
+    addListener: vi.fn((eventName, handler) => {
+      listeners[eventName] = handler;
+    }),
+  };
+  const onHoverChange = vi.fn();
+
+  bindPinHoverCard({
+    maps: { InfoWindow: function InfoWindow() { return { open: vi.fn(), close: vi.fn() }; } },
+    map: { addListener: vi.fn() },
+    marker,
+    cityName: 'Atlanta, GA',
+    onGetWeather: vi.fn(),
+    onHoverChange,
+  });
+
+  listeners.mouseover();
+  expect(onHoverChange).toHaveBeenCalledWith(true);
+
+  listeners.mouseout();
+  vi.advanceTimersByTime(PIN_HOVER_CARD_CLOSE_DELAY_MS);
+  expect(onHoverChange).toHaveBeenCalledWith(false);
+});
+
 test('opening another pin closes the previous card', () => {
   const firstMarker = {
     addListener: vi.fn((eventName, handler) => {

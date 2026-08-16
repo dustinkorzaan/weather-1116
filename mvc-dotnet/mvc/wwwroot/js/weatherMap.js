@@ -136,29 +136,154 @@ window.weatherMap = (function () {
     return new maps.Map(element, options);
   }
 
-  function createCityMarkers(maps, map, cities, appearance) {
-    const icon = createPinIcon(maps, appearance.pinFill);
-    const markers = [];
-    (cities || []).forEach(function (city) {
-      const marker = new maps.Marker({
-        map: map,
-        position: { lat: city.lat, lng: city.lng },
-        icon: icon,
-        clickable: true,
-        cursor: 'pointer',
-        label: {
-          text: city.name,
-          color: appearance.labelColor,
-          fontSize: '12px',
-          fontWeight: '500',
-          className: 'weather-map-label',
-        },
-      });
+  function logoPinUrl(theme) {
+    return theme === 'dark' ? '/logo.svg' : '/logo-black.svg';
+  }
 
-      bindPinHoverCard(maps, map, marker, city.name, function (cityName) {
-        window.location.assign(currentAiWeatherPath(cityName));
+  function logoPinSpinOffsetSec(index) {
+    return ((Number(index) || 0) * 3.7) % 16;
+  }
+
+  function bindPinDomEvent(element, mapsEventName, handler) {
+    const domEvent =
+      mapsEventName === 'mouseover' ? 'mouseenter' : mapsEventName === 'mouseout' ? 'mouseleave' : mapsEventName;
+    element.addEventListener(domEvent, handler);
+  }
+
+  function createLogoPinOverlayClass(maps) {
+    class LogoPinOverlay extends maps.OverlayView {
+      constructor(options) {
+        super();
+        this.position = new maps.LatLng(options.lat, options.lng);
+        if (typeof this.set === 'function') {
+          this.set('position', this.position);
+        }
+        this.cityName = options.cityName;
+        this.logoUrl = options.logoUrl;
+        this.spinOffsetSec = options.spinOffsetSec || 0;
+        this.pendingListeners = [];
+        this.div = null;
+      }
+
+      onAdd() {
+        const pin = document.createElement('button');
+        pin.type = 'button';
+        pin.className = 'weather-map-logo-pin';
+        pin.setAttribute('aria-label', this.cityName);
+
+        const pulse = document.createElement('span');
+        pulse.className = 'weather-map-logo-pin-pulse';
+        pulse.setAttribute('aria-hidden', 'true');
+
+        const spinner = document.createElement('span');
+        spinner.className = 'weather-map-logo-pin-spin';
+        spinner.style.animationDelay = '-' + this.spinOffsetSec + 's';
+
+        const image = document.createElement('img');
+        image.className = 'weather-map-logo-pin-image';
+        image.src = this.logoUrl;
+        image.alt = '';
+        image.draggable = false;
+
+        spinner.appendChild(image);
+        pin.appendChild(pulse);
+        pin.appendChild(spinner);
+        pin.addEventListener('click', function (event) {
+          event.stopPropagation();
+        });
+        pin.addEventListener('mousedown', function (event) {
+          event.stopPropagation();
+        });
+
+        this.div = pin;
+        const panes = this.getPanes();
+        if (!panes || !panes.overlayMouseTarget) {
+          return;
+        }
+        panes.overlayMouseTarget.appendChild(pin);
+        this.pendingListeners.forEach(function (item) {
+          bindPinDomEvent(pin, item.eventName, item.handler);
+        });
+        this.pendingListeners = [];
+      }
+
+      draw() {
+        const projection = this.getProjection();
+        if (!projection || !this.div) {
+          return;
+        }
+        const point = projection.fromLatLngToDivPixel(this.position);
+        if (!point) {
+          return;
+        }
+        this.div.style.left = point.x + 'px';
+        this.div.style.top = point.y + 'px';
+      }
+
+      onRemove() {
+        if (this.div && this.div.parentNode) {
+          this.div.parentNode.removeChild(this.div);
+        }
+        this.div = null;
+      }
+
+      getPosition() {
+        return this.position;
+      }
+
+      addListener(eventName, handler) {
+        if (this.div) {
+          bindPinDomEvent(this.div, eventName, handler);
+          return;
+        }
+        this.pendingListeners.push({ eventName: eventName, handler: handler });
+      }
+
+      setPaused(paused) {
+        if (this.div) {
+          this.div.classList.toggle('is-paused', Boolean(paused));
+        }
+      }
+
+      setLogoUrl(url) {
+        this.logoUrl = url;
+        const image = this.div && this.div.querySelector('.weather-map-logo-pin-image');
+        if (image) {
+          image.src = url;
+        }
+      }
+    }
+
+    return LogoPinOverlay;
+  }
+
+  function createCityMarkers(maps, map, cities, appearance) {
+    const LogoPinOverlay = createLogoPinOverlayClass(maps);
+    const logoUrl = logoPinUrl(appearance.colorScheme === 'DARK' ? 'dark' : 'light');
+    const markers = [];
+    (cities || []).forEach(function (city, index) {
+      const overlay = new LogoPinOverlay({
+        lat: city.lat,
+        lng: city.lng,
+        cityName: city.name,
+        logoUrl: logoUrl,
+        spinOffsetSec: logoPinSpinOffsetSec(index),
       });
-      markers.push(marker);
+      overlay.setMap(map);
+
+      bindPinHoverCard(
+        maps,
+        map,
+        overlay,
+        city.name,
+        function (cityName) {
+          window.location.assign(currentAiWeatherPath(cityName));
+        },
+        function (hovered) {
+          overlay.setPaused(hovered);
+        }
+      );
+      markers.push(overlay);
     });
     return markers;
   }
@@ -210,17 +335,6 @@ window.weatherMap = (function () {
     return '/current-ai-weather?location=' + encodeURIComponent(trimmed);
   }
 
-  function createPinIcon(maps, pinFill) {
-    return {
-      path: maps.SymbolPath.CIRCLE,
-      scale: 6,
-      fillColor: pinFill,
-      fillOpacity: 1,
-      strokeWeight: 0,
-      labelOrigin: new maps.Point(18, 0),
-    };
-  }
-
   function applyMapAppearance(entry, theme) {
     const resolved = theme || resolvedTheme();
     if (entry.theme === resolved && entry.map) {
@@ -237,6 +351,14 @@ window.weatherMap = (function () {
       if (typeof entry.map.getZoom === 'function' && entry.map.getZoom() != null) {
         zoom = entry.map.getZoom();
       }
+    }
+
+    if (entry.markers) {
+      entry.markers.forEach(function (pin) {
+        if (pin && typeof pin.setMap === 'function') {
+          pin.setMap(null);
+        }
+      });
     }
 
     const map = createThemedMap(entry.maps, entry.element, appearance, center, zoom);
@@ -265,13 +387,17 @@ window.weatherMap = (function () {
     return { card: card, button: button };
   }
 
-  function bindPinHoverCard(maps, map, marker, cityName, onGetWeather) {
+  function bindPinHoverCard(maps, map, marker, cityName, onGetWeather, onHoverChange) {
     const created = createPinHoverCard(cityName);
-    const infoWindow = new maps.InfoWindow({
+    const infoWindowOptions = {
       content: created.card,
       disableAutoPan: true,
       headerDisabled: true,
-    });
+    };
+    if (typeof maps.Size === 'function') {
+      infoWindowOptions.pixelOffset = new maps.Size(0, -18);
+    }
+    const infoWindow = new maps.InfoWindow(infoWindowOptions);
 
     let closeTimer = null;
     let isOpen = false;
@@ -293,6 +419,9 @@ window.weatherMap = (function () {
         isOpen = true;
       }
       activeCloseCard = closeCard;
+      if (typeof onHoverChange === 'function') {
+        onHoverChange(true);
+      }
     }
 
     function closeCard() {
@@ -303,6 +432,9 @@ window.weatherMap = (function () {
       }
       if (activeCloseCard === closeCard) {
         activeCloseCard = null;
+      }
+      if (typeof onHoverChange === 'function') {
+        onHoverChange(false);
       }
     }
 

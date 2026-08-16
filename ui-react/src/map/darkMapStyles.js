@@ -1,3 +1,5 @@
+import { logoPinUrl } from './logoPinOverlay';
+
 export const DARK_MAP_BACKGROUND = '#0b111d';
 export const LIGHT_MAP_BACKGROUND = '#e8eef4';
 
@@ -148,18 +150,7 @@ export function createMapOptions(maps, resolvedTheme, extras = {}) {
   };
 }
 
-export function createPinIcon(maps, pinFill) {
-  return {
-    path: maps.SymbolPath.CIRCLE,
-    scale: 6,
-    fillColor: pinFill,
-    fillOpacity: 1,
-    strokeWeight: 0,
-    labelOrigin: new maps.Point(18, 0),
-  };
-}
-
-export function applyMapAppearance(maps, map, markers, resolvedTheme) {
+export function applyMapAppearance(maps, map, pins, resolvedTheme) {
   const appearance = getMapAppearance(resolvedTheme);
   if (typeof map.getDiv === 'function') {
     applyMapColorSchemeCss(map.getDiv(), resolvedTheme);
@@ -169,15 +160,10 @@ export function applyMapAppearance(maps, map, markers, resolvedTheme) {
     backgroundColor: appearance.backgroundColor,
     colorScheme: mapColorScheme(maps, resolvedTheme),
   });
-  const icon = createPinIcon(maps, appearance.pinFill);
-  markers.forEach((marker) => {
-    const label = typeof marker.getLabel === 'function' ? marker.getLabel() : null;
-    marker.setIcon(icon);
-    if (label) {
-      marker.setLabel({
-        ...label,
-        color: appearance.labelColor,
-      });
+  const url = logoPinUrl(resolvedTheme);
+  pins?.forEach((pin) => {
+    if (typeof pin.setLogoUrl === 'function') {
+      pin.setLogoUrl(url);
     }
   });
   return appearance;

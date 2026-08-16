@@ -273,8 +273,10 @@ differs by library; the behavior does not:
 ## Google Maps
 
 Each UI shows a Google Map with sample city pins (New York, Toronto,
-Atlanta, Charlotte) filling the landing page (`/`) below the top bar. The map
-canvas, pin color, labels, and hover card follow the resolved Light/Dark theme.
+Atlanta, Charlotte) filling the landing page (`/`) below the top bar. Pins
+use the site logo (no city-name label on the map); names appear on the
+hover card. Logos slowly spin until hover, then pause and scale up. The map
+canvas, logo contrast, and hover card follow the resolved Light/Dark theme.
 Weather overlays will come later.
 
 **API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
