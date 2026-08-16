@@ -5,7 +5,8 @@ namespace Core.Geo.Events;
 
 /// <summary>
 /// Reverse-geocodes a latitude/longitude to a simple place label.
-/// US results are "City, State"; elsewhere "City, State, Country".
+/// Prefers "City, State" (US) or "City, State, Country", then a feature name,
+/// then a formatted coordinate such as "35.51° N, 86.58° W".
 /// </summary>
 public class GetLocationEvent : IRequest<NonAILocationResponse>
 {

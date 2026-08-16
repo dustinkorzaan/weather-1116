@@ -158,7 +158,7 @@ public sealed class Chat2aService : IChatClientService
         return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
     }
 
-    [Description("Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.")]
+    [Description("Turn a latitude and longitude into a simple place label. Prefers City, State in the US (City, State, Country elsewhere), then a feature name, then a formatted coordinate such as 35.51° N, 86.58° W.")]
     private async Task<string> GetLocation(
         [Description("Latitude in decimal degrees")] double latitude,
         [Description("Longitude in decimal degrees")] double longitude,

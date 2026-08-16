@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using Core.Geo;
 using Core.Geo.Events;
 using Core.Geo.Models;
 using MediatR;
@@ -8,7 +9,8 @@ using Microsoft.Extensions.Logging;
 namespace Core.Geo.Handlers;
 
 /// <summary>
-/// Reverse-geocodes lat/long to a City, State (or City, State, Country) label using Nominatim.
+/// Reverse-geocodes lat/long to a place label: City, State (or City, State, Country),
+/// then a feature name, then a formatted coordinate.
 /// </summary>
 public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocationResponse>
 {
@@ -33,12 +35,7 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
         // codeql[cs/exposure-of-sensitive-information]
         string jsonResponse = await client.GetStringAsync(url, cancellationToken);
         var geoData = JsonSerializer.Deserialize<NominatimReverseResponse>(jsonResponse);
-        var location = NominatimLocationMapper.FromAddress(geoData?.Address);
-
-        if (string.IsNullOrWhiteSpace(location))
-        {
-            throw new InvalidOperationException("Nominatim: No location found for the given coordinates.");
-        }
+        var location = NominatimLocationMapper.FromReverse(geoData, request.Latitude, request.Longitude);
 
         _logger.LogInformation("Nominatim: Reverse geocoded to {Location}", location);
 

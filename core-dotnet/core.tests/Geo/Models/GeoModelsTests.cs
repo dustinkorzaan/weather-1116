@@ -104,6 +104,8 @@ public class GeoModelsTests
     {
         const string json = """
         {
+          "name": "Nashville",
+          "display_name": "Nashville, Davidson County, Tennessee, United States",
           "address": {
             "city": "Nashville",
             "town": "",
@@ -117,11 +119,13 @@ public class GeoModelsTests
         var result = JsonSerializer.Deserialize<NominatimReverseResponse>(json);
 
         Assert.NotNull(result);
-        Assert.NotNull(result!.Address);
+        Assert.Equal("Nashville", result!.Name);
+        Assert.NotNull(result.Address);
         Assert.Equal("Nashville", result.Address.City);
         Assert.Equal("Tennessee", result.Address.State);
         Assert.Equal("United States", result.Address.Country);
         Assert.Equal("us", result.Address.CountryCode);
+        Assert.DoesNotContain("display_name", typeof(NominatimReverseResponse).GetProperties().Select(p => p.Name), StringComparer.OrdinalIgnoreCase);
     }
 
     [Fact]

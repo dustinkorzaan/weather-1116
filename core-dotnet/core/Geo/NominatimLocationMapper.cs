@@ -1,9 +1,27 @@
+using System.Globalization;
 using Core.Geo.Models;
 
 namespace Core.Geo;
 
 internal static class NominatimLocationMapper
 {
+    public static string FromReverse(NominatimReverseResponse? geoData, double latitude, double longitude)
+    {
+        var structured = FromAddress(geoData?.Address);
+        if (structured.Length > 0)
+        {
+            return structured;
+        }
+
+        var name = geoData?.Name.Trim() ?? string.Empty;
+        if (name.Length > 0)
+        {
+            return name;
+        }
+
+        return FormatCoordinates(latitude, longitude);
+    }
+
     public static string FromAddress(NominatimAddress? address)
     {
         if (address is null)
@@ -38,6 +56,17 @@ internal static class NominatimLocationMapper
         }
 
         return string.Join(", ", parts);
+    }
+
+    internal static string FormatCoordinates(double latitude, double longitude) =>
+        string.Create(
+            CultureInfo.InvariantCulture,
+            $"{FormatHemisphereDegrees(latitude, "N", "S")}, {FormatHemisphereDegrees(longitude, "E", "W")}");
+
+    private static string FormatHemisphereDegrees(double value, string positiveLabel, string negativeLabel)
+    {
+        var hemisphere = value >= 0 ? positiveLabel : negativeLabel;
+        return string.Create(CultureInfo.InvariantCulture, $"{Math.Abs(value):0.00}\u00B0 {hemisphere}");
     }
 
     private static string FirstNonEmpty(params string[] values)
