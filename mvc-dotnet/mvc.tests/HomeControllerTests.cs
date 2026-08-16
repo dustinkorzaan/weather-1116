@@ -32,8 +32,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("id=\"weather-map\"", html);
-        Assert.Contains("Atlanta, GA", html);
-        Assert.Contains("New York, NY", html);
         Assert.Contains("href=\"/hello-world\"", html);
         Assert.Contains("href=\"/current-ai-weather\"", html);
         Assert.Contains("href=\"/chat-clients\"", html);
@@ -91,6 +89,16 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("id=\"ai-weather-form\"", html);
         Assert.Contains("id=\"ai-weather-location\"", html);
         Assert.Contains("currentAIWeather.js", html);
+    }
+
+    [Fact]
+    public void IndexView_UsesCityAndStateMapPinLabels()
+    {
+        var view = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/Views/Home/Index.cshtml"));
+        Assert.Contains("Atlanta, GA", view);
+        Assert.Contains("New York, NY", view);
+        Assert.Contains("Toronto, ON", view);
+        Assert.Contains("Charlotte, NC", view);
     }
 
     [Fact]
