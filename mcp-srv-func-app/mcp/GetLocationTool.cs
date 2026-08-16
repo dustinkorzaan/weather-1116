@@ -16,7 +16,7 @@ public class GetLocationTool(IMediator mediator, ILogger<GetLocationTool> logger
 	public async Task<string> GetLocation(
 		[McpToolTrigger(
 			"GetLocation",
-			"Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.")]
+			"Turn a latitude and longitude into a simple place label. Prefers City, State in the US (City, State, Country elsewhere), then a feature name, then a formatted coordinate such as 35.51° N, 86.58° W.")]
 		ToolInvocationContext context,
 		[McpToolProperty(
 			"latitude",

@@ -99,4 +99,46 @@ public class NominatimLocationMapperTests
         Assert.Equal(string.Empty, NominatimLocationMapper.FromAddress(null));
         Assert.Equal(string.Empty, NominatimLocationMapper.FromAddress(new NominatimAddress()));
     }
+
+    [Fact]
+    public void FromReverse_PrefersStructuredLabelOverName()
+    {
+        var geoData = new NominatimReverseResponse
+        {
+            Name = "Davidson County",
+            Address = new NominatimAddress
+            {
+                City = "Nashville",
+                State = "Tennessee",
+                CountryCode = "us",
+            },
+        };
+
+        Assert.Equal("Nashville, Tennessee", NominatimLocationMapper.FromReverse(geoData, 36.16, -86.78));
+    }
+
+    [Fact]
+    public void FromReverse_UsesNameWhenStructuredLabelIsEmpty()
+    {
+        var geoData = new NominatimReverseResponse { Name = "Gulf of Mexico" };
+
+        Assert.Equal("Gulf of Mexico", NominatimLocationMapper.FromReverse(geoData, 25.0, -90.0));
+    }
+
+    [Fact]
+    public void FromReverse_UsesFormattedCoordinatesWhenNameAndAddressAreEmpty()
+    {
+        Assert.Equal("35.51° N, 86.58° W", NominatimLocationMapper.FromReverse(null, 35.51, -86.58));
+        Assert.Equal(
+            "35.51° N, 86.58° W",
+            NominatimLocationMapper.FromReverse(new NominatimReverseResponse(), 35.51, -86.58));
+        Assert.Equal("33.87° S, 151.21° E", NominatimLocationMapper.FromReverse(null, -33.8688, 151.2093));
+    }
+
+    [Fact]
+    public void FormatCoordinates_UsesTwoDecimalHemisphereLabels()
+    {
+        Assert.Equal("35.51° N, 86.58° W", NominatimLocationMapper.FormatCoordinates(35.51, -86.58));
+        Assert.Equal("0.00° N, 0.00° E", NominatimLocationMapper.FormatCoordinates(0, 0));
+    }
 }

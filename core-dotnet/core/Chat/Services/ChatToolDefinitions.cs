@@ -25,7 +25,7 @@ public static class ChatToolDefinitions
 
     public static FunctionTool CreateGetLocationTool() => ResponseTool.CreateFunctionTool(
         functionName: "GetLocation",
-        functionDescription: "Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.",
+        functionDescription: "Turn a latitude and longitude into a simple place label. Prefers City, State in the US (City, State, Country elsewhere), then a feature name, then a formatted coordinate such as 35.51° N, 86.58° W.",
         functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
         {
           "type": "object",

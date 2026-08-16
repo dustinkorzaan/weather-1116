@@ -56,7 +56,8 @@ internal class Program
 		You can call the GetLatLong tool to resolve a place name to ranked latitude/longitude
 		matches (up to 5; rank 1 is the best match). Use name, state, and country to pick the
 		right place — you may skip rank 1. Call GetLocation to turn latitude/longitude into
-		a City, State label (City, State, Country outside the US). Then call GetPublicWeatherCurrent
+		a City, State label (City, State, Country outside the US), then a feature name, then a
+		formatted coordinate such as 35.51° N, 86.58° W. Then call GetPublicWeatherCurrent
 		for conditions now, GetPublicWeatherForecast for upcoming weather, or GetPublicWeatherHistory
 		for the recent past.
 		Use those tools whenever you need real weather data.
@@ -131,7 +132,7 @@ internal class Program
 
 		FunctionTool getLocationTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetLocation",
-			functionDescription: "Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.",
+			functionDescription: "Turn a latitude and longitude into a simple place label. Prefers City, State in the US (City, State, Country elsewhere), then a feature name, then a formatted coordinate such as 35.51° N, 86.58° W.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
 			  "type": "object",
