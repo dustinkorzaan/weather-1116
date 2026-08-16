@@ -22,7 +22,7 @@ pattern) plus the hosted-agent learning demo in Foundry Console V5.
 | 2 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
 | 3 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
 | 4 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
-| 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire servers + dashboard | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
+| 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire dashboard and servers | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
 | 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | Shared events/handlers referenced by MVC, API, worker, and MCP hosts |
 
 ### Adjacent projects (not UI/API dependencies)
@@ -159,7 +159,7 @@ so they can enqueue jobs without running servers; the worker processes them.
 
 | Project | Path | Role | Port | Endpoint |
 | --- | --- | --- | --- | --- |
-| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | `/hangfire` (POC — no auth), `/About` |
+| Worker DotNet | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire dashboard and servers | 8130 | `/hangfire` (POC — no auth), `/About` |
 
 - **Dashboard:** `/hangfire` on the worker (POC — open to all; auth TBD).
 - **Health:** `/About` returns `Worker Root` with `worker-dotnet` and a `Hangfire`
