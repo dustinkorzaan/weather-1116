@@ -19,6 +19,8 @@ public sealed class LayoutCssTests
         var css = File.ReadAllText(cssPath);
         Assert.Contains(".layout.weather-shell > .body-content.weather-body", css);
         Assert.Contains("align-items: stretch", css);
+        Assert.Contains("color-scheme: light", css);
+        Assert.Contains("html[data-theme=\"dark\"] .weather-map", css);
     }
 
     [Fact]

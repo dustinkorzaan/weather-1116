@@ -117,6 +117,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("bindPinHoverCard", script);
         Assert.Contains("LIGHT_MAP_STYLES", script);
         Assert.Contains("weather-theme-change", script);
+        Assert.Contains("colorScheme", script);
+        Assert.Contains("RenderingType.RASTER", script);
+        Assert.Contains("createThemedMap", script);
     }
 
     [Fact]
@@ -176,6 +179,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("#weather-map", css);
         Assert.Contains(".weather-map-pin-card", css);
         Assert.Contains("html.dark", css);
+        Assert.Contains("color-scheme: light", css);
+        Assert.Contains("html[data-theme=\"dark\"] #weather-map", css);
         Assert.Contains("[hidden]", css);
         Assert.DoesNotContain("tailwindcss", css, StringComparison.OrdinalIgnoreCase);
     }

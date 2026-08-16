@@ -462,6 +462,12 @@ code {
   min-height: 0;
   flex: 1;
   background-color: var(--color-map);
+  color-scheme: light;
+}
+
+html.dark #weather-map,
+html[data-theme="dark"] #weather-map {
+  color-scheme: dark;
 }
 
 .weather-map-pin-card-preview {

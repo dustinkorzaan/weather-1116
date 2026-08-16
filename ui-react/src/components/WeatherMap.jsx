@@ -6,7 +6,8 @@ import {
   MAP_DEFAULT_ZOOM,
 } from '../data/mapCities';
 import {
-  applyMapAppearance,
+  applyMapColorSchemeCss,
+  createMapOptions,
   createPinIcon,
   getMapAppearance,
 } from '../map/darkMapStyles';
@@ -20,17 +21,31 @@ const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 function WeatherMap() {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const mapsApiRef = useRef(null);
   const markersRef = useRef([]);
+  const viewStateRef = useRef({
+    center: MAP_DEFAULT_CENTER,
+    zoom: MAP_DEFAULT_ZOOM,
+  });
   const navigate = useNavigate();
   const [status, setStatus] = useState(apiKey ? 'loading' : 'missing-key');
+  const [resolvedTheme, setResolvedTheme] = useState(() => resolveTheme());
 
   useEffect(() => {
-    if (!apiKey || !mapRef.current || mapInstanceRef.current) {
+    const syncMapTheme = (event) => {
+      setResolvedTheme(event?.detail?.resolved ?? resolveTheme());
+    };
+
+    window.addEventListener(THEME_CHANGE_EVENT, syncMapTheme);
+    return () => window.removeEventListener(THEME_CHANGE_EVENT, syncMapTheme);
+  }, []);
+
+  useEffect(() => {
+    if (!apiKey || !mapRef.current) {
       return undefined;
     }
 
     let cancelled = false;
+    applyMapColorSchemeCss(mapRef.current, resolvedTheme);
 
     loadGoogleMaps(apiKey)
       .then((maps) => {
@@ -38,18 +53,15 @@ function WeatherMap() {
           return;
         }
 
-        const appearance = getMapAppearance(resolveTheme());
-        const map = new maps.Map(mapRef.current, {
-          center: MAP_DEFAULT_CENTER,
-          zoom: MAP_DEFAULT_ZOOM,
-          styles: appearance.styles,
-          disableDefaultUI: true,
-          zoomControl: true,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-          backgroundColor: appearance.backgroundColor,
-        });
+        const appearance = getMapAppearance(resolvedTheme);
+        applyMapColorSchemeCss(mapRef.current, resolvedTheme);
+        const map = new maps.Map(
+          mapRef.current,
+          createMapOptions(maps, resolvedTheme, {
+            center: viewStateRef.current.center,
+            zoom: viewStateRef.current.zoom,
+          })
+        );
 
         const icon = createPinIcon(maps, appearance.pinFill);
         const markers = MAP_CITIES.map((city) => {
@@ -81,7 +93,6 @@ function WeatherMap() {
           return marker;
         });
 
-        mapsApiRef.current = maps;
         mapInstanceRef.current = map;
         markersRef.current = markers;
         setStatus('ready');
@@ -94,24 +105,21 @@ function WeatherMap() {
 
     return () => {
       cancelled = true;
-    };
-  }, [navigate]);
-
-  useEffect(() => {
-    const syncMapTheme = (event) => {
-      const maps = mapsApiRef.current;
       const map = mapInstanceRef.current;
-      if (!maps || !map) {
-        return;
+      if (map && typeof map.getCenter === 'function') {
+        const center = map.getCenter();
+        const zoom = typeof map.getZoom === 'function' ? map.getZoom() : null;
+        if (center) {
+          viewStateRef.current = {
+            center: { lat: center.lat(), lng: center.lng() },
+            zoom: zoom ?? viewStateRef.current.zoom,
+          };
+        }
       }
-
-      const resolved = event?.detail?.resolved ?? resolveTheme();
-      applyMapAppearance(maps, map, markersRef.current, resolved);
+      mapInstanceRef.current = null;
+      markersRef.current = [];
     };
-
-    window.addEventListener(THEME_CHANGE_EVENT, syncMapTheme);
-    return () => window.removeEventListener(THEME_CHANGE_EVENT, syncMapTheme);
-  }, []);
+  }, [navigate, resolvedTheme]);
 
   return (
     <section className="flex min-h-0 w-full flex-1 flex-col" aria-label="Map">

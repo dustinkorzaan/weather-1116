@@ -94,7 +94,74 @@ window.weatherMap = (function () {
       backgroundColor: isDark ? '#0b111d' : '#e8eef4',
       pinFill: isDark ? '#ffffff' : '#111827',
       labelColor: isDark ? '#e4e4e7' : '#1f2937',
+      colorScheme: isDark ? 'DARK' : 'LIGHT',
     };
+  }
+
+  function colorSchemeOption(maps, isDark) {
+    const schemes = maps.ColorScheme;
+    if (schemes) {
+      return isDark ? schemes.DARK : schemes.LIGHT;
+    }
+    return isDark ? 'DARK' : 'LIGHT';
+  }
+
+  function applyMapColorSchemeCss(element, theme) {
+    if (!element || !element.style) {
+      return;
+    }
+    element.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
+  }
+
+  /**
+   * Vector maps ignore JSON styles, and colorScheme is init-only. Raster + an
+   * explicit LIGHT/DARK scheme keeps the canvas on the site theme.
+   */
+  function createThemedMap(maps, element, appearance, center, zoom) {
+    applyMapColorSchemeCss(element, appearance.colorScheme === 'DARK' ? 'dark' : 'light');
+    const options = {
+      center: center || DEFAULT_CENTER,
+      zoom: zoom == null ? DEFAULT_ZOOM : zoom,
+      styles: appearance.styles,
+      disableDefaultUI: true,
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      backgroundColor: appearance.backgroundColor,
+      colorScheme: colorSchemeOption(maps, appearance.colorScheme === 'DARK'),
+    };
+    if (maps.RenderingType) {
+      options.renderingType = maps.RenderingType.RASTER;
+    }
+    return new maps.Map(element, options);
+  }
+
+  function createCityMarkers(maps, map, cities, appearance) {
+    const icon = createPinIcon(maps, appearance.pinFill);
+    const markers = [];
+    (cities || []).forEach(function (city) {
+      const marker = new maps.Marker({
+        map: map,
+        position: { lat: city.lat, lng: city.lng },
+        icon: icon,
+        clickable: true,
+        cursor: 'pointer',
+        label: {
+          text: city.name,
+          color: appearance.labelColor,
+          fontSize: '12px',
+          fontWeight: '500',
+          className: 'weather-map-label',
+        },
+      });
+
+      bindPinHoverCard(maps, map, marker, city.name, function (cityName) {
+        window.location.assign(currentAiWeatherPath(cityName));
+      });
+      markers.push(marker);
+    });
+    return markers;
   }
   let activeCloseCard = null;
 
@@ -157,20 +224,30 @@ window.weatherMap = (function () {
   }
 
   function applyMapAppearance(entry, theme) {
-    const appearance = mapAppearance(theme || resolvedTheme());
-    entry.map.setOptions({
-      styles: appearance.styles,
-      backgroundColor: appearance.backgroundColor,
-    });
-    const icon = createPinIcon(entry.maps, appearance.pinFill);
-    entry.markers.forEach(function (marker) {
-      const label = marker.getLabel();
-      marker.setIcon(icon);
-      if (label) {
-        label.color = appearance.labelColor;
-        marker.setLabel(label);
+    const resolved = theme || resolvedTheme();
+    if (entry.theme === resolved && entry.map) {
+      return;
+    }
+    const appearance = mapAppearance(resolved);
+    let center = DEFAULT_CENTER;
+    let zoom = DEFAULT_ZOOM;
+    if (entry.map && typeof entry.map.getCenter === 'function') {
+      const current = entry.map.getCenter();
+      if (current) {
+        center = { lat: current.lat(), lng: current.lng() };
       }
-    });
+      if (typeof entry.map.getZoom === 'function' && entry.map.getZoom() != null) {
+        zoom = entry.map.getZoom();
+      }
+    }
+
+    const map = createThemedMap(entry.maps, entry.element, appearance, center, zoom);
+    entry.map = map;
+    entry.markers = createCityMarkers(entry.maps, map, entry.cities, appearance);
+    entry.theme = resolved;
+    if (entry.element) {
+      mapByElement.set(entry.element, map);
+    }
   }
 
   function createPinHoverCard(cityName) {
@@ -299,57 +376,36 @@ window.weatherMap = (function () {
       }
 
       const appearance = mapAppearance(resolvedTheme());
-      const map = new maps.Map(current, {
-        center: DEFAULT_CENTER,
-        zoom: DEFAULT_ZOOM,
-        styles: appearance.styles,
-        disableDefaultUI: true,
-        zoomControl: true,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        backgroundColor: appearance.backgroundColor,
-      });
+      const map = createThemedMap(maps, current, appearance, DEFAULT_CENTER, DEFAULT_ZOOM);
+      const markers = createCityMarkers(maps, map, cities, appearance);
+      const entry = {
+        maps: maps,
+        map: map,
+        markers: markers,
+        element: current,
+        cities: cities || [],
+        theme: resolvedTheme(),
+      };
 
-      const icon = createPinIcon(maps, appearance.pinFill);
-      const markers = [];
-      (cities || []).forEach(function (city) {
-        const marker = new maps.Marker({
-          map: map,
-          position: { lat: city.lat, lng: city.lng },
-          icon: icon,
-          clickable: true,
-          cursor: 'pointer',
-          label: {
-            text: city.name,
-            color: appearance.labelColor,
-            fontSize: '12px',
-            fontWeight: '500',
-            className: 'weather-map-label',
-          },
-        });
-
-        bindPinHoverCard(maps, map, marker, city.name, function (cityName) {
-          window.location.assign(currentAiWeatherPath(cityName));
-        });
-        markers.push(marker);
-      });
-
-      themedMaps.push({ maps: maps, map: map, markers: markers });
+      themedMaps.push(entry);
       mapByElement.set(current, map);
       current.setAttribute('data-status', 'ready');
-      observeMapSize(current, map);
+      observeMapSize(current, function () {
+        return mapByElement.get(current);
+      });
       return map;
     });
   }
 
-  function observeMapSize(element, map) {
-    if (!window.ResizeObserver || !element || !map) {
+  function observeMapSize(element, getMap) {
+    if (!window.ResizeObserver || !element || typeof getMap !== 'function') {
       return;
     }
 
     const observer = new ResizeObserver(function () {
+      const map = getMap();
       if (
+        map &&
         element.offsetWidth > 0 &&
         element.offsetHeight > 0 &&
         window.google &&

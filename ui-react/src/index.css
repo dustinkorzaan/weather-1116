@@ -130,6 +130,14 @@
     }
 }
 
+.weather-map {
+  color-scheme: light;
+}
+
+.dark .weather-map {
+  color-scheme: dark;
+}
+
 /* Google Maps InfoWindow chrome around the pin hover card. */
 .weather-map .gm-style-iw-chr,
 .weather-map .gm-ui-hover-effect {

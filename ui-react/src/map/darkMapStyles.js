@@ -102,6 +102,49 @@ export function getMapAppearance(resolvedTheme) {
     backgroundColor: isDark ? DARK_MAP_BACKGROUND : LIGHT_MAP_BACKGROUND,
     pinFill: isDark ? '#ffffff' : '#111827',
     labelColor: isDark ? '#e4e4e7' : '#1f2937',
+    colorScheme: isDark ? 'DARK' : 'LIGHT',
+  };
+}
+
+export function mapColorScheme(maps, resolvedTheme) {
+  const isDark = resolvedTheme === 'dark';
+  const schemes = maps?.ColorScheme;
+  if (schemes) {
+    return isDark ? schemes.DARK : schemes.LIGHT;
+  }
+  return isDark ? 'DARK' : 'LIGHT';
+}
+
+export function mapRenderingType(maps) {
+  return maps?.RenderingType?.RASTER ?? 'RASTER';
+}
+
+export function applyMapColorSchemeCss(element, resolvedTheme) {
+  if (!element || !element.style) {
+    return;
+  }
+  element.style.colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
+}
+
+/**
+ * Google Maps ignores JSON `styles` on vector maps, and `colorScheme` is
+ * init-only. Raster + an explicit LIGHT/DARK scheme keeps the canvas in
+ * sync with the site theme (not the OS preference).
+ */
+export function createMapOptions(maps, resolvedTheme, extras = {}) {
+  const appearance = getMapAppearance(resolvedTheme);
+  return {
+    center: extras.center,
+    zoom: extras.zoom,
+    styles: appearance.styles,
+    disableDefaultUI: true,
+    zoomControl: true,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    backgroundColor: appearance.backgroundColor,
+    colorScheme: mapColorScheme(maps, resolvedTheme),
+    renderingType: mapRenderingType(maps),
   };
 }
 
@@ -118,9 +161,13 @@ export function createPinIcon(maps, pinFill) {
 
 export function applyMapAppearance(maps, map, markers, resolvedTheme) {
   const appearance = getMapAppearance(resolvedTheme);
+  if (typeof map.getDiv === 'function') {
+    applyMapColorSchemeCss(map.getDiv(), resolvedTheme);
+  }
   map.setOptions({
     styles: appearance.styles,
     backgroundColor: appearance.backgroundColor,
+    colorScheme: mapColorScheme(maps, resolvedTheme),
   });
   const icon = createPinIcon(maps, appearance.pinFill);
   markers.forEach((marker) => {

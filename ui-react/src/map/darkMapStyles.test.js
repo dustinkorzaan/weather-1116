@@ -1,0 +1,71 @@
+import { afterEach, expect, test } from 'vitest';
+import {
+  DARK_MAP_BACKGROUND,
+  DARK_MAP_STYLES,
+  LIGHT_MAP_BACKGROUND,
+  LIGHT_MAP_STYLES,
+  applyMapColorSchemeCss,
+  createMapOptions,
+  getMapAppearance,
+  mapColorScheme,
+  mapRenderingType,
+} from './darkMapStyles';
+
+afterEach(() => {
+  document.documentElement.style.colorScheme = '';
+});
+
+test('light site theme uses the light map canvas, pins, and color scheme', () => {
+  const appearance = getMapAppearance('light');
+
+  expect(appearance.styles).toBe(LIGHT_MAP_STYLES);
+  expect(appearance.backgroundColor).toBe(LIGHT_MAP_BACKGROUND);
+  expect(appearance.pinFill).toBe('#111827');
+  expect(appearance.labelColor).toBe('#1f2937');
+  expect(appearance.colorScheme).toBe('LIGHT');
+});
+
+test('dark site theme uses the dark map canvas, pins, and color scheme', () => {
+  const appearance = getMapAppearance('dark');
+
+  expect(appearance.styles).toBe(DARK_MAP_STYLES);
+  expect(appearance.backgroundColor).toBe(DARK_MAP_BACKGROUND);
+  expect(appearance.pinFill).toBe('#ffffff');
+  expect(appearance.labelColor).toBe('#e4e4e7');
+  expect(appearance.colorScheme).toBe('DARK');
+});
+
+test('createMapOptions forces raster rendering and LIGHT colorScheme for the light theme', () => {
+  const maps = {
+    ColorScheme: { LIGHT: 'LIGHT', DARK: 'DARK' },
+    RenderingType: { RASTER: 'RASTER', VECTOR: 'VECTOR' },
+  };
+
+  const options = createMapOptions(maps, 'light', {
+    center: { lat: 1, lng: 2 },
+    zoom: 4,
+  });
+
+  expect(options.colorScheme).toBe('LIGHT');
+  expect(options.renderingType).toBe('RASTER');
+  expect(options.styles).toBe(LIGHT_MAP_STYLES);
+  expect(options.backgroundColor).toBe(LIGHT_MAP_BACKGROUND);
+  expect(options.center).toEqual({ lat: 1, lng: 2 });
+  expect(options.zoom).toBe(4);
+});
+
+test('mapColorScheme and mapRenderingType fall back to strings without the Maps enums', () => {
+  expect(mapColorScheme({}, 'light')).toBe('LIGHT');
+  expect(mapColorScheme({}, 'dark')).toBe('DARK');
+  expect(mapRenderingType({})).toBe('RASTER');
+});
+
+test('applyMapColorSchemeCss follows the resolved site theme, not the OS', () => {
+  const element = document.createElement('div');
+
+  applyMapColorSchemeCss(element, 'light');
+  expect(element.style.colorScheme).toBe('light');
+
+  applyMapColorSchemeCss(element, 'dark');
+  expect(element.style.colorScheme).toBe('dark');
+});

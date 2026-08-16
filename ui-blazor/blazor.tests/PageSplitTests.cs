@@ -94,6 +94,9 @@ public sealed class PageSplitTests
         Assert.Contains("bindPinHoverCard", script);
         Assert.Contains("LIGHT_MAP_STYLES", script);
         Assert.Contains("weather-theme-change", script);
+        Assert.Contains("colorScheme", script);
+        Assert.Contains("RenderingType.RASTER", script);
+        Assert.Contains("createThemedMap", script);
     }
 
     [Fact]
