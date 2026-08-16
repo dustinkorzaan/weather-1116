@@ -229,8 +229,8 @@ and layout code instead of sharing it.
 | `/current-ai-weather` | Same top bar, then the Current AI Weather widget — no map |
 | `/chat-clients` | Same top bar, then the chat clients (ChatPanel) — no map |
 
-The avatar menu is a person icon (lucide `user` in React/MVC,
-Fluent `Person` in Blazor) and its items are ordered:
+The avatar menu is a filled person silhouette (`avatar.svg` in all three UIs)
+and its items are ordered:
 **Login/Logout** (placeholder, no-op) → divider →
 cross-UI external links (UI React / UI Blazor / MVC, API About, Worker Hangfire)
 → divider → **Hello World** (`/hello-world`) → **Current AI Weather**

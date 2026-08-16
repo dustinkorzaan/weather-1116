@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
-import { User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -154,9 +153,9 @@ function App() {
                 variant="outline"
                 size="icon"
                 aria-label="Open user menu"
-                className="size-9 rounded-full border-2 border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="size-9 overflow-hidden rounded-full border-2 border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
               >
-                <User className="size-5" strokeWidth={2.25} aria-hidden="true" />
+                <img src="/avatar.svg" alt="" width="20" height="20" className="avatar-icon block size-5 shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-44">

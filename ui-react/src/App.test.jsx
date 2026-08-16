@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, expect, test, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -104,12 +107,23 @@ test('user menu is a gray outline control instead of a solid blue button', () =>
   expect(button.className).toMatch(/border-2/);
 });
 
-test('header person icon uses a bolder stroke', () => {
+test('header person icon uses the shared filled avatar svg', () => {
   mockHelloFetch();
   renderApp('/');
 
   const title = screen.getByRole('heading', { name: /weather react/i });
-  expect(title.closest('header')?.querySelector('svg')?.getAttribute('stroke-width')).toBe('2.25');
+  const avatar = title.closest('header')?.querySelector('img.avatar-icon');
+  expect(avatar).toBeTruthy();
+  expect(avatar?.getAttribute('src')).toBe('/avatar.svg');
+  expect(avatar?.getAttribute('width')).toBe('20');
+  expect(avatar?.getAttribute('height')).toBe('20');
+
+  const avatarSvg = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), '../public/avatar.svg'),
+    'utf8'
+  );
+  expect(avatarSvg).toContain('<path ');
+  expect(avatarSvg).not.toContain('<circle ');
 });
 
 test('renders the map on the home route without split page content', () => {
