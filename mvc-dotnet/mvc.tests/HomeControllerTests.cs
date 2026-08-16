@@ -102,13 +102,16 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
-    public void WeatherMapScript_NavigatesToCurrentAiWeatherWithLocationQuery()
+    public void WeatherMapScript_ShowsHoverCardWithGetCurrentAiWeatherButton()
     {
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
         Assert.Contains("currentAiWeatherPath", script);
         Assert.Contains("encodeURIComponent", script);
         Assert.Contains("/current-ai-weather?location=", script);
-        Assert.Contains("marker.addListener('click'", script);
+        Assert.Contains("marker.addListener('mouseover'", script);
+        Assert.Contains("marker.addListener('click', openCard)", script);
+        Assert.Contains("Get Current AI Weather", script);
+        Assert.Contains("bindPinHoverCard", script);
     }
 
     [Fact]
@@ -166,6 +169,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".site-header", css);
         Assert.Contains("border: 2px solid var(--color-border-strong)", css);
         Assert.Contains("#weather-map", css);
+        Assert.Contains(".weather-map-pin-card", css);
         Assert.Contains("[hidden]", css);
         Assert.DoesNotContain("tailwindcss", css, StringComparison.OrdinalIgnoreCase);
     }

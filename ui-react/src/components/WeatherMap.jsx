@@ -7,6 +7,7 @@ import {
 } from '../data/mapCities';
 import { DARK_MAP_STYLES } from '../map/darkMapStyles';
 import { loadGoogleMaps } from '../map/loadGoogleMaps';
+import { bindPinHoverCard } from '../map/pinHoverCard';
 import { currentAiWeatherPath } from '../utils/currentAiWeatherLocation';
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
@@ -58,7 +59,6 @@ function WeatherMap() {
           const marker = new maps.Marker({
             map,
             position: { lat: city.lat, lng: city.lng },
-            title: city.name,
             icon,
             clickable: true,
             cursor: 'pointer',
@@ -71,8 +71,14 @@ function WeatherMap() {
             },
           });
 
-          marker.addListener('click', () => {
-            navigate(currentAiWeatherPath(city.name));
+          bindPinHoverCard({
+            maps,
+            map,
+            marker,
+            cityName: city.name,
+            onGetWeather: (cityName) => {
+              navigate(currentAiWeatherPath(cityName));
+            },
           });
         });
 
@@ -105,7 +111,7 @@ function WeatherMap() {
       <div className="min-h-0 w-full flex-1">
         <div
           ref={mapRef}
-          className="h-full w-full bg-[#0b111d]"
+          className="weather-map h-full w-full bg-[#0b111d]"
           role="presentation"
           data-status={status}
         />

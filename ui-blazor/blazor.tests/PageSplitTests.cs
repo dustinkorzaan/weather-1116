@@ -80,13 +80,16 @@ public sealed class PageSplitTests
     }
 
     [Fact]
-    public void WeatherMapScript_NavigatesToCurrentAiWeatherWithLocationQuery()
+    public void WeatherMapScript_ShowsHoverCardWithGetCurrentAiWeatherButton()
     {
         var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
         Assert.Contains("currentAiWeatherPath", script);
         Assert.Contains("encodeURIComponent", script);
         Assert.Contains("/current-ai-weather?location=", script);
-        Assert.Contains("marker.addListener('click'", script);
+        Assert.Contains("marker.addListener('mouseover'", script);
+        Assert.Contains("marker.addListener('click', openCard)", script);
+        Assert.Contains("Get Current AI Weather", script);
+        Assert.Contains("bindPinHoverCard", script);
     }
 
     [Fact]

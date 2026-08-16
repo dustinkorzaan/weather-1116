@@ -318,6 +318,48 @@ fluent-menu-item a {
     white-space: nowrap;
 }
 
+.weather-map-pin-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 10.5rem;
+}
+
+.weather-map-pin-card-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.weather-map-pin-card-button {
+    padding: 0.4rem 0.65rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background: #ffffff;
+    color: #111827;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.weather-map-pin-card-button:hover {
+    background: #f9fafb;
+}
+
+.weather-map .gm-style-iw-chr,
+.weather-map .gm-ui-hover-effect {
+    display: none !important;
+}
+
+.weather-map .gm-style-iw-c {
+    padding: 0.75rem 0.85rem !important;
+    border-radius: 0.5rem !important;
+}
+
+.weather-map .gm-style-iw-d {
+    overflow: hidden !important;
+}
+
 .chat-section {
     margin-top: 1.5rem;
 }
