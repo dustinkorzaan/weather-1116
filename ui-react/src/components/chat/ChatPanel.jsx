@@ -36,7 +36,7 @@ const TAB_CONFIG = [
 const MESSAGE_CLASSES = {
   user: 'self-end max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap',
   assistant: 'self-start max-w-[85%] rounded-2xl border border-border bg-muted px-3 py-2 text-foreground whitespace-pre-wrap',
-  tool: 'self-center max-w-[85%] rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200',
+  tool: 'self-center text-xs text-muted-foreground',
   error: 'w-full rounded-md bg-destructive/15 px-3 py-2 text-destructive',
 };
 
@@ -221,7 +221,7 @@ function ChatPanel() {
                 ...current[tabId],
                 {
                   role: 'tool',
-                  content: `Running ${toolName}…`,
+                  content: `Running ${toolName} …`,
                   toolName,
                   toolArguments,
                   running: true,
@@ -243,7 +243,7 @@ function ChatPanel() {
               const currentEntry = tabHistory[index];
               tabHistory[index] = {
                 role: 'tool',
-                content: `Ran ${toolName}`,
+                content: `Ran ${toolName} …`,
                 toolName,
                 toolArguments: toolArguments || currentEntry.toolArguments,
                 toolResult,

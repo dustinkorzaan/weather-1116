@@ -79,7 +79,7 @@ test('shows tool arguments and result on hover', async () => {
   await user.type(screen.getByLabelText(/message/i), 'weather in nashville');
   await user.click(screen.getByRole('button', { name: /^send$/i }));
 
-  const chip = await screen.findByText('Ran GetLatLongData');
+  const chip = await screen.findByText('Ran GetLatLongData …');
   await user.hover(chip);
 
   await waitFor(() => {

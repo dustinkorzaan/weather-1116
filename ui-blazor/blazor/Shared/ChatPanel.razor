@@ -231,7 +231,7 @@
                     history.Add(new ChatEntry
                     {
                         Role = "tool",
-                        Content = $"Running {streamEvent.ToolName}…",
+                        Content = $"Running {streamEvent.ToolName} …",
                         ToolName = streamEvent.ToolName,
                         ToolArguments = streamEvent.ToolArguments,
                         Running = true,
@@ -244,7 +244,7 @@
                     if (pending is not null)
                     {
                         pending.Running = false;
-                        pending.Content = $"Ran {streamEvent.ToolName}";
+                        pending.Content = $"Ran {streamEvent.ToolName} …";
                         pending.ToolArguments = streamEvent.ToolArguments ?? pending.ToolArguments;
                         pending.ToolResult = streamEvent.ToolResult;
                         StateHasChanged();
