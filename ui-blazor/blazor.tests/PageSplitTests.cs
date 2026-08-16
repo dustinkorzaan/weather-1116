@@ -174,7 +174,7 @@ public sealed class PageSplitTests
         var markdown = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Data/ChatMarkdown.cs"));
         Assert.Contains("UseAdvancedExtensions", markdown);
         Assert.Contains("DisableHtml", markdown);
-        Assert.Contains("HtmlSanitizer", markdown);
+        Assert.Contains("UnsafeUrlAttribute", markdown);
 
         var chatInput = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
         Assert.Contains("function scrollToBottom(element)", chatInput);

@@ -1,4 +1,4 @@
-using Ganss.Xss;
+using System.Text.RegularExpressions;
 using Markdig;
 
 namespace WeatherBlazor.Data;
@@ -10,7 +10,9 @@ public static class ChatMarkdown
         .DisableHtml()
         .Build();
 
-    private static readonly HtmlSanitizer Sanitizer = new();
+    private static readonly Regex UnsafeUrlAttribute = new(
+        @"\s(?:href|src)\s*=\s*""(?:javascript|data|vbscript):[^""]*""",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     public static string ToHtml(string? markdown)
     {
@@ -19,6 +21,6 @@ public static class ChatMarkdown
             return string.Empty;
         }
 
-        return Sanitizer.Sanitize(Markdown.ToHtml(markdown, Pipeline));
+        return UnsafeUrlAttribute.Replace(Markdown.ToHtml(markdown, Pipeline), string.Empty);
     }
 }
