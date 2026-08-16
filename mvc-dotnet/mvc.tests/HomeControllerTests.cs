@@ -179,6 +179,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("windArrowRotationDeg", script);
         Assert.Contains("renderWindDirection", script);
         Assert.Contains("\\u27A4", script);
+        Assert.True(
+            script.IndexOf("el.appendChild(label)", StringComparison.Ordinal)
+                < script.IndexOf("el.appendChild(arrow)", StringComparison.Ordinal),
+            "Wind direction arrow should follow the compass label.");
         Assert.Contains("toFixed(2)", script);
         Assert.Contains("windDirectionDegrees", script);
         Assert.Contains("data.latitude", script);
@@ -279,7 +283,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("border: 2px solid var(--color-border-strong)", css);
         Assert.Contains("#weather-map", css);
         Assert.Contains(".weather-map-pin-card", css);
+        Assert.Contains(".weather-map-pin-card-header", css);
         Assert.Contains(".weather-map-pin-card-delete", css);
+        Assert.Contains(".weather-map-pin-card-delete svg", css);
         Assert.Contains(".weather-map-add-location-button", css);
         Assert.Contains(".wind-direction-arrow", css);
         Assert.Contains(".add-location-panel", css);

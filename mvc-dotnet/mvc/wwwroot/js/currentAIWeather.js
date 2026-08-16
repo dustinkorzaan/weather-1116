@@ -65,6 +65,10 @@
     }
 
     el.replaceChildren();
+    var label = document.createElement('span');
+    label.textContent = formatWindDirection(compass, degrees);
+    el.appendChild(label);
+
     var rotation = windArrowRotationDeg(degrees);
     if (rotation !== null) {
       var arrow = document.createElement('span');
@@ -74,10 +78,6 @@
       arrow.style.transform = 'rotate(' + rotation + 'deg)';
       el.appendChild(arrow);
     }
-
-    var label = document.createElement('span');
-    label.textContent = formatWindDirection(compass, degrees);
-    el.appendChild(label);
   }
 
   function init(config) {

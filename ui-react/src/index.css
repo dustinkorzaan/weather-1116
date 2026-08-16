@@ -162,6 +162,22 @@
   overflow: hidden !important;
 }
 
+.weather-map-pin-card-header {
+  align-items: center;
+}
+
+.weather-map-pin-card-name {
+  line-height: 1;
+}
+
+.weather-map-pin-card-delete {
+  line-height: 0;
+}
+
+.weather-map-pin-card-delete svg {
+  display: block;
+}
+
 /* Logo pins sit in OverlayView HTML so CSS can spin an inner element
    without fighting Google Maps' positioning transforms. */
 .weather-map-logo-pin {
