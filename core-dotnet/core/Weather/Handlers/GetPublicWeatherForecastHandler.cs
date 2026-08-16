@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using Core.Http;
 using Core.Weather.Events;
 using Core.Weather.Models;
 using MediatR;
@@ -21,10 +22,10 @@ public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherF
 
     public async Task<PublicWeatherForecastResponse> Handle(GetPublicWeatherForecastEvent request, CancellationToken cancellationToken)
     {
-        var client = new HttpClient();
+        using var client = new HttpClient();
         string endpoint = BuildForecastUrl(request.Latitude, request.Longitude, request.Resolution);
 
-        string jsonResponse = await client.GetStringAsync(endpoint, cancellationToken);
+        string jsonResponse = await ThirdPartyHttp.GetStringWithRetryAsync(client, endpoint, cancellationToken);
 
         var options = new JsonSerializerOptions { WriteIndented = true };
 

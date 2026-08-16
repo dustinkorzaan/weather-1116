@@ -3,6 +3,7 @@ using System.Text.Json;
 using Core.Geo;
 using Core.Geo.Events;
 using Core.Geo.Models;
+using Core.Http;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -25,7 +26,7 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
 
     public async Task<NonAILocationResponse> Handle(GetLocationEvent request, CancellationToken cancellationToken)
     {
-        var client = new HttpClient();
+        using var client = new HttpClient();
         client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", UserAgent);
         client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");
 
@@ -33,7 +34,7 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
 
         // Reverse geocoding has to send coordinates to Nominatim; do not log them.
         // codeql[cs/exposure-of-sensitive-information]
-        string jsonResponse = await client.GetStringAsync(url, cancellationToken);
+        string jsonResponse = await ThirdPartyHttp.GetStringWithRetryAsync(client, url, cancellationToken);
         var geoData = JsonSerializer.Deserialize<NominatimReverseResponse>(jsonResponse);
         var location = NominatimLocationMapper.FromReverse(geoData, request.Latitude, request.Longitude);
 
