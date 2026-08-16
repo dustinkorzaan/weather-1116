@@ -15,7 +15,14 @@ public class AIWeatherResponse
     public double WindSpeedMPH { get; set; }
     public string WindDirection { get; set; } = string.Empty;
     public string Conditions { get; set; } = string.Empty;
-    public string LocationName { get; set; } = string.Empty;
+}
+
+public class LatLongResponse
+{
+    public int Rank { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
+    public string Country { get; set; } = string.Empty;
     public double Latitude { get; set; }
     public double Longitude { get; set; }
 }
@@ -38,6 +45,12 @@ public class WeatherApiClient
     {
         var route = $"AIWeather/Current?location={Uri.EscapeDataString(location)}";
         return await _httpClient.GetFromJsonAsync<AIWeatherResponse>(route);
+    }
+
+    public async Task<LatLongResponse?> SearchLocation(string location)
+    {
+        var route = $"Geo?location={Uri.EscapeDataString(location)}";
+        return await _httpClient.GetFromJsonAsync<LatLongResponse>(route);
     }
 
     public async Task<AboutNode> GetAbout()

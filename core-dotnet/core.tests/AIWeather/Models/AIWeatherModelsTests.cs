@@ -17,10 +17,7 @@ public class AIWeatherModelsTests
           "temperatureF": 41,
           "windSpeedMPH": 7.5,
           "windDirection": "S",
-          "conditions": "Partly cloudy",
-          "locationName": "Nashville, TN",
-          "latitude": 36.1627,
-          "longitude": -86.7816
+          "conditions": "Partly cloudy"
         }
         """;
 
@@ -34,9 +31,6 @@ public class AIWeatherModelsTests
         Assert.Equal(7.5, result.WindSpeedMPH);
         Assert.Equal("S", result.WindDirection);
         Assert.Equal("Partly cloudy", result.Conditions);
-        Assert.Equal("Nashville, TN", result.LocationName);
-        Assert.Equal(36.1627, result.Latitude);
-        Assert.Equal(-86.7816, result.Longitude);
     }
 
     [Fact]
@@ -47,8 +41,5 @@ public class AIWeatherModelsTests
         Assert.Equal(string.Empty, result.FullSummary);
         Assert.Equal(string.Empty, result.WindDirection);
         Assert.Equal(string.Empty, result.Conditions);
-        Assert.Equal(string.Empty, result.LocationName);
-        Assert.Equal(0, result.Latitude);
-        Assert.Equal(0, result.Longitude);
     }
 }
