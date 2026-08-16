@@ -98,6 +98,10 @@ public sealed class PageSplitTests
         Assert.Contains("FormatWindDirection", pageSource);
         Assert.Contains("FormatLatLong", pageSource);
         Assert.Contains("wind-direction-arrow", pageSource);
+        Assert.True(
+            pageSource.IndexOf("@FormatWindDirection", StringComparison.Ordinal)
+                < pageSource.IndexOf("wind-direction-arrow", StringComparison.Ordinal),
+            "Wind direction arrow should follow the compass label.");
         Assert.Contains("&#x27A4;", pageSource);
         Assert.Contains("WindDirectionDegrees - 90", pageSource);
         Assert.DoesNotContain("Temperature F", pageSource);
@@ -150,6 +154,10 @@ public sealed class PageSplitTests
             Assert.Contains("wind-direction-arrow", rendered.Markup);
             Assert.Contains("rotate(90deg)", rendered.Markup);
             Assert.Contains("\u27A4", rendered.Markup);
+            Assert.True(
+                rendered.Markup.IndexOf("S (180°)", StringComparison.Ordinal)
+                    < rendered.Markup.IndexOf("wind-direction-arrow", StringComparison.Ordinal),
+                "Wind direction arrow should follow the compass label.");
             Assert.Contains("Lat/Long", rendered.Markup);
             Assert.Contains("36.16° N, 86.78° W", rendered.Markup);
             Assert.DoesNotContain("Temperature F", rendered.Markup);
