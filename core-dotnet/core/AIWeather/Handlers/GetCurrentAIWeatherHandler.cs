@@ -61,7 +61,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         You have access to 3rd-party Model Context Protocol (MCP) tools for location mapping and real-time public meteorology data.
 
         # Tool Protocol
-        1. When given a location, immediately call your coordinates resolution tool to map the location to latitude and longitude.
+        1. When given a location, immediately call your coordinates resolution tool. It returns ranked matches (rank 1 is best); pick the place that matches using name, state, and country — you may skip rank 1.
         2. Use those resolved coordinates to invoke your weather fetching tool.
         3. You must query these tools whenever real weather data is required to fulfill the request.
 

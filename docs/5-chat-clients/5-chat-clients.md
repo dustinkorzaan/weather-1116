@@ -111,7 +111,7 @@ All four tabs expose the same two weather tools (no web search):
 
 | Tool | Purpose |
 | --- | --- |
-| `GetLatLongData` | Resolve a place name to coordinates |
+| `GetLatLongData` | Resolve a place name to ranked coordinates (default top 5) |
 | `GetPublicWeatherData` | Fetch current weather for lat/long |
 
 - **In-process (Chat1a, Chat2a):** Core `ChatToolExecutor` runs MediatR handlers when the model
