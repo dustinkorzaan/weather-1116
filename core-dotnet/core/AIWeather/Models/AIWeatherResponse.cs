@@ -18,4 +18,13 @@ public class AIWeatherResponse
 
     [JsonPropertyName("conditions")]
     public string Conditions { get; set; } = string.Empty;
+
+    [JsonPropertyName("locationName")]
+    public string LocationName { get; set; } = string.Empty;
+
+    [JsonPropertyName("latitude")]
+    public double Latitude { get; set; }
+
+    [JsonPropertyName("longitude")]
+    public double Longitude { get; set; }
 }

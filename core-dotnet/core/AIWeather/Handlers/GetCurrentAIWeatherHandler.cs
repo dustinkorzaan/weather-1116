@@ -74,6 +74,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         # JSON Structure Properties
         - fullSummary: Exactly one sentence capturing current weather metrics (temperature, wind speed, wind direction, and overall conditions).
         - For the location name inside the summary sentence, dynamically evaluate and select the most human-friendly city name. Prefer a clean, recognized city name returned by your geo tool over a raw ZIP code, coordinate pair, or opaque input string provided by the user.
+        - locationName: That same human-friendly place name (city and region/state), not a ZIP code or coordinate pair.
+        - latitude: WGS84 latitude of the resolved location from your coordinates tool.
+        - longitude: WGS84 longitude of the resolved location from your coordinates tool.
         """;
 
         var userPrompt = $"What is the current weather in: `{location}`?";
