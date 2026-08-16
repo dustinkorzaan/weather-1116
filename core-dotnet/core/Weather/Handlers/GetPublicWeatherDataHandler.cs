@@ -23,7 +23,7 @@ public class GetPublicWeatherDataHandler : IRequestHandler<GetPublicWeatherDataE
         var client = new HttpClient();
         var currentWeatherPath = "forecast";
 
-        string endpoint = $"https://api.open-meteo.com/v1/{currentWeatherPath}?latitude={request.LatLong.Latitude}&longitude={request.LatLong.Longitude}&current_weather=true";
+        string endpoint = $"https://api.open-meteo.com/v1/{currentWeatherPath}?latitude={request.Latitude}&longitude={request.Longitude}&current_weather=true";
         // _logger.LogInformation("Non-AI: Fetching weather data from: {endpoint}", endpoint);
 
         // 1. Fetch raw JSON string from API

@@ -171,7 +171,11 @@ internal class Program
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongDataEvent { Location = location, Count = 1 });
 		var latLong = latLongMatches.Results[0];
-		var weatherData = await mediator.Send(new GetPublicWeatherDataEvent { LatLong = latLong });
+		var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
+		{
+			Latitude = latLong.Latitude,
+			Longitude = latLong.Longitude,
+		});
 		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
 
 		// AI prep
@@ -241,7 +245,11 @@ internal class Program
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongDataEvent { Location = location, Count = 1 });
 		var latLong = latLongMatches.Results[0];
-		var weatherData = await mediator.Send(new GetPublicWeatherDataEvent { LatLong = latLong });
+		var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
+		{
+			Latitude = latLong.Latitude,
+			Longitude = latLong.Longitude,
+		});
 		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
 
 		// AI prep

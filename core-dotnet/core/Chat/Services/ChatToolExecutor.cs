@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Core.Geo.Events;
-using Core.Geo.Models;
 using Core.Weather.Events;
 using MediatR;
 using OpenAI.Responses;
@@ -44,11 +43,8 @@ public sealed class ChatToolExecutor
 
         var weatherData = await _mediator.Send(new GetPublicWeatherDataEvent
         {
-            LatLong = new NonAILatLongResponse
-            {
-                Latitude = latitude,
-                Longitude = longitude,
-            },
+            Latitude = latitude,
+            Longitude = longitude,
         }, cancellationToken);
 
         return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
