@@ -162,6 +162,33 @@
   overflow: hidden !important;
 }
 
+.weather-map-type-toggle {
+  display: inline-flex;
+  margin: 10px;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.25);
+}
+
+.weather-map-type-toggle-button {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.4rem 0.75rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.weather-map-type-toggle-button[aria-pressed='true'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
 /* Logo pins sit in OverlayView HTML so CSS can spin an inner element
    without fighting Google Maps' positioning transforms. */
 .weather-map-logo-pin {

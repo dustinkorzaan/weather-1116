@@ -138,6 +138,7 @@ export function createMapOptions(maps, resolvedTheme, extras = {}) {
   return {
     center: extras.center,
     zoom: extras.zoom,
+    mapTypeId: extras.mapTypeId,
     styles: appearance.styles,
     disableDefaultUI: true,
     zoomControl: true,

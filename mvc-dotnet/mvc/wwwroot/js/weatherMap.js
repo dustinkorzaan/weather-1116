@@ -12,6 +12,8 @@ window.weatherMap = (function () {
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
   const DEFAULT_CENTER = { lat: 39.5, lng: -77.5 };
   const DEFAULT_ZOOM = 5;
+  const MAP_VIEW_TYPE = 'map';
+  const AERIAL_VIEW_TYPE = 'aerial';
 
   const DARK_MAP_STYLES = [
     { elementType: 'geometry', stylers: [{ color: '#0b111d' }] },
@@ -123,15 +125,78 @@ window.weatherMap = (function () {
     element.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
   }
 
+  function resolveMapTypeId(maps, viewType) {
+    const ids = maps && maps.MapTypeId;
+    if (viewType === AERIAL_VIEW_TYPE) {
+      return (ids && ids.HYBRID) || 'hybrid';
+    }
+    return (ids && ids.ROADMAP) || 'roadmap';
+  }
+
+  function viewTypeFromMapTypeId(mapTypeId) {
+    const id = String(mapTypeId || '').toLowerCase();
+    if (id === 'hybrid' || id === 'satellite') {
+      return AERIAL_VIEW_TYPE;
+    }
+    return MAP_VIEW_TYPE;
+  }
+
+  function bindMapTypeToggle(maps, map, initialViewType, onChange) {
+    const group = document.createElement('div');
+    group.className = 'weather-map-type-toggle';
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-label', 'Map view');
+
+    function createToggleButton(label, viewType) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'weather-map-type-toggle-button';
+      button.textContent = label;
+      button.dataset.viewType = viewType;
+      return button;
+    }
+
+    const mapButton = createToggleButton('Map', MAP_VIEW_TYPE);
+    const aerialButton = createToggleButton('Aerial', AERIAL_VIEW_TYPE);
+    group.appendChild(mapButton);
+    group.appendChild(aerialButton);
+
+    function applyView(viewType) {
+      const selected = viewType === AERIAL_VIEW_TYPE ? AERIAL_VIEW_TYPE : MAP_VIEW_TYPE;
+      mapButton.setAttribute('aria-pressed', selected === MAP_VIEW_TYPE ? 'true' : 'false');
+      aerialButton.setAttribute('aria-pressed', selected === AERIAL_VIEW_TYPE ? 'true' : 'false');
+      if (map && typeof map.setMapTypeId === 'function') {
+        map.setMapTypeId(resolveMapTypeId(maps, selected));
+      }
+      if (typeof onChange === 'function') {
+        onChange(selected);
+      }
+    }
+
+    mapButton.addEventListener('click', function () {
+      applyView(MAP_VIEW_TYPE);
+    });
+    aerialButton.addEventListener('click', function () {
+      applyView(AERIAL_VIEW_TYPE);
+    });
+    applyView(initialViewType || MAP_VIEW_TYPE);
+
+    const position = maps && maps.ControlPosition && maps.ControlPosition.TOP_LEFT;
+    if (position != null && map.controls && map.controls[position] && typeof map.controls[position].push === 'function') {
+      map.controls[position].push(group);
+    }
+  }
+
   /**
    * Vector maps ignore JSON styles, and colorScheme is init-only. Raster + an
    * explicit LIGHT/DARK scheme keeps the canvas on the site theme.
    */
-  function createThemedMap(maps, element, appearance, center, zoom) {
+  function createThemedMap(maps, element, appearance, center, zoom, mapTypeId) {
     applyMapColorSchemeCss(element, appearance.colorScheme === 'DARK' ? 'dark' : 'light');
     const options = {
       center: center || DEFAULT_CENTER,
       zoom: zoom == null ? DEFAULT_ZOOM : zoom,
+      mapTypeId: mapTypeId || resolveMapTypeId(maps, MAP_VIEW_TYPE),
       styles: appearance.styles,
       disableDefaultUI: true,
       zoomControl: true,
@@ -539,6 +604,7 @@ window.weatherMap = (function () {
     const appearance = mapAppearance(resolved);
     let center = DEFAULT_CENTER;
     let zoom = DEFAULT_ZOOM;
+    let viewType = entry.viewType || MAP_VIEW_TYPE;
     if (entry.map && typeof entry.map.getCenter === 'function') {
       const current = entry.map.getCenter();
       if (current) {
@@ -546,6 +612,9 @@ window.weatherMap = (function () {
       }
       if (typeof entry.map.getZoom === 'function' && entry.map.getZoom() != null) {
         zoom = entry.map.getZoom();
+      }
+      if (typeof entry.map.getMapTypeId === 'function') {
+        viewType = viewTypeFromMapTypeId(entry.map.getMapTypeId());
       }
     }
 
@@ -557,10 +626,21 @@ window.weatherMap = (function () {
       });
     }
 
-    const map = createThemedMap(entry.maps, entry.element, appearance, center, zoom);
+    const map = createThemedMap(
+      entry.maps,
+      entry.element,
+      appearance,
+      center,
+      zoom,
+      resolveMapTypeId(entry.maps, viewType)
+    );
     entry.map = map;
     entry.markers = createCityMarkers(entry.maps, map, entry.cities, appearance);
     entry.theme = resolved;
+    entry.viewType = viewType;
+    bindMapTypeToggle(entry.maps, map, viewType, function (next) {
+      entry.viewType = next;
+    });
     bindRightClickAddLocation(entry.maps, map, entry.getLocationUrl || '/Geo/GetLocation');
   }
 
@@ -809,9 +889,7 @@ window.weatherMap = (function () {
       const map = createThemedMap(maps, element, appearance, DEFAULT_CENTER, DEFAULT_ZOOM);
       const markers = createCityMarkers(maps, map, resolvedCities, appearance);
       const getLocationUrl = resolveGetLocationUrl(element);
-      bindRightClickAddLocation(maps, map, getLocationUrl);
-
-      mapsByElement.push({
+      const entry = {
         maps: maps,
         map: map,
         markers: markers,
@@ -819,7 +897,14 @@ window.weatherMap = (function () {
         cities: resolvedCities,
         theme: resolvedTheme(),
         getLocationUrl: getLocationUrl,
+        viewType: MAP_VIEW_TYPE,
+      };
+      bindMapTypeToggle(maps, map, MAP_VIEW_TYPE, function (next) {
+        entry.viewType = next;
       });
+      bindRightClickAddLocation(maps, map, getLocationUrl);
+
+      mapsByElement.push(entry);
       element.setAttribute('data-status', 'ready');
       return map;
     });

@@ -4,6 +4,12 @@ import { cityFromReverseLookup, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from '../
 import { applyMapColorSchemeCss, createMapOptions } from '../map/darkMapStyles';
 import { loadGoogleMaps } from '../map/loadGoogleMaps';
 import {
+  MAP_VIEW_TYPE,
+  bindMapTypeToggle,
+  resolveMapTypeId,
+  viewTypeFromMapTypeId,
+} from '../map/mapTypeToggle';
+import {
   createLogoPinOverlay,
   logoPinSpinOffsetSec,
   logoPinUrl,
@@ -25,6 +31,7 @@ function WeatherMap() {
   const viewStateRef = useRef({
     center: MAP_DEFAULT_CENTER,
     zoom: MAP_DEFAULT_ZOOM,
+    mapType: MAP_VIEW_TYPE,
   });
   const citiesRef = useRef([]);
   const removeCityRef = useRef(() => {});
@@ -71,8 +78,17 @@ function WeatherMap() {
           createMapOptions(maps, resolvedTheme, {
             center: viewStateRef.current.center,
             zoom: viewStateRef.current.zoom,
+            mapTypeId: resolveMapTypeId(maps, viewStateRef.current.mapType),
           })
         );
+        bindMapTypeToggle({
+          maps,
+          map,
+          initialViewType: viewStateRef.current.mapType,
+          onChange: (mapType) => {
+            viewStateRef.current = { ...viewStateRef.current, mapType };
+          },
+        });
 
         mapsApiRef.current = maps;
         mapInstanceRef.current = map;
@@ -124,9 +140,11 @@ function WeatherMap() {
         const center = map.getCenter();
         const zoom = typeof map.getZoom === 'function' ? map.getZoom() : null;
         if (center) {
+          const mapTypeId = typeof map.getMapTypeId === 'function' ? map.getMapTypeId() : null;
           viewStateRef.current = {
             center: { lat: center.lat(), lng: center.lng() },
             zoom: zoom ?? viewStateRef.current.zoom,
+            mapType: viewTypeFromMapTypeId(mapTypeId) || viewStateRef.current.mapType,
           };
         }
       }

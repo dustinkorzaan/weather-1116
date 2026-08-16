@@ -46,6 +46,7 @@ test('createMapOptions forces raster rendering and LIGHT colorScheme for the lig
   const options = createMapOptions(maps, 'light', {
     center: { lat: 1, lng: 2 },
     zoom: 4,
+    mapTypeId: 'hybrid',
   });
 
   expect(options.colorScheme).toBe('LIGHT');
@@ -54,6 +55,8 @@ test('createMapOptions forces raster rendering and LIGHT colorScheme for the lig
   expect(options.backgroundColor).toBe(LIGHT_MAP_BACKGROUND);
   expect(options.center).toEqual({ lat: 1, lng: 2 });
   expect(options.zoom).toBe(4);
+  expect(options.mapTypeId).toBe('hybrid');
+  expect(options.mapTypeControl).toBe(false);
 });
 
 test('mapColorScheme and mapRenderingType fall back to strings without the Maps enums', () => {

@@ -30,6 +30,8 @@ public sealed class LayoutCssTests
         Assert.Contains(".chat-form textarea.chat-input", css);
         Assert.Contains(".weather-map-add-location-button", css);
         Assert.Contains(".weather-map-add-location-error", css);
+        Assert.Contains(".weather-map-type-toggle", css);
+        Assert.Contains(".weather-map-type-toggle-button", css);
     }
 
     [Fact]
