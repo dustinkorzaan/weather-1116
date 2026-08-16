@@ -106,18 +106,46 @@ window.chatInput = (function () {
 })();
 
 window.chatToolHover = (function () {
+  var TOOL_HOVER_CLOSE_DELAY_MS = 200;
+  var wrap = null;
   var card = null;
+  var hideTimer = null;
+
+  function cancelHide() {
+    if (hideTimer !== null) {
+      window.clearTimeout(hideTimer);
+      hideTimer = null;
+    }
+  }
+
+  function hide() {
+    cancelHide();
+    if (wrap) {
+      wrap.hidden = true;
+    }
+  }
+
+  function scheduleHide() {
+    cancelHide();
+    hideTimer = window.setTimeout(hide, TOOL_HOVER_CLOSE_DELAY_MS);
+  }
 
   function ensureCard() {
     if (card) {
       return card;
     }
 
+    wrap = document.createElement('div');
+    wrap.className = 'chat-tool-hover-wrap';
+    wrap.hidden = true;
+    wrap.addEventListener('mouseenter', cancelHide);
+    wrap.addEventListener('mouseleave', scheduleHide);
+
     card = document.createElement('pre');
     card.className = 'chat-tool-hover-card';
     card.setAttribute('role', 'tooltip');
-    card.hidden = true;
-    document.body.appendChild(card);
+    wrap.appendChild(card);
+    document.body.appendChild(wrap);
     return card;
   }
 
@@ -127,29 +155,41 @@ window.chatToolHover = (function () {
       return;
     }
 
+    cancelHide();
     var el = ensureCard();
     el.textContent = text;
-    el.hidden = false;
-    var rect = anchor.getBoundingClientRect();
-    el.style.left = (rect.left + (rect.width / 2)) + 'px';
-    el.style.top = (rect.bottom + 8) + 'px';
+    wrap.hidden = false;
+    wrap.classList.remove('is-above');
+    wrap.style.top = '';
+    wrap.style.bottom = '';
 
-    var cardRect = el.getBoundingClientRect();
-    if (cardRect.bottom > window.innerHeight - 8) {
-      el.style.top = Math.max(8, rect.top - cardRect.height - 8) + 'px';
+    var rect = anchor.getBoundingClientRect();
+    wrap.style.left = (rect.left + (rect.width / 2)) + 'px';
+    wrap.style.top = rect.bottom + 'px';
+
+    var wrapRect = wrap.getBoundingClientRect();
+    if (wrapRect.bottom > window.innerHeight - 8) {
+      wrap.classList.add('is-above');
+      wrap.style.top = 'auto';
+      wrap.style.bottom = (window.innerHeight - rect.top) + 'px';
+      wrapRect = wrap.getBoundingClientRect();
     }
-    if (cardRect.right > window.innerWidth - 8) {
-      el.style.left = (window.innerWidth - 8 - (cardRect.width / 2)) + 'px';
+    if (wrapRect.right > window.innerWidth - 8) {
+      wrap.style.left = (window.innerWidth - 8 - (wrapRect.width / 2)) + 'px';
     }
-    if (cardRect.left < 8) {
-      el.style.left = (8 + (cardRect.width / 2)) + 'px';
+    if (wrapRect.left < 8) {
+      wrap.style.left = (8 + (wrapRect.width / 2)) + 'px';
     }
   }
 
-  function hide() {
-    if (card) {
-      card.hidden = true;
+  function relatedIsHoverUi(related) {
+    if (!related) {
+      return false;
     }
+    if (wrap && wrap.contains(related)) {
+      return true;
+    }
+    return !!(related.closest && related.closest('[data-tool-details]'));
   }
 
   function bind() {
@@ -165,12 +205,11 @@ window.chatToolHover = (function () {
         return;
       }
 
-      var related = event.relatedTarget;
-      if (related && chip.contains(related)) {
+      if (relatedIsHoverUi(event.relatedTarget)) {
         return;
       }
 
-      hide();
+      scheduleHide();
     });
     document.addEventListener('focusin', function (event) {
       var chip = event.target.closest && event.target.closest('[data-tool-details]');
@@ -178,8 +217,18 @@ window.chatToolHover = (function () {
         show(chip);
       }
     });
-    document.addEventListener('focusout', hide);
-    window.addEventListener('scroll', hide, true);
+    document.addEventListener('focusout', function (event) {
+      if (relatedIsHoverUi(event.relatedTarget)) {
+        return;
+      }
+      scheduleHide();
+    });
+    window.addEventListener('scroll', function (event) {
+      if (wrap && event.target && wrap.contains(event.target)) {
+        return;
+      }
+      hide();
+    }, true);
   }
 
   if (document.readyState === 'loading') {

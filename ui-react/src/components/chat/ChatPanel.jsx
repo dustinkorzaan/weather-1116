@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
-import { formatToolHoverText } from '../../utils/chatToolHover';
+import { formatToolHoverText, TOOL_HOVER_CLOSE_DELAY_MS } from '../../utils/chatToolHover';
 import { streamChatMessage } from '../../utils/chatStream';
 
 const TAB_CONFIG = [
@@ -54,8 +54,17 @@ function scrollElementToBottom(element) {
 
 function ToolChip({ content, details }) {
   const chipRef = useRef(null);
+  const tooltipRef = useRef(null);
+  const hideTimerRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
+
+  const cancelHide = () => {
+    if (hideTimerRef.current !== null) {
+      window.clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  };
 
   const updatePosition = () => {
     const node = chipRef.current;
@@ -64,8 +73,24 @@ function ToolChip({ content, details }) {
     }
 
     const rect = node.getBoundingClientRect();
-    setCoords({ top: rect.bottom + 8, left: rect.left + rect.width / 2 });
+    setCoords({ top: rect.bottom, left: rect.left + rect.width / 2 });
   };
+
+  const show = () => {
+    cancelHide();
+    updatePosition();
+    setOpen(true);
+  };
+
+  const scheduleHide = () => {
+    cancelHide();
+    hideTimerRef.current = window.setTimeout(() => {
+      hideTimerRef.current = null;
+      setOpen(false);
+    }, TOOL_HOVER_CLOSE_DELAY_MS);
+  };
+
+  useLayoutEffect(() => () => cancelHide(), []);
 
   useLayoutEffect(() => {
     if (!open) {
@@ -73,7 +98,12 @@ function ToolChip({ content, details }) {
     }
 
     updatePosition();
-    const onReposition = () => updatePosition();
+    const onReposition = (event) => {
+      if (tooltipRef.current && event.target && tooltipRef.current.contains(event.target)) {
+        return;
+      }
+      updatePosition();
+    };
     window.addEventListener('scroll', onReposition, true);
     window.addEventListener('resize', onReposition);
     return () => {
@@ -82,11 +112,6 @@ function ToolChip({ content, details }) {
     };
   }, [open, details]);
 
-  const show = () => {
-    updatePosition();
-    setOpen(true);
-  };
-
   return (
     <div
       ref={chipRef}
@@ -94,20 +119,25 @@ function ToolChip({ content, details }) {
       data-tool-details={details || undefined}
       tabIndex={details ? 0 : undefined}
       onMouseEnter={details ? show : undefined}
-      onMouseLeave={details ? () => setOpen(false) : undefined}
+      onMouseLeave={details ? scheduleHide : undefined}
       onFocus={details ? show : undefined}
-      onBlur={details ? () => setOpen(false) : undefined}
+      onBlur={details ? scheduleHide : undefined}
     >
       {content}
       {open && details
         ? createPortal(
-            <pre
+            <div
+              ref={tooltipRef}
               role="tooltip"
-              className="pointer-events-none fixed z-50 max-h-64 w-max max-w-sm -translate-x-1/2 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-popover p-2 font-mono text-xs text-popover-foreground shadow-lg"
+              className="fixed z-50 w-max max-w-sm -translate-x-1/2 pt-2"
               style={{ top: coords.top, left: coords.left }}
+              onMouseEnter={show}
+              onMouseLeave={scheduleHide}
             >
-              {details}
-            </pre>,
+              <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-popover p-2 font-mono text-xs text-popover-foreground shadow-lg">
+                {details}
+              </pre>
+            </div>,
             document.body,
           )
         : null}

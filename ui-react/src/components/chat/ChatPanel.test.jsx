@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ChatPanel from './ChatPanel';
 import { streamChatMessage } from '../../utils/chatStream';
+import { TOOL_HOVER_CLOSE_DELAY_MS } from '../../utils/chatToolHover';
 
 vi.mock('../../utils/chatStream', () => ({
   streamChatMessage: vi.fn(),
@@ -11,6 +12,7 @@ vi.mock('../../utils/chatStream', () => ({
 afterEach(() => {
   vi.restoreAllMocks();
   vi.resetAllMocks();
+  vi.useRealTimers();
 });
 
 function stubChatMessagesScrollHeight(height) {
@@ -88,4 +90,62 @@ test('shows tool arguments and result on hover', async () => {
     expect(screen.getByRole('tooltip').textContent).toContain('Result');
     expect(screen.getByRole('tooltip').textContent).toContain('"name": "Nashville"');
   });
+});
+
+async function renderFinishedToolChip(user) {
+  streamChatMessage.mockImplementation(async ({ onEvent }) => {
+    onEvent({
+      type: 'tool_start',
+      toolName: 'GetPublicWeatherData',
+      toolArguments: '{\n  "latitude": 43.70643,\n  "longitude": -79.39864\n}',
+    });
+    onEvent({
+      type: 'tool_end',
+      toolName: 'GetPublicWeatherData',
+      toolArguments: '{\n  "latitude": 43.70643,\n  "longitude": -79.39864\n}',
+      toolResult: '{\n  "timezone": "America/Toronto",\n  "elevation": 113\n}',
+    });
+    onEvent({ type: 'done' });
+  });
+
+  render(<ChatPanel />);
+  await user.type(screen.getByLabelText(/message/i), 'weather in toronto');
+  await user.click(screen.getByRole('button', { name: /^send$/i }));
+  return screen.findByText('Ran GetPublicWeatherData …');
+}
+
+test('keeps tool details open and scrollable when the pointer moves onto the popup', async () => {
+  const user = userEvent.setup();
+  const chip = await renderFinishedToolChip(user);
+
+  await user.hover(chip);
+  const tooltip = await screen.findByRole('tooltip');
+  const body = tooltip.querySelector('pre');
+  expect(body?.className).toContain('overflow-auto');
+  expect(tooltip.className).not.toContain('pointer-events-none');
+  expect(body?.className).not.toContain('pointer-events-none');
+
+  await user.hover(tooltip);
+  expect(screen.getByRole('tooltip')).toBeDefined();
+  expect(body?.textContent).toContain('"elevation": 113');
+});
+
+test('does not close tool details until the pointer leaves the popup', async () => {
+  vi.useFakeTimers();
+  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  const chip = await renderFinishedToolChip(user);
+
+  await user.hover(chip);
+  const tooltip = await screen.findByRole('tooltip');
+  await user.hover(tooltip);
+
+  vi.advanceTimersByTime(TOOL_HOVER_CLOSE_DELAY_MS);
+  expect(screen.getByRole('tooltip')).toBeDefined();
+
+  await user.unhover(tooltip);
+  vi.advanceTimersByTime(TOOL_HOVER_CLOSE_DELAY_MS - 1);
+  expect(screen.getByRole('tooltip')).toBeDefined();
+
+  vi.advanceTimersByTime(1);
+  expect(screen.queryByRole('tooltip')).toBeNull();
 });

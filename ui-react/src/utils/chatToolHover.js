@@ -1,3 +1,5 @@
+export const TOOL_HOVER_CLOSE_DELAY_MS = 200;
+
 export function formatToolHoverText({ toolArguments, toolResult, running } = {}) {
   const sections = [];
   if (toolArguments) {

@@ -173,6 +173,9 @@ public sealed class PageSplitTests
         Assert.Contains("element.scrollTop = element.scrollHeight", chatInput);
         Assert.Contains("data-tool-details", chatInput);
         Assert.Contains("chat-tool-hover-card", chatInput);
+        Assert.Contains("chat-tool-hover-wrap", chatInput);
+        Assert.Contains("scheduleHide", chatInput);
+        Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", chatInput);
     }
 
     private static string FindRepoFile(string relativePath)
