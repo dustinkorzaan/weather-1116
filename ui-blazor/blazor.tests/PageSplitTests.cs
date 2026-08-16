@@ -179,6 +179,8 @@ public sealed class PageSplitTests
         Assert.Contains("mapTypeControl: true", script);
         Assert.Contains("SATELLITE", script);
         Assert.Contains("ROADMAP", script);
+        Assert.Contains("HYBRID", script);
+        Assert.Contains("MapTypeId.HYBRID", script);
         Assert.Contains("LIGHT_MAP_STYLES", script);
         Assert.Contains("weather-theme-change", script);
         Assert.Contains("colorScheme", script);

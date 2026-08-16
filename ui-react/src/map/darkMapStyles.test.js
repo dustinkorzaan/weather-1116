@@ -57,7 +57,7 @@ test('createMapOptions forces raster rendering and LIGHT colorScheme for the lig
   expect(options.backgroundColor).toBe(LIGHT_MAP_BACKGROUND);
   expect(options.center).toEqual({ lat: 1, lng: 2 });
   expect(options.zoom).toBe(4);
-  expect(options.mapTypeId).toBe('roadmap');
+  expect(options.mapTypeId).toBe('hybrid');
   expect(options.mapTypeControl).toBe(true);
   expect(options.mapTypeControlOptions).toEqual({
     style: 'HORIZONTAL_BAR',
