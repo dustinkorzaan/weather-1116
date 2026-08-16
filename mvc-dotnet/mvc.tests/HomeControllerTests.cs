@@ -134,9 +134,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("bindPinHoverCard", script);
         Assert.Contains("bindRightClickAddLocation", script);
         Assert.Contains("Add Location", script);
-        Assert.Contains("bindMapTypeToggle", script);
-        Assert.Contains("Aerial", script);
-        Assert.Contains("HYBRID", script);
+        Assert.Contains("mapTypeControl: true", script);
+        Assert.Contains("SATELLITE", script);
+        Assert.Contains("ROADMAP", script);
         Assert.Contains("weather-map-pin-card-delete", script);
         Assert.Contains("addCity", script);
         Assert.Contains("removeCity", script);
@@ -260,8 +260,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".weather-map-pin-card", css);
         Assert.Contains(".weather-map-pin-card-delete", css);
         Assert.Contains(".weather-map-add-location-button", css);
-        Assert.Contains(".weather-map-type-toggle", css);
-        Assert.Contains(".weather-map-type-toggle-button", css);
         Assert.Contains(".add-location-panel", css);
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);

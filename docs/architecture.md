@@ -276,11 +276,11 @@ Each UI shows a Google Map with sample city pins (New York, Toronto,
 Atlanta, Charlotte) filling the landing page (`/`) below the top bar. Pins
 use a filled site logo (`logo-solid.svg` / `logo-black-solid.svg`) with no
 city-name label on the map; names appear on the hover card. Logos slowly
-spin. A **Map / Aerial** control (top-left) switches the canvas between the
-themed roadmap and satellite imagery with labels (`hybrid`). The selected
-view is kept when Light/Dark theme changes. The map canvas, logo contrast,
-and hover card follow the resolved Light/Dark theme. Header chrome keeps
-the outline `logo.svg`. Weather overlays will come later.
+spin. Google's **Map / Satellite** type control (top-left) switches the
+canvas between the themed roadmap (default) and aerial satellite imagery.
+The selected view is kept when Light/Dark theme changes. The map canvas,
+logo contrast, and hover card follow the resolved Light/Dark theme. Header
+chrome keeps the outline `logo.svg`. Weather overlays will come later.
 
 **API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
 in a Google Cloud project.

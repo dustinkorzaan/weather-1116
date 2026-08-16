@@ -3,12 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { cityFromReverseLookup, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from '../data/mapCities';
 import { applyMapColorSchemeCss, createMapOptions } from '../map/darkMapStyles';
 import { loadGoogleMaps } from '../map/loadGoogleMaps';
-import {
-  MAP_VIEW_TYPE,
-  bindMapTypeToggle,
-  resolveMapTypeId,
-  viewTypeFromMapTypeId,
-} from '../map/mapTypeToggle';
+import { defaultMapTypeId } from '../map/mapTypeToggle';
 import {
   createLogoPinOverlay,
   logoPinSpinOffsetSec,
@@ -31,7 +26,7 @@ function WeatherMap() {
   const viewStateRef = useRef({
     center: MAP_DEFAULT_CENTER,
     zoom: MAP_DEFAULT_ZOOM,
-    mapType: MAP_VIEW_TYPE,
+    mapTypeId: undefined,
   });
   const citiesRef = useRef([]);
   const removeCityRef = useRef(() => {});
@@ -78,16 +73,14 @@ function WeatherMap() {
           createMapOptions(maps, resolvedTheme, {
             center: viewStateRef.current.center,
             zoom: viewStateRef.current.zoom,
-            mapTypeId: resolveMapTypeId(maps, viewStateRef.current.mapType),
+            mapTypeId: defaultMapTypeId(maps, viewStateRef.current.mapTypeId),
           })
         );
-        bindMapTypeToggle({
-          maps,
-          map,
-          initialViewType: viewStateRef.current.mapType,
-          onChange: (mapType) => {
-            viewStateRef.current = { ...viewStateRef.current, mapType };
-          },
+        map.addListener('maptypeid_changed', () => {
+          const mapTypeId = typeof map.getMapTypeId === 'function' ? map.getMapTypeId() : null;
+          if (mapTypeId) {
+            viewStateRef.current = { ...viewStateRef.current, mapTypeId };
+          }
         });
 
         mapsApiRef.current = maps;
@@ -144,7 +137,7 @@ function WeatherMap() {
           viewStateRef.current = {
             center: { lat: center.lat(), lng: center.lng() },
             zoom: zoom ?? viewStateRef.current.zoom,
-            mapType: viewTypeFromMapTypeId(mapTypeId) || viewStateRef.current.mapType,
+            mapTypeId: mapTypeId || viewStateRef.current.mapTypeId,
           };
         }
       }

@@ -728,33 +728,6 @@ html[data-theme="dark"] .weather-map-logo-pin {
   overflow: hidden !important;
 }
 
-.weather-map-type-toggle {
-  display: inline-flex;
-  margin: 10px;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
-  color: var(--color-text);
-  box-shadow: var(--shadow-lg);
-}
-
-.weather-map-type-toggle-button {
-  margin: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  padding: 0.4rem 0.75rem;
-  font: inherit;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.weather-map-type-toggle-button[aria-pressed="true"] {
-  background: var(--color-primary);
-  color: var(--color-bg);
-}
-
 /* Content / error pages */
 
 .page-shell {
