@@ -9,6 +9,7 @@ public class ChatToolPayloadTests
     {
         var formatted = ChatToolPayload.Format("""{"location":"Nashville, TN"}""");
 
+        Assert.NotNull(formatted);
         Assert.Contains("\"location\"", formatted);
         Assert.Contains("Nashville, TN", formatted);
         Assert.Contains('\n', formatted);
@@ -23,6 +24,7 @@ public class ChatToolPayloadTests
             ["longitude"] = -86,
         });
 
+        Assert.NotNull(formatted);
         Assert.Contains("latitude", formatted);
         Assert.Contains("36", formatted);
         Assert.Contains("longitude", formatted);
