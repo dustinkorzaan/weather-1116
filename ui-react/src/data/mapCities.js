@@ -62,6 +62,24 @@ export function newCityId() {
 }
 
 /**
+ * Builds a map pin from GET /Geo/GetLocation, keeping the clicked coordinates.
+ * @returns {{ id: string, name: string, lat: number, lng: number } | null}
+ */
+export function cityFromReverseLookup(lat, lng, data) {
+  const name = String(data?.location || '').trim();
+  if (!name || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
+    return null;
+  }
+
+  return {
+    id: newCityId(),
+    name,
+    lat: Number(lat),
+    lng: Number(lng),
+  };
+}
+
+/**
  * Builds a map pin from the first GET /Geo match.
  * @returns {{ id: string, name: string, lat: number, lng: number } | null}
  */

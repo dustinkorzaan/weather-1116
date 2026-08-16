@@ -68,11 +68,60 @@ public class GeoControllerTests
 		Assert.IsType<NotFoundResult>(result.Result);
 	}
 
-	private sealed class FakeMediator(NonAILatLongListResponse? response, bool throwNotFound = false) : IMediator
+	[Fact]
+	public async Task GetLocation_ReturnsPlaceLabel()
+	{
+		var mediator = new FakeMediator(new NonAILocationResponse { Location = "Nashville, Tennessee" });
+		var controller = new GeoController(mediator);
+
+		var result = await controller.GetLocation(36.1627, -86.7816, CancellationToken.None);
+
+		var ok = Assert.IsType<OkObjectResult>(result.Result);
+		var body = Assert.IsType<NonAILocationResponse>(ok.Value);
+		Assert.Equal("Nashville, Tennessee", body.Location);
+		Assert.Equal(36.1627, mediator.LastLatitude);
+		Assert.Equal(-86.7816, mediator.LastLongitude);
+	}
+
+	[Fact]
+	public async Task GetLocation_ReturnsBadRequestWhenCoordinatesAreMissing()
+	{
+		var controller = new GeoController(new FakeMediator(new NonAILocationResponse()));
+
+		var result = await controller.GetLocation(null, -86.7816, CancellationToken.None);
+
+		Assert.IsType<BadRequestResult>(result.Result);
+	}
+
+	[Fact]
+	public async Task GetLocation_ReturnsBadRequestWhenCoordinatesAreOutOfRange()
+	{
+		var controller = new GeoController(new FakeMediator(new NonAILocationResponse()));
+
+		var result = await controller.GetLocation(91, 0, CancellationToken.None);
+
+		Assert.IsType<BadRequestResult>(result.Result);
+	}
+
+	[Fact]
+	public async Task GetLocation_ReturnsNotFoundWhenHandlerThrows()
+	{
+		var controller = new GeoController(new FakeMediator(null, throwNotFound: true));
+
+		var result = await controller.GetLocation(0, 0, CancellationToken.None);
+
+		Assert.IsType<NotFoundResult>(result.Result);
+	}
+
+	private sealed class FakeMediator(object? response, bool throwNotFound = false) : IMediator
 	{
 		public string? LastLocation { get; private set; }
 
 		public int LastCount { get; private set; }
+
+		public double? LastLatitude { get; private set; }
+
+		public double? LastLongitude { get; private set; }
 
 		public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
 		{
@@ -86,6 +135,18 @@ public class GeoControllerTests
 				}
 
 				return Task.FromResult((TResponse)(object)(response ?? new NonAILatLongListResponse()));
+			}
+
+			if (request is GetLocationEvent locationEvent)
+			{
+				LastLatitude = locationEvent.Latitude;
+				LastLongitude = locationEvent.Longitude;
+				if (throwNotFound)
+				{
+					throw new InvalidOperationException("Nominatim: No location found for the given coordinates.");
+				}
+
+				return Task.FromResult((TResponse)(object)(response ?? new NonAILocationResponse()));
 			}
 
 			throw new NotSupportedException();

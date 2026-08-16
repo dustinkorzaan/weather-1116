@@ -27,6 +27,11 @@ public class LatLongResponse
     public double Longitude { get; set; }
 }
 
+public class LocationResponse
+{
+    public string Location { get; set; } = string.Empty;
+}
+
 public class WeatherApiClient
 {
     private HttpClient _httpClient;
@@ -51,6 +56,23 @@ public class WeatherApiClient
     {
         var route = $"Geo?location={Uri.EscapeDataString(location)}";
         return await _httpClient.GetFromJsonAsync<LatLongResponse>(route);
+    }
+
+    public async Task<LocationResponse?> GetLocation(
+        double latitude,
+        double longitude,
+        CancellationToken cancellationToken = default)
+    {
+        var route = string.Create(
+            CultureInfo.InvariantCulture,
+            $"Geo/GetLocation?latitude={latitude}&longitude={longitude}");
+        using var response = await _httpClient.GetAsync(route, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        return await response.Content.ReadFromJsonAsync<LocationResponse>(cancellationToken: cancellationToken);
     }
 
     public async Task<AboutNode> GetAbout()

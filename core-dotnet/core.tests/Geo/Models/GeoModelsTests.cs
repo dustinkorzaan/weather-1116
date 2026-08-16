@@ -125,12 +125,12 @@ public class GeoModelsTests
     }
 
     [Fact]
-    public void NominatimLocationResponse_RoundTripsLocation()
+    public void NonAILocationResponse_RoundTripsLocation()
     {
-        var original = new NominatimLocationResponse { Location = "Paris, Île-de-France, France" };
+        var original = new NonAILocationResponse { Location = "Paris, Île-de-France, France" };
 
         var json = JsonSerializer.Serialize(original);
-        var roundTripped = JsonSerializer.Deserialize<NominatimLocationResponse>(json);
+        var roundTripped = JsonSerializer.Deserialize<NonAILocationResponse>(json);
         Assert.NotNull(roundTripped);
         Assert.Equal(original.Location, roundTripped!.Location);
     }

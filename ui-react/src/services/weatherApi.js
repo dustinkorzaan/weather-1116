@@ -23,6 +23,10 @@ export const weatherApi = createApi({
     searchLocation: builder.query({
       query: (location) => `/Geo?location=${encodeURIComponent(location || '')}`,
     }),
+    getLocation: builder.query({
+      query: ({ latitude, longitude }) =>
+        `/Geo/GetLocation?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}`,
+    }),
   }),
 });
 
@@ -31,4 +35,5 @@ export const {
   useLazyGetAboutQuery,
   useLazyGetCurrentAIWeatherQuery,
   useLazySearchLocationQuery,
+  useLazyGetLocationQuery,
 } = weatherApi;

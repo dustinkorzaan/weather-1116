@@ -661,6 +661,32 @@ html[data-theme="dark"] .weather-map-logo-pin {
     background: var(--wx-hover);
 }
 
+.weather-map-add-location-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.weather-map-add-location-button:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.weather-map-add-location-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+}
+
+.weather-map-add-location-error {
+    margin: 0;
+    color: var(--wx-error-fg);
+    font-size: 0.875rem;
+}
+
 .weather-map .gm-style-iw-chr,
 .weather-map .gm-ui-hover-effect {
     display: none !important;

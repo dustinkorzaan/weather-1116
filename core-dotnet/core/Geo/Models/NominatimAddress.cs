@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Core.Geo.Models;
 
-public class NominatimAddress
+internal class NominatimAddress
 {
     [JsonPropertyName("city")]
     public string City { get; set; } = string.Empty;

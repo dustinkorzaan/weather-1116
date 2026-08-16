@@ -113,6 +113,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", view);
         Assert.DoesNotContain("id = \"nyc\"", view);
         Assert.DoesNotContain("id = \"atlanta\"", view);
+        Assert.Contains("data-get-location-url", view);
+        Assert.Contains("GetLocation", view);
     }
 
     [Fact]
@@ -130,9 +132,14 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("marker.addListener('click', openCard)", script);
         Assert.Contains("Get Current AI Weather", script);
         Assert.Contains("bindPinHoverCard", script);
+        Assert.Contains("bindRightClickAddLocation", script);
+        Assert.Contains("Add Location", script);
         Assert.Contains("weather-map-pin-card-delete", script);
         Assert.Contains("addCity", script);
         Assert.Contains("removeCity", script);
+        Assert.Contains("rightclick", script);
+        Assert.Contains("Add Location", script);
+        Assert.Contains("/Geo/GetLocation", script);
         Assert.Contains("LIGHT_MAP_STYLES", script);
         Assert.Contains("weather-theme-change", script);
         Assert.Contains("colorScheme", script);
@@ -249,6 +256,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("#weather-map", css);
         Assert.Contains(".weather-map-pin-card", css);
         Assert.Contains(".weather-map-pin-card-delete", css);
+        Assert.Contains(".weather-map-add-location-button", css);
         Assert.Contains(".add-location-panel", css);
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
