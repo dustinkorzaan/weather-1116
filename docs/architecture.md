@@ -199,13 +199,14 @@ and handlers, including:
 
 Parity is **behavioral/feature parity only**: the three UI projects (MVC, React,
 Blazor) expose the same routes, pages, features, data, and interactions. They are
-**not** required to look alike — each is styled independently:
+**not** required to look alike — each is styled independently (no shared CSS,
+config, or components):
 
 | UI | Styling / component library |
 | --- | --- |
-| React (`ui-react`) | Tailwind CSS v4 (Vite plugin) + shadcn/ui (Radix primitives) + lucide-react |
+| React (`ui-react`) | Tailwind CSS v4 (`@tailwindcss/vite`) + shadcn/ui (Radix primitives) + lucide-react |
 | Blazor (`ui-blazor`) | Fluent UI Blazor |
-| MVC (`mvc-dotnet`) | Hand-written CSS (`wwwroot/css/site.css`) + vanilla JS |
+| MVC (`mvc-dotnet`) | Hand-written CSS + vanilla JS ([`mvc-dotnet/README.md`](../mvc-dotnet/README.md)) |
 
 Each UI is implemented as if it were a standalone repo: they share **no** CSS,
 component source, or frontend toolchain. Bootstrap is not used anywhere.

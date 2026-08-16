@@ -3,9 +3,10 @@
 Weather sample app implemented across seven runnable stacks plus one
 shared .NET class library.
 
-This README is intentionally brief. Use it for quick orientation, and use
-[`docs/architecture.md`](docs/architecture.md) for architecture constraints,
-project relationships, and parity guidance.
+This README is intentionally brief. Use it for the project grid and demo
+outline. UI pages, styling stacks, theme, architecture constraints, project
+relationships, and parity guidance live in
+[`docs/architecture.md`](docs/architecture.md).
 
 | Project | Path | Stack | Port | PROD |
 | --- | --- | --- | --- | --- |
@@ -17,29 +18,6 @@ project relationships, and parity guidance.
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 | — |
 | MCP Server on Functions App | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 | — |
 | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire servers + dashboard | 8130 | — |
-
-Architecture reference: [`docs/architecture.md`](docs/architecture.md)
-
-## UI pages and styling
-
-All three UIs implement the same pages (behavioral parity), each styled with its own
-framework-native library (no shared CSS, config, or components):
-
-| Route | Contents |
-| --- | --- |
-| `/` | Top bar (logo left, person menu right) above a full-viewport Google Map |
-| `/hello-world` | Same top bar, then the hello message |
-| `/current-ai-weather` | Same top bar, then the Current AI Weather widget |
-| `/chat-clients` | Same top bar, then the chat clients |
-
-| UI | Styling |
-| --- | --- |
-| React | Tailwind CSS v4 (`@tailwindcss/vite`) + shadcn/ui (Radix) + lucide-react |
-| Blazor | Fluent UI Blazor |
-| MVC | Hand-written CSS + vanilla JS ([`mvc-dotnet/README.md`](mvc-dotnet/README.md)) |
-
-The avatar menu includes **Light**, **Dark**, and **System** theme options on
-all three UIs (persisted per origin; System follows `prefers-color-scheme`).
 
 ## Foundry console demos
 
