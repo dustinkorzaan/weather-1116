@@ -21,7 +21,14 @@
         <div @ref="_messagesElement" class="chat-messages">
             @foreach (var entry in _histories[_activeTab])
             {
-                <div class="@MessageClass(entry.Role)" @attributes="ToolHoverAttributes(entry)">@entry.Content</div>
+                @if (entry.Role == "assistant" && !entry.Streaming)
+                {
+                    <div class="chat-message assistant chat-markdown">@((MarkupString)ChatMarkdown.ToHtml(entry.Content))</div>
+                }
+                else
+                {
+                    <div class="@MessageClass(entry.Role)" @attributes="ToolHoverAttributes(entry)">@entry.Content</div>
+                }
             }
         </div>
 
@@ -111,6 +118,7 @@
         public string? ToolArguments { get; set; }
         public string? ToolResult { get; set; }
         public bool Running { get; set; }
+        public bool Streaming { get; set; }
     }
 
     private static string MessageClass(string role) => role switch
@@ -216,7 +224,12 @@
                     assistantBuilder.Append(streamEvent.Text);
                     if (assistantEntry is null)
                     {
-                        assistantEntry = new ChatEntry { Role = "assistant", Content = assistantBuilder.ToString() };
+                        assistantEntry = new ChatEntry
+                        {
+                            Role = "assistant",
+                            Content = assistantBuilder.ToString(),
+                            Streaming = true,
+                        };
                         history.Add(assistantEntry);
                     }
                     else
@@ -257,6 +270,11 @@
                 }
                 else if (streamEvent.Type == "done")
                 {
+                    if (assistantEntry is not null)
+                    {
+                        assistantEntry.Streaming = false;
+                    }
+
                     RequestScrollToBottom(tabId);
                     StateHasChanged();
                 }
@@ -269,6 +287,11 @@
         finally
         {
             _isSendingByTab[tabId] = false;
+            if (assistantEntry is not null)
+            {
+                assistantEntry.Streaming = false;
+            }
+
             RequestScrollToBottom(tabId);
         }
     }

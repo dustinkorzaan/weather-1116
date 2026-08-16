@@ -145,3 +145,37 @@ test('does not close tool details until the pointer leaves the popup', async () 
     expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });
+
+test('renders assistant markdown after the stream finishes, including tables', async () => {
+  let finish;
+  streamChatMessage.mockImplementation(async ({ onEvent }) => {
+    onEvent({
+      type: 'token',
+      text: '**Warmest**\n\n| City | Temp |\n| --- | --- |\n| Nashville | 72 |\n',
+    });
+    await new Promise((resolve) => {
+      finish = resolve;
+    });
+    onEvent({ type: 'done' });
+  });
+
+  const user = userEvent.setup();
+  render(<ChatPanel />);
+
+  await user.type(screen.getByLabelText(/message/i), 'compare nashville and atlanta');
+  await user.click(screen.getByRole('button', { name: /^send$/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText(/\| City \| Temp \|/)).toBeDefined();
+  });
+  expect(screen.queryByRole('table')).toBeNull();
+
+  finish();
+
+  await waitFor(() => {
+    expect(screen.getByRole('table')).toBeDefined();
+  });
+  expect(screen.getByText('Nashville')).toBeDefined();
+  expect(screen.getByText('Warmest').tagName).toBe('STRONG');
+  expect(screen.queryByText(/\| City \| Temp \|/)).toBeNull();
+});

@@ -25,6 +25,7 @@ public sealed class LayoutCssTests
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
         Assert.Contains(".chat-message.tool", css);
+        Assert.Contains(".chat-markdown", css);
     }
 
     [Fact]
@@ -171,5 +172,6 @@ public sealed class LayoutCssTests
         Assert.Contains(".weather-map-pin-card-delete", css);
         Assert.Contains(".about-modal.is-open", css);
         Assert.Contains(".about-close", css);
+        Assert.Contains(".chat-markdown", css);
     }
 }

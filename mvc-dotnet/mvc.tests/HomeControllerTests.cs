@@ -161,6 +161,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Remote MCP · Agent Framework · Like Foundry Console V4", html);
         Assert.Contains("class=\"page-shell\"", html);
         Assert.Contains("class=\"chat-tab is-active\"", html);
+        Assert.Contains("chatMarkdown.js", html);
+        Assert.Contains("marked.min.js", html);
+        Assert.Contains("purify.min.js", html);
         Assert.DoesNotContain("aria-label=\"Add location\"", html);
         Assert.DoesNotContain("Hello World</h2>", html);
         Assert.DoesNotContain("Current AI Weather</h2>", html);
@@ -179,6 +182,13 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("chat-tool-hover-wrap", script);
         Assert.Contains("scheduleToolHoverHide", script);
         Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", script);
+        Assert.Contains("chatMarkdown.render", script);
+        Assert.Contains("streaming", script);
+
+        var markdown = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatMarkdown.js"));
+        Assert.Contains("marked.parse", markdown);
+        Assert.Contains("gfm: true", markdown);
+        Assert.Contains("DOMPurify.sanitize", markdown);
     }
 
     [Fact]
@@ -229,6 +239,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".add-location-panel", css);
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
+        Assert.Contains(".chat-markdown", css);
         Assert.Contains("html.dark", css);
         Assert.Contains("color-scheme: light", css);
         Assert.Contains("html[data-theme=\"dark\"] #weather-map", css);

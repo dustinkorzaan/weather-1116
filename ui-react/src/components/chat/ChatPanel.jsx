@@ -1,5 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import ChatMarkdown from './ChatMarkdown';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
@@ -35,13 +36,19 @@ const TAB_CONFIG = [
 
 const MESSAGE_CLASSES = {
   user: 'self-end max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap',
-  assistant: 'self-start max-w-[85%] rounded-2xl border border-border bg-muted px-3 py-2 text-foreground whitespace-pre-wrap',
+  assistant: 'self-start max-w-[85%] overflow-x-auto rounded-2xl border border-border bg-muted px-3 py-2 text-foreground',
   tool: 'self-center text-xs text-muted-foreground',
   error: 'w-full rounded-md bg-destructive/15 px-3 py-2 text-destructive',
 };
 
-function messageClasses(role) {
-  return MESSAGE_CLASSES[role] ?? MESSAGE_CLASSES.assistant;
+function messageClasses(entry) {
+  if (entry.role === 'assistant' && !entry.streaming) {
+    return `${MESSAGE_CLASSES.assistant} chat-markdown`;
+  }
+  if (entry.role === 'assistant') {
+    return `${MESSAGE_CLASSES.assistant} whitespace-pre-wrap`;
+  }
+  return MESSAGE_CLASSES[entry.role] ?? MESSAGE_CLASSES.assistant;
 }
 
 function scrollElementToBottom(element) {
@@ -373,8 +380,12 @@ function ChatPanel() {
                     details={formatToolHoverText(entry)}
                   />
                 ) : (
-                  <div key={`${activeTab}-${index}`} className={messageClasses(entry.role)}>
-                    {entry.content}
+                  <div key={`${activeTab}-${index}`} className={messageClasses(entry)}>
+                    {entry.role === 'assistant' && !entry.streaming ? (
+                      <ChatMarkdown>{entry.content}</ChatMarkdown>
+                    ) : (
+                      entry.content
+                    )}
                   </div>
                 )
               ))}

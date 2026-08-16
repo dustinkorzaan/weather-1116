@@ -725,6 +725,77 @@ html[data-theme="dark"] .weather-map-logo-pin {
     border: 1px solid var(--wx-assistant-border);
 }
 
+.chat-message.chat-markdown {
+    white-space: normal;
+    overflow-x: auto;
+}
+
+.chat-markdown > :first-child {
+    margin-top: 0;
+}
+
+.chat-markdown > :last-child {
+    margin-bottom: 0;
+}
+
+.chat-markdown p,
+.chat-markdown ul,
+.chat-markdown ol,
+.chat-markdown pre,
+.chat-markdown table,
+.chat-markdown blockquote {
+    margin: 0.4em 0;
+}
+
+.chat-markdown ul,
+.chat-markdown ol {
+    padding-left: 1.25em;
+}
+
+.chat-markdown code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.875em;
+    padding: 0.1em 0.35em;
+    border-radius: 0.25rem;
+    background: var(--wx-bg);
+}
+
+.chat-markdown pre {
+    overflow-x: auto;
+    padding: 0.5em 0.75em;
+    border-radius: 0.4rem;
+    background: var(--wx-bg);
+}
+
+.chat-markdown pre code {
+    padding: 0;
+    background: none;
+}
+
+.chat-markdown table {
+    border-collapse: collapse;
+    width: max-content;
+    max-width: 100%;
+    font-size: 0.875em;
+}
+
+.chat-markdown th,
+.chat-markdown td {
+    border: 1px solid var(--wx-border);
+    padding: 0.3em 0.55em;
+    text-align: left;
+}
+
+.chat-markdown th {
+    font-weight: 600;
+    background: var(--wx-bg);
+}
+
+.chat-markdown a {
+    color: inherit;
+    text-decoration: underline;
+}
+
 .chat-message.tool {
     align-self: center;
     max-width: none;

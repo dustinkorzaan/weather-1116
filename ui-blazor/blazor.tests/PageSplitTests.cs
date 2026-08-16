@@ -167,6 +167,14 @@ public sealed class PageSplitTests
         Assert.Contains("ToolHoverAttributes", panelSource);
         Assert.Contains("ToolArguments", panelSource);
         Assert.Contains("ToolResult", panelSource);
+        Assert.Contains("ChatMarkdown.ToHtml", panelSource);
+        Assert.Contains("MarkupString", panelSource);
+        Assert.Contains("Streaming", panelSource);
+
+        var markdown = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Data/ChatMarkdown.cs"));
+        Assert.Contains("UseAdvancedExtensions", markdown);
+        Assert.Contains("DisableHtml", markdown);
+        Assert.Contains("HtmlSanitizer", markdown);
 
         var chatInput = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
         Assert.Contains("function scrollToBottom(element)", chatInput);
