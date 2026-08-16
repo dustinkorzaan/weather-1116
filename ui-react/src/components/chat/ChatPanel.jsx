@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
@@ -42,6 +42,14 @@ function messageClasses(role) {
   return MESSAGE_CLASSES[role] ?? MESSAGE_CLASSES.assistant;
 }
 
+function scrollElementToBottom(element) {
+  if (!element) {
+    return;
+  }
+
+  element.scrollTop = element.scrollHeight;
+}
+
 function createEmptyHistory() {
   return {
     Chat1a: [],
@@ -74,7 +82,21 @@ function ChatPanel() {
   const [input, setInput] = useState('');
   const [sendingTabs, setSendingTabs] = useState(createEmptySendingState);
   const [histories, setHistories] = useState(createEmptyHistory);
+  const [scrollNonce, setScrollNonce] = useState(0);
   const sessionsRef = useRef(createEmptySessions());
+  const messagesRef = useRef(null);
+  const activeTabRef = useRef(activeTab);
+  activeTabRef.current = activeTab;
+
+  const requestScrollToBottom = (tabId) => {
+    if (tabId === activeTabRef.current) {
+      setScrollNonce((current) => current + 1);
+    }
+  };
+
+  useLayoutEffect(() => {
+    scrollElementToBottom(messagesRef.current);
+  }, [activeTab, scrollNonce]);
 
   const activeConfig = useMemo(
     () => TAB_CONFIG.find((tab) => tab.id === activeTab) ?? TAB_CONFIG[0],
@@ -158,6 +180,11 @@ function ChatPanel() {
               ...current,
               [tabId]: [...current[tabId], { role: 'error', content: payload.errorMessage }],
             }));
+            return;
+          }
+
+          if (payload.type === 'done') {
+            requestScrollToBottom(tabId);
           }
         },
       });
@@ -181,6 +208,7 @@ function ChatPanel() {
       }));
     } finally {
       setSendingTabs((current) => ({ ...current, [tabId]: false }));
+      requestScrollToBottom(tabId);
     }
   };
 
@@ -224,7 +252,11 @@ function ChatPanel() {
 
         <TabsContent value={activeTab} className="mt-3">
           <section className="rounded-lg border border-border bg-card p-3" aria-label="Chat conversation">
-            <div className="flex max-h-96 min-h-40 flex-col gap-2 overflow-y-auto p-1">
+            <div
+              ref={messagesRef}
+              data-chat-messages
+              className="flex max-h-96 min-h-40 flex-col gap-2 overflow-y-auto p-1"
+            >
               {histories[activeTab].map((entry, index) => (
                 <div key={`${activeTab}-${index}`} className={messageClasses(entry.role)}>
                   {entry.content}
