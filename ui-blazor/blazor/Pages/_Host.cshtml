@@ -30,6 +30,17 @@
         })();
     </script>
     <base href="~/" />
+    @* Define --body-font before Fluent reboot.css. Reboot sets font-family: var(--body-font)
+       with no fallback, so an unset variable makes the banner title paint in Times then
+       jump when FluentDesignTheme injects tokens. *@
+    <style>
+        :root {
+            --body-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+        }
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+        }
+    </style>
     <link href="_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css" rel="stylesheet" />
     <link href="css/site.css" rel="stylesheet" asp-append-version="true" />
     <link href="WeatherBlazor.styles.css" rel="stylesheet" asp-append-version="true" />

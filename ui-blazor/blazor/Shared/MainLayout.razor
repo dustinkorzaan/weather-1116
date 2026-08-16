@@ -17,17 +17,13 @@
 
         <FluentSpacer />
 
-        <FluentButton Id="user-menu-button"
-                      Appearance="Appearance.Stealth"
-                      Class="avatar-button"
-                      Title="Open user menu"
-                      aria-label="Open user menu">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true" focusable="false">
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-            </svg>
-        </FluentButton>
+        <button id="user-menu-button"
+                type="button"
+                class="avatar-button"
+                title="Open user menu"
+                aria-label="Open user menu">
+            <img src="avatar.svg" alt="" width="20" height="20" class="avatar-icon" />
+        </button>
         <FluentMenu Anchor="user-menu-button"
                     Trigger="MouseButton.Left"
                     HorizontalPosition="HorizontalPosition.Right">

@@ -52,7 +52,9 @@ public sealed class LayoutCssTests
         Assert.Contains("class=\"brand-title\"", rendered.Markup);
         Assert.Contains("<a href=\"/\" class=\"brand-link\">", rendered.Markup);
         Assert.Contains("<h1 class=\"brand-title\">Weather Blazor</h1>", rendered.Markup);
-        Assert.Contains("stroke-width=\"2.25\"", rendered.Markup);
+        Assert.Contains("id=\"user-menu-button\"", rendered.Markup);
+        Assert.Contains("src=\"avatar.svg\"", rendered.Markup);
+        Assert.Contains("class=\"avatar-icon\"", rendered.Markup);
         Assert.Contains("class=\"about-modal", rendered.Markup);
         Assert.Contains("class=\"about-close\"", rendered.Markup);
         Assert.Contains("aria-label=\"Close\"", rendered.Markup);
@@ -69,6 +71,18 @@ public sealed class LayoutCssTests
         Assert.Contains("NavigateTo(\"/current-ai-weather\")", layoutSource);
         Assert.Contains("NavigateTo(\"/chat-clients\")", layoutSource);
         Assert.Contains("OpenExternalAsync", layoutSource);
+        Assert.Contains("avatar.svg", layoutSource);
+        Assert.DoesNotContain("FluentButton", layoutSource);
+
+        var avatarSvg = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/avatar.svg"));
+        Assert.Contains("<path ", avatarSvg);
+        Assert.DoesNotContain("<circle ", avatarSvg);
+
+        var host = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Pages/_Host.cshtml"));
+        Assert.Contains("--body-font:", host);
+
+        var app = File.ReadAllText(FindRepoFile("ui-blazor/blazor/App.razor"));
+        Assert.Contains("Selector=\".section-title\"", app);
     }
 
     private static string FindRepoFile(string relativePath)
@@ -98,6 +112,9 @@ public sealed class LayoutCssTests
         Assert.Contains("h1.brand-title", css);
         Assert.Contains("font-size: 1.25rem", css);
         Assert.Contains("font-weight: 600", css);
+        Assert.Contains("font-family: var(--wx-font)", css);
+        Assert.Contains("--body-font: var(--wx-font)", css);
+        Assert.DoesNotContain("font-family: inherit", css);
         Assert.Contains("text-decoration: none", css);
         Assert.Contains("outline: none", css);
         Assert.Contains(".form-row-start", css);
@@ -105,7 +122,7 @@ public sealed class LayoutCssTests
         Assert.Contains("border: 2px solid var(--wx-border-strong)", css);
         Assert.Contains("html.dark", css);
         Assert.Contains("--wx-map", css);
-        Assert.Contains("stroke-width: 2.25", css);
+        Assert.Contains(".avatar-icon", css);
         Assert.Contains(".about-modal.is-open", css);
         Assert.Contains(".about-close", css);
     }
