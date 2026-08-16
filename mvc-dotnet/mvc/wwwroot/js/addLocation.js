@@ -1,18 +1,32 @@
 (function initAddLocation() {
-  function cityFromAiWeather(locationInput, data) {
+  function newCityId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (char) {
+      const nibble = (Math.random() * 16) | 0;
+      const value = char === 'x' ? nibble : (nibble & 0x3) | 0x8;
+      return value.toString(16);
+    });
+  }
+
+  function cityFromLatLongSearch(locationInput, data) {
     const lat = Number(data && data.latitude);
     const lng = Number(data && data.longitude);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       return null;
     }
 
-    const name = String((data && data.locationName) || locationInput || '').trim();
+    const parts = [data && data.name, data && data.state]
+      .map(function (part) { return String(part || '').trim(); })
+      .filter(Boolean);
+    const name = parts.join(', ') || String(locationInput || '').trim();
     if (!name) {
       return null;
     }
 
     return {
-      id: 'pin-' + lat.toFixed(4) + '-' + lng.toFixed(4),
+      id: newCityId(),
       name: name,
       lat: lat,
       lng: lng,
@@ -28,7 +42,7 @@
     const submit = document.getElementById('addLocationSubmit');
     const spinner = document.getElementById('addLocationSpinner');
     const errorEl = document.getElementById('addLocationError');
-    const endpoint = form && form.getAttribute('data-ai-weather-url');
+    const endpoint = form && form.getAttribute('data-geo-url');
 
     if (!wrap || !button || !panel || !form || !input || !submit || !endpoint) {
       return;
@@ -54,7 +68,7 @@
         spinner.hidden = !busy;
       }
       submit.querySelector('.add-location-submit-label').textContent = busy
-        ? 'Looking up weather…'
+        ? 'Looking up location…'
         : 'Add to map';
     }
 
@@ -100,14 +114,14 @@
       })
         .then(function (response) {
           if (!response.ok) {
-            throw new Error('Unable to load AI weather.');
+            throw new Error('Unable to find that location.');
           }
           return response.json();
         })
         .then(function (data) {
-          const city = cityFromAiWeather(location, data);
+          const city = cityFromLatLongSearch(location, data);
           if (!city) {
-            throw new Error('AI weather did not include map coordinates.');
+            throw new Error('Unable to find that location.');
           }
           if (window.weatherMap && typeof window.weatherMap.addCity === 'function') {
             window.weatherMap.addCity(city);
@@ -135,7 +149,7 @@
         })
         .catch(function (error) {
           if (errorEl) {
-            errorEl.textContent = error && error.message ? error.message : 'Unable to load AI weather.';
+            errorEl.textContent = error && error.message ? error.message : 'Unable to find that location.';
             errorEl.hidden = false;
           }
         })

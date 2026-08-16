@@ -171,6 +171,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("class=\"header-actions\"", html);
         Assert.Contains("aria-label=\"Add location\"", html);
         Assert.Contains("addLocation.js", html);
+        Assert.Contains("data-geo-url", html);
         Assert.Contains("class=\"site-header\"", html);
         Assert.Contains("class=\"avatar-menu\"", html);
         Assert.Contains("class=\"site-main\"", html);

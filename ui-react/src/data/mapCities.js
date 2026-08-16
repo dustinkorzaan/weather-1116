@@ -49,28 +49,40 @@ export function saveMapCities(cities) {
   }
 }
 
-export function cityIdFromCoordinates(lat, lng) {
-  return `pin-${Number(lat).toFixed(4)}-${Number(lng).toFixed(4)}`;
+export function newCityId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+    const nibble = (Math.random() * 16) | 0;
+    const value = char === 'x' ? nibble : (nibble & 0x3) | 0x8;
+    return value.toString(16);
+  });
 }
 
 /**
- * Builds a map pin from a Get Current AI Weather payload.
+ * Builds a map pin from the first GET /Geo match.
  * @returns {{ id: string, name: string, lat: number, lng: number } | null}
  */
-export function cityFromAiWeather(locationInput, data) {
+export function cityFromLatLongSearch(locationInput, data) {
   const lat = Number(data?.latitude);
   const lng = Number(data?.longitude);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return null;
   }
 
-  const name = String(data?.locationName || locationInput || '').trim();
+  const resolved = [data?.name, data?.state]
+    .map((part) => String(part || '').trim())
+    .filter(Boolean)
+    .join(', ');
+  const name = resolved || String(locationInput || '').trim();
   if (!name) {
     return null;
   }
 
   return {
-    id: cityIdFromCoordinates(lat, lng),
+    id: newCityId(),
     name,
     lat,
     lng,

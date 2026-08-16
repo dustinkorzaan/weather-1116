@@ -52,7 +52,7 @@
                             {
                                 <span class="add-location-spinner" aria-hidden="true"></span>
                             }
-                            @(_addLocationLoading ? "Looking up weather…" : "Add to map")
+                            @(_addLocationLoading ? "Looking up location…" : "Add to map")
                         </button>
                         @if (!string.IsNullOrWhiteSpace(_addLocationError))
                         {
@@ -298,30 +298,27 @@
 
         try
         {
-            var weather = await WeatherClient.GetCurrentAIWeather(trimmed);
-            if (weather is null)
+            var match = await WeatherClient.SearchLocation(trimmed);
+            if (match is null || (match.Latitude == 0 && match.Longitude == 0))
             {
-                _addLocationError = "Unable to load AI weather.";
+                _addLocationError = "Unable to find that location.";
                 return;
             }
 
-            if (weather.Latitude == 0 && weather.Longitude == 0)
+            var nameParts = new[] { match.Name, match.State }
+                .Where(part => !string.IsNullOrWhiteSpace(part));
+            var name = string.Join(", ", nameParts);
+            if (string.IsNullOrWhiteSpace(name))
             {
-                _addLocationError = "AI weather did not include map coordinates.";
-                return;
+                name = trimmed;
             }
 
-            var name = string.IsNullOrWhiteSpace(weather.LocationName) ? trimmed : weather.LocationName.Trim();
             var city = new
             {
-                id = string.Format(
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    "pin-{0:F4}-{1:F4}",
-                    weather.Latitude,
-                    weather.Longitude),
+                id = Guid.NewGuid().ToString(),
                 name,
-                lat = weather.Latitude,
-                lng = weather.Longitude,
+                lat = match.Latitude,
+                lng = match.Longitude,
             };
 
             await JS.InvokeVoidAsync("weatherMap.addCity", city);
@@ -330,7 +327,7 @@
         }
         catch
         {
-            _addLocationError = "Unable to load AI weather.";
+            _addLocationError = "Unable to find that location.";
         }
         finally
         {

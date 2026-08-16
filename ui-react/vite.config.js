@@ -25,6 +25,10 @@ export default defineConfig({
         target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
+      '/Geo': {
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+      },
       '/Chat1a': {
         target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
         changeOrigin: true,

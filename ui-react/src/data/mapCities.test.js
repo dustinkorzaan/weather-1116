@@ -2,8 +2,7 @@ import { afterEach, expect, test } from 'vitest';
 import {
   MAP_CITIES,
   MAP_CITIES_STORAGE_KEY,
-  cityFromAiWeather,
-  cityIdFromCoordinates,
+  cityFromLatLongSearch,
   loadMapCities,
   removeMapCity,
   saveMapCities,
@@ -51,20 +50,22 @@ test('loadMapCities seeds sample cities then round-trips session storage', () =>
   expect(loadMapCities()).toEqual(next);
 });
 
-test('cityFromAiWeather requires coordinates and prefers the resolved name', () => {
-  expect(cityFromAiWeather('37201', null)).toBeNull();
-  expect(
-    cityFromAiWeather('37201', {
-      locationName: 'Nashville, TN',
-      latitude: 36.1627,
-      longitude: -86.7816,
-    })
-  ).toEqual({
-    id: cityIdFromCoordinates(36.1627, -86.7816),
-    name: 'Nashville, TN',
+test('cityFromLatLongSearch uses the first geo match name and coordinates', () => {
+  expect(cityFromLatLongSearch('37201', null)).toBeNull();
+  const city = cityFromLatLongSearch('37201', {
+    name: 'Nashville',
+    state: 'Tennessee',
+    latitude: 36.1627,
+    longitude: -86.7816,
+  });
+  expect(city).toMatchObject({
+    name: 'Nashville, Tennessee',
     lat: 36.1627,
     lng: -86.7816,
   });
+  expect(city.id).toMatch(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  );
 });
 
 test('upsertMapCity appends a new pin and removeMapCity drops it', () => {

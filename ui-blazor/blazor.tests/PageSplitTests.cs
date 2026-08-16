@@ -216,11 +216,30 @@ public sealed class PageSplitTests
                 };
             }
 
-            if (path.Contains("AIWeather/Current", StringComparison.OrdinalIgnoreCase))
+            if (path.Contains("AIWeather/Current", StringComparison.OrdinalIgnoreCase)
+                || path.Contains("/Geo", StringComparison.OrdinalIgnoreCase)
+                || path.Equals("/Geo", StringComparison.OrdinalIgnoreCase))
             {
                 if (holdWeather)
                 {
                     await Task.Delay(Timeout.Infinite, cancellationToken);
+                }
+
+                if (path.Contains("/Geo", StringComparison.OrdinalIgnoreCase)
+                    || path.Equals("/Geo", StringComparison.OrdinalIgnoreCase))
+                {
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = JsonContent.Create(new LatLongResponse
+                        {
+                            Rank = 1,
+                            Name = "Nashville",
+                            State = "Tennessee",
+                            Country = "United States",
+                            Latitude = 36.1627,
+                            Longitude = -86.7816,
+                        }),
+                    };
                 }
 
                 return new HttpResponseMessage(HttpStatusCode.OK)

@@ -75,6 +75,7 @@ public sealed class LayoutCssTests
         Assert.Contains("avatar.svg", layoutSource);
         Assert.Contains("Add location", layoutSource);
         Assert.Contains("weatherMap.addCity", layoutSource);
+        Assert.Contains("SearchLocation", layoutSource);
         Assert.DoesNotContain("FluentButton", layoutSource);
 
         var avatarSvg = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/avatar.svg"));

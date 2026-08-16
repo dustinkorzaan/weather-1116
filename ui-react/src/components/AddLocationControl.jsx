@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cityFromAiWeather } from '../data/mapCities';
+import { cityFromLatLongSearch } from '../data/mapCities';
 import { useMapPins } from '../map/mapPinsContext';
-import { useLazyGetCurrentAIWeatherQuery } from '../services/weatherApi';
+import { useLazySearchLocationQuery } from '../services/weatherApi';
 
 function AddLocationControl() {
   const { addCity } = useMapPins();
@@ -12,7 +12,7 @@ function AddLocationControl() {
   const [error, setError] = useState('');
   const wrapRef = useRef(null);
   const inputRef = useRef(null);
-  const [trigger, { isFetching }] = useLazyGetCurrentAIWeatherQuery();
+  const [trigger, { isFetching }] = useLazySearchLocationQuery();
 
   useEffect(() => {
     if (isOpen && !isFetching) {
@@ -57,9 +57,9 @@ function AddLocationControl() {
 
     try {
       const data = await trigger(trimmed).unwrap();
-      const city = cityFromAiWeather(trimmed, data);
+      const city = cityFromLatLongSearch(trimmed, data);
       if (!city) {
-        setError('AI weather did not include map coordinates.');
+        setError('Unable to find that location.');
         return;
       }
 
@@ -67,7 +67,7 @@ function AddLocationControl() {
       setIsOpen(false);
       setLocation('Nashville, TN');
     } catch {
-      setError('Unable to load AI weather.');
+      setError('Unable to find that location.');
     }
   };
 
@@ -127,7 +127,7 @@ function AddLocationControl() {
                   aria-hidden="true"
                 />
               )}
-              <span>{isFetching ? 'Looking up weather…' : 'Add to map'}</span>
+              <span>{isFetching ? 'Looking up location…' : 'Add to map'}</span>
             </Button>
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>

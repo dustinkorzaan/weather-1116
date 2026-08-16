@@ -50,6 +50,26 @@ function mockHelloFetch() {
       );
     }
 
+    if (url.includes('/Geo')) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 40);
+      });
+      return new Response(
+        JSON.stringify({
+          rank: 1,
+          name: 'Nashville',
+          state: 'Tennessee',
+          country: 'United States',
+          latitude: 36.1627,
+          longitude: -86.7816,
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     if (url.includes('/AIWeather/Current')) {
       await new Promise((resolve) => {
         setTimeout(resolve, 40);
@@ -297,7 +317,7 @@ test('renders a public message in the About tree', () => {
   expect(screen.getByText('0 failed, 1 processing, 2 enqueued')).toBeDefined();
 });
 
-test('header plus control opens a location popdown and stays open while weather loads', async () => {
+test('header plus control opens a location popdown and stays open while geo search runs', async () => {
   const fetchMock = mockHelloFetch();
   const user = userEvent.setup();
   renderApp('/');
@@ -313,22 +333,22 @@ test('header plus control opens a location popdown and stays open while weather 
   await user.click(screen.getByRole('button', { name: /add to map/i }));
 
   await waitFor(() => {
-    expect(screen.getByRole('button', { name: /looking up weather/i }).getAttribute('aria-busy')).toBe(
+    expect(screen.getByRole('button', { name: /looking up location/i }).getAttribute('aria-busy')).toBe(
       'true'
     );
   });
   expect(locationInput).toBeDefined();
 
   await waitFor(() => {
-    expect(screen.queryByRole('button', { name: /looking up weather/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /looking up location/i })).toBeNull();
   });
 
-  const weatherUrl = fetchMock.mock.calls
+  const geoUrl = fetchMock.mock.calls
     .map(([input]) => requestUrl(input))
-    .find((url) => url.includes('/AIWeather/Current'));
-  expect(weatherUrl).toBeDefined();
-  expect(weatherUrl).toContain('location=Nashville');
+    .find((url) => url.includes('/Geo'));
+  expect(geoUrl).toBeDefined();
+  expect(geoUrl).toContain('location=Nashville');
   expect(JSON.parse(window.sessionStorage.getItem(MAP_CITIES_STORAGE_KEY)).at(-1).name).toBe(
-    'Nashville, TN'
+    'Nashville, Tennessee'
   );
 });
