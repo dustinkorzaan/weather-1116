@@ -17,12 +17,14 @@
                                  Style="flex: 1 1 12rem; max-width: 20rem;" />
                 <FluentButton Type="ButtonType.Submit"
                               Appearance="Appearance.Outline"
+                              Class="ai-weather-submit"
                               Disabled="isAiWeatherLoading">
                     @if (isAiWeatherLoading)
                     {
-                        <FluentProgressRing Width="16px" Stroke="ProgressStroke.Small" Style="margin-inline-end: 0.5rem;" />
+                        @* start slot sits beside the label so the button grows wider instead of wrapping. *@
+                        <FluentProgressRing Slot="start" Width="16px" Stroke="ProgressStroke.Small" />
                     }
-                    <span>Get Current AI Weather</span>
+                    Get Current AI Weather
                 </FluentButton>
             </div>
         </EditForm>

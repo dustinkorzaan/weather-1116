@@ -216,6 +216,24 @@ fluent-menu-item a {
     gap: 1rem;
 }
 
+.form-row fluent-button.ai-weather-submit,
+.ai-weather-submit {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    white-space: nowrap;
+}
+
+.ai-weather-submit::part(control),
+.ai-weather-submit::part(content) {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: auto;
+    white-space: nowrap;
+}
+
 .form-row-start {
     align-items: flex-start;
 }

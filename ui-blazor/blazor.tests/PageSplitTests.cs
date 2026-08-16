@@ -57,10 +57,32 @@ public sealed class PageSplitTests
 
         Assert.Contains("Current AI Weather", rendered.Markup);
         Assert.Contains("Get Current AI Weather", rendered.Markup);
+
+        var pageSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Pages/CurrentAIWeather.razor"));
+        Assert.Contains("Class=\"ai-weather-submit\"", pageSource);
+        Assert.Contains("Slot=\"start\"", pageSource);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
         Assert.DoesNotContain("chat-input", rendered.Markup);
         Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
+    }
+
+    [Fact]
+    public void CurrentAIWeather_LoadingPutsSpinnerInStartSlotBesideTheLabel()
+    {
+        using var context = CreateContext(holdWeather: true);
+        context.Services.GetRequiredService<NavigationManager>()
+            .NavigateTo("/current-ai-weather?location=nashville%20tn");
+
+        var rendered = context.Render<WeatherBlazor.Pages.CurrentAIWeather>();
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("Get Current AI Weather", rendered.Markup);
+            Assert.Contains("ai-weather-submit", rendered.Markup);
+            Assert.Contains("fluent-progress-ring", rendered.Markup, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("slot=\"start\"", rendered.Markup, StringComparison.OrdinalIgnoreCase);
+        });
     }
 
     [Fact]
@@ -131,7 +153,7 @@ public sealed class PageSplitTests
         throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
     }
 
-    private static BunitContext CreateContext()
+    private static BunitContext CreateContext(bool holdWeather = false)
     {
         var context = new BunitContext();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
@@ -146,7 +168,7 @@ public sealed class PageSplitTests
                 })
                 .Build());
 
-        var http = new HttpClient(new StubHelloHandler())
+        var http = new HttpClient(new StubHelloHandler(holdWeather))
         {
             BaseAddress = new Uri("http://localhost/"),
         };
@@ -155,9 +177,9 @@ public sealed class PageSplitTests
         return context;
     }
 
-    private sealed class StubHelloHandler : HttpMessageHandler
+    private sealed class StubHelloHandler(bool holdWeather) : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
@@ -166,19 +188,24 @@ public sealed class PageSplitTests
                 || path.Equals("/Home/Hello", StringComparison.OrdinalIgnoreCase)
                 || path.EndsWith("Home/Hello", StringComparison.OrdinalIgnoreCase))
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = JsonContent.Create(new HelloWorldResponse
                     {
                         RequestMessage = "from test",
                         RequestResponse = "Hello from test API.",
                     }),
-                });
+                };
             }
 
             if (path.Contains("AIWeather/Current", StringComparison.OrdinalIgnoreCase))
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                if (holdWeather)
+                {
+                    await Task.Delay(Timeout.Infinite, cancellationToken);
+                }
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = JsonContent.Create(new AIWeatherResponse
                     {
@@ -188,13 +215,13 @@ public sealed class PageSplitTests
                         WindDirection = "S",
                         Conditions = "Clear",
                     }),
-                });
+                };
             }
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound)
+            return new HttpResponseMessage(HttpStatusCode.NotFound)
             {
                 Content = new StringContent("{}", Encoding.UTF8, "application/json"),
-            });
+            };
         }
     }
 }

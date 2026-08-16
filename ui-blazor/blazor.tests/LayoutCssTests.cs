@@ -119,6 +119,9 @@ public sealed class LayoutCssTests
         Assert.Contains("outline: none", css);
         Assert.Contains(".form-row-start", css);
         Assert.Contains("align-items: flex-start", css);
+        Assert.Contains(".ai-weather-submit", css);
+        Assert.Contains("white-space: nowrap", css);
+        Assert.Contains("flex: 0 0 auto", css);
         Assert.Contains("border: 2px solid var(--wx-border-strong)", css);
         Assert.Contains("html.dark", css);
         Assert.Contains("--wx-map", css);
