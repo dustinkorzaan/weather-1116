@@ -696,6 +696,32 @@ html[data-theme="dark"] .weather-map-logo-pin {
     margin-top: 0.75rem;
 }
 
+.chat-form textarea.chat-input {
+    flex: 1 1 12rem;
+    min-width: 0;
+    min-height: 4.5rem;
+    box-sizing: border-box;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--wx-border-strong);
+    border-radius: 0.375rem;
+    background: var(--wx-bg);
+    color: var(--wx-fg);
+    font-family: var(--wx-font);
+    font-size: 1rem;
+    line-height: 1.4;
+    resize: vertical;
+}
+
+.chat-form textarea.chat-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--wx-border-strong);
+}
+
+.chat-form textarea.chat-input:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
 .chat-window-toolbar {
     display: flex;
     justify-content: flex-end;

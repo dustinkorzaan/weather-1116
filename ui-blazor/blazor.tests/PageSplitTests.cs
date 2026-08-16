@@ -168,6 +168,11 @@ public sealed class PageSplitTests
 
         var panelSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/ChatPanel.razor"));
         Assert.Contains("chatInput.scrollToBottom", panelSource);
+        Assert.Contains("chatInput.getValue", panelSource);
+        Assert.Contains("chatInput.setValue", panelSource);
+        Assert.Contains("textarea", panelSource);
+        Assert.DoesNotContain("Immediate=\"true\"", panelSource);
+        Assert.DoesNotContain("@bind-Value=\"_input\"", panelSource);
         Assert.Contains("Type == \"done\"", panelSource);
         Assert.Contains("RequestScrollToBottom", panelSource);
         Assert.Contains("data-tool-details", panelSource);
@@ -190,6 +195,8 @@ public sealed class PageSplitTests
         var chatInput = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
         Assert.Contains("function scrollToBottom(element)", chatInput);
         Assert.Contains("element.scrollTop = element.scrollHeight", chatInput);
+        Assert.Contains("function getValue(element)", chatInput);
+        Assert.Contains("function setValue(element, value)", chatInput);
         Assert.Contains("data-tool-details", chatInput);
         Assert.Contains("chat-tool-hover-card", chatInput);
         Assert.Contains("chat-tool-hover-wrap", chatInput);
@@ -200,6 +207,27 @@ public sealed class PageSplitTests
         Assert.Contains("data-chat-fullscreen-button", fullscreen);
         Assert.Contains("requestFullscreen", fullscreen);
         Assert.Contains("is-css-fullscreen", fullscreen);
+    }
+
+    [Fact]
+    public void ChatPanel_SubmitReadsComposerFromJsWithoutServerKeystrokeBind()
+    {
+        using var context = CreateContext();
+        context.JSInterop.Setup<string>("chatInput.getValue", _ => true).SetResult("Hello Nashville");
+        context.JSInterop.SetupVoid("chatInput.setValue", _ => true);
+        context.JSInterop.SetupVoid("chatInput.scrollToBottom", _ => true);
+
+        var rendered = context.Render<ChatPanel>();
+        rendered.Find("form.chat-form").Submit();
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("Hello Nashville", rendered.Markup);
+            Assert.Contains("chat-message user", rendered.Markup);
+        });
+
+        context.JSInterop.VerifyInvoke("chatInput.getValue");
+        context.JSInterop.VerifyInvoke("chatInput.setValue");
     }
 
     private static string FindRepoFile(string relativePath)
