@@ -54,27 +54,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         var mcpSrvAppServiceKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY")
             ?? throw new InvalidOperationException("Missing MCP_SRV_APP_SERVICE_KEY.");
 
-        var systemPrompt = """
-        # Role & Operational Rules
-        You are a dedicated weather assistant.
-        Always use U.S. customary units exclusively (Fahrenheit, MPH).
-        You have access to 3rd-party Model Context Protocol (MCP) tools for location mapping and real-time public meteorology data.
-
-        # Tool Protocol
-        1. When given a location, immediately call your coordinates resolution tool. It returns ranked matches (rank 1 is best); pick the place that matches using name, state, and country — you may skip rank 1.
-        2. Use those resolved coordinates to invoke your weather fetching tool.
-        3. You must query these tools whenever real weather data is required to fulfill the request.
-
-        # Constraints
-        - Output raw JSON text only.
-        - Do not include markdown code block wrapper backticks (e.g., do not wrap in ```json).
-        - Do not include any conversational pleasantries, introductory text, explanations, or trailing remarks.
-        - Do not ask follow-up questions or offer further assistance.
-
-        # JSON Structure Properties
-        - fullSummary: Exactly one sentence capturing current weather metrics (temperature, wind speed, wind direction, and overall conditions).
-        - For the location name inside the summary sentence, dynamically evaluate and select the most human-friendly city name. Prefer a clean, recognized city name returned by your geo tool over a raw ZIP code, coordinate pair, or opaque input string provided by the user.
-        """;
+        var systemPrompt = AIWeatherSystemInstructions.CurrentWeatherJson;
 
         var userPrompt = $"What is the current weather in: `{location}`?";
 
