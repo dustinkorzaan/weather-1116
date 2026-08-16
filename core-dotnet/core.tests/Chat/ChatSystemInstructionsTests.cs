@@ -10,7 +10,7 @@ public class ChatSystemInstructionsTests
         var prompt = ChatSystemInstructions.WeatherAssistant;
 
         Assert.Contains("GitHub-flavored Markdown", prompt);
-        Assert.Contains("one or two friendly sentences", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("When you report current weather, use one or two friendly sentences", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("place name", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("place name, latitude, longitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("latitude/longitude", prompt, StringComparison.OrdinalIgnoreCase);

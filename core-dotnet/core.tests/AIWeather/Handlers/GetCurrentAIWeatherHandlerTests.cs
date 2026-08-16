@@ -7,7 +7,7 @@ public class GetCurrentAIWeatherHandlerTests
     {
         var prompt = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherHandler.cs"));
 
-        Assert.Contains("one or two friendly sentences", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("one or two friendly sentences describing the current weather", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("place name", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("human-friendly city name", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("latitude", prompt, StringComparison.OrdinalIgnoreCase);
