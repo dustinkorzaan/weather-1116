@@ -128,7 +128,7 @@ window.weatherMap = (function () {
     if (mapTypeId) {
       return mapTypeId;
     }
-    return (maps && maps.MapTypeId && maps.MapTypeId.ROADMAP) || 'roadmap';
+    return (maps && maps.MapTypeId && maps.MapTypeId.HYBRID) || 'hybrid';
   }
 
   function createMapTypeControlOptions(maps) {

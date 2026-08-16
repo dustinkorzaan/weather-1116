@@ -5,14 +5,14 @@ export const TERRAIN_MAP_TYPE = 'terrain';
 
 /**
  * Google's built-in type control supports four MapTypeId values:
- * Roadmap (default), Satellite (aerial), Hybrid (satellite + labels),
+ * Roadmap, Satellite (aerial), Hybrid (satellite + labels; the default),
  * and Terrain.
  */
 export function defaultMapTypeId(maps, mapTypeId) {
   if (mapTypeId) {
     return mapTypeId;
   }
-  return maps?.MapTypeId?.ROADMAP ?? ROADMAP_MAP_TYPE;
+  return maps?.MapTypeId?.HYBRID ?? HYBRID_MAP_TYPE;
 }
 
 export function builtInMapTypeIds(maps) {
