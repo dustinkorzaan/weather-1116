@@ -24,11 +24,11 @@
             <div id="ai-weather-summary" class="weather-summary chat-markdown"></div>
             <dl class="weather-stats">
                 <div class="weather-stat">
-                    <dt>Temperature F</dt>
+                    <dt>Temperature</dt>
                     <dd id="ai-weather-temperature"></dd>
                 </div>
                 <div class="weather-stat">
-                    <dt>Wind Speed MPH</dt>
+                    <dt>Wind Speed</dt>
                     <dd id="ai-weather-wind-speed"></dd>
                 </div>
                 <div class="weather-stat">
@@ -38,6 +38,10 @@
                 <div class="weather-stat">
                     <dt>Conditions</dt>
                     <dd id="ai-weather-conditions"></dd>
+                </div>
+                <div class="weather-stat">
+                    <dt>Lat/Long</dt>
+                    <dd id="ai-weather-lat-long"></dd>
                 </div>
             </dl>
         </div>
@@ -62,6 +66,7 @@
             windSpeedId: 'ai-weather-wind-speed',
             windDirectionId: 'ai-weather-wind-direction',
             conditionsId: 'ai-weather-conditions',
+            latLongId: 'ai-weather-lat-long',
             endpoint: '@Url.Action("GetCurrentAIWeather", "Home")'
         });
     </script>

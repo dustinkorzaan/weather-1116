@@ -1,4 +1,5 @@
 @page "/current-ai-weather"
+@using System.Globalization
 @using WeatherBlazor.Data
 @inject WeatherApiClient WeatherClient
 @inject NavigationManager Navigation
@@ -40,20 +41,24 @@
                 <div class="chat-markdown">@((MarkupString)SafeGfmMarkdown.ToHtml(aiWeather.FullSummary))</div>
                 <FluentGrid Spacing="2">
                     <FluentGridItem xs="12" sm="6">
-                        <div class="stat-label">Temperature F</div>
-                        <div>@aiWeather.TemperatureF</div>
+                        <div class="stat-label">Temperature</div>
+                        <div>@FormatTemperatureF(aiWeather.TemperatureF)</div>
                     </FluentGridItem>
                     <FluentGridItem xs="12" sm="6">
-                        <div class="stat-label">Wind Speed MPH</div>
-                        <div>@aiWeather.WindSpeedMPH</div>
+                        <div class="stat-label">Wind Speed</div>
+                        <div>@FormatWindSpeedMph(aiWeather.WindSpeedMPH)</div>
                     </FluentGridItem>
                     <FluentGridItem xs="12" sm="6">
                         <div class="stat-label">Wind Direction</div>
-                        <div>@aiWeather.WindDirection</div>
+                        <div>@FormatWindDirection(aiWeather.WindDirection, aiWeather.WindDirectionDegrees)</div>
                     </FluentGridItem>
                     <FluentGridItem xs="12" sm="6">
                         <div class="stat-label">Conditions</div>
                         <div>@aiWeather.Conditions</div>
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="6">
+                        <div class="stat-label">Lat/Long</div>
+                        <div>@FormatLatLong(aiWeather.Latitude, aiWeather.Longitude)</div>
                     </FluentGridItem>
                 </FluentGrid>
             </div>
@@ -122,5 +127,29 @@
         {
             isAiWeatherLoading = false;
         }
+    }
+
+    private static string FormatTemperatureF(double value) =>
+        string.Create(CultureInfo.InvariantCulture, $"{value} °F");
+
+    private static string FormatWindSpeedMph(double value) =>
+        string.Create(CultureInfo.InvariantCulture, $"{value} mph");
+
+    private static string FormatWindDirection(string compass, int degrees)
+    {
+        var label = (compass ?? string.Empty).Trim();
+        var withDegrees = string.Create(CultureInfo.InvariantCulture, $"({degrees}°)");
+        return label.Length == 0 ? withDegrees : $"{label} {withDegrees}";
+    }
+
+    private static string FormatLatLong(double latitude, double longitude) =>
+        string.Create(
+            CultureInfo.InvariantCulture,
+            $"{FormatHemisphereDegrees(latitude, "N", "S")}, {FormatHemisphereDegrees(longitude, "E", "W")}");
+
+    private static string FormatHemisphereDegrees(double value, string positiveLabel, string negativeLabel)
+    {
+        var hemisphere = value >= 0 ? positiveLabel : negativeLabel;
+        return string.Create(CultureInfo.InvariantCulture, $"{Math.Abs(value):0.00}° {hemisphere}");
     }
 }

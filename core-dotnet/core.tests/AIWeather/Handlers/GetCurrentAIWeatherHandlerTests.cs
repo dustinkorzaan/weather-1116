@@ -10,8 +10,11 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.Contains("one or two friendly sentences describing the current weather", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("place name", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("human-friendly city name", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("latitude", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("longitude", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Do not include latitude or longitude in fullSummary", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("place name, latitude, longitude", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("- latitude:", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("- longitude:", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("- windDirectionDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("temperature", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("wind speed", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("wind direction", prompt, StringComparison.OrdinalIgnoreCase);
