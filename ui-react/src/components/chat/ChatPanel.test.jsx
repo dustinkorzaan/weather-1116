@@ -129,6 +129,23 @@ test('keeps tool details open and scrollable when the pointer moves onto the pop
   expect(body?.textContent).toContain('"elevation": 113');
 });
 
+test('chat window has a fullscreen control that expands the conversation', async () => {
+  const user = userEvent.setup();
+  const { container } = render(<ChatPanel />);
+
+  const button = screen.getByRole('button', { name: /enter fullscreen/i });
+  expect(button).toBeDefined();
+
+  await user.click(button);
+
+  expect(container.querySelector('.chat-window')?.classList.contains('is-css-fullscreen')).toBe(true);
+  expect(screen.getByRole('button', { name: /exit fullscreen/i })).toBeDefined();
+
+  await user.click(screen.getByRole('button', { name: /exit fullscreen/i }));
+  expect(container.querySelector('.chat-window')?.classList.contains('is-css-fullscreen')).toBe(false);
+  expect(screen.getByRole('button', { name: /enter fullscreen/i })).toBeDefined();
+});
+
 test('does not close tool details until the pointer leaves the popup', async () => {
   const user = userEvent.setup();
   const chip = await renderFinishedToolChip(user);
@@ -144,4 +161,38 @@ test('does not close tool details until the pointer leaves the popup', async () 
   await waitFor(() => {
     expect(screen.queryByRole('tooltip')).toBeNull();
   });
+});
+
+test('renders assistant markdown after the stream finishes, including tables', async () => {
+  let finish;
+  streamChatMessage.mockImplementation(async ({ onEvent }) => {
+    onEvent({
+      type: 'token',
+      text: '**Warmest**\n\n| City | Temp |\n| --- | --- |\n| Nashville | 72 |\n',
+    });
+    await new Promise((resolve) => {
+      finish = resolve;
+    });
+    onEvent({ type: 'done' });
+  });
+
+  const user = userEvent.setup();
+  render(<ChatPanel />);
+
+  await user.type(screen.getByLabelText(/message/i), 'compare nashville and atlanta');
+  await user.click(screen.getByRole('button', { name: /^send$/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText(/\| City \| Temp \|/)).toBeDefined();
+  });
+  expect(screen.queryByRole('table')).toBeNull();
+
+  finish();
+
+  await waitFor(() => {
+    expect(screen.getByRole('table')).toBeDefined();
+  });
+  expect(screen.getByText('Nashville')).toBeDefined();
+  expect(screen.getByText('Warmest').tagName).toBe('STRONG');
+  expect(screen.queryByText(/\| City \| Temp \|/)).toBeNull();
 });

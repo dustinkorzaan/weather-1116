@@ -1,10 +1,13 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Maximize2, Minimize2 } from 'lucide-react';
+import SafeGfmMarkdown from '../markdown/SafeGfmMarkdown';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
 import { formatToolHoverText, TOOL_HOVER_CLOSE_DELAY_MS } from '../../utils/chatToolHover';
 import { streamChatMessage } from '../../utils/chatStream';
+import { useChatFullscreen } from './useChatFullscreen';
 
 const TAB_CONFIG = [
   {
@@ -35,13 +38,19 @@ const TAB_CONFIG = [
 
 const MESSAGE_CLASSES = {
   user: 'self-end max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap',
-  assistant: 'self-start max-w-[85%] rounded-2xl border border-border bg-muted px-3 py-2 text-foreground whitespace-pre-wrap',
+  assistant: 'self-start max-w-[85%] overflow-x-auto rounded-2xl border border-border bg-muted px-3 py-2 text-foreground',
   tool: 'self-center text-xs text-muted-foreground',
   error: 'w-full rounded-md bg-destructive/15 px-3 py-2 text-destructive',
 };
 
-function messageClasses(role) {
-  return MESSAGE_CLASSES[role] ?? MESSAGE_CLASSES.assistant;
+function messageClasses(entry) {
+  if (entry.role === 'assistant' && !entry.streaming) {
+    return `${MESSAGE_CLASSES.assistant} chat-markdown`;
+  }
+  if (entry.role === 'assistant') {
+    return `${MESSAGE_CLASSES.assistant} whitespace-pre-wrap`;
+  }
+  return MESSAGE_CLASSES[entry.role] ?? MESSAGE_CLASSES.assistant;
 }
 
 function scrollElementToBottom(element) {
@@ -180,6 +189,8 @@ function ChatPanel() {
   const [scrollNonce, setScrollNonce] = useState(0);
   const sessionsRef = useRef(createEmptySessions());
   const messagesRef = useRef(null);
+  const windowRef = useRef(null);
+  const { isFullscreen, isCssFullscreen, toggle: toggleFullscreen } = useChatFullscreen(windowRef);
   const activeTabRef = useRef(activeTab);
   activeTabRef.current = activeTab;
 
@@ -359,11 +370,33 @@ function ChatPanel() {
         <p className="mt-2 text-sm text-muted-foreground">{activeConfig.description}</p>
 
         <TabsContent value={activeTab} className="mt-3">
-          <section className="rounded-lg border border-border bg-card p-3" aria-label="Chat conversation">
+          <section
+            ref={windowRef}
+            className={`chat-window relative flex flex-col rounded-lg border border-border bg-card p-3 ${
+              isCssFullscreen ? 'is-css-fullscreen' : ''
+            }`}
+            aria-label="Chat conversation"
+          >
+            <div className="mb-1 flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                aria-pressed={isFullscreen}
+                onClick={() => {
+                  void toggleFullscreen();
+                }}
+              >
+                {isFullscreen ? <Minimize2 className="size-5" /> : <Maximize2 className="size-5" />}
+              </Button>
+            </div>
             <div
               ref={messagesRef}
               data-chat-messages
-              className="flex max-h-96 min-h-40 flex-col gap-2 overflow-y-auto p-1"
+              className={`flex min-h-40 flex-col gap-2 overflow-y-auto p-1 ${
+                isFullscreen ? 'min-h-0 flex-1 max-h-none' : 'max-h-96'
+              }`}
             >
               {histories[activeTab].map((entry, index) => (
                 entry.role === 'tool' ? (
@@ -373,8 +406,12 @@ function ChatPanel() {
                     details={formatToolHoverText(entry)}
                   />
                 ) : (
-                  <div key={`${activeTab}-${index}`} className={messageClasses(entry.role)}>
-                    {entry.content}
+                  <div key={`${activeTab}-${index}`} className={messageClasses(entry)}>
+                    {entry.role === 'assistant' && !entry.streaming ? (
+                      <SafeGfmMarkdown>{entry.content}</SafeGfmMarkdown>
+                    ) : (
+                      entry.content
+                    )}
                   </div>
                 )
               ))}

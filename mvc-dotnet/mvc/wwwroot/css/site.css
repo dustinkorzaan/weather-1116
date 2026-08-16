@@ -882,6 +882,69 @@ html[data-theme="dark"] .weather-map-logo-pin {
   box-shadow: var(--shadow-sm);
 }
 
+.chat-window-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0.75rem 1rem 0;
+}
+
+.chat-fullscreen-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-avatar);
+  cursor: pointer;
+}
+
+.chat-fullscreen-button:hover {
+  background: var(--color-bg-muted);
+  color: var(--color-avatar-hover);
+}
+
+.chat-fullscreen-button:focus {
+  outline: none;
+}
+
+.chat-fullscreen-button:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-primary-soft);
+}
+
+.chat-window:fullscreen,
+.chat-window:-webkit-full-screen,
+.chat-window.is-css-fullscreen {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 1rem;
+  background: var(--color-bg);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.chat-window.is-css-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  margin: 0;
+}
+
+.chat-window:fullscreen .chat-messages,
+.chat-window:-webkit-full-screen .chat-messages,
+.chat-window.is-css-fullscreen .chat-messages {
+  max-height: none;
+  flex: 1;
+  min-height: 0;
+}
+
 .chat-messages {
   display: flex;
   max-height: 26rem;
@@ -911,6 +974,77 @@ html[data-theme="dark"] .weather-map-logo-pin {
   border-radius: var(--radius-xl);
   background: var(--color-bg-hover);
   color: var(--color-text);
+}
+
+.chat-message.chat-markdown {
+  white-space: normal;
+  overflow-x: auto;
+}
+
+.chat-markdown > :first-child {
+  margin-top: 0;
+}
+
+.chat-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.chat-markdown p,
+.chat-markdown ul,
+.chat-markdown ol,
+.chat-markdown pre,
+.chat-markdown table,
+.chat-markdown blockquote {
+  margin: 0.4em 0;
+}
+
+.chat-markdown ul,
+.chat-markdown ol {
+  padding-left: 1.25em;
+}
+
+.chat-markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+}
+
+.chat-markdown pre {
+  overflow-x: auto;
+  padding: 0.5em 0.75em;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.chat-markdown pre code {
+  padding: 0;
+  background: none;
+}
+
+.chat-markdown table {
+  border-collapse: collapse;
+  width: max-content;
+  max-width: 100%;
+  font-size: 0.875em;
+}
+
+.chat-markdown th,
+.chat-markdown td {
+  border: 1px solid var(--color-border);
+  padding: 0.3em 0.55em;
+  text-align: left;
+}
+
+.chat-markdown th {
+  font-weight: 600;
+  background: var(--color-bg);
+}
+
+.chat-markdown a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .chat-message.tool {

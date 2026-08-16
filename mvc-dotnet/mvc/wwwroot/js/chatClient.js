@@ -90,7 +90,12 @@
     const item = document.createElement('div');
     const role = MESSAGE_ROLES.includes(entry.role) ? entry.role : 'assistant';
     item.className = `chat-message ${role}`;
-    item.textContent = entry.content;
+    if (role === 'assistant' && !entry.streaming && window.safeGfmMarkdown) {
+      item.classList.add('chat-markdown');
+      item.innerHTML = window.safeGfmMarkdown.render(entry.content);
+    } else {
+      item.textContent = entry.content;
+    }
     if (role === 'tool') {
       const details = formatToolHoverText(entry);
       if (details) {
@@ -153,7 +158,15 @@
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        if (assistantEntry) {
+          assistantEntry.streaming = false;
+          if (tabId === activeTab) {
+            renderMessages();
+          }
+        }
+        break;
+      }
 
       buffer += decoder.decode(value, { stream: true });
       const parts = buffer.split('\n\n');
@@ -169,7 +182,7 @@
         } else if (payload.type === 'token' && payload.text) {
           assistantText += payload.text;
           if (!assistantEntry) {
-            assistantEntry = addEntry(tabId, { role: 'assistant', content: assistantText });
+            assistantEntry = addEntry(tabId, { role: 'assistant', content: assistantText, streaming: true });
           } else {
             updateEntry(tabId, assistantEntry, assistantText);
           }
@@ -193,6 +206,12 @@
         } else if (payload.type === 'error' && payload.errorMessage) {
           addEntry(tabId, { role: 'error', content: payload.errorMessage });
         } else if (payload.type === 'done') {
+          if (assistantEntry) {
+            assistantEntry.streaming = false;
+            if (tabId === activeTab) {
+              renderMessages();
+            }
+          }
           requestScrollToBottom(tabId);
         }
       }

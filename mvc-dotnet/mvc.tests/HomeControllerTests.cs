@@ -75,6 +75,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Current AI Weather", html);
         Assert.Contains("class=\"weather-card\"", html);
         Assert.Contains("class=\"btn\"", html);
+        Assert.Contains("chat-markdown", html);
+        Assert.Contains("safeGfmMarkdown.js", html);
+        Assert.Contains("marked.min.js", html);
+        Assert.Contains("purify.min.js", html);
         Assert.DoesNotContain("aria-label=\"Add location\"", html);
         Assert.DoesNotContain("Hello World</h2>", html);
         Assert.DoesNotContain("Chat Clients</h2>", html);
@@ -146,6 +150,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("params.get('location')", script);
         Assert.Contains("history.replaceState", script);
         Assert.Contains("requestWeather()", script);
+        Assert.Contains("safeGfmMarkdown.render", script);
+        Assert.Contains("summaryEl.innerHTML", script);
     }
 
     [Fact]
@@ -161,6 +167,11 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Remote MCP · Agent Framework · Like Foundry Console V4", html);
         Assert.Contains("class=\"page-shell\"", html);
         Assert.Contains("class=\"chat-tab is-active\"", html);
+        Assert.Contains("aria-label=\"Enter fullscreen\"", html);
+        Assert.Contains("chatFullscreen.js", html);
+        Assert.Contains("safeGfmMarkdown.js", html);
+        Assert.Contains("marked.min.js", html);
+        Assert.Contains("purify.min.js", html);
         Assert.DoesNotContain("aria-label=\"Add location\"", html);
         Assert.DoesNotContain("Hello World</h2>", html);
         Assert.DoesNotContain("Current AI Weather</h2>", html);
@@ -179,6 +190,18 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("chat-tool-hover-wrap", script);
         Assert.Contains("scheduleToolHoverHide", script);
         Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", script);
+        Assert.Contains("safeGfmMarkdown.render", script);
+        Assert.Contains("streaming", script);
+
+        var markdown = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/markdown/safeGfmMarkdown.js"));
+        Assert.Contains("marked.parse", markdown);
+        Assert.Contains("gfm: true", markdown);
+        Assert.Contains("DOMPurify.sanitize", markdown);
+
+        var fullscreen = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatFullscreen.js"));
+        Assert.Contains("data-chat-fullscreen-button", fullscreen);
+        Assert.Contains("requestFullscreen", fullscreen);
+        Assert.Contains("is-css-fullscreen", fullscreen);
     }
 
     [Fact]
@@ -229,6 +252,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".add-location-panel", css);
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
+        Assert.Contains(".chat-markdown", css);
+        Assert.Contains(".chat-fullscreen-button", css);
         Assert.Contains("html.dark", css);
         Assert.Contains("color-scheme: light", css);
         Assert.Contains("html[data-theme=\"dark\"] #weather-map", css);

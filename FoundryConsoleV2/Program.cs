@@ -192,6 +192,8 @@ internal class Program
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
+		GitHub-flavored Markdown is allowed when it makes the answer easier to read. Do not emit raw HTML.
+		Use one or two sentences and include the place name, latitude, longitude, temperature, wind speed, wind direction, and overall conditions. Keep those facts even if they also appear in JSON.
 		""";
 		var userPrompt = $"""
 		You are given this WeatherConditions JSON:
@@ -273,7 +275,7 @@ internal class Program
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
 
 		Return valid JSON with these fields:
-		- fullSummary (string) (full sentence summary of the current weather including temperature, wind speed, wind direction, and conditions)
+		- fullSummary (string) (one or two sentences including place name, latitude, longitude, temperature, wind speed, wind direction, and overall conditions — keep those facts even though some are also JSON fields; GitHub-flavored Markdown is allowed when it helps readability)
 		- temperatureF (number) in Fahrenheit
 		- windSpeedMPH (number) in MPH
 		- windDirection (string)

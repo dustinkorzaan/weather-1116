@@ -236,3 +236,87 @@
     animation: none;
   }
 }
+
+.chat-markdown > :first-child {
+  margin-top: 0;
+}
+
+.chat-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.chat-markdown p,
+.chat-markdown ul,
+.chat-markdown ol,
+.chat-markdown pre,
+.chat-markdown table,
+.chat-markdown blockquote {
+  margin: 0.4em 0;
+}
+
+.chat-markdown ul,
+.chat-markdown ol {
+  padding-left: 1.25em;
+}
+
+.chat-markdown code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875em;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+  background: var(--background);
+}
+
+.chat-markdown pre {
+  overflow-x: auto;
+  padding: 0.5em 0.75em;
+  border-radius: 0.4rem;
+  background: var(--background);
+}
+
+.chat-markdown pre code {
+  padding: 0;
+  background: none;
+}
+
+.chat-markdown table {
+  border-collapse: collapse;
+  width: max-content;
+  max-width: 100%;
+  font-size: 0.875em;
+}
+
+.chat-markdown th,
+.chat-markdown td {
+  border: 1px solid var(--border);
+  padding: 0.3em 0.55em;
+  text-align: left;
+}
+
+.chat-markdown th {
+  font-weight: 600;
+  background: var(--background);
+}
+
+.chat-markdown a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.chat-window.is-css-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.chat-window:fullscreen,
+.chat-window:-webkit-full-screen {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: var(--background);
+}

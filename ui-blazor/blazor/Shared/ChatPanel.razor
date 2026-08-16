@@ -17,11 +17,40 @@
 
     <p class="muted tab-description">@_tabs.First(tab => tab.Id == _activeTab).Description</p>
 
+    <div class="chat-window">
     <FluentCard Class="chat-card" aria-label="Chat conversation">
+        <div class="chat-window-toolbar">
+            <button type="button"
+                    class="chat-fullscreen-button"
+                    data-chat-fullscreen-button
+                    aria-label="Enter fullscreen"
+                    aria-pressed="false"
+                    title="Enter fullscreen">
+                <svg data-icon="enter" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="15 3 21 3 21 9" />
+                    <polyline points="9 21 3 21 3 15" />
+                    <line x1="21" x2="14" y1="3" y2="10" />
+                    <line x1="3" x2="10" y1="21" y2="14" />
+                </svg>
+                <svg data-icon="exit" hidden xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="4 14 10 14 10 20" />
+                    <polyline points="20 10 14 10 14 4" />
+                    <line x1="14" x2="21" y1="10" y2="3" />
+                    <line x1="3" x2="10" y1="21" y2="14" />
+                </svg>
+            </button>
+        </div>
         <div @ref="_messagesElement" class="chat-messages">
             @foreach (var entry in _histories[_activeTab])
             {
-                <div class="@MessageClass(entry.Role)" @attributes="ToolHoverAttributes(entry)">@entry.Content</div>
+                @if (entry.Role == "assistant" && !entry.Streaming)
+                {
+                    <div class="chat-message assistant chat-markdown">@((MarkupString)SafeGfmMarkdown.ToHtml(entry.Content))</div>
+                }
+                else
+                {
+                    <div class="@MessageClass(entry.Role)" @attributes="ToolHoverAttributes(entry)">@entry.Content</div>
+                }
             }
         </div>
 
@@ -44,6 +73,7 @@
             </div>
         </EditForm>
     </FluentCard>
+    </div>
 </div>
 
 @code {
@@ -111,6 +141,7 @@
         public string? ToolArguments { get; set; }
         public string? ToolResult { get; set; }
         public bool Running { get; set; }
+        public bool Streaming { get; set; }
     }
 
     private static string MessageClass(string role) => role switch
@@ -216,7 +247,12 @@
                     assistantBuilder.Append(streamEvent.Text);
                     if (assistantEntry is null)
                     {
-                        assistantEntry = new ChatEntry { Role = "assistant", Content = assistantBuilder.ToString() };
+                        assistantEntry = new ChatEntry
+                        {
+                            Role = "assistant",
+                            Content = assistantBuilder.ToString(),
+                            Streaming = true,
+                        };
                         history.Add(assistantEntry);
                     }
                     else
@@ -257,6 +293,11 @@
                 }
                 else if (streamEvent.Type == "done")
                 {
+                    if (assistantEntry is not null)
+                    {
+                        assistantEntry.Streaming = false;
+                    }
+
                     RequestScrollToBottom(tabId);
                     StateHasChanged();
                 }
@@ -269,6 +310,11 @@
         finally
         {
             _isSendingByTab[tabId] = false;
+            if (assistantEntry is not null)
+            {
+                assistantEntry.Streaming = false;
+            }
+
             RequestScrollToBottom(tabId);
         }
     }

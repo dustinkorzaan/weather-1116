@@ -25,6 +25,8 @@ public sealed class LayoutCssTests
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
         Assert.Contains(".chat-message.tool", css);
+        Assert.Contains(".chat-markdown", css);
+        Assert.Contains(".chat-fullscreen-button", css);
     }
 
     [Fact]
@@ -89,6 +91,7 @@ public sealed class LayoutCssTests
 
         var host = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Pages/_Host.cshtml"));
         Assert.Contains("--body-font:", host);
+        Assert.Contains("chatFullscreen.js", host);
 
         var app = File.ReadAllText(FindRepoFile("ui-blazor/blazor/App.razor"));
         Assert.Contains("Selector=\".section-title\"", app);
@@ -171,5 +174,7 @@ public sealed class LayoutCssTests
         Assert.Contains(".weather-map-pin-card-delete", css);
         Assert.Contains(".about-modal.is-open", css);
         Assert.Contains(".about-close", css);
+        Assert.Contains(".chat-markdown", css);
+        Assert.Contains(".chat-fullscreen-button", css);
     }
 }

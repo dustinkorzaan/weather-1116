@@ -82,6 +82,9 @@ public sealed class PageSplitTests
         var pageSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Pages/CurrentAIWeather.razor"));
         Assert.Contains("Class=\"ai-weather-submit\"", pageSource);
         Assert.Contains("Slot=\"start\"", pageSource);
+        Assert.Contains("chat-markdown", pageSource);
+        Assert.Contains("SafeGfmMarkdown.ToHtml", pageSource);
+        Assert.Contains("MarkupString", pageSource);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
         Assert.DoesNotContain("chat-input", rendered.Markup);
@@ -117,7 +120,10 @@ public sealed class PageSplitTests
 
         rendered.WaitForAssertion(() =>
         {
-            Assert.Contains("Sunny in Nashville.", rendered.Markup);
+            Assert.Contains("chat-markdown", rendered.Markup);
+            Assert.Contains("<strong>Sunny</strong>", rendered.Markup);
+            Assert.Contains("in Nashville.", rendered.Markup);
+            Assert.DoesNotContain("**Sunny**", rendered.Markup);
         });
 
         Assert.Contains("nashville tn", rendered.Markup);
@@ -154,6 +160,7 @@ public sealed class PageSplitTests
         Assert.Contains("Chat Clients", rendered.Markup);
         Assert.Contains("In-process · Responses API · Like Foundry Console V3", rendered.Markup);
         Assert.Contains("chat-input", rendered.Markup);
+        Assert.Contains("Enter fullscreen", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Current AI Weather", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
@@ -167,6 +174,18 @@ public sealed class PageSplitTests
         Assert.Contains("ToolHoverAttributes", panelSource);
         Assert.Contains("ToolArguments", panelSource);
         Assert.Contains("ToolResult", panelSource);
+        Assert.Contains("SafeGfmMarkdown.ToHtml", panelSource);
+        Assert.Contains("MarkupString", panelSource);
+        Assert.Contains("Streaming", panelSource);
+        Assert.Contains("chat-fullscreen-button", panelSource);
+        Assert.Contains("Enter fullscreen", panelSource);
+        Assert.Contains("chat-window", panelSource);
+
+        var markdown = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Markdown/SafeGfmMarkdown.cs"));
+        Assert.Contains("UseAdvancedExtensions", markdown);
+        Assert.Contains("Markdig.Markdown.ToHtml", markdown);
+        Assert.Contains("DisableHtml", markdown);
+        Assert.Contains("UnsafeUrlAttribute", markdown);
 
         var chatInput = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
         Assert.Contains("function scrollToBottom(element)", chatInput);
@@ -176,6 +195,11 @@ public sealed class PageSplitTests
         Assert.Contains("chat-tool-hover-wrap", chatInput);
         Assert.Contains("scheduleHide", chatInput);
         Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", chatInput);
+
+        var fullscreen = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatFullscreen.js"));
+        Assert.Contains("data-chat-fullscreen-button", fullscreen);
+        Assert.Contains("requestFullscreen", fullscreen);
+        Assert.Contains("is-css-fullscreen", fullscreen);
     }
 
     private static string FindRepoFile(string relativePath)
@@ -270,7 +294,7 @@ public sealed class PageSplitTests
                 {
                     Content = JsonContent.Create(new AIWeatherResponse
                     {
-                        FullSummary = "Sunny in Nashville.",
+                        FullSummary = "**Sunny** in Nashville.",
                         TemperatureF = 72,
                         WindSpeedMPH = 5,
                         WindDirection = "S",
