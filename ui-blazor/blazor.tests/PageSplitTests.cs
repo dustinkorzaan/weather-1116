@@ -183,6 +183,7 @@ public sealed class PageSplitTests
 
         var markdown = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Markdown/SafeGfmMarkdown.cs"));
         Assert.Contains("UseAdvancedExtensions", markdown);
+        Assert.Contains("Markdig.Markdown.ToHtml", markdown);
         Assert.Contains("DisableHtml", markdown);
         Assert.Contains("UnsafeUrlAttribute", markdown);
 

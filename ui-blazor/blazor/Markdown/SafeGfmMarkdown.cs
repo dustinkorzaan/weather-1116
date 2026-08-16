@@ -21,6 +21,6 @@ public static class SafeGfmMarkdown
             return string.Empty;
         }
 
-        return UnsafeUrlAttribute.Replace(Markdown.ToHtml(markdown, Pipeline), string.Empty);
+        return UnsafeUrlAttribute.Replace(Markdig.Markdown.ToHtml(markdown, Pipeline), string.Empty);
     }
 }
