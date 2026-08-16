@@ -29,16 +29,13 @@ public class GetLocationDataTool(IMediator mediator, ILogger<GetLocationDataTool
 			true)]
 		double longitude)
 	{
-		logger.LogInformation(
-			"MCP tool GetLocationData invoked for {Latitude}, {Longitude}",
-			latitude,
-			longitude);
-
 		var result = await mediator.Send(new GetLocationDataEvent
 		{
 			Latitude = latitude,
 			Longitude = longitude,
 		});
+
+		logger.LogInformation("MCP tool GetLocationData returned {Location}", result.Location);
 
 		return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
 	}
