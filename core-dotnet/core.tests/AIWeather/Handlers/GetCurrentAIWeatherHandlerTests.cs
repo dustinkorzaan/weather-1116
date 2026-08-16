@@ -3,14 +3,15 @@ namespace Core.Tests.AIWeather.Handlers;
 public class GetCurrentAIWeatherHandlerTests
 {
     [Fact]
-    public void SystemPrompt_AllowsMarkdownAndIncludesLocationFacts()
+    public void SystemPrompt_UsesFriendlySummaryWithoutLatLong()
     {
         var prompt = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherHandler.cs"));
 
-        Assert.Contains("one or two sentences", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("one or two friendly sentences describing the current weather", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("place name", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("latitude", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("longitude", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("human-friendly city name", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("latitude", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("longitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("temperature", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("wind speed", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("wind direction", prompt, StringComparison.OrdinalIgnoreCase);
