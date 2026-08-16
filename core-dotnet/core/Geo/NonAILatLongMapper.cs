@@ -6,7 +6,7 @@ namespace Core.Geo;
 internal static class NonAILatLongMapper
 {
     public static int NormalizeCount(int count) =>
-        Math.Clamp(count, 1, GetLatLongDataEvent.MaxCount);
+        Math.Clamp(count, 1, GetLatLongEvent.MaxCount);
 
     public static NonAILatLongListResponse FromGeocodingResults(IReadOnlyList<NonAIGeocodingResult> matches)
     {

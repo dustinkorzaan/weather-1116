@@ -179,9 +179,9 @@ internal class Program
 		""");
 
 		// Non-AI prep
-		var latLongMatches = await mediator.Send(new GetLatLongDataEvent { Location = location, Count = 1 });
+		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });
 		var latLong = latLongMatches.Results[0];
-		var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
+		var weatherData = await mediator.Send(new GetPublicWeatherCurrentEvent
 		{
 			Latitude = latLong.Latitude,
 			Longitude = latLong.Longitude,
@@ -260,9 +260,9 @@ internal class Program
 		""");
 
 		// Non-AI prep
-		var latLongMatches = await mediator.Send(new GetLatLongDataEvent { Location = location, Count = 1 });
+		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });
 		var latLong = latLongMatches.Results[0];
-		var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
+		var weatherData = await mediator.Send(new GetPublicWeatherCurrentEvent
 		{
 			Latitude = latLong.Latitude,
 			Longitude = latLong.Longitude,

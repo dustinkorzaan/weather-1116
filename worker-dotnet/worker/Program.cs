@@ -13,7 +13,7 @@ Env.TraversePath().Load();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMediatR(cfg =>
-	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
+	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherCurrentHandler>());
 builder.Services.Configure<HangfireAboutHealthOptions>(options =>
 	HangfireAboutHealthOptions.Configure(options, builder.Configuration));
 builder.Services.AddControllers();

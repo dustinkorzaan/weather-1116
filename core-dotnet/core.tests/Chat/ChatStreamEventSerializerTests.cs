@@ -30,7 +30,7 @@ public class ChatStreamEventSerializerTests
     {
         var json = ChatStreamEventSerializer.Serialize(
             ChatStreamEvent.ToolEnd(
-                "GetLatLongData",
+                "GetLatLong",
                 """{"location":"Nashville, TN"}""",
                 """[{"name":"Nashville"}]"""));
 
@@ -38,7 +38,7 @@ public class ChatStreamEventSerializerTests
         var root = document.RootElement;
 
         Assert.Equal("tool_end", root.GetProperty("type").GetString());
-        Assert.Equal("GetLatLongData", root.GetProperty("toolName").GetString());
+        Assert.Equal("GetLatLong", root.GetProperty("toolName").GetString());
         Assert.Equal("""{"location":"Nashville, TN"}""", root.GetProperty("toolArguments").GetString());
         Assert.Equal("""[{"name":"Nashville"}]""", root.GetProperty("toolResult").GetString());
     }

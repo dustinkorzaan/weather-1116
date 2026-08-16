@@ -61,7 +61,7 @@ public class GeoControllerTests
 
 		public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
 		{
-			if (request is GetLatLongDataEvent geoEvent)
+			if (request is GetLatLongEvent geoEvent)
 			{
 				LastLocation = geoEvent.Location;
 				LastCount = geoEvent.Count;

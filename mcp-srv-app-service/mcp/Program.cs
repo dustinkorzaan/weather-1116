@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddMediatR(cfg =>
-	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherDataHandler>());
+	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherCurrentHandler>());
 
 builder.Services
 	.AddMcpServer(options =>

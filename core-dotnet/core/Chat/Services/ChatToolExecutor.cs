@@ -19,9 +19,11 @@ public sealed class ChatToolExecutor
     {
         return functionCall.FunctionName switch
         {
-            "GetLatLongData" => await ExecuteGetLatLong(functionCall.FunctionArguments, cancellationToken),
-            "GetLocationData" => await ExecuteGetLocation(functionCall.FunctionArguments, cancellationToken),
-            "GetPublicWeatherData" => await ExecuteGetPublicWeather(functionCall.FunctionArguments, cancellationToken),
+            "GetLatLong" => await ExecuteGetLatLong(functionCall.FunctionArguments, cancellationToken),
+            "GetLocation" => await ExecuteGetLocation(functionCall.FunctionArguments, cancellationToken),
+            "GetPublicWeatherCurrent" => await ExecuteGetPublicWeatherCurrent(functionCall.FunctionArguments, cancellationToken),
+            "GetPublicWeatherForecast" => await ExecuteGetPublicWeatherForecast(functionCall.FunctionArguments, cancellationToken),
+            "GetPublicWeatherHistory" => await ExecuteGetPublicWeatherHistory(functionCall.FunctionArguments, cancellationToken),
             _ => throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}"),
         };
     }
@@ -30,9 +32,9 @@ public sealed class ChatToolExecutor
     {
         using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
         string location = argumentsJson.RootElement.GetProperty("location").GetString()
-            ?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
+            ?? throw new InvalidOperationException("GetLatLong requires a location argument.");
 
-        var latLongMatches = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
+        var latLongMatches = await _mediator.Send(new GetLatLongEvent { Location = location }, cancellationToken);
         return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
     }
 
@@ -42,7 +44,7 @@ public sealed class ChatToolExecutor
         double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
         double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 
-        var locationData = await _mediator.Send(new GetLocationDataEvent
+        var locationData = await _mediator.Send(new GetLocationEvent
         {
             Latitude = latitude,
             Longitude = longitude,
@@ -50,16 +52,62 @@ public sealed class ChatToolExecutor
         return JsonSerializer.Serialize(locationData, new JsonSerializerOptions { WriteIndented = true });
     }
 
-    private async Task<string> ExecuteGetPublicWeather(BinaryData arguments, CancellationToken cancellationToken)
+    private async Task<string> ExecuteGetPublicWeatherCurrent(BinaryData arguments, CancellationToken cancellationToken)
     {
         using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
         double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
         double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 
-        var weatherData = await _mediator.Send(new GetPublicWeatherDataEvent
+        var weatherData = await _mediator.Send(new GetPublicWeatherCurrentEvent
         {
             Latitude = latitude,
             Longitude = longitude,
+        }, cancellationToken);
+
+        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    private async Task<string> ExecuteGetPublicWeatherForecast(BinaryData arguments, CancellationToken cancellationToken)
+    {
+        using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
+        double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+        double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+        var resolution = PublicWeatherForecastResolution.Daily;
+        if (argumentsJson.RootElement.TryGetProperty("resolution", out var resolutionElement)
+            && resolutionElement.GetString() is string resolutionText
+            && Enum.TryParse(resolutionText, ignoreCase: true, out PublicWeatherForecastResolution parsedResolution))
+        {
+            resolution = parsedResolution;
+        }
+
+        var weatherData = await _mediator.Send(new GetPublicWeatherForecastEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+            Resolution = resolution,
+        }, cancellationToken);
+
+        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    private async Task<string> ExecuteGetPublicWeatherHistory(BinaryData arguments, CancellationToken cancellationToken)
+    {
+        using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
+        double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+        double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+        var resolution = PublicWeatherHistoryResolution.Daily;
+        if (argumentsJson.RootElement.TryGetProperty("resolution", out var resolutionElement)
+            && resolutionElement.GetString() is string resolutionText
+            && Enum.TryParse(resolutionText, ignoreCase: true, out PublicWeatherHistoryResolution parsedResolution))
+        {
+            resolution = parsedResolution;
+        }
+
+        var weatherData = await _mediator.Send(new GetPublicWeatherHistoryEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+            Resolution = resolution,
         }, cancellationToken);
 
         return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });

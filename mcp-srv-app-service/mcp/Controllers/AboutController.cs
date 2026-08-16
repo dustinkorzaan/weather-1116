@@ -15,10 +15,16 @@ public sealed class AboutController(
     [HttpGet]
     public ActionResult<AboutNode> Get()
     {
-        const string expectedTool = "GetPublicWeatherData";
+        string[] expectedTools =
+        [
+            "GetPublicWeatherCurrent",
+            "GetPublicWeatherForecast",
+            "GetPublicWeatherHistory",
+        ];
         var mcpSrvAppServiceKey = configuration["MCP_SRV_APP_SERVICE_KEY"];
-        var isHealthy = !string.IsNullOrWhiteSpace(mcpSrvAppServiceKey) && tools.Any(tool =>
-            string.Equals(tool.ProtocolTool.Name, expectedTool, StringComparison.Ordinal));
+        var isHealthy = !string.IsNullOrWhiteSpace(mcpSrvAppServiceKey)
+            && expectedTools.All(expectedTool => tools.Any(tool =>
+                string.Equals(tool.ProtocolTool.Name, expectedTool, StringComparison.Ordinal)));
 
         return Ok(AboutTreeBuilder.BuildMcpSrvAppServiceNode(isHealthy));
     }

@@ -7,7 +7,7 @@ namespace Core.Geo.Events;
 /// Resolves a location name to ranked latitude/longitude matches via the Open-Meteo geocoding API.
 /// Rank 1 is the best match. <see cref="Count"/> defaults to 5 (max 100).
 /// </summary>
-public class GetLatLongDataEvent : IRequest<NonAILatLongListResponse>
+public class GetLatLongEvent : IRequest<NonAILatLongListResponse>
 {
     public const int DefaultCount = 5;
     public const int MaxCount = 100;

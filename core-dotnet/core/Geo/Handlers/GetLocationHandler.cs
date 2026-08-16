@@ -10,18 +10,18 @@ namespace Core.Geo.Handlers;
 /// <summary>
 /// Reverse-geocodes lat/long to a City, State (or City, State, Country) label using Nominatim.
 /// </summary>
-public class GetLocationDataHandler : IRequestHandler<GetLocationDataEvent, NominatimLocationResponse>
+public class GetLocationHandler : IRequestHandler<GetLocationEvent, NominatimLocationResponse>
 {
     internal const string UserAgent = "Weather-1116/1.0 (https://github.com/dustinkorzaan/weather-1116)";
 
-    private readonly ILogger<GetLocationDataHandler> _logger;
+    private readonly ILogger<GetLocationHandler> _logger;
 
-    public GetLocationDataHandler(ILogger<GetLocationDataHandler> logger)
+    public GetLocationHandler(ILogger<GetLocationHandler> logger)
     {
         _logger = logger;
     }
 
-    public async Task<NominatimLocationResponse> Handle(GetLocationDataEvent request, CancellationToken cancellationToken)
+    public async Task<NominatimLocationResponse> Handle(GetLocationEvent request, CancellationToken cancellationToken)
     {
         var client = new HttpClient();
         client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", UserAgent);

@@ -8,7 +8,7 @@ one-shot structured JSON response.
 
 | Tab | Stack | Tools | Maps to console demo |
 | --- | --- | --- | --- |
-| **Chat1a** | Responses API (model-direct) | In-process (`GetLatLongData`, `GetPublicWeatherData`) | Foundry Console **V3** |
+| **Chat1a** | Responses API (model-direct) | In-process (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) | Foundry Console **V3** |
 | **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-srv-func-app`, `mcp-srv-app-service`) | Foundry Console **V4** |
 | **Chat2a** | Microsoft Agent Framework (model-direct) | In-process tools via `AIFunctionFactory` | V3 orchestration style |
 | **Chat2b** | Microsoft Agent Framework (model-direct) | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
@@ -107,12 +107,15 @@ builder.Services.AddWeatherChatClients();
 
 ## Tools (no web search)
 
-All four tabs expose the same two weather tools (no web search):
+All four tabs expose the same public geo and weather tools (no web search):
 
 | Tool | Purpose |
 | --- | --- |
-| `GetLatLongData` | Resolve a place name to ranked coordinates (default top 5) |
-| `GetPublicWeatherData` | Fetch current weather for lat/long |
+| `GetLatLong` | Resolve a place name to ranked coordinates (default top 5) |
+| `GetLocation` | Reverse-geocode lat/long to a place label |
+| `GetPublicWeatherCurrent` | Fetch current weather for lat/long |
+| `GetPublicWeatherForecast` | Upcoming forecast: Daily (7 days), Hourly (48 hours), or FifteenMinutes (48 hours) |
+| `GetPublicWeatherHistory` | Recent past: Daily (previous 7 days) or Hourly (previous 48 hours) |
 
 - **In-process (Chat1a, Chat2a):** Core `ChatToolExecutor` runs MediatR handlers when the model
   emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a).

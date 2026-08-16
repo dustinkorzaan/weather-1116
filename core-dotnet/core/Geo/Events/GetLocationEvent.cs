@@ -7,7 +7,7 @@ namespace Core.Geo.Events;
 /// Reverse-geocodes a latitude/longitude to a simple place label via Nominatim.
 /// US results are "City, State"; elsewhere "City, State, Country".
 /// </summary>
-public class GetLocationDataEvent : IRequest<NominatimLocationResponse>
+public class GetLocationEvent : IRequest<NominatimLocationResponse>
 {
     public required double Latitude { get; set; }
 

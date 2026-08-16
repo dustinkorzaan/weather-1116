@@ -9,16 +9,16 @@ namespace Core.Geo.Handlers;
 /// <summary>
 /// Geocodes a location string to ranked latitude/longitude matches using Open-Meteo.
 /// </summary>
-public class GetLatLongDataHandler : IRequestHandler<GetLatLongDataEvent, NonAILatLongListResponse>
+public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongListResponse>
 {
-    private readonly ILogger<GetLatLongDataHandler> _logger;
+    private readonly ILogger<GetLatLongHandler> _logger;
 
-    public GetLatLongDataHandler(ILogger<GetLatLongDataHandler> logger)
+    public GetLatLongHandler(ILogger<GetLatLongHandler> logger)
     {
         _logger = logger;
     }
 
-    public async Task<NonAILatLongListResponse> Handle(GetLatLongDataEvent request, CancellationToken cancellationToken)
+    public async Task<NonAILatLongListResponse> Handle(GetLatLongEvent request, CancellationToken cancellationToken)
     {
         var client = new HttpClient();
         var count = NonAILatLongMapper.NormalizeCount(request.Count);
