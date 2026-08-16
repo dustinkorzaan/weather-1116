@@ -1,4 +1,5 @@
 using Bunit;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -76,6 +77,7 @@ public sealed class LayoutCssTests
         Assert.Contains("OpenExternalAsync", layoutSource);
         Assert.Contains("avatar.svg", layoutSource);
         Assert.Contains("Add location", layoutSource);
+        Assert.Contains("IsMapPage", layoutSource);
         Assert.Contains("weatherMap.addCity", layoutSource);
         Assert.Contains("SearchLocation", layoutSource);
         Assert.DoesNotContain("FluentButton", layoutSource);
@@ -89,6 +91,38 @@ public sealed class LayoutCssTests
 
         var app = File.ReadAllText(FindRepoFile("ui-blazor/blazor/App.razor"));
         Assert.Contains("Selector=\".section-title\"", app);
+    }
+
+    [Fact]
+    public void MainLayout_ShowsAddLocationOnlyOnTheMapPage()
+    {
+        using var context = new BunitContext();
+        context.JSInterop.Mode = JSRuntimeMode.Loose;
+        context.Services.AddHttpClient();
+        context.Services.AddFluentUIComponents();
+        context.Services.AddSingleton<IConfiguration>(
+            new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["API_DOTNET_URL"] = "http://localhost:8080",
+                    ["UI_REACT_URL"] = "http://localhost:3000",
+                    ["MVC_URL"] = "http://localhost:8100",
+                    ["WORKER_DOTNET_URL"] = "http://localhost:8130",
+                })
+                .Build());
+        context.Services.AddSingleton(
+            new WeatherApiClient(new HttpClient { BaseAddress = new Uri("http://localhost/") }, NullLogger<WeatherApiClient>.Instance));
+
+        var rendered = context.Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, "<div id=\"child\"></div>"));
+
+        Assert.Contains("aria-label=\"Add location\"", rendered.Markup);
+
+        context.Services.GetRequiredService<NavigationManager>().NavigateTo("/hello-world");
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.DoesNotContain("aria-label=\"Add location\"", rendered.Markup);
+        });
     }
 
     private static string FindRepoFile(string relativePath)

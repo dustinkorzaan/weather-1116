@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
 import {
@@ -133,6 +133,8 @@ function AppShell() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [loadAbout, aboutQuery] = useLazyGetAboutQuery();
   const { preference, setPreference } = useTheme();
+  const { pathname } = useLocation();
+  const isMapVisible = pathname === '/';
 
   const handleAboutClick = () => {
     setIsAboutOpen(true);
@@ -149,7 +151,7 @@ function AppShell() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <AddLocationControl />
+            {isMapVisible && <AddLocationControl />}
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

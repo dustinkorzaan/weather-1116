@@ -288,8 +288,8 @@ window.weatherMap = (function () {
       map,
       overlay,
       city.name,
-      function (cityName) {
-        window.location.assign(currentAiWeatherPath(cityName));
+      function () {
+        window.location.assign(currentAiWeatherPath(formatLocationWithLatLong(city.name, city.lat, city.lng)));
       },
       function () {
         removeCity(city.id);
@@ -335,6 +335,27 @@ window.weatherMap = (function () {
     });
 
     return loadPromise;
+  }
+
+  function formatHemisphereDegrees(value, positiveLabel, negativeLabel) {
+    var numeric = Number(value);
+    var hemisphere = numeric >= 0 ? positiveLabel : negativeLabel;
+    return Math.abs(numeric).toFixed(4) + '\u00B0 ' + hemisphere;
+  }
+
+  function formatLocationWithLatLong(name, lat, lng) {
+    var trimmed = String(name || '').trim();
+    if (!trimmed || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
+      return trimmed;
+    }
+    return (
+      trimmed +
+      ' (' +
+      formatHemisphereDegrees(lat, 'N', 'S') +
+      ', ' +
+      formatHemisphereDegrees(lng, 'E', 'W') +
+      ')'
+    );
   }
 
   function currentAiWeatherPath(location) {
@@ -647,5 +668,6 @@ window.weatherMap = (function () {
     addCity: addCity,
     removeCity: removeCity,
     currentAiWeatherPath: currentAiWeatherPath,
+    formatLocationWithLatLong: formatLocationWithLatLong,
   };
 })();

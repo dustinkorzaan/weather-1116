@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 import {
   CURRENT_AI_WEATHER_PATH,
   currentAiWeatherPath,
+  formatLocationWithLatLong,
   locationFromSearchParams,
 } from './currentAiWeatherLocation';
 
@@ -19,6 +20,31 @@ test('encodes a city, state location without cleaning or splitting', () => {
     '/current-ai-weather?location=Atlanta%2C%20GA'
   );
   expect(currentAiWeatherPath('')).toBe(CURRENT_AI_WEATHER_PATH);
+});
+
+test('expands a city name with hemisphere lat/long', () => {
+  expect(formatLocationWithLatLong('Nashville, TN', 36.1659, -86.7844)).toBe(
+    'Nashville, TN (36.1659° N, 86.7844° W)'
+  );
+  expect(formatLocationWithLatLong('Atlanta, GA', 33.749, -84.388)).toBe(
+    'Atlanta, GA (33.7490° N, 84.3880° W)'
+  );
+  expect(formatLocationWithLatLong('Sydney, NSW', -33.8688, 151.2093)).toBe(
+    'Sydney, NSW (33.8688° S, 151.2093° E)'
+  );
+  expect(formatLocationWithLatLong('  Atlanta, GA  ', 33.749, -84.388)).toBe(
+    'Atlanta, GA (33.7490° N, 84.3880° W)'
+  );
+  expect(formatLocationWithLatLong('', 36.1659, -86.7844)).toBe('');
+  expect(formatLocationWithLatLong('Nashville, TN', Number.NaN, -86.7844)).toBe('Nashville, TN');
+});
+
+test('encodes an expanded pin location into the AI weather query', () => {
+  expect(
+    currentAiWeatherPath(formatLocationWithLatLong('Nashville, TN', 36.1659, -86.7844))
+  ).toBe(
+    '/current-ai-weather?location=Nashville%2C%20TN%20(36.1659%C2%B0%20N%2C%2086.7844%C2%B0%20W)'
+  );
 });
 
 test('reads a location query without reformatting it', () => {

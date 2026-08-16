@@ -156,6 +156,7 @@ test('renders the map on the home route without split page content', () => {
   renderApp('/');
 
   expect(screen.getByRole('region', { name: /map/i })).toBeDefined();
+  expect(screen.getByRole('button', { name: /add location/i })).toBeDefined();
   expect(screen.queryByText('Hello from test API.')).toBeNull();
   expect(screen.queryByRole('heading', { name: /chat clients/i })).toBeNull();
   expect(screen.queryByRole('heading', { name: /^hello world$/i })).toBeNull();
@@ -172,6 +173,7 @@ test('renders hello world on its own page', async () => {
   expect(screen.queryByRole('heading', { name: /current ai weather/i })).toBeNull();
   expect(screen.queryByRole('heading', { name: /chat clients/i })).toBeNull();
   expect(screen.queryByRole('region', { name: /map/i })).toBeNull();
+  expect(screen.queryByRole('button', { name: /add location/i })).toBeNull();
 });
 
 test('renders current AI weather on its own page', () => {
@@ -184,6 +186,7 @@ test('renders current AI weather on its own page', () => {
   expect(screen.queryByRole('heading', { name: /^hello world$/i })).toBeNull();
   expect(screen.queryByRole('heading', { name: /chat clients/i })).toBeNull();
   expect(screen.queryByRole('region', { name: /map/i })).toBeNull();
+  expect(screen.queryByRole('button', { name: /add location/i })).toBeNull();
 });
 
 test('current AI weather submit is a charcoal button instead of blue or a flat outline', () => {
@@ -255,6 +258,7 @@ test('renders chat clients on its own page', () => {
   expect(screen.queryByRole('heading', { name: /^hello world$/i })).toBeNull();
   expect(screen.queryByRole('heading', { name: /current ai weather/i })).toBeNull();
   expect(screen.queryByRole('region', { name: /map/i })).toBeNull();
+  expect(screen.queryByRole('button', { name: /add location/i })).toBeNull();
 });
 
 test('user menu lists login and the three content pages', async () => {
