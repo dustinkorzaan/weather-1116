@@ -32,7 +32,7 @@ for hello/AI weather/map flows in the three UIs.
 
 | Project | Path | Role |
 | --- | --- | --- |
-| MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | Remote MCP server exposing `GetPublicWeatherData` via `Core` |
+| MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | Remote MCP server exposing `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` via `Core` |
 | MCP Server on Functions App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetLatLongData` via `Core` |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
@@ -98,7 +98,7 @@ flowchart LR
   Core[Core GetCurrentAIWeatherHandler]
   Model[Azure OpenAI model]
   McpSrvFuncApp[mcp-srv-func-app GetLatLongData]
-  McpSrvAppService[mcp-srv-app-service GetPublicWeatherData]
+  McpSrvAppService[mcp-srv-app-service weather tools]
   CoreGeo[Core geo handlers]
   CoreWx[Core weather handlers]
 
@@ -124,8 +124,8 @@ MediatR handlers the sample uses in-process elsewhere.
 
 | Host | Path | Tool | Port | Endpoint | Auth |
 | --- | --- | --- | --- | --- | --- |
-| MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | `GetPublicWeatherData` | 8110 | `/mcp` | Bearer `MCP_SRV_APP_SERVICE_KEY` (no default — must be set by developer) |
-| MCP Server on Functions App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLongData` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
+| MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` | 8110 | `/mcp` | Bearer `MCP_SRV_APP_SERVICE_KEY` (no default — must be set by developer) |
+| MCP Server on Functions App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLongData`, `GetLocationData` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
 
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
@@ -191,7 +191,7 @@ and handlers, including:
 
 - `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
 - `core-dotnet/core/Geo/` — geocoding (`GetLatLongData`)
-- `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherData`)
+- `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`)
 - `core-dotnet/core/AIWeather/` — model-direct AI weather (`GetCurrentAIWeatherHandler`)
 - `core-dotnet/core/About/` — About tree builder and remote about client
 
@@ -368,7 +368,7 @@ blocks**, not production deployables:
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | In-process tool callbacks (`GetLatLongData`, `GetPublicWeatherData`) — same tools `Core` exposes, answered locally |
+| **V3** | In-process tool callbacks (`GetLatLongData`, `GetLocationData`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same tools `Core` exposes, answered locally |
 | **V4** | Model-direct via `ResponsesClient`, tools target remote MCP servers — same pattern as API/MVC production |
 | **V5** | Hosted Foundry agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
 

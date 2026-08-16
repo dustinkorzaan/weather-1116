@@ -15,6 +15,9 @@ public class ChatSystemInstructionsTests
         Assert.Contains("latitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("longitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("GetLocationData", prompt);
+        Assert.Contains("GetPublicWeatherCurrent", prompt);
+        Assert.Contains("GetPublicWeatherForecast", prompt);
+        Assert.Contains("GetPublicWeatherHistory", prompt);
         Assert.Contains("Do not emit raw HTML", prompt);
     }
 }

@@ -44,7 +44,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - ResponsesClient with in-process tool callbacks (GetLatLongData, GetLocationData, GetPublicWeatherData)
+		 - ResponsesClient with in-process tool callbacks (GetLatLongData, GetLocationData, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory)
 		 - Model can call tools to derive lat/long, label a coordinate, and fetch public weather
 		 - JSON output from AI
 		""");
@@ -56,8 +56,9 @@ internal class Program
 		You can call the GetLatLongData tool to resolve a place name to ranked latitude/longitude
 		matches (up to 5; rank 1 is the best match). Use name, state, and country to pick the
 		right place — you may skip rank 1. Call GetLocationData to turn latitude/longitude into
-		a City, State label (City, State, Country outside the US). Then call GetPublicWeatherData
-		with those coordinates.
+		a City, State label (City, State, Country outside the US). Then call GetPublicWeatherCurrent
+		for conditions now, GetPublicWeatherForecast for upcoming weather, or GetPublicWeatherHistory
+		for the recent past.
 		Use those tools whenever you need real weather data.
 
 		Return valid JSON with these fields:
@@ -150,8 +151,8 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
-		FunctionTool getPublicWeatherTool = ResponseTool.CreateFunctionTool(
-			functionName: "GetPublicWeatherData",
+		FunctionTool getPublicWeatherCurrentTool = ResponseTool.CreateFunctionTool(
+			functionName: "GetPublicWeatherCurrent",
 			functionDescription: "Get current public weather conditions for a latitude and longitude.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
@@ -167,6 +168,60 @@ internal class Program
 			    }
 			  },
 			  "required": ["latitude", "longitude"],
+			  "additionalProperties": false
+			}
+			""")),
+			strictModeEnabled: true);
+
+		FunctionTool getPublicWeatherForecastTool = ResponseTool.CreateFunctionTool(
+			functionName: "GetPublicWeatherForecast",
+			functionDescription: "Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute steps. Use Daily unless the user asks for hourly or 15-minute detail.",
+			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+			{
+			  "type": "object",
+			  "properties": {
+			    "latitude": {
+			      "type": "number",
+			      "description": "Latitude in decimal degrees"
+			    },
+			    "longitude": {
+			      "type": "number",
+			      "description": "Longitude in decimal degrees"
+			    },
+			    "resolution": {
+			      "type": "string",
+			      "enum": ["Daily", "Hourly", "FifteenMinutes"],
+			      "description": "Daily (next 7 days), Hourly (next 48 hours), or FifteenMinutes (next 48 hours). Defaults to Daily."
+			    }
+			  },
+			  "required": ["latitude", "longitude", "resolution"],
+			  "additionalProperties": false
+			}
+			""")),
+			strictModeEnabled: true);
+
+		FunctionTool getPublicWeatherHistoryTool = ResponseTool.CreateFunctionTool(
+			functionName: "GetPublicWeatherHistory",
+			functionDescription: "Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail.",
+			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+			{
+			  "type": "object",
+			  "properties": {
+			    "latitude": {
+			      "type": "number",
+			      "description": "Latitude in decimal degrees"
+			    },
+			    "longitude": {
+			      "type": "number",
+			      "description": "Longitude in decimal degrees"
+			    },
+			    "resolution": {
+			      "type": "string",
+			      "enum": ["Daily", "Hourly"],
+			      "description": "Daily (previous 7 days) or Hourly (previous 48 hours). Defaults to Daily."
+			    }
+			  },
+			  "required": ["latitude", "longitude", "resolution"],
 			  "additionalProperties": false
 			}
 			""")),
@@ -189,7 +244,7 @@ internal class Program
 				CreateResponseOptions options = new(deploymentName, inputItems)
 				{
 					Instructions = systemPrompt,
-					Tools = { getLatLongTool, getLocationTool, getPublicWeatherTool },
+					Tools = { getLatLongTool, getLocationTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool },
 					TextOptions = new ResponseTextOptions
 					{
 						TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
@@ -243,17 +298,69 @@ internal class Program
 									break;
 								}
 
-							case "GetPublicWeatherData":
+							case "GetPublicWeatherCurrent":
 								{
 									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
 									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
 									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 
-									Console.WriteLine($"\nTool call: GetPublicWeatherData({latitude}, {longitude})");
-									var weatherData = await mediator.Send(new GetPublicWeatherDataEvent
+									Console.WriteLine($"\nTool call: GetPublicWeatherCurrent({latitude}, {longitude})");
+									var weatherData = await mediator.Send(new GetPublicWeatherCurrentEvent
 									{
 										Latitude = latitude,
 										Longitude = longitude,
+									});
+									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+									Console.WriteLine($"Tool output: {functionOutput}");
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
+								}
+
+							case "GetPublicWeatherForecast":
+								{
+									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+									var resolution = PublicWeatherForecastResolution.Daily;
+									if (argumentsJson.RootElement.TryGetProperty("resolution", out var resolutionElement)
+										&& resolutionElement.GetString() is string resolutionText
+										&& Enum.TryParse(resolutionText, ignoreCase: true, out PublicWeatherForecastResolution parsedResolution))
+									{
+										resolution = parsedResolution;
+									}
+
+									Console.WriteLine($"\nTool call: GetPublicWeatherForecast({latitude}, {longitude}, {resolution})");
+									var weatherData = await mediator.Send(new GetPublicWeatherForecastEvent
+									{
+										Latitude = latitude,
+										Longitude = longitude,
+										Resolution = resolution,
+									});
+									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+									Console.WriteLine($"Tool output: {functionOutput}");
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
+								}
+
+							case "GetPublicWeatherHistory":
+								{
+									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+									var resolution = PublicWeatherHistoryResolution.Daily;
+									if (argumentsJson.RootElement.TryGetProperty("resolution", out var resolutionElement)
+										&& resolutionElement.GetString() is string resolutionText
+										&& Enum.TryParse(resolutionText, ignoreCase: true, out PublicWeatherHistoryResolution parsedResolution))
+									{
+										resolution = parsedResolution;
+									}
+
+									Console.WriteLine($"\nTool call: GetPublicWeatherHistory({latitude}, {longitude}, {resolution})");
+									var weatherData = await mediator.Send(new GetPublicWeatherHistoryEvent
+									{
+										Latitude = latitude,
+										Longitude = longitude,
+										Resolution = resolution,
 									});
 									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
 									Console.WriteLine($"Tool output: {functionOutput}");

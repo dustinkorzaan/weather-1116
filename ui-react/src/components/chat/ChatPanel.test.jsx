@@ -95,12 +95,12 @@ async function renderFinishedToolChip(user) {
   streamChatMessage.mockImplementation(async ({ onEvent }) => {
     onEvent({
       type: 'tool_start',
-      toolName: 'GetPublicWeatherData',
+      toolName: 'GetPublicWeatherCurrent',
       toolArguments: '{\n  "latitude": 43.70643,\n  "longitude": -79.39864\n}',
     });
     onEvent({
       type: 'tool_end',
-      toolName: 'GetPublicWeatherData',
+      toolName: 'GetPublicWeatherCurrent',
       toolArguments: '{\n  "latitude": 43.70643,\n  "longitude": -79.39864\n}',
       toolResult: '{\n  "timezone": "America/Toronto",\n  "elevation": 113\n}',
     });
@@ -110,7 +110,7 @@ async function renderFinishedToolChip(user) {
   render(<ChatPanel />);
   await user.type(screen.getByLabelText(/message/i), 'weather in toronto');
   await user.click(screen.getByRole('button', { name: /^send$/i }));
-  return screen.findByText('Ran GetPublicWeatherData …');
+  return screen.findByText('Ran GetPublicWeatherCurrent …');
 }
 
 test('keeps tool details open and scrollable when the pointer moves onto the popup', async () => {

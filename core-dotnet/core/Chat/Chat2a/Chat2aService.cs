@@ -144,7 +144,9 @@ public sealed class Chat2aService : IChatClientService
     [
         AIFunctionFactory.Create(GetLatLongData),
         AIFunctionFactory.Create(GetLocationData),
-        AIFunctionFactory.Create(GetPublicWeatherData),
+        AIFunctionFactory.Create(GetPublicWeatherCurrent),
+        AIFunctionFactory.Create(GetPublicWeatherForecast),
+        AIFunctionFactory.Create(GetPublicWeatherHistory),
     ];
 
     [Description("Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.")]
@@ -171,15 +173,51 @@ public sealed class Chat2aService : IChatClientService
     }
 
     [Description("Get current public weather conditions for a latitude and longitude.")]
-    private async Task<string> GetPublicWeatherData(
+    private async Task<string> GetPublicWeatherCurrent(
         [Description("Latitude in decimal degrees")] double latitude,
         [Description("Longitude in decimal degrees")] double longitude,
         CancellationToken cancellationToken)
     {
-        var weatherData = await _mediator.Send(new GetPublicWeatherDataEvent
+        var weatherData = await _mediator.Send(new GetPublicWeatherCurrentEvent
         {
             Latitude = latitude,
             Longitude = longitude,
+        }, cancellationToken);
+
+        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    [Description("Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute steps. Use Daily unless the user asks for hourly or 15-minute detail.")]
+    private async Task<string> GetPublicWeatherForecast(
+        [Description("Latitude in decimal degrees")] double latitude,
+        [Description("Longitude in decimal degrees")] double longitude,
+        [Description("Daily (next 7 days), Hourly (next 48 hours), or FifteenMinutes (next 48 hours). Defaults to Daily.")]
+        PublicWeatherForecastResolution resolution,
+        CancellationToken cancellationToken)
+    {
+        var weatherData = await _mediator.Send(new GetPublicWeatherForecastEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+            Resolution = resolution,
+        }, cancellationToken);
+
+        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    [Description("Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail.")]
+    private async Task<string> GetPublicWeatherHistory(
+        [Description("Latitude in decimal degrees")] double latitude,
+        [Description("Longitude in decimal degrees")] double longitude,
+        [Description("Daily (previous 7 days) or Hourly (previous 48 hours). Defaults to Daily.")]
+        PublicWeatherHistoryResolution resolution,
+        CancellationToken cancellationToken)
+    {
+        var weatherData = await _mediator.Send(new GetPublicWeatherHistoryEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+            Resolution = resolution,
         }, cancellationToken);
 
         return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
