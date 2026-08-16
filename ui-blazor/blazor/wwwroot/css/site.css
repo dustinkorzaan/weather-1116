@@ -279,7 +279,7 @@ body {
 
 .weather-map-pin-card-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
 }
@@ -297,6 +297,11 @@ body {
     background: transparent;
     color: var(--wx-muted);
     cursor: pointer;
+    line-height: 0;
+}
+
+.weather-map-pin-card-delete svg {
+    display: block;
 }
 
 .weather-map-pin-card-delete:hover {
@@ -656,6 +661,7 @@ html[data-theme="dark"] .weather-map-logo-pin {
 .weather-map-pin-card-name {
     font-size: 0.875rem;
     font-weight: 600;
+    line-height: 1;
     color: var(--wx-fg);
 }
 

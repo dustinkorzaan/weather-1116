@@ -182,7 +182,9 @@ public sealed class LayoutCssTests
         Assert.Contains("--wx-map", css);
         Assert.Contains(".avatar-icon", css);
         Assert.Contains(".add-location-button", css);
+        Assert.Contains(".weather-map-pin-card-header", css);
         Assert.Contains(".weather-map-pin-card-delete", css);
+        Assert.Contains(".weather-map-pin-card-delete svg", css);
         Assert.Contains(".about-modal.is-open", css);
         Assert.Contains(".about-close", css);
         Assert.Contains(".chat-markdown", css);

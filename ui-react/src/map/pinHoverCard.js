@@ -26,16 +26,16 @@ export function createPinHoverCard(cityName) {
   card.setAttribute('aria-label', cityName);
 
   const header = document.createElement('div');
-  header.className = 'weather-map-pin-card-header flex items-start justify-between gap-2';
+  header.className = 'weather-map-pin-card-header flex items-center justify-between gap-2';
 
   const name = document.createElement('div');
-  name.className = 'weather-map-pin-card-name text-sm font-semibold text-foreground';
+  name.className = 'weather-map-pin-card-name text-sm font-semibold leading-none text-foreground';
   name.textContent = cityName;
 
   const deleteButton = document.createElement('button');
   deleteButton.type = 'button';
   deleteButton.className =
-    'weather-map-pin-card-delete inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive';
+    'weather-map-pin-card-delete inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md leading-none text-muted-foreground hover:bg-muted hover:text-destructive [&_svg]:block';
   deleteButton.setAttribute('aria-label', `Remove ${cityName} from the map`);
   deleteButton.innerHTML = DELETE_ICON_SVG;
 

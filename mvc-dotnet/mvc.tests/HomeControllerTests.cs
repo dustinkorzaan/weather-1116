@@ -279,7 +279,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("border: 2px solid var(--color-border-strong)", css);
         Assert.Contains("#weather-map", css);
         Assert.Contains(".weather-map-pin-card", css);
+        Assert.Contains(".weather-map-pin-card-header", css);
         Assert.Contains(".weather-map-pin-card-delete", css);
+        Assert.Contains(".weather-map-pin-card-delete svg", css);
         Assert.Contains(".weather-map-add-location-button", css);
         Assert.Contains(".wind-direction-arrow", css);
         Assert.Contains(".add-location-panel", css);
