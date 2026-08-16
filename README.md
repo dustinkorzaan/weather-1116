@@ -44,5 +44,5 @@ Standalone multi-turn chat page with four tabs:
 | --- | --- | --- | --- |
 | Chat1a | In-process | Azure OpenAI / Foundry ResponsesClient model-direct | Like Foundry Console V3 |
 | Chat1b | MCP | Azure OpenAI / Foundry ResponsesClient model-direct | Like Foundry Console V4 |
-| Chat2a | In-process | Agent Framework | Like Foundry Console V3 |
-| Chat2b | MCP | Agent Framework | Like Foundry Console V4 |
+| Chat2a | In-process | Azure OpenAI / Foundry Agent Framework model-direct | Like Foundry Console V3 |
+| Chat2b | MCP | Azure OpenAI / Foundry Agent Framework model-direct | Like Foundry Console V4 |
