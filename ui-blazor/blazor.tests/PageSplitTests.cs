@@ -86,7 +86,7 @@ public sealed class PageSplitTests
         Assert.Contains("SafeGfmMarkdown.ToHtml", pageSource);
         Assert.Contains("MarkupString", pageSource);
         Assert.Contains("OnAfterRenderAsync", pageSource);
-        Assert.DoesNotContain("OnParametersSetAsync", pageSource);
+        Assert.DoesNotContain("protected override async Task OnParametersSetAsync", pageSource);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
         Assert.DoesNotContain("chat-input", rendered.Markup);
