@@ -71,17 +71,29 @@
     [SupplyParameterFromQuery(Name = "location")]
     public string? LocationQuery { get; set; }
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
         if (queryHandled || string.IsNullOrWhiteSpace(LocationQuery))
         {
             return;
         }
 
-        queryHandled = true;
         location = LocationQuery.Trim();
-        Navigation.NavigateTo("/current-ai-weather", replace: true);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || queryHandled || string.IsNullOrWhiteSpace(LocationQuery))
+        {
+            return;
+        }
+
+        // Consume the map-pin query after the first paint. NavigateTo during
+        // OnParametersSetAsync throws NavigationException on prerender and
+        // skips the auto-submit, leaving the field filled but unsubmitted.
+        queryHandled = true;
         await GetCurrentAIWeather();
+        Navigation.NavigateTo("/current-ai-weather", replace: true);
     }
 
     private async Task GetCurrentAIWeather()
@@ -89,6 +101,7 @@
         isAiWeatherLoading = true;
         aiWeatherError = null;
         aiWeather = null;
+        StateHasChanged();
 
         try
         {
