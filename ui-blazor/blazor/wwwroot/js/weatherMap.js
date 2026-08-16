@@ -41,6 +41,7 @@ window.weatherMap = (function () {
 
   let loadPromise = null;
   const mapByElement = new WeakMap();
+  let activeCloseCard = null;
 
   function loadGoogleMaps(apiKey) {
     if (window.google && window.google.maps) {
@@ -100,6 +101,91 @@ window.weatherMap = (function () {
     };
   }
 
+  function createPinHoverCard(cityName) {
+    const card = document.createElement('div');
+    card.className = 'weather-map-pin-card';
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-label', cityName);
+
+    const name = document.createElement('div');
+    name.className = 'weather-map-pin-card-name';
+    name.textContent = cityName;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'weather-map-pin-card-button';
+    button.textContent = 'Get Current AI Weather';
+
+    card.appendChild(name);
+    card.appendChild(button);
+    return { card: card, button: button };
+  }
+
+  function bindPinHoverCard(maps, map, marker, cityName, onGetWeather) {
+    const created = createPinHoverCard(cityName);
+    const infoWindow = new maps.InfoWindow({
+      content: created.card,
+      disableAutoPan: true,
+      headerDisabled: true,
+    });
+
+    let closeTimer = null;
+    let isOpen = false;
+
+    function cancelClose() {
+      if (closeTimer !== null) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+    }
+
+    function openCard() {
+      cancelClose();
+      if (activeCloseCard && activeCloseCard !== closeCard) {
+        activeCloseCard();
+      }
+      if (!isOpen) {
+        infoWindow.open({ map: map, anchor: marker });
+        isOpen = true;
+      }
+      activeCloseCard = closeCard;
+    }
+
+    function closeCard() {
+      cancelClose();
+      if (isOpen) {
+        infoWindow.close();
+        isOpen = false;
+      }
+      if (activeCloseCard === closeCard) {
+        activeCloseCard = null;
+      }
+    }
+
+    function scheduleClose() {
+      cancelClose();
+      closeTimer = setTimeout(closeCard, 200);
+    }
+
+    marker.addListener('mouseover', openCard);
+    marker.addListener('mouseout', scheduleClose);
+    marker.addListener('click', openCard);
+
+    created.card.addEventListener('mouseenter', openCard);
+    created.card.addEventListener('mouseleave', scheduleClose);
+    created.card.addEventListener('click', function (event) {
+      event.stopPropagation();
+    });
+
+    created.button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      onGetWeather(cityName);
+    });
+
+    map.addListener('click', closeCard);
+  }
+
   function resolveElement(elementOrId) {
     if (typeof elementOrId === 'string') {
       return document.getElementById(elementOrId);
@@ -157,7 +243,6 @@ window.weatherMap = (function () {
         const marker = new maps.Marker({
           map: map,
           position: { lat: city.lat, lng: city.lng },
-          title: city.name,
           icon: icon,
           clickable: true,
           cursor: 'pointer',
@@ -170,8 +255,8 @@ window.weatherMap = (function () {
           },
         });
 
-        marker.addListener('click', function () {
-          window.location.assign(currentAiWeatherPath(city.name));
+        bindPinHoverCard(maps, map, marker, city.name, function (cityName) {
+          window.location.assign(currentAiWeatherPath(cityName));
         });
       });
 
