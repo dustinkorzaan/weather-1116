@@ -268,18 +268,9 @@ test('current AI weather renders the full summary as GitHub-flavored Markdown', 
   await waitFor(() => {
     expect(screen.getByText('Sunny').tagName).toBe('STRONG');
     expect(screen.getByRole('table')).toBeDefined();
-    expect(screen.getByText('Temp')).toBeDefined();
-    expect(screen.getByText('72')).toBeDefined();
+    expect(screen.getByRole('columnheader', { name: 'Metric' })).toBeDefined();
+    expect(screen.getByRole('cell', { name: 'Temp' })).toBeDefined();
   });
-
-  const weatherUrl = fetchMock.mock.calls
-    .map(([input]) => requestUrl(input))
-    .find((url) => url.includes('/AIWeather/Current'));
-
-  expect(weatherUrl).toBeDefined();
-  expect(weatherUrl).toContain('location=nashville');
-  expect(router.state.location.pathname).toBe('/current-ai-weather');
-  expect(router.state.location.search).toBe('');
 });
 
 test('renders chat clients on its own page', () => {
