@@ -4,6 +4,8 @@ import {
   formatTemperatureF,
   formatWindDirection,
   formatWindSpeedMph,
+  WIND_DIRECTION_ARROW,
+  windArrowRotationDeg,
 } from './aiWeatherDisplay';
 
 test('formats lat/long with two-decimal hemisphere labels', () => {
@@ -32,4 +34,14 @@ test('formats wind direction as compass plus degrees', () => {
   expect(formatWindDirection(' N ', 10.4)).toBe('N (10°)');
   expect(formatWindDirection('SW', Number.NaN)).toBe('SW');
   expect(formatWindDirection('', 224)).toBe('(224°)');
+});
+
+test('rotates the wind arrow so meteorological from-degrees point on a compass', () => {
+  expect(WIND_DIRECTION_ARROW).toBe('\u27A4');
+  expect(windArrowRotationDeg(0)).toBe(-90);
+  expect(windArrowRotationDeg(90)).toBe(0);
+  expect(windArrowRotationDeg(180)).toBe(90);
+  expect(windArrowRotationDeg(224)).toBe(134);
+  expect(windArrowRotationDeg(270)).toBe(180);
+  expect(windArrowRotationDeg(Number.NaN)).toBeNull();
 });

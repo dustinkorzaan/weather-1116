@@ -97,6 +97,9 @@ public sealed class PageSplitTests
         Assert.Contains("FormatWindSpeedMph", pageSource);
         Assert.Contains("FormatWindDirection", pageSource);
         Assert.Contains("FormatLatLong", pageSource);
+        Assert.Contains("wind-direction-arrow", pageSource);
+        Assert.Contains("&#x27A4;", pageSource);
+        Assert.Contains("WindDirectionDegrees - 90", pageSource);
         Assert.DoesNotContain("Temperature F", pageSource);
         Assert.DoesNotContain("Wind Speed MPH", pageSource);
         Assert.DoesNotContain("protected override async Task OnParametersSetAsync", pageSource);
@@ -144,6 +147,9 @@ public sealed class PageSplitTests
             Assert.Contains("Wind Speed", rendered.Markup);
             Assert.Contains("5 mph", rendered.Markup);
             Assert.Contains("S (180°)", rendered.Markup);
+            Assert.Contains("wind-direction-arrow", rendered.Markup);
+            Assert.Contains("rotate(90deg)", rendered.Markup);
+            Assert.Contains("\u27A4", rendered.Markup);
             Assert.Contains("Lat/Long", rendered.Markup);
             Assert.Contains("36.16° N, 86.78° W", rendered.Markup);
             Assert.DoesNotContain("Temperature F", rendered.Markup);

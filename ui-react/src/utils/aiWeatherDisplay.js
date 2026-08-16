@@ -40,3 +40,15 @@ export function formatWindDirection(compass, degrees) {
   const withDegrees = `(${Math.round(numeric)}\u00B0)`;
   return label ? `${label} ${withDegrees}` : withDegrees;
 }
+
+/** Black Rightwards Arrowhead; rotate so 0° (north / from the north) points up. */
+export const WIND_DIRECTION_ARROW = '\u27A4';
+
+export function windArrowRotationDeg(degrees) {
+  const numeric = Number(degrees);
+  if (!Number.isFinite(numeric)) {
+    return null;
+  }
+
+  return Math.round(numeric) - 90;
+}

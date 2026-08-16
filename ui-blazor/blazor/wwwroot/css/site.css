@@ -388,6 +388,19 @@ fluent-menu-item a {
     color: var(--neutral-foreground-hint, #616161);
 }
 
+.wind-direction {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.wind-direction-arrow {
+    display: inline-block;
+    font-size: 1.15em;
+    line-height: 1;
+    transform-origin: center;
+}
+
 .inline-row {
     display: flex;
     align-items: center;

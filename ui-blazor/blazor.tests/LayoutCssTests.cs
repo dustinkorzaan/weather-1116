@@ -174,6 +174,7 @@ public sealed class LayoutCssTests
         Assert.Contains(".form-row-start", css);
         Assert.Contains("align-items: flex-start", css);
         Assert.Contains(".ai-weather-submit", css);
+        Assert.Contains(".wind-direction-arrow", css);
         Assert.Contains("white-space: nowrap", css);
         Assert.Contains("flex: 0 0 auto", css);
         Assert.Contains("border: 2px solid var(--wx-border-strong)", css);

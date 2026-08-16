@@ -49,6 +49,37 @@
     return label ? label + ' ' + withDegrees : withDegrees;
   }
 
+  var WIND_DIRECTION_ARROW = '\u27A4';
+
+  function windArrowRotationDeg(degrees) {
+    var numeric = Number(degrees);
+    if (!Number.isFinite(numeric)) {
+      return null;
+    }
+    return Math.round(numeric) - 90;
+  }
+
+  function renderWindDirection(el, compass, degrees) {
+    if (!el) {
+      return;
+    }
+
+    el.replaceChildren();
+    var rotation = windArrowRotationDeg(degrees);
+    if (rotation !== null) {
+      var arrow = document.createElement('span');
+      arrow.className = 'wind-direction-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = WIND_DIRECTION_ARROW;
+      arrow.style.transform = 'rotate(' + rotation + 'deg)';
+      el.appendChild(arrow);
+    }
+
+    var label = document.createElement('span');
+    label.textContent = formatWindDirection(compass, degrees);
+    el.appendChild(label);
+  }
+
   function init(config) {
     var form = document.getElementById(config.formId);
     var locationInput = document.getElementById(config.locationId);
@@ -96,7 +127,7 @@
           }
           temperatureEl.textContent = formatTemperatureF(data.temperatureF);
           windSpeedEl.textContent = formatWindSpeedMph(data.windSpeedMPH);
-          windDirectionEl.textContent = formatWindDirection(data.windDirection, data.windDirectionDegrees);
+          renderWindDirection(windDirectionEl, data.windDirection, data.windDirectionDegrees);
           conditionsEl.textContent = data.conditions || '';
           if (latLongEl) {
             latLongEl.textContent = formatLatLong(data.latitude, data.longitude);

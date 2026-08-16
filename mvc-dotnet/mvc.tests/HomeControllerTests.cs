@@ -82,6 +82,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("<dt>Temperature</dt>", html);
         Assert.Contains("<dt>Wind Speed</dt>", html);
         Assert.Contains("<dt>Wind Direction</dt>", html);
+        Assert.Contains("class=\"wind-direction\"", html);
         Assert.Contains("<dt>Lat/Long</dt>", html);
         Assert.Contains("id=\"ai-weather-lat-long\"", html);
         Assert.DoesNotContain("Temperature F", html);
@@ -173,6 +174,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("formatWindSpeedMph", script);
         Assert.Contains("formatWindDirection", script);
         Assert.Contains("formatLatLong", script);
+        Assert.Contains("windArrowRotationDeg", script);
+        Assert.Contains("renderWindDirection", script);
+        Assert.Contains("\\u27A4", script);
         Assert.Contains("toFixed(2)", script);
         Assert.Contains("windDirectionDegrees", script);
         Assert.Contains("data.latitude", script);
@@ -275,6 +279,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".weather-map-pin-card", css);
         Assert.Contains(".weather-map-pin-card-delete", css);
         Assert.Contains(".weather-map-add-location-button", css);
+        Assert.Contains(".wind-direction-arrow", css);
         Assert.Contains(".add-location-panel", css);
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
