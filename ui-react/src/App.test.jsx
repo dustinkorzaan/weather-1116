@@ -148,7 +148,7 @@ test('current AI weather submit is a charcoal button instead of blue or a flat o
   renderApp('/current-ai-weather');
 
   const button = screen.getByRole('button', { name: /get current ai weather/i });
-  expect(button.className).toMatch(/bg-gray-800/);
+  expect(button.className).toMatch(/bg-gray-700/);
   expect(button.className).toMatch(/text-white/);
   expect(button.className).toMatch(/cursor-pointer/);
   expect(button.className).not.toMatch(/bg-blue/);
@@ -162,11 +162,11 @@ test('chat tabs and send use clickable gray controls instead of blue', () => {
   const tab = screen.getByRole('tab', { name: 'Chat1a' });
   expect(tab.className).toMatch(/cursor-pointer/);
   expect(tab.className).toMatch(/border-2/);
-  expect(tab.className).toMatch(/bg-gray-100|bg-gray-800/);
+  expect(tab.className).toMatch(/bg-gray-100|bg-gray-700/);
   expect(tab.className).not.toMatch(/bg-blue/);
 
   const send = screen.getByRole('button', { name: /^send$/i });
-  expect(send.className).toMatch(/bg-gray-800/);
+  expect(send.className).toMatch(/bg-gray-700/);
   expect(send.className).toMatch(/text-white/);
   expect(send.className).toMatch(/cursor-pointer/);
   expect(send.className).not.toMatch(/bg-blue/);

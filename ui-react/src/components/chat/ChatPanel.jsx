@@ -213,7 +213,7 @@ function ChatPanel() {
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="h-auto flex-none cursor-pointer rounded-md border-2 border-gray-400 bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-800 shadow-sm after:hidden hover:border-gray-500 hover:bg-gray-200 hover:text-gray-900 data-active:border-gray-800 data-active:bg-gray-800 data-active:text-white data-active:shadow-none data-active:hover:bg-gray-900 data-active:hover:text-white"
+              className="h-auto flex-none cursor-pointer rounded-md border-2 border-gray-400 bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-800 shadow-sm after:hidden hover:border-gray-500 hover:bg-gray-200 hover:text-gray-900 group-data-[variant=line]/tabs-list:bg-gray-100 group-data-[variant=line]/tabs-list:hover:bg-gray-200 group-data-[variant=line]/tabs-list:data-active:bg-gray-700 group-data-[variant=line]/tabs-list:data-active:text-white data-active:border-gray-700 data-active:bg-gray-700 data-active:text-white data-active:shadow-none data-active:hover:bg-gray-800 data-active:hover:text-white"
             >
               {tab.label}
             </TabsTrigger>
@@ -245,7 +245,7 @@ function ChatPanel() {
                 disabled={isActiveTabSending}
               />
               <Button
-                className="bg-gray-800 px-4 py-2 text-white shadow-sm hover:bg-gray-900"
+                className="bg-gray-700 px-4 py-2 text-white shadow-sm hover:bg-gray-800"
                 type="submit"
                 disabled={isActiveTabSending}
               >

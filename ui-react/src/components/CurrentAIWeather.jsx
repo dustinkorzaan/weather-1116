@@ -64,7 +64,7 @@ function CurrentAIWeather() {
         <Button
           type="submit"
           size="lg"
-          className="bg-gray-800 text-white shadow-sm hover:bg-gray-900"
+          className="bg-gray-700 text-white shadow-sm hover:bg-gray-800"
           disabled={isFetching}
           aria-busy={isFetching}
         >
