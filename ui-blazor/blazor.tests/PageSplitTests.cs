@@ -83,7 +83,7 @@ public sealed class PageSplitTests
         Assert.Contains("Class=\"ai-weather-submit\"", pageSource);
         Assert.Contains("Slot=\"start\"", pageSource);
         Assert.Contains("chat-markdown", pageSource);
-        Assert.Contains("ChatMarkdown.ToHtml", pageSource);
+        Assert.Contains("SafeGfmMarkdown.ToHtml", pageSource);
         Assert.Contains("MarkupString", pageSource);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
@@ -174,14 +174,14 @@ public sealed class PageSplitTests
         Assert.Contains("ToolHoverAttributes", panelSource);
         Assert.Contains("ToolArguments", panelSource);
         Assert.Contains("ToolResult", panelSource);
-        Assert.Contains("ChatMarkdown.ToHtml", panelSource);
+        Assert.Contains("SafeGfmMarkdown.ToHtml", panelSource);
         Assert.Contains("MarkupString", panelSource);
         Assert.Contains("Streaming", panelSource);
         Assert.Contains("chat-fullscreen-button", panelSource);
         Assert.Contains("Enter fullscreen", panelSource);
         Assert.Contains("chat-window", panelSource);
 
-        var markdown = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Data/ChatMarkdown.cs"));
+        var markdown = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Markdown/SafeGfmMarkdown.cs"));
         Assert.Contains("UseAdvancedExtensions", markdown);
         Assert.Contains("DisableHtml", markdown);
         Assert.Contains("UnsafeUrlAttribute", markdown);

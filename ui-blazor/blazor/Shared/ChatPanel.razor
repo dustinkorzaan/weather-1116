@@ -45,7 +45,7 @@
             {
                 @if (entry.Role == "assistant" && !entry.Streaming)
                 {
-                    <div class="chat-message assistant chat-markdown">@((MarkupString)ChatMarkdown.ToHtml(entry.Content))</div>
+                    <div class="chat-message assistant chat-markdown">@((MarkupString)SafeGfmMarkdown.ToHtml(entry.Content))</div>
                 }
                 else
                 {

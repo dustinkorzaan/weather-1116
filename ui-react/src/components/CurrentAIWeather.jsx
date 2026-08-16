@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import ChatMarkdown from './chat/ChatMarkdown';
+import SafeGfmMarkdown from './markdown/SafeGfmMarkdown';
 import { useLazyGetCurrentAIWeatherQuery } from '../services/weatherApi';
 import { locationFromSearchParams } from '../utils/currentAiWeatherLocation';
 
@@ -84,7 +84,7 @@ function CurrentAIWeather() {
       {data && !isFetching && (
         <div className="mt-3.5">
           <div className="chat-markdown mb-2.5 text-base">
-            <ChatMarkdown>{data.fullSummary}</ChatMarkdown>
+            <SafeGfmMarkdown>{data.fullSummary}</SafeGfmMarkdown>
           </div>
           <dl className="grid gap-x-4 gap-y-1.5">
             <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">

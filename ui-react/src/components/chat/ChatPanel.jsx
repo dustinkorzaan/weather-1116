@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Maximize2, Minimize2 } from 'lucide-react';
-import ChatMarkdown from './ChatMarkdown';
+import SafeGfmMarkdown from '../markdown/SafeGfmMarkdown';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
@@ -408,7 +408,7 @@ function ChatPanel() {
                 ) : (
                   <div key={`${activeTab}-${index}`} className={messageClasses(entry)}>
                     {entry.role === 'assistant' && !entry.streaming ? (
-                      <ChatMarkdown>{entry.content}</ChatMarkdown>
+                      <SafeGfmMarkdown>{entry.content}</SafeGfmMarkdown>
                     ) : (
                       entry.content
                     )}

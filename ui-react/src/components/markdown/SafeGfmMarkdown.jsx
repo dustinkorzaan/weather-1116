@@ -2,7 +2,7 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 
-function ChatMarkdown({ children }) {
+function SafeGfmMarkdown({ children }) {
   return (
     <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
       {children}
@@ -10,4 +10,4 @@ function ChatMarkdown({ children }) {
   );
 }
 
-export default ChatMarkdown;
+export default SafeGfmMarkdown;

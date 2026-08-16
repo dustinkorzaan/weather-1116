@@ -90,9 +90,9 @@
     const item = document.createElement('div');
     const role = MESSAGE_ROLES.includes(entry.role) ? entry.role : 'assistant';
     item.className = `chat-message ${role}`;
-    if (role === 'assistant' && !entry.streaming && window.chatMarkdown) {
+    if (role === 'assistant' && !entry.streaming && window.safeGfmMarkdown) {
       item.classList.add('chat-markdown');
-      item.innerHTML = window.chatMarkdown.render(entry.content);
+      item.innerHTML = window.safeGfmMarkdown.render(entry.content);
     } else {
       item.textContent = entry.content;
     }

@@ -1,13 +1,13 @@
-using WeatherBlazor.Data;
+using WeatherBlazor.Markdown;
 
 namespace WeatherBlazor.Tests;
 
-public sealed class ChatMarkdownTests
+public sealed class SafeGfmMarkdownTests
 {
     [Fact]
     public void ToHtml_RendersGfmTablesAndEmphasis()
     {
-        var html = ChatMarkdown.ToHtml("""
+        var html = SafeGfmMarkdown.ToHtml("""
             **Warmest** today:
 
             | City | Temp |
@@ -26,7 +26,7 @@ public sealed class ChatMarkdownTests
     [Fact]
     public void ToHtml_StripsRawHtmlAndUnsafeLinks()
     {
-        var html = ChatMarkdown.ToHtml("Hello <script>alert(1)</script> [x](javascript:alert(1))");
+        var html = SafeGfmMarkdown.ToHtml("Hello <script>alert(1)</script> [x](javascript:alert(1))");
 
         Assert.DoesNotContain("<script", html, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("javascript:", html, StringComparison.OrdinalIgnoreCase);

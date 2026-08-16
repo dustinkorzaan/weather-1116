@@ -51,8 +51,8 @@
           return response.json();
         })
         .then(function (data) {
-          if (window.chatMarkdown) {
-            summaryEl.innerHTML = window.chatMarkdown.render(data.fullSummary || '');
+          if (window.safeGfmMarkdown) {
+            summaryEl.innerHTML = window.safeGfmMarkdown.render(data.fullSummary || '');
           } else {
             summaryEl.textContent = data.fullSummary || '';
           }

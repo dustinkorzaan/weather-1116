@@ -19,5 +19,5 @@
     return window.DOMPurify.sanitize(html);
   }
 
-  window.chatMarkdown = { render: render };
+  window.safeGfmMarkdown = { render: render };
 })(window);

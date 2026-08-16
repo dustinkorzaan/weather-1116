@@ -1,10 +1,10 @@
 import { expect, test } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ChatMarkdown from './ChatMarkdown';
+import SafeGfmMarkdown from './SafeGfmMarkdown';
 
 test('renders GFM tables and emphasis after the markdown is complete', () => {
   render(
-    <ChatMarkdown>
+    <SafeGfmMarkdown>
       {`**Warmest** today:
 
 | City | Temp |
@@ -12,7 +12,7 @@ test('renders GFM tables and emphasis after the markdown is complete', () => {
 | Nashville | 72 |
 | Atlanta | 80 |
 `}
-    </ChatMarkdown>
+    </SafeGfmMarkdown>
   );
 
   expect(screen.getByRole('table')).toBeDefined();
@@ -23,7 +23,7 @@ test('renders GFM tables and emphasis after the markdown is complete', () => {
 
 test('does not render raw HTML from the model', () => {
   render(
-    <ChatMarkdown>{'Hello <script>alert(1)</script> world'}</ChatMarkdown>
+    <SafeGfmMarkdown>{'Hello <script>alert(1)</script> world'}</SafeGfmMarkdown>
   );
 
   expect(document.querySelector('script')).toBeNull();

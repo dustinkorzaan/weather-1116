@@ -76,7 +76,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("class=\"weather-card\"", html);
         Assert.Contains("class=\"btn\"", html);
         Assert.Contains("chat-markdown", html);
-        Assert.Contains("chatMarkdown.js", html);
+        Assert.Contains("safeGfmMarkdown.js", html);
         Assert.Contains("marked.min.js", html);
         Assert.Contains("purify.min.js", html);
         Assert.DoesNotContain("aria-label=\"Add location\"", html);
@@ -150,7 +150,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("params.get('location')", script);
         Assert.Contains("history.replaceState", script);
         Assert.Contains("requestWeather()", script);
-        Assert.Contains("chatMarkdown.render", script);
+        Assert.Contains("safeGfmMarkdown.render", script);
         Assert.Contains("summaryEl.innerHTML", script);
     }
 
@@ -169,7 +169,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("class=\"chat-tab is-active\"", html);
         Assert.Contains("aria-label=\"Enter fullscreen\"", html);
         Assert.Contains("chatFullscreen.js", html);
-        Assert.Contains("chatMarkdown.js", html);
+        Assert.Contains("safeGfmMarkdown.js", html);
         Assert.Contains("marked.min.js", html);
         Assert.Contains("purify.min.js", html);
         Assert.DoesNotContain("aria-label=\"Add location\"", html);
@@ -190,10 +190,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("chat-tool-hover-wrap", script);
         Assert.Contains("scheduleToolHoverHide", script);
         Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", script);
-        Assert.Contains("chatMarkdown.render", script);
+        Assert.Contains("safeGfmMarkdown.render", script);
         Assert.Contains("streaming", script);
 
-        var markdown = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatMarkdown.js"));
+        var markdown = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/markdown/safeGfmMarkdown.js"));
         Assert.Contains("marked.parse", markdown);
         Assert.Contains("gfm: true", markdown);
         Assert.Contains("DOMPurify.sanitize", markdown);

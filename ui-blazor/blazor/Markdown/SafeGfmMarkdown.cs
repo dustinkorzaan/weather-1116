@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
 using Markdig;
 
-namespace WeatherBlazor.Data;
+namespace WeatherBlazor.Markdown;
 
-public static class ChatMarkdown
+public static class SafeGfmMarkdown
 {
     private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
         .UseAdvancedExtensions()
