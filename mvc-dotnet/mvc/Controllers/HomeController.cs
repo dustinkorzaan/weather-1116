@@ -45,13 +45,6 @@ public class HomeController : Controller
         return View();
     }
 
-    [Route("presentation")]
-    [Route("Home/Presentation")]
-    public IActionResult Presentation()
-    {
-        return RedirectPermanent("/hello-world");
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetCurrentAIWeather([FromQuery] string? location, CancellationToken cancellationToken)
     {

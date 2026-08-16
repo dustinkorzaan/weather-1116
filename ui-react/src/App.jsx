@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 import { User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -185,7 +185,6 @@ function App() {
           <Route path="/hello-world" element={<HelloWorldPage />} />
           <Route path="/current-ai-weather" element={<CurrentAIWeatherPage />} />
           <Route path="/chat-clients" element={<ChatClientsPage />} />
-          <Route path="/presentation" element={<Navigate to="/hello-world" replace />} />
         </Routes>
       </div>
 

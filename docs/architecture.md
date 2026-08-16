@@ -228,7 +228,6 @@ and layout code instead of sharing it.
 | `/current-ai-weather` | Same top bar, then the Current AI Weather widget — no map |
 | `/chat-clients` | Same top bar, then the chat clients (ChatPanel) — no map |
 
-The former `/presentation` route redirects to `/hello-world` in all three UIs.
 The former `/chat` route is removed (the chat backends `Chat1a`/`Chat1b`/`Chat2a`/`Chat2b`
 are unchanged; chat now lives on `/chat-clients`).
 

@@ -39,6 +39,6 @@ and the Foundry console learning path (V1 → V5).
 5. **V5** — hosted Foundry agent demo; agent owns instructions, response schema, and MCP tools; console sends only the user prompt.
 6. **Production** — V4 model-direct path in `GetCurrentAIWeatherHandler` (API/MVC).
 7. **Demos** — React / Blazor / API `GetCurrentAIWeather`; optional MCP inspector on 8110 / 8120.
-8. **Chat clients** — `/chat-clients` in React, Blazor, and MVC (the old `/chat` and combined `/presentation` routes are gone); compare Chat1a–Chat2b side by side.
+8. **Chat clients** — `/chat-clients` in React, Blazor, and MVC; compare Chat1a–Chat2b side by side.
 
 Adjust 1–3 to taste, keep the main pallet focused on 4–6, and finish the menu with hands-on paths in the repo.

@@ -116,14 +116,6 @@ test('renders chat clients on its own page', () => {
   expect(screen.queryByRole('region', { name: /map/i })).toBeNull();
 });
 
-test('redirects the old presentation route to hello world', async () => {
-  mockHelloFetch();
-  renderApp('/presentation');
-
-  expect(await screen.findByRole('heading', { name: /^hello world$/i })).toBeDefined();
-  expect(await screen.findByText('Hello from test API.')).toBeDefined();
-});
-
 test('user menu lists login and the three split pages instead of presentation', async () => {
   mockHelloFetch();
   const user = userEvent.setup();

@@ -72,17 +72,6 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
     }
 
-    [Fact]
-    public void Presentation_RedirectsToHelloWorld()
-    {
-        using var context = CreateContext();
-        var navigation = context.Services.GetRequiredService<Bunit.TestDoubles.BunitNavigationManager>();
-
-        context.Render<WeatherBlazor.Pages.Presentation>();
-
-        Assert.EndsWith("/hello-world", navigation.Uri, StringComparison.Ordinal);
-    }
-
     private static BunitContext CreateContext()
     {
         var context = new BunitContext();

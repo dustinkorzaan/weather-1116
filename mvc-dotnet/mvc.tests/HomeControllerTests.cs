@@ -4,7 +4,7 @@ namespace WeatherMVC.Tests;
 
 public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : IClassFixture<WeatherMvcWebApplicationFactory>
 {
-    private readonly HttpClient _client = factory.CreateClient(new() { AllowAutoRedirect = false });
+    private readonly HttpClient _client = factory.CreateClient();
 
     [Fact]
     public async Task Index_ReturnsOkWithMapAndWithoutSplitPageContent()
@@ -79,21 +79,11 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
-    public async Task Presentation_RedirectsToHelloWorld()
+    public async Task Presentation_IsNotARoute()
     {
         var response = await _client.GetAsync("/presentation");
 
-        Assert.Equal(HttpStatusCode.MovedPermanently, response.StatusCode);
-        Assert.Equal("/hello-world", response.Headers.Location?.OriginalString);
-    }
-
-    [Fact]
-    public async Task Presentation_RedirectsAtConventionalRoute()
-    {
-        var response = await _client.GetAsync("/Home/Presentation");
-
-        Assert.Equal(HttpStatusCode.MovedPermanently, response.StatusCode);
-        Assert.Equal("/hello-world", response.Headers.Location?.OriginalString);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
