@@ -90,6 +90,8 @@ public sealed class PageSplitTests
         Assert.Contains("marker.addListener('click', openCard)", script);
         Assert.Contains("Get Current AI Weather", script);
         Assert.Contains("bindPinHoverCard", script);
+        Assert.Contains("LIGHT_MAP_STYLES", script);
+        Assert.Contains("weather-theme-change", script);
     }
 
     [Fact]

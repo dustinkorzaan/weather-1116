@@ -36,6 +36,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("href=\"/current-ai-weather\"", html);
         Assert.Contains("href=\"/chat-clients\"", html);
         Assert.Contains("Login/Logout", html);
+        Assert.Contains("data-theme-option=\"light\"", html);
+        Assert.Contains("data-theme-option=\"dark\"", html);
+        Assert.Contains("data-theme-option=\"system\"", html);
         Assert.DoesNotContain("Hello, from WeatherMVC", html);
         Assert.DoesNotContain("id=\"ai-weather-form\"", html);
         Assert.DoesNotContain("id=\"chat-messages\"", html);
@@ -112,6 +115,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("marker.addListener('click', openCard)", script);
         Assert.Contains("Get Current AI Weather", script);
         Assert.Contains("bindPinHoverCard", script);
+        Assert.Contains("LIGHT_MAP_STYLES", script);
+        Assert.Contains("weather-theme-change", script);
     }
 
     [Fact]
@@ -170,6 +175,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("border: 2px solid var(--color-border-strong)", css);
         Assert.Contains("#weather-map", css);
         Assert.Contains(".weather-map-pin-card", css);
+        Assert.Contains("html.dark", css);
         Assert.Contains("[hidden]", css);
         Assert.DoesNotContain("tailwindcss", css, StringComparison.OrdinalIgnoreCase);
     }

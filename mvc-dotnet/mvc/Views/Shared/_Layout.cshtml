@@ -12,7 +12,27 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#111827" />
+    <meta name="theme-color" content="#ffffff" />
+    <script>
+        (function () {
+            var key = 'weather-theme';
+            var stored;
+            try { stored = localStorage.getItem(key); } catch (e) { stored = null; }
+            var preference = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+            var resolved = preference === 'system'
+                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : preference;
+            var root = document.documentElement;
+            root.classList.toggle('dark', resolved === 'dark');
+            root.setAttribute('data-theme', resolved);
+            root.setAttribute('data-theme-preference', preference);
+            root.style.colorScheme = resolved;
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) {
+                meta.setAttribute('content', resolved === 'dark' ? '#111827' : '#ffffff');
+            }
+        })();
+    </script>
     <title>@ViewData["Title"] - Weather MVC</title>
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" asp-append-version="true" />
     <link rel="apple-touch-icon" href="~/apple-touch-icon.png" asp-append-version="true" />
@@ -69,6 +89,16 @@
                     </li>
                     <li role="separator"><hr class="menu-separator" /></li>
                     <li role="none">
+                        <button class="menu-item" type="button" role="menuitemradio" data-theme-option="light" aria-checked="false">Light</button>
+                    </li>
+                    <li role="none">
+                        <button class="menu-item" type="button" role="menuitemradio" data-theme-option="dark" aria-checked="false">Dark</button>
+                    </li>
+                    <li role="none">
+                        <button class="menu-item" type="button" role="menuitemradio" data-theme-option="system" aria-checked="false">System</button>
+                    </li>
+                    <li role="separator"><hr class="menu-separator" /></li>
+                    <li role="none">
                         <button id="aboutMenuItem" class="menu-item" type="button" role="menuitem">About</button>
                     </li>
                 </ul>
@@ -106,6 +136,7 @@
         </div>
     </div>
 
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

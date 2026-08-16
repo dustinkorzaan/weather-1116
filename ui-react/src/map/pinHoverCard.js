@@ -15,13 +15,13 @@ export function createPinHoverCard(cityName) {
   card.setAttribute('aria-label', cityName);
 
   const name = document.createElement('div');
-  name.className = 'weather-map-pin-card-name text-sm font-semibold text-gray-900';
+  name.className = 'weather-map-pin-card-name text-sm font-semibold text-foreground';
   name.textContent = cityName;
 
   const button = document.createElement('button');
   button.type = 'button';
   button.className =
-    'weather-map-pin-card-button cursor-pointer rounded-md bg-gray-700 px-2.5 py-1.5 text-left text-sm font-medium text-white shadow-sm hover:bg-gray-800';
+    'weather-map-pin-card-button cursor-pointer rounded-md bg-primary px-2.5 py-1.5 text-left text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/80';
   button.textContent = PIN_HOVER_CARD_BUTTON_LABEL;
 
   card.append(name, button);

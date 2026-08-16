@@ -32,10 +32,10 @@ const TAB_CONFIG = [
 ];
 
 const MESSAGE_CLASSES = {
-  user: 'self-end max-w-[85%] rounded-2xl bg-gray-800 px-3 py-2 text-white whitespace-pre-wrap',
-  assistant: 'self-start max-w-[85%] rounded-2xl border bg-gray-100 px-3 py-2 text-gray-900 whitespace-pre-wrap',
-  tool: 'self-center max-w-[85%] rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-900',
-  error: 'w-full rounded-md bg-red-100 px-3 py-2 text-red-800',
+  user: 'self-end max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap',
+  assistant: 'self-start max-w-[85%] rounded-2xl border border-border bg-muted px-3 py-2 text-foreground whitespace-pre-wrap',
+  tool: 'self-center max-w-[85%] rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200',
+  error: 'w-full rounded-md bg-destructive/15 px-3 py-2 text-destructive',
 };
 
 function messageClasses(role) {
@@ -199,7 +199,7 @@ function ChatPanel() {
   return (
     <div>
       <h2 className="text-xl font-semibold">Chat Clients</h2>
-      <p className="mt-1 text-sm text-gray-600">
+      <p className="mt-1 text-sm text-muted-foreground">
         Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
       </p>
 
@@ -213,17 +213,17 @@ function ChatPanel() {
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="h-auto flex-none cursor-pointer rounded-md border-2 border-gray-400 bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-800 shadow-sm after:hidden hover:border-gray-500 hover:bg-gray-200 hover:text-gray-900 group-data-[variant=line]/tabs-list:bg-gray-100 group-data-[variant=line]/tabs-list:hover:bg-gray-200 group-data-[variant=line]/tabs-list:data-active:bg-gray-700 group-data-[variant=line]/tabs-list:data-active:text-white data-active:border-gray-700 data-active:bg-gray-700 data-active:text-white data-active:shadow-none data-active:hover:bg-gray-800 data-active:hover:text-white"
+              className="h-auto flex-none cursor-pointer rounded-md border-2 border-border bg-muted px-3 py-1.5 text-sm font-medium text-foreground shadow-sm after:hidden hover:border-foreground/40 hover:bg-accent hover:text-accent-foreground group-data-[variant=line]/tabs-list:bg-muted group-data-[variant=line]/tabs-list:hover:bg-accent group-data-[variant=line]/tabs-list:data-active:bg-primary group-data-[variant=line]/tabs-list:data-active:text-primary-foreground data-active:border-primary data-active:bg-primary data-active:text-primary-foreground data-active:shadow-none data-active:hover:bg-primary/80 data-active:hover:text-primary-foreground"
             >
               {tab.label}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        <p className="mt-2 text-sm text-gray-600">{activeConfig.description}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{activeConfig.description}</p>
 
         <TabsContent value={activeTab} className="mt-3">
-          <section className="rounded-lg border border-gray-300 bg-white p-3" aria-label="Chat conversation">
+          <section className="rounded-lg border border-border bg-card p-3" aria-label="Chat conversation">
             <div className="flex max-h-96 min-h-40 flex-col gap-2 overflow-y-auto p-1">
               {histories[activeTab].map((entry, index) => (
                 <div key={`${activeTab}-${index}`} className={messageClasses(entry.role)}>
@@ -236,7 +236,7 @@ function ChatPanel() {
               <label className="sr-only" htmlFor="chat-input">Message</label>
               <textarea
                 id="chat-input"
-                className="w-full flex-1 resize-y rounded-md border border-gray-300 px-2.5 py-2 focus:border-gray-800 focus:outline-none disabled:bg-gray-100"
+                className="w-full flex-1 resize-y rounded-md border border-input bg-background px-2.5 py-2 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
                 rows={3}
                 value={input}
                 placeholder="Ask about weather in a city…"
@@ -245,7 +245,7 @@ function ChatPanel() {
                 disabled={isActiveTabSending}
               />
               <Button
-                className="bg-gray-700 px-4 py-2 text-white shadow-sm hover:bg-gray-800"
+                className="bg-primary px-4 py-2 text-primary-foreground shadow-sm hover:bg-primary/80"
                 type="submit"
                 disabled={isActiveTabSending}
               >

@@ -12,9 +12,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useTheme } from './theme/useTheme';
 import { siteLinks } from './config/siteLinks';
 import ChatClientsPage from './pages/ChatClientsPage';
 import CurrentAIWeatherPage from './pages/CurrentAIWeatherPage';
@@ -62,22 +66,24 @@ export function AboutTreeNode({ node }) {
   return (
     <li className="my-2">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-semibold text-gray-900">{node.name ?? 'Unnamed node'}</span>
+        <span className="font-semibold text-foreground">{node.name ?? 'Unnamed node'}</span>
         <span
           className={`rounded-full px-2 py-0.5 text-[0.7rem] font-bold tracking-wide uppercase ${
-            node.isHealthy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            node.isHealthy
+              ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300'
+              : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
           }`}
         >
           {node.isHealthy ? 'Healthy' : 'Unhealthy'}
         </span>
       </div>
-      {node.publicMessage && <div className="mt-1 text-xs text-gray-600">{node.publicMessage}</div>}
+      {node.publicMessage && <div className="mt-1 text-xs text-muted-foreground">{node.publicMessage}</div>}
       {metadata.length > 0 && (
-        <div className="mt-1 text-xs text-gray-500">
+        <div className="mt-1 text-xs text-muted-foreground">
           {metadata.map((item, index) => (
             <span key={`${item.text}-${index}`}>
               {index > 0 && ' | '}
-              <span className={item.isBranch && item.value !== 'main' ? 'text-amber-600' : undefined}>
+              <span className={item.isBranch && item.value !== 'main' ? 'text-amber-600 dark:text-amber-400' : undefined}>
                 {item.text}
               </span>
             </span>
@@ -98,11 +104,11 @@ export function AboutTreeNode({ node }) {
 
 function SiteLinksFooter() {
   return (
-    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-3 border-t border-gray-200 pt-3 text-sm">
+    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-3 border-t border-border pt-3 text-sm">
       {siteLinks.map((link) => (
         <a
           key={link.label}
-          className="text-gray-700 hover:underline"
+          className="text-foreground/80 hover:underline"
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
@@ -111,7 +117,7 @@ function SiteLinksFooter() {
         </a>
       ))}
       <a
-        className="text-gray-700 hover:underline"
+        className="text-foreground/80 hover:underline"
         href="https://github.com/dustinkorzaan/weather-1116"
         target="_blank"
         rel="noopener noreferrer"
@@ -125,6 +131,7 @@ function SiteLinksFooter() {
 function App() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [loadAbout, aboutQuery] = useLazyGetAboutQuery();
+  const { preference, setPreference } = useTheme();
 
   const handleAboutClick = () => {
     setIsAboutOpen(true);
@@ -132,8 +139,8 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-white text-gray-900">
-      <header className="border-b border-gray-200 bg-white shadow-sm">
+    <div className="flex h-screen flex-col bg-background text-foreground">
+      <header className="border-b border-border bg-background shadow-sm">
         <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link className="flex min-w-0 items-center gap-2 text-inherit no-underline" to="/">
             <img src="/logo.svg" alt="Weather logo" className="h-6 w-6 shrink-0" />
@@ -147,7 +154,7 @@ function App() {
                 variant="outline"
                 size="icon"
                 aria-label="Open user menu"
-                className="size-9 rounded-full border-2 border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                className="size-9 rounded-full border-2 border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 <User className="size-5" strokeWidth={2.25} aria-hidden="true" />
               </Button>
@@ -173,6 +180,13 @@ function App() {
                 <Link to="/chat-clients">Chat Clients</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuLabel>Theme</DropdownMenuLabel>
+              <DropdownMenuRadioGroup value={preference} onValueChange={setPreference}>
+                <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={handleAboutClick}>About</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -195,16 +209,16 @@ function App() {
           </DialogHeader>
           <div className="min-h-16">
             {aboutQuery.isFetching && (
-              <p className="inline-flex items-center gap-2 text-gray-700">
+              <p className="inline-flex items-center gap-2 text-muted-foreground">
                 <span
-                  className="size-4 animate-spin rounded-full border-2 border-gray-200 border-t-gray-600"
+                  className="size-4 animate-spin rounded-full border-2 border-border border-t-foreground"
                   aria-hidden="true"
                 />
                 <span>Loading About information...</span>
               </p>
             )}
             {!aboutQuery.isFetching && aboutQuery.isError && (
-              <p className="text-red-700">Unable to load About information.</p>
+              <p className="text-destructive">Unable to load About information.</p>
             )}
             {!aboutQuery.isFetching && !aboutQuery.isError && aboutQuery.data && (
               <ul className="list-disc pl-5">

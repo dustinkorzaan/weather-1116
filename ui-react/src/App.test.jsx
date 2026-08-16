@@ -89,6 +89,10 @@ function renderAppWithRouter(path) {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  document.documentElement.classList.remove('dark');
+  document.documentElement.removeAttribute('data-theme');
+  document.documentElement.removeAttribute('data-theme-preference');
+  window.localStorage.removeItem('weather-theme');
 });
 
 test('user menu is a gray outline control instead of a solid blue button', () => {
@@ -148,8 +152,8 @@ test('current AI weather submit is a charcoal button instead of blue or a flat o
   renderApp('/current-ai-weather');
 
   const button = screen.getByRole('button', { name: /get current ai weather/i });
-  expect(button.className).toMatch(/bg-gray-700/);
-  expect(button.className).toMatch(/text-white/);
+  expect(button.className).toMatch(/bg-primary/);
+  expect(button.className).toMatch(/text-primary-foreground/);
   expect(button.className).toMatch(/cursor-pointer/);
   expect(button.className).not.toMatch(/bg-blue/);
   expect(button.className).not.toMatch(/bg-white/);
@@ -166,12 +170,12 @@ test('chat tabs and send use clickable gray controls instead of blue', () => {
   const tab = screen.getByRole('tab', { name: 'Chat1a' });
   expect(tab.className).toMatch(/cursor-pointer/);
   expect(tab.className).toMatch(/border-2/);
-  expect(tab.className).toMatch(/bg-gray-100|bg-gray-700/);
+  expect(tab.className).toMatch(/bg-muted|bg-primary/);
   expect(tab.className).not.toMatch(/bg-blue/);
 
   const send = screen.getByRole('button', { name: /^send$/i });
-  expect(send.className).toMatch(/bg-gray-700/);
-  expect(send.className).toMatch(/text-white/);
+  expect(send.className).toMatch(/bg-primary/);
+  expect(send.className).toMatch(/text-primary-foreground/);
   expect(send.className).toMatch(/cursor-pointer/);
   expect(send.className).not.toMatch(/bg-blue/);
 });
@@ -224,6 +228,22 @@ test('user menu lists login and the three content pages', async () => {
   expect(screen.getByRole('menuitem', { name: 'Hello World' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Current AI Weather' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Chat Clients' })).toBeDefined();
+  expect(screen.getByRole('menuitemradio', { name: 'Light' })).toBeDefined();
+  expect(screen.getByRole('menuitemradio', { name: 'Dark' })).toBeDefined();
+  expect(screen.getByRole('menuitemradio', { name: 'System' })).toBeDefined();
+});
+
+test('user menu can switch the document to the dark theme', async () => {
+  mockHelloFetch();
+  const user = userEvent.setup();
+  renderApp('/');
+
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
+  await user.click(await screen.findByRole('menuitemradio', { name: 'Dark' }));
+
+  expect(document.documentElement.classList.contains('dark')).toBe(true);
+  expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  expect(window.localStorage.getItem('weather-theme')).toBe('dark');
 });
 
 test('renders a public message in the About tree', () => {

@@ -39,8 +39,63 @@ window.weatherMap = (function () {
     },
   ];
 
+  const LIGHT_MAP_STYLES = [
+    { elementType: 'geometry', stylers: [{ color: '#e8eef4' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#4b5563' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#e8eef4' }] },
+    {
+      featureType: 'administrative',
+      elementType: 'geometry.stroke',
+      stylers: [{ color: '#cbd5e1' }],
+    },
+    {
+      featureType: 'administrative.land_parcel',
+      stylers: [{ visibility: 'off' }],
+    },
+    {
+      featureType: 'administrative.neighborhood',
+      stylers: [{ visibility: 'off' }],
+    },
+    {
+      featureType: 'administrative.province',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#4b5563' }],
+    },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'road', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    {
+      featureType: 'water',
+      elementType: 'geometry',
+      stylers: [{ color: '#c5d4e0' }],
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#64748b' }],
+    },
+  ];
+
   let loadPromise = null;
   const mapByElement = new WeakMap();
+  const themedMaps = [];
+
+  function resolvedTheme() {
+    if (window.weatherTheme && typeof window.weatherTheme.resolve === 'function') {
+      return window.weatherTheme.resolve(window.weatherTheme.getPreference());
+    }
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+
+  function mapAppearance(theme) {
+    const isDark = theme === 'dark';
+    return {
+      styles: isDark ? DARK_MAP_STYLES : LIGHT_MAP_STYLES,
+      backgroundColor: isDark ? '#0b111d' : '#e8eef4',
+      pinFill: isDark ? '#ffffff' : '#111827',
+      labelColor: isDark ? '#e4e4e7' : '#1f2937',
+    };
+  }
   let activeCloseCard = null;
 
   function loadGoogleMaps(apiKey) {
@@ -90,15 +145,32 @@ window.weatherMap = (function () {
     return '/current-ai-weather?location=' + encodeURIComponent(trimmed);
   }
 
-  function createWhiteDotIcon(maps) {
+  function createPinIcon(maps, pinFill) {
     return {
       path: maps.SymbolPath.CIRCLE,
       scale: 6,
-      fillColor: '#ffffff',
+      fillColor: pinFill,
       fillOpacity: 1,
       strokeWeight: 0,
       labelOrigin: new maps.Point(18, 0),
     };
+  }
+
+  function applyMapAppearance(entry, theme) {
+    const appearance = mapAppearance(theme || resolvedTheme());
+    entry.map.setOptions({
+      styles: appearance.styles,
+      backgroundColor: appearance.backgroundColor,
+    });
+    const icon = createPinIcon(entry.maps, appearance.pinFill);
+    entry.markers.forEach(function (marker) {
+      const label = marker.getLabel();
+      marker.setIcon(icon);
+      if (label) {
+        label.color = appearance.labelColor;
+        marker.setLabel(label);
+      }
+    });
   }
 
   function createPinHoverCard(cityName) {
@@ -226,19 +298,21 @@ window.weatherMap = (function () {
         return mapByElement.get(current);
       }
 
+      const appearance = mapAppearance(resolvedTheme());
       const map = new maps.Map(current, {
         center: DEFAULT_CENTER,
         zoom: DEFAULT_ZOOM,
-        styles: DARK_MAP_STYLES,
+        styles: appearance.styles,
         disableDefaultUI: true,
         zoomControl: true,
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: false,
-        backgroundColor: '#0b111d',
+        backgroundColor: appearance.backgroundColor,
       });
 
-      const icon = createWhiteDotIcon(maps);
+      const icon = createPinIcon(maps, appearance.pinFill);
+      const markers = [];
       (cities || []).forEach(function (city) {
         const marker = new maps.Marker({
           map: map,
@@ -248,7 +322,7 @@ window.weatherMap = (function () {
           cursor: 'pointer',
           label: {
             text: city.name,
-            color: '#e4e4e7',
+            color: appearance.labelColor,
             fontSize: '12px',
             fontWeight: '500',
             className: 'weather-map-label',
@@ -258,8 +332,10 @@ window.weatherMap = (function () {
         bindPinHoverCard(maps, map, marker, city.name, function (cityName) {
           window.location.assign(currentAiWeatherPath(cityName));
         });
+        markers.push(marker);
       });
 
+      themedMaps.push({ maps: maps, map: map, markers: markers });
       mapByElement.set(current, map);
       current.setAttribute('data-status', 'ready');
       observeMapSize(current, map);
@@ -365,6 +441,13 @@ window.weatherMap = (function () {
   } else {
     startAutoInit();
   }
+
+  window.addEventListener('weather-theme-change', function (event) {
+    const theme = event.detail && event.detail.resolved ? event.detail.resolved : resolvedTheme();
+    themedMaps.forEach(function (entry) {
+      applyMapAppearance(entry, theme);
+    });
+  });
 
   return {
     init: init,

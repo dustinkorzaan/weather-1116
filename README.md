@@ -38,6 +38,9 @@ framework-native library (no shared CSS, config, or components):
 | Blazor | Fluent UI Blazor |
 | MVC | Hand-written CSS + vanilla JS ([`mvc-dotnet/README.md`](mvc-dotnet/README.md)) |
 
+The avatar menu includes **Light**, **Dark**, and **System** theme options on
+all three UIs (persisted per origin; System follows `prefers-color-scheme`).
+
 ## Foundry console demos
 
 Presentation reference: [`docs/presentation.md`](docs/presentation.md)

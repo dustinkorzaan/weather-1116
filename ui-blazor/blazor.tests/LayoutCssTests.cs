@@ -60,6 +60,9 @@ public sealed class LayoutCssTests
         Assert.Contains("Hello World", layoutSource);
         Assert.Contains("Current AI Weather", layoutSource);
         Assert.Contains("Chat Clients", layoutSource);
+        Assert.Contains("ThemeItemLabel(\"light\", \"Light\")", layoutSource);
+        Assert.Contains("ThemeItemLabel(\"dark\", \"Dark\")", layoutSource);
+        Assert.Contains("ThemeItemLabel(\"system\", \"System\")", layoutSource);
         Assert.Contains("NavigateTo(\"/hello-world\")", layoutSource);
         Assert.Contains("NavigateTo(\"/current-ai-weather\")", layoutSource);
         Assert.Contains("NavigateTo(\"/chat-clients\")", layoutSource);
@@ -97,7 +100,9 @@ public sealed class LayoutCssTests
         Assert.Contains("outline: none", css);
         Assert.Contains(".form-row-start", css);
         Assert.Contains("align-items: flex-start", css);
-        Assert.Contains("border: 2px solid #d1d5db", css);
+        Assert.Contains("border: 2px solid var(--wx-border-strong)", css);
+        Assert.Contains("html.dark", css);
+        Assert.Contains("--wx-map", css);
         Assert.Contains("stroke-width: 2.25", css);
         Assert.Contains(".about-modal.is-open", css);
         Assert.Contains(".about-close", css);

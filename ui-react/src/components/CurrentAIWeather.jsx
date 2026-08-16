@@ -54,7 +54,7 @@ function CurrentAIWeather() {
         </label>
         <input
           id="ai-weather-location"
-          className="min-w-40 max-w-80 flex-1 rounded-md border border-gray-300 px-2.5 py-1.5 focus:border-gray-800 focus:outline-none disabled:bg-gray-100"
+          className="min-w-40 max-w-80 flex-1 rounded-md border border-input bg-background px-2.5 py-1.5 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
           type="text"
           value={location}
           onChange={(event) => setLocation(event.target.value)}
@@ -64,13 +64,13 @@ function CurrentAIWeather() {
         <Button
           type="submit"
           size="lg"
-          className="bg-gray-700 text-white shadow-sm hover:bg-gray-800"
+          className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/80"
           disabled={isFetching}
           aria-busy={isFetching}
         >
           {isFetching && (
             <span
-              className="size-4 animate-spin rounded-full border-2 border-gray-500 border-t-white"
+              className="size-4 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground"
               aria-hidden="true"
             />
           )}
@@ -78,7 +78,7 @@ function CurrentAIWeather() {
         </Button>
       </form>
 
-      {isError && <p className="mt-2 text-red-700">{errorMessage}</p>}
+      {isError && <p className="mt-2 text-destructive">{errorMessage}</p>}
 
       {data && !isFetching && (
         <div className="mt-3.5">

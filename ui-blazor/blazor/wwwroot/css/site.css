@@ -1,5 +1,46 @@
 /* Blazor UI is styled with Fluent UI Blazor. Only styles Fluent does not cover live here. */
 
+:root {
+    --wx-bg: #ffffff;
+    --wx-fg: #111827;
+    --wx-muted: #6b7280;
+    --wx-soft: #374151;
+    --wx-border: #e5e7eb;
+    --wx-border-strong: #d1d5db;
+    --wx-hover: #f9fafb;
+    --wx-map: #e8eef4;
+    --wx-chat-user-bg: #1f2937;
+    --wx-chat-user-fg: #ffffff;
+    --wx-assistant-bg: #f5f5f5;
+    --wx-assistant-border: #e0e0e0;
+    --wx-tool-bg: #fff4ce;
+    --wx-error-bg: #fde7e9;
+    --wx-error-fg: #a4262c;
+    --wx-healthy-bg: #dff6dd;
+    --wx-healthy-fg: #0e700e;
+}
+
+html.dark,
+html[data-theme="dark"] {
+    --wx-bg: #1f2937;
+    --wx-fg: #f9fafb;
+    --wx-muted: #9ca3af;
+    --wx-soft: #d1d5db;
+    --wx-border: #374151;
+    --wx-border-strong: #4b5563;
+    --wx-hover: #374151;
+    --wx-map: #0b111d;
+    --wx-chat-user-bg: #e5e7eb;
+    --wx-chat-user-fg: #111827;
+    --wx-assistant-bg: #111827;
+    --wx-assistant-border: #4b5563;
+    --wx-tool-bg: #78350f;
+    --wx-error-bg: #7f1d1d;
+    --wx-error-fg: #fecaca;
+    --wx-healthy-bg: #14532d;
+    --wx-healthy-fg: #bbf7d0;
+}
+
 html, body {
     height: 100%;
     margin: 0;
@@ -8,6 +49,8 @@ html, body {
 body {
     display: flex;
     flex-direction: column;
+    background: var(--wx-bg);
+    color: var(--wx-fg);
 }
 
 .weather-shell {
@@ -47,7 +90,7 @@ body {
     min-width: 0;
     align-items: center;
     gap: 0.5rem;
-    color: #111827;
+    color: var(--wx-fg);
     text-decoration: none;
     outline: none;
 }
@@ -72,9 +115,9 @@ body {
 }
 
 .layout.weather-shell > .header.weather-header {
-    background-color: #ffffff;
-    color: #111827;
-    border-bottom: 1px solid #e5e7eb;
+    background-color: var(--wx-bg);
+    color: var(--wx-fg);
+    border-bottom: 1px solid var(--wx-border);
 }
 
 .layout.weather-shell .avatar-button,
@@ -84,16 +127,16 @@ body {
     width: 2.25rem;
     height: 2.25rem;
     padding: 0;
-    color: #6b7280;
-    background: #ffffff;
-    border: 2px solid #d1d5db;
+    color: var(--wx-muted);
+    background: var(--wx-bg);
+    border: 2px solid var(--wx-border-strong);
     border-radius: 9999px;
 }
 
 .layout.weather-shell .avatar-button:hover,
 .layout.weather-shell #user-menu-button:hover {
-    color: #374151;
-    background: #f9fafb;
+    color: var(--wx-soft);
+    background: var(--wx-hover);
 }
 
 .layout.weather-shell .avatar-button svg,
@@ -183,7 +226,7 @@ fluent-menu-item a {
 
 .footer-links fluent-anchor,
 .footer-links a {
-    color: #374151;
+    color: var(--wx-soft);
 }
 
 .about-modal {
@@ -209,7 +252,8 @@ fluent-menu-item a {
     flex-direction: column;
     overflow: hidden;
     border-radius: 0.75rem;
-    background: #ffffff;
+    background: var(--wx-bg);
+    color: var(--wx-fg);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
@@ -218,7 +262,7 @@ fluent-menu-item a {
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--wx-border);
 }
 
 .about-dialog-title {
@@ -231,14 +275,14 @@ fluent-menu-item a {
     padding: 0;
     border: 0;
     background: transparent;
-    color: #4b5563;
+    color: var(--wx-muted);
     font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
 }
 
 .about-close:hover {
-    color: #111827;
+    color: var(--wx-fg);
 }
 
 .about-dialog-body {
@@ -278,13 +322,13 @@ fluent-menu-item a {
 }
 
 .about-tree-health.healthy {
-    background: #dff6dd;
-    color: #0e700e;
+    background: var(--wx-healthy-bg);
+    color: var(--wx-healthy-fg);
 }
 
 .about-tree-health.unhealthy {
-    background: #fde7e9;
-    color: #a4262c;
+    background: var(--wx-error-bg);
+    color: var(--wx-error-fg);
 }
 
 .branch-warn {
@@ -308,7 +352,7 @@ fluent-menu-item a {
     min-height: 0;
     width: 100%;
     height: 100%;
-    background-color: #0b111d;
+    background-color: var(--wx-map);
 }
 
 .weather-map-label {
@@ -328,22 +372,22 @@ fluent-menu-item a {
 .weather-map-pin-card-name {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #111827;
+    color: var(--wx-fg);
 }
 
 .weather-map-pin-card-button {
     padding: 0.4rem 0.65rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--wx-border-strong);
     border-radius: 0.375rem;
-    background: #ffffff;
-    color: #111827;
+    background: var(--wx-bg);
+    color: var(--wx-fg);
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
 }
 
 .weather-map-pin-card-button:hover {
-    background: #f9fafb;
+    background: var(--wx-hover);
 }
 
 .weather-map .gm-style-iw-chr,
@@ -354,6 +398,15 @@ fluent-menu-item a {
 .weather-map .gm-style-iw-c {
     padding: 0.75rem 0.85rem !important;
     border-radius: 0.5rem !important;
+    background-color: var(--wx-bg) !important;
+    color: var(--wx-fg) !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.25) !important;
+}
+
+.weather-map .gm-style-iw-tc::after,
+.weather-map .gm-style-iw-t::after {
+    background: var(--wx-bg) !important;
+    background-color: var(--wx-bg) !important;
 }
 
 .weather-map .gm-style-iw-d {
@@ -391,19 +444,19 @@ fluent-menu-item a {
 
 .chat-message.user {
     align-self: flex-end;
-    background: #1f2937;
-    color: #fff;
+    background: var(--wx-chat-user-bg);
+    color: var(--wx-chat-user-fg);
 }
 
 .chat-message.assistant {
     align-self: flex-start;
-    background: #f5f5f5;
-    border: 1px solid #e0e0e0;
+    background: var(--wx-assistant-bg);
+    border: 1px solid var(--wx-assistant-border);
 }
 
 .chat-message.tool {
     align-self: center;
-    background: #fff4ce;
+    background: var(--wx-tool-bg);
     border-radius: 999px;
     padding: 0.25rem 0.75rem;
     font-size: 0.9rem;
@@ -412,13 +465,13 @@ fluent-menu-item a {
 .chat-message.error {
     width: 100%;
     max-width: none;
-    background: #fde7e9;
-    color: #a4262c;
+    background: var(--wx-error-bg);
+    color: var(--wx-error-fg);
     border-radius: 0.4rem;
 }
 
 .error-title {
-    color: #a4262c;
+    color: var(--wx-error-fg);
 }
 
 #blazor-error-ui {

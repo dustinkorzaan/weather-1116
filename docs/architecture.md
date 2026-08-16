@@ -234,7 +234,18 @@ Fluent `Person` in Blazor) and its items are ordered:
 cross-UI external links (UI React / UI Blazor / MVC, API About, Worker Hangfire)
 → divider → **Hello World** (`/hello-world`) → **Current AI Weather**
 (`/current-ai-weather`) → **Chat Clients** (`/chat-clients`) → divider →
+**Light** / **Dark** / **System** (theme) → divider →
 **About** (dialog/modal).
+
+## Theme contract
+
+All three UIs expose the same Light / Dark / System preference in the avatar
+menu. The choice is stored in `localStorage` (`weather-theme`) per origin and
+defaults to **System** (`prefers-color-scheme`). The resolved theme applies to
+chrome, content pages, chat, About, the Google Map canvas, pins, and the pin
+hover card. Each UI implements this with its own tokens (Tailwind/shadcn in
+React, Fluent `DesignThemeModes` plus custom CSS variables in Blazor,
+`:root` / `html.dark` variables in MVC).
 
 ## Responsive Design Contract
 
@@ -259,9 +270,10 @@ differs by library; the behavior does not:
 
 ## Google Maps
 
-Each UI shows a dark-styled Google Map with sample city pins (New York, Toronto,
-Atlanta, Charlotte) filling the landing page (`/`) below the top bar. Weather
-overlays will come later.
+Each UI shows a Google Map with sample city pins (New York, Toronto,
+Atlanta, Charlotte) filling the landing page (`/`) below the top bar. The map
+canvas, pin color, labels, and hover card follow the resolved Light/Dark theme.
+Weather overlays will come later.
 
 **API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
 in a Google Cloud project.

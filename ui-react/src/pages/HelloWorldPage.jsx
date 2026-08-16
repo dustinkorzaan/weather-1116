@@ -9,7 +9,7 @@ function HelloWorldPage() {
         <h2 id="hello-world-heading" className="mb-2 text-xl font-semibold">
           Hello World
         </h2>
-        <p className="text-base leading-normal text-gray-800">
+        <p className="text-base leading-normal text-foreground">
           {isHelloError ? 'Unable to load hello message from API.' : (helloMessage ?? 'Loading hello message...')}
         </p>
       </section>
