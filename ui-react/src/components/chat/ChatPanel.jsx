@@ -14,7 +14,7 @@ const TAB_CONFIG = [
   {
     id: 'Chat1b',
     label: 'Chat1b',
-    description: 'MCP · Responses API · Like Foundry Console V4',
+    description: 'Remote MCP · Responses API · Like Foundry Console V4',
     endpoint: '/Chat1b/messages',
   },
   {
@@ -26,7 +26,7 @@ const TAB_CONFIG = [
   {
     id: 'Chat2b',
     label: 'Chat2b',
-    description: 'MCP · Agent Framework · Like Foundry Console V4',
+    description: 'Remote MCP · Agent Framework · Like Foundry Console V4',
     endpoint: '/Chat2b/messages',
   },
 ];
