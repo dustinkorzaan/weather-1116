@@ -41,7 +41,7 @@ test('createMapOptions forces raster rendering and LIGHT colorScheme for the lig
   const maps = {
     ColorScheme: { LIGHT: 'LIGHT', DARK: 'DARK' },
     RenderingType: { RASTER: 'RASTER', VECTOR: 'VECTOR' },
-    MapTypeId: { ROADMAP: 'roadmap', SATELLITE: 'satellite' },
+    MapTypeId: { ROADMAP: 'roadmap', SATELLITE: 'satellite', HYBRID: 'hybrid', TERRAIN: 'terrain' },
     MapTypeControlStyle: { HORIZONTAL_BAR: 'HORIZONTAL_BAR' },
     ControlPosition: { TOP_LEFT: 'TOP_LEFT' },
   };
@@ -62,7 +62,7 @@ test('createMapOptions forces raster rendering and LIGHT colorScheme for the lig
   expect(options.mapTypeControlOptions).toEqual({
     style: 'HORIZONTAL_BAR',
     position: 'TOP_LEFT',
-    mapTypeIds: ['roadmap', 'satellite'],
+    mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain'],
   });
 });
 

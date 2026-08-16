@@ -133,7 +133,12 @@ window.weatherMap = (function () {
   function createMapTypeControlOptions(maps) {
     const ids = maps && maps.MapTypeId;
     const options = {
-      mapTypeIds: [(ids && ids.ROADMAP) || 'roadmap', (ids && ids.SATELLITE) || 'satellite'],
+      mapTypeIds: [
+        (ids && ids.ROADMAP) || 'roadmap',
+        (ids && ids.SATELLITE) || 'satellite',
+        (ids && ids.HYBRID) || 'hybrid',
+        (ids && ids.TERRAIN) || 'terrain',
+      ],
     };
     if (maps && maps.MapTypeControlStyle && maps.MapTypeControlStyle.HORIZONTAL_BAR) {
       options.style = maps.MapTypeControlStyle.HORIZONTAL_BAR;
