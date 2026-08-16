@@ -176,6 +176,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("payload.toolArguments", script);
         Assert.Contains("payload.toolResult", script);
         Assert.Contains("chat-tool-hover-card", script);
+        Assert.Contains("chat-tool-hover-wrap", script);
+        Assert.Contains("scheduleToolHoverHide", script);
+        Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", script);
     }
 
     [Fact]
@@ -225,6 +228,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".weather-map-pin-card-delete", css);
         Assert.Contains(".add-location-panel", css);
         Assert.Contains(".chat-tool-hover-card", css);
+        Assert.Contains(".chat-tool-hover-wrap", css);
         Assert.Contains("html.dark", css);
         Assert.Contains("color-scheme: light", css);
         Assert.Contains("html[data-theme=\"dark\"] #weather-map", css);

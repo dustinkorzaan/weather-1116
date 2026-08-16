@@ -925,9 +925,20 @@ html[data-theme="dark"] .weather-map-logo-pin {
   cursor: help;
 }
 
-.chat-tool-hover-card {
+.chat-tool-hover-wrap {
   position: fixed;
   z-index: 40;
+  max-width: 22rem;
+  padding-top: 8px;
+  transform: translateX(-50%);
+}
+
+.chat-tool-hover-wrap.is-above {
+  padding-top: 0;
+  padding-bottom: 8px;
+}
+
+.chat-tool-hover-card {
   max-width: 22rem;
   max-height: 16rem;
   overflow: auto;
@@ -942,8 +953,6 @@ html[data-theme="dark"] .weather-map-logo-pin {
   font-size: 0.75rem;
   line-height: 1.35;
   white-space: pre-wrap;
-  pointer-events: none;
-  transform: translateX(-50%);
 }
 
 .chat-message.error {

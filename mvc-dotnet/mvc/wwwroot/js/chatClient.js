@@ -199,43 +199,90 @@
     }
   }
 
+  const TOOL_HOVER_CLOSE_DELAY_MS = 200;
+  let toolHoverWrap = null;
+  let toolHoverCard = null;
+  let toolHoverHideTimer = null;
+
+  function cancelToolHoverHide() {
+    if (toolHoverHideTimer !== null) {
+      window.clearTimeout(toolHoverHideTimer);
+      toolHoverHideTimer = null;
+    }
+  }
+
+  function hideToolHover() {
+    cancelToolHoverHide();
+    if (toolHoverWrap) {
+      toolHoverWrap.hidden = true;
+    }
+  }
+
+  function scheduleToolHoverHide() {
+    cancelToolHoverHide();
+    toolHoverHideTimer = window.setTimeout(hideToolHover, TOOL_HOVER_CLOSE_DELAY_MS);
+  }
+
+  function relatedIsToolHoverUi(related) {
+    if (!related) {
+      return false;
+    }
+    if (toolHoverWrap && toolHoverWrap.contains(related)) {
+      return true;
+    }
+    return !!(related.closest && related.closest('[data-tool-details]'));
+  }
+
+  function ensureToolHoverCard() {
+    if (toolHoverCard) {
+      return toolHoverCard;
+    }
+
+    toolHoverWrap = document.createElement('div');
+    toolHoverWrap.id = 'chat-tool-hover-card';
+    toolHoverWrap.className = 'chat-tool-hover-wrap';
+    toolHoverWrap.hidden = true;
+    toolHoverWrap.addEventListener('mouseenter', cancelToolHoverHide);
+    toolHoverWrap.addEventListener('mouseleave', scheduleToolHoverHide);
+
+    toolHoverCard = document.createElement('pre');
+    toolHoverCard.className = 'chat-tool-hover-card';
+    toolHoverCard.setAttribute('role', 'tooltip');
+    toolHoverWrap.appendChild(toolHoverCard);
+    document.body.appendChild(toolHoverWrap);
+    return toolHoverCard;
+  }
+
   function showToolHover(anchor) {
     const text = anchor && anchor.getAttribute('data-tool-details');
     if (!text) {
       return;
     }
 
-    let card = document.getElementById('chat-tool-hover-card');
-    if (!card) {
-      card = document.createElement('pre');
-      card.id = 'chat-tool-hover-card';
-      card.className = 'chat-tool-hover-card';
-      card.setAttribute('role', 'tooltip');
-      document.body.appendChild(card);
-    }
-
+    cancelToolHoverHide();
+    const card = ensureToolHoverCard();
     card.textContent = text;
-    card.hidden = false;
+    toolHoverWrap.hidden = false;
+    toolHoverWrap.classList.remove('is-above');
+    toolHoverWrap.style.top = '';
+    toolHoverWrap.style.bottom = '';
+
     const rect = anchor.getBoundingClientRect();
-    card.style.left = `${rect.left + (rect.width / 2)}px`;
-    card.style.top = `${rect.bottom + 8}px`;
+    toolHoverWrap.style.left = `${rect.left + (rect.width / 2)}px`;
+    toolHoverWrap.style.top = `${rect.bottom}px`;
 
-    const cardRect = card.getBoundingClientRect();
-    if (cardRect.bottom > window.innerHeight - 8) {
-      card.style.top = `${Math.max(8, rect.top - cardRect.height - 8)}px`;
+    let wrapRect = toolHoverWrap.getBoundingClientRect();
+    if (wrapRect.bottom > window.innerHeight - 8) {
+      toolHoverWrap.classList.add('is-above');
+      toolHoverWrap.style.top = 'auto';
+      toolHoverWrap.style.bottom = `${window.innerHeight - rect.top}px`;
+      wrapRect = toolHoverWrap.getBoundingClientRect();
     }
-    if (cardRect.right > window.innerWidth - 8) {
-      card.style.left = `${window.innerWidth - 8 - (cardRect.width / 2)}px`;
+    if (wrapRect.right > window.innerWidth - 8) {
+      toolHoverWrap.style.left = `${window.innerWidth - 8 - (wrapRect.width / 2)}px`;
     }
-    if (cardRect.left < 8) {
-      card.style.left = `${8 + (cardRect.width / 2)}px`;
-    }
-  }
-
-  function hideToolHover() {
-    const card = document.getElementById('chat-tool-hover-card');
-    if (card) {
-      card.hidden = true;
+    if (wrapRect.left < 8) {
+      toolHoverWrap.style.left = `${8 + (wrapRect.width / 2)}px`;
     }
   }
 
@@ -250,11 +297,10 @@
     if (!chip) {
       return;
     }
-    const related = event.relatedTarget;
-    if (related && chip.contains(related)) {
+    if (relatedIsToolHoverUi(event.relatedTarget)) {
       return;
     }
-    hideToolHover();
+    scheduleToolHoverHide();
   });
   messagesEl.addEventListener('focusin', (event) => {
     const chip = event.target.closest('[data-tool-details]');
@@ -262,7 +308,12 @@
       showToolHover(chip);
     }
   });
-  messagesEl.addEventListener('focusout', hideToolHover);
+  messagesEl.addEventListener('focusout', (event) => {
+    if (relatedIsToolHoverUi(event.relatedTarget)) {
+      return;
+    }
+    scheduleToolHoverHide();
+  });
   messagesEl.addEventListener('scroll', hideToolHover);
 
   input.addEventListener('keydown', (event) => {
