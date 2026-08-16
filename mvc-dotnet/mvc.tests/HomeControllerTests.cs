@@ -262,6 +262,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".chat-tool-hover-wrap", css);
         Assert.Contains(".chat-markdown", css);
         Assert.Contains(".chat-fullscreen-button", css);
+        Assert.Contains("flex: 0 0 auto", css);
+        Assert.Contains("height: max-content", css);
+        Assert.Contains("min-height: min-content", css);
         Assert.Contains("html.dark", css);
         Assert.Contains("color-scheme: light", css);
         Assert.Contains("html[data-theme=\"dark\"] #weather-map", css);

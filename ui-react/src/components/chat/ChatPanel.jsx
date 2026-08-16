@@ -37,10 +37,10 @@ const TAB_CONFIG = [
 ];
 
 const MESSAGE_CLASSES = {
-  user: 'self-end max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap',
-  assistant: 'self-start max-w-[85%] overflow-x-auto rounded-2xl border border-border bg-muted px-3 py-2 text-foreground',
-  tool: 'self-center text-xs text-muted-foreground',
-  error: 'w-full rounded-md bg-destructive/15 px-3 py-2 text-destructive',
+  user: 'h-max min-h-min shrink-0 self-end max-w-[85%] overflow-visible rounded-2xl bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap',
+  assistant: 'h-max min-h-min shrink-0 self-start max-w-[85%] overflow-visible rounded-2xl border border-border bg-muted px-3 py-2 text-foreground',
+  tool: 'h-max min-h-min shrink-0 self-center text-xs text-muted-foreground',
+  error: 'h-max min-h-min shrink-0 w-full rounded-md bg-destructive/15 px-3 py-2 text-destructive',
 };
 
 function messageClasses(entry) {
@@ -394,7 +394,7 @@ function ChatPanel() {
             <div
               ref={messagesRef}
               data-chat-messages
-              className={`flex min-h-40 flex-col gap-2 overflow-y-auto p-1 ${
+              className={`flex min-h-40 flex-col gap-2 overflow-x-auto overflow-y-auto p-1 ${
                 isFullscreen ? 'min-h-0 flex-1 max-h-none' : 'max-h-96'
               }`}
             >
