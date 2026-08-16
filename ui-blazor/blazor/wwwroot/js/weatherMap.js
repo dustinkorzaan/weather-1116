@@ -1,4 +1,13 @@
 window.weatherMap = (function () {
+  const DEFAULT_CITIES = [
+    { id: 'nyc', name: 'New York, NY', lat: 40.7128, lng: -74.006 },
+    { id: 'toronto', name: 'Toronto, ON', lat: 43.6532, lng: -79.3832 },
+    { id: 'atlanta', name: 'Atlanta, GA', lat: 33.749, lng: -84.388 },
+    { id: 'charlotte', name: 'Charlotte, NC', lat: 35.2271, lng: -80.8431 },
+  ];
+  const STORAGE_KEY = 'weather-map-cities';
+  const DELETE_ICON_SVG =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
   const DEFAULT_CENTER = { lat: 39.5, lng: -77.5 };
   const DEFAULT_ZOOM = 5;
 
@@ -257,21 +266,37 @@ window.weatherMap = (function () {
     const logoUrl = logoPinUrl(appearance.colorScheme === 'DARK' ? 'dark' : 'light');
     const markers = [];
     (cities || []).forEach(function (city, index) {
-      const overlay = new LogoPinOverlay({
-        lat: city.lat,
-        lng: city.lng,
-        cityName: city.name,
-        logoUrl: logoUrl,
-        spinOffsetSec: logoPinSpinOffsetSec(index),
-      });
-      overlay.setMap(map);
-
-      bindPinHoverCard(maps, map, overlay, city.name, function (cityName) {
-        window.location.assign(currentAiWeatherPath(cityName));
-      });
-      markers.push(overlay);
+      markers.push(createOneMarker(maps, map, city, appearance, index, LogoPinOverlay, logoUrl));
     });
     return markers;
+  }
+
+  function createOneMarker(maps, map, city, appearance, index, LogoPinOverlay, logoUrl) {
+    const OverlayClass = LogoPinOverlay || createLogoPinOverlayClass(maps);
+    const pinUrl = logoUrl || logoPinUrl(appearance.colorScheme === 'DARK' ? 'dark' : 'light');
+    const overlay = new OverlayClass({
+      lat: city.lat,
+      lng: city.lng,
+      cityName: city.name,
+      logoUrl: pinUrl,
+      spinOffsetSec: logoPinSpinOffsetSec(index),
+    });
+    overlay.cityId = city.id;
+    overlay.setMap(map);
+
+    bindPinHoverCard(
+      maps,
+      map,
+      overlay,
+      city.name,
+      function (cityName) {
+        window.location.assign(currentAiWeatherPath(cityName));
+      },
+      function () {
+        removeCity(city.id);
+      }
+    );
+    return overlay;
   }
   let activeCloseCard = null;
 
@@ -363,21 +388,33 @@ window.weatherMap = (function () {
     card.setAttribute('role', 'dialog');
     card.setAttribute('aria-label', cityName);
 
+    const header = document.createElement('div');
+    header.className = 'weather-map-pin-card-header';
+
     const name = document.createElement('div');
     name.className = 'weather-map-pin-card-name';
     name.textContent = cityName;
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'weather-map-pin-card-delete';
+    deleteButton.setAttribute('aria-label', 'Remove ' + cityName + ' from the map');
+    deleteButton.innerHTML = DELETE_ICON_SVG;
+
+    header.appendChild(name);
+    header.appendChild(deleteButton);
 
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'weather-map-pin-card-button';
     button.textContent = 'Get Current AI Weather';
 
-    card.appendChild(name);
+    card.appendChild(header);
     card.appendChild(button);
-    return { card: card, button: button };
+    return { card: card, button: button, deleteButton: deleteButton };
   }
 
-  function bindPinHoverCard(maps, map, marker, cityName, onGetWeather) {
+  function bindPinHoverCard(maps, map, marker, cityName, onGetWeather, onDelete) {
     const created = createPinHoverCard(cityName);
     const infoWindowOptions = {
       content: created.card,
@@ -443,7 +480,120 @@ window.weatherMap = (function () {
       onGetWeather(cityName);
     });
 
+    created.deleteButton.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCard();
+      if (typeof onDelete === 'function') {
+        onDelete();
+      }
+    });
+
     map.addListener('click', closeCard);
+  }
+
+  function isValidCity(city) {
+    return !!(
+      city &&
+      city.id &&
+      city.name &&
+      Number.isFinite(city.lat) &&
+      Number.isFinite(city.lng)
+    );
+  }
+
+  function loadStoredCities() {
+    try {
+      const raw = window.sessionStorage && window.sessionStorage.getItem(STORAGE_KEY);
+      if (raw == null) {
+        return null;
+      }
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.every(isValidCity)) {
+        return parsed;
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
+
+  function saveCities(cities) {
+    try {
+      if (window.sessionStorage) {
+        window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(cities));
+      }
+    } catch (e) {
+      // Ignore quota / private-mode failures.
+    }
+  }
+
+  function ensureCities(fallback) {
+    const stored = loadStoredCities();
+    if (stored) {
+      return stored.slice();
+    }
+    const seed = ((fallback && fallback.length ? fallback : DEFAULT_CITIES) || []).map(function (city) {
+      return { id: city.id, name: city.name, lat: city.lat, lng: city.lng };
+    });
+    saveCities(seed);
+    return seed;
+  }
+
+  function mapEntries() {
+    return themedMaps;
+  }
+
+  function addCity(city) {
+    if (!isValidCity(city)) {
+      return;
+    }
+    const nextCity = { id: city.id, name: city.name, lat: city.lat, lng: city.lng };
+    const cities = ensureCities(DEFAULT_CITIES);
+    const exists = cities.some(function (item) {
+      return item.id === nextCity.id || (item.lat === nextCity.lat && item.lng === nextCity.lng);
+    });
+    if (!exists) {
+      cities.push(nextCity);
+      saveCities(cities);
+    }
+    mapEntries().forEach(function (entry) {
+      entry.cities = cities.slice();
+      const already = (entry.markers || []).some(function (pin) {
+        return pin.cityId === nextCity.id;
+      });
+      if (already || !entry.map || !entry.maps) {
+        return;
+      }
+      const appearance = mapAppearance(entry.theme || resolvedTheme());
+      entry.markers = (entry.markers || []).concat(
+        createOneMarker(entry.maps, entry.map, nextCity, appearance, entry.markers.length)
+      );
+      if (typeof entry.map.panTo === 'function') {
+        entry.map.panTo({ lat: nextCity.lat, lng: nextCity.lng });
+      }
+    });
+  }
+
+  function removeCity(cityId) {
+    const cities = ensureCities(DEFAULT_CITIES).filter(function (city) {
+      return city.id !== cityId;
+    });
+    saveCities(cities);
+    mapEntries().forEach(function (entry) {
+      entry.cities = cities.slice();
+      const remaining = [];
+      (entry.markers || []).forEach(function (pin) {
+        if (pin.cityId === cityId) {
+          if (pin && typeof pin.setMap === 'function') {
+            pin.setMap(null);
+          }
+        } else {
+          remaining.push(pin);
+        }
+      });
+      entry.markers = remaining;
+    });
   }
 
   function resolveElement(elementOrId) {
@@ -487,14 +637,15 @@ window.weatherMap = (function () {
       }
 
       const appearance = mapAppearance(resolvedTheme());
+      const resolvedCities = ensureCities(cities);
       const map = createThemedMap(maps, current, appearance, DEFAULT_CENTER, DEFAULT_ZOOM);
-      const markers = createCityMarkers(maps, map, cities, appearance);
+      const markers = createCityMarkers(maps, map, resolvedCities, appearance);
       const entry = {
         maps: maps,
         map: map,
         markers: markers,
         element: current,
-        cities: cities || [],
+        cities: resolvedCities,
         theme: resolvedTheme(),
       };
 
@@ -619,6 +770,8 @@ window.weatherMap = (function () {
   return {
     init: init,
     tryAutoInit: tryAutoInit,
+    addCity: addCity,
+    removeCity: removeCity,
     currentAiWeatherPath: currentAiWeatherPath,
   };
 })();

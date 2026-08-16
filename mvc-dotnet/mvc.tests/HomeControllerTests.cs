@@ -115,6 +115,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("marker.addListener('click', openCard)", script);
         Assert.Contains("Get Current AI Weather", script);
         Assert.Contains("bindPinHoverCard", script);
+        Assert.Contains("weather-map-pin-card-delete", script);
+        Assert.Contains("addCity", script);
+        Assert.Contains("removeCity", script);
         Assert.Contains("LIGHT_MAP_STYLES", script);
         Assert.Contains("weather-theme-change", script);
         Assert.Contains("colorScheme", script);
@@ -159,6 +162,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("css/site.css", html);
+        Assert.Contains("class=\"header-actions\"", html);
+        Assert.Contains("aria-label=\"Add location\"", html);
+        Assert.Contains("addLocation.js", html);
         Assert.Contains("class=\"site-header\"", html);
         Assert.Contains("class=\"avatar-menu\"", html);
         Assert.Contains("class=\"site-main\"", html);
@@ -189,6 +195,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("border: 2px solid var(--color-border-strong)", css);
         Assert.Contains("#weather-map", css);
         Assert.Contains(".weather-map-pin-card", css);
+        Assert.Contains(".weather-map-pin-card-delete", css);
+        Assert.Contains(".add-location-panel", css);
         Assert.Contains("html.dark", css);
         Assert.Contains("color-scheme: light", css);
         Assert.Contains("html[data-theme=\"dark\"] #weather-map", css);

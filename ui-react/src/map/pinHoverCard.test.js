@@ -10,15 +10,17 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test('pin hover card shows the city name above the Get Current AI Weather button', () => {
-  const { card, button } = createPinHoverCard('Atlanta, GA');
+test('pin hover card shows the city name, delete control, and Get Current AI Weather button', () => {
+  const { card, button, deleteButton } = createPinHoverCard('Atlanta, GA');
 
   expect(card.className).toMatch(/flex-col/);
   expect(card.querySelector('.weather-map-pin-card-name')?.textContent).toBe('Atlanta, GA');
+  expect(card.querySelector('.weather-map-pin-card-header')).toBeTruthy();
+  expect(deleteButton.getAttribute('aria-label')).toBe('Remove Atlanta, GA from the map');
   expect(button.textContent).toBe(PIN_HOVER_CARD_BUTTON_LABEL);
   expect(button.textContent).toBe('Get Current AI Weather');
-  expect(card.firstElementChild).not.toBe(button);
   expect(card.lastElementChild).toBe(button);
+  expect(card.querySelector('.weather-map-pin-card-header')?.lastElementChild).toBe(deleteButton);
 });
 
 test('hovering a pin opens the card; only the button requests weather', () => {
@@ -62,6 +64,35 @@ test('hovering a pin opens the card; only the button requests weather', () => {
 
   button.click();
   expect(onGetWeather).toHaveBeenCalledWith('Toronto, ON');
+});
+
+test('delete control removes the pin and closes the card', () => {
+  const listeners = {};
+  const marker = {
+    addListener: vi.fn((eventName, handler) => {
+      listeners[eventName] = handler;
+    }),
+  };
+  const infoWindow = {
+    open: vi.fn(),
+    close: vi.fn(),
+  };
+  const onDelete = vi.fn();
+
+  const { deleteButton } = bindPinHoverCard({
+    maps: { InfoWindow: function InfoWindow() { return infoWindow; } },
+    map: { addListener: vi.fn() },
+    marker,
+    cityName: 'Charlotte, NC',
+    onGetWeather: vi.fn(),
+    onDelete,
+  });
+
+  listeners.mouseover();
+  deleteButton.click();
+
+  expect(infoWindow.close).toHaveBeenCalled();
+  expect(onDelete).toHaveBeenCalledWith('Charlotte, NC');
 });
 
 test('opening another pin closes the previous card', () => {

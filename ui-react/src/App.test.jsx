@@ -8,6 +8,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-dom';
 import App, { AboutTreeNode } from './App';
+import { MAP_CITIES_STORAGE_KEY } from './data/mapCities';
 import { weatherApi } from './services/weatherApi';
 
 function createTestStore() {
@@ -60,6 +61,9 @@ function mockHelloFetch() {
           windSpeedMPH: 5,
           windDirection: 'S',
           conditions: 'Clear',
+          locationName: 'Nashville, TN',
+          latitude: 36.1627,
+          longitude: -86.7816,
         }),
         {
           status: 200,
@@ -96,6 +100,7 @@ afterEach(() => {
   document.documentElement.removeAttribute('data-theme');
   document.documentElement.removeAttribute('data-theme-preference');
   window.localStorage.removeItem('weather-theme');
+  window.sessionStorage.removeItem(MAP_CITIES_STORAGE_KEY);
 });
 
 test('user menu is a gray outline control instead of a solid blue button', () => {
@@ -290,4 +295,40 @@ test('renders a public message in the About tree', () => {
   );
 
   expect(screen.getByText('0 failed, 1 processing, 2 enqueued')).toBeDefined();
+});
+
+test('header plus control opens a location popdown and stays open while weather loads', async () => {
+  const fetchMock = mockHelloFetch();
+  const user = userEvent.setup();
+  renderApp('/');
+
+  const addButton = screen.getByRole('button', { name: /add location/i });
+  const avatar = screen.getByRole('button', { name: /open user menu/i });
+  expect(addButton.compareDocumentPosition(avatar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+  await user.click(addButton);
+  const locationInput = screen.getByLabelText(/^location$/i);
+  expect(locationInput.value).toBe('Nashville, TN');
+
+  await user.click(screen.getByRole('button', { name: /add to map/i }));
+
+  await waitFor(() => {
+    expect(screen.getByRole('button', { name: /looking up weather/i }).getAttribute('aria-busy')).toBe(
+      'true'
+    );
+  });
+  expect(locationInput).toBeDefined();
+
+  await waitFor(() => {
+    expect(screen.queryByRole('button', { name: /looking up weather/i })).toBeNull();
+  });
+
+  const weatherUrl = fetchMock.mock.calls
+    .map(([input]) => requestUrl(input))
+    .find((url) => url.includes('/AIWeather/Current'));
+  expect(weatherUrl).toBeDefined();
+  expect(weatherUrl).toContain('location=Nashville');
+  expect(JSON.parse(window.sessionStorage.getItem(MAP_CITIES_STORAGE_KEY)).at(-1).name).toBe(
+    'Nashville, TN'
+  );
 });

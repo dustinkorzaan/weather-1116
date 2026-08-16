@@ -49,6 +49,40 @@
                 <span class="brand-title">Weather MVC</span>
             </a>
 
+            <div class="header-actions">
+            <div id="addLocationWrap" class="add-location-wrap">
+                <button id="addLocationButton"
+                        type="button"
+                        class="add-location-button"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-controls="addLocationPanel"
+                        aria-label="Add location">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 5v14" />
+                        <path d="M5 12h14" />
+                    </svg>
+                </button>
+                <div id="addLocationPanel" class="add-location-panel" hidden>
+                    <form id="addLocationForm"
+                          class="add-location-form"
+                          data-ai-weather-url="@Url.Action("GetCurrentAIWeather", "Home")">
+                        <label class="add-location-label" for="addLocationInput">Location</label>
+                        <input id="addLocationInput"
+                               class="text-input"
+                               type="text"
+                               value="Nashville, TN"
+                               autocomplete="address-level2"
+                               placeholder="Nashville, TN" />
+                        <button id="addLocationSubmit" class="btn" type="submit">
+                            <span id="addLocationSpinner" class="spinner spinner-on-muted" hidden aria-hidden="true"></span>
+                            <span class="add-location-submit-label">Add to map</span>
+                        </button>
+                        <p id="addLocationError" class="form-error" hidden></p>
+                    </form>
+                </div>
+            </div>
+
             <div class="avatar-wrap">
                 <button id="avatarMenuButton"
                         type="button"
@@ -98,6 +132,7 @@
                     </li>
                 </ul>
             </div>
+            </div>
         </nav>
     </header>
 
@@ -133,6 +168,7 @@
 
     <script src="~/js/theme.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/addLocation.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

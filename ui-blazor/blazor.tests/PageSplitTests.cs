@@ -29,6 +29,20 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
         Assert.Contains("Get Current AI Weather", rendered.Markup);
         Assert.Contains("weather-map-pin-card-preview", rendered.Markup);
+        Assert.Contains("weather-map-pin-card-delete", rendered.Markup);
+        Assert.Contains("weather-map-pin-card-header", rendered.Markup);
+    }
+
+    [Fact]
+    public void WeatherMapScript_ShowsDeleteControlAndMutatesPinList()
+    {
+        var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
+        Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("Get Current AI Weather", script);
+        Assert.Contains("weather-map-pin-card-delete", script);
+        Assert.Contains("addCity", script);
+        Assert.Contains("removeCity", script);
+        Assert.Contains("weather-map-cities", script);
     }
 
     [Fact]
