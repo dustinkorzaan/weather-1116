@@ -10,9 +10,9 @@ relationships, and parity guidance live in
 
 | PROD | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
-| <a href="https://weather1116-prod-blazor.azurewebsites.net" target="_blank" rel="noopener noreferrer">Visit</a> | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
-| <a href="https://nice-glacier-08fd44e1e.7.azurestaticapps.net" target="_blank" rel="noopener noreferrer">Visit</a> | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
-| <a href="https://weather1116-prod-mvc.azurewebsites.net" target="_blank" rel="noopener noreferrer">Visit</a> | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
+| [Visit](https://weather1116-prod-blazor.azurewebsites.net) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
+| [Visit](https://nice-glacier-08fd44e1e.7.azurestaticapps.net) | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
+| [Visit](https://weather1116-prod-mvc.azurewebsites.net) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
 |  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
 |  | Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts |  |
 |  | MCP Server on App Service | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
