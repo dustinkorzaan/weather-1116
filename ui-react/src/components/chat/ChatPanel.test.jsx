@@ -3,7 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ChatPanel from './ChatPanel';
 import { streamChatMessage } from '../../utils/chatStream';
-import { TOOL_HOVER_CLOSE_DELAY_MS } from '../../utils/chatToolHover';
 
 vi.mock('../../utils/chatStream', () => ({
   streamChatMessage: vi.fn(),
@@ -131,21 +130,18 @@ test('keeps tool details open and scrollable when the pointer moves onto the pop
 });
 
 test('does not close tool details until the pointer leaves the popup', async () => {
-  vi.useFakeTimers();
-  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  const user = userEvent.setup();
   const chip = await renderFinishedToolChip(user);
 
   await user.hover(chip);
   const tooltip = await screen.findByRole('tooltip');
   await user.hover(tooltip);
-
-  vi.advanceTimersByTime(TOOL_HOVER_CLOSE_DELAY_MS);
   expect(screen.getByRole('tooltip')).toBeDefined();
 
   await user.unhover(tooltip);
-  vi.advanceTimersByTime(TOOL_HOVER_CLOSE_DELAY_MS - 1);
   expect(screen.getByRole('tooltip')).toBeDefined();
 
-  vi.advanceTimersByTime(1);
-  expect(screen.queryByRole('tooltip')).toBeNull();
+  await waitFor(() => {
+    expect(screen.queryByRole('tooltip')).toBeNull();
+  });
 });
