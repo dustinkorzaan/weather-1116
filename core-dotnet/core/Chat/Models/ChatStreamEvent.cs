@@ -10,6 +10,10 @@ public class ChatStreamEvent
 
     public string? ToolName { get; init; }
 
+    public string? ToolArguments { get; init; }
+
+    public string? ToolResult { get; init; }
+
     public string? ErrorMessage { get; init; }
 
     public static ChatStreamEvent Session(string sessionId) => new()
@@ -24,16 +28,19 @@ public class ChatStreamEvent
         Text = text,
     };
 
-    public static ChatStreamEvent ToolStart(string toolName) => new()
+    public static ChatStreamEvent ToolStart(string toolName, string? toolArguments = null) => new()
     {
         Type = "tool_start",
         ToolName = toolName,
+        ToolArguments = toolArguments,
     };
 
-    public static ChatStreamEvent ToolEnd(string toolName) => new()
+    public static ChatStreamEvent ToolEnd(string toolName, string? toolArguments = null, string? toolResult = null) => new()
     {
         Type = "tool_end",
         ToolName = toolName,
+        ToolArguments = toolArguments,
+        ToolResult = toolResult,
     };
 
     public static ChatStreamEvent Done() => new()

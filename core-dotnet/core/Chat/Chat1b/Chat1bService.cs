@@ -91,8 +91,11 @@ public sealed class Chat1bService : IChatClientService
             if (update is StreamingResponseOutputItemDoneUpdate itemDone
                 && itemDone.Item is McpToolCallItem mcpCall)
             {
-                yield return ChatStreamEvent.ToolStart(mcpCall.ToolName);
-                yield return ChatStreamEvent.ToolEnd(mcpCall.ToolName);
+                var toolArguments = ChatToolPayload.Format(mcpCall.ToolArguments);
+                var toolResult = ChatToolPayload.Format(mcpCall.ToolOutput)
+                    ?? ChatToolPayload.Format(mcpCall.Error);
+                yield return ChatStreamEvent.ToolStart(mcpCall.ToolName, toolArguments);
+                yield return ChatStreamEvent.ToolEnd(mcpCall.ToolName, toolArguments, toolResult);
             }
         }
 

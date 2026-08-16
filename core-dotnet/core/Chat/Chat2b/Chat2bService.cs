@@ -80,7 +80,7 @@ public sealed class Chat2bService : IChatClientService
         }
 
         var assistantBuilder = new StringBuilder();
-        var pendingToolCalls = new Dictionary<string, string>();
+        var pendingToolCalls = new Dictionary<string, PendingToolCall>();
 
         IAsyncEnumerable<AgentResponseUpdate>? updates = null;
         string? streamError = null;
@@ -113,12 +113,16 @@ public sealed class Chat2bService : IChatClientService
                 switch (content)
                 {
                     case McpServerToolCallContent mcpCall:
-                        pendingToolCalls[mcpCall.CallId] = mcpCall.Name;
-                        yield return ChatStreamEvent.ToolStart(mcpCall.Name);
+                        var toolArguments = ChatToolPayload.Format(mcpCall.Arguments);
+                        pendingToolCalls[mcpCall.CallId] = new PendingToolCall(mcpCall.Name, toolArguments);
+                        yield return ChatStreamEvent.ToolStart(mcpCall.Name, toolArguments);
                         break;
                     case McpServerToolResultContent mcpResult
-                        when pendingToolCalls.Remove(mcpResult.CallId, out var mcpToolName):
-                        yield return ChatStreamEvent.ToolEnd(mcpToolName);
+                        when pendingToolCalls.Remove(mcpResult.CallId, out var pending):
+                        yield return ChatStreamEvent.ToolEnd(
+                            pending.Name,
+                            pending.Arguments,
+                            ChatToolPayload.Format(mcpResult.Outputs));
                         break;
                 }
             }
@@ -132,4 +136,6 @@ public sealed class Chat2bService : IChatClientService
 
         yield return ChatStreamEvent.Done();
     }
+
+    private sealed record PendingToolCall(string Name, string? Arguments);
 }

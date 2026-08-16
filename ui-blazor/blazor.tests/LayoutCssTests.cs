@@ -21,6 +21,8 @@ public sealed class LayoutCssTests
         Assert.Contains("align-items: stretch", css);
         Assert.Contains("color-scheme: light", css);
         Assert.Contains("html[data-theme=\"dark\"] .weather-map", css);
+        Assert.Contains(".chat-tool-hover-card", css);
+        Assert.Contains(".chat-message.tool", css);
     }
 
     [Fact]

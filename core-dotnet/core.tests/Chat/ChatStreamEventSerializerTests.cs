@@ -21,6 +21,26 @@ public class ChatStreamEventSerializerTests
 
         Assert.False(root.TryGetProperty("Type", out _));
         Assert.False(root.TryGetProperty("ToolName", out _));
+        Assert.False(root.TryGetProperty("toolArguments", out _));
+        Assert.False(root.TryGetProperty("toolResult", out _));
+    }
+
+    [Fact]
+    public void Serialize_ToolEndEvent_IncludesArgumentsAndResult()
+    {
+        var json = ChatStreamEventSerializer.Serialize(
+            ChatStreamEvent.ToolEnd(
+                "GetLatLongData",
+                """{"location":"Nashville, TN"}""",
+                """[{"name":"Nashville"}]"""));
+
+        using var document = JsonDocument.Parse(json);
+        var root = document.RootElement;
+
+        Assert.Equal("tool_end", root.GetProperty("type").GetString());
+        Assert.Equal("GetLatLongData", root.GetProperty("toolName").GetString());
+        Assert.Equal("""{"location":"Nashville, TN"}""", root.GetProperty("toolArguments").GetString());
+        Assert.Equal("""[{"name":"Nashville"}]""", root.GetProperty("toolResult").GetString());
     }
 
     [Fact]

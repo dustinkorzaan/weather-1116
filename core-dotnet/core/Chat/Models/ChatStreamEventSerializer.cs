@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Core.Chat.Models;
 
@@ -8,7 +9,10 @@ namespace Core.Chat.Models;
 /// </summary>
 public static class ChatStreamEventSerializer
 {
-    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web);
+    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
 
     public static string Serialize(ChatStreamEvent streamEvent) => JsonSerializer.Serialize(streamEvent, Options);
 }

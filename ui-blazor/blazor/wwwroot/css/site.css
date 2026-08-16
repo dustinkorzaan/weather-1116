@@ -733,6 +733,28 @@ html[data-theme="dark"] .weather-map-logo-pin {
     border-radius: 999px;
     padding: 0.25rem 0.75rem;
     font-size: 0.9rem;
+    cursor: help;
+}
+
+.chat-tool-hover-card {
+    position: fixed;
+    z-index: 40;
+    max-width: 22rem;
+    max-height: 16rem;
+    overflow: auto;
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--wx-border);
+    border-radius: 0.5rem;
+    background: var(--wx-bg);
+    color: var(--wx-fg);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    white-space: pre-wrap;
+    pointer-events: none;
+    transform: translateX(-50%);
 }
 
 .chat-message.error {

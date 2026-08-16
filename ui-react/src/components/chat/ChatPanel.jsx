@@ -1,7 +1,9 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
+import { formatToolHoverText } from '../../utils/chatToolHover';
 import { streamChatMessage } from '../../utils/chatStream';
 
 const TAB_CONFIG = [
@@ -48,6 +50,69 @@ function scrollElementToBottom(element) {
   }
 
   element.scrollTop = element.scrollHeight;
+}
+
+function ToolChip({ content, details }) {
+  const chipRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+
+  const updatePosition = () => {
+    const node = chipRef.current;
+    if (!node) {
+      return;
+    }
+
+    const rect = node.getBoundingClientRect();
+    setCoords({ top: rect.bottom + 8, left: rect.left + rect.width / 2 });
+  };
+
+  useLayoutEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    updatePosition();
+    const onReposition = () => updatePosition();
+    window.addEventListener('scroll', onReposition, true);
+    window.addEventListener('resize', onReposition);
+    return () => {
+      window.removeEventListener('scroll', onReposition, true);
+      window.removeEventListener('resize', onReposition);
+    };
+  }, [open, details]);
+
+  const show = () => {
+    updatePosition();
+    setOpen(true);
+  };
+
+  return (
+    <div
+      ref={chipRef}
+      className={`${MESSAGE_CLASSES.tool} cursor-help`}
+      data-tool-details={details || undefined}
+      tabIndex={details ? 0 : undefined}
+      onMouseEnter={details ? show : undefined}
+      onMouseLeave={details ? () => setOpen(false) : undefined}
+      onFocus={details ? show : undefined}
+      onBlur={details ? () => setOpen(false) : undefined}
+    >
+      {content}
+      {open && details
+        ? createPortal(
+            <pre
+              role="tooltip"
+              className="pointer-events-none fixed z-50 max-h-64 w-max max-w-sm -translate-x-1/2 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-popover p-2 font-mono text-xs text-popover-foreground shadow-lg"
+              style={{ top: coords.top, left: coords.left }}
+            >
+              {details}
+            </pre>,
+            document.body,
+          )
+        : null}
+    </div>
+  );
 }
 
 function createEmptyHistory() {
@@ -149,19 +214,25 @@ function ChatPanel() {
           }
 
           if (payload.type === 'tool_start' && payload.toolName) {
-            const { toolName } = payload;
+            const { toolName, toolArguments } = payload;
             setHistories((current) => ({
               ...current,
               [tabId]: [
                 ...current[tabId],
-                { role: 'tool', content: `Running ${toolName}…`, toolName, running: true },
+                {
+                  role: 'tool',
+                  content: `Running ${toolName}…`,
+                  toolName,
+                  toolArguments,
+                  running: true,
+                },
               ],
             }));
             return;
           }
 
           if (payload.type === 'tool_end' && payload.toolName) {
-            const { toolName } = payload;
+            const { toolName, toolArguments, toolResult } = payload;
             setHistories((current) => {
               const tabHistory = [...current[tabId]];
               const index = findLastIndex(
@@ -169,7 +240,14 @@ function ChatPanel() {
                 (entry) => entry.role === 'tool' && entry.running && entry.toolName === toolName,
               );
               if (index === -1) return current;
-              tabHistory[index] = { role: 'tool', content: `Ran ${toolName}`, toolName };
+              const currentEntry = tabHistory[index];
+              tabHistory[index] = {
+                role: 'tool',
+                content: `Ran ${toolName}`,
+                toolName,
+                toolArguments: toolArguments || currentEntry.toolArguments,
+                toolResult,
+              };
               return { ...current, [tabId]: tabHistory };
             });
             return;
@@ -258,9 +336,17 @@ function ChatPanel() {
               className="flex max-h-96 min-h-40 flex-col gap-2 overflow-y-auto p-1"
             >
               {histories[activeTab].map((entry, index) => (
-                <div key={`${activeTab}-${index}`} className={messageClasses(entry.role)}>
-                  {entry.content}
-                </div>
+                entry.role === 'tool' ? (
+                  <ToolChip
+                    key={`${activeTab}-${index}`}
+                    content={entry.content}
+                    details={formatToolHoverText(entry)}
+                  />
+                ) : (
+                  <div key={`${activeTab}-${index}`} className={messageClasses(entry.role)}>
+                    {entry.content}
+                  </div>
+                )
               ))}
             </div>
 
