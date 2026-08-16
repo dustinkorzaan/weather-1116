@@ -11,11 +11,22 @@
 
     @* Map is initialized by wwwroot/js/weatherMap.js from these data attributes.
        That keeps the map working even when the Blazor SignalR circuit is slow or fails. *@
-    <div id="weather-map"
-         class="weather-map"
-         data-google-maps-key="@_apiKey"
-         data-cities="@_citiesJson"
-         data-status="@(string.IsNullOrWhiteSpace(_apiKey) ? "missing-key" : "pending")"></div>
+    <div class="weather-map-canvas-wrap">
+        <div id="weather-map"
+             class="weather-map"
+             data-google-maps-key="@_apiKey"
+             data-cities="@_citiesJson"
+             data-status="@(string.IsNullOrWhiteSpace(_apiKey) ? "missing-key" : "pending")"></div>
+        @if (string.IsNullOrWhiteSpace(_apiKey))
+        {
+            <div class="weather-map-pin-card-preview" role="dialog" aria-label="Atlanta, GA">
+                <div class="weather-map-pin-card">
+                    <div class="weather-map-pin-card-name">Atlanta, GA</div>
+                    <button type="button" class="weather-map-pin-card-button">Get Current AI Weather</button>
+                </div>
+            </div>
+        }
+    </div>
 </section>
 
 @code {

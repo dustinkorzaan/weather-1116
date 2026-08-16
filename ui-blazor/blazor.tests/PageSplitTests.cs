@@ -24,9 +24,11 @@ public sealed class PageSplitTests
         Assert.Contains("Atlanta, GA", rendered.Markup);
         Assert.Contains("New York, NY", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
-        Assert.DoesNotContain("Current AI Weather", rendered.Markup);
+        Assert.DoesNotContain("<h2 class=\"section-title\">Current AI Weather</h2>", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
+        Assert.Contains("Get Current AI Weather", rendered.Markup);
+        Assert.Contains("weather-map-pin-card-preview", rendered.Markup);
     }
 
     [Fact]

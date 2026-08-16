@@ -125,13 +125,32 @@ function WeatherMap() {
           Unable to load Google Maps. Check the API key and that Maps JavaScript API is enabled.
         </p>
       )}
-      <div className="min-h-0 w-full flex-1">
+      <div className="relative min-h-0 w-full flex-1">
         <div
           ref={mapRef}
           className="weather-map h-full w-full bg-[var(--map-canvas)]"
           role="presentation"
           data-status={status}
         />
+        {!apiKey && (
+          <div className="pointer-events-none absolute top-8 left-8 rounded-lg bg-background p-3 shadow-lg ring-1 ring-foreground/10">
+            <div
+              className="weather-map-pin-card flex min-w-[10.5rem] flex-col gap-2"
+              role="dialog"
+              aria-label="Atlanta, GA"
+            >
+              <div className="weather-map-pin-card-name text-sm font-semibold text-foreground">
+                Atlanta, GA
+              </div>
+              <button
+                type="button"
+                className="weather-map-pin-card-button cursor-pointer rounded-md bg-primary px-2.5 py-1.5 text-left text-sm font-medium text-primary-foreground shadow-sm"
+              >
+                Get Current AI Weather
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

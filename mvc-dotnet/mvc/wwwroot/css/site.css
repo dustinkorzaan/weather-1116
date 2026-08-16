@@ -448,11 +448,32 @@ code {
   color: var(--color-danger);
 }
 
+.map-canvas-wrap {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
 #weather-map {
   width: 100%;
   min-height: 0;
   flex: 1;
   background-color: var(--color-map);
+}
+
+.weather-map-pin-card-preview {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
 }
 
 .weather-map-label {
