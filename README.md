@@ -39,5 +39,8 @@ against Core weather data (V1–V4) or a hosted Foundry Agent (V5).
 Presentation reference: [`docs/5-chat-clients/5-chat-clients.md`](docs/5-chat-clients/5-chat-clients.md)
 
 Standalone multi-turn chat page with four tabs:
-**Chat1a** (Responses + in-process), **Chat1b** (Responses + MCP), **Chat2a** (Agent Framework +
-in-process), **Chat2b** (Agent Framework + MCP).
+
+- **Chat1a** (Responses + in-process)
+- **Chat1b** (Responses + MCP)
+- **Chat2a** (Agent Framework + in-process)
+- **Chat2b** (Agent Framework + MCP)
