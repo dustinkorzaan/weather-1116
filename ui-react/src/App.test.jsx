@@ -246,6 +246,22 @@ test('user menu can switch the document to the dark theme', async () => {
   expect(window.localStorage.getItem('weather-theme')).toBe('dark');
 });
 
+test('user menu can switch the document back to the light theme', async () => {
+  mockHelloFetch();
+  const user = userEvent.setup();
+  renderApp('/');
+
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
+  await user.click(await screen.findByRole('menuitemradio', { name: 'Dark' }));
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
+  await user.click(await screen.findByRole('menuitemradio', { name: 'Light' }));
+
+  expect(document.documentElement.classList.contains('dark')).toBe(false);
+  expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+  expect(window.localStorage.getItem('weather-theme')).toBe('light');
+  expect(screen.getByRole('region', { name: /map/i })).toBeDefined();
+});
+
 test('renders a public message in the About tree', () => {
   render(
     <AboutTreeNode

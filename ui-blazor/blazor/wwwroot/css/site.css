@@ -363,6 +363,12 @@ fluent-menu-item a {
     width: 100%;
     height: 100%;
     background-color: var(--wx-map);
+    color-scheme: light;
+}
+
+html.dark .weather-map,
+html[data-theme="dark"] .weather-map {
+    color-scheme: dark;
 }
 
 .weather-map-pin-card-preview {
