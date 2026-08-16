@@ -8,25 +8,25 @@ const TAB_CONFIG = [
   {
     id: 'Chat1a',
     label: 'Chat1a',
-    description: 'Responses API · in-process tools (V3 loop)',
+    description: 'In-process · Responses API · Like Foundry Console V3',
     endpoint: '/Chat1a/messages',
   },
   {
     id: 'Chat1b',
     label: 'Chat1b',
-    description: 'Responses API · remote MCP tools (V4)',
+    description: 'Remote MCP · Responses API · Like Foundry Console V4',
     endpoint: '/Chat1b/messages',
   },
   {
     id: 'Chat2a',
     label: 'Chat2a',
-    description: 'Agent Framework · in-process tools',
+    description: 'In-process · Agent Framework · Like Foundry Console V3',
     endpoint: '/Chat2a/messages',
   },
   {
     id: 'Chat2b',
     label: 'Chat2b',
-    description: 'Agent Framework · remote MCP tools',
+    description: 'Remote MCP · Agent Framework · Like Foundry Console V4',
     endpoint: '/Chat2b/messages',
   },
 ];
