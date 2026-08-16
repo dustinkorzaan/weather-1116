@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace WeatherMcpSrvFuncApp;
 
 /// <summary>
-/// MCP tool that resolves a location name to latitude/longitude via Core/MediatR.
+/// MCP tool that resolves a location name to ranked latitude/longitude matches via Core/MediatR.
 /// </summary>
 public class GetLatLongDataTool(IMediator mediator, ILogger<GetLatLongDataTool> logger)
 {
@@ -16,7 +16,7 @@ public class GetLatLongDataTool(IMediator mediator, ILogger<GetLatLongDataTool> 
 	public async Task<string> GetLatLongData(
 		[McpToolTrigger(
 			"GetLatLongData",
-			"Resolve a location name to latitude and longitude using public geocoding data.")]
+			"Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.")]
 		ToolInvocationContext context,
 		[McpToolProperty(
 			"location",

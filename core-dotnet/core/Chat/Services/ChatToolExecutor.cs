@@ -32,8 +32,8 @@ public sealed class ChatToolExecutor
         string location = argumentsJson.RootElement.GetProperty("location").GetString()
             ?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
 
-        var latLong = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
-        return JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
+        var latLongMatches = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
+        return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
     }
 
     private async Task<string> ExecuteGetPublicWeatherAsync(BinaryData arguments, CancellationToken cancellationToken)

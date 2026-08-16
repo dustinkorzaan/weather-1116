@@ -54,8 +54,9 @@ internal class Program
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		You provide weather and climate data using U.S. customary units (Fahrenheit and MPH).
-		You can call the GetLatLongData tool to resolve a place name to latitude/longitude,
-		and the GetPublicWeatherData tool to fetch current public weather for those coordinates.
+		You can call the GetLatLongData tool to resolve a place name to ranked latitude/longitude
+		matches (up to 5; rank 1 is the best match). Use name, state, and country to pick the
+		right place — you may skip rank 1. Then call GetPublicWeatherData with those coordinates.
 		Use those tools whenever you need real weather data.
 
 		Return valid JSON with these fields:
@@ -110,7 +111,7 @@ internal class Program
 
 		FunctionTool getLatLongTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetLatLongData",
-			functionDescription: "Resolve a location name to latitude and longitude using public geocoding data.",
+			functionDescription: "Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
 			  "type": "object",
@@ -194,8 +195,8 @@ internal class Program
 										?? throw new InvalidOperationException("GetLatLongData requires a location argument.");
 
 									Console.WriteLine($"\nTool call: GetLatLongData({toolLocation})");
-									var latLong = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
-									string functionOutput = JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
+									var latLongMatches = await mediator.Send(new GetLatLongDataEvent { Location = toolLocation });
+									string functionOutput = JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;

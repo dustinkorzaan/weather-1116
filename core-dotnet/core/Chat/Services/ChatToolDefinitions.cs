@@ -7,7 +7,7 @@ public static class ChatToolDefinitions
 {
     public static FunctionTool CreateGetLatLongTool() => ResponseTool.CreateFunctionTool(
         functionName: "GetLatLongData",
-        functionDescription: "Resolve a location name to latitude and longitude using public geocoding data.",
+        functionDescription: "Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.",
         functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
         {
           "type": "object",

@@ -52,7 +52,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant Model as Foundry Model
 
       Console->>GetLatLong: GetLatLong(location)
-      GetLatLong-->>Console: NonAILatLongResponse
+      GetLatLong-->>Console: NonAILatLongListResponse (V1/V2 use top 1)
       Console->>GetPublicWeather: GetPublicWeather(lat,long)
       GetPublicWeather-->>Console: NonAIWeatherResponse
       Console->>Model: prompt + weather JSON
@@ -87,7 +87,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       UI->>API: GetPublicWeather(location)
       API->>Model: GetPublicWeather(location)
       Model->>GetLatLongFunc: GetLatLong(location)
-      GetLatLongFunc-->>Model: NonAILatLongResponse
+      GetLatLongFunc-->>Model: NonAILatLongListResponse
       Model->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
       GetPublicWeatherFunc-->>Model: NonAIWeatherResponse
       Model-->>API: AIWeatherResponse
@@ -113,8 +113,8 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       AppLoop->>Model: GetPublicWeather(location)
       Model->>AppLoop: GetLatLong(location)
       AppLoop->>GetLatLongFunc: GetLatLong(location)
-      GetLatLongFunc-->>AppLoop: NonAILatLongResponse
-      AppLoop-->>Model: NonAILatLongResponse
+      GetLatLongFunc-->>AppLoop: NonAILatLongListResponse
+      AppLoop-->>Model: NonAILatLongListResponse
       Model->>AppLoop: GetPublicWeather(lat,long)
       AppLoop->>GetPublicWeatherFunc: GetPublicWeather(lat,long)
       GetPublicWeatherFunc-->>AppLoop: NonAIWeatherResponse
@@ -147,7 +147,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 
       Console->>Model: system prompt + MCP tools, user prompt last
       Model->>GetLatLongTool: GetLatLong(location)
-      GetLatLongTool-->>Model: NonAILatLongResponse
+      GetLatLongTool-->>Model: NonAILatLongListResponse
       Model->>GetPublicWeatherTool: GetPublicWeather(lat,long)
       GetPublicWeatherTool-->>Model: NonAIWeatherResponse
       Model-->>Console: AIWeatherResponse
@@ -172,8 +172,8 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       AppLoop->>Model: system prompt + MCP tools, user prompt last
       Model->>AppLoop: GetLatLong(location)
       AppLoop->>GetLatLongTool: GetLatLong(location)
-      GetLatLongTool-->>AppLoop: NonAILatLongResponse
-      AppLoop-->>Model: NonAILatLongResponse
+      GetLatLongTool-->>AppLoop: NonAILatLongListResponse
+      AppLoop-->>Model: NonAILatLongListResponse
       Model->>AppLoop: GetPublicWeather(lat,long)
       AppLoop->>GetPublicWeatherTool: GetPublicWeather(lat,long)
       GetPublicWeatherTool-->>AppLoop: NonAIWeatherResponse
@@ -207,7 +207,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 
       Console->>Agent: user prompt only
       Agent->>GetLatLongTool: GetLatLong(location)
-      GetLatLongTool-->>Agent: NonAILatLongResponse
+      GetLatLongTool-->>Agent: NonAILatLongListResponse
       Agent->>GetPublicWeatherTool: GetPublicWeather(lat,long)
       GetPublicWeatherTool-->>Agent: NonAIWeatherResponse
       Agent-->>Console: AIWeatherResponse
@@ -232,8 +232,8 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       Agent->>Model: user prompt only
       Model->>Agent: GetLatLong(location)
       Agent->>GetLatLongTool: GetLatLong(location)
-      GetLatLongTool-->>Agent: NonAILatLongResponse
-      Agent-->>Model: NonAILatLongResponse
+      GetLatLongTool-->>Agent: NonAILatLongListResponse
+      Agent-->>Model: NonAILatLongListResponse
       Model->>Agent: GetPublicWeather(lat,long)
       Agent->>GetPublicWeatherTool: GetPublicWeather(lat,long)
       GetPublicWeatherTool-->>Agent: NonAIWeatherResponse

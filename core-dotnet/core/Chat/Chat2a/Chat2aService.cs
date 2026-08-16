@@ -141,13 +141,13 @@ public sealed class Chat2aService : IChatClientService
         AIFunctionFactory.Create(GetPublicWeatherDataAsync),
     ];
 
-    [Description("Resolve a location name to latitude and longitude using public geocoding data.")]
+    [Description("Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.")]
     private async Task<string> GetLatLongDataAsync(
         [Description("City and optional region/country, e.g. Nashville, TN")] string location,
         CancellationToken cancellationToken)
     {
-        var latLong = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
-        return JsonSerializer.Serialize(latLong, new JsonSerializerOptions { WriteIndented = true });
+        var latLongMatches = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
+        return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
     }
 
     [Description("Get current public weather conditions for a latitude and longitude.")]

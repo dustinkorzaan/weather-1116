@@ -7,9 +7,9 @@ using Microsoft.Extensions.Logging;
 namespace Core.Geo.Handlers;
 
 /// <summary>
-/// Geocodes a location string to latitude/longitude using Open-Meteo.
+/// Geocodes a location string to ranked latitude/longitude matches using Open-Meteo.
 /// </summary>
-public class GetLatLongDataHandler : IRequestHandler<GetLatLongDataEvent, NonAILatLongResponse>
+public class GetLatLongDataHandler : IRequestHandler<GetLatLongDataEvent, NonAILatLongListResponse>
 {
     private readonly ILogger<GetLatLongDataHandler> _logger;
 
@@ -18,9 +18,10 @@ public class GetLatLongDataHandler : IRequestHandler<GetLatLongDataEvent, NonAIL
         _logger = logger;
     }
 
-    public async Task<NonAILatLongResponse> Handle(GetLatLongDataEvent request, CancellationToken cancellationToken)
+    public async Task<NonAILatLongListResponse> Handle(GetLatLongDataEvent request, CancellationToken cancellationToken)
     {
         var client = new HttpClient();
+        var count = NonAILatLongMapper.NormalizeCount(request.Count);
 
         // Try multiple location variants to handle inputs like "City, ST".
         var queries = new List<string> { request.Location };
@@ -32,25 +33,22 @@ public class GetLatLongDataHandler : IRequestHandler<GetLatLongDataEvent, NonAIL
         foreach (var query in queries.Distinct(StringComparer.OrdinalIgnoreCase))
         {
             string encodedLocation = Uri.EscapeDataString(query);
-            string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedLocation}&count=1&language=en&format=json";
+            string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedLocation}&count={count}&language=en&format=json";
             _logger.LogInformation("Non-AI: Fetching geocoding data from: {Url}", url);
             string jsonResponse = await client.GetStringAsync(url, cancellationToken);
             var geoData = JsonSerializer.Deserialize<NonAIGeocodingResponse>(jsonResponse);
 
             if (geoData?.Results != null && geoData.Results.Count > 0)
             {
-                var topMatch = geoData.Results[0];
+                var mapped = NonAILatLongMapper.FromGeocodingResults(geoData.Results.Take(count).ToList());
+                var topMatch = mapped.Results[0];
                 _logger.LogInformation(
-                    "Non-AI: Found: {Name}, {Admin1}, {Country}",
+                    "Non-AI: Found {ResultCount} match(es); top: {Name}, {State}, {Country}",
+                    mapped.Results.Count,
                     topMatch.Name,
-                    topMatch.Admin1,
+                    topMatch.State,
                     topMatch.Country);
-                return new NonAILatLongResponse
-                {
-                    Name = topMatch.Name,
-                    Latitude = topMatch.Latitude,
-                    Longitude = topMatch.Longitude,
-                };
+                return mapped;
             }
         }
 

@@ -5,7 +5,7 @@ namespace Core.Tests.Geo.Models;
 
 /// <summary>
 /// Verifies the JSON contracts the Core geo handlers rely on when deserializing
-/// Open-Meteo geocoding responses.
+/// Open-Meteo geocoding responses and serializing ranked lat/long matches.
 /// </summary>
 public class GeoModelsTests
 {
@@ -51,19 +51,51 @@ public class GeoModelsTests
     {
         var original = new NonAILatLongResponse
         {
-            Name = "Toronto",
-            Latitude = 43.7,
-            Longitude = -79.42,
+            Rank = 2,
+            Name = "Paris",
+            State = "Texas",
+            Country = "United States",
+            Latitude = 33.66,
+            Longitude = -95.56,
         };
 
         var json = JsonSerializer.Serialize(original);
-        Assert.Contains("\"name\":\"Toronto\"", json);
-        Assert.Contains("\"latitude\":43.7", json);
+        Assert.Contains("\"rank\":2", json);
+        Assert.Contains("\"name\":\"Paris\"", json);
+        Assert.Contains("\"state\":\"Texas\"", json);
+        Assert.Contains("\"country\":\"United States\"", json);
+        Assert.DoesNotContain("admin1", json, StringComparison.OrdinalIgnoreCase);
 
         var roundTripped = JsonSerializer.Deserialize<NonAILatLongResponse>(json);
         Assert.NotNull(roundTripped);
-        Assert.Equal(original.Name, roundTripped!.Name);
+        Assert.Equal(original.Rank, roundTripped!.Rank);
+        Assert.Equal(original.Name, roundTripped.Name);
+        Assert.Equal(original.State, roundTripped.State);
+        Assert.Equal(original.Country, roundTripped.Country);
         Assert.Equal(original.Latitude, roundTripped.Latitude);
         Assert.Equal(original.Longitude, roundTripped.Longitude);
+    }
+
+    [Fact]
+    public void NonAILatLongListResponse_RoundTripsResultsArray()
+    {
+        var original = new NonAILatLongListResponse
+        {
+            Results =
+            [
+                new NonAILatLongResponse { Rank = 1, Name = "Paris", State = "Île-de-France", Country = "France" },
+                new NonAILatLongResponse { Rank = 2, Name = "Paris", State = "Texas", Country = "United States" },
+            ],
+        };
+
+        var json = JsonSerializer.Serialize(original);
+        var roundTripped = JsonSerializer.Deserialize<NonAILatLongListResponse>(json);
+
+        Assert.NotNull(roundTripped);
+        Assert.Equal(2, roundTripped!.Results.Count);
+        Assert.Equal(1, roundTripped.Results[0].Rank);
+        Assert.Equal("Île-de-France", roundTripped.Results[0].State);
+        Assert.Equal(2, roundTripped.Results[1].Rank);
+        Assert.Equal("Texas", roundTripped.Results[1].State);
     }
 }
