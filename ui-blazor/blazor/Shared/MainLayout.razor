@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 @using WeatherBlazor.Data
 @inject WeatherApiClient WeatherClient
 @inject IConfiguration Configuration
@@ -18,6 +19,8 @@
         <FluentSpacer />
 
         <div class="header-actions">
+            @if (IsMapPage)
+            {
             <div class="add-location-wrap">
                 <button type="button"
                         class="add-location-button"
@@ -61,6 +64,7 @@
                     </form>
                 }
             </div>
+            }
 
         <button id="user-menu-button"
                 type="button"
@@ -169,6 +173,7 @@
 
     protected override void OnInitialized()
     {
+        Navigation.LocationChanged += OnLocationChanged;
         _uiReactUrl = Configuration["UI_REACT_URL"] ?? "http://localhost:3000";
         _mvcUrl = Configuration["MVC_URL"] ?? "http://localhost:8100";
         var apiUrl = (Configuration["API_DOTNET_URL"] ?? "http://localhost:8080").TrimEnd('/');
@@ -197,6 +202,37 @@
         {
             // Tests and missing script keep System.
         }
+    }
+
+    private bool IsMapPage
+    {
+        get
+        {
+            var path = Navigation.ToBaseRelativePath(Navigation.Uri);
+            var separator = path.IndexOfAny(['?', '#']);
+            if (separator >= 0)
+            {
+                path = path[..separator];
+            }
+
+            return string.IsNullOrEmpty(path);
+        }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        if (_addLocationOpen && !IsMapPage)
+        {
+            _addLocationOpen = false;
+            _addLocationError = string.Empty;
+        }
+
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 
     private string ThemeItemLabel(string value, string label) =>

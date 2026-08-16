@@ -8,7 +8,7 @@ import {
   saveMapCities,
   upsertMapCity,
 } from './mapCities';
-import { currentAiWeatherPath } from '../utils/currentAiWeatherLocation';
+import { currentAiWeatherPath, formatLocationWithLatLong } from '../utils/currentAiWeatherLocation';
 
 afterEach(() => {
   window.sessionStorage.removeItem(MAP_CITIES_STORAGE_KEY);
@@ -36,9 +36,9 @@ test('default map cities use GUID ids', () => {
   }
 });
 
-test('map pin labels encode into the location query', () => {
-  expect(currentAiWeatherPath('Atlanta, GA')).toBe(
-    '/current-ai-weather?location=Atlanta%2C%20GA'
+test('map pin labels encode into the location query with lat/long', () => {
+  expect(currentAiWeatherPath(formatLocationWithLatLong('Atlanta, GA', 33.749, -84.388))).toBe(
+    '/current-ai-weather?location=Atlanta%2C%20GA%20(33.7490%C2%B0%20N%2C%2084.3880%C2%B0%20W)'
   );
 });
 

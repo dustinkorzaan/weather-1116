@@ -32,6 +32,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("id=\"weather-map\"", html);
+        Assert.Contains("aria-label=\"Add location\"", html);
         Assert.Contains("href=\"/hello-world\"", html);
         Assert.Contains("href=\"/current-ai-weather\"", html);
         Assert.Contains("href=\"/chat-clients\"", html);
@@ -57,6 +58,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("Hello, from WeatherMVC", html);
         Assert.Contains("Hello World", html);
+        Assert.DoesNotContain("aria-label=\"Add location\"", html);
         Assert.DoesNotContain("Current AI Weather</h2>", html);
         Assert.DoesNotContain("Chat Clients</h2>", html);
         Assert.DoesNotContain("id=\"weather-map\"", html);
@@ -73,6 +75,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Current AI Weather", html);
         Assert.Contains("class=\"weather-card\"", html);
         Assert.Contains("class=\"btn\"", html);
+        Assert.DoesNotContain("aria-label=\"Add location\"", html);
         Assert.DoesNotContain("Hello World</h2>", html);
         Assert.DoesNotContain("Chat Clients</h2>", html);
         Assert.DoesNotContain("id=\"weather-map\"", html);
@@ -113,6 +116,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     {
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
         Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("formatLocationWithLatLong", script);
+        Assert.Contains("formatHemisphereDegrees", script);
+        Assert.Contains("city.lat", script);
+        Assert.Contains("city.lng", script);
         Assert.Contains("encodeURIComponent", script);
         Assert.Contains("/current-ai-weather?location=", script);
         Assert.Contains("marker.addListener('mouseover'", script);
@@ -154,6 +161,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Remote MCP · Agent Framework · Like Foundry Console V4", html);
         Assert.Contains("class=\"page-shell\"", html);
         Assert.Contains("class=\"chat-tab is-active\"", html);
+        Assert.DoesNotContain("aria-label=\"Add location\"", html);
         Assert.DoesNotContain("Hello World</h2>", html);
         Assert.DoesNotContain("Current AI Weather</h2>", html);
         Assert.DoesNotContain("id=\"weather-map\"", html);
@@ -194,6 +202,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var layoutSource = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/Views/Shared/_Layout.cshtml"));
         Assert.Contains("avatar.svg", layoutSource);
+        Assert.Contains("isMapPage", layoutSource);
         Assert.DoesNotContain("stroke-width=\"2.25\"", layoutSource);
 
         var avatarSvg = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/avatar.svg"));

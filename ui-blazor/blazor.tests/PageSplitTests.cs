@@ -40,6 +40,9 @@ public sealed class PageSplitTests
     {
         var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
         Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("formatLocationWithLatLong", script);
+        Assert.Contains("formatHemisphereDegrees", script);
+        Assert.Contains("toFixed(4)", script);
         Assert.Contains("Get Current AI Weather", script);
         Assert.Contains("weather-map-pin-card-delete", script);
         Assert.Contains("addCity", script);
@@ -126,6 +129,9 @@ public sealed class PageSplitTests
     {
         var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
         Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("formatLocationWithLatLong", script);
+        Assert.Contains("city.lat", script);
+        Assert.Contains("city.lng", script);
         Assert.Contains("encodeURIComponent", script);
         Assert.Contains("/current-ai-weather?location=", script);
         Assert.Contains("marker.addListener('mouseover'", script);

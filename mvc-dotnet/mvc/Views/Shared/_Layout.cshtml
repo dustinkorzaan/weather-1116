@@ -6,6 +6,7 @@
     var apiAboutUrl = $"{apiUrl}/About";
     var workerUrl = (Configuration["WORKER_DOTNET_URL"] ?? "http://localhost:8130").TrimEnd('/');
     var workerHangfireUrl = $"{workerUrl}/hangfire";
+    var isMapPage = string.Equals(ViewContext.RouteData.Values["action"] as string, "Index", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -50,6 +51,8 @@
             </a>
 
             <div class="header-actions">
+            @if (isMapPage)
+            {
             <div id="addLocationWrap" class="add-location-wrap">
                 <button id="addLocationButton"
                         type="button"
@@ -82,6 +85,7 @@
                     </form>
                 </div>
             </div>
+            }
 
             <div class="avatar-wrap">
                 <button id="avatarMenuButton"

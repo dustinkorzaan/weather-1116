@@ -11,7 +11,7 @@ import {
 import { useMapPins } from '../map/mapPinsContext';
 import { bindPinHoverCard } from '../map/pinHoverCard';
 import { THEME_CHANGE_EVENT, resolveTheme } from '../theme/theme';
-import { currentAiWeatherPath } from '../utils/currentAiWeatherLocation';
+import { currentAiWeatherPath, formatLocationWithLatLong } from '../utils/currentAiWeatherLocation';
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
@@ -204,8 +204,8 @@ function paintMarkers(maps, map, resolvedTheme, navigate, citiesRef, markersRef,
       map,
       marker: overlay,
       cityName: city.name,
-      onGetWeather: (cityName) => {
-        navigate(currentAiWeatherPath(cityName));
+      onGetWeather: () => {
+        navigate(currentAiWeatherPath(formatLocationWithLatLong(city.name, city.lat, city.lng)));
       },
       onDelete: () => {
         removeCityRef.current(city.id);
