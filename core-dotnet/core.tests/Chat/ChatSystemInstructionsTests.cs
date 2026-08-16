@@ -14,6 +14,7 @@ public class ChatSystemInstructionsTests
         Assert.Contains("place name", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("latitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("longitude", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("GetLocationData", prompt);
         Assert.Contains("Do not emit raw HTML", prompt);
     }
 }

@@ -51,6 +51,7 @@ public sealed class Chat1aService : IChatClientService
 
         var client = _settings.CreateResponsesClient();
         var getLatLongTool = ChatToolDefinitions.CreateGetLatLongTool();
+        var getLocationTool = ChatToolDefinitions.CreateGetLocationDataTool();
         var getPublicWeatherTool = ChatToolDefinitions.CreateGetPublicWeatherTool();
 
         var assistantBuilder = new StringBuilder();
@@ -63,7 +64,7 @@ public sealed class Chat1aService : IChatClientService
 
             CreateResponseOptions options = new(_settings.DeploymentName, inputItems)
             {
-                Tools = { getLatLongTool, getPublicWeatherTool },
+                Tools = { getLatLongTool, getLocationTool, getPublicWeatherTool },
                 StreamingEnabled = true,
             };
 

@@ -28,6 +28,12 @@ public class AboutFunctionTests
     }
 
     [Fact]
+    public void HasMcpTool_ReturnsTrue_ForGetLocationData()
+    {
+        Assert.True(AboutFunction.HasMcpTool("GetLocationData"));
+    }
+
+    [Fact]
     public void HasMcpTool_ReturnsFalse_ForUnknownTool()
     {
         Assert.False(AboutFunction.HasMcpTool("NotRegistered"));

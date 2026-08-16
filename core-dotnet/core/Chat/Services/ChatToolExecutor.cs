@@ -20,6 +20,7 @@ public sealed class ChatToolExecutor
         return functionCall.FunctionName switch
         {
             "GetLatLongData" => await ExecuteGetLatLongAsync(functionCall.FunctionArguments, cancellationToken),
+            "GetLocationData" => await ExecuteGetLocationAsync(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherData" => await ExecuteGetPublicWeatherAsync(functionCall.FunctionArguments, cancellationToken),
             _ => throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}"),
         };
@@ -33,6 +34,20 @@ public sealed class ChatToolExecutor
 
         var latLongMatches = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
         return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    private async Task<string> ExecuteGetLocationAsync(BinaryData arguments, CancellationToken cancellationToken)
+    {
+        using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
+        double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+        double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+
+        var locationData = await _mediator.Send(new GetLocationDataEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+        }, cancellationToken);
+        return JsonSerializer.Serialize(locationData, new JsonSerializerOptions { WriteIndented = true });
     }
 
     private async Task<string> ExecuteGetPublicWeatherAsync(BinaryData arguments, CancellationToken cancellationToken)

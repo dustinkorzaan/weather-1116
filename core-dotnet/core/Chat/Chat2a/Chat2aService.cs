@@ -143,6 +143,7 @@ public sealed class Chat2aService : IChatClientService
     private IList<AITool> CreateTools() =>
     [
         AIFunctionFactory.Create(GetLatLongDataAsync),
+        AIFunctionFactory.Create(GetLocationDataAsync),
         AIFunctionFactory.Create(GetPublicWeatherDataAsync),
     ];
 
@@ -153,6 +154,20 @@ public sealed class Chat2aService : IChatClientService
     {
         var latLongMatches = await _mediator.Send(new GetLatLongDataEvent { Location = location }, cancellationToken);
         return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    [Description("Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.")]
+    private async Task<string> GetLocationDataAsync(
+        [Description("Latitude in decimal degrees")] double latitude,
+        [Description("Longitude in decimal degrees")] double longitude,
+        CancellationToken cancellationToken)
+    {
+        var locationData = await _mediator.Send(new GetLocationDataEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+        }, cancellationToken);
+        return JsonSerializer.Serialize(locationData, new JsonSerializerOptions { WriteIndented = true });
     }
 
     [Description("Get current public weather conditions for a latitude and longitude.")]

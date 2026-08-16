@@ -23,6 +23,28 @@ public static class ChatToolDefinitions
         """)),
         strictModeEnabled: true);
 
+    public static FunctionTool CreateGetLocationDataTool() => ResponseTool.CreateFunctionTool(
+        functionName: "GetLocationData",
+        functionDescription: "Turn a latitude and longitude into a simple place label. US results are City, State; elsewhere City, State, Country.",
+        functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+        {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "description": "Latitude in decimal degrees"
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Longitude in decimal degrees"
+            }
+          },
+          "required": ["latitude", "longitude"],
+          "additionalProperties": false
+        }
+        """)),
+        strictModeEnabled: true);
+
     public static FunctionTool CreateGetPublicWeatherTool() => ResponseTool.CreateFunctionTool(
         functionName: "GetPublicWeatherData",
         functionDescription: "Get current public weather conditions for a latitude and longitude.",

@@ -5,7 +5,7 @@ namespace Core.Tests.Geo.Models;
 
 /// <summary>
 /// Verifies the JSON contracts the Core geo handlers rely on when deserializing
-/// Open-Meteo geocoding responses and serializing ranked lat/long matches.
+/// Open-Meteo geocoding / Nominatim reverse responses and serializing results.
 /// </summary>
 public class GeoModelsTests
 {
@@ -97,5 +97,43 @@ public class GeoModelsTests
         Assert.Equal("Île-de-France", roundTripped.Results[0].State);
         Assert.Equal(2, roundTripped.Results[1].Rank);
         Assert.Equal("Texas", roundTripped.Results[1].State);
+    }
+
+    [Fact]
+    public void NominatimReverseResponse_DeserializesAddressFields()
+    {
+        const string json = """
+        {
+          "address": {
+            "city": "Nashville",
+            "town": "",
+            "state": "Tennessee",
+            "country": "United States",
+            "country_code": "us"
+          }
+        }
+        """;
+
+        var result = JsonSerializer.Deserialize<NominatimReverseResponse>(json);
+
+        Assert.NotNull(result);
+        Assert.NotNull(result!.Address);
+        Assert.Equal("Nashville", result.Address.City);
+        Assert.Equal("Tennessee", result.Address.State);
+        Assert.Equal("United States", result.Address.Country);
+        Assert.Equal("us", result.Address.CountryCode);
+    }
+
+    [Fact]
+    public void NominatimLocationResponse_RoundTripsLocation()
+    {
+        var original = new NominatimLocationResponse { Location = "Paris, Île-de-France, France" };
+
+        var json = JsonSerializer.Serialize(original);
+        Assert.Contains("\"location\":\"Paris, Île-de-France, France\"", json);
+
+        var roundTripped = JsonSerializer.Deserialize<NominatimLocationResponse>(json);
+        Assert.NotNull(roundTripped);
+        Assert.Equal(original.Location, roundTripped!.Location);
     }
 }
