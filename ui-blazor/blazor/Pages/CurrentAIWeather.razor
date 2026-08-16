@@ -1,6 +1,7 @@
 @page "/current-ai-weather"
 @using WeatherBlazor.Data
 @inject WeatherApiClient WeatherClient
+@inject NavigationManager Navigation
 
 <PageTitle>Weather Razor - Current AI Weather</PageTitle>
 
@@ -63,6 +64,23 @@
     private bool isAiWeatherLoading;
     private string? aiWeatherError;
     private AIWeatherResponse? aiWeather;
+    private bool queryHandled;
+
+    [SupplyParameterFromQuery(Name = "location")]
+    public string? LocationQuery { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (queryHandled || string.IsNullOrWhiteSpace(LocationQuery))
+        {
+            return;
+        }
+
+        queryHandled = true;
+        location = LocationQuery.Trim();
+        Navigation.NavigateTo("/current-ai-weather", replace: true);
+        await GetCurrentAIWeather();
+    }
 
     private async Task GetCurrentAIWeather()
     {

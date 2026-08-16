@@ -79,6 +79,14 @@ window.weatherMap = (function () {
     return loadPromise;
   }
 
+  function currentAiWeatherPath(location) {
+    var trimmed = String(location || '').trim();
+    if (!trimmed) {
+      return '/current-ai-weather';
+    }
+    return '/current-ai-weather?location=' + encodeURIComponent(trimmed);
+  }
+
   function createWhiteDotIcon(maps) {
     return {
       path: maps.SymbolPath.CIRCLE,
@@ -130,11 +138,13 @@ window.weatherMap = (function () {
 
       const icon = createWhiteDotIcon(maps);
       (cities || []).forEach(function (city) {
-        new maps.Marker({
+        const marker = new maps.Marker({
           map: map,
           position: { lat: city.lat, lng: city.lng },
           title: city.name,
           icon: icon,
+          clickable: true,
+          cursor: 'pointer',
           label: {
             text: city.name,
             color: '#e4e4e7',
@@ -143,6 +153,10 @@ window.weatherMap = (function () {
             className: 'weather-map-label',
           },
         });
+
+        marker.addListener('click', function () {
+          window.location.assign(currentAiWeatherPath(city.name));
+        });
       });
 
       element.setAttribute('data-status', 'ready');
@@ -150,5 +164,8 @@ window.weatherMap = (function () {
     });
   }
 
-  return { init: init };
+  return {
+    init: init,
+    currentAiWeatherPath: currentAiWeatherPath,
+  };
 })();

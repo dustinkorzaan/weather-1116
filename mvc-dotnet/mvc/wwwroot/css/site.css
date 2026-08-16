@@ -708,7 +708,7 @@ code {
 
   .chat-form {
     flex-direction: row;
-    align-items: flex-end;
+    align-items: flex-start;
   }
 
   .chat-send {

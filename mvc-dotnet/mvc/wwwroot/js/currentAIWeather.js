@@ -29,9 +29,7 @@
       return;
     }
 
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-
+    function requestWeather() {
       var location = (locationInput.value || '').trim() || 'Nashville, TN';
       locationInput.value = location;
 
@@ -70,7 +68,30 @@
           button.removeAttribute('aria-busy');
           locationInput.disabled = false;
         });
+    }
+
+    function consumeLocationQuery() {
+      var params = new URLSearchParams(window.location.search);
+      var fromQuery = (params.get('location') || '').trim();
+      if (!fromQuery) {
+        return false;
+      }
+
+      locationInput.value = fromQuery;
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+      }
+      return true;
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      requestWeather();
     });
+
+    if (consumeLocationQuery()) {
+      requestWeather();
+    }
   }
 
   window.currentAIWeather = { init: init };

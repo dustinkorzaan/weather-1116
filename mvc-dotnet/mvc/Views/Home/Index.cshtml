@@ -5,10 +5,10 @@
     var mapsApiKey = Configuration["GOOGLE_MAPS_API_KEY"] ?? "";
     var mapCities = new[]
     {
-        new { id = "nyc", name = "New York", lat = 40.7128, lng = -74.006 },
-        new { id = "toronto", name = "Toronto", lat = 43.6532, lng = -79.3832 },
-        new { id = "atlanta", name = "Atlanta", lat = 33.749, lng = -84.388 },
-        new { id = "charlotte", name = "Charlotte", lat = 35.2271, lng = -80.8431 },
+        new { id = "nyc", name = "New York, NY", lat = 40.7128, lng = -74.006 },
+        new { id = "toronto", name = "Toronto, ON", lat = 43.6532, lng = -79.3832 },
+        new { id = "atlanta", name = "Atlanta, GA", lat = 33.749, lng = -84.388 },
+        new { id = "charlotte", name = "Charlotte, NC", lat = 35.2271, lng = -80.8431 },
     };
     var citiesJson = JsonSerializer.Serialize(mapCities);
 }

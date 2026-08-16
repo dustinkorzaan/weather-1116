@@ -1,15 +1,41 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLazyGetCurrentAIWeatherQuery } from '../services/weatherApi';
+import { locationFromSearchParams } from '../utils/currentAiWeatherLocation';
 
 function CurrentAIWeather() {
-  const [location, setLocation] = useState('Nashville, TN');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [location, setLocation] = useState(
+    () => locationFromSearchParams(searchParams) || 'Nashville, TN'
+  );
   const [trigger, { data, isFetching, isError, error }] = useLazyGetCurrentAIWeatherQuery();
+  const queryHandledRef = useRef(false);
+
+  const requestWeather = (rawLocation) => {
+    const trimmed = (rawLocation ?? location).trim() || 'Nashville, TN';
+    setLocation(trimmed);
+    trigger(trimmed);
+  };
+
+  useEffect(() => {
+    if (queryHandledRef.current) {
+      return;
+    }
+
+    const fromQuery = locationFromSearchParams(searchParams);
+    if (!fromQuery) {
+      return;
+    }
+
+    queryHandledRef.current = true;
+    setSearchParams({}, { replace: true });
+    requestWeather(fromQuery);
+  }, [searchParams, setSearchParams, trigger]);
 
   const onSubmit = (event) => {
     event.preventDefault();
-    const trimmed = location.trim() || 'Nashville, TN';
-    trigger(trimmed);
+    requestWeather(location);
   };
 
   const errorMessage =
@@ -37,15 +63,14 @@ function CurrentAIWeather() {
         />
         <Button
           type="submit"
-          variant="outline"
           size="lg"
-          className="border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
+          className="bg-gray-700 text-white shadow-sm hover:bg-gray-800"
           disabled={isFetching}
           aria-busy={isFetching}
         >
           {isFetching && (
             <span
-              className="size-4 animate-spin rounded-full border-2 border-gray-200 border-t-gray-600"
+              className="size-4 animate-spin rounded-full border-2 border-gray-500 border-t-white"
               aria-hidden="true"
             />
           )}

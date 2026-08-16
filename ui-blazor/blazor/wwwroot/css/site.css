@@ -49,6 +49,7 @@ body {
     gap: 0.5rem;
     color: #111827;
     text-decoration: none;
+    outline: none;
 }
 
 .layout.weather-shell .brand-logo {
@@ -152,8 +153,8 @@ fluent-menu-item a {
     gap: 1rem;
 }
 
-.form-row-end {
-    align-items: flex-end;
+.form-row-start {
+    align-items: flex-start;
 }
 
 .weather-results {
