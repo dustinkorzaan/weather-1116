@@ -3,6 +3,7 @@ import {
   MAP_CITIES,
   MAP_CITIES_STORAGE_KEY,
   cityFromLatLongSearch,
+  cityFromReverseLookup,
   loadMapCities,
   removeMapCity,
   saveMapCities,
@@ -58,6 +59,20 @@ test('cityFromLatLongSearch uses the first geo match name and coordinates', () =
     latitude: 36.1627,
     longitude: -86.7816,
   });
+  expect(city).toMatchObject({
+    name: 'Nashville, Tennessee',
+    lat: 36.1627,
+    lng: -86.7816,
+  });
+  expect(city.id).toMatch(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  );
+});
+
+test('cityFromReverseLookup uses the clicked coordinates and GetLocation label', () => {
+  expect(cityFromReverseLookup(36.1627, -86.7816, null)).toBeNull();
+  expect(cityFromReverseLookup(36.1627, -86.7816, { location: '  ' })).toBeNull();
+  const city = cityFromReverseLookup(36.1627, -86.7816, { location: 'Nashville, Tennessee' });
   expect(city).toMatchObject({
     name: 'Nashville, Tennessee',
     lat: 36.1627,

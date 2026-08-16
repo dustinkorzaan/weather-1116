@@ -50,6 +50,13 @@ function mockHelloFetch(weather = {}) {
       );
     }
 
+    if (url.includes('/Geo/GetLocation')) {
+      return new Response(JSON.stringify({ location: 'Nashville, Tennessee' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     if (url.includes('/Geo')) {
       await new Promise((resolve) => {
         setTimeout(resolve, 40);
@@ -162,6 +169,14 @@ test('renders the map on the home route without split page content', () => {
   expect(screen.queryByRole('heading', { name: /chat clients/i })).toBeNull();
   expect(screen.queryByRole('heading', { name: /^hello world$/i })).toBeNull();
   expect(screen.queryByRole('heading', { name: /current ai weather/i })).toBeNull();
+
+  const mapSource = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), 'components/WeatherMap.jsx'),
+    'utf8'
+  );
+  expect(mapSource).toContain('bindRightClickAddLocation');
+  expect(mapSource).toContain('cityFromReverseLookup');
+  expect(mapSource).toContain('useLazyGetLocationQuery');
 });
 
 test('renders hello world on its own page', async () => {

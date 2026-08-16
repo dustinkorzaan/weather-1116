@@ -22,7 +22,8 @@
     }
     <div class="map-canvas-wrap">
         <div id="weather-map"
-             data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"></div>
+             data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"
+             data-get-location-url="@Url.Action("GetLocation", "Geo")"></div>
         @if (string.IsNullOrWhiteSpace(mapsApiKey))
         {
             <div class="weather-map-pin-card-preview" role="dialog" aria-label="Atlanta, GA">

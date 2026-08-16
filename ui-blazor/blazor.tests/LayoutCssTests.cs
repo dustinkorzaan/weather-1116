@@ -28,6 +28,8 @@ public sealed class LayoutCssTests
         Assert.Contains(".chat-markdown", css);
         Assert.Contains(".chat-fullscreen-button", css);
         Assert.Contains(".chat-form textarea.chat-input", css);
+        Assert.Contains(".weather-map-add-location-button", css);
+        Assert.Contains(".weather-map-add-location-error", css);
     }
 
     [Fact]
@@ -85,6 +87,13 @@ public sealed class LayoutCssTests
         Assert.Contains("weatherMap.addCity", layoutSource);
         Assert.Contains("SearchLocation", layoutSource);
         Assert.DoesNotContain("FluentButton", layoutSource);
+
+        var programSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Program.cs"));
+        Assert.Contains("MapGet(\"/Geo/GetLocation\"", programSource);
+        Assert.Contains("client.GetLocation", programSource);
+
+        var weatherClient = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Data/WeatherApiClient.cs"));
+        Assert.Contains("Geo/GetLocation?latitude=", weatherClient);
 
         var avatarSvg = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/avatar.svg"));
         Assert.Contains("<path ", avatarSvg);

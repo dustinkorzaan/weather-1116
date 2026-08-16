@@ -38,6 +38,15 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.MapGet("/Geo/GetLocation", async (
+    double latitude,
+    double longitude,
+    WeatherApiClient client,
+    CancellationToken cancellationToken) =>
+{
+    var result = await client.GetLocation(latitude, longitude, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
+});
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 app.Run();

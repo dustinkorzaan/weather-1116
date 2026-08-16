@@ -45,4 +45,41 @@ public class GeoController : Controller
 			return NotFound();
 		}
 	}
+
+	[HttpGet]
+	public async Task<IActionResult> GetLocation(
+		[FromQuery] double? latitude,
+		[FromQuery] double? longitude,
+		CancellationToken cancellationToken)
+	{
+		if (!IsValidCoordinate(latitude, longitude))
+		{
+			return BadRequest();
+		}
+
+		try
+		{
+			var response = await _mediator.Send(
+				new GetLocationEvent
+				{
+					Latitude = latitude.Value,
+					Longitude = longitude.Value,
+				},
+				cancellationToken);
+
+			if (string.IsNullOrWhiteSpace(response.Location))
+			{
+				return NotFound();
+			}
+
+			return Json(response);
+		}
+		catch (InvalidOperationException)
+		{
+			return NotFound();
+		}
+	}
+
+	private static bool IsValidCoordinate(double? latitude, double? longitude) =>
+		latitude is >= -90 and <= 90 && longitude is >= -180 and <= 180;
 }

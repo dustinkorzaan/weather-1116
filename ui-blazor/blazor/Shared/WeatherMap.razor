@@ -16,6 +16,7 @@
              class="weather-map"
              data-google-maps-key="@_apiKey"
              data-cities="@_citiesJson"
+             data-get-location-url="/Geo/GetLocation"
              data-status="@(string.IsNullOrWhiteSpace(_apiKey) ? "missing-key" : "pending")"></div>
         @if (string.IsNullOrWhiteSpace(_apiKey))
         {

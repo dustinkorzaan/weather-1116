@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from '../data/mapCities';
+import { cityFromReverseLookup, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from '../data/mapCities';
 import { applyMapColorSchemeCss, createMapOptions } from '../map/darkMapStyles';
 import { loadGoogleMaps } from '../map/loadGoogleMaps';
 import {
@@ -10,6 +10,8 @@ import {
 } from '../map/logoPinOverlay';
 import { useMapPins } from '../map/mapPinsContext';
 import { bindPinHoverCard } from '../map/pinHoverCard';
+import { bindRightClickAddLocation } from '../map/rightClickAddLocation';
+import { useLazyGetLocationQuery } from '../services/weatherApi';
 import { THEME_CHANGE_EVENT, resolveTheme } from '../theme/theme';
 import { currentAiWeatherPath, formatLocationWithLatLong } from '../utils/currentAiWeatherLocation';
 
@@ -26,13 +28,19 @@ function WeatherMap() {
   });
   const citiesRef = useRef([]);
   const removeCityRef = useRef(() => {});
+  const addCityRef = useRef(() => {});
+  const getLocationRef = useRef(null);
+  const unbindAddLocationRef = useRef(() => {});
   const navigate = useNavigate();
-  const { cities, removeCity } = useMapPins();
+  const { cities, addCity, removeCity } = useMapPins();
+  const [triggerGetLocation] = useLazyGetLocationQuery();
   const [status, setStatus] = useState(apiKey ? 'loading' : 'missing-key');
   const [resolvedTheme, setResolvedTheme] = useState(() => resolveTheme());
 
   citiesRef.current = cities;
   removeCityRef.current = removeCity;
+  addCityRef.current = addCity;
+  getLocationRef.current = triggerGetLocation;
 
   useEffect(() => {
     const syncMapTheme = (event) => {
@@ -69,7 +77,35 @@ function WeatherMap() {
         mapsApiRef.current = maps;
         mapInstanceRef.current = map;
         paintMarkers(maps, map, resolvedTheme, navigate, citiesRef, markersRef, removeCityRef);
+        unbindAddLocationRef.current = bindRightClickAddLocation({
+          maps,
+          map,
+          onAddLocation: async (lat, lng, controls) => {
+            controls.setError('');
+            controls.setBusy(true);
+            try {
+              const lookup = getLocationRef.current;
+              if (typeof lookup !== 'function') {
+                controls.setError('Unable to find that location.');
+                return;
+              }
+              const data = await lookup({ latitude: lat, longitude: lng }).unwrap();
+              const city = cityFromReverseLookup(lat, lng, data);
+              if (!city) {
+                controls.setError('Unable to find that location.');
+                return;
+              }
+              addCityRef.current(city);
+              controls.hide();
+            } catch {
+              controls.setError('Unable to find that location.');
+            } finally {
+              controls.setBusy(false);
+            }
+          },
+        });
         if (cancelled) {
+          unbindAddLocationRef.current();
           markersRef.current.forEach((pin) => pin.setMap(null));
           return;
         }
@@ -94,6 +130,8 @@ function WeatherMap() {
           };
         }
       }
+      unbindAddLocationRef.current();
+      unbindAddLocationRef.current = () => {};
       markersRef.current.forEach((pin) => pin.setMap(null));
       markersRef.current = [];
       mapInstanceRef.current = null;

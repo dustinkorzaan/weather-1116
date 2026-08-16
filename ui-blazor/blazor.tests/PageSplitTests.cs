@@ -33,6 +33,7 @@ public sealed class PageSplitTests
         Assert.Contains("weather-map-pin-card-preview", rendered.Markup);
         Assert.Contains("weather-map-pin-card-delete", rendered.Markup);
         Assert.Contains("weather-map-pin-card-header", rendered.Markup);
+        Assert.Contains("data-get-location-url=\"/Geo/GetLocation\"", rendered.Markup);
     }
 
     [Fact]
@@ -47,6 +48,9 @@ public sealed class PageSplitTests
         Assert.Contains("weather-map-pin-card-delete", script);
         Assert.Contains("addCity", script);
         Assert.Contains("removeCity", script);
+        Assert.Contains("rightclick", script);
+        Assert.Contains("Add Location", script);
+        Assert.Contains("/Geo/GetLocation", script);
         Assert.Contains("weather-map-cities", script);
         Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", script);
         Assert.DoesNotContain("id: 'nyc'", script);
@@ -146,6 +150,8 @@ public sealed class PageSplitTests
         Assert.Contains("marker.addListener('click', openCard)", script);
         Assert.Contains("Get Current AI Weather", script);
         Assert.Contains("bindPinHoverCard", script);
+        Assert.Contains("bindRightClickAddLocation", script);
+        Assert.Contains("Add Location", script);
         Assert.Contains("LIGHT_MAP_STYLES", script);
         Assert.Contains("weather-theme-change", script);
         Assert.Contains("colorScheme", script);
@@ -286,6 +292,17 @@ public sealed class PageSplitTests
                 if (holdWeather)
                 {
                     await Task.Delay(Timeout.Infinite, cancellationToken);
+                }
+
+                if (path.Contains("Geo/GetLocation", StringComparison.OrdinalIgnoreCase))
+                {
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = JsonContent.Create(new LocationResponse
+                        {
+                            Location = "Nashville, Tennessee",
+                        }),
+                    };
                 }
 
                 if (path.Contains("/Geo", StringComparison.OrdinalIgnoreCase)
