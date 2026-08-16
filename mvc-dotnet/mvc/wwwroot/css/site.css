@@ -982,6 +982,7 @@ html[data-theme="dark"] .weather-map-logo-pin {
 }
 
 .chat-message {
+  flex-shrink: 0;
   max-width: 85%;
   padding: 0.5rem 0.75rem;
   white-space: pre-wrap;

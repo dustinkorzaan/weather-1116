@@ -163,6 +163,31 @@ test('does not close tool details until the pointer leaves the popup', async () 
   });
 });
 
+test('assistant replies grow with their text instead of shrinking inside the transcript', async () => {
+  const reply = Array.from({ length: 12 }, (_, index) => `Line ${index + 1} of the forecast.`).join('\n');
+  streamChatMessage.mockImplementation(async ({ onEvent }) => {
+    onEvent({ type: 'tool_end', toolName: 'GetPublicWeatherCurrent' });
+    onEvent({ type: 'token', text: reply });
+    onEvent({ type: 'done' });
+  });
+
+  const user = userEvent.setup();
+  const { container } = render(<ChatPanel />);
+
+  await user.type(screen.getByLabelText(/message/i), 'weather in nashville');
+  await user.click(screen.getByRole('button', { name: /^send$/i }));
+
+  const bubble = await waitFor(() => {
+    const node = screen.getByText('Line 1 of the forecast.', { exact: false }).closest('div');
+    expect(node).toBeTruthy();
+    return node;
+  });
+
+  expect(bubble.className).toContain('shrink-0');
+  expect(bubble.className).not.toMatch(/\bmax-h-/);
+  expect(container.querySelector('[data-chat-messages]')?.className).toContain('overflow-y-auto');
+});
+
 test('renders assistant markdown after the stream finishes, including tables', async () => {
   let finish;
   streamChatMessage.mockImplementation(async ({ onEvent }) => {

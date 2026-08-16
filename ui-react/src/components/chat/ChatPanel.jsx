@@ -37,10 +37,10 @@ const TAB_CONFIG = [
 ];
 
 const MESSAGE_CLASSES = {
-  user: 'self-end max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap',
-  assistant: 'self-start max-w-[85%] overflow-x-auto rounded-2xl border border-border bg-muted px-3 py-2 text-foreground',
-  tool: 'self-center text-xs text-muted-foreground',
-  error: 'w-full rounded-md bg-destructive/15 px-3 py-2 text-destructive',
+  user: 'shrink-0 self-end max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap',
+  assistant: 'shrink-0 self-start max-w-[85%] overflow-x-auto rounded-2xl border border-border bg-muted px-3 py-2 text-foreground',
+  tool: 'shrink-0 self-center text-xs text-muted-foreground',
+  error: 'shrink-0 w-full rounded-md bg-destructive/15 px-3 py-2 text-destructive',
 };
 
 function messageClasses(entry) {
