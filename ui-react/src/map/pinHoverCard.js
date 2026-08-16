@@ -36,17 +36,9 @@ export function createPinHoverCard(cityName) {
  *   marker: { addListener: (eventName: string, handler: Function) => void },
  *   cityName: string,
  *   onGetWeather: (cityName: string) => void,
- *   onHoverChange?: (hovered: boolean) => void,
  * }} options
  */
-export function bindPinHoverCard({
-  maps,
-  map,
-  marker,
-  cityName,
-  onGetWeather,
-  onHoverChange,
-}) {
+export function bindPinHoverCard({ maps, map, marker, cityName, onGetWeather }) {
   const { card, button } = createPinHoverCard(cityName);
   const infoWindowOptions = {
     content: card,
@@ -78,7 +70,6 @@ export function bindPinHoverCard({
       isOpen = true;
     }
     activeCloseCard = closeCard;
-    onHoverChange?.(true);
   }
 
   function closeCard() {
@@ -90,7 +81,6 @@ export function bindPinHoverCard({
     if (activeCloseCard === closeCard) {
       activeCloseCard = null;
     }
-    onHoverChange?.(false);
   }
 
   function scheduleClose() {

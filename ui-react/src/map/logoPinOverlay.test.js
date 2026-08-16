@@ -104,7 +104,7 @@ test('logo overlay renders a spinning image without a city-name label', () => {
   expect(pin.style.top).toBe('80px');
 });
 
-test('hover pause class and theme logo updates apply to the overlay', () => {
+test('theme logo updates apply to the overlay', () => {
   const pane = document.createElement('div');
   const overlay = createLogoPinOverlay(createMaps(pane), {
     lat: 40.7128,
@@ -114,11 +114,8 @@ test('hover pause class and theme logo updates apply to the overlay', () => {
   });
 
   overlay.setMap({});
-  overlay.setPaused(true);
   overlay.setLogoUrl(LOGO_PIN_DARK_URL);
 
-  const pin = pane.querySelector('.weather-map-logo-pin');
-  expect(pin?.classList.contains('is-paused')).toBe(true);
   expect(pane.querySelector('.weather-map-logo-pin-image')?.src).toContain(
     LOGO_PIN_DARK_URL
   );

@@ -37,7 +37,7 @@ function stopMapClick(event) {
 }
 
 /**
- * HTML overlay pin: the weather logo, slowly spinning until hover.
+ * HTML overlay pin: the weather logo, slowly spinning.
  * Mimics enough of a Marker for InfoWindow anchoring (`getPosition`, `addListener`).
  * @param {{
  *   OverlayView: new () => object,
@@ -127,20 +127,16 @@ export function createLogoPinOverlay(maps, options) {
       return this.position;
     }
 
-    addListener(eventName, handler) {
-      if (this.div) {
-        bindDomEvent(this.div, eventName, handler);
-        return;
+      addListener(eventName, handler) {
+        if (this.div) {
+          bindDomEvent(this.div, eventName, handler);
+          return;
+        }
+
+        this.pendingListeners.push({ eventName, handler });
       }
 
-      this.pendingListeners.push({ eventName, handler });
-    }
-
-    setPaused(paused) {
-      this.div?.classList.toggle('is-paused', Boolean(paused));
-    }
-
-    setLogoUrl(url) {
+      setLogoUrl(url) {
       this.logoUrl = url;
       const image = this.div?.querySelector('.weather-map-logo-pin-image');
       if (image) {

@@ -82,7 +82,6 @@ function WeatherMap() {
             onGetWeather: (cityName) => {
               navigate(currentAiWeatherPath(cityName));
             },
-            onHoverChange: (hovered) => overlay.setPaused(hovered),
           });
 
           return overlay;

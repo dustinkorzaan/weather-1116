@@ -240,12 +240,6 @@ window.weatherMap = (function () {
         this.pendingListeners.push({ eventName: eventName, handler: handler });
       }
 
-      setPaused(paused) {
-        if (this.div) {
-          this.div.classList.toggle('is-paused', Boolean(paused));
-        }
-      }
-
       setLogoUrl(url) {
         this.logoUrl = url;
         const image = this.div && this.div.querySelector('.weather-map-logo-pin-image');
@@ -272,18 +266,9 @@ window.weatherMap = (function () {
       });
       overlay.setMap(map);
 
-      bindPinHoverCard(
-        maps,
-        map,
-        overlay,
-        city.name,
-        function (cityName) {
-          window.location.assign(currentAiWeatherPath(cityName));
-        },
-        function (hovered) {
-          overlay.setPaused(hovered);
-        }
-      );
+      bindPinHoverCard(maps, map, overlay, city.name, function (cityName) {
+        window.location.assign(currentAiWeatherPath(cityName));
+      });
       markers.push(overlay);
     });
     return markers;
@@ -392,7 +377,7 @@ window.weatherMap = (function () {
     return { card: card, button: button };
   }
 
-  function bindPinHoverCard(maps, map, marker, cityName, onGetWeather, onHoverChange) {
+  function bindPinHoverCard(maps, map, marker, cityName, onGetWeather) {
     const created = createPinHoverCard(cityName);
     const infoWindowOptions = {
       content: created.card,
@@ -424,9 +409,6 @@ window.weatherMap = (function () {
         isOpen = true;
       }
       activeCloseCard = closeCard;
-      if (typeof onHoverChange === 'function') {
-        onHoverChange(true);
-      }
     }
 
     function closeCard() {
@@ -437,9 +419,6 @@ window.weatherMap = (function () {
       }
       if (activeCloseCard === closeCard) {
         activeCloseCard = null;
-      }
-      if (typeof onHoverChange === 'function') {
-        onHoverChange(false);
       }
     }
 
