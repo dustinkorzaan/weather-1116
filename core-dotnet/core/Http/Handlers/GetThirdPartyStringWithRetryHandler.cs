@@ -11,46 +11,22 @@ namespace Core.Http.Handlers;
 public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdPartyStringWithRetryEvent, string>
 {
     internal const int RetryCount = 5;
-    internal static readonly TimeSpan InitialRetryDelay = TimeSpan.FromMilliseconds(200);
+    internal const int RetryDelay = 200;
 
     private readonly HttpClient _httpClient;
-    private readonly Func<TimeSpan, CancellationToken, Task> _delayAsync;
 
     public GetThirdPartyStringWithRetryHandler(HttpClient httpClient)
-        : this(httpClient, Task.Delay)
     {
-    }
-
-    internal GetThirdPartyStringWithRetryHandler(
-        HttpClient httpClient,
-        Func<TimeSpan, CancellationToken, Task> delayAsync)
-    {
-        ArgumentNullException.ThrowIfNull(httpClient);
-        ArgumentNullException.ThrowIfNull(delayAsync);
         _httpClient = httpClient;
-        _delayAsync = delayAsync;
     }
 
-    public Task<string> Handle(
+    public async Task<string> Handle(
         GetThirdPartyStringWithRetryEvent request,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
 
-        return GetStringWithRetryAsync(request, cancellationToken);
-    }
-
-    internal static TimeSpan DelayBeforeRetry(int retryIndex)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(retryIndex);
-        return TimeSpan.FromMilliseconds(InitialRetryDelay.TotalMilliseconds * Math.Pow(2, retryIndex));
-    }
-
-    private async Task<string> GetStringWithRetryAsync(
-        GetThirdPartyStringWithRetryEvent request,
-        CancellationToken cancellationToken)
-    {
         for (var attempt = 0; ; attempt++)
         {
             try
@@ -60,7 +36,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
             catch (Exception exception) when (
                 IsTransient(exception, cancellationToken) && attempt < RetryCount)
             {
-                await _delayAsync(DelayBeforeRetry(attempt), cancellationToken);
+                await Task.Delay((int)(RetryDelay * Math.Pow(2, attempt)), cancellationToken);
             }
         }
     }

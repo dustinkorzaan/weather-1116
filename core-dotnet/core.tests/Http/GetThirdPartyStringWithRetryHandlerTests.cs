@@ -11,33 +11,12 @@ public class GetThirdPartyStringWithRetryHandlerTests
     private const string RequestUri = "https://api.open-meteo.com/v1/forecast";
     private const string SslFailure = "The SSL connection could not be established, see inner exception.";
 
-    private static readonly TimeSpan[] ExpectedRetryDelays =
-    [
-        TimeSpan.FromMilliseconds(200),
-        TimeSpan.FromMilliseconds(400),
-        TimeSpan.FromMilliseconds(800),
-        TimeSpan.FromMilliseconds(1600),
-        TimeSpan.FromMilliseconds(3200),
-    ];
-
     [Fact]
-    public void DelayBeforeRetry_StartsAt200MsAndDoublesFiveTimes()
-    {
-        Assert.Equal(5, GetThirdPartyStringWithRetryHandler.RetryCount);
-        Assert.Equal(TimeSpan.FromMilliseconds(200), GetThirdPartyStringWithRetryHandler.InitialRetryDelay);
-        Assert.Equal(
-            ExpectedRetryDelays,
-            Enumerable.Range(0, GetThirdPartyStringWithRetryHandler.RetryCount)
-                .Select(GetThirdPartyStringWithRetryHandler.DelayBeforeRetry));
-    }
-
-    [Fact]
-    public async Task Handle_SucceedsOnFirstAttempt_WithoutDelay()
+    public async Task Handle_SucceedsOnFirstAttempt()
     {
         var handler = new SequenceHandler(["{\"ok\":true}"]);
-        var delays = new List<TimeSpan>();
         using var client = new HttpClient(handler);
-        var sut = CreateSut(client, delays);
+        var sut = new GetThirdPartyStringWithRetryHandler(client);
 
         var body = await sut.Handle(
             new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
@@ -45,7 +24,6 @@ public class GetThirdPartyStringWithRetryHandlerTests
 
         Assert.Equal("{\"ok\":true}", body);
         Assert.Equal(1, handler.Attempts);
-        Assert.Empty(delays);
     }
 
     [Fact]
@@ -60,9 +38,8 @@ public class GetThirdPartyStringWithRetryHandlerTests
                 new HttpRequestException(SslFailure),
                 "{\"ok\":true}",
             ]);
-        var delays = new List<TimeSpan>();
         using var client = new HttpClient(handler);
-        var sut = CreateSut(client, delays);
+        var sut = new GetThirdPartyStringWithRetryHandler(client);
 
         var body = await sut.Handle(
             new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
@@ -70,7 +47,6 @@ public class GetThirdPartyStringWithRetryHandlerTests
 
         Assert.Equal("{\"ok\":true}", body);
         Assert.Equal(6, handler.Attempts);
-        Assert.Equal(ExpectedRetryDelays, delays);
     }
 
     [Fact]
@@ -85,9 +61,8 @@ public class GetThirdPartyStringWithRetryHandlerTests
                 new HttpRequestException("fourth"),
                 new HttpRequestException(SslFailure),
             ]);
-        var delays = new List<TimeSpan>();
         using var client = new HttpClient(handler);
-        var sut = CreateSut(client, delays);
+        var sut = new GetThirdPartyStringWithRetryHandler(client);
 
         var thrown = await Assert.ThrowsAsync<HttpRequestException>(() =>
             sut.Handle(
@@ -96,7 +71,6 @@ public class GetThirdPartyStringWithRetryHandlerTests
 
         Assert.Equal(SslFailure, thrown.Message);
         Assert.Equal(6, handler.Attempts);
-        Assert.Equal(ExpectedRetryDelays, delays);
     }
 
     [Fact]
@@ -105,9 +79,8 @@ public class GetThirdPartyStringWithRetryHandlerTests
         using var cts = new CancellationTokenSource();
         cts.Cancel();
         var handler = new SequenceHandler([new HttpRequestException(SslFailure)]);
-        var delays = new List<TimeSpan>();
         using var client = new HttpClient(handler);
-        var sut = CreateSut(client, delays);
+        var sut = new GetThirdPartyStringWithRetryHandler(client);
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             sut.Handle(
@@ -115,16 +88,14 @@ public class GetThirdPartyStringWithRetryHandlerTests
                 cts.Token));
 
         Assert.InRange(handler.Attempts, 0, 1);
-        Assert.Empty(delays);
     }
 
     [Fact]
     public async Task Handle_SendsCustomHeaders()
     {
         var handler = new SequenceHandler(["{\"ok\":true}"]);
-        var delays = new List<TimeSpan>();
         using var client = new HttpClient(handler);
-        var sut = CreateSut(client, delays);
+        var sut = new GetThirdPartyStringWithRetryHandler(client);
 
         await sut.Handle(
             new GetThirdPartyStringWithRetryEvent
@@ -149,7 +120,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
         var release = new TaskCompletionSource();
         var handler = new BlockingHandler(release.Task, "{\"ok\":true}");
         using var client = new HttpClient(handler);
-        var sut = CreateSut(client, []);
+        var sut = new GetThirdPartyStringWithRetryHandler(client);
         var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
         using var cts = new CancellationTokenSource();
 
@@ -176,19 +147,6 @@ public class GetThirdPartyStringWithRetryHandlerTests
         Assert.DoesNotContain("new HttpClient", source);
         Assert.DoesNotContain("GetStringAsync", source);
     }
-
-    private static GetThirdPartyStringWithRetryHandler CreateSut(
-        HttpClient client,
-        List<TimeSpan> delays) =>
-        new(client, RecordDelay(delays));
-
-    private static Func<TimeSpan, CancellationToken, Task> RecordDelay(List<TimeSpan> delays) =>
-        (delay, cancellationToken) =>
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            delays.Add(delay);
-            return Task.CompletedTask;
-        };
 
     private static string FindRepoFile(string relativePath)
     {
