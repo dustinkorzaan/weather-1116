@@ -13,11 +13,12 @@ apt-get install -y dotnet-sdk-10.0
 export NVM_DIR="$HOME/.nvm"
 . /opt/nvm/nvm.sh
 nvm install 24
-npm install -g npm@latest
 {
   echo "export NVM_DIR=\"$NVM_DIR\""
   echo "export PATH=\"$(dirname "$(nvm which 24)"):\$PATH\""
 } >> "$CLAUDE_ENV_FILE"
+
+npm install -g npm@latest
 
 dotnet restore Weather.sln
 npm install --prefix ui-react
