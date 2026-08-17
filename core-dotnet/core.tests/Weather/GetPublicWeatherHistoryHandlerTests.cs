@@ -40,6 +40,7 @@ public class GetPublicWeatherHistoryHandlerTests
         Assert.Contains("past_hours=48", url);
         Assert.Contains("forecast_hours=0", url);
         Assert.Contains("timezone=auto", url);
+        Assert.Contains("precipitation_unit=inch", url);
         Assert.DoesNotContain("daily=", url);
     }
 }
