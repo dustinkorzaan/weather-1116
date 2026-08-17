@@ -9,12 +9,12 @@ public class TransientRetryHelperTests
     private static TransientRetryHelper CreateSut() => new(NullLogger<TransientRetryHelper>.Instance);
 
     [Fact]
-    public async Task ExecuteAsync_SucceedsOnFirstAttempt()
+    public async Task Execute_SucceedsOnFirstAttempt()
     {
         var sut = CreateSut();
         var attempts = 0;
 
-        var result = await sut.ExecuteAsync(
+        var result = await sut.Execute(
             _ =>
             {
                 attempts++;
@@ -27,7 +27,7 @@ public class TransientRetryHelperTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_RetriesTransientFailuresThenSucceeds()
+    public async Task Execute_RetriesTransientFailuresThenSucceeds()
     {
         var sut = CreateSut();
         var outcomes = new Queue<Exception?>(
@@ -39,7 +39,7 @@ public class TransientRetryHelperTests
             ]);
         var attempts = 0;
 
-        var result = await sut.ExecuteAsync(
+        var result = await sut.Execute(
             _ =>
             {
                 attempts++;
@@ -53,13 +53,13 @@ public class TransientRetryHelperTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_ThrowsAfterExhaustingRetries()
+    public async Task Execute_ThrowsAfterExhaustingRetries()
     {
         var sut = CreateSut();
         var attempts = 0;
 
         await Assert.ThrowsAsync<HttpRequestException>(() =>
-            sut.ExecuteAsync<string>(
+            sut.Execute<string>(
                 _ =>
                 {
                     attempts++;
@@ -71,13 +71,13 @@ public class TransientRetryHelperTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_DoesNotRetryNonTransientException()
+    public async Task Execute_DoesNotRetryNonTransientException()
     {
         var sut = CreateSut();
         var attempts = 0;
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            sut.ExecuteAsync<string>(
+            sut.Execute<string>(
                 _ =>
                 {
                     attempts++;
@@ -89,7 +89,7 @@ public class TransientRetryHelperTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_DoesNotRetryWhenCanceled()
+    public async Task Execute_DoesNotRetryWhenCanceled()
     {
         var sut = CreateSut();
         using var cts = new CancellationTokenSource();
@@ -97,7 +97,7 @@ public class TransientRetryHelperTests
         var attempts = 0;
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-            sut.ExecuteAsync<string>(
+            sut.Execute<string>(
                 ct =>
                 {
                     attempts++;

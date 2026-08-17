@@ -15,7 +15,7 @@ public class TransientRetryHelper
         _logger = logger;
     }
 
-    public async Task<T> ExecuteAsync<T>(Func<CancellationToken, Task<T>> action, CancellationToken cancellationToken)
+    public async Task<T> Execute<T>(Func<CancellationToken, Task<T>> action, CancellationToken cancellationToken)
     {
         for (var attempt = 0; ; attempt++)
         {
