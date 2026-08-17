@@ -40,7 +40,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
         {
             try
             {
-                var result = await SendGetAsync(_httpClient, request, cancellationToken);
+                var result = await SendGet(_httpClient, request, cancellationToken);
                 SaveToCache(request.RequestUri, result);
                 return result;
             }
@@ -75,7 +75,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
         Cache.TryAdd(requestUri, (value, DateTimeOffset.UtcNow));
     }
 
-    private static async Task<string> SendGetAsync(
+    private static async Task<string> SendGet(
         HttpClient client,
         GetThirdPartyStringWithRetryEvent request,
         CancellationToken cancellationToken)
