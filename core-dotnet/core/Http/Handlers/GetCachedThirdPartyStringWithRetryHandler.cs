@@ -9,7 +9,7 @@ namespace Core.Http.Handlers;
 /// Backoff starts at 200ms and doubles after each retry. Successful
 /// responses are cached in memory keyed by request URI.
 /// </summary>
-public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdPartyStringWithRetryEvent, string>
+public class GetCachedThirdPartyStringWithRetryHandler : IRequestHandler<GetCachedThirdPartyStringWithRetryEvent, string>
 {
     internal const int RetryCount = 5;
     internal const int RetryDelay = 200;
@@ -18,14 +18,14 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     private readonly HttpClient _httpClient;
     private readonly IMemoryCache _cache;
 
-    public GetThirdPartyStringWithRetryHandler(HttpClient httpClient, IMemoryCache cache)
+    public GetCachedThirdPartyStringWithRetryHandler(HttpClient httpClient, IMemoryCache cache)
     {
         _httpClient = httpClient;
         _cache = cache;
     }
 
     public async Task<string> Handle(
-        GetThirdPartyStringWithRetryEvent request,
+        GetCachedThirdPartyStringWithRetryEvent request,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
@@ -52,7 +52,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
 
     private static async Task<string> SendGet(
         HttpClient client,
-        GetThirdPartyStringWithRetryEvent request,
+        GetCachedThirdPartyStringWithRetryEvent request,
         CancellationToken cancellationToken)
     {
         using var httpRequest = new HttpRequestMessage(HttpMethod.Get, request.RequestUri);

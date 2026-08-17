@@ -33,7 +33,7 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
         // Reverse geocoding has to send coordinates to Nominatim; do not log them.
         // codeql[cs/exposure-of-sensitive-information]
         string jsonResponse = await _mediator.Send(
-            new GetThirdPartyStringWithRetryEvent
+            new GetCachedThirdPartyStringWithRetryEvent
             {
                 RequestUri = url,
                 Headers = new Dictionary<string, string>

@@ -13,12 +13,12 @@ public class HttpServiceCollectionExtensionsTests
     {
         var services = new ServiceCollection();
         services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssemblyContaining<GetThirdPartyStringWithRetryHandler>());
+            cfg.RegisterServicesFromAssemblyContaining<GetCachedThirdPartyStringWithRetryHandler>());
         services.AddThirdPartyHttp();
         using var provider = services.BuildServiceProvider();
 
-        var handler = provider.GetRequiredService<IRequestHandler<GetThirdPartyStringWithRetryEvent, string>>();
+        var handler = provider.GetRequiredService<IRequestHandler<GetCachedThirdPartyStringWithRetryEvent, string>>();
 
-        Assert.IsType<GetThirdPartyStringWithRetryHandler>(handler);
+        Assert.IsType<GetCachedThirdPartyStringWithRetryHandler>(handler);
     }
 }

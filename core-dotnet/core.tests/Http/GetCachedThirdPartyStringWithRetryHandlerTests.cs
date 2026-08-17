@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Core.Tests.Http;
 
-public class GetThirdPartyStringWithRetryHandlerTests
+public class GetCachedThirdPartyStringWithRetryHandlerTests
 {
     private const string RequestUri = "https://api.open-meteo.com/v1/forecast";
     private const string SslFailure = "The SSL connection could not be established, see inner exception.";
@@ -20,7 +20,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
         var sut = CreateSut(client);
 
         var body = await sut.Handle(
-            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+            new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
             CancellationToken.None);
 
         Assert.Equal("{\"ok\":true}", body);
@@ -43,7 +43,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
         var sut = CreateSut(client);
 
         var body = await sut.Handle(
-            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+            new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
             CancellationToken.None);
 
         Assert.Equal("{\"ok\":true}", body);
@@ -67,7 +67,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
 
         var thrown = await Assert.ThrowsAsync<HttpRequestException>(() =>
             sut.Handle(
-                new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+                new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
                 CancellationToken.None));
 
         Assert.Equal(SslFailure, thrown.Message);
@@ -85,7 +85,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             sut.Handle(
-                new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+                new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
                 cts.Token));
 
         Assert.InRange(handler.Attempts, 0, 1);
@@ -99,7 +99,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
         var sut = CreateSut(client);
 
         await sut.Handle(
-            new GetThirdPartyStringWithRetryEvent
+            new GetCachedThirdPartyStringWithRetryEvent
             {
                 RequestUri = RequestUri,
                 Headers = new Dictionary<string, string>
@@ -122,7 +122,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
         var handler = new BlockingHandler(release.Task, "{\"ok\":true}");
         using var client = new HttpClient(handler);
         var sut = CreateSut(client);
-        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
+        var request = new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
         using var cts = new CancellationTokenSource();
 
         var call = sut.Handle(request, cts.Token);
@@ -143,10 +143,10 @@ public class GetThirdPartyStringWithRetryHandlerTests
         var sut = CreateSut(client, cache);
 
         var first = await sut.Handle(
-            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+            new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
             CancellationToken.None);
         var second = await sut.Handle(
-            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+            new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
             CancellationToken.None);
 
         Assert.Equal("{\"ok\":true}", first);
@@ -164,7 +164,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
         var firstSut = CreateSut(firstClient, cache);
 
         var firstResult = await firstSut.Handle(
-            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+            new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
             CancellationToken.None);
 
         var secondHandler = new SequenceHandler(["{\"ok\":false}"]);
@@ -172,7 +172,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
         var secondSut = CreateSut(secondClient, cache);
 
         var secondResult = await secondSut.Handle(
-            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+            new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
             CancellationToken.None);
 
         Assert.Equal("{\"ok\":true}", firstResult);
@@ -189,13 +189,13 @@ public class GetThirdPartyStringWithRetryHandlerTests
     public void ThirdPartyHttpsHandlers_UseSharedRetryEvent(string relativePath)
     {
         var source = File.ReadAllText(FindRepoFile(relativePath));
-        Assert.Contains("GetThirdPartyStringWithRetryEvent", source);
+        Assert.Contains("GetCachedThirdPartyStringWithRetryEvent", source);
         Assert.Contains("_mediator.Send", source);
         Assert.DoesNotContain("new HttpClient", source);
         Assert.DoesNotContain("GetStringAsync", source);
     }
 
-    private static GetThirdPartyStringWithRetryHandler CreateSut(
+    private static GetCachedThirdPartyStringWithRetryHandler CreateSut(
         HttpClient client,
         IMemoryCache? cache = null) =>
         new(client, cache ?? new MemoryCache(new MemoryCacheOptions()));

@@ -29,7 +29,7 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
         string endpoint = BuildCurrentWeatherUrl(request.Latitude, request.Longitude);
 
         string jsonResponse = await _mediator.Send(
-            new GetThirdPartyStringWithRetryEvent { RequestUri = endpoint },
+            new GetCachedThirdPartyStringWithRetryEvent { RequestUri = endpoint },
             cancellationToken);
 
         var options = new JsonSerializerOptions { WriteIndented = true };
