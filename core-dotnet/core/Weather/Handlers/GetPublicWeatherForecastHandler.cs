@@ -49,6 +49,11 @@ public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherF
 
         string jsonResponse = await client.GetStringAsync(endpoint, cancellationToken);
 
+        if (string.IsNullOrWhiteSpace(jsonResponse))
+        {
+            throw new HttpRequestException("Non-AI: Weather forecast API returned an empty response.");
+        }
+
         PublicWeatherForecastResponse weatherData = JsonSerializer.Deserialize<PublicWeatherForecastResponse>(jsonResponse)
             ?? throw new InvalidOperationException("Non-AI: Weather forecast API returned empty or invalid JSON.");
 
