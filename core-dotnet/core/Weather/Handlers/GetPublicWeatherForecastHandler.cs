@@ -38,7 +38,7 @@ public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherF
         return await _cache.GetOrCreate(
             cacheKey: cacheKey,
             cacheDuration: TimeSpan.FromMinutes(5),
-            valueFactory: ct => _retry.ExecuteAsync(c => GetPublicWeatherForecast(request, c), ct),
+            valueFactory: ct => _retry.Execute(c => GetPublicWeatherForecast(request, c), ct),
             cancellationToken: cancellationToken);
     }
 

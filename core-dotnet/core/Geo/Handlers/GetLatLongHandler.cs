@@ -37,7 +37,7 @@ public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongLi
         return await _cache.GetOrCreate(
             cacheKey: cacheKey,
             cacheDuration: TimeSpan.FromMinutes(60),
-            valueFactory: ct => _retry.ExecuteAsync(c => GetLatLong(request, c), ct),
+            valueFactory: ct => _retry.Execute(c => GetLatLong(request, c), ct),
             cancellationToken: cancellationToken);
     }
 

@@ -42,7 +42,7 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
         return await _cache.GetOrCreate(
             cacheKey: cacheKey,
             cacheDuration: TimeSpan.FromMinutes(60),
-            valueFactory: ct => _retry.ExecuteAsync(c => GetLocation(request, c), ct),
+            valueFactory: ct => _retry.Execute(c => GetLocation(request, c), ct),
             cancellationToken: cancellationToken);
     }
 
