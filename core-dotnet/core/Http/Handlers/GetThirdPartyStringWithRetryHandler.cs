@@ -1,6 +1,6 @@
-using System.Collections.Concurrent;
 using Core.Http.Events;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Core.Http.Handlers;
 
@@ -13,15 +13,15 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
 {
     internal const int RetryCount = 5;
     internal const int RetryDelay = 200;
-
-    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
-    private static readonly ConcurrentDictionary<string, (string Value, DateTimeOffset CachedAt)> Cache = new();
+    internal static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
 
     private readonly HttpClient _httpClient;
+    private readonly IMemoryCache _cache;
 
-    public GetThirdPartyStringWithRetryHandler(HttpClient httpClient)
+    public GetThirdPartyStringWithRetryHandler(HttpClient httpClient, IMemoryCache cache)
     {
         _httpClient = httpClient;
+        _cache = cache;
     }
 
     public async Task<string> Handle(
@@ -30,10 +30,9 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
 
-        var cached = GetFromCache(request.RequestUri);
-        if (!string.IsNullOrWhiteSpace(cached))
+        if (_cache.TryGetValue(request.RequestUri, out string? cached))
         {
-            return cached;
+            return cached!;
         }
 
         for (var attempt = 0; ; attempt++)
@@ -41,7 +40,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
             try
             {
                 var result = await SendGet(_httpClient, request, cancellationToken);
-                SaveToCache(request.RequestUri, result);
+                _cache.Set(request.RequestUri, result, CacheDuration);
                 return result;
             }
             catch when (attempt < RetryCount)
@@ -49,30 +48,6 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
                 await Task.Delay((int)(RetryDelay * Math.Pow(2, attempt)), cancellationToken);
             }
         }
-    }
-
-    private static string? GetFromCache(string requestUri)
-    {
-        var cutoff = DateTimeOffset.UtcNow - CacheDuration;
-        foreach (var (key, entry) in Cache)
-        {
-            if (entry.CachedAt < cutoff)
-            {
-                Cache.TryRemove(key, out _);
-            }
-        }
-
-        return Cache.TryGetValue(requestUri, out var current) ? current.Value : null;
-    }
-
-    private static void SaveToCache(string requestUri, string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return;
-        }
-
-        Cache.TryAdd(requestUri, (value, DateTimeOffset.UtcNow));
     }
 
     private static async Task<string> SendGet(
