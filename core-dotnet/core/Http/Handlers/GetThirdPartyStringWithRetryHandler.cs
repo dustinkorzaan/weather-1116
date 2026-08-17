@@ -14,7 +14,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     internal const int RetryCount = 5;
     internal const int RetryDelay = 200;
 
-    private static readonly ConcurrentDictionary<string, string> Cache = new();
+    private static readonly ConcurrentDictionary<string, (string Value, DateTimeOffset CachedAt)> Cache = new();
 
     private readonly HttpClient _httpClient;
 
@@ -51,7 +51,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     }
 
     private static string? GetFromCache(string requestUri) =>
-        Cache.TryGetValue(requestUri, out var value) ? value : null;
+        Cache.TryGetValue(requestUri, out var entry) ? entry.Value : null;
 
     private static void SaveToCache(string requestUri, string value)
     {
@@ -60,7 +60,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
             return;
         }
 
-        Cache.TryAdd(requestUri, value);
+        Cache.TryAdd(requestUri, (value, DateTimeOffset.UtcNow));
     }
 
     private static async Task<string> SendGetAsync(
