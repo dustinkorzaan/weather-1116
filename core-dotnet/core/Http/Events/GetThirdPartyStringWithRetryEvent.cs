@@ -9,5 +9,5 @@ public class GetThirdPartyStringWithRetryEvent : IRequest<string>
 {
     public required string RequestUri { get; set; }
 
-    public Dictionary<string, string>? Headers { get; set; }
+    public Dictionary<string, string> Headers { get; set; } = new();
 }

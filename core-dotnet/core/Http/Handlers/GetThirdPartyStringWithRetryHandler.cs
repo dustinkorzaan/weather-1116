@@ -69,12 +69,9 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
         CancellationToken cancellationToken)
     {
         using var httpRequest = new HttpRequestMessage(HttpMethod.Get, request.RequestUri);
-        if (request.Headers is not null)
+        foreach (var header in request.Headers)
         {
-            foreach (var header in request.Headers)
-            {
-                httpRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
-            }
+            httpRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
 
         using var response = await client.SendAsync(httpRequest, cancellationToken);
