@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Http;
@@ -37,5 +38,5 @@ public class TransientRetryHelper
 
     private static bool IsTransient(Exception exception, CancellationToken cancellationToken) =>
         !cancellationToken.IsCancellationRequested
-        && exception is HttpRequestException or IOException or SocketException;
+        && exception is HttpRequestException or IOException or SocketException or JsonException;
 }
