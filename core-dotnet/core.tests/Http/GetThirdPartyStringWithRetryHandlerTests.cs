@@ -1,10 +1,8 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Core.Http;
 using Core.Http.Events;
 using Core.Http.Handlers;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Core.Tests.Http;
 
@@ -146,131 +144,12 @@ public class GetThirdPartyStringWithRetryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_CachesSuccessfulResponseByRequestUri()
-    {
-        var handler = new SequenceHandler(["{\"ok\":true}", "{\"ok\":false}"]);
-        var delays = new List<TimeSpan>();
-        using var cache = new MemoryCache(new MemoryCacheOptions());
-        using var client = new HttpClient(handler);
-        var sut = CreateSut(client, delays, cache);
-        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
-
-        var first = await sut.Handle(request, CancellationToken.None);
-        var second = await sut.Handle(request, CancellationToken.None);
-
-        Assert.Equal("{\"ok\":true}", first);
-        Assert.Equal("{\"ok\":true}", second);
-        Assert.Equal(1, handler.Attempts);
-        Assert.Empty(delays);
-    }
-
-    [Fact]
-    public async Task Handle_DoesNotShareCacheAcrossDifferentRequestUris()
-    {
-        var handler = new SequenceHandler(["{\"first\":true}", "{\"second\":true}"]);
-        var delays = new List<TimeSpan>();
-        using var cache = new MemoryCache(new MemoryCacheOptions());
-        using var client = new HttpClient(handler);
-        var sut = CreateSut(client, delays, cache);
-
-        var first = await sut.Handle(
-            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri + "?one=1" },
-            CancellationToken.None);
-        var second = await sut.Handle(
-            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri + "?two=2" },
-            CancellationToken.None);
-
-        Assert.Equal("{\"first\":true}", first);
-        Assert.Equal("{\"second\":true}", second);
-        Assert.Equal(2, handler.Attempts);
-    }
-
-    [Fact]
-    public async Task Handle_DoesNotCacheFailures()
-    {
-        var handler = new SequenceHandler(
-            [
-                new HttpRequestException("first"),
-                new HttpRequestException("second"),
-                new HttpRequestException("third"),
-                new HttpRequestException("fourth"),
-                new HttpRequestException("fifth"),
-                new HttpRequestException("final"),
-                "{\"ok\":true}",
-            ]);
-        var delays = new List<TimeSpan>();
-        using var cache = new MemoryCache(new MemoryCacheOptions());
-        using var client = new HttpClient(handler);
-        var sut = CreateSut(client, delays, cache);
-        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
-
-        await Assert.ThrowsAsync<HttpRequestException>(() =>
-            sut.Handle(request, CancellationToken.None));
-
-        var body = await sut.Handle(request, CancellationToken.None);
-
-        Assert.Equal("{\"ok\":true}", body);
-        Assert.Equal(7, handler.Attempts);
-    }
-
-    [Fact]
-    public async Task Handle_CoalescesConcurrentRequestsForSameUri()
+    public async Task Handle_CancelingTheCallerAbortsTheFetch()
     {
         var release = new TaskCompletionSource();
         var handler = new BlockingHandler(release.Task, "{\"ok\":true}");
-        using var cache = new MemoryCache(new MemoryCacheOptions());
-        var coalescer = new ThirdPartyRequestCoalescer();
         using var client = new HttpClient(handler);
-        var sut1 = CreateSut(client, [], cache, coalescer);
-        var sut2 = CreateSut(client, [], cache, coalescer);
-        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
-
-        var firstCall = sut1.Handle(request, CancellationToken.None);
-        await handler.RequestStarted;
-        var secondCall = sut2.Handle(request, CancellationToken.None);
-        release.SetResult();
-
-        var results = await Task.WhenAll(firstCall, secondCall);
-
-        Assert.Equal(["{\"ok\":true}", "{\"ok\":true}"], results);
-        Assert.Equal(1, handler.Attempts);
-    }
-
-    [Fact]
-    public async Task Handle_CancelingOneJoinedCallerDoesNotAbortSharedFetchForOthers()
-    {
-        var release = new TaskCompletionSource();
-        var handler = new BlockingHandler(release.Task, "{\"ok\":true}");
-        using var cache = new MemoryCache(new MemoryCacheOptions());
-        var coalescer = new ThirdPartyRequestCoalescer();
-        using var client = new HttpClient(handler);
-        var sut1 = CreateSut(client, [], cache, coalescer);
-        var sut2 = CreateSut(client, [], cache, coalescer);
-        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
-        using var cts = new CancellationTokenSource();
-
-        var firstCall = sut1.Handle(request, cts.Token);
-        await handler.RequestStarted;
-        var secondCall = sut2.Handle(request, CancellationToken.None);
-        cts.Cancel();
-
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => firstCall);
-
-        release.SetResult();
-        var secondResult = await secondCall;
-
-        Assert.Equal("{\"ok\":true}", secondResult);
-        Assert.Equal(1, handler.Attempts);
-    }
-
-    [Fact]
-    public async Task Handle_CancelingTheOnlyCallerAbortsTheFetch()
-    {
-        var release = new TaskCompletionSource();
-        var handler = new BlockingHandler(release.Task, "{\"ok\":true}");
-        using var cache = new MemoryCache(new MemoryCacheOptions());
-        using var client = new HttpClient(handler);
-        var sut = CreateSut(client, [], cache);
+        var sut = CreateSut(client, []);
         var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
         using var cts = new CancellationTokenSource();
 
@@ -300,14 +179,8 @@ public class GetThirdPartyStringWithRetryHandlerTests
 
     private static GetThirdPartyStringWithRetryHandler CreateSut(
         HttpClient client,
-        List<TimeSpan> delays,
-        IMemoryCache? cache = null,
-        ThirdPartyRequestCoalescer? coalescer = null) =>
-        new(
-            cache ?? new MemoryCache(new MemoryCacheOptions()),
-            coalescer ?? new ThirdPartyRequestCoalescer(),
-            client,
-            RecordDelay(delays));
+        List<TimeSpan> delays) =>
+        new(client, RecordDelay(delays));
 
     private static Func<TimeSpan, CancellationToken, Task> RecordDelay(List<TimeSpan> delays) =>
         (delay, cancellationToken) =>
