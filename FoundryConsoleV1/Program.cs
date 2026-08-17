@@ -3,6 +3,7 @@ using Azure.AI.OpenAI;
 using Core.AIWeather.Models;
 using Core.HelloWorld.Handlers;
 using Core.Geo.Events;
+using Core.Json;
 using Core.Weather.Events;
 using DotNetEnv;
 using MediatR;
@@ -178,7 +179,7 @@ internal class Program
 			Latitude = latLong.Latitude,
 			Longitude = latLong.Longitude,
 		});
-		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+		var weatherDataJson = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 
 		// AI prep
 		var systemPrompt = """
@@ -254,7 +255,7 @@ internal class Program
 			Latitude = latLong.Latitude,
 			Longitude = latLong.Longitude,
 		});
-		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+		var weatherDataJson = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 
 		// AI prep
 		var systemPrompt = """
@@ -339,7 +340,7 @@ internal class Program
 			else
 			{
 				Console.WriteLine("\nResponse:");
-				Console.WriteLine(JsonSerializer.Serialize(aiWeather, new JsonSerializerOptions { WriteIndented = true }));
+				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}
 		}
 		catch (Exception ex)
