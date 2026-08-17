@@ -39,6 +39,7 @@ public class GetPublicWeatherForecastHandlerTests
         Assert.Contains("hourly=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m", url);
         Assert.Contains("forecast_hours=48", url);
         Assert.Contains("timezone=auto", url);
+        Assert.Contains("precipitation_unit=inch", url);
         Assert.DoesNotContain("daily=", url);
         Assert.DoesNotContain("minutely_15=", url);
     }
@@ -54,6 +55,7 @@ public class GetPublicWeatherForecastHandlerTests
         Assert.Contains("minutely_15=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m", url);
         Assert.Contains("forecast_minutely_15=192", url);
         Assert.Contains("timezone=auto", url);
+        Assert.Contains("precipitation_unit=inch", url);
         Assert.DoesNotContain("daily=", url);
         Assert.DoesNotContain("hourly=", url);
     }
