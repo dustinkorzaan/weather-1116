@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Core.Geo.Events;
+using Core.Json;
 using Core.Weather.Events;
 using MediatR;
 using OpenAI.Responses;
@@ -35,7 +36,7 @@ public sealed class ChatToolExecutor
             ?? throw new InvalidOperationException("GetLatLong requires a location argument.");
 
         var latLongMatches = await _mediator.Send(new GetLatLongEvent { Location = location }, cancellationToken);
-        return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(latLongMatches, JsonDefaults.Pretty);
     }
 
     private async Task<string> ExecuteGetLocation(BinaryData arguments, CancellationToken cancellationToken)
@@ -49,7 +50,7 @@ public sealed class ChatToolExecutor
             Latitude = latitude,
             Longitude = longitude,
         }, cancellationToken);
-        return JsonSerializer.Serialize(locationData, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
     }
 
     private async Task<string> ExecuteGetPublicWeatherCurrent(BinaryData arguments, CancellationToken cancellationToken)
@@ -64,7 +65,7 @@ public sealed class ChatToolExecutor
             Longitude = longitude,
         }, cancellationToken);
 
-        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
     }
 
     private async Task<string> ExecuteGetPublicWeatherForecast(BinaryData arguments, CancellationToken cancellationToken)
@@ -87,7 +88,7 @@ public sealed class ChatToolExecutor
             Resolution = resolution,
         }, cancellationToken);
 
-        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
     }
 
     private async Task<string> ExecuteGetPublicWeatherHistory(BinaryData arguments, CancellationToken cancellationToken)
@@ -110,6 +111,6 @@ public sealed class ChatToolExecutor
             Resolution = resolution,
         }, cancellationToken);
 
-        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
     }
 }
