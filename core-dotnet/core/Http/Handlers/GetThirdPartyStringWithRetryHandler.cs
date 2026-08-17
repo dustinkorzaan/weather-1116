@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Core.Http.Events;
 using MediatR;
 
@@ -5,12 +6,15 @@ namespace Core.Http.Handlers;
 
 /// <summary>
 /// GET helper for Open-Meteo and Nominatim with five retries on failure.
-/// Backoff starts at 200ms and doubles after each retry.
+/// Backoff starts at 200ms and doubles after each retry. Successful
+/// responses are cached in memory keyed by request URI.
 /// </summary>
 public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdPartyStringWithRetryEvent, string>
 {
     internal const int RetryCount = 5;
     internal const int RetryDelay = 200;
+
+    private static readonly ConcurrentDictionary<string, string> Cache = new();
 
     private readonly HttpClient _httpClient;
 
@@ -25,11 +29,19 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
 
+        var cached = GetFromCache(request.RequestUri);
+        if (cached is not null)
+        {
+            return cached;
+        }
+
         for (var attempt = 0; ; attempt++)
         {
             try
             {
-                return await SendGetAsync(_httpClient, request, cancellationToken);
+                var result = await SendGetAsync(_httpClient, request, cancellationToken);
+                SaveToCache(request.RequestUri, result);
+                return result;
             }
             catch when (attempt < RetryCount)
             {
@@ -37,6 +49,12 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
             }
         }
     }
+
+    private static string? GetFromCache(string requestUri) =>
+        Cache.TryGetValue(requestUri, out var value) ? value : null;
+
+    private static void SaveToCache(string requestUri, string value) =>
+        Cache.TryAdd(requestUri, value);
 
     private static async Task<string> SendGetAsync(
         HttpClient client,
