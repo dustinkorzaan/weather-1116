@@ -1,10 +1,11 @@
 using System.Globalization;
 using System.Text.Json;
+using Core.Caching;
 using Core.Geo;
 using Core.Geo.Events;
 using Core.Geo.Models;
+using Core.Http;
 using MediatR;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
@@ -18,42 +19,31 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
 {
     internal const string UserAgent = "Weather-1116/1.0 (https://github.com/dustinkorzaan/weather-1116)";
 
-    internal const int RetryCount = 5;
-    internal const int RetryDelay = 200;
-
-    private readonly IMemoryCache _cache;
+    private readonly CacheHelper _cache;
+    private readonly TransientRetryHelper _retry;
     private readonly IHttpClientFactory _clientFactory;
     private readonly ILogger<GetLocationHandler> _logger;
 
-    public GetLocationHandler(IMemoryCache cache, IHttpClientFactory clientFactory, ILogger<GetLocationHandler> logger)
+    public GetLocationHandler(
+        CacheHelper cache,
+        TransientRetryHelper retry,
+        IHttpClientFactory clientFactory,
+        ILogger<GetLocationHandler> logger)
     {
         _cache = cache;
+        _retry = retry;
         _clientFactory = clientFactory;
         _logger = logger;
     }
 
-    public async Task<NonAILocationResponse> Handle(GetLocationEvent request, CancellationToken cancellationToken)
+    public Task<NonAILocationResponse> Handle(GetLocationEvent request, CancellationToken cancellationToken)
     {
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetLocationHandler), Request = request });
-
-        if (_cache.TryGetValue(cacheKey, out NonAILocationResponse? cached))
-        {
-            return cached!;
-        }
-
-        for (var attempt = 0; ; attempt++)
-        {
-            try
-            {
-                var result = await GetLocation(request, cancellationToken);
-                _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
-                return result;
-            }
-            catch when (attempt < RetryCount)
-            {
-                await Task.Delay((int)(RetryDelay * Math.Pow(2, attempt)), cancellationToken);
-            }
-        }
+        return _cache.GetOrCreateAsync(
+            cacheKey,
+            TimeSpan.FromMinutes(5),
+            ct => _retry.ExecuteAsync(c => GetLocation(request, c), ct),
+            cancellationToken);
     }
 
     private async Task<NonAILocationResponse> GetLocation(GetLocationEvent request, CancellationToken cancellationToken)

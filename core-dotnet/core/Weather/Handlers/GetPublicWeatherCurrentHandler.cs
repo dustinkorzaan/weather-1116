@@ -1,9 +1,10 @@
 using System.Globalization;
 using System.Text.Json;
+using Core.Caching;
+using Core.Http;
 using Core.Weather.Events;
 using Core.Weather.Models;
 using MediatR;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
@@ -14,42 +15,31 @@ namespace Core.Weather.Handlers;
 /// </summary>
 public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCurrentEvent, NonAIWeatherResponse>
 {
-    internal const int RetryCount = 5;
-    internal const int RetryDelay = 200;
-
-    private readonly IMemoryCache _cache;
+    private readonly CacheHelper _cache;
+    private readonly TransientRetryHelper _retry;
     private readonly IHttpClientFactory _clientFactory;
     private readonly ILogger<GetPublicWeatherCurrentHandler> _logger;
 
-    public GetPublicWeatherCurrentHandler(IMemoryCache cache, IHttpClientFactory clientFactory, ILogger<GetPublicWeatherCurrentHandler> logger)
+    public GetPublicWeatherCurrentHandler(
+        CacheHelper cache,
+        TransientRetryHelper retry,
+        IHttpClientFactory clientFactory,
+        ILogger<GetPublicWeatherCurrentHandler> logger)
     {
         _cache = cache;
+        _retry = retry;
         _clientFactory = clientFactory;
         _logger = logger;
     }
 
-    public async Task<NonAIWeatherResponse> Handle(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
+    public Task<NonAIWeatherResponse> Handle(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
     {
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetPublicWeatherCurrentHandler), Request = request });
-
-        if (_cache.TryGetValue(cacheKey, out NonAIWeatherResponse? cached))
-        {
-            return cached!;
-        }
-
-        for (var attempt = 0; ; attempt++)
-        {
-            try
-            {
-                var result = await GetPublicWeatherCurrent(request, cancellationToken);
-                _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
-                return result;
-            }
-            catch when (attempt < RetryCount)
-            {
-                await Task.Delay((int)(RetryDelay * Math.Pow(2, attempt)), cancellationToken);
-            }
-        }
+        return _cache.GetOrCreateAsync(
+            cacheKey,
+            TimeSpan.FromMinutes(5),
+            ct => _retry.ExecuteAsync(c => GetPublicWeatherCurrent(request, c), ct),
+            cancellationToken);
     }
 
     private async Task<NonAIWeatherResponse> GetPublicWeatherCurrent(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)

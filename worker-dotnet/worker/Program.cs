@@ -1,5 +1,7 @@
 using Core.About;
+using Core.Caching;
 using Core.Hangfire;
+using Core.Http;
 using Core.Weather.Handlers;
 using DotNetEnv;
 using Hangfire;
@@ -16,6 +18,8 @@ builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherCurrentHandler>());
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
+builder.Services.AddSingleton<CacheHelper>();
+builder.Services.AddSingleton<TransientRetryHelper>();
 builder.Services.Configure<HangfireAboutHealthOptions>(options =>
 	HangfireAboutHealthOptions.Configure(options, builder.Configuration));
 builder.Services.AddControllers();

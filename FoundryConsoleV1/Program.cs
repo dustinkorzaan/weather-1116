@@ -1,8 +1,10 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
 using Core.AIWeather.Models;
+using Core.Caching;
 using Core.HelloWorld.Handlers;
 using Core.Geo.Events;
+using Core.Http;
 using Core.Json;
 using Core.Weather.Events;
 using DotNetEnv;
@@ -27,6 +29,8 @@ internal class Program
 		services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
 		services.AddMemoryCache();
 		services.AddHttpClient();
+		services.AddSingleton<CacheHelper>();
+		services.AddSingleton<TransientRetryHelper>();
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 
