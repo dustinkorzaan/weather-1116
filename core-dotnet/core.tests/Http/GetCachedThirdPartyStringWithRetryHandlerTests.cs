@@ -180,6 +180,40 @@ public class GetCachedThirdPartyStringWithRetryHandlerTests
         Assert.Equal(0, secondHandler.Attempts);
     }
 
+    [Fact]
+    public async Task Handle_DoesNotCacheFailures()
+    {
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+
+        var failingHandler = new SequenceHandler(
+            [
+                new HttpRequestException("fail"),
+                new HttpRequestException("fail"),
+                new HttpRequestException("fail"),
+                new HttpRequestException("fail"),
+                new HttpRequestException("fail"),
+                new HttpRequestException("fail"),
+            ]);
+        using var failingClient = new HttpClient(failingHandler);
+        var failingSut = CreateSut(failingClient, cache);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            failingSut.Handle(
+                new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+                CancellationToken.None));
+
+        var succeedingHandler = new SequenceHandler(["{\"ok\":true}"]);
+        using var succeedingClient = new HttpClient(succeedingHandler);
+        var succeedingSut = CreateSut(succeedingClient, cache);
+
+        var body = await succeedingSut.Handle(
+            new GetCachedThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
+            CancellationToken.None);
+
+        Assert.Equal("{\"ok\":true}", body);
+        Assert.Equal(1, succeedingHandler.Attempts);
+    }
+
     [Theory]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLatLongHandler.cs")]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLocationHandler.cs")]
