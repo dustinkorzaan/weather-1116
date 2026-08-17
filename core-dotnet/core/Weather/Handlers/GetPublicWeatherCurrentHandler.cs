@@ -1,10 +1,10 @@
 using System.Globalization;
 using System.Text.Json;
-using Core.Http;
 using Core.Weather.Events;
 using Core.Weather.Models;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Weather.Handlers;
@@ -18,11 +18,13 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
     internal const int RetryDelay = 200;
 
     private readonly IMemoryCache _cache;
+    private readonly IHttpClientFactory _clientFactory;
     private readonly ILogger<GetPublicWeatherCurrentHandler> _logger;
 
-    public GetPublicWeatherCurrentHandler(IMemoryCache cache, ILogger<GetPublicWeatherCurrentHandler> logger)
+    public GetPublicWeatherCurrentHandler(IMemoryCache cache, IHttpClientFactory clientFactory, ILogger<GetPublicWeatherCurrentHandler> logger)
     {
         _cache = cache;
+        _clientFactory = clientFactory;
         _logger = logger;
     }
 
@@ -50,12 +52,12 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
         }
     }
 
-    private static async Task<NonAIWeatherResponse> GetPublicWeatherCurrent(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
+    private async Task<NonAIWeatherResponse> GetPublicWeatherCurrent(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
     {
-        using var client = new HttpClient();
+        using var client = _clientFactory.CreateClient();
         string endpoint = BuildCurrentWeatherUrl(request.Latitude, request.Longitude);
 
-        string jsonResponse = await ThirdPartyHttp.GetStringWithRetryAsync(client, endpoint, cancellationToken);
+        string jsonResponse = await client.GetStringAsync(endpoint, cancellationToken);
 
         var options = new JsonSerializerOptions { WriteIndented = true };
 

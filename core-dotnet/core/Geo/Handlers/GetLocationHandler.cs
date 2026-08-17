@@ -3,9 +3,9 @@ using System.Text.Json;
 using Core.Geo;
 using Core.Geo.Events;
 using Core.Geo.Models;
-using Core.Http;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Geo.Handlers;
@@ -22,11 +22,13 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
     internal const int RetryDelay = 200;
 
     private readonly IMemoryCache _cache;
+    private readonly IHttpClientFactory _clientFactory;
     private readonly ILogger<GetLocationHandler> _logger;
 
-    public GetLocationHandler(IMemoryCache cache, ILogger<GetLocationHandler> logger)
+    public GetLocationHandler(IMemoryCache cache, IHttpClientFactory clientFactory, ILogger<GetLocationHandler> logger)
     {
         _cache = cache;
+        _clientFactory = clientFactory;
         _logger = logger;
     }
 
@@ -56,7 +58,7 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
 
     private async Task<NonAILocationResponse> GetLocation(GetLocationEvent request, CancellationToken cancellationToken)
     {
-        using var client = new HttpClient();
+        using var client = _clientFactory.CreateClient();
         client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", UserAgent);
         client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");
 
@@ -64,7 +66,7 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
 
         // Reverse geocoding has to send coordinates to Nominatim; do not log them.
         // codeql[cs/exposure-of-sensitive-information]
-        string jsonResponse = await ThirdPartyHttp.GetStringWithRetryAsync(client, url, cancellationToken);
+        string jsonResponse = await client.GetStringAsync(url, cancellationToken);
         var geoData = JsonSerializer.Deserialize<NominatimReverseResponse>(jsonResponse);
         var location = NominatimLocationMapper.FromReverse(geoData, request.Latitude, request.Longitude);
 

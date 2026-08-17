@@ -24,6 +24,7 @@ internal class Program
 		services.AddLogging(logging => logging.AddConsole());
 		services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
 		services.AddMemoryCache();
+		services.AddHttpClient();
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 

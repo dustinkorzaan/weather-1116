@@ -12,6 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherCurrentHandler>());
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient();
 
 builder.Services
 	.AddMcpServer(options =>

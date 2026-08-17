@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Core.Geo.Events;
 using Core.Geo.Models;
-using Core.Http;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Geo.Handlers;
@@ -17,11 +17,13 @@ public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongLi
     internal const int RetryDelay = 200;
 
     private readonly IMemoryCache _cache;
+    private readonly IHttpClientFactory _clientFactory;
     private readonly ILogger<GetLatLongHandler> _logger;
 
-    public GetLatLongHandler(IMemoryCache cache, ILogger<GetLatLongHandler> logger)
+    public GetLatLongHandler(IMemoryCache cache, IHttpClientFactory clientFactory, ILogger<GetLatLongHandler> logger)
     {
         _cache = cache;
+        _clientFactory = clientFactory;
         _logger = logger;
     }
 
@@ -51,7 +53,7 @@ public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongLi
 
     private async Task<NonAILatLongListResponse> GetLatLong(GetLatLongEvent request, CancellationToken cancellationToken)
     {
-        using var client = new HttpClient();
+        using var client = _clientFactory.CreateClient();
         var count = NonAILatLongMapper.NormalizeCount(request.Count);
 
         // Try multiple location variants to handle inputs like "City, ST".
@@ -65,7 +67,7 @@ public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongLi
         {
             string encodedLocation = Uri.EscapeDataString(query);
             string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedLocation}&count={count}&language=en&format=json";
-            string jsonResponse = await ThirdPartyHttp.GetStringWithRetryAsync(client, url, cancellationToken);
+            string jsonResponse = await client.GetStringAsync(url, cancellationToken);
             var geoData = JsonSerializer.Deserialize<NonAIGeocodingResponse>(jsonResponse);
 
             if (geoData?.Results != null && geoData.Results.Count > 0)
