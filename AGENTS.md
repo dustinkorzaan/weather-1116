@@ -15,6 +15,11 @@ This repo is one Weather sample implemented as six .NET/JS projects (see
 
 ### Toolchain (already provisioned in the VM snapshot)
 
+This subsection describes the pre-provisioned Cursor Cloud VM snapshot only.
+Claude Code Remote sessions provision their own container instead, via
+`.claude/hooks/session-start.sh` (apt-installed .NET SDK); that script is
+unrelated to the snapshot state described below.
+
 - .NET SDK 10 lives in `~/.dotnet` (installed via the official `dotnet-install.sh`,
   not apt). `~/.bashrc` puts it on `PATH` and sets `DOTNET_ROOT`, so interactive
   shells get `dotnet` automatically. In non-interactive contexts, call

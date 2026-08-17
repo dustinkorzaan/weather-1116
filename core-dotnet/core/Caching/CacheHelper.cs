@@ -11,19 +11,19 @@ public class CacheHelper
         _cache = cache;
     }
 
-    public async Task<T> GetOrCreateAsync<T>(
-        string key,
-        TimeSpan duration,
-        Func<CancellationToken, Task<T>> factory,
+    public async Task<T> GetOrCreate<T>(
+        string cacheKey,
+        TimeSpan cacheDuration,
+        Func<CancellationToken, Task<T>> valueFactory,
         CancellationToken cancellationToken)
     {
-        if (_cache.TryGetValue(key, out T? cached))
+        if (_cache.TryGetValue(cacheKey, out T? cached))
         {
             return cached!;
         }
 
-        var result = await factory(cancellationToken);
-        _cache.Set(key, result, duration);
+        var result = await valueFactory(cancellationToken);
+        _cache.Set(cacheKey, result, cacheDuration);
         return result;
     }
 }

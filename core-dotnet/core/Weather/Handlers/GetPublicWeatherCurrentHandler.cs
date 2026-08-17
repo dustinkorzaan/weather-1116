@@ -32,14 +32,14 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
         _logger = logger;
     }
 
-    public Task<NonAIWeatherResponse> Handle(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
+    public async Task<NonAIWeatherResponse> Handle(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
     {
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetPublicWeatherCurrentHandler), Request = request });
-        return _cache.GetOrCreateAsync(
-            cacheKey,
-            TimeSpan.FromMinutes(5),
-            ct => _retry.ExecuteAsync(c => GetPublicWeatherCurrent(request, c), ct),
-            cancellationToken);
+        return await _cache.GetOrCreate(
+            cacheKey: cacheKey,
+            cacheDuration: TimeSpan.FromMinutes(5),
+            valueFactory: ct => _retry.Execute(c => GetPublicWeatherCurrent(request, c), ct),
+            cancellationToken: cancellationToken);
     }
 
     private async Task<NonAIWeatherResponse> GetPublicWeatherCurrent(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
