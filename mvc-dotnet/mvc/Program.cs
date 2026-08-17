@@ -42,6 +42,7 @@ builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(15);
 });
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
+builder.Services.AddMemoryCache();
 builder.Services.AddWeatherChatClients();
 
 var app = builder.Build();

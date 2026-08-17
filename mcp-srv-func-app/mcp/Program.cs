@@ -13,5 +13,6 @@ builder.ConfigureFunctionsWebApplication();
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetLatLongHandler>());
+builder.Services.AddMemoryCache();
 
 builder.Build().Run();
