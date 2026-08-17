@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Core.Http;
 using Core.Http.Events;
 using Core.Http.Handlers;
 using Microsoft.Extensions.Caching.Memory;
@@ -212,6 +213,56 @@ public class GetThirdPartyStringWithRetryHandlerTests
         Assert.Equal(7, handler.Attempts);
     }
 
+    [Fact]
+    public async Task Handle_CoalescesConcurrentRequestsForSameUri()
+    {
+        var release = new TaskCompletionSource();
+        var handler = new BlockingHandler(release.Task, "{\"ok\":true}");
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        var coalescer = new ThirdPartyRequestCoalescer();
+        using var client = new HttpClient(handler);
+        var sut1 = CreateSut(client, [], cache, coalescer);
+        var sut2 = CreateSut(client, [], cache, coalescer);
+        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
+
+        var firstCall = sut1.Handle(request, CancellationToken.None);
+        await handler.RequestStarted;
+        var secondCall = sut2.Handle(request, CancellationToken.None);
+        release.SetResult();
+
+        var results = await Task.WhenAll(firstCall, secondCall);
+
+        Assert.Equal(["{\"ok\":true}", "{\"ok\":true}"], results);
+        Assert.Equal(1, handler.Attempts);
+    }
+
+    [Fact]
+    public async Task Handle_CancelingOneJoinedCallerDoesNotAbortSharedFetchForOthers()
+    {
+        var release = new TaskCompletionSource();
+        var handler = new BlockingHandler(release.Task, "{\"ok\":true}");
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        var coalescer = new ThirdPartyRequestCoalescer();
+        using var client = new HttpClient(handler);
+        var sut1 = CreateSut(client, [], cache, coalescer);
+        var sut2 = CreateSut(client, [], cache, coalescer);
+        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
+        using var cts = new CancellationTokenSource();
+
+        var firstCall = sut1.Handle(request, cts.Token);
+        await handler.RequestStarted;
+        var secondCall = sut2.Handle(request, CancellationToken.None);
+        cts.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => firstCall);
+
+        release.SetResult();
+        var secondResult = await secondCall;
+
+        Assert.Equal("{\"ok\":true}", secondResult);
+        Assert.Equal(1, handler.Attempts);
+    }
+
     [Theory]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLatLongHandler.cs")]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLocationHandler.cs")]
@@ -230,8 +281,13 @@ public class GetThirdPartyStringWithRetryHandlerTests
     private static GetThirdPartyStringWithRetryHandler CreateSut(
         HttpClient client,
         List<TimeSpan> delays,
-        IMemoryCache? cache = null) =>
-        new(cache ?? new MemoryCache(new MemoryCacheOptions()), client, RecordDelay(delays));
+        IMemoryCache? cache = null,
+        ThirdPartyRequestCoalescer? coalescer = null) =>
+        new(
+            cache ?? new MemoryCache(new MemoryCacheOptions()),
+            coalescer ?? new ThirdPartyRequestCoalescer(),
+            client,
+            RecordDelay(delays));
 
     private static Func<TimeSpan, CancellationToken, Task> RecordDelay(List<TimeSpan> delays) =>
         (delay, cancellationToken) =>
@@ -283,6 +339,28 @@ public class GetThirdPartyStringWithRetryHandlerTests
             {
                 Content = new StringContent((string)outcome, Encoding.UTF8, "application/json"),
             });
+        }
+    }
+
+    private sealed class BlockingHandler(Task release, string body) : HttpMessageHandler
+    {
+        private readonly TaskCompletionSource _started = new();
+
+        public int Attempts { get; private set; }
+
+        public Task RequestStarted => _started.Task;
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            Attempts++;
+            _started.TrySetResult();
+            await release;
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json"),
+            };
         }
     }
 }
