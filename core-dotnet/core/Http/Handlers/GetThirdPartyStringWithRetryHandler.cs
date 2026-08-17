@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Core.Http.Events;
 using MediatR;
 
@@ -5,12 +6,16 @@ namespace Core.Http.Handlers;
 
 /// <summary>
 /// GET helper for Open-Meteo and Nominatim with five retries on failure.
-/// Backoff starts at 200ms and doubles after each retry.
+/// Backoff starts at 200ms and doubles after each retry. Successful
+/// responses are cached in memory keyed by request URI.
 /// </summary>
 public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdPartyStringWithRetryEvent, string>
 {
     internal const int RetryCount = 5;
     internal const int RetryDelay = 200;
+
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
+    private static readonly ConcurrentDictionary<string, (string Value, DateTimeOffset CachedAt)> Cache = new();
 
     private readonly HttpClient _httpClient;
 
@@ -25,11 +30,19 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
 
+        var cached = GetFromCache(request.RequestUri);
+        if (!string.IsNullOrWhiteSpace(cached))
+        {
+            return cached;
+        }
+
         for (var attempt = 0; ; attempt++)
         {
             try
             {
-                return await SendGetAsync(_httpClient, request, cancellationToken);
+                var result = await SendGet(_httpClient, request, cancellationToken);
+                SaveToCache(request.RequestUri, result);
+                return result;
             }
             catch when (attempt < RetryCount)
             {
@@ -38,16 +51,35 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
         }
     }
 
-    private static async Task<string> SendGetAsync(
+    private static string? GetFromCache(string requestUri)
+    {
+        var cutoff = DateTimeOffset.UtcNow - CacheDuration;
+        foreach (var (key, entry) in Cache)
+        {
+            if (entry.CachedAt < cutoff)
+            {
+                Cache.TryRemove(key, out _);
+            }
+        }
+
+        return Cache.TryGetValue(requestUri, out var current) ? current.Value : null;
+    }
+
+    private static void SaveToCache(string requestUri, string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        Cache.TryAdd(requestUri, (value, DateTimeOffset.UtcNow));
+    }
+
+    private static async Task<string> SendGet(
         HttpClient client,
         GetThirdPartyStringWithRetryEvent request,
         CancellationToken cancellationToken)
     {
-        if (request.Headers is not { Count: > 0 })
-        {
-            return await client.GetStringAsync(request.RequestUri, cancellationToken);
-        }
-
         using var httpRequest = new HttpRequestMessage(HttpMethod.Get, request.RequestUri);
         foreach (var header in request.Headers)
         {
