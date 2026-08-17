@@ -22,6 +22,7 @@ public class GetPublicWeatherHistoryHandlerTests
         Assert.Contains("timezone=auto", url);
         Assert.Contains("temperature_unit=fahrenheit", url);
         Assert.Contains("wind_speed_unit=mph", url);
+        Assert.Contains("precipitation_unit=inch", url);
         Assert.DoesNotContain("hourly=", url);
         Assert.DoesNotContain("latitude=36,1627", url);
         Assert.DoesNotContain("longitude=-86,7816", url);
