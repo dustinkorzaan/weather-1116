@@ -169,8 +169,6 @@ function AppShell() {
                 <Link to="/">Home</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Login/Logout</DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/hello-world">Hello World</Link>
               </DropdownMenuItem>
@@ -205,7 +203,7 @@ function AppShell() {
       </div>
 
       <Dialog open={isAboutOpen} onOpenChange={setIsAboutOpen}>
-        <DialogContent className="max-h-[calc(100vh-5rem)] overflow-y-auto sm:max-w-2xl">
+        <DialogContent className="max-h-[calc(100dvh-3rem)] overflow-y-auto sm:max-h-[calc(100dvh-5rem)] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>About</DialogTitle>
           </DialogHeader>

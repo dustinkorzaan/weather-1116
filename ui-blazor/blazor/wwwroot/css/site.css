@@ -385,6 +385,10 @@ fluent-menu-item a {
     margin-top: 1rem;
 }
 
+.weather-results .chat-markdown {
+    margin-bottom: 1rem;
+}
+
 .stat-label {
     font-size: 0.75rem;
     font-weight: 600;
@@ -431,6 +435,7 @@ fluent-menu-item a {
     align-items: flex-start;
     justify-content: center;
     padding: 4rem 1rem 1rem;
+    overflow-y: auto;
     background: rgba(0, 0, 0, 0.5);
 }
 
@@ -443,6 +448,7 @@ fluent-menu-item a {
     width: 100%;
     max-width: 42rem;
     max-height: calc(100vh - 5rem);
+    max-height: calc(100dvh - 5rem);
     flex-direction: column;
     overflow: hidden;
     border-radius: 0.75rem;
@@ -483,6 +489,17 @@ fluent-menu-item a {
     min-height: 4rem;
     overflow-y: auto;
     padding: 1rem 1.25rem;
+}
+
+@media (max-width: 30rem) {
+    .about-modal {
+        padding: 2rem 0.75rem 0.75rem;
+    }
+
+    .about-dialog {
+        max-height: calc(100vh - 3rem);
+        max-height: calc(100dvh - 3rem);
+    }
 }
 
 .about-tree-list {

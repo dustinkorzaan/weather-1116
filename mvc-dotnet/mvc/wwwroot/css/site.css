@@ -355,6 +355,7 @@ code {
   align-items: flex-start;
   justify-content: center;
   padding: 4rem 1rem 1rem;
+  overflow-y: auto;
   background: var(--color-overlay);
 }
 
@@ -367,11 +368,23 @@ code {
   width: 100%;
   max-width: 48rem;
   max-height: calc(100vh - 5rem);
+  max-height: calc(100dvh - 5rem);
   flex-direction: column;
   overflow: hidden;
   border-radius: var(--radius-lg);
   background: var(--color-bg);
   box-shadow: var(--shadow-xl);
+}
+
+@media (max-width: 30rem) {
+  .about-modal {
+    padding: 2rem 0.75rem 0.75rem;
+  }
+
+  .about-dialog {
+    max-height: calc(100vh - 3rem);
+    max-height: calc(100dvh - 3rem);
+  }
 }
 
 .about-dialog-header {

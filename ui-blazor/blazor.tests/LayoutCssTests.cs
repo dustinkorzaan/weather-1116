@@ -71,7 +71,6 @@ public sealed class LayoutCssTests
 
         var layoutSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/MainLayout.razor"));
         Assert.Contains("Label=\"Home\"", layoutSource);
-        Assert.Contains("Login/Logout", layoutSource);
         Assert.Contains("Hello World", layoutSource);
         Assert.Contains("Current AI Weather", layoutSource);
         Assert.Contains("Chat Clients", layoutSource);
