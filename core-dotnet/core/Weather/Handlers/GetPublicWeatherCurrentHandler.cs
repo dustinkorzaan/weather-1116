@@ -49,11 +49,6 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
 
         string jsonResponse = await client.GetStringAsync(endpoint, cancellationToken);
 
-        if (string.IsNullOrWhiteSpace(jsonResponse))
-        {
-            throw new HttpRequestException("Non-AI: Weather API returned an empty response.");
-        }
-
         NonAIWeatherResponse weatherData = JsonSerializer.Deserialize<NonAIWeatherResponse>(jsonResponse)
             ?? throw new InvalidOperationException("Non-AI: Weather API returned empty or invalid JSON.");
 
