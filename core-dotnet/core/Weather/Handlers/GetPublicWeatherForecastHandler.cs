@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
-using Core.Http;
+using Core.Http.Events;
 using Core.Weather.Events;
 using Core.Weather.Models;
 using MediatR;
@@ -13,19 +13,24 @@ namespace Core.Weather.Handlers;
 /// </summary>
 public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherForecastEvent, PublicWeatherForecastResponse>
 {
+    private readonly IMediator _mediator;
     private readonly ILogger<GetPublicWeatherForecastHandler> _logger;
 
-    public GetPublicWeatherForecastHandler(ILogger<GetPublicWeatherForecastHandler> logger)
+    public GetPublicWeatherForecastHandler(
+        IMediator mediator,
+        ILogger<GetPublicWeatherForecastHandler> logger)
     {
+        _mediator = mediator;
         _logger = logger;
     }
 
     public async Task<PublicWeatherForecastResponse> Handle(GetPublicWeatherForecastEvent request, CancellationToken cancellationToken)
     {
-        using var client = new HttpClient();
         string endpoint = BuildForecastUrl(request.Latitude, request.Longitude, request.Resolution);
 
-        string jsonResponse = await ThirdPartyHttp.GetStringWithRetryAsync(client, endpoint, cancellationToken);
+        string jsonResponse = await _mediator.Send(
+            new GetThirdPartyStringWithRetryEvent { RequestUri = endpoint },
+            cancellationToken);
 
         var options = new JsonSerializerOptions { WriteIndented = true };
 

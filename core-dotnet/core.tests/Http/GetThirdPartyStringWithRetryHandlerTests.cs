@@ -1,11 +1,12 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Core.Http;
+using Core.Http.Events;
+using Core.Http.Handlers;
 
 namespace Core.Tests.Http;
 
-public class ThirdPartyHttpTests
+public class GetThirdPartyStringWithRetryHandlerTests
 {
     private const string RequestUri = "https://api.open-meteo.com/v1/forecast";
     private const string SslFailure = "The SSL connection could not be established, see inner exception.";
@@ -22,24 +23,24 @@ public class ThirdPartyHttpTests
     [Fact]
     public void DelayBeforeRetry_StartsAt200MsAndDoublesFiveTimes()
     {
-        Assert.Equal(5, ThirdPartyHttp.RetryCount);
-        Assert.Equal(TimeSpan.FromMilliseconds(200), ThirdPartyHttp.InitialRetryDelay);
+        Assert.Equal(5, GetThirdPartyStringWithRetryHandler.RetryCount);
+        Assert.Equal(TimeSpan.FromMilliseconds(200), GetThirdPartyStringWithRetryHandler.InitialRetryDelay);
         Assert.Equal(
             ExpectedRetryDelays,
-            Enumerable.Range(0, ThirdPartyHttp.RetryCount).Select(ThirdPartyHttp.DelayBeforeRetry));
+            Enumerable.Range(0, GetThirdPartyStringWithRetryHandler.RetryCount)
+                .Select(GetThirdPartyStringWithRetryHandler.DelayBeforeRetry));
     }
 
     [Fact]
-    public async Task GetStringWithRetryAsync_SucceedsOnFirstAttempt_WithoutDelay()
+    public async Task Handle_SucceedsOnFirstAttempt_WithoutDelay()
     {
         var handler = new SequenceHandler(["{\"ok\":true}"]);
         var delays = new List<TimeSpan>();
         using var client = new HttpClient(handler);
+        var sut = CreateSut(client, delays);
 
-        var body = await ThirdPartyHttp.GetStringWithRetryAsync(
-            client,
-            RequestUri,
-            RecordDelay(delays),
+        var body = await sut.Handle(
+            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
             CancellationToken.None);
 
         Assert.Equal("{\"ok\":true}", body);
@@ -48,7 +49,7 @@ public class ThirdPartyHttpTests
     }
 
     [Fact]
-    public async Task GetStringWithRetryAsync_RetriesSslFailureFiveTimesThenSucceeds()
+    public async Task Handle_RetriesSslFailureFiveTimesThenSucceeds()
     {
         var handler = new SequenceHandler(
             [
@@ -61,11 +62,10 @@ public class ThirdPartyHttpTests
             ]);
         var delays = new List<TimeSpan>();
         using var client = new HttpClient(handler);
+        var sut = CreateSut(client, delays);
 
-        var body = await ThirdPartyHttp.GetStringWithRetryAsync(
-            client,
-            RequestUri,
-            RecordDelay(delays),
+        var body = await sut.Handle(
+            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
             CancellationToken.None);
 
         Assert.Equal("{\"ok\":true}", body);
@@ -74,7 +74,7 @@ public class ThirdPartyHttpTests
     }
 
     [Fact]
-    public async Task GetStringWithRetryAsync_ThrowsAfterFiveRetries()
+    public async Task Handle_ThrowsAfterFiveRetries()
     {
         var handler = new SequenceHandler(
             [
@@ -87,12 +87,11 @@ public class ThirdPartyHttpTests
             ]);
         var delays = new List<TimeSpan>();
         using var client = new HttpClient(handler);
+        var sut = CreateSut(client, delays);
 
         var thrown = await Assert.ThrowsAsync<HttpRequestException>(() =>
-            ThirdPartyHttp.GetStringWithRetryAsync(
-                client,
-                RequestUri,
-                RecordDelay(delays),
+            sut.Handle(
+                new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
                 CancellationToken.None));
 
         Assert.Equal(SslFailure, thrown.Message);
@@ -101,23 +100,47 @@ public class ThirdPartyHttpTests
     }
 
     [Fact]
-    public async Task GetStringWithRetryAsync_DoesNotRetryWhenCanceled()
+    public async Task Handle_DoesNotRetryWhenCanceled()
     {
         using var cts = new CancellationTokenSource();
         cts.Cancel();
         var handler = new SequenceHandler([new HttpRequestException(SslFailure)]);
         var delays = new List<TimeSpan>();
         using var client = new HttpClient(handler);
+        var sut = CreateSut(client, delays);
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-            ThirdPartyHttp.GetStringWithRetryAsync(
-                client,
-                RequestUri,
-                RecordDelay(delays),
+            sut.Handle(
+                new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri },
                 cts.Token));
 
         Assert.InRange(handler.Attempts, 0, 1);
         Assert.Empty(delays);
+    }
+
+    [Fact]
+    public async Task Handle_SendsCustomHeaders()
+    {
+        var handler = new SequenceHandler(["{\"ok\":true}"]);
+        var delays = new List<TimeSpan>();
+        using var client = new HttpClient(handler);
+        var sut = CreateSut(client, delays);
+
+        await sut.Handle(
+            new GetThirdPartyStringWithRetryEvent
+            {
+                RequestUri = RequestUri,
+                Headers = new Dictionary<string, string>
+                {
+                    ["User-Agent"] = "Weather-1116/1.0",
+                    ["Accept"] = "application/json",
+                },
+            },
+            CancellationToken.None);
+
+        Assert.NotNull(handler.LastRequest);
+        Assert.Equal("Weather-1116/1.0", handler.LastRequest!.Headers.UserAgent.ToString());
+        Assert.Equal("application/json", handler.LastRequest.Headers.Accept.ToString());
     }
 
     [Theory]
@@ -126,12 +149,19 @@ public class ThirdPartyHttpTests
     [InlineData("core-dotnet/core/Weather/Handlers/GetPublicWeatherCurrentHandler.cs")]
     [InlineData("core-dotnet/core/Weather/Handlers/GetPublicWeatherForecastHandler.cs")]
     [InlineData("core-dotnet/core/Weather/Handlers/GetPublicWeatherHistoryHandler.cs")]
-    public void ThirdPartyHttpsHandlers_UseSharedRetryHelper(string relativePath)
+    public void ThirdPartyHttpsHandlers_UseSharedRetryEvent(string relativePath)
     {
         var source = File.ReadAllText(FindRepoFile(relativePath));
-        Assert.Contains("ThirdPartyHttp.GetStringWithRetryAsync", source);
-        Assert.DoesNotContain("client.GetStringAsync", source);
+        Assert.Contains("GetThirdPartyStringWithRetryEvent", source);
+        Assert.Contains("_mediator.Send", source);
+        Assert.DoesNotContain("new HttpClient", source);
+        Assert.DoesNotContain("GetStringAsync", source);
     }
+
+    private static GetThirdPartyStringWithRetryHandler CreateSut(
+        HttpClient client,
+        List<TimeSpan> delays) =>
+        new(client, RecordDelay(delays));
 
     private static Func<TimeSpan, CancellationToken, Task> RecordDelay(List<TimeSpan> delays) =>
         (delay, cancellationToken) =>
@@ -164,11 +194,14 @@ public class ThirdPartyHttpTests
 
         public int Attempts { get; private set; }
 
+        public HttpRequestMessage? LastRequest { get; private set; }
+
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             Attempts++;
+            LastRequest = request;
             cancellationToken.ThrowIfCancellationRequested();
             var outcome = _outcomes.Dequeue();
             if (outcome is Exception exception)

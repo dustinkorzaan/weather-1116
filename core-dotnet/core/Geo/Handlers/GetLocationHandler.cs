@@ -3,7 +3,7 @@ using System.Text.Json;
 using Core.Geo;
 using Core.Geo.Events;
 using Core.Geo.Models;
-using Core.Http;
+using Core.Http.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -17,24 +17,32 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
 {
     internal const string UserAgent = "Weather-1116/1.0 (https://github.com/dustinkorzaan/weather-1116)";
 
+    private readonly IMediator _mediator;
     private readonly ILogger<GetLocationHandler> _logger;
 
-    public GetLocationHandler(ILogger<GetLocationHandler> logger)
+    public GetLocationHandler(IMediator mediator, ILogger<GetLocationHandler> logger)
     {
+        _mediator = mediator;
         _logger = logger;
     }
 
     public async Task<NonAILocationResponse> Handle(GetLocationEvent request, CancellationToken cancellationToken)
     {
-        using var client = new HttpClient();
-        client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", UserAgent);
-        client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");
-
         var url = BuildReverseGeocodeUrl(request.Latitude, request.Longitude);
 
         // Reverse geocoding has to send coordinates to Nominatim; do not log them.
         // codeql[cs/exposure-of-sensitive-information]
-        string jsonResponse = await ThirdPartyHttp.GetStringWithRetryAsync(client, url, cancellationToken);
+        string jsonResponse = await _mediator.Send(
+            new GetThirdPartyStringWithRetryEvent
+            {
+                RequestUri = url,
+                Headers = new Dictionary<string, string>
+                {
+                    ["User-Agent"] = UserAgent,
+                    ["Accept"] = "application/json",
+                },
+            },
+            cancellationToken);
         var geoData = JsonSerializer.Deserialize<NominatimReverseResponse>(jsonResponse);
         var location = NominatimLocationMapper.FromReverse(geoData, request.Latitude, request.Longitude);
 

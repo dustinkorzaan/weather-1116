@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Core.Geo.Events;
 using Core.Geo.Models;
-using Core.Http;
+using Core.Http.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -12,16 +12,17 @@ namespace Core.Geo.Handlers;
 /// </summary>
 public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongListResponse>
 {
+    private readonly IMediator _mediator;
     private readonly ILogger<GetLatLongHandler> _logger;
 
-    public GetLatLongHandler(ILogger<GetLatLongHandler> logger)
+    public GetLatLongHandler(IMediator mediator, ILogger<GetLatLongHandler> logger)
     {
+        _mediator = mediator;
         _logger = logger;
     }
 
     public async Task<NonAILatLongListResponse> Handle(GetLatLongEvent request, CancellationToken cancellationToken)
     {
-        using var client = new HttpClient();
         var count = NonAILatLongMapper.NormalizeCount(request.Count);
 
         // Try multiple location variants to handle inputs like "City, ST".
@@ -35,7 +36,9 @@ public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongLi
         {
             string encodedLocation = Uri.EscapeDataString(query);
             string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedLocation}&count={count}&language=en&format=json";
-            string jsonResponse = await ThirdPartyHttp.GetStringWithRetryAsync(client, url, cancellationToken);
+            string jsonResponse = await _mediator.Send(
+                new GetThirdPartyStringWithRetryEvent { RequestUri = url },
+                cancellationToken);
             var geoData = JsonSerializer.Deserialize<NonAIGeocodingResponse>(jsonResponse);
 
             if (geoData?.Results != null && geoData.Results.Count > 0)
