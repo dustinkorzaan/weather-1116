@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Core.AIWeather.Models;
+using Core.Json;
 
 namespace Core.Tests.AIWeather.Models;
 
@@ -26,7 +27,7 @@ public class AIWeatherModelsTests
 
         var result = JsonSerializer.Deserialize<AIWeatherResponse>(
             json,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            JsonDefaults.CaseInsensitive);
 
         Assert.NotNull(result);
         Assert.Equal("It is 41F in Nashville with light winds from the south.", result!.FullSummary);

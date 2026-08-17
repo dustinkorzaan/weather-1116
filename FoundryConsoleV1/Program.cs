@@ -331,7 +331,7 @@ internal class Program
 			var content = response.Value.Content[0].Text;
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
 				content,
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+				JsonDefaults.CaseInsensitive);
 
 			if (aiWeather is null)
 			{
