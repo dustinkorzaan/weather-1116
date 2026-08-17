@@ -70,6 +70,7 @@ public sealed class LayoutCssTests
         Assert.Contains("aria-label=\"Close\"", rendered.Markup);
 
         var layoutSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/MainLayout.razor"));
+        Assert.Contains("Label=\"Home\"", layoutSource);
         Assert.Contains("Login/Logout", layoutSource);
         Assert.Contains("Hello World", layoutSource);
         Assert.Contains("Current AI Weather", layoutSource);
@@ -80,7 +81,6 @@ public sealed class LayoutCssTests
         Assert.Contains("NavigateTo(\"/hello-world\")", layoutSource);
         Assert.Contains("NavigateTo(\"/current-ai-weather\")", layoutSource);
         Assert.Contains("NavigateTo(\"/chat-clients\")", layoutSource);
-        Assert.Contains("OpenExternalAsync", layoutSource);
         Assert.Contains("avatar.svg", layoutSource);
         Assert.Contains("Add location", layoutSource);
         Assert.Contains("IsMapPage", layoutSource);

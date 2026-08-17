@@ -76,12 +76,9 @@
         <FluentMenu Anchor="user-menu-button"
                     Trigger="MouseButton.Left"
                     HorizontalPosition="HorizontalPosition.Right">
-            <FluentMenuItem Label="Login/Logout" OnClick="NoOpLoginLogout" />
+            <FluentMenuItem Label="Home" OnClick="@(() => NavigateTo("/"))" />
             <FluentDivider />
-            <FluentMenuItem Label="UI React" OnClick="@(() => OpenExternalAsync(_uiReactUrl))" />
-            <FluentMenuItem Label="MVC" OnClick="@(() => OpenExternalAsync(_mvcUrl))" />
-            <FluentMenuItem Label="API About" OnClick="@(() => OpenExternalAsync(_apiAboutUrl))" />
-            <FluentMenuItem Label="Worker Hangfire" OnClick="@(() => OpenExternalAsync(_workerHangfireUrl))" />
+            <FluentMenuItem Label="Login/Logout" OnClick="NoOpLoginLogout" />
             <FluentDivider />
             <FluentMenuItem Label="Hello World" OnClick="@(() => NavigateTo("/hello-world"))" />
             <FluentMenuItem Label="Current AI Weather" OnClick="@(() => NavigateTo("/current-ai-weather"))" />
@@ -261,11 +258,6 @@
     private void NavigateTo(string path)
     {
         Navigation.NavigateTo(path);
-    }
-
-    private async Task OpenExternalAsync(string url)
-    {
-        await JS.InvokeVoidAsync("open", url, "_blank", "noopener,noreferrer");
     }
 
     private async Task OpenAboutModal()
