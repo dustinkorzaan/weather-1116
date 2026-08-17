@@ -30,7 +30,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
 
         var cached = GetFromCache(request.RequestUri);
-        if (cached is not null)
+        if (!string.IsNullOrWhiteSpace(cached))
         {
             return cached;
         }
