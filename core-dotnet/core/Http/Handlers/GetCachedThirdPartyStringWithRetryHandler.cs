@@ -13,7 +13,6 @@ public class GetCachedThirdPartyStringWithRetryHandler : IRequestHandler<GetCach
 {
     internal const int RetryCount = 5;
     internal const int RetryDelay = 200;
-    internal static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
 
     private readonly HttpClient _httpClient;
     private readonly IMemoryCache _cache;
@@ -40,7 +39,7 @@ public class GetCachedThirdPartyStringWithRetryHandler : IRequestHandler<GetCach
             try
             {
                 var result = await SendGet(_httpClient, request, cancellationToken);
-                _cache.Set(request.RequestUri, result, CacheDuration);
+                _cache.Set(request.RequestUri, result, request.CacheDuration);
                 return result;
             }
             catch when (attempt < RetryCount)
