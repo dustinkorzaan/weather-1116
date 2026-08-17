@@ -23,6 +23,7 @@
     <PackageReference Include="OpenAI" Version="2.9.1" />
     <ProjectReference Include="..\..\mediatr-dotnet\mediatr\MediatR.csproj" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.*" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.*" />
   </ItemGroup>
 

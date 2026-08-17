@@ -20,22 +20,26 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
 
     private readonly IMemoryCache _cache;
     private readonly ThirdPartyRequestCoalescer _coalescer;
-    private readonly HttpClient? _httpClient;
+    private readonly HttpClient _httpClient;
     private readonly Func<TimeSpan, CancellationToken, Task> _delayAsync;
 
-    public GetThirdPartyStringWithRetryHandler(IMemoryCache cache, ThirdPartyRequestCoalescer coalescer)
-        : this(cache, coalescer, httpClient: null, Task.Delay)
+    public GetThirdPartyStringWithRetryHandler(
+        IMemoryCache cache,
+        ThirdPartyRequestCoalescer coalescer,
+        HttpClient httpClient)
+        : this(cache, coalescer, httpClient, Task.Delay)
     {
     }
 
     internal GetThirdPartyStringWithRetryHandler(
         IMemoryCache cache,
         ThirdPartyRequestCoalescer coalescer,
-        HttpClient? httpClient,
+        HttpClient httpClient,
         Func<TimeSpan, CancellationToken, Task> delayAsync)
     {
         ArgumentNullException.ThrowIfNull(cache);
         ArgumentNullException.ThrowIfNull(coalescer);
+        ArgumentNullException.ThrowIfNull(httpClient);
         ArgumentNullException.ThrowIfNull(delayAsync);
         _cache = cache;
         _coalescer = coalescer;
@@ -49,23 +53,16 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
-        cancellationToken.ThrowIfCancellationRequested();
 
         if (_cache.TryGetValue(request.RequestUri, out string? cached) && cached is not null)
         {
             return cached;
         }
 
-        // The shared fetch is not tied to any single caller's token, so one caller canceling
-        // does not abort it for callers still waiting on the same URI. Each caller still stops
-        // waiting on its own token via WaitAsync below.
-        var fetch = _coalescer.GetOrAdd(
+        return await _coalescer.GetOrAdd(
             request.RequestUri,
-            () => GetStringWithRetryAsync(request, CancellationToken.None));
-        var body = await fetch.WaitAsync(cancellationToken);
-
-        _cache.Set(request.RequestUri, body, CacheDuration);
-        return body;
+            ct => FetchAndCacheAsync(request, ct),
+            cancellationToken);
     }
 
     internal static TimeSpan DelayBeforeRetry(int retryIndex)
@@ -74,19 +71,24 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
         return TimeSpan.FromMilliseconds(InitialRetryDelay.TotalMilliseconds * Math.Pow(2, retryIndex));
     }
 
+    private async Task<string> FetchAndCacheAsync(
+        GetThirdPartyStringWithRetryEvent request,
+        CancellationToken cancellationToken)
+    {
+        var body = await GetStringWithRetryAsync(request, cancellationToken);
+        _cache.Set(request.RequestUri, body, CacheDuration);
+        return body;
+    }
+
     private async Task<string> GetStringWithRetryAsync(
         GetThirdPartyStringWithRetryEvent request,
         CancellationToken cancellationToken)
     {
-        var ownsClient = _httpClient is null;
-        using HttpClient? ownedClient = ownsClient ? new HttpClient() : null;
-        var client = ownedClient ?? _httpClient!;
-
         for (var attempt = 0; ; attempt++)
         {
             try
             {
-                return await SendGetAsync(client, request, cancellationToken);
+                return await SendGetAsync(_httpClient, request, cancellationToken);
             }
             catch (Exception exception) when (
                 IsTransient(exception, cancellationToken) && attempt < RetryCount)

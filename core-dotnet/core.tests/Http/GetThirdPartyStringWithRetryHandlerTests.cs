@@ -263,6 +263,26 @@ public class GetThirdPartyStringWithRetryHandlerTests
         Assert.Equal(1, handler.Attempts);
     }
 
+    [Fact]
+    public async Task Handle_CancelingTheOnlyCallerAbortsTheFetch()
+    {
+        var release = new TaskCompletionSource();
+        var handler = new BlockingHandler(release.Task, "{\"ok\":true}");
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        using var client = new HttpClient(handler);
+        var sut = CreateSut(client, [], cache);
+        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
+        using var cts = new CancellationTokenSource();
+
+        var call = sut.Handle(request, cts.Token);
+        await handler.RequestStarted;
+        cts.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => call);
+        Assert.Equal(1, handler.Attempts);
+        Assert.False(release.Task.IsCompleted);
+    }
+
     [Theory]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLatLongHandler.cs")]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLocationHandler.cs")]
@@ -356,7 +376,7 @@ public class GetThirdPartyStringWithRetryHandlerTests
         {
             Attempts++;
             _started.TrySetResult();
-            await release;
+            await release.WaitAsync(cancellationToken);
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(body, Encoding.UTF8, "application/json"),
