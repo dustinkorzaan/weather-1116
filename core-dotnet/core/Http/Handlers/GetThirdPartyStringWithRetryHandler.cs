@@ -9,7 +9,8 @@ namespace Core.Http.Handlers;
 /// GET helper for Open-Meteo and Nominatim with five retries on transient HTTPS failures.
 /// Backoff starts at 200ms and doubles after each retry.
 /// Successful response bodies are cached per process in <see cref="IMemoryCache"/> by request URI.
-/// Failures are not cached.
+/// Failures are not cached. Concurrent requests for the same URI while a fetch is in flight
+/// share that fetch instead of each issuing their own upstream request.
 /// </summary>
 public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdPartyStringWithRetryEvent, string>
 {
@@ -18,22 +19,26 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     internal static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
     private readonly IMemoryCache _cache;
+    private readonly ThirdPartyRequestCoalescer _coalescer;
     private readonly HttpClient? _httpClient;
     private readonly Func<TimeSpan, CancellationToken, Task> _delayAsync;
 
-    public GetThirdPartyStringWithRetryHandler(IMemoryCache cache)
-        : this(cache, httpClient: null, Task.Delay)
+    public GetThirdPartyStringWithRetryHandler(IMemoryCache cache, ThirdPartyRequestCoalescer coalescer)
+        : this(cache, coalescer, httpClient: null, Task.Delay)
     {
     }
 
     internal GetThirdPartyStringWithRetryHandler(
         IMemoryCache cache,
+        ThirdPartyRequestCoalescer coalescer,
         HttpClient? httpClient,
         Func<TimeSpan, CancellationToken, Task> delayAsync)
     {
         ArgumentNullException.ThrowIfNull(cache);
+        ArgumentNullException.ThrowIfNull(coalescer);
         ArgumentNullException.ThrowIfNull(delayAsync);
         _cache = cache;
+        _coalescer = coalescer;
         _httpClient = httpClient;
         _delayAsync = delayAsync;
     }
@@ -44,13 +49,21 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (_cache.TryGetValue(request.RequestUri, out string? cached) && cached is not null)
         {
             return cached;
         }
 
-        var body = await GetStringWithRetryAsync(request, cancellationToken);
+        // The shared fetch is not tied to any single caller's token, so one caller canceling
+        // does not abort it for callers still waiting on the same URI. Each caller still stops
+        // waiting on its own token via WaitAsync below.
+        var fetch = _coalescer.GetOrAdd(
+            request.RequestUri,
+            () => GetStringWithRetryAsync(request, CancellationToken.None));
+        var body = await fetch.WaitAsync(cancellationToken);
+
         _cache.Set(request.RequestUri, body, CacheDuration);
         return body;
     }
