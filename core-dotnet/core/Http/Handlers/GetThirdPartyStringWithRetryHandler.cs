@@ -24,7 +24,6 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
         GetThirdPartyStringWithRetryEvent request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
 
         for (var attempt = 0; ; attempt++)
