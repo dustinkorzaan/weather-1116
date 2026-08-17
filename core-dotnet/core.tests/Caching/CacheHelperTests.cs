@@ -6,13 +6,13 @@ namespace Core.Tests.Caching;
 public class CacheHelperTests
 {
     [Fact]
-    public async Task GetOrCreateAsync_CacheMiss_InvokesFactoryAndStoresResult()
+    public async Task GetOrCreate_CacheMiss_InvokesFactoryAndStoresResult()
     {
         using var cache = new MemoryCache(new MemoryCacheOptions());
         var sut = new CacheHelper(cache);
         var calls = 0;
 
-        var result = await sut.GetOrCreateAsync(
+        var result = await sut.GetOrCreate(
             "key",
             TimeSpan.FromMinutes(5),
             _ =>
@@ -29,7 +29,7 @@ public class CacheHelperTests
     }
 
     [Fact]
-    public async Task GetOrCreateAsync_CacheHit_DoesNotInvokeFactoryAgain()
+    public async Task GetOrCreate_CacheHit_DoesNotInvokeFactoryAgain()
     {
         using var cache = new MemoryCache(new MemoryCacheOptions());
         var sut = new CacheHelper(cache);
@@ -41,8 +41,8 @@ public class CacheHelperTests
             return Task.FromResult("value");
         }
 
-        var first = await sut.GetOrCreateAsync("key", TimeSpan.FromMinutes(5), Factory, CancellationToken.None);
-        var second = await sut.GetOrCreateAsync("key", TimeSpan.FromMinutes(5), Factory, CancellationToken.None);
+        var first = await sut.GetOrCreate("key", TimeSpan.FromMinutes(5), Factory, CancellationToken.None);
+        var second = await sut.GetOrCreate("key", TimeSpan.FromMinutes(5), Factory, CancellationToken.None);
 
         Assert.Equal("value", first);
         Assert.Equal("value", second);
@@ -50,7 +50,7 @@ public class CacheHelperTests
     }
 
     [Fact]
-    public async Task GetOrCreateAsync_DifferentKeys_InvokeFactorySeparately()
+    public async Task GetOrCreate_DifferentKeys_InvokeFactorySeparately()
     {
         using var cache = new MemoryCache(new MemoryCacheOptions());
         var sut = new CacheHelper(cache);
@@ -62,8 +62,8 @@ public class CacheHelperTests
             return Task.FromResult($"value-{calls}");
         }
 
-        var first = await sut.GetOrCreateAsync("key-1", TimeSpan.FromMinutes(5), Factory, CancellationToken.None);
-        var second = await sut.GetOrCreateAsync("key-2", TimeSpan.FromMinutes(5), Factory, CancellationToken.None);
+        var first = await sut.GetOrCreate("key-1", TimeSpan.FromMinutes(5), Factory, CancellationToken.None);
+        var second = await sut.GetOrCreate("key-2", TimeSpan.FromMinutes(5), Factory, CancellationToken.None);
 
         Assert.Equal("value-1", first);
         Assert.Equal("value-2", second);

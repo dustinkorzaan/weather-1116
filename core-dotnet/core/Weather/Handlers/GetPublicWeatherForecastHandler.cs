@@ -35,11 +35,11 @@ public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherF
     public Task<PublicWeatherForecastResponse> Handle(GetPublicWeatherForecastEvent request, CancellationToken cancellationToken)
     {
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetPublicWeatherForecastHandler), Request = request });
-        return _cache.GetOrCreateAsync(
-            cacheKey,
-            TimeSpan.FromMinutes(5),
-            ct => _retry.ExecuteAsync(c => GetPublicWeatherForecast(request, c), ct),
-            cancellationToken);
+        return _cache.GetOrCreate(
+            cacheKey: cacheKey,
+            cacheDuration: TimeSpan.FromMinutes(5),
+            valueFactory: ct => _retry.ExecuteAsync(c => GetPublicWeatherForecast(request, c), ct),
+            cancellationToken: cancellationToken);
     }
 
     private async Task<PublicWeatherForecastResponse> GetPublicWeatherForecast(GetPublicWeatherForecastEvent request, CancellationToken cancellationToken)

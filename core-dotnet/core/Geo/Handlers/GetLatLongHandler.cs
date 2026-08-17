@@ -34,11 +34,11 @@ public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongLi
     public Task<NonAILatLongListResponse> Handle(GetLatLongEvent request, CancellationToken cancellationToken)
     {
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetLatLongHandler), Request = request });
-        return _cache.GetOrCreateAsync(
-            cacheKey,
-            TimeSpan.FromMinutes(60),
-            ct => _retry.ExecuteAsync(c => GetLatLong(request, c), ct),
-            cancellationToken);
+        return _cache.GetOrCreate(
+            cacheKey: cacheKey,
+            cacheDuration: TimeSpan.FromMinutes(60),
+            valueFactory: ct => _retry.ExecuteAsync(c => GetLatLong(request, c), ct),
+            cancellationToken: cancellationToken);
     }
 
     private async Task<NonAILatLongListResponse> GetLatLong(GetLatLongEvent request, CancellationToken cancellationToken)
