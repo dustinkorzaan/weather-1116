@@ -317,20 +317,25 @@ test('renders chat clients on its own page', () => {
   expect(screen.queryByRole('button', { name: /add location/i })).toBeNull();
 });
 
-test('user menu lists login and the three content pages', async () => {
+test('user menu lists home, login, and the three content pages', async () => {
   mockHelloFetch();
   const user = userEvent.setup();
   renderApp('/');
 
   await user.click(screen.getByRole('button', { name: /open user menu/i }));
 
-  expect(await screen.findByRole('menuitem', { name: 'Login/Logout' })).toBeDefined();
+  expect(await screen.findByRole('menuitem', { name: 'Home' })).toBeDefined();
+  expect(screen.getByRole('menuitem', { name: 'Login/Logout' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Hello World' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Current AI Weather' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Chat Clients' })).toBeDefined();
   expect(screen.getByRole('menuitemradio', { name: 'Light' })).toBeDefined();
   expect(screen.getByRole('menuitemradio', { name: 'Dark' })).toBeDefined();
   expect(screen.getByRole('menuitemradio', { name: 'System' })).toBeDefined();
+  expect(screen.queryByRole('menuitem', { name: 'UI Blazor' })).toBeNull();
+  expect(screen.queryByRole('menuitem', { name: 'MVC' })).toBeNull();
+  expect(screen.queryByRole('menuitem', { name: 'API About' })).toBeNull();
+  expect(screen.queryByRole('menuitem', { name: 'Worker Hangfire' })).toBeNull();
 });
 
 test('user menu can switch the document to the dark theme', async () => {

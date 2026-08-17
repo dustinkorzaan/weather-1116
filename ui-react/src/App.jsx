@@ -165,15 +165,11 @@ function AppShell() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-44">
-              <DropdownMenuItem>Login/Logout</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/">Home</Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              {siteLinks.map((link) => (
-                <DropdownMenuItem key={link.label} asChild>
-                  <a href={link.href} target="_blank" rel="noopener noreferrer">
-                    {link.label}
-                  </a>
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuItem>Login/Logout</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/hello-world">Hello World</Link>
