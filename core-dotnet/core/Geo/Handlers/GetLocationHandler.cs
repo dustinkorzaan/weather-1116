@@ -67,7 +67,8 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
         // Reverse geocoding has to send coordinates to Nominatim; do not log them.
         // codeql[cs/exposure-of-sensitive-information]
         string jsonResponse = await client.GetStringAsync(url, cancellationToken);
-        var geoData = JsonSerializer.Deserialize<NominatimReverseResponse>(jsonResponse);
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        var geoData = JsonSerializer.Deserialize<NominatimReverseResponse>(jsonResponse, options);
         var location = NominatimLocationMapper.FromReverse(geoData, request.Latitude, request.Longitude);
 
         _logger.LogInformation("Nominatim: Reverse geocoded to {Location}", location);

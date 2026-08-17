@@ -55,6 +55,7 @@ public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongLi
     {
         using var client = _clientFactory.CreateClient();
         var count = NonAILatLongMapper.NormalizeCount(request.Count);
+        var options = new JsonSerializerOptions { WriteIndented = true };
 
         // Try multiple location variants to handle inputs like "City, ST".
         var queries = new List<string> { request.Location };
@@ -68,7 +69,7 @@ public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongLi
             string encodedLocation = Uri.EscapeDataString(query);
             string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedLocation}&count={count}&language=en&format=json";
             string jsonResponse = await client.GetStringAsync(url, cancellationToken);
-            var geoData = JsonSerializer.Deserialize<NonAIGeocodingResponse>(jsonResponse);
+            var geoData = JsonSerializer.Deserialize<NonAIGeocodingResponse>(jsonResponse, options);
 
             if (geoData?.Results != null && geoData.Results.Count > 0)
             {
