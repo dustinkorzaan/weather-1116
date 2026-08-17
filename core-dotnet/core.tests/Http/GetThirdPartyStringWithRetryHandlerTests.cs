@@ -184,6 +184,32 @@ public class GetThirdPartyStringWithRetryHandlerTests
     }
 
     [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Handle_DoesNotCacheNullOrWhitespaceResponses(string emptyBody)
+    {
+        var requestUri = UniqueRequestUri();
+        var firstHandler = new SequenceHandler([emptyBody]);
+        using var firstClient = new HttpClient(firstHandler);
+        var firstSut = new GetThirdPartyStringWithRetryHandler(firstClient);
+
+        await firstSut.Handle(
+            new GetThirdPartyStringWithRetryEvent { RequestUri = requestUri },
+            CancellationToken.None);
+
+        var secondHandler = new SequenceHandler(["{\"ok\":true}"]);
+        using var secondClient = new HttpClient(secondHandler);
+        var secondSut = new GetThirdPartyStringWithRetryHandler(secondClient);
+
+        var secondResult = await secondSut.Handle(
+            new GetThirdPartyStringWithRetryEvent { RequestUri = requestUri },
+            CancellationToken.None);
+
+        Assert.Equal("{\"ok\":true}", secondResult);
+        Assert.Equal(1, secondHandler.Attempts);
+    }
+
+    [Theory]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLatLongHandler.cs")]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLocationHandler.cs")]
     [InlineData("core-dotnet/core/Weather/Handlers/GetPublicWeatherCurrentHandler.cs")]

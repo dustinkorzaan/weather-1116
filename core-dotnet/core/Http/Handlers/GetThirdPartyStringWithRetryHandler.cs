@@ -53,8 +53,15 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
     private static string? GetFromCache(string requestUri) =>
         Cache.TryGetValue(requestUri, out var value) ? value : null;
 
-    private static void SaveToCache(string requestUri, string value) =>
+    private static void SaveToCache(string requestUri, string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
         Cache.TryAdd(requestUri, value);
+    }
 
     private static async Task<string> SendGetAsync(
         HttpClient client,
