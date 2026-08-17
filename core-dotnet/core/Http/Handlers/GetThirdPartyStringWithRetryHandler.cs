@@ -1,11 +1,10 @@
-using System.Net.Sockets;
 using Core.Http.Events;
 using MediatR;
 
 namespace Core.Http.Handlers;
 
 /// <summary>
-/// GET helper for Open-Meteo and Nominatim with five retries on transient HTTPS failures.
+/// GET helper for Open-Meteo and Nominatim with five retries on failure.
 /// Backoff starts at 200ms and doubles after each retry.
 /// </summary>
 public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdPartyStringWithRetryEvent, string>
@@ -32,8 +31,7 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
             {
                 return await SendGetAsync(_httpClient, request, cancellationToken);
             }
-            catch (Exception exception) when (
-                IsTransient(exception, cancellationToken) && attempt < RetryCount)
+            catch when (attempt < RetryCount)
             {
                 await Task.Delay((int)(RetryDelay * Math.Pow(2, attempt)), cancellationToken);
             }
@@ -59,15 +57,5 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
         using var response = await client.SendAsync(httpRequest, cancellationToken);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync(cancellationToken);
-    }
-
-    private static bool IsTransient(Exception exception, CancellationToken cancellationToken)
-    {
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return false;
-        }
-
-        return exception is HttpRequestException or IOException or SocketException;
     }
 }
