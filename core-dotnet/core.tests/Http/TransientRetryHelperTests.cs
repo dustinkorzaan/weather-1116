@@ -1,14 +1,17 @@
 using System.Net.Sockets;
 using Core.Http;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.Tests.Http;
 
 public class TransientRetryHelperTests
 {
+    private static TransientRetryHelper CreateSut() => new(NullLogger<TransientRetryHelper>.Instance);
+
     [Fact]
     public async Task ExecuteAsync_SucceedsOnFirstAttempt()
     {
-        var sut = new TransientRetryHelper();
+        var sut = CreateSut();
         var attempts = 0;
 
         var result = await sut.ExecuteAsync(
@@ -26,7 +29,7 @@ public class TransientRetryHelperTests
     [Fact]
     public async Task ExecuteAsync_RetriesTransientFailuresThenSucceeds()
     {
-        var sut = new TransientRetryHelper();
+        var sut = CreateSut();
         var outcomes = new Queue<Exception?>(
             [
                 new HttpRequestException("first"),
@@ -52,7 +55,7 @@ public class TransientRetryHelperTests
     [Fact]
     public async Task ExecuteAsync_ThrowsAfterExhaustingRetries()
     {
-        var sut = new TransientRetryHelper();
+        var sut = CreateSut();
         var attempts = 0;
 
         await Assert.ThrowsAsync<HttpRequestException>(() =>
@@ -70,7 +73,7 @@ public class TransientRetryHelperTests
     [Fact]
     public async Task ExecuteAsync_DoesNotRetryNonTransientException()
     {
-        var sut = new TransientRetryHelper();
+        var sut = CreateSut();
         var attempts = 0;
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -88,7 +91,7 @@ public class TransientRetryHelperTests
     [Fact]
     public async Task ExecuteAsync_DoesNotRetryWhenCanceled()
     {
-        var sut = new TransientRetryHelper();
+        var sut = CreateSut();
         using var cts = new CancellationTokenSource();
         cts.Cancel();
         var attempts = 0;

@@ -1,8 +1,5 @@
-using Core.Caching;
-using Core.Http;
-using Core.Weather.Handlers;
+using Core;
 using DotNetEnv;
-using MediatR;
 using ModelContextProtocol.Server;
 
 Env.TraversePath().Load();
@@ -11,12 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddMediatR(cfg =>
-	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherCurrentHandler>());
-builder.Services.AddMemoryCache();
-builder.Services.AddHttpClient();
-builder.Services.AddSingleton<CacheHelper>();
-builder.Services.AddSingleton<TransientRetryHelper>();
+builder.Services.AddStandardCoreServices();
 
 builder.Services
 	.AddMcpServer(options =>

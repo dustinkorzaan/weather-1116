@@ -1,8 +1,6 @@
-﻿using Core.AIWeather.Models;
-using Core.Caching;
-using Core.HelloWorld.Handlers;
+﻿using Core;
+using Core.AIWeather.Models;
 using Core.Geo.Events;
-using Core.Http;
 using Core.Json;
 using Core.Weather.Events;
 using DotNetEnv;
@@ -25,11 +23,7 @@ internal class Program
 
 		var services = new ServiceCollection();
 		services.AddLogging(logging => logging.AddConsole());
-		services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
-		services.AddMemoryCache();
-		services.AddHttpClient();
-		services.AddSingleton<CacheHelper>();
-		services.AddSingleton<TransientRetryHelper>();
+		services.AddStandardCoreServices();
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 
