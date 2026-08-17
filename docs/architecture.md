@@ -231,9 +231,8 @@ and layout code instead of sharing it.
 
 The avatar menu is a filled person silhouette (`avatar.svg` in all three UIs)
 and its items are ordered:
-**Login/Logout** (placeholder, no-op) → divider →
-cross-UI external links (UI React / UI Blazor / MVC, API About, Worker Hangfire)
-→ divider → **Hello World** (`/hello-world`) → **Current AI Weather**
+**Home** → divider →
+**Hello World** (`/hello-world`) → **Current AI Weather**
 (`/current-ai-weather`) → **Chat Clients** (`/chat-clients`) → divider →
 **Light** / **Dark** / **System** (theme) → divider →
 **About** (dialog/modal).

@@ -78,8 +78,6 @@
                     HorizontalPosition="HorizontalPosition.Right">
             <FluentMenuItem Label="Home" OnClick="@(() => NavigateTo("/"))" />
             <FluentDivider />
-            <FluentMenuItem Label="Login/Logout" OnClick="NoOpLoginLogout" />
-            <FluentDivider />
             <FluentMenuItem Label="Hello World" OnClick="@(() => NavigateTo("/hello-world"))" />
             <FluentMenuItem Label="Current AI Weather" OnClick="@(() => NavigateTo("/current-ai-weather"))" />
             <FluentMenuItem Label="Chat Clients" OnClick="@(() => NavigateTo("/chat-clients"))" />
@@ -248,11 +246,6 @@
         {
             // Theme script is optional in component tests.
         }
-    }
-
-    private void NoOpLoginLogout()
-    {
-        // Placeholder until authentication is implemented.
     }
 
     private void NavigateTo(string path)

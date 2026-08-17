@@ -325,7 +325,6 @@ test('user menu lists home, login, and the three content pages', async () => {
   await user.click(screen.getByRole('button', { name: /open user menu/i }));
 
   expect(await screen.findByRole('menuitem', { name: 'Home' })).toBeDefined();
-  expect(screen.getByRole('menuitem', { name: 'Login/Logout' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Hello World' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Current AI Weather' })).toBeDefined();
   expect(screen.getByRole('menuitem', { name: 'Chat Clients' })).toBeDefined();

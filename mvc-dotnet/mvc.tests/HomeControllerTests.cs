@@ -36,7 +36,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("href=\"/hello-world\"", html);
         Assert.Contains("href=\"/current-ai-weather\"", html);
         Assert.Contains("href=\"/chat-clients\"", html);
-        Assert.Contains("Login/Logout", html);
         Assert.Contains("data-theme-option=\"light\"", html);
         Assert.Contains("data-theme-option=\"dark\"", html);
         Assert.Contains("data-theme-option=\"system\"", html);
