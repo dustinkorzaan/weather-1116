@@ -41,6 +41,7 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
                     ["User-Agent"] = UserAgent,
                     ["Accept"] = "application/json",
                 },
+                CacheDuration = TimeSpan.FromMinutes(60),
             },
             cancellationToken);
         var geoData = JsonSerializer.Deserialize<NominatimReverseResponse>(jsonResponse);

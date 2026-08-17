@@ -11,5 +11,5 @@ public class GetCachedThirdPartyStringWithRetryEvent : IRequest<string>
 
     public Dictionary<string, string> Headers { get; set; } = [];
 
-    public TimeSpan CacheDuration { get; set; } = TimeSpan.FromMinutes(10);
+    public TimeSpan CacheDuration { get; set; } = TimeSpan.FromMinutes(5);
 }
