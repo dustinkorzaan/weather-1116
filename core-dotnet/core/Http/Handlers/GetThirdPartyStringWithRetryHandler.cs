@@ -53,9 +53,13 @@ public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdParty
 
     private static string? GetFromCache(string requestUri)
     {
-        if (Cache.TryGetValue(requestUri, out var entry) && DateTimeOffset.UtcNow - entry.CachedAt > CacheDuration)
+        var cutoff = DateTimeOffset.UtcNow - CacheDuration;
+        foreach (var (key, entry) in Cache)
         {
-            Cache.TryRemove(requestUri, out _);
+            if (entry.CachedAt < cutoff)
+            {
+                Cache.TryRemove(key, out _);
+            }
         }
 
         return Cache.TryGetValue(requestUri, out var current) ? current.Value : null;
