@@ -6,7 +6,6 @@ using Core.Weather.Events;
 using Core.Weather.Models;
 using MediatR;
 using Microsoft.Extensions.Http;
-using Microsoft.Extensions.Logging;
 
 namespace Core.Weather.Handlers;
 
@@ -18,18 +17,15 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
     private readonly CacheHelper _cache;
     private readonly TransientRetryHelper _retry;
     private readonly IHttpClientFactory _clientFactory;
-    private readonly ILogger<GetPublicWeatherCurrentHandler> _logger;
 
     public GetPublicWeatherCurrentHandler(
         CacheHelper cache,
         TransientRetryHelper retry,
-        IHttpClientFactory clientFactory,
-        ILogger<GetPublicWeatherCurrentHandler> logger)
+        IHttpClientFactory clientFactory)
     {
         _cache = cache;
         _retry = retry;
         _clientFactory = clientFactory;
-        _logger = logger;
     }
 
     public async Task<NonAIWeatherResponse> Handle(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
@@ -58,5 +54,5 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
     internal static string BuildCurrentWeatherUrl(double latitude, double longitude) =>
         string.Create(
             CultureInfo.InvariantCulture,
-            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true");
+            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch");
 }
