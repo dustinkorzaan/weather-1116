@@ -41,7 +41,7 @@ public class GetLocationHandler : IRequestHandler<GetLocationEvent, NonAILocatio
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetLocationHandler), Request = request });
         return _cache.GetOrCreateAsync(
             cacheKey,
-            TimeSpan.FromMinutes(5),
+            TimeSpan.FromMinutes(60),
             ct => _retry.ExecuteAsync(c => GetLocation(request, c), ct),
             cancellationToken);
     }

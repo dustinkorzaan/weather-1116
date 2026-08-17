@@ -36,7 +36,7 @@ public class GetLatLongHandler : IRequestHandler<GetLatLongEvent, NonAILatLongLi
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetLatLongHandler), Request = request });
         return _cache.GetOrCreateAsync(
             cacheKey,
-            TimeSpan.FromMinutes(5),
+            TimeSpan.FromMinutes(60),
             ct => _retry.ExecuteAsync(c => GetLatLong(request, c), ct),
             cancellationToken);
     }
