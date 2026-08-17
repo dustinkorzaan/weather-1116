@@ -2,6 +2,7 @@
 using Core.AIWeather.Models;
 using Core.HelloWorld.Handlers;
 using Core.Geo.Events;
+using Core.Http;
 using Core.Weather.Events;
 using DotNetEnv;
 using MediatR;
@@ -26,6 +27,7 @@ internal class Program
 		var services = new ServiceCollection();
 		services.AddLogging(logging => logging.AddConsole());
 		services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
+		services.AddThirdPartyHttp();
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 

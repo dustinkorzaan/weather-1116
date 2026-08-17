@@ -1,3 +1,4 @@
+using Core.Http;
 using Core.Weather.Handlers;
 using DotNetEnv;
 using MediatR;
@@ -11,6 +12,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetPublicWeatherCurrentHandler>());
+builder.Services.AddThirdPartyHttp();
 
 builder.Services
 	.AddMcpServer(options =>

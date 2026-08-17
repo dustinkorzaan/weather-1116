@@ -1,4 +1,5 @@
 using Core.Geo.Handlers;
+using Core.Http;
 using DotNetEnv;
 using MediatR;
 using Microsoft.Azure.Functions.Worker.Builder;
@@ -13,5 +14,6 @@ builder.ConfigureFunctionsWebApplication();
 
 builder.Services.AddMediatR(cfg =>
 	cfg.RegisterServicesFromAssemblyContaining<GetLatLongHandler>());
+builder.Services.AddThirdPartyHttp();
 
 builder.Build().Run();

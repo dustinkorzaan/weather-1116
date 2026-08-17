@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using Core.Http.Events;
 using Core.Http.Handlers;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Core.Tests.Http;
 
@@ -143,6 +144,74 @@ public class GetThirdPartyStringWithRetryHandlerTests
         Assert.Equal("application/json", handler.LastRequest.Headers.Accept.ToString());
     }
 
+    [Fact]
+    public async Task Handle_CachesSuccessfulResponseByRequestUri()
+    {
+        var handler = new SequenceHandler(["{\"ok\":true}", "{\"ok\":false}"]);
+        var delays = new List<TimeSpan>();
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        using var client = new HttpClient(handler);
+        var sut = CreateSut(client, delays, cache);
+        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
+
+        var first = await sut.Handle(request, CancellationToken.None);
+        var second = await sut.Handle(request, CancellationToken.None);
+
+        Assert.Equal("{\"ok\":true}", first);
+        Assert.Equal("{\"ok\":true}", second);
+        Assert.Equal(1, handler.Attempts);
+        Assert.Empty(delays);
+    }
+
+    [Fact]
+    public async Task Handle_DoesNotShareCacheAcrossDifferentRequestUris()
+    {
+        var handler = new SequenceHandler(["{\"first\":true}", "{\"second\":true}"]);
+        var delays = new List<TimeSpan>();
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        using var client = new HttpClient(handler);
+        var sut = CreateSut(client, delays, cache);
+
+        var first = await sut.Handle(
+            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri + "?one=1" },
+            CancellationToken.None);
+        var second = await sut.Handle(
+            new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri + "?two=2" },
+            CancellationToken.None);
+
+        Assert.Equal("{\"first\":true}", first);
+        Assert.Equal("{\"second\":true}", second);
+        Assert.Equal(2, handler.Attempts);
+    }
+
+    [Fact]
+    public async Task Handle_DoesNotCacheFailures()
+    {
+        var handler = new SequenceHandler(
+            [
+                new HttpRequestException("first"),
+                new HttpRequestException("second"),
+                new HttpRequestException("third"),
+                new HttpRequestException("fourth"),
+                new HttpRequestException("fifth"),
+                new HttpRequestException("final"),
+                "{\"ok\":true}",
+            ]);
+        var delays = new List<TimeSpan>();
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        using var client = new HttpClient(handler);
+        var sut = CreateSut(client, delays, cache);
+        var request = new GetThirdPartyStringWithRetryEvent { RequestUri = RequestUri };
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sut.Handle(request, CancellationToken.None));
+
+        var body = await sut.Handle(request, CancellationToken.None);
+
+        Assert.Equal("{\"ok\":true}", body);
+        Assert.Equal(7, handler.Attempts);
+    }
+
     [Theory]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLatLongHandler.cs")]
     [InlineData("core-dotnet/core/Geo/Handlers/GetLocationHandler.cs")]
@@ -160,8 +229,9 @@ public class GetThirdPartyStringWithRetryHandlerTests
 
     private static GetThirdPartyStringWithRetryHandler CreateSut(
         HttpClient client,
-        List<TimeSpan> delays) =>
-        new(client, RecordDelay(delays));
+        List<TimeSpan> delays,
+        IMemoryCache? cache = null) =>
+        new(cache ?? new MemoryCache(new MemoryCacheOptions()), client, RecordDelay(delays));
 
     private static Func<TimeSpan, CancellationToken, Task> RecordDelay(List<TimeSpan> delays) =>
         (delay, cancellationToken) =>

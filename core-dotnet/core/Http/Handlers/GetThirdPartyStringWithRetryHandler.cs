@@ -1,43 +1,58 @@
 using System.Net.Sockets;
 using Core.Http.Events;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Core.Http.Handlers;
 
 /// <summary>
 /// GET helper for Open-Meteo and Nominatim with five retries on transient HTTPS failures.
 /// Backoff starts at 200ms and doubles after each retry.
+/// Successful response bodies are cached per process in <see cref="IMemoryCache"/> by request URI.
+/// Failures are not cached.
 /// </summary>
 public class GetThirdPartyStringWithRetryHandler : IRequestHandler<GetThirdPartyStringWithRetryEvent, string>
 {
     internal const int RetryCount = 5;
     internal static readonly TimeSpan InitialRetryDelay = TimeSpan.FromMilliseconds(200);
+    internal static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
+    private readonly IMemoryCache _cache;
     private readonly HttpClient? _httpClient;
     private readonly Func<TimeSpan, CancellationToken, Task> _delayAsync;
 
-    public GetThirdPartyStringWithRetryHandler()
-        : this(httpClient: null, Task.Delay)
+    public GetThirdPartyStringWithRetryHandler(IMemoryCache cache)
+        : this(cache, httpClient: null, Task.Delay)
     {
     }
 
     internal GetThirdPartyStringWithRetryHandler(
+        IMemoryCache cache,
         HttpClient? httpClient,
         Func<TimeSpan, CancellationToken, Task> delayAsync)
     {
+        ArgumentNullException.ThrowIfNull(cache);
         ArgumentNullException.ThrowIfNull(delayAsync);
+        _cache = cache;
         _httpClient = httpClient;
         _delayAsync = delayAsync;
     }
 
-    public Task<string> Handle(
+    public async Task<string> Handle(
         GetThirdPartyStringWithRetryEvent request,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentException.ThrowIfNullOrWhiteSpace(request.RequestUri);
 
-        return GetStringWithRetryAsync(request, cancellationToken);
+        if (_cache.TryGetValue(request.RequestUri, out string? cached) && cached is not null)
+        {
+            return cached;
+        }
+
+        var body = await GetStringWithRetryAsync(request, cancellationToken);
+        _cache.Set(request.RequestUri, body, CacheDuration);
+        return body;
     }
 
     internal static TimeSpan DelayBeforeRetry(int retryIndex)
