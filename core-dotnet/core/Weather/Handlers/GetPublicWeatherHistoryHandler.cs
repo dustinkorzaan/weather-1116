@@ -1,9 +1,11 @@
 using System.Globalization;
 using System.Text.Json;
+using Core.Caching;
 using Core.Http;
 using Core.Weather.Events;
 using Core.Weather.Models;
 using MediatR;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Weather.Handlers;
@@ -13,23 +15,41 @@ namespace Core.Weather.Handlers;
 /// </summary>
 public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHistoryEvent, PublicWeatherHistoryResponse>
 {
+    private readonly CacheHelper _cache;
+    private readonly TransientRetryHelper _retry;
+    private readonly IHttpClientFactory _clientFactory;
     private readonly ILogger<GetPublicWeatherHistoryHandler> _logger;
 
-    public GetPublicWeatherHistoryHandler(ILogger<GetPublicWeatherHistoryHandler> logger)
+    public GetPublicWeatherHistoryHandler(
+        CacheHelper cache,
+        TransientRetryHelper retry,
+        IHttpClientFactory clientFactory,
+        ILogger<GetPublicWeatherHistoryHandler> logger)
     {
+        _cache = cache;
+        _retry = retry;
+        _clientFactory = clientFactory;
         _logger = logger;
     }
 
-    public async Task<PublicWeatherHistoryResponse> Handle(GetPublicWeatherHistoryEvent request, CancellationToken cancellationToken)
+    public Task<PublicWeatherHistoryResponse> Handle(GetPublicWeatherHistoryEvent request, CancellationToken cancellationToken)
     {
-        using var client = new HttpClient();
+        var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetPublicWeatherHistoryHandler), Request = request });
+        return _cache.GetOrCreateAsync(
+            cacheKey,
+            TimeSpan.FromMinutes(5),
+            ct => _retry.ExecuteAsync(c => GetPublicWeatherHistory(request, c), ct),
+            cancellationToken);
+    }
+
+    private async Task<PublicWeatherHistoryResponse> GetPublicWeatherHistory(GetPublicWeatherHistoryEvent request, CancellationToken cancellationToken)
+    {
+        using var client = _clientFactory.CreateClient();
         string endpoint = BuildHistoryUrl(request.Latitude, request.Longitude, request.Resolution);
 
-        string jsonResponse = await ThirdPartyHttp.GetStringWithRetryAsync(client, endpoint, cancellationToken);
+        string jsonResponse = await client.GetStringAsync(endpoint, cancellationToken);
 
-        var options = new JsonSerializerOptions { WriteIndented = true };
-
-        PublicWeatherHistoryResponse weatherData = JsonSerializer.Deserialize<PublicWeatherHistoryResponse>(jsonResponse, options)
+        PublicWeatherHistoryResponse weatherData = JsonSerializer.Deserialize<PublicWeatherHistoryResponse>(jsonResponse)
             ?? throw new InvalidOperationException("Non-AI: Weather history API returned empty or invalid JSON.");
 
         return weatherData;

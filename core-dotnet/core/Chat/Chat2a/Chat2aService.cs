@@ -4,6 +4,7 @@ using System.Text.Json;
 using Core.Chat.Models;
 using Core.Chat.Services;
 using Core.Geo.Events;
+using Core.Json;
 using Core.Weather.Events;
 using MediatR;
 using Microsoft.Agents.AI;
@@ -155,7 +156,7 @@ public sealed class Chat2aService : IChatClientService
         CancellationToken cancellationToken)
     {
         var latLongMatches = await _mediator.Send(new GetLatLongEvent { Location = location }, cancellationToken);
-        return JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(latLongMatches, JsonDefaults.Pretty);
     }
 
     [Description("Turn a latitude and longitude into a simple place label. Prefers City, State in the US (City, State, Country elsewhere), then a feature name, then a formatted coordinate such as 35.51° N, 86.58° W.")]
@@ -169,7 +170,7 @@ public sealed class Chat2aService : IChatClientService
             Latitude = latitude,
             Longitude = longitude,
         }, cancellationToken);
-        return JsonSerializer.Serialize(locationData, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
     }
 
     [Description("Get current public weather conditions for a latitude and longitude.")]
@@ -184,7 +185,7 @@ public sealed class Chat2aService : IChatClientService
             Longitude = longitude,
         }, cancellationToken);
 
-        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
     }
 
     [Description("Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute steps. Use Daily unless the user asks for hourly or 15-minute detail.")]
@@ -202,7 +203,7 @@ public sealed class Chat2aService : IChatClientService
             Resolution = resolution,
         }, cancellationToken);
 
-        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
     }
 
     [Description("Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail.")]
@@ -220,6 +221,6 @@ public sealed class Chat2aService : IChatClientService
             Resolution = resolution,
         }, cancellationToken);
 
-        return JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
     }
 }

@@ -1,6 +1,7 @@
-﻿using Core.AIWeather.Models;
-using Core.HelloWorld.Handlers;
+﻿using Core;
+using Core.AIWeather.Models;
 using Core.Geo.Events;
+using Core.Json;
 using Core.Weather.Events;
 using DotNetEnv;
 using MediatR;
@@ -22,7 +23,7 @@ internal class Program
 
 		var services = new ServiceCollection();
 		services.AddLogging(logging => logging.AddConsole());
-		services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
+		services.AddStandardCoreServices();
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 
@@ -186,7 +187,7 @@ internal class Program
 			Latitude = latLong.Latitude,
 			Longitude = latLong.Longitude,
 		});
-		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+		var weatherDataJson = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 
 		// AI prep
 		var systemPrompt = """
@@ -267,7 +268,7 @@ internal class Program
 			Latitude = latLong.Latitude,
 			Longitude = latLong.Longitude,
 		});
-		var weatherDataJson = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+		var weatherDataJson = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 
 		// AI prep
 		var systemPrompt = """
@@ -348,7 +349,7 @@ internal class Program
 			var content = response.GetOutputText();
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
 				content,
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+				JsonDefaults.CaseInsensitive);
 
 			if (aiWeather is null)
 			{
@@ -357,7 +358,7 @@ internal class Program
 			else
 			{
 				Console.WriteLine("\nResponse:");
-				Console.WriteLine(JsonSerializer.Serialize(aiWeather, new JsonSerializerOptions { WriteIndented = true }));
+				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}
 		}
 		catch (Exception ex)

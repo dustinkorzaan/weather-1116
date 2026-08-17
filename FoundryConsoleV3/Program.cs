@@ -1,7 +1,8 @@
 ﻿using Azure.AI.Extensions.OpenAI;
+using Core;
 using Core.AIWeather.Models;
-using Core.HelloWorld.Handlers;
 using Core.Geo.Events;
+using Core.Json;
 using Core.Weather.Events;
 using DotNetEnv;
 using MediatR;
@@ -25,7 +26,7 @@ internal class Program
 
 		var services = new ServiceCollection();
 		services.AddLogging(logging => logging.AddConsole());
-		services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
+		services.AddStandardCoreServices();
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 
@@ -275,7 +276,7 @@ internal class Program
 
 									Console.WriteLine($"\nTool call: GetLatLong({toolLocation})");
 									var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = toolLocation });
-									string functionOutput = JsonSerializer.Serialize(latLongMatches, new JsonSerializerOptions { WriteIndented = true });
+									string functionOutput = JsonSerializer.Serialize(latLongMatches, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
@@ -293,7 +294,7 @@ internal class Program
 										Latitude = latitude,
 										Longitude = longitude,
 									});
-									string functionOutput = JsonSerializer.Serialize(locationData, new JsonSerializerOptions { WriteIndented = true });
+									string functionOutput = JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
@@ -311,7 +312,7 @@ internal class Program
 										Latitude = latitude,
 										Longitude = longitude,
 									});
-									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+									string functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
@@ -337,7 +338,7 @@ internal class Program
 										Longitude = longitude,
 										Resolution = resolution,
 									});
-									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+									string functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
@@ -363,7 +364,7 @@ internal class Program
 										Longitude = longitude,
 										Resolution = resolution,
 									});
-									string functionOutput = JsonSerializer.Serialize(weatherData, new JsonSerializerOptions { WriteIndented = true });
+									string functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
@@ -393,7 +394,7 @@ internal class Program
 			else
 			{
 				Console.WriteLine("\nResponse:");
-				Console.WriteLine(JsonSerializer.Serialize(aiWeather, new JsonSerializerOptions { WriteIndented = true }));
+				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}
 		}
 		catch (Exception ex)

@@ -1,6 +1,7 @@
 ﻿using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Services;
 using Core.AIWeather.Models;
+using Core.Json;
 using DotNetEnv;
 using OpenAI.Responses;
 using System;
@@ -83,7 +84,7 @@ internal class Program
 			else
 			{
 				Console.WriteLine("\nResponse:");
-				Console.WriteLine(JsonSerializer.Serialize(aiWeather, new JsonSerializerOptions { WriteIndented = true }));
+				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}
 		}
 		catch (Exception ex)

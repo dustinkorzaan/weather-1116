@@ -1,7 +1,7 @@
+using Core;
 using Core.About;
 using Core.Chat;
 using Core.Hangfire;
-using Core.HelloWorld.Handlers;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
@@ -40,7 +40,7 @@ builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 {
 	client.Timeout = TimeSpan.FromSeconds(15);
 });
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
+builder.Services.AddStandardCoreServices();
 builder.Services.AddWeatherChatClients();
 builder.Services.AddCors(options =>
 {

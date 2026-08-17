@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
+using Core.Json;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -175,6 +176,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 },
             });
 
-        return schema.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+        return schema.ToJsonString(JsonDefaults.Pretty);
     }
 }
