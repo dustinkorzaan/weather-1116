@@ -16,7 +16,6 @@ public static class ChatServiceCollectionExtensions
         services.AddSingleton<ChatMcpToolFactory>();
         services.AddSingleton<ChatHostedMcpToolFactory>();
         services.AddSingleton<ChatAgentSessionStore>();
-        services.AddScoped<ChatToolExecutor>();
 
         services.AddKeyedScoped<IChatClientService, Chat1aService>("Chat1a");
         services.AddKeyedScoped<IChatClientService, Chat1bService>("Chat1b");

@@ -14,11 +14,12 @@ The goal is feature parity across all UI implementations while keeping each
 project idiomatic for its framework.
 
 The remaining two runnable stacks are the **MCP tool hosts**. The UIs never
-call them directly. Current AI Weather still depends on them: API and MVC
-declare those hosts as remote tools on the model request (V4
-`GetCurrentAIWeatherHandler`). The **Foundry console demos** are local
-learning apps on the same `Core` weather and geo logic, plus the hosted-agent
-contrast in Foundry Console V5.
+call them directly, and neither does Current AI Weather —
+`GetCurrentAIWeatherHandler` resolves geo/weather tools in-process (V3
+pattern). The MCP hosts remain required for the Chat1b/Chat2b remote-MCP chat
+tabs. The **Foundry console demos** are local learning apps on the same
+`Core` weather and geo logic, plus the hosted-agent contrast in Foundry
+Console V5.
 
 ## Projects
 
@@ -36,8 +37,9 @@ contrast in Foundry Console V5.
 ### Adjacent projects (not UI/API dependencies)
 
 Foundry consoles are learning demos, not UI dependencies. MCP hosts are not
-called by the UIs directly, but they **are** on the Current AI Weather path:
-API and MVC declare them as remote tools on the model request (V4). Hello and
+called by the UIs directly, and they are **not** on the Current AI Weather
+path either — `GetCurrentAIWeatherHandler` resolves tools in-process (V3).
+They remain required for the Chat1b/Chat2b remote-MCP chat tabs. Hello and
 map chrome do not need them.
 
 | Project | Path | Role |
@@ -58,9 +60,10 @@ auth/env details are in this doc and each project's `.env.example`.
 - Backend logic is intentionally duplicated in MVC and API (no shared backend
   dependency between those projects), except for shared cross-cutting code
   (events/handlers) provided by `Core`, which both MVC and API reference.
-- **MCP hosts are not called by any UI for standard AI weather/hello flows.**
-  API and MVC call them indirectly through `GetCurrentAIWeatherHandler`, which
-  declares remote MCP tools on the model request (see below).
+- **MCP hosts are not called by any UI, and are not on the Current AI Weather
+  path.** `GetCurrentAIWeatherHandler` resolves its `GetLatLong` and
+  `GetPublicWeatherCurrent` tools in-process (V3 pattern, see below); the MCP
+  hosts remain required only for the Chat1b/Chat2b remote-MCP chat tabs.
 
 ## AI Weather and Foundry
 
@@ -68,6 +71,9 @@ All three UIs expose **Current AI Weather**. The request path differs by stack:
 
 - **React / Blazor** → `WeatherAPI` (`/AIWeather/Current`)
 - **MVC** → local `HomeController` + `Core` (same handler, no API hop)
+- Tools (`GetLatLong`, `GetPublicWeatherCurrent`) run in-process via the
+  shared `WeatherToolDefinitions`/`WeatherToolExecutor` helpers (V3 pattern) — no
+  network hop to the MCP hosts.
 
 ## Chat Clients (Chat1a–Chat2b)
 
@@ -107,18 +113,16 @@ flowchart LR
   API[MVC or WeatherAPI]
   Core[Core GetCurrentAIWeatherHandler]
   Model[Azure OpenAI model]
-  McpSrvFuncApp[mcp-srv-func-app GetLatLong]
-  McpSrvAppService[mcp-srv-app-service weather tools]
+  Tools[WeatherToolExecutor in-process]
   CoreGeo[Core geo handlers]
   CoreWx[Core weather handlers]
 
   UI --> API
   API --> Core
   Core --> Model
-  Model --> McpSrvFuncApp
-  Model --> McpSrvAppService
-  McpSrvFuncApp --> CoreGeo
-  McpSrvAppService --> CoreWx
+  Core --> Tools
+  Tools --> CoreGeo
+  Tools --> CoreWx
 ```
 
 Required settings for API/MVC in production are listed under
@@ -385,8 +389,8 @@ blocks**, not production deployables:
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same Core code reused in the tools |
-| **V4** | Model-direct: tools handled by remote MCP servers — actual production pattern in `GetCurrentAIWeatherHandler` (API/MVC) |
+| **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherHandler` (API/MVC) |
+| **V4** | Model-direct: tools handled by remote MCP servers — still used by the Chat1b/Chat2b remote-MCP chat tabs |
 | **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
@@ -399,17 +403,18 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `MCP_SRV_FUNC_APP_KEY` | Yes | `mcp_extension` system key for the `McpSrvFuncApp` server (`x-functions-key`) |
 | `MCP_SRV_APP_SERVICE_KEY` | Yes | Bearer token for the `McpSrvAppService` server |
 
-**API/MVC AI weather settings** (same pattern as V4):
+**API/MVC AI weather settings** (same pattern as V3 — tools run in-process,
+no MCP host required for this feature):
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Microsoft Foundry API key |
 | `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes | Hosted model deployment name (e.g. `gpt-5.4-mini`) |
-| `MCP_SRV_FUNC_APP_KEY` | Yes | `mcp_extension` system key for the `McpSrvFuncApp` server (`x-functions-key`) |
-| `MCP_SRV_APP_SERVICE_KEY` | Yes | Bearer token for the `McpSrvAppService` server |
-| `MCP_SRV_APP_SERVICE_URL` | Yes | Base URL for MCP Server on App Service (e.g. `http://localhost:8110`) |
-| `MCP_SRV_FUNC_APP_URL` | Yes | Base URL for MCP Server on Function App (e.g. `http://localhost:8120`) |
+
+`MCP_SRV_FUNC_APP_*` and `MCP_SRV_APP_SERVICE_*` are no longer needed for AI
+Weather; they're still required if the Chat1b/Chat2b remote-MCP chat tabs are
+used (see [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)).
 
 **V5 settings** (agent-hosted demo only):
 
@@ -419,5 +424,6 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` (project default version) |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 |
 
-Suggested reading order: V1 → V2 → V3 → V4 → `GetCurrentAIWeatherHandler` in
-`core-dotnet/core/AIWeather` → V5 (hosted-agent contrast).
+Suggested reading order: V1 → V2 → V3 → `GetCurrentAIWeatherHandler` in
+`core-dotnet/core/AIWeather` (the production V3-pattern handler) → V4 → V5
+(hosted-agent contrast).

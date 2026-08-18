@@ -115,11 +115,11 @@ scaffolding.”
 
 ### 5. Same request — model-direct vs agent-hosted
 
-Side-by-side mental model (Console V1–V4 / production vs V5).
+Side-by-side mental model (Console V1–V4 vs V5; Current AI Weather production is V3).
 
 ```mermaid
 flowchart LR
-    subgraph Direct["Model-direct (V1–V4, production)"]
+    subgraph Direct["Model-direct (V1–V4; Current AI Weather is V3)"]
         A1[App] --> M1[(Model)]
     end
     subgraph Hosted["Agent-hosted (V5)"]
@@ -199,7 +199,7 @@ and call them across languages and hosts.”
 ### 8. Agent contains model; model never talks to MCP directly ("Agent" is your code when calling Model directly)
 
 Clarifies who owns the loop — a hosted agent runtime, or **your app** when you
-call the model directly (V3/V4 / production).
+call the model directly (V3 production AI weather / V4 Chat1b–Chat2b).
 
 ```mermaid
 sequenceDiagram
@@ -431,8 +431,8 @@ flowchart TD
 flowchart LR
     V1[V1 Model only] --> V2[V2 Unified endpoint]
     V2 --> V3[V3 Local in-process looping]
+    V3 --> PROD[API / MVC production handler]
     V3 --> V4[V4 Model-direct + MCP]
-    V4 --> PROD[API / MVC production handler]
     V4 --> V5[V5 Hosted agent contrast]
 
     V1 -.->|risk| H[Ungrounded answers]

@@ -6,6 +6,7 @@ using System.Text.Json.Schema;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.Json;
+using Core.Tools;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -15,17 +16,21 @@ using OpenAI.Responses;
 namespace Core.AIWeather.Handlers;
 
 /// <summary>
-/// Calls the hosted model directly for current weather (same pattern as Foundry Console V4).
-/// MCP tools resolve geo and weather data; this handler does not call geo directly.
+/// Calls the hosted model directly for current weather (same pattern as Foundry Console V3).
+/// Geo and weather tools run in-process via <see cref="WeatherToolExecutor"/>; the model
+/// drives the tool-call loop, but no network hop leaves this process to resolve a tool call.
 /// </summary>
 public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEvent, AIWeatherResponse>
 {
     private static readonly string DefaultLocation = "Nashville, TN";
+    private const int MaxToolLoopTurns = 32;
 
+    private readonly WeatherToolExecutor _toolExecutor;
     private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
 
-    public GetCurrentAIWeatherHandler(ILogger<GetCurrentAIWeatherHandler> logger)
+    public GetCurrentAIWeatherHandler(WeatherToolExecutor toolExecutor, ILogger<GetCurrentAIWeatherHandler> logger)
     {
+        _toolExecutor = toolExecutor;
         _logger = logger;
     }
 
@@ -45,21 +50,11 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_MODEL")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_MODEL.");
 
-        var mcpSrvFuncAppUrl = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_URL")
-            ?? throw new InvalidOperationException("Missing MCP_SRV_FUNC_APP_URL.");
-        var mcpSrvFuncAppKey = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_KEY")
-            ?? throw new InvalidOperationException("Missing MCP_SRV_FUNC_APP_KEY.");
-
-        var mcpSrvAppServiceUrl = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_URL")
-            ?? throw new InvalidOperationException("Missing MCP_SRV_APP_SERVICE_URL.");
-        var mcpSrvAppServiceKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY")
-            ?? throw new InvalidOperationException("Missing MCP_SRV_APP_SERVICE_KEY.");
-
         var systemPrompt = """
         # Role & Operational Rules
         You are a dedicated weather assistant.
         Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
-        You have access to 3rd-party Model Context Protocol (MCP) tools for location mapping and real-time public meteorology data.
+        You have access to tools for location mapping and real-time public meteorology data.
 
         # Tool Protocol
         1. When given a location, immediately call your coordinates resolution tool. It returns ranked matches (rank 1 is best); pick the place that matches using name, state, and country — you may skip rank 1.
@@ -90,9 +85,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         var aiOutputSchema = BuildAIOutputSchema();
 
         _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, deploymentName);
-        _logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
-        _logger.LogInformation("AI Weather: User prompt for {Location}: {Prompt}", location, userPrompt);
-        _logger.LogInformation("AI Weather: Output schema for {Location}: {Schema}", location, aiOutputSchema);
 
         ResponsesClient client = new(
             credential: new ApiKeyCredential(apiKey),
@@ -101,51 +93,72 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 Endpoint = endpoint,
             });
 
-        McpTool myMcpSrvFuncApp = ResponseTool.CreateMcpTool(
-            serverLabel: "McpSrvFuncApp",
-            serverUri: new Uri($"{mcpSrvFuncAppUrl.TrimEnd('/')}/runtime/webhooks/mcp"),
-            headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
-            toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
-
-        McpTool myMcpSrvAppService = ResponseTool.CreateMcpTool(
-            serverLabel: "McpSrvAppService",
-            serverUri: new Uri($"{mcpSrvAppServiceUrl.TrimEnd('/')}/mcp"),
-            headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
-            toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+        FunctionTool getLatLongTool = WeatherToolDefinitions.CreateGetLatLongTool();
+        FunctionTool getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();
 
         var inputItems = new List<ResponseItem>
         {
             ResponseItem.CreateSystemMessageItem(systemPrompt),
             // Placing the dynamic query at the absolute end ensures the unchanging system instructions,
-            // response schema, and MCP tool schemas form a stable hash that qualifies for Azure OpenAI
+            // response schema, and tool schemas form a stable hash that qualifies for Azure OpenAI
             // Prompt Caching (1,024+ token threshold).
             ResponseItem.CreateUserMessageItem(userPrompt),
         };
 
-        CreateResponseOptions options = new(deploymentName, inputItems)
+        bool requiresAction;
+        string? content = null;
+        var toolLoopTurns = 0;
+
+        do
         {
-            Tools = { myMcpSrvFuncApp, myMcpSrvAppService },
-            TextOptions = new ResponseTextOptions
+            if (++toolLoopTurns > MaxToolLoopTurns)
             {
-                TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
-                    jsonSchemaFormatName: "ai_weather_response",
-                    jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
-                    jsonSchemaIsStrict: true),
-            },
-        };
+                throw new InvalidOperationException(
+                    $"AI Weather tool loop exceeded {MaxToolLoopTurns} model turns.");
+            }
 
-        ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
+            requiresAction = false;
 
-        if (response.Status != ResponseStatus.Completed)
-        {
-            throw new InvalidOperationException(
-                $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
-                $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
-                $"error: {response.Error?.Message ?? "(none)"}");
-        }
+            CreateResponseOptions options = new(deploymentName, inputItems)
+            {
+                Tools = { getLatLongTool, getPublicWeatherCurrentTool },
+                TextOptions = new ResponseTextOptions
+                {
+                    TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+                        jsonSchemaFormatName: "ai_weather_response",
+                        jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+                        jsonSchemaIsStrict: true),
+                },
+            };
 
-        var content = response.GetOutputText();
-        var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
+            ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
+
+            var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
+            if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
+                    $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
+                    $"error: {response.Error?.Message ?? "(none)"}");
+            }
+
+            inputItems.AddRange(response.OutputItems);
+
+            foreach (FunctionCallResponseItem functionCall in functionCalls)
+            {
+                var functionOutput = await _toolExecutor.ExecuteAsync(functionCall, cancellationToken);
+                inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+                requiresAction = true;
+            }
+
+            if (!requiresAction)
+            {
+                content = response.GetOutputText();
+            }
+        } while (requiresAction);
+
+        var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
+            content ?? throw new InvalidOperationException("Model finished without producing content."));
 
         if (aiWeather is null)
         {
