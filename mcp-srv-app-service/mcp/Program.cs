@@ -29,23 +29,17 @@ builder.Services
 var app = builder.Build();
 
 // Shared secret for MCP clients (Foundry project connection, MCP Inspector, etc.).
-var mcpSrvAppServiceKey = builder.Configuration["MCP_SRV_APP_SERVICE_KEY"];
+var mcpSrvAppServiceKey = builder.Configuration["MCP_SRV_APP_SERVICE_KEY"]?.Trim();
 
-// Auth filter: require a valid Bearer token for all /mcp requests.
+// Auth filter: require the shared secret for all /mcp requests.
+// Foundry project connections send the credential name as the HTTP header name.
+// The HTTP standard is Authorization; some Foundry connections use Authentication.
 app.Use(async (context, next) =>
 {
 	if (context.Request.Path.StartsWithSegments("/mcp"))
 	{
-		if (string.IsNullOrWhiteSpace(mcpSrvAppServiceKey))
-		{
-			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-			return;
-		}
-
-		var header = context.Request.Headers.Authorization.ToString();
-		const string prefix = "Bearer ";
-		if (!header.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-			|| !string.Equals(header[prefix.Length..].Trim(), mcpSrvAppServiceKey, StringComparison.Ordinal))
+		if (string.IsNullOrWhiteSpace(mcpSrvAppServiceKey)
+			|| !HasValidMcpSharedSecret(context.Request, mcpSrvAppServiceKey))
 		{
 			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 			return;
@@ -59,5 +53,36 @@ app.MapMcp("/mcp");
 app.MapControllers();
 
 app.Run();
+
+static bool HasValidMcpSharedSecret(HttpRequest request, string expectedKey)
+{
+	string[] headers =
+	[
+		request.Headers.Authorization.ToString(),
+		request.Headers["Authentication"].ToString(),
+	];
+
+	foreach (var header in headers)
+	{
+		if (string.IsNullOrWhiteSpace(header))
+		{
+			continue;
+		}
+
+		var token = header.Trim();
+		const string prefix = "Bearer ";
+		if (token.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+		{
+			token = token[prefix.Length..].Trim();
+		}
+
+		if (string.Equals(token, expectedKey, StringComparison.Ordinal))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
 
 public partial class Program;

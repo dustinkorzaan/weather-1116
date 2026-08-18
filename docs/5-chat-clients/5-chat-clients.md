@@ -200,7 +200,7 @@ Match the labels Chat1b already uses so traces stay comparable:
 | `server_label` | `server_url` | Auth | Tools the server exposes |
 | --- | --- | --- | --- |
 | `McpSrvFuncApp` | `https://<prod-mcp-srv-func-app>/runtime/webhooks/mcp` | Header `x-functions-key` = Functions `mcp_extension` system key (`MCP_SRV_FUNC_APP_KEY`) | `GetLatLong`, `GetLocation` |
-| `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
+| `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` (or Foundry alias `Authentication`) = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
 
 Production host names are in [`docs/architecture.md`](../architecture.md) (MCP Tool Hosts).
 Prefer Foundry **project connections** for the secrets if the portal offers them, instead of

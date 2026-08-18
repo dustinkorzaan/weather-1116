@@ -152,7 +152,7 @@ Prod apps: `weather1116-prod-mcp-srv-app-service`, `weather1116-prod-mcp-srv-fun
 
 Auth examples:
 
-- MCP Server on App Service: `Authorization: Bearer {your MCP_SRV_APP_SERVICE_KEY value}` (`/About` stays open)
+- MCP Server on App Service: `Authorization: Bearer {your MCP_SRV_APP_SERVICE_KEY value}` (`/About` stays open). `Authentication` is accepted as an alias (Foundry project connections use the credential name as the header name). The value may be `Bearer <key>` or just `<key>`.
 - MCP Server on Function App (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 
 Each host also exposes an anonymous **`/About`** probe that returns a leaf
