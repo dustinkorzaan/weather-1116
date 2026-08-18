@@ -68,4 +68,17 @@ public static class WeatherGridFormat
     /// <summary>Formats meteorological degrees as compass plus degrees, e.g. "SW (224°)".</summary>
     public static string FormatWindDirection(double degrees) =>
         string.Create(CultureInfo.InvariantCulture, $"{DegreesToCompass(degrees)} ({Math.Round(degrees):0}°)");
+
+    /// <summary>
+    /// Rotation for the ➤ wind arrow so 0° (north / from the north) points up.
+    /// </summary>
+    public static int? WindArrowRotationDeg(double degrees)
+    {
+        if (double.IsNaN(degrees) || double.IsInfinity(degrees))
+        {
+            return null;
+        }
+
+        return (int)Math.Round(degrees) - 90;
+    }
 }

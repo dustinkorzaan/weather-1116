@@ -58,4 +58,12 @@ public sealed class WeatherGridFormatTests
     {
         Assert.Equal("SW (224°)", WeatherGridFormat.FormatWindDirection(224));
     }
+
+    [Fact]
+    public void WindArrowRotationDeg_PointsNorthUp()
+    {
+        Assert.Equal(-90, WeatherGridFormat.WindArrowRotationDeg(0));
+        Assert.Equal(134, WeatherGridFormat.WindArrowRotationDeg(224));
+        Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.NaN));
+    }
 }

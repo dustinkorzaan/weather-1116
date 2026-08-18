@@ -189,6 +189,20 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
+    public void WeatherModalGridsScript_RendersRotatedWindArrow()
+    {
+        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherModalGrids.js"));
+        Assert.Contains("createWindDirectionCell", script);
+        Assert.Contains("wind-direction-arrow", script);
+        Assert.Contains("windArrowRotationDeg", script);
+        Assert.Contains("\\u27A4", script);
+        Assert.True(
+            script.IndexOf("wrap.appendChild(label)", StringComparison.Ordinal)
+                < script.IndexOf("wrap.appendChild(arrow)", StringComparison.Ordinal),
+            "Wind direction arrow should follow the compass label.");
+    }
+
+    [Fact]
     public async Task Weather_ReturnsOkWithTabsAndCurrentAIWeatherWiredUp()
     {
         var response = await _client.GetAsync("/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=current");

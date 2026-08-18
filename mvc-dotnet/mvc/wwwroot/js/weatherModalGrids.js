@@ -77,6 +77,35 @@
     return compass ? compass + ' ' + withDegrees : withDegrees;
   }
 
+  var WIND_DIRECTION_ARROW = '\u27A4';
+
+  function windArrowRotationDeg(degrees) {
+    var numeric = Number(degrees);
+    if (!Number.isFinite(numeric)) {
+      return null;
+    }
+    return Math.round(numeric) - 90;
+  }
+
+  function createWindDirectionCell(degrees) {
+    var wrap = document.createElement('span');
+    wrap.className = 'wind-direction';
+    var label = document.createElement('span');
+    label.textContent = formatWindDirection(degrees);
+    wrap.appendChild(label);
+
+    var rotation = windArrowRotationDeg(degrees);
+    if (rotation !== null) {
+      var arrow = document.createElement('span');
+      arrow.className = 'wind-direction-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = WIND_DIRECTION_ARROW;
+      arrow.style.transform = 'rotate(' + rotation + 'deg)';
+      wrap.appendChild(arrow);
+    }
+    return wrap;
+  }
+
   function setHidden(el, hidden) {
     if (!el) {
       return;
@@ -100,7 +129,7 @@
         formatTemperatureF(daily.temperature_2m_min[index]),
         formatPrecipitationIn(daily.precipitation_sum[index]),
         formatWindSpeedMph(daily.wind_speed_10m_max[index]),
-        formatWindDirection(daily.wind_direction_10m_dominant[index]),
+        createWindDirectionCell(daily.wind_direction_10m_dominant[index]),
       ];
     });
   }
@@ -116,7 +145,7 @@
         formatTemperatureF(series.temperature_2m[index]),
         formatPrecipitationIn(series.precipitation[index]),
         formatWindSpeedMph(series.wind_speed_10m[index]),
-        formatWindDirection(series.wind_direction_10m[index]),
+        createWindDirectionCell(series.wind_direction_10m[index]),
       ];
     });
   }
@@ -125,9 +154,13 @@
     tbody.replaceChildren();
     rows.forEach(function (cells) {
       var tr = document.createElement('tr');
-      cells.forEach(function (text) {
+      cells.forEach(function (cell) {
         var td = document.createElement('td');
-        td.textContent = text;
+        if (cell instanceof Node) {
+          td.appendChild(cell);
+        } else {
+          td.textContent = cell;
+        }
         tr.appendChild(td);
       });
       tbody.appendChild(tr);

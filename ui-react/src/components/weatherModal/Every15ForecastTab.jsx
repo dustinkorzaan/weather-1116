@@ -1,8 +1,8 @@
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGetForecastQuery } from '../../services/weatherApi';
-import { formatWindDirection } from '../../utils/aiWeatherDisplay';
-import { degreesToCompass, formatClockTime, formatPrecipitationIn, formatTemperatureF, formatWindSpeedMph } from '../../utils/weatherGridFormat';
+import WindDirectionCell from './WindDirectionCell';
+import { formatClockTime, formatPrecipitationIn, formatTemperatureF, formatWindSpeedMph } from '../../utils/weatherGridFormat';
 
 /** Static single-use grid for the Every 15 Forecast tab — soonest first. */
 function Every15ForecastTab({ lat, lng }) {
@@ -60,7 +60,7 @@ function Every15ForecastTab({ lat, lng }) {
                   <td className="py-1.5 pr-4">{formatPrecipitationIn(row.precipitation)}</td>
                   <td className="py-1.5 pr-4">{formatWindSpeedMph(row.windSpeed)}</td>
                   <td className="py-1.5">
-                    {formatWindDirection(degreesToCompass(row.windDirection), row.windDirection)}
+                    <WindDirectionCell degrees={row.windDirection} />
                   </td>
                 </tr>
               ))}

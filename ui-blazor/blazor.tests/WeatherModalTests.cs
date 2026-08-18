@@ -56,6 +56,8 @@ public sealed class WeatherModalTests
             Assert.Contains("88.4 °F", rendered.Markup);
             Assert.Contains("0.3\"", rendered.Markup);
             Assert.Contains("SW (224°)", rendered.Markup);
+            Assert.Contains("wind-direction-arrow", rendered.Markup);
+            Assert.Contains("rotate(134deg)", rendered.Markup);
             Assert.True(
                 rendered.Markup.IndexOf("Wed, Aug 19", StringComparison.Ordinal)
                     < rendered.Markup.IndexOf("Thu, Aug 20", StringComparison.Ordinal),
