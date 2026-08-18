@@ -170,16 +170,24 @@ public sealed class WeatherModalTests
         return context;
     }
 
+    // Delays every response so tests exercise the real "fetch completes on a
+    // later render pass" path (matching an actual HTTP round-trip), instead
+    // of resolving synchronously inside LoadAsync before StateHasChanged()
+    // has a chance to matter. Without this, a missing post-fetch
+    // StateHasChanged() call would pass these tests despite leaving the UI
+    // stuck on its spinner forever in production.
     private sealed class StubWeatherHandler : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            await Task.Delay(20, cancellationToken);
+
             var path = request.RequestUri?.AbsolutePath ?? string.Empty;
             if (path.Contains("AIWeather/Current", StringComparison.OrdinalIgnoreCase))
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = JsonContent.Create(new AIWeatherResponse
                     {
@@ -192,12 +200,12 @@ public sealed class WeatherModalTests
                         Latitude = 36.1659,
                         Longitude = -86.7844,
                     }),
-                });
+                };
             }
 
             if (path.Contains("/Forecast", StringComparison.OrdinalIgnoreCase))
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = JsonContent.Create(new UIWeatherForecastResponse
                     {
@@ -233,12 +241,12 @@ public sealed class WeatherModalTests
                             WindDirectionDegrees = [190],
                         },
                     }),
-                });
+                };
             }
 
             if (path.Contains("/History", StringComparison.OrdinalIgnoreCase))
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = JsonContent.Create(new UIWeatherHistoryResponse
                     {
@@ -265,10 +273,10 @@ public sealed class WeatherModalTests
                             WindDirectionDegrees = [180, 170],
                         },
                     }),
-                });
+                };
             }
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
         }
     }
 }
