@@ -5,8 +5,8 @@ loops, to a hosted agent, behind a pin map using the following core weather
 concepts:
 
 - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
-- Lat/Long `"36.166° N, 86.784° W"` → Non-AI weather JSON
-- Non-AI weather JSON → AI Summary
+- Lat/Long `"36.166° N, 86.784° W"` → Non-AI weather JSON `{ temp: 41, wind: 7.5, ... }`
+- Non-AI weather JSON `{ temp: 41, wind: 7.5, ... }` → AI Summary
 
 | PROD | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
