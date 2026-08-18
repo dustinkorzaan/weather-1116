@@ -400,11 +400,8 @@ window.weatherMap = (function () {
 
   /**
    * Uses Blazor's client-side router (already connected on this page) instead
-   * of a full browser navigation. A full navigation would re-request /weather
-   * from the server, which prerenders the page and blocks on the AI weather
-   * fetch before the browser sees anything, then fetches it a second time
-   * once the interactive circuit reconnects. Client-side nav renders the page
-   * immediately (spinner first) and fetches once.
+   * of a full browser navigation, so the pin click reuses the live circuit
+   * rather than round-tripping through a fresh server request.
    */
   function navigateToWeather(name, lat, lng, tab) {
     const path = weatherModalPath(name, lat, lng, tab);
