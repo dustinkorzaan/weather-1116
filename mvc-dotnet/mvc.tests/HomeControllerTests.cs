@@ -214,17 +214,44 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
-    public async Task Weather_ShowsComingSoonPlaceholderForUnimplementedTabs()
+    public async Task Weather_WiresDailyForecastTabToForecastGrid()
     {
         var response = await _client.GetAsync("/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=daily-forecast");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var html = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Coming soon.", html);
-        Assert.Contains("weather-modal-coming-soon", html);
-        Assert.DoesNotContain("id=\"weatherModalRefresh\"", html);
+        Assert.Contains("Daily Forecast</h2>", html);
+        Assert.Contains("id=\"weatherModalGridRefresh\"", html);
+        Assert.Contains("id=\"weatherModalGridBody\"", html);
+        Assert.Contains("<th>Date</th>", html);
+        Assert.Contains("<th>High</th>", html);
+        Assert.Contains("<th>Low</th>", html);
+        Assert.Contains("<th>Wind Direction</th>", html);
+        Assert.Contains("weatherModalGrids.js", html);
+        Assert.Contains("endpoint: \"/Forecast\"", html);
+        Assert.Contains("resolution: \"Daily\"", html);
+        Assert.Contains("field: \"daily\"", html);
+        Assert.Contains("reverse: false", html);
         Assert.DoesNotContain("weatherModal.js", html);
+        Assert.DoesNotContain("Coming soon.", html);
+    }
+
+    [Fact]
+    public async Task Weather_WiresHourlyHistoryTabToHistoryGridReversed()
+    {
+        var response = await _client.GetAsync("/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=hourly-history");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Hourly History</h2>", html);
+        Assert.Contains("<th>Time</th>", html);
+        Assert.Contains("<th>Temp</th>", html);
+        Assert.Contains("endpoint: \"/History\"", html);
+        Assert.Contains("resolution: \"Hourly\"", html);
+        Assert.Contains("field: \"hourly\"", html);
+        Assert.Contains("reverse: true", html);
     }
 
     [Fact]
