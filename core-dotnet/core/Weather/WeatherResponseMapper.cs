@@ -36,12 +36,12 @@ public static class WeatherResponseMapper
 
         return new UIWeatherHourlySeries
         {
-            Time = source.Time,
+            Time = [.. source.Time],
             TemperatureF = source.Temperature2m.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
             PrecipitationInch = source.Precipitation.ConvertAll(WeatherUnitConversion.MillimetersToInches),
-            WeatherCode = source.WeatherCode,
+            WeatherCode = [.. source.WeatherCode],
             WindSpeedMPH = source.WindSpeed10m.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = source.WindDirection10m,
+            WindDirectionDegrees = [.. source.WindDirection10m],
         };
     }
 
@@ -54,12 +54,12 @@ public static class WeatherResponseMapper
 
         return new UIWeatherHourlySeries
         {
-            Time = source.Time,
+            Time = [.. source.Time],
             TemperatureF = source.Temperature2m.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
             PrecipitationInch = source.Precipitation.ConvertAll(WeatherUnitConversion.MillimetersToInches),
-            WeatherCode = source.WeatherCode,
+            WeatherCode = [.. source.WeatherCode],
             WindSpeedMPH = source.WindSpeed10m.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = source.WindDirection10m,
+            WindDirectionDegrees = [.. source.WindDirection10m],
         };
     }
 
@@ -72,12 +72,12 @@ public static class WeatherResponseMapper
 
         return new UIWeatherHourlySeries
         {
-            Time = source.Time,
+            Time = [.. source.Time],
             TemperatureF = source.Temperature2m.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
             PrecipitationInch = source.Precipitation.ConvertAll(WeatherUnitConversion.MillimetersToInches),
-            WeatherCode = source.WeatherCode,
+            WeatherCode = [.. source.WeatherCode],
             WindSpeedMPH = source.WindSpeed10m.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = source.WindDirection10m,
+            WindDirectionDegrees = [.. source.WindDirection10m],
         };
     }
 
@@ -90,13 +90,13 @@ public static class WeatherResponseMapper
 
         return new UIWeatherDailySeries
         {
-            Time = source.Time,
-            WeatherCode = source.WeatherCode,
+            Time = [.. source.Time],
+            WeatherCode = [.. source.WeatherCode],
             TemperatureHighF = source.Temperature2mMax.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
             TemperatureLowF = source.Temperature2mMin.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
             PrecipitationInch = source.PrecipitationSum.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WindSpeedMPH = source.WindSpeed10mMax.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = source.WindDirection10mDominant,
+            WindDirectionDegrees = [.. source.WindDirection10mDominant],
         };
     }
 
@@ -109,13 +109,13 @@ public static class WeatherResponseMapper
 
         return new UIWeatherDailySeries
         {
-            Time = source.Time,
-            WeatherCode = source.WeatherCode,
+            Time = [.. source.Time],
+            WeatherCode = [.. source.WeatherCode],
             TemperatureHighF = source.Temperature2mMax.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
             TemperatureLowF = source.Temperature2mMin.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
             PrecipitationInch = source.PrecipitationSum.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WindSpeedMPH = source.WindSpeed10mMax.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = source.WindDirection10mDominant,
+            WindDirectionDegrees = [.. source.WindDirection10mDominant],
         };
     }
 }
