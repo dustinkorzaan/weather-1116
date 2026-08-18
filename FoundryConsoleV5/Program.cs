@@ -73,9 +73,9 @@ internal class Program
 		{
 			ResponseResult response = await responseClient.CreateResponseAsync(options);
 			var content = response.GetOutputText();
-			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
+			var modelOutput = JsonSerializer.Deserialize<AIWeatherModelResponse>(content);
 
-			if (aiWeather is null)
+			if (modelOutput is null)
 			{
 				Console.WriteLine("Received empty or invalid JSON response.");
 				Console.WriteLine("Raw output:");
@@ -83,6 +83,7 @@ internal class Program
 			}
 			else
 			{
+				var aiWeather = modelOutput.ToApiResponse();
 				Console.WriteLine("\nResponse:");
 				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}

@@ -53,7 +53,6 @@ internal class Program
 		- temperatureF (number) in Fahrenheit
 		- windSpeedMPH (number) in MPH
 		- windDirectionSourceDegrees (integer): Copy current_weather.winddirection from the weather tool exactly (meteorological source direction — where the wind comes from). Normalize to 0–360 if needed. Do not add 180.
-		- windDirectionSource (string): 16-point compass label derived from windDirectionSourceDegrees. Round normalized degrees to the nearest 22.5° sector and map to one of: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (e.g. 180 → S, 224 → SW).
 		- conditions (string)
 		- latitude (number): Decimal degrees from the best geo result (positive north, negative south).
 		- longitude (number): Decimal degrees from the best geo result (positive east, negative west).
@@ -72,12 +71,11 @@ internal class Program
 		    "temperatureF": { "type": "number" },
 		    "windSpeedMPH": { "type": "number" },
 		    "windDirectionSourceDegrees": { "type": "integer" },
-		    "windDirectionSource": { "type": "string" },
 		    "conditions": { "type": "string" },
 		    "latitude": { "type": "number" },
 		    "longitude": { "type": "number" }
 		  },
-		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirectionSourceDegrees", "windDirectionSource", "conditions", "latitude", "longitude"],
+		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirectionSourceDegrees", "conditions", "latitude", "longitude"],
 		  "additionalProperties": false
 		}
 		""";
@@ -142,14 +140,15 @@ internal class Program
 			ResponseResult response = await client.CreateResponseAsync(options);
 
 			var content = response.GetOutputText();
-			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
+			var modelOutput = JsonSerializer.Deserialize<AIWeatherModelResponse>(content);
 
-			if (aiWeather is null)
+			if (modelOutput is null)
 			{
 				Console.WriteLine("Received empty or invalid JSON response.");
 			}
 			else
 			{
+				var aiWeather = modelOutput.ToApiResponse();
 				Console.WriteLine("\nResponse:");
 				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}

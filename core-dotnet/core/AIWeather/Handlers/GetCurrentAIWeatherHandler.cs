@@ -71,12 +71,11 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             - Do not ask follow-up questions or offer further assistance.
 
             # JSON Structure Properties
-            - fullSummary: One or two friendly sentences describing the current weather. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields. Do not include latitude or longitude in fullSummary. When stating wind direction, use the meteorological source compass label from windDirectionSource (where the wind comes from), optionally with source degrees in parentheses (e.g. SW (224°)). Do not add 180 to degrees.
+            - fullSummary: One or two friendly sentences describing the current weather. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields. Do not include latitude or longitude in fullSummary. When stating wind direction in prose, use a 16-point meteorological source compass label (where the wind comes from), optionally with source degrees in parentheses (e.g. SW (224°)). Do not add 180 to degrees.
             - For the place name, prefer a clean, human-friendly city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
             - temperatureF: Current temperature in Fahrenheit (convert from the weather tool).
             - windSpeedMPH: Current wind speed in miles per hour (convert from the weather tool).
             - windDirectionSourceDegrees: Copy current_weather.winddirection from the weather tool exactly (meteorological source direction — where the wind comes from). Normalize to 0–360 if needed. Do not add 180.
-            - windDirectionSource: 16-point compass label derived from windDirectionSourceDegrees. Round normalized degrees to the nearest 22.5° sector and map to one of: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (e.g. 180 → S, 224 → SW).
             - conditions: Short current conditions phrase from the weather tool.
             - latitude: Decimal degrees from the best geo result (positive north, negative south).
             - longitude: Decimal degrees from the best geo result (positive east, negative west).
@@ -159,7 +158,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             }
         } while (requiresAction);
 
-        var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(
+        var modelOutput = JsonSerializer.Deserialize<AIWeatherModelResponse>(
             content ?? throw new InvalidOperationException("Model finished without producing content."));
 
         if (modelOutput is null)
@@ -168,19 +167,14 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
         }
 
-        modelOutput.WindDirectionSourceDegrees =
-            WeatherUnitConversion.NormalizeSourceDegrees(modelOutput.WindDirectionSourceDegrees);
-        modelOutput.WindDirectionSource =
-            WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
-
-        return modelOutput;
+        return modelOutput.ToApiResponse();
     }
 
     private static string BuildAIOutputSchema()
     {
         var schema = JsonSchemaExporter.GetJsonSchemaAsNode(
             JsonSerializerOptions.Default,
-            typeof(AIWeatherResponse),
+            typeof(AIWeatherModelResponse),
             new JsonSchemaExporterOptions
             {
                 TreatNullObliviousAsNonNullable = true,
