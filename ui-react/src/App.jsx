@@ -24,6 +24,7 @@ import ChatClientsPage from './pages/ChatClientsPage';
 import CurrentAIWeatherPage from './pages/CurrentAIWeatherPage';
 import HelloWorldPage from './pages/HelloWorldPage';
 import MapPage from './pages/MapPage';
+import WeatherModalPage from './pages/WeatherModalPage';
 import { MapPinsProvider } from './map/mapPinsContext';
 import {
   useLazyGetAboutQuery,
@@ -199,6 +200,7 @@ function AppShell() {
           <Route path="/hello-world" element={<HelloWorldPage />} />
           <Route path="/current-ai-weather" element={<CurrentAIWeatherPage />} />
           <Route path="/chat-clients" element={<ChatClientsPage />} />
+          <Route path="/weather" element={<WeatherModalPage />} />
         </Routes>
       </div>
 

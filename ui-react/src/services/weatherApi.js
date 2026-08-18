@@ -33,6 +33,7 @@ export const weatherApi = createApi({
 export const {
   useGetHelloQuery,
   useLazyGetAboutQuery,
+  useGetCurrentAIWeatherQuery,
   useLazyGetCurrentAIWeatherQuery,
   useLazySearchLocationQuery,
   useLazyGetLocationQuery,

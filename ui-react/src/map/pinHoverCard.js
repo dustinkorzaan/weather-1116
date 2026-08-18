@@ -1,4 +1,4 @@
-export const PIN_HOVER_CARD_BUTTON_LABEL = 'Get Current AI Weather';
+export const PIN_HOVER_CARD_BUTTON_LABEL = 'Weather';
 export const PIN_HOVER_CARD_CLOSE_DELAY_MS = 200;
 export const PIN_HOVER_CARD_DELETE_LABEL = 'Remove from map';
 
@@ -12,10 +12,13 @@ const DELETE_ICON_SVG = `
   </svg>
 `;
 
+const SEARCH_ICON_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>';
+
 let activeCloseCard = null;
 
 /**
- * Builds the floating pin card: city name, delete, then Get Current AI Weather.
+ * Builds the floating pin card: city name, delete, then Weather.
  * @param {string} cityName
  * @returns {{ card: HTMLDivElement, button: HTMLButtonElement, deleteButton: HTMLButtonElement }}
  */
@@ -44,8 +47,8 @@ export function createPinHoverCard(cityName) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className =
-    'weather-map-pin-card-button cursor-pointer rounded-md bg-primary px-2.5 py-1.5 text-left text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/80';
-  button.textContent = PIN_HOVER_CARD_BUTTON_LABEL;
+    'weather-map-pin-card-button inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-primary px-2.5 py-1.5 text-left text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/80 [&_svg]:block';
+  button.innerHTML = `${SEARCH_ICON_SVG}<span>${PIN_HOVER_CARD_BUTTON_LABEL}</span>`;
 
   card.append(header, button);
   return { card, button, deleteButton };

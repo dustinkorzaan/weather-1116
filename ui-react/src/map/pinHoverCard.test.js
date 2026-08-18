@@ -10,7 +10,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test('pin hover card shows the city name, delete control, and Get Current AI Weather button', () => {
+test('pin hover card shows the city name, delete control, and Weather button', () => {
   const { card, button, deleteButton } = createPinHoverCard('Atlanta, GA');
 
   expect(card.className).toMatch(/flex-col/);
@@ -18,7 +18,8 @@ test('pin hover card shows the city name, delete control, and Get Current AI Wea
   expect(card.querySelector('.weather-map-pin-card-header')?.className).toMatch(/items-center/);
   expect(deleteButton.getAttribute('aria-label')).toBe('Remove Atlanta, GA from the map');
   expect(button.textContent).toBe(PIN_HOVER_CARD_BUTTON_LABEL);
-  expect(button.textContent).toBe('Get Current AI Weather');
+  expect(button.textContent).toBe('Weather');
+  expect(button.querySelector('svg')).not.toBeNull();
   expect(card.lastElementChild).toBe(button);
   expect(card.querySelector('.weather-map-pin-card-header')?.lastElementChild).toBe(deleteButton);
 });
