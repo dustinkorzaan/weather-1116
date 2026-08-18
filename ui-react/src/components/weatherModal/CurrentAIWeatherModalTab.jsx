@@ -28,7 +28,7 @@ function CurrentAIWeatherModalTab({ name, lat, lng }) {
       ? error.data.title
       : 'Unable to load AI weather.';
 
-  const windRotationDeg = windArrowRotationDeg(data?.windDirectionToDegrees);
+  const windRotationDeg = windArrowRotationDeg(data?.windDirectionTowardsDegrees);
 
   return (
     <section aria-labelledby="current-ai-weather-modal-heading">
@@ -67,7 +67,7 @@ function CurrentAIWeatherModalTab({ name, lat, lng }) {
             <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
               <dt className="font-semibold">Wind Direction</dt>
               <dd className="inline-flex items-center gap-2">
-                <span>{formatWindDirection(data.windDirection, data.windDirectionToDegrees)}</span>
+                <span>{formatWindDirection(data.windDirection, data.windDirectionTowardsDegrees)}</span>
                 {windRotationDeg != null && (
                   <span
                     aria-hidden="true"

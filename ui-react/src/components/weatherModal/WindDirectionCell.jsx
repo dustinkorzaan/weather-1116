@@ -5,7 +5,7 @@ import {
 } from '../../utils/aiWeatherDisplay';
 import { degreesToCompass } from '../../utils/weatherGridFormat';
 
-/** Compass label plus the same rotated ➤ used on Current AI Weather. */
+/** Compass label plus the same rotated ⮙ used on Current AI Weather. */
 function WindDirectionCell({ degrees }) {
   const rotationDeg = windArrowRotationDeg(degrees);
 

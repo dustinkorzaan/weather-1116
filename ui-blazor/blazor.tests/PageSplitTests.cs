@@ -95,7 +95,7 @@ public sealed class PageSplitTests
                 < pageSource.IndexOf("wind-direction-arrow", StringComparison.Ordinal),
             "Wind direction arrow should follow the compass label.");
         Assert.Contains("&#x2B99;", pageSource);
-        Assert.Contains("WindDirectionToDegrees}deg", pageSource);
+        Assert.Contains("WindDirectionTowardsDegrees}deg", pageSource);
         Assert.DoesNotContain("Temperature F", pageSource);
         Assert.DoesNotContain("Wind Speed MPH", pageSource);
         Assert.DoesNotContain("protected override async Task OnParametersSetAsync", pageSource);
@@ -360,7 +360,7 @@ public sealed class PageSplitTests
                         TemperatureF = 72,
                         WindSpeedMPH = 5,
                         WindDirection = "S",
-                        WindDirectionToDegrees = 180,
+                        WindDirectionTowardsDegrees = 180,
                         Conditions = "Clear",
                         Latitude = 36.1627,
                         Longitude = -86.7816,

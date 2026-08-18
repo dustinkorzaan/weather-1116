@@ -36,7 +36,7 @@ test('formats wind direction as compass plus degrees', () => {
   expect(formatWindDirection('', 224)).toBe('(224°)');
 });
 
-test('rotates the wind arrow by wind-to degrees', () => {
+test('rotates the wind arrow by towards-degrees', () => {
   expect(WIND_DIRECTION_ARROW).toBe('\u2B99');
   expect(windArrowRotationDeg(0)).toBe(0);
   expect(windArrowRotationDeg(90)).toBe(90);

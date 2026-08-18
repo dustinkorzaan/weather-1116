@@ -11,7 +11,7 @@ public static class WeatherGridFormat
         "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
     ];
 
-    /// <summary>Converts wind-to degrees (0° = toward north) to a 16-point compass abbreviation.</summary>
+    /// <summary>Converts towards-degrees (0° = towards north) to a 16-point compass abbreviation.</summary>
     public static string DegreesToCompass(double degrees)
     {
         var normalized = ((degrees % 360) + 360) % 360;
@@ -87,7 +87,7 @@ public static class WeatherGridFormat
     public static string FormatWindSpeedMph(double mph) =>
         string.Create(CultureInfo.InvariantCulture, $"{Math.Round(mph, 1)} mph");
 
-    /// <summary>Formats wind-to degrees as compass plus degrees, e.g. "SW (224°)".</summary>
+    /// <summary>Formats towards-degrees as compass plus degrees, e.g. "SW (224°)".</summary>
     public static string FormatWindDirection(double degrees) =>
         string.Create(CultureInfo.InvariantCulture, $"{DegreesToCompass(degrees)} ({Math.Round(degrees):0}°)");
 

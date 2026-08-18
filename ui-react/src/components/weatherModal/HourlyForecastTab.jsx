@@ -17,7 +17,7 @@ function HourlyForecastTab({ lat, lng }) {
     temperature: hourly.temperatureF[index],
     precipitation: hourly.precipitationInch[index],
     windSpeed: hourly.windSpeedMPH[index],
-    windDirection: hourly.windDirectionToDegrees[index],
+    windDirection: hourly.windDirectionTowardsDegrees[index],
   }));
 
   return (

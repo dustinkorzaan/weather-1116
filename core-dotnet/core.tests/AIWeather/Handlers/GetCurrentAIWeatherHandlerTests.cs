@@ -14,7 +14,7 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.DoesNotContain("place name, latitude, longitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("- latitude:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("- longitude:", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("- windDirectionToDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("- windDirectionTowardsDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Do not add 180", prompt, StringComparison.Ordinal);
         Assert.Contains("temperature", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("wind speed", prompt, StringComparison.OrdinalIgnoreCase);

@@ -6,7 +6,7 @@
     'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW',
   ];
 
-  /** Converts wind-to degrees (0° = toward north) to a 16-point compass abbreviation. */
+  /** Converts towards-degrees (0° = towards north) to a 16-point compass abbreviation. */
   function degreesToCompass(degrees) {
     var numeric = Number(degrees);
     if (!Number.isFinite(numeric)) {
@@ -148,7 +148,7 @@
         formatTemperatureF(daily.temperatureLowF[index]),
         formatPrecipitationIn(daily.precipitationInch[index]),
         formatWindSpeedMph(daily.windSpeedMPH[index]),
-        createWindDirectionCell(daily.windDirectionToDegrees[index]),
+        createWindDirectionCell(daily.windDirectionTowardsDegrees[index]),
       ];
     });
   }
@@ -165,7 +165,7 @@
         formatTemperatureF(series.temperatureF[index]),
         formatPrecipitationIn(series.precipitationInch[index]),
         formatWindSpeedMph(series.windSpeedMPH[index]),
-        createWindDirectionCell(series.windDirectionToDegrees[index]),
+        createWindDirectionCell(series.windDirectionTowardsDegrees[index]),
       ];
     });
   }

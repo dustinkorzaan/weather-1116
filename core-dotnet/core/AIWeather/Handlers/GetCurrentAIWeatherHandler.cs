@@ -75,7 +75,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         - temperatureF: Current temperature in Fahrenheit (convert from the weather tool).
         - windSpeedMPH: Current wind speed in miles per hour (convert from the weather tool).
         - windDirection: Compass point such as N, NE, or SW matching the weather tool's meteorological from-direction.
-        - windDirectionToDegrees: Copy the weather tool's winddirection degrees exactly (meteorological from-direction, 0–360). Do not add 180; a server-side mapper converts this to a destination heading.
+        - windDirectionTowardsDegrees: Copy the weather tool's winddirection degrees exactly (meteorological from-direction, 0–360). Do not add 180; a server-side mapper converts this to a destination heading.
         - conditions: Short current conditions phrase from the weather tool.
         - latitude: Decimal degrees from your coordinates tool (positive north, negative south).
         - longitude: Decimal degrees from your coordinates tool (positive east, negative west).
@@ -167,8 +167,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
         }
 
-        aiWeather.WindDirectionToDegrees = WeatherUnitConversion.MeteorologicalFromToWindTo(aiWeather.WindDirectionToDegrees);
-        aiWeather.WindDirection = WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionToDegrees);
+        aiWeather.WindDirectionTowardsDegrees = WeatherUnitConversion.MeteorologicalFromToWindTo(aiWeather.WindDirectionTowardsDegrees);
+        aiWeather.WindDirection = WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionTowardsDegrees);
 
         return aiWeather;
     }

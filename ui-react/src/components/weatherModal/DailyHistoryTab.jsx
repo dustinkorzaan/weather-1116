@@ -19,7 +19,7 @@ function DailyHistoryTab({ lat, lng }) {
       low: daily.temperatureLowF[index],
       precipitation: daily.precipitationInch[index],
       windSpeed: daily.windSpeedMPH[index],
-      windDirection: daily.windDirectionToDegrees[index],
+      windDirection: daily.windDirectionTowardsDegrees[index],
     }))
     .reverse();
 
