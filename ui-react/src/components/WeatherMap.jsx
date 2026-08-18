@@ -12,9 +12,10 @@ import {
 import { useMapPins } from '../map/mapPinsContext';
 import { bindPinHoverCard } from '../map/pinHoverCard';
 import { bindRightClickAddLocation } from '../map/rightClickAddLocation';
+import { Search } from 'lucide-react';
 import { useLazyGetLocationQuery } from '../services/weatherApi';
 import { THEME_CHANGE_EVENT, resolveTheme } from '../theme/theme';
-import { currentAiWeatherPath, formatLocationWithLatLong } from '../utils/currentAiWeatherLocation';
+import { DEFAULT_WEATHER_MODAL_TAB, weatherModalPath } from '../utils/weatherModalLocation';
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
@@ -221,9 +222,10 @@ function WeatherMap() {
               </div>
               <button
                 type="button"
-                className="weather-map-pin-card-button cursor-pointer rounded-md bg-primary px-2.5 py-1.5 text-left text-sm font-medium text-primary-foreground shadow-sm"
+                className="weather-map-pin-card-button inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-primary px-2.5 py-1.5 text-left text-sm font-medium text-primary-foreground shadow-sm"
               >
-                Get Current AI Weather
+                <Search className="size-4" aria-hidden="true" />
+                <span>Weather</span>
               </button>
             </div>
           </div>
@@ -254,7 +256,14 @@ function paintMarkers(maps, map, resolvedTheme, navigate, citiesRef, markersRef,
       marker: overlay,
       cityName: city.name,
       onGetWeather: () => {
-        navigate(currentAiWeatherPath(formatLocationWithLatLong(city.name, city.lat, city.lng)));
+        navigate(
+          weatherModalPath({
+            name: city.name,
+            lat: city.lat,
+            lng: city.lng,
+            tab: DEFAULT_WEATHER_MODAL_TAB,
+          })
+        );
       },
       onDelete: () => {
         removeCityRef.current(city.id);
