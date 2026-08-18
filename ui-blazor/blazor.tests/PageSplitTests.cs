@@ -94,7 +94,7 @@ public sealed class PageSplitTests
             pageSource.IndexOf("@FormatWindDirection", StringComparison.Ordinal)
                 < pageSource.IndexOf("wind-direction-arrow", StringComparison.Ordinal),
             "Wind direction arrow should follow the compass label.");
-        Assert.Contains("WindArrowRotationDeg", pageSource);
+        Assert.Contains("WindDirectionSourceDegrees", pageSource);
         Assert.Contains("&#x2B9B;", pageSource);
         Assert.DoesNotContain("Temperature F", pageSource);
         Assert.DoesNotContain("Wind Speed MPH", pageSource);

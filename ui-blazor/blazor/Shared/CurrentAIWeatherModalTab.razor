@@ -44,12 +44,9 @@
                     <div class="stat-label">Wind Direction</div>
                     <div class="wind-direction">
                         @FormatWindDirection(_aiWeather.WindDirectionSource, _aiWeather.WindDirectionSourceDegrees)
-                        @if (WeatherGridFormat.WindArrowRotationDeg(_aiWeather.WindDirectionSourceDegrees) is double rotation)
-                        {
-                            <span class="wind-direction-arrow"
-                                  aria-hidden="true"
-                                  style="@($"transform: rotate({rotation}deg)")">&#x2B9B;</span>
-                        }
+                        <span class="wind-direction-arrow"
+                              aria-hidden="true"
+                              style="@($"transform: rotate({_aiWeather.WindDirectionSourceDegrees}deg)")">&#x2B9B;</span>
                     </div>
                 </FluentGridItem>
                 <FluentGridItem xs="12" sm="6">

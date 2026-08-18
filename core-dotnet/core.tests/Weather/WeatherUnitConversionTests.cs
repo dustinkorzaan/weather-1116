@@ -25,17 +25,4 @@ public class WeatherUnitConversionTests
     {
         Assert.Equal(expected, WeatherUnitConversion.NormalizeSourceDegrees(degrees));
     }
-
-    [Fact]
-    public void WindArrowRotationDeg_UsesSourceDegreesDirectly()
-    {
-        Assert.Equal(180, WeatherUnitConversion.WindArrowRotationDeg(180));
-        Assert.Equal(224, WeatherUnitConversion.WindArrowRotationDeg(224));
-    }
-
-    [Fact]
-    public void WindArrowRotationDeg_ReturnsNullForNonFiniteDouble()
-    {
-        Assert.Null(WeatherUnitConversion.WindArrowRotationDeg(double.NaN));
-    }
 }

@@ -43,7 +43,4 @@ export function formatWindDirection(compass, degrees) {
   return label ? `${label} ${withDegrees}` : withDegrees;
 }
 
-export {
-  WIND_DIRECTION_ARROW,
-  windArrowRotationDeg,
-} from './windDirectionDisplay';
+export { WIND_DIRECTION_ARROW } from './windDirectionDisplay';

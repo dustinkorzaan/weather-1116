@@ -76,15 +76,4 @@ public static class WeatherGridFormat
     /// <summary>Formats API-provided compass plus source degrees, e.g. "SW (224°)".</summary>
     public static string FormatWindDirection(string compass, double degrees) =>
         string.Create(CultureInfo.InvariantCulture, $"{compass} ({Math.Round(degrees):0}°)");
-
-    /// <summary>CSS rotate degrees for ⮛ from meteorological source degrees; null when not finite.</summary>
-    public static double? WindArrowRotationDeg(double sourceDegrees)
-    {
-        if (double.IsNaN(sourceDegrees) || double.IsInfinity(sourceDegrees))
-        {
-            return null;
-        }
-
-        return sourceDegrees;
-    }
 }

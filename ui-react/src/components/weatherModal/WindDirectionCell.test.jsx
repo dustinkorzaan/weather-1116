@@ -10,9 +10,3 @@ test('renders compass label and rotates arrow by source degrees', () => {
   const arrow = screen.getByText(WIND_DIRECTION_ARROW);
   expect(arrow.style.transform).toBe('rotate(224deg)');
 });
-
-test('omits arrow when degrees are not finite', () => {
-  render(<WindDirectionCell compass="SW" degrees={Number.NaN} />);
-
-  expect(screen.queryByText(WIND_DIRECTION_ARROW)).toBeNull();
-});
