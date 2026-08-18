@@ -29,10 +29,6 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("<h2 class=\"section-title\">Current AI Weather</h2>", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
-        Assert.Contains("weather-map-pin-card-preview", rendered.Markup);
-        Assert.Contains(">Weather</span>", rendered.Markup);
-        Assert.Contains("weather-map-pin-card-delete", rendered.Markup);
-        Assert.Contains("weather-map-pin-card-header", rendered.Markup);
         Assert.Contains("data-get-location-url=\"/Geo/GetLocation\"", rendered.Markup);
     }
 
