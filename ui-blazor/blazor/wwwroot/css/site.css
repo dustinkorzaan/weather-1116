@@ -565,26 +565,29 @@ fluent-menu-item a {
     }
 }
 
-.coming-soon-tab {
-    display: flex;
-    min-height: 10rem;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 2rem;
-    border: 1px dashed var(--wx-border-strong);
-    border-radius: 0.5rem;
-    color: var(--neutral-foreground-hint, #616161);
-    text-align: center;
+.weather-grid-wrap {
+    overflow-x: auto;
 }
 
-.coming-soon-tab-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.weather-grid {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.875rem;
+}
+
+.weather-grid th {
+    padding: 0.4rem 1rem 0.4rem 0;
+    border-bottom: 1px solid var(--wx-border-strong);
+    color: var(--neutral-foreground-hint, #616161);
     font-weight: 600;
-    color: var(--wx-fg);
+    white-space: nowrap;
+}
+
+.weather-grid td {
+    padding: 0.4rem 1rem 0.4rem 0;
+    border-bottom: 1px solid var(--wx-border);
+    white-space: nowrap;
 }
 
 .icon-button {
