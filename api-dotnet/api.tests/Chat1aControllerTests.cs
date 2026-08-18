@@ -67,6 +67,58 @@ public class Chat1aControllerTests(ChatApiWebApplicationFactory factory) : IClas
     }
 }
 
+public class Chat3ControllerTests(ChatApiWebApplicationFactory factory) : IClassFixture<ChatApiWebApplicationFactory>
+{
+    private readonly HttpClient _client = factory.CreateClient();
+
+    [Fact]
+    public async Task PostMessage_ReturnsCamelCaseSseEvents()
+    {
+        using var response = await _client.PostAsJsonAsync(
+            "/Chat3/messages",
+            new ChatSendMessageRequest { Message = "Hi" });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/event-stream", response.Content.Headers.ContentType?.MediaType);
+
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("data: ", body, StringComparison.Ordinal);
+
+        var events = ParseSsePayloads(body);
+        Assert.Collection(
+            events,
+            sessionEvent =>
+            {
+                Assert.Equal("session", sessionEvent.GetProperty("type").GetString());
+                Assert.Equal("Chat3:test-session", sessionEvent.GetProperty("sessionId").GetString());
+            },
+            tokenEvent =>
+            {
+                Assert.Equal("token", tokenEvent.GetProperty("type").GetString());
+                Assert.Equal("Hello from Chat3", tokenEvent.GetProperty("text").GetString());
+            },
+            doneEvent => Assert.Equal("done", doneEvent.GetProperty("type").GetString()));
+    }
+
+    private static List<JsonElement> ParseSsePayloads(string body)
+    {
+        var events = new List<JsonElement>();
+
+        foreach (var block in body.Split("\n\n", StringSplitOptions.RemoveEmptyEntries))
+        {
+            var line = block.Trim();
+            if (!line.StartsWith("data:", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            events.Add(JsonDocument.Parse(line["data:".Length..].Trim()).RootElement.Clone());
+        }
+
+        return events;
+    }
+}
+
 public class ChatApiWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -78,6 +130,7 @@ public class ChatApiWebApplicationFactory : WebApplicationFactory<Program>
             services.AddSingleton<IAboutClient, WeatherApiWebApplicationFactory.StubAboutClient>();
 
             services.Replace(ServiceDescriptor.KeyedScoped<IChatClientService, StubChatClientService>("Chat1a"));
+            services.Replace(ServiceDescriptor.KeyedScoped<IChatClientService, StubChat3ClientService>("Chat3"));
         });
     }
 }
@@ -90,6 +143,18 @@ internal sealed class StubChatClientService : IChatClientService
     {
         yield return ChatStreamEvent.Session("Chat1a:test-session");
         yield return ChatStreamEvent.Token("Hello");
+        yield return ChatStreamEvent.Done();
+    }
+}
+
+internal sealed class StubChat3ClientService : IChatClientService
+{
+    public async IAsyncEnumerable<ChatStreamEvent> SendMessageAsync(
+        ChatSendMessageRequest request,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        yield return ChatStreamEvent.Session("Chat3:test-session");
+        yield return ChatStreamEvent.Token("Hello from Chat3");
         yield return ChatStreamEvent.Done();
     }
 }

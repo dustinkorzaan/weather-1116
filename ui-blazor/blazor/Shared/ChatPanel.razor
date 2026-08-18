@@ -5,7 +5,7 @@
 <div class="chat-section">
     <h2 class="section-title">Chat Clients</h2>
     <p class="muted">
-        Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
+        Five standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5).
     </p>
 
     <FluentTabs @bind-ActiveTabId="ActiveTab">
@@ -85,6 +85,7 @@
         new("Chat1b", "Chat1b", "Remote MCP · Responses API · Like Foundry Console V4"),
         new("Chat2a", "Chat2a", "In-process · Agent Framework · Like Foundry Console V3"),
         new("Chat2b", "Chat2b", "Remote MCP · Agent Framework · Like Foundry Console V4"),
+        new("Chat3", "Chat3", "Hosted Foundry agent · Like Foundry Console V5"),
     ];
 
     private readonly Dictionary<string, string?> _sessions = new()
@@ -93,6 +94,7 @@
         ["Chat1b"] = null,
         ["Chat2a"] = null,
         ["Chat2b"] = null,
+        ["Chat3"] = null,
     };
 
     private readonly Dictionary<string, List<ChatEntry>> _histories = new()
@@ -101,6 +103,7 @@
         ["Chat1b"] = [],
         ["Chat2a"] = [],
         ["Chat2b"] = [],
+        ["Chat3"] = [],
     };
 
     private string _activeTab = "Chat1a";
@@ -129,6 +132,7 @@
         ["Chat1b"] = false,
         ["Chat2a"] = false,
         ["Chat2b"] = false,
+        ["Chat3"] = false,
     };
 
     private bool IsActiveTabSending => _isSendingByTab[_activeTab];

@@ -116,6 +116,7 @@ jobs:
                 AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
                 AZURE_FOUNDRY_PROD_EUS2_KEY="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}" \
                 AZURE_FOUNDRY_PROD_EUS2_MODEL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}" \
+                AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME="${{ vars.AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME }}" \
                 MCP_SRV_FUNC_APP_KEY="${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}" \
                 MCP_SRV_APP_SERVICE_KEY="${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}" \
                 ASPNETCORE_ENVIRONMENT=Production \

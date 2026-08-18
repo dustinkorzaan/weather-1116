@@ -75,9 +75,9 @@ All three UIs expose **Current AI Weather**. The request path differs by stack:
   shared `WeatherToolDefinitions`/`WeatherToolExecutor` helpers (V3 pattern) — no
   network hop to the MCP hosts.
 
-## Chat Clients (Chat1a–Chat2b)
+## Chat Clients (Chat1a–Chat2b and Chat3)
 
-Separate from **Current AI Weather**. All three UIs expose a chat panel on `/chat-clients` with four tabs:
+Separate from **Current AI Weather**. All three UIs expose a chat panel on `/chat-clients` with five tabs:
 
 | Tab | Stack | Tools |
 | --- | --- | --- |
@@ -85,9 +85,10 @@ Separate from **Current AI Weather**. All three UIs expose a chat panel on `/cha
 | Chat1b | Responses API | Remote MCP (V4) |
 | Chat2a | Agent Framework | In-process |
 | Chat2b | Agent Framework | Remote MCP |
+| Chat3 | Hosted Foundry agent | MCP on `wx1116-agent-chat` (V5) |
 
-- **React / Blazor** → `POST /Chat1a/messages` … `/Chat2b/messages` on Weather API (SSE stream)
-- **MVC** → same routes locally via `Chat1aController` … `Chat2bController` + Core services
+- **React / Blazor** → `POST /Chat1a/messages` … `/Chat3/messages` on Weather API (SSE stream)
+- **MVC** → same routes locally via `Chat1aController` … `Chat3Controller` + Core services
 
 Full detail: [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)
 
@@ -95,9 +96,9 @@ Full detail: [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-cli
 flowchart LR
   UI[React / Blazor / MVC /chat-clients chat panel]
   API[MVC or WeatherAPI Chat controllers]
-  Core[Core.Chat1a…2b services]
-  Model[Azure OpenAI Responses]
-  Tools[In-process or MCP]
+  Core[Core.Chat1a…3 services]
+  Model[Azure OpenAI Responses or hosted Foundry agent]
+  Tools[In-process, MCP, or agent-owned MCP]
 
   UI --> API
   API --> Core
@@ -421,9 +422,15 @@ used (see [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-client
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL, e.g. `https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2` |
-| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` (project default version) |
+| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No | Defaults to `wx1116-agent-default` (project default version; JSON weather) |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Same API key as V1–V3 |
 
 Suggested reading order: V1 → V2 → V3 → `GetCurrentAIWeatherHandler` in
 `core-dotnet/core/AIWeather` (the production V3-pattern handler) → V4 → V5
-(hosted-agent contrast).
+(hosted-agent contrast) → Chat3 (`wx1116-agent-chat`).
+
+**Chat3 settings** (hosted chat agent; independent of V5):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | Yes (Chat3) | Chat3 only. GitHub variable `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` (API/MVC App Service). Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. |
