@@ -1,0 +1,167 @@
+@page "/weather"
+@using System.Globalization
+@inject NavigationManager Navigation
+
+<PageTitle>Weather Razor - @Title</PageTitle>
+
+<div class="weather-modal" role="presentation" @onclick="Close">
+    <div class="weather-dialog"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="weather-dialog-title"
+         tabindex="-1"
+         @ref="_dialogElement"
+         @onkeydown="OnKeyDown"
+         @onclick:stopPropagation="true">
+        <div class="weather-dialog-header">
+            <h2 id="weather-dialog-title" class="weather-dialog-title">@Title</h2>
+            <button type="button" class="about-close" aria-label="Close" @onclick="Close">&times;</button>
+        </div>
+
+        <FluentTabs @bind-ActiveTabId="ActiveTab" Class="weather-dialog-tabs">
+            @foreach (var tab in Tabs)
+            {
+                <FluentTab Id="@tab.Id" Label="@tab.Label"></FluentTab>
+            }
+        </FluentTabs>
+
+        <div class="weather-dialog-body">
+            @if (_activeTab == CurrentTabId)
+            {
+                <CurrentAIWeatherModalTab Location="@_locationString" />
+            }
+            else
+            {
+                <ComingSoonTab Label="@CurrentTabLabel" />
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private const string CurrentTabId = "current";
+
+    private static readonly (string Id, string Label)[] Tabs =
+    [
+        (CurrentTabId, "Current AI Weather"),
+        ("daily-forecast", "Daily Forecast"),
+        ("hourly-forecast", "Hourly Forecast"),
+        ("every-15-forecast", "Every 15 Forecast"),
+        ("daily-history", "Daily History"),
+        ("hourly-history", "Hourly History"),
+    ];
+
+    [SupplyParameterFromQuery(Name = "name")]
+    public string? NameQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "lat")]
+    public double? LatQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "lng")]
+    public double? LngQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? TabQuery { get; set; }
+
+    private ElementReference _dialogElement;
+    private string _activeTab = CurrentTabId;
+    private string _locationString = string.Empty;
+    private bool _queryHandled;
+
+    private string CurrentTabLabel => Tabs.First(tab => tab.Id == _activeTab).Label;
+
+    private string Title => _locationString.Length == 0 ? "Location" : _locationString;
+
+    private string ActiveTab
+    {
+        get => _activeTab;
+        set
+        {
+            if (_activeTab == value)
+            {
+                return;
+            }
+
+            _activeTab = value;
+            Navigation.NavigateTo(BuildPath(value), replace: true);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_queryHandled)
+        {
+            return;
+        }
+
+        _queryHandled = true;
+        var name = (NameQuery ?? string.Empty).Trim();
+        _locationString = FormatLocationWithLatLong(name, LatQuery, LngQuery);
+        _activeTab = Tabs.Any(tab => tab.Id == TabQuery) ? TabQuery! : CurrentTabId;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            await _dialogElement.FocusAsync();
+        }
+        catch
+        {
+            // Focus is a nicety for Escape-to-close; ignore where unsupported (prerender/tests).
+        }
+    }
+
+    private void OnKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Escape")
+        {
+            Close();
+        }
+    }
+
+    private void Close() => Navigation.NavigateTo("/");
+
+    private string BuildPath(string tab)
+    {
+        var query = new List<string>();
+        if (!string.IsNullOrWhiteSpace(NameQuery))
+        {
+            query.Add($"name={Uri.EscapeDataString(NameQuery)}");
+        }
+
+        if (LatQuery is not null)
+        {
+            query.Add($"lat={Uri.EscapeDataString(LatQuery.Value.ToString(CultureInfo.InvariantCulture))}");
+        }
+
+        if (LngQuery is not null)
+        {
+            query.Add($"lng={Uri.EscapeDataString(LngQuery.Value.ToString(CultureInfo.InvariantCulture))}");
+        }
+
+        query.Add($"tab={Uri.EscapeDataString(tab)}");
+        return $"/weather?{string.Join('&', query)}";
+    }
+
+    private static string FormatLocationWithLatLong(string name, double? lat, double? lng)
+    {
+        if (name.Length == 0 || lat is null || lng is null)
+        {
+            return name;
+        }
+
+        return $"{name} ({FormatHemisphereDegrees(lat.Value, "N", "S")}, {FormatHemisphereDegrees(lng.Value, "E", "W")})";
+    }
+
+    private static string FormatHemisphereDegrees(double value, string positiveLabel, string negativeLabel)
+    {
+        var hemisphere = value >= 0 ? positiveLabel : negativeLabel;
+        return string.Create(CultureInfo.InvariantCulture, $"{Math.Abs(value):0.0000}° {hemisphere}");
+    }
+}
