@@ -5,7 +5,7 @@ in-process looping, to remote MCP, to a hosted agent, behind a pin map using
 the following core weather concepts:
 
 - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
-- Lat/Long → Non-AI Weather `{ temp: 75, conditions: "partly cloudy", ... }`
+- Lat/Long → Non-AI Weather `{ temp: 24, ... }`
 - Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
 
 ## Microsoft reference

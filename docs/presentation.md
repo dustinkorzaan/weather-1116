@@ -30,7 +30,7 @@ and the Foundry console learning path (V1 → V5).
 
 1. **Problem** — AI weather needs real lat/long and public weather data, not hallucination.
    - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
-   - Lat/Long → Non-AI Weather `{ temp: 75, conditions: "partly cloudy", ... }`
+   - Lat/Long → Non-AI Weather `{ temp: 24, ... }`
    - Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
    - `GetLatLongEvent(location)` returns ranked lat/long matches (default 5; V1/V2 use top 1)
    - `GetPublicWeatherCurrentEvent(Lat/Long)` returns Non-AI Weather
