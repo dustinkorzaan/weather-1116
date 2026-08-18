@@ -7,13 +7,26 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CurrentAIWeatherModalTab from '../components/weatherModal/CurrentAIWeatherModalTab';
-import ComingSoonTab from '../components/weatherModal/ComingSoonTab';
+import DailyForecastTab from '../components/weatherModal/DailyForecastTab';
+import HourlyForecastTab from '../components/weatherModal/HourlyForecastTab';
+import Every15ForecastTab from '../components/weatherModal/Every15ForecastTab';
+import DailyHistoryTab from '../components/weatherModal/DailyHistoryTab';
+import HourlyHistoryTab from '../components/weatherModal/HourlyHistoryTab';
 import { WEATHER_MODAL_TAB_CONFIG } from '../components/weatherModal/weatherModalTabs';
 import { formatLocationWithLatLong } from '../utils/currentAiWeatherLocation';
 import {
   weatherModalParamsFromSearchParams,
   weatherModalPath,
 } from '../utils/weatherModalLocation';
+
+const TAB_COMPONENTS = {
+  current: CurrentAIWeatherModalTab,
+  'daily-forecast': DailyForecastTab,
+  'hourly-forecast': HourlyForecastTab,
+  'every-15-forecast': Every15ForecastTab,
+  'daily-history': DailyHistoryTab,
+  'hourly-history': HourlyHistoryTab,
+};
 
 function WeatherModalPage() {
   const navigate = useNavigate();
@@ -47,15 +60,14 @@ function WeatherModalPage() {
             ))}
           </TabsList>
           <div className="min-h-0 flex-1 overflow-y-auto pt-3">
-            {WEATHER_MODAL_TAB_CONFIG.map(({ value, label, icon }) => (
-              <TabsContent key={value} value={value}>
-                {value === 'current' ? (
-                  <CurrentAIWeatherModalTab name={name} lat={lat} lng={lng} />
-                ) : (
-                  <ComingSoonTab label={label} icon={icon} />
-                )}
-              </TabsContent>
-            ))}
+            {WEATHER_MODAL_TAB_CONFIG.map(({ value }) => {
+              const TabComponent = TAB_COMPONENTS[value];
+              return (
+                <TabsContent key={value} value={value}>
+                  <TabComponent name={name} lat={lat} lng={lng} />
+                </TabsContent>
+              );
+            })}
           </div>
         </Tabs>
       </DialogContent>

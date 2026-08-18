@@ -14,19 +14,21 @@ export function formatLatLong(lat, lng) {
 }
 
 export function formatTemperatureF(value) {
-  if (!Number.isFinite(Number(value))) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${value} \u00B0F`;
+  return `${Math.round(numeric * 10) / 10} \u00B0F`;
 }
 
 export function formatWindSpeedMph(value) {
-  if (!Number.isFinite(Number(value))) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${value} mph`;
+  return `${Math.round(numeric * 10) / 10} mph`;
 }
 
 /** Formats compass plus meteorological degrees as "SW (224°)". */
