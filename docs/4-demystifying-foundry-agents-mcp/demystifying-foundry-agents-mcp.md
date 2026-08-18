@@ -76,7 +76,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 - **V3 — Local in-process looping** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
   (`FoundryConsoleV3InProcessToolCallbacks.csproj`)
   - Registers `GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as tools
-    answered by local in-process looping (same tools `Core` exposes).
+    answered by local in-process looping (same Core code reused in tool).
   - Model chooses tools that are actually handled locally; no remote MCP servers yet.
 
   **Simple Diagram without Agent/Loop**

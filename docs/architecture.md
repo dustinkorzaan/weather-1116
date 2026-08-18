@@ -383,7 +383,7 @@ blocks**, not production deployables:
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same tools `Core` exposes |
+| **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same Core code reused in tool |
 | **V4** | Model-direct: tools handled by remote MCP servers — same pattern as API/MVC production |
 | **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
