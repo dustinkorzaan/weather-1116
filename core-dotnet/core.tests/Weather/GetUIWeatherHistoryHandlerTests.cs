@@ -21,7 +21,7 @@ public class GetUIWeatherHistoryHandlerTests
                 Temperature2m = [24],
                 Precipitation = [25.4],
                 WindSpeed10m = [10],
-                WindDirection10m = [180],
+                WindDirectionSource10m = [180],
                 WeatherCode = [1],
             },
         };

@@ -42,7 +42,7 @@ public class GetPublicWeatherHistoryHandlerTests
         Assert.Empty(response.Hourly.Precipitation);
         Assert.Empty(response.Hourly.WeatherCode);
         Assert.Empty(response.Hourly.WindSpeed10m);
-        Assert.Empty(response.Hourly.WindDirection10m);
+        Assert.Empty(response.Hourly.WindDirectionSource10m);
     }
 
     [Fact]

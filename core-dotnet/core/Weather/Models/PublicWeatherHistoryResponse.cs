@@ -56,7 +56,7 @@ public class PublicWeatherHistoryHourlyUnits
     public string WindSpeed10m { get; set; } = string.Empty;
 
     [JsonPropertyName("wind_direction_10m")]
-    public string WindDirection10m { get; set; } = string.Empty;
+    public string WindDirectionSource10m { get; set; } = string.Empty;
 }
 
 public class PublicWeatherHistoryHourly
@@ -77,7 +77,7 @@ public class PublicWeatherHistoryHourly
     public List<double> WindSpeed10m { get; set; } = [];
 
     [JsonPropertyName("wind_direction_10m")]
-    public List<int> WindDirection10m { get; set; } = [];
+    public List<int> WindDirectionSource10m { get; set; } = [];
 }
 
 public class PublicWeatherHistoryDailyUnits
@@ -101,7 +101,7 @@ public class PublicWeatherHistoryDailyUnits
     public string WindSpeed10mMax { get; set; } = string.Empty;
 
     [JsonPropertyName("wind_direction_10m_dominant")]
-    public string WindDirection10mDominant { get; set; } = string.Empty;
+    public string WindDirectionSource10mDominant { get; set; } = string.Empty;
 }
 
 public class PublicWeatherHistoryDaily
@@ -125,5 +125,5 @@ public class PublicWeatherHistoryDaily
     public List<double> WindSpeed10mMax { get; set; } = [];
 
     [JsonPropertyName("wind_direction_10m_dominant")]
-    public List<int> WindDirection10mDominant { get; set; } = [];
+    public List<int> WindDirectionSource10mDominant { get; set; } = [];
 }

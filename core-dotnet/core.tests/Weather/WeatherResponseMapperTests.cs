@@ -21,7 +21,7 @@ public class WeatherResponseMapperTests
                 Temperature2mMin = [0],
                 PrecipitationSum = [25.4],
                 WindSpeed10mMax = [10],
-                WindDirection10mDominant = [224],
+                WindDirectionSource10mDominant = [224],
             },
             Hourly = new PublicWeatherForecastHourly
             {
@@ -30,7 +30,7 @@ public class WeatherResponseMapperTests
                 Precipitation = [25.4],
                 WeatherCode = [1],
                 WindSpeed10m = [10],
-                WindDirection10m = [180],
+                WindDirectionSource10m = [180],
             },
             Minutely15 = new PublicWeatherForecastMinutely15
             {
@@ -39,7 +39,7 @@ public class WeatherResponseMapperTests
                 Precipitation = [7.62],
                 WeatherCode = [3],
                 WindSpeed10m = [10],
-                WindDirection10m = [90],
+                WindDirectionSource10m = [90],
             },
         };
 
@@ -96,7 +96,7 @@ public class WeatherResponseMapperTests
                 Temperature2mMin = [0],
                 PrecipitationSum = [25.4],
                 WindSpeed10mMax = [10],
-                WindDirection10mDominant = [224],
+                WindDirectionSource10mDominant = [224],
             },
             Hourly = new PublicWeatherHistoryHourly
             {
@@ -105,7 +105,7 @@ public class WeatherResponseMapperTests
                 Precipitation = [25.4],
                 WeatherCode = [1],
                 WindSpeed10m = [10],
-                WindDirection10m = [180],
+                WindDirectionSource10m = [180],
             },
         };
 

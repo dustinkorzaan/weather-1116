@@ -17,7 +17,7 @@ public class NonAICurrentWeather
     public double WindSpeed { get; set; }
 
     [JsonPropertyName("winddirection")]
-    public int WindDirection { get; set; }
+    public int WindDirectionSourceDegrees { get; set; }
 
     [JsonPropertyName("is_day")]
     public int IsDay { get; set; }

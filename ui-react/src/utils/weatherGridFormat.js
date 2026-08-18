@@ -3,7 +3,7 @@ const COMPASS_POINTS = [
   'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW',
 ];
 
-/** Converts towards-degrees (0° = towards north) to a 16-point compass abbreviation. */
+/** Converts meteorological source degrees (0° = north is the wind source) to a 16-point compass abbreviation. */
 export function degreesToCompass(degrees) {
   const numeric = Number(degrees);
   if (!Number.isFinite(numeric)) {

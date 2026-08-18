@@ -62,7 +62,7 @@ public class PublicWeatherForecastHourlyUnits
     public string WindSpeed10m { get; set; } = string.Empty;
 
     [JsonPropertyName("wind_direction_10m")]
-    public string WindDirection10m { get; set; } = string.Empty;
+    public string WindDirectionSource10m { get; set; } = string.Empty;
 }
 
 public class PublicWeatherForecastHourly
@@ -83,7 +83,7 @@ public class PublicWeatherForecastHourly
     public List<double> WindSpeed10m { get; set; } = [];
 
     [JsonPropertyName("wind_direction_10m")]
-    public List<int> WindDirection10m { get; set; } = [];
+    public List<int> WindDirectionSource10m { get; set; } = [];
 }
 
 public class PublicWeatherForecastDailyUnits
@@ -107,7 +107,7 @@ public class PublicWeatherForecastDailyUnits
     public string WindSpeed10mMax { get; set; } = string.Empty;
 
     [JsonPropertyName("wind_direction_10m_dominant")]
-    public string WindDirection10mDominant { get; set; } = string.Empty;
+    public string WindDirectionSource10mDominant { get; set; } = string.Empty;
 }
 
 public class PublicWeatherForecastDaily
@@ -131,7 +131,7 @@ public class PublicWeatherForecastDaily
     public List<double> WindSpeed10mMax { get; set; } = [];
 
     [JsonPropertyName("wind_direction_10m_dominant")]
-    public List<int> WindDirection10mDominant { get; set; } = [];
+    public List<int> WindDirectionSource10mDominant { get; set; } = [];
 }
 
 public class PublicWeatherForecastMinutely15Units
@@ -152,7 +152,7 @@ public class PublicWeatherForecastMinutely15Units
     public string WindSpeed10m { get; set; } = string.Empty;
 
     [JsonPropertyName("wind_direction_10m")]
-    public string WindDirection10m { get; set; } = string.Empty;
+    public string WindDirectionSource10m { get; set; } = string.Empty;
 }
 
 public class PublicWeatherForecastMinutely15
@@ -173,5 +173,5 @@ public class PublicWeatherForecastMinutely15
     public List<double> WindSpeed10m { get; set; } = [];
 
     [JsonPropertyName("wind_direction_10m")]
-    public List<int> WindDirection10m { get; set; } = [];
+    public List<int> WindDirectionSource10m { get; set; } = [];
 }

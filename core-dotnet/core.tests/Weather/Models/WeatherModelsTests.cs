@@ -53,12 +53,13 @@ public class WeatherModelsTests
 
         Assert.Equal("°C", result.CurrentWeatherUnits.Temperature);
         Assert.Equal("km/h", result.CurrentWeatherUnits.WindSpeed);
+        Assert.Equal("°", result.CurrentWeatherUnits.WindDirectionSourceDegrees);
 
         Assert.Equal("2024-01-02T03:00", result.CurrentWeather.Time);
         Assert.Equal(900, result.CurrentWeather.Interval);
         Assert.Equal(41.2, result.CurrentWeather.Temperature);
         Assert.Equal(7.5, result.CurrentWeather.WindSpeed);
-        Assert.Equal(200, result.CurrentWeather.WindDirection);
+        Assert.Equal(200, result.CurrentWeather.WindDirectionSourceDegrees);
         Assert.Equal(1, result.CurrentWeather.IsDay);
         Assert.Equal(3, result.CurrentWeather.WeatherCode);
     }
@@ -157,6 +158,6 @@ public class WeatherModelsTests
         Assert.NotNull(result.Hourly);
         Assert.Equal(["2026-08-16T00:00", "2026-08-16T01:00"], result.Hourly!.Time);
         Assert.Equal([72.1, 71.5], result.Hourly.Temperature2m);
-        Assert.Equal([180, 190], result.Hourly.WindDirection10m);
+        Assert.Equal([180, 190], result.Hourly.WindDirectionSource10m);
     }
 }

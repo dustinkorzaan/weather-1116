@@ -44,7 +44,7 @@ public class GetPublicWeatherForecastHandlerTests
         Assert.Empty(response.Daily.Temperature2mMin);
         Assert.Empty(response.Daily.PrecipitationSum);
         Assert.Empty(response.Daily.WindSpeed10mMax);
-        Assert.Empty(response.Daily.WindDirection10mDominant);
+        Assert.Empty(response.Daily.WindDirectionSource10mDominant);
     }
 
     [Fact]

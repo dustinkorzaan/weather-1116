@@ -22,7 +22,7 @@ public class GetUIWeatherForecastHandlerTests
                 Temperature2mMin = [0],
                 PrecipitationSum = [25.4],
                 WindSpeed10mMax = [10],
-                WindDirection10mDominant = [224],
+                WindDirectionSource10mDominant = [224],
                 WeatherCode = [2],
             },
         };

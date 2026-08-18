@@ -17,7 +17,7 @@ public class NonAICurrentWeatherUnits
     public string WindSpeed { get; set; } = string.Empty;
 
     [JsonPropertyName("winddirection")]
-    public string WindDirection { get; set; } = string.Empty;
+    public string WindDirectionSourceDegrees { get; set; } = string.Empty;
 
     [JsonPropertyName("is_day")]
     public string IsDay { get; set; } = string.Empty;

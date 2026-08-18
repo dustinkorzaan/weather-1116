@@ -70,7 +70,7 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
             hourly.Precipitation ??= [];
             hourly.WeatherCode ??= [];
             hourly.WindSpeed10m ??= [];
-            hourly.WindDirection10m ??= [];
+            hourly.WindDirectionSource10m ??= [];
             ClampNegativeToZero(hourly.Precipitation);
         }
 
@@ -82,7 +82,7 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
             daily.Temperature2mMin ??= [];
             daily.PrecipitationSum ??= [];
             daily.WindSpeed10mMax ??= [];
-            daily.WindDirection10mDominant ??= [];
+            daily.WindDirectionSource10mDominant ??= [];
             ClampNegativeToZero(daily.PrecipitationSum);
         }
     }
