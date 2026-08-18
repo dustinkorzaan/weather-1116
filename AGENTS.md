@@ -2,9 +2,10 @@
 
 ## Cursor Cloud specific instructions
 
-This repo is one Weather sample implemented as six .NET/JS projects (see
-`README.md` and `docs/architecture.md`). Five are runnable apps plus one shared
-`Core` class library.
+This repo is one Weather sample implemented across seven runnable stacks plus
+one shared `Core` class library (see `README.md` and `docs/architecture.md`).
+The five primary apps are React UI, Blazor UI, MVC UI, API, and Worker; the
+other two runnable stacks are the MCP hosts (App Service and Function App).
 
 ## Git / PR policy
 
@@ -43,7 +44,7 @@ hot reload); React uses `npm start`. Ports come from each project's
 | React UI | `ui-react` | `npm start` | 3000 |
 | Worker DotNet | `worker-dotnet/worker` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8130 |
 | MCP Server on App Service | `mcp-srv-app-service/mcp` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8110 |
-| MCP Server on Functions App | `mcp-srv-func-app/mcp` | `func start` from `mcp-srv-func-app/mcp` (or VS Code **WeatherMcpSrvFuncApp**) | 8120 |
+| MCP Server on Function App | `mcp-srv-func-app/mcp` | `func start` from `mcp-srv-func-app/mcp` (or VS Code **WeatherMcpSrvFuncApp**) | 8120 |
 
 ### Non-obvious caveats
 
