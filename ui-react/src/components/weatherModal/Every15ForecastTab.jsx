@@ -1,8 +1,8 @@
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGetForecastQuery } from '../../services/weatherApi';
-import { formatTemperatureF, formatWindDirection, formatWindSpeedMph } from '../../utils/aiWeatherDisplay';
-import { degreesToCompass, formatClockTime, formatPrecipitationIn } from '../../utils/weatherGridFormat';
+import { formatWindDirection } from '../../utils/aiWeatherDisplay';
+import { degreesToCompass, formatClockTime, formatPrecipitationMm, formatTemperatureC, formatWindSpeedKmh } from '../../utils/weatherGridFormat';
 
 /** Static single-use grid for the Every 15 Forecast tab — soonest first. */
 function Every15ForecastTab({ lat, lng }) {
@@ -56,9 +56,9 @@ function Every15ForecastTab({ lat, lng }) {
               {rows.map((row) => (
                 <tr key={row.time} className="border-b border-border/50">
                   <td className="py-1.5 pr-4">{formatClockTime(row.time)}</td>
-                  <td className="py-1.5 pr-4">{formatTemperatureF(row.temperature)}</td>
-                  <td className="py-1.5 pr-4">{formatPrecipitationIn(row.precipitation)}</td>
-                  <td className="py-1.5 pr-4">{formatWindSpeedMph(row.windSpeed)}</td>
+                  <td className="py-1.5 pr-4">{formatTemperatureC(row.temperature)}</td>
+                  <td className="py-1.5 pr-4">{formatPrecipitationMm(row.precipitation)}</td>
+                  <td className="py-1.5 pr-4">{formatWindSpeedKmh(row.windSpeed)}</td>
                   <td className="py-1.5">
                     {formatWindDirection(degreesToCompass(row.windDirection), row.windDirection)}
                   </td>

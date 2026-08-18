@@ -34,21 +34,21 @@ public sealed class WeatherGridFormatTests
     }
 
     [Fact]
-    public void FormatPrecipitationIn_RoundsAwayFloatingPointNoise()
+    public void FormatPrecipitationMm_RoundsAwayFloatingPointNoise()
     {
-        Assert.Equal("0.3\"", WeatherGridFormat.FormatPrecipitationIn(0.30000000000000004));
+        Assert.Equal("0.3 mm", WeatherGridFormat.FormatPrecipitationMm(0.30000000000000004));
     }
 
     [Fact]
-    public void FormatTemperatureF_RoundsToOneDecimal()
+    public void FormatTemperatureC_RoundsToOneDecimal()
     {
-        Assert.Equal("88.4 °F", WeatherGridFormat.FormatTemperatureF(88.44));
+        Assert.Equal("88.4 °C", WeatherGridFormat.FormatTemperatureC(88.44));
     }
 
     [Fact]
-    public void FormatWindSpeedMph_RoundsToOneDecimal()
+    public void FormatWindSpeedKmh_RoundsToOneDecimal()
     {
-        Assert.Equal("12.3 mph", WeatherGridFormat.FormatWindSpeedMph(12.34));
+        Assert.Equal("12.3 km/h", WeatherGridFormat.FormatWindSpeedKmh(12.34));
     }
 
     [Fact]

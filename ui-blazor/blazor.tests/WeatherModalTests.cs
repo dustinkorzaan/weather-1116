@@ -53,8 +53,8 @@ public sealed class WeatherModalTests
             Assert.Contains("daily-forecast-heading", rendered.Markup);
             Assert.Contains("High</th>", rendered.Markup);
             Assert.Contains("Wind Direction</th>", rendered.Markup);
-            Assert.Contains("88.4 °F", rendered.Markup);
-            Assert.Contains("0.3\"", rendered.Markup);
+            Assert.Contains("88.4 °C", rendered.Markup);
+            Assert.Contains("0.3 mm", rendered.Markup);
             Assert.Contains("SW (224°)", rendered.Markup);
             Assert.True(
                 rendered.Markup.IndexOf("Wed, Aug 19", StringComparison.Ordinal)
@@ -95,7 +95,7 @@ public sealed class WeatherModalTests
         {
             Assert.Contains("hourly-forecast-heading", rendered.Markup);
             Assert.Contains("Wed, Aug 19, 2 PM", rendered.Markup);
-            Assert.Contains("86.5 °F", rendered.Markup);
+            Assert.Contains("86.5 °C", rendered.Markup);
         });
     }
 

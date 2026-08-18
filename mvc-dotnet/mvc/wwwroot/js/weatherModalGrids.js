@@ -40,28 +40,28 @@
     return datePart + ', ' + timePart;
   }
 
-  function formatTemperatureF(value) {
+  function formatTemperatureC(value) {
     var numeric = Number(value);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 10) / 10) + ' °F';
+    return (Math.round(numeric * 10) / 10) + ' °C';
   }
 
-  function formatWindSpeedMph(value) {
+  function formatWindSpeedKmh(value) {
     var numeric = Number(value);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 10) / 10) + ' mph';
+    return (Math.round(numeric * 10) / 10) + ' km/h';
   }
 
-  function formatPrecipitationIn(value) {
+  function formatPrecipitationMm(value) {
     var numeric = Number(value);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 100) / 100) + '"';
+    return (Math.round(numeric * 100) / 100) + ' mm';
   }
 
   function formatWindDirection(degrees) {
@@ -93,10 +93,10 @@
     return daily.time.map(function (time, index) {
       return [
         formatCalendarDate(time),
-        formatTemperatureF(daily.temperature_2m_max[index]),
-        formatTemperatureF(daily.temperature_2m_min[index]),
-        formatPrecipitationIn(daily.precipitation_sum[index]),
-        formatWindSpeedMph(daily.wind_speed_10m_max[index]),
+        formatTemperatureC(daily.temperature_2m_max[index]),
+        formatTemperatureC(daily.temperature_2m_min[index]),
+        formatPrecipitationMm(daily.precipitation_sum[index]),
+        formatWindSpeedKmh(daily.wind_speed_10m_max[index]),
         formatWindDirection(daily.wind_direction_10m_dominant[index]),
       ];
     });
@@ -110,9 +110,9 @@
     return series.time.map(function (time, index) {
       return [
         formatClockTime(time),
-        formatTemperatureF(series.temperature_2m[index]),
-        formatPrecipitationIn(series.precipitation[index]),
-        formatWindSpeedMph(series.wind_speed_10m[index]),
+        formatTemperatureC(series.temperature_2m[index]),
+        formatPrecipitationMm(series.precipitation[index]),
+        formatWindSpeedKmh(series.wind_speed_10m[index]),
         formatWindDirection(series.wind_direction_10m[index]),
       ];
     });

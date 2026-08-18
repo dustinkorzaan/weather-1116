@@ -40,11 +40,29 @@ export function formatClockTime(isoDateTime) {
   return `${datePart}, ${timePart}`;
 }
 
-export function formatPrecipitationIn(value) {
+export function formatPrecipitationMm(value) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${Math.round(numeric * 100) / 100}"`;
+  return `${Math.round(numeric * 100) / 100} mm`;
+}
+
+export function formatTemperatureC(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return '';
+  }
+
+  return `${Math.round(numeric * 10) / 10} \u00B0C`;
+}
+
+export function formatWindSpeedKmh(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return '';
+  }
+
+  return `${Math.round(numeric * 10) / 10} km/h`;
 }

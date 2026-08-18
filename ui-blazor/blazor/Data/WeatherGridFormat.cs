@@ -46,14 +46,14 @@ public static class WeatherGridFormat
         return $"{datePart}, {timePart}";
     }
 
-    public static string FormatPrecipitationIn(double value) =>
-        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(value, 2)}\"");
+    public static string FormatPrecipitationMm(double value) =>
+        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(value, 2)} mm");
 
-    public static string FormatTemperatureF(double value) =>
-        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(value, 1)} °F");
+    public static string FormatTemperatureC(double value) =>
+        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(value, 1)} °C");
 
-    public static string FormatWindSpeedMph(double value) =>
-        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(value, 1)} mph");
+    public static string FormatWindSpeedKmh(double value) =>
+        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(value, 1)} km/h");
 
     /// <summary>Formats meteorological degrees as compass plus degrees, e.g. "SW (224°)".</summary>
     public static string FormatWindDirection(double degrees) =>
