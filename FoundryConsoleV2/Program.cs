@@ -192,7 +192,7 @@ internal class Program
 		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
-		Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not use C, KPH, or MM.
+		Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
 		GitHub-flavored Markdown is allowed when it makes the answer easier to read. Do not emit raw HTML.
 		Use one or two friendly sentences of the current weather and include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts even if they also appear in JSON.
 		""";
@@ -273,7 +273,7 @@ internal class Program
 		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
-		Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not use C, KPH, or MM.
+		Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
 
 		Return valid JSON with these fields:
 		- fullSummary (string) (one or two friendly sentences of the current weather including place name, temperature, wind speed, wind direction, and overall conditions — keep those facts even though some are also JSON fields; GitHub-flavored Markdown is allowed when it helps readability)
