@@ -11,8 +11,8 @@ in-process looping, to remote MCP, to a hosted agent, behind a pin map.
 |  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
 |  | Core | [`core-dotnet/core`](core-dotnet/core) | In API, MVC, worker, and MCP |  |
 |  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |
-|  | MCP Server on App Svc | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
-|  | MCP Server on Func App | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |
+|  | MCP Server (App Service) | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
+|  | MCP Server (Function App) | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |
 
 This README is intentionally brief. Use it for the project grid and demo
 outline. UI pages, styling stacks, theme, architecture constraints, project
