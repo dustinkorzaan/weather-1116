@@ -76,4 +76,22 @@ public sealed class WeatherGridFormatTests
         Assert.Equal("SW (224°)", WeatherGridFormat.FormatWindDirection(224));
     }
 
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(90, 90)]
+    [InlineData(180, 180)]
+    [InlineData(224, 224)]
+    [InlineData(270, 270)]
+    public void WindArrowRotationDeg_UsesSourceDegreesDirectly(double sourceDegrees, double expected)
+    {
+        Assert.Equal(expected, WeatherGridFormat.WindArrowRotationDeg(sourceDegrees));
+    }
+
+    [Fact]
+    public void WindArrowRotationDeg_ReturnsNullForNonFiniteValues()
+    {
+        Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.NaN));
+        Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.PositiveInfinity));
+        Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.NegativeInfinity));
+    }
 }

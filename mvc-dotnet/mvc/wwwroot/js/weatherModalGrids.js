@@ -98,6 +98,11 @@
 
   var WIND_DIRECTION_ARROW = '\u2B9B';
 
+  function windArrowRotationDeg(sourceDegrees) {
+    var numeric = Number(sourceDegrees);
+    return Number.isFinite(numeric) ? numeric : null;
+  }
+
   function createWindDirectionCell(degrees) {
     var wrap = document.createElement('span');
     wrap.className = 'wind-direction';
@@ -105,8 +110,7 @@
     label.textContent = formatWindDirection(degrees);
     wrap.appendChild(label);
 
-    var numeric = Number(degrees);
-    var rotation = Number.isFinite(numeric) ? numeric : null;
+    var rotation = windArrowRotationDeg(degrees);
     if (rotation !== null) {
       var arrow = document.createElement('span');
       arrow.className = 'wind-direction-arrow';

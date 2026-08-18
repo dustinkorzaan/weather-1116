@@ -53,6 +53,11 @@
 
   var WIND_DIRECTION_ARROW = '\u2B9B';
 
+  function windArrowRotationDeg(sourceDegrees) {
+    var numeric = Number(sourceDegrees);
+    return Number.isFinite(numeric) ? numeric : null;
+  }
+
   function renderWindDirection(el, compass, degrees) {
     if (!el) {
       return;
@@ -63,8 +68,7 @@
     label.textContent = formatWindDirection(compass, degrees);
     el.appendChild(label);
 
-    var numeric = Number(degrees);
-    var rotation = Number.isFinite(numeric) ? numeric : null;
+    var rotation = windArrowRotationDeg(degrees);
     if (rotation !== null) {
       var arrow = document.createElement('span');
       arrow.className = 'wind-direction-arrow';

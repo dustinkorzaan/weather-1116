@@ -2,11 +2,11 @@
 
 <div class="wind-direction">
     @WeatherGridFormat.FormatWindDirection(Degrees)
-    @if (!double.IsNaN(Degrees) && !double.IsInfinity(Degrees))
+    @if (WeatherGridFormat.WindArrowRotationDeg(Degrees) is double rotation)
     {
         <span class="wind-direction-arrow"
               aria-hidden="true"
-              style="@($"transform: rotate({Degrees}deg)")">&#x2B9B;</span>
+              style="@($"transform: rotate({rotation}deg)")">&#x2B9B;</span>
     }
 </div>
 

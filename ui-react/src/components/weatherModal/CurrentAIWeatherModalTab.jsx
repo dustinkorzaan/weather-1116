@@ -8,6 +8,7 @@ import {
   formatWindDirection,
   formatWindSpeedMph,
   WIND_DIRECTION_ARROW,
+  windArrowRotationDeg,
 } from '../../utils/aiWeatherDisplay';
 import { formatLocationWithLatLong } from '../../utils/currentAiWeatherLocation';
 
@@ -27,9 +28,7 @@ function CurrentAIWeatherModalTab({ name, lat, lng }) {
       ? error.data.title
       : 'Unable to load AI weather.';
 
-  const windRotationDeg = Number.isFinite(Number(data?.windDirectionSourceDegrees))
-    ? Number(data.windDirectionSourceDegrees)
-    : null;
+  const windRotationDeg = windArrowRotationDeg(data?.windDirectionSourceDegrees);
 
   return (
     <section aria-labelledby="current-ai-weather-modal-heading">
