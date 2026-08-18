@@ -18,8 +18,8 @@ pattern) plus the hosted-agent learning demo in Foundry Console V5.
 
 | # | Project | Path | Stack | Role |
 | - | --- | --- | --- | --- |
-| 1 | Blazor UI | [`ui-blazor/blazor`](../ui-blazor/blazor) | Blazor | Interactive server-rendered UI in C# |
-| 2 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
+| 1 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
+| 2 | Blazor UI | [`ui-blazor/blazor`](../ui-blazor/blazor) | Blazor | Interactive server-rendered UI in C# |
 | 3 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
 | 4 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
 | 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire dashboard and servers | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
