@@ -11,7 +11,7 @@ public static class WeatherGridFormat
         "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
     ];
 
-    /// <summary>Converts towards-degrees (0° = towards north) to a 16-point compass abbreviation.</summary>
+    /// <summary>Converts meteorological from-degrees (0° = from the north) to a 16-point compass abbreviation.</summary>
     public static string DegreesToCompass(double degrees)
     {
         var normalized = ((degrees % 360) + 360) % 360;
@@ -87,20 +87,21 @@ public static class WeatherGridFormat
     public static string FormatWindSpeedMph(double mph) =>
         string.Create(CultureInfo.InvariantCulture, $"{Math.Round(mph, 1)} mph");
 
-    /// <summary>Formats towards-degrees as compass plus degrees, e.g. "SW (224°)".</summary>
+    /// <summary>Formats from-degrees as compass plus degrees, e.g. "SW (224°)".</summary>
     public static string FormatWindDirection(double degrees) =>
         string.Create(CultureInfo.InvariantCulture, $"{DegreesToCompass(degrees)} ({Math.Round(degrees):0}°)");
 
     /// <summary>
-    /// Rotation for the ⮙ wind arrow; 0° (towards north) points up with no offset.
+    /// Rotation for the ⮙ wind arrow; adds 180° to from-degrees so the icon points where wind blows.
     /// </summary>
-    public static int? WindArrowRotationDeg(double degrees)
+    public static int? WindArrowRotationDeg(double fromDegrees)
     {
-        if (double.IsNaN(degrees) || double.IsInfinity(degrees))
+        if (double.IsNaN(fromDegrees) || double.IsInfinity(fromDegrees))
         {
             return null;
         }
 
-        return (int)Math.Round(degrees);
+        var normalized = ((fromDegrees % 360) + 360) % 360;
+        return (int)Math.Round((normalized + 180) % 360);
     }
 }

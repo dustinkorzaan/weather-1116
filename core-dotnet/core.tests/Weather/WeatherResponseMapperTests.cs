@@ -54,20 +54,20 @@ public class WeatherResponseMapperTests
         Assert.Equal([32], result.Daily.TemperatureLowF);
         Assert.Equal([1], result.Daily.PrecipitationInch);
         Assert.Equal([6.2], result.Daily.WindSpeedMPH);
-        Assert.Equal([44], result.Daily.WindDirectionTowardsDegrees);
+        Assert.Equal([224], result.Daily.WindDirectionFromDegrees);
         Assert.Equal([2], result.Daily.WeatherCode);
 
         Assert.NotNull(result.Hourly);
         Assert.Equal([75.2], result.Hourly!.TemperatureF);
         Assert.Equal([1], result.Hourly.PrecipitationInch);
         Assert.Equal([6.2], result.Hourly.WindSpeedMPH);
-        Assert.Equal([0], result.Hourly.WindDirectionTowardsDegrees);
+        Assert.Equal([180], result.Hourly.WindDirectionFromDegrees);
         Assert.Equal([1], result.Hourly.WeatherCode);
 
         Assert.NotNull(result.Minutely15);
         Assert.Equal([32], result.Minutely15!.TemperatureF);
         Assert.Equal([0.3], result.Minutely15.PrecipitationInch);
-        Assert.Equal([270], result.Minutely15.WindDirectionTowardsDegrees);
+        Assert.Equal([90], result.Minutely15.WindDirectionFromDegrees);
     }
 
     [Fact]
@@ -116,13 +116,13 @@ public class WeatherResponseMapperTests
         Assert.Equal([32], result.Daily.TemperatureLowF);
         Assert.Equal([1], result.Daily.PrecipitationInch);
         Assert.Equal([6.2], result.Daily.WindSpeedMPH);
-        Assert.Equal([44], result.Daily.WindDirectionTowardsDegrees);
+        Assert.Equal([224], result.Daily.WindDirectionFromDegrees);
 
         Assert.NotNull(result.Hourly);
         Assert.Equal([75.2], result.Hourly!.TemperatureF);
         Assert.Equal([1], result.Hourly.PrecipitationInch);
         Assert.Equal([6.2], result.Hourly.WindSpeedMPH);
-        Assert.Equal([0], result.Hourly.WindDirectionTowardsDegrees);
+        Assert.Equal([180], result.Hourly.WindDirectionFromDegrees);
     }
 
     [Fact]

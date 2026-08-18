@@ -178,14 +178,14 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("windArrowRotationDeg", script);
         Assert.Contains("renderWindDirection", script);
         Assert.Contains("\\u2B99", script);
-        Assert.Contains("Math.round(numeric)", script);
+        Assert.Contains("numeric + 180", script);
         Assert.DoesNotContain("Math.round(numeric) - 90", script);
         Assert.True(
             script.IndexOf("el.appendChild(label)", StringComparison.Ordinal)
                 < script.IndexOf("el.appendChild(arrow)", StringComparison.Ordinal),
             "Wind direction arrow should follow the compass label.");
         Assert.Contains("toFixed(2)", script);
-        Assert.Contains("windDirectionTowardsDegrees", script);
+        Assert.Contains("windDirectionFromDegrees", script);
         Assert.Contains("data.latitude", script);
         Assert.Contains("data.longitude", script);
     }
@@ -198,7 +198,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("wind-direction-arrow", script);
         Assert.Contains("windArrowRotationDeg", script);
         Assert.Contains("\\u2B99", script);
-        Assert.Contains("Math.round(numeric)", script);
+        Assert.Contains("numeric + 180", script);
         Assert.DoesNotContain("Math.round(numeric) - 90", script);
         Assert.True(
             script.IndexOf("wrap.appendChild(label)", StringComparison.Ordinal)

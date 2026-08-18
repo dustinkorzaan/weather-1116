@@ -5,7 +5,7 @@ namespace Core.Weather;
 /// <summary>
 /// Maps Open-Meteo's metric public weather responses (°C, km/h, mm) into the UI-facing
 /// responses (°F, mph, in) so the UI only formats values instead of converting them.
-/// Wind direction is converted from meteorological from-degrees to towards heading.
+/// Wind direction is passed through as meteorological from-degrees (Open-Meteo convention).
 /// </summary>
 public static class WeatherResponseMapper
 {
@@ -42,7 +42,7 @@ public static class WeatherResponseMapper
             PrecipitationInch = source.Precipitation.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WeatherCode = [.. source.WeatherCode],
             WindSpeedMPH = source.WindSpeed10m.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionTowardsDegrees = source.WindDirection10m.ConvertAll(WeatherUnitConversion.MeteorologicalFromToWindTowards),
+            WindDirectionFromDegrees = [.. source.WindDirection10m],
         };
     }
 
@@ -60,7 +60,7 @@ public static class WeatherResponseMapper
             PrecipitationInch = source.Precipitation.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WeatherCode = [.. source.WeatherCode],
             WindSpeedMPH = source.WindSpeed10m.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionTowardsDegrees = source.WindDirection10m.ConvertAll(WeatherUnitConversion.MeteorologicalFromToWindTowards),
+            WindDirectionFromDegrees = [.. source.WindDirection10m],
         };
     }
 
@@ -78,7 +78,7 @@ public static class WeatherResponseMapper
             PrecipitationInch = source.Precipitation.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WeatherCode = [.. source.WeatherCode],
             WindSpeedMPH = source.WindSpeed10m.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionTowardsDegrees = source.WindDirection10m.ConvertAll(WeatherUnitConversion.MeteorologicalFromToWindTowards),
+            WindDirectionFromDegrees = [.. source.WindDirection10m],
         };
     }
 
@@ -97,7 +97,7 @@ public static class WeatherResponseMapper
             TemperatureLowF = source.Temperature2mMin.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
             PrecipitationInch = source.PrecipitationSum.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WindSpeedMPH = source.WindSpeed10mMax.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionTowardsDegrees = source.WindDirection10mDominant.ConvertAll(WeatherUnitConversion.MeteorologicalFromToWindTowards),
+            WindDirectionFromDegrees = [.. source.WindDirection10mDominant],
         };
     }
 
@@ -116,7 +116,7 @@ public static class WeatherResponseMapper
             TemperatureLowF = source.Temperature2mMin.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
             PrecipitationInch = source.PrecipitationSum.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WindSpeedMPH = source.WindSpeed10mMax.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionTowardsDegrees = source.WindDirection10mDominant.ConvertAll(WeatherUnitConversion.MeteorologicalFromToWindTowards),
+            WindDirectionFromDegrees = [.. source.WindDirection10mDominant],
         };
     }
 }

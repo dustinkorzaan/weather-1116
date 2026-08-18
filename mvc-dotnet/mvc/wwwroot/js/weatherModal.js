@@ -53,12 +53,12 @@
 
   var WIND_DIRECTION_ARROW = '\u2B99';
 
-  function windArrowRotationDeg(degrees) {
-    var numeric = Number(degrees);
+  function windArrowRotationDeg(fromDegrees) {
+    var numeric = Number(fromDegrees);
     if (!Number.isFinite(numeric)) {
       return null;
     }
-    return Math.round(numeric);
+    return Math.round(((numeric + 180) % 360 + 360) % 360);
   }
 
   function renderWindDirection(el, compass, degrees) {
@@ -121,7 +121,7 @@
           }
           temperatureEl.textContent = formatTemperatureF(data.temperatureF);
           windSpeedEl.textContent = formatWindSpeedMph(data.windSpeedMPH);
-          renderWindDirection(windDirectionEl, data.windDirection, data.windDirectionTowardsDegrees);
+          renderWindDirection(windDirectionEl, data.windDirection, data.windDirectionFromDegrees);
           conditionsEl.textContent = data.conditions || '';
           if (latLongEl) {
             latLongEl.textContent = formatLatLong(data.latitude, data.longitude);

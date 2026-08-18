@@ -5,13 +5,12 @@ using Core.Json;
 namespace Core.Tests.AIWeather.Models;
 
 /// <summary>
-/// Verifies JSON contracts for model output (<see cref="AIWeatherModelResponse"/>)
-/// and API responses (<see cref="AIWeatherResponse"/>).
+/// Verifies JSON contracts for <see cref="AIWeatherResponse"/> (model output and API).
 /// </summary>
 public class AIWeatherModelsTests
 {
     [Fact]
-    public void AIWeatherModelResponse_DeserializesStrictModelSchema()
+    public void AIWeatherResponse_DeserializesStrictModelSchema()
     {
         const string json = """
         {
@@ -26,32 +25,13 @@ public class AIWeatherModelsTests
         }
         """;
 
-        var result = JsonSerializer.Deserialize<AIWeatherModelResponse>(
+        var result = JsonSerializer.Deserialize<AIWeatherResponse>(
             json,
             JsonDefaults.CaseInsensitive);
 
         Assert.NotNull(result);
         Assert.Equal(180, result!.WindDirectionFromDegrees);
         Assert.Equal("S", result.WindDirection);
-    }
-
-    [Fact]
-    public void AIWeatherModelResponse_ToApiResponse_ConvertsFromDegreesToTowards()
-    {
-        var api = new AIWeatherModelResponse
-        {
-            FullSummary = "Windy.",
-            TemperatureF = 72,
-            WindSpeedMPH = 8,
-            WindDirection = "S",
-            WindDirectionFromDegrees = 180,
-            Conditions = "Clear",
-            Latitude = 36.16,
-            Longitude = -86.78,
-        }.ToApiResponse();
-
-        Assert.Equal(0, api.WindDirectionTowardsDegrees);
-        Assert.Equal("N", api.WindDirection);
     }
 
     [Fact]
@@ -62,8 +42,8 @@ public class AIWeatherModelsTests
           "fullSummary": "It is 41F in Nashville with light winds from the south.",
           "temperatureF": 41,
           "windSpeedMPH": 7.5,
-          "windDirection": "N",
-          "windDirectionTowardsDegrees": 0,
+          "windDirection": "S",
+          "windDirectionFromDegrees": 180,
           "conditions": "Partly cloudy",
           "latitude": 36.1627,
           "longitude": -86.7816
@@ -75,8 +55,8 @@ public class AIWeatherModelsTests
             JsonDefaults.CaseInsensitive);
 
         Assert.NotNull(result);
-        Assert.Equal("N", result!.WindDirection);
-        Assert.Equal(0, result.WindDirectionTowardsDegrees);
+        Assert.Equal("S", result!.WindDirection);
+        Assert.Equal(180, result.WindDirectionFromDegrees);
     }
 
     [Fact]
@@ -88,7 +68,7 @@ public class AIWeatherModelsTests
             TemperatureF = 100,
             WindSpeedMPH = 13,
             WindDirection = "SW",
-            WindDirectionTowardsDegrees = 224,
+            WindDirectionFromDegrees = 224,
             Conditions = "Hot",
             Latitude = 36.16,
             Longitude = -86.78,
@@ -100,11 +80,11 @@ public class AIWeatherModelsTests
         Assert.Equal(100, root.GetProperty("temperatureF").GetDouble());
         Assert.Equal(13, root.GetProperty("windSpeedMPH").GetDouble());
         Assert.Equal("SW", root.GetProperty("windDirection").GetString());
-        Assert.Equal(224, root.GetProperty("windDirectionTowardsDegrees").GetInt32());
+        Assert.Equal(224, root.GetProperty("windDirectionFromDegrees").GetInt32());
         Assert.Equal(36.16, root.GetProperty("latitude").GetDouble());
         Assert.Equal(-86.78, root.GetProperty("longitude").GetDouble());
         Assert.False(root.TryGetProperty("TemperatureF", out _));
-        Assert.False(root.TryGetProperty("windDirectionFromDegrees", out _));
+        Assert.False(root.TryGetProperty("windDirectionTowardsDegrees", out _));
         Assert.False(root.TryGetProperty("windDirectionToDegrees", out _));
     }
 
