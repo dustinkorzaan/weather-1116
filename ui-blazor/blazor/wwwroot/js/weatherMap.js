@@ -124,9 +124,12 @@ window.weatherMap = (function () {
     element.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
   }
 
-  function defaultMapTypeId(maps, mapTypeId) {
+  function defaultMapTypeId(maps, mapTypeId, isDark) {
     if (mapTypeId) {
       return mapTypeId;
+    }
+    if (isDark) {
+      return (maps && maps.MapTypeId && maps.MapTypeId.ROADMAP) || 'roadmap';
     }
     return (maps && maps.MapTypeId && maps.MapTypeId.HYBRID) || 'hybrid';
   }
@@ -154,12 +157,12 @@ window.weatherMap = (function () {
    * Vector maps ignore JSON styles, and colorScheme is init-only. Raster + an
    * explicit LIGHT/DARK scheme keeps the canvas on the site theme.
    */
-  function createThemedMap(maps, element, appearance, center, zoom, mapTypeId) {
+  function createThemedMap(maps, element, appearance, center, zoom, mapTypeId, onTypeChanged) {
     applyMapColorSchemeCss(element, appearance.colorScheme === 'DARK' ? 'dark' : 'light');
     const options = {
       center: center || DEFAULT_CENTER,
       zoom: zoom == null ? DEFAULT_ZOOM : zoom,
-      mapTypeId: defaultMapTypeId(maps, mapTypeId),
+      mapTypeId: defaultMapTypeId(maps, mapTypeId, appearance.colorScheme === 'DARK'),
       mapTypeControl: true,
       mapTypeControlOptions: createMapTypeControlOptions(maps),
       styles: appearance.styles,
@@ -173,7 +176,15 @@ window.weatherMap = (function () {
     if (maps.RenderingType) {
       options.renderingType = maps.RenderingType.RASTER;
     }
-    return new maps.Map(element, options);
+    const map = new maps.Map(element, options);
+    if (typeof onTypeChanged === 'function' && typeof map.addListener === 'function') {
+      map.addListener('maptypeid_changed', function () {
+        if (typeof map.getMapTypeId === 'function') {
+          onTypeChanged(map.getMapTypeId());
+        }
+      });
+    }
+    return map;
   }
 
   function logoPinUrl(theme) {
@@ -569,7 +580,6 @@ window.weatherMap = (function () {
     const appearance = mapAppearance(resolved);
     let center = DEFAULT_CENTER;
     let zoom = DEFAULT_ZOOM;
-    let mapTypeId = entry.mapTypeId;
     if (entry.map && typeof entry.map.getCenter === 'function') {
       const current = entry.map.getCenter();
       if (current) {
@@ -577,9 +587,6 @@ window.weatherMap = (function () {
       }
       if (typeof entry.map.getZoom === 'function' && entry.map.getZoom() != null) {
         zoom = entry.map.getZoom();
-      }
-      if (typeof entry.map.getMapTypeId === 'function') {
-        mapTypeId = entry.map.getMapTypeId() || mapTypeId;
       }
     }
 
@@ -591,11 +598,17 @@ window.weatherMap = (function () {
       });
     }
 
-    const map = createThemedMap(entry.maps, entry.element, appearance, center, zoom, mapTypeId);
+    // entry.mapTypeId is only set when the user explicitly picks a type via
+    // the map type control (see the maptypeid_changed listener below), so an
+    // untouched map keeps re-deriving the theme's default (Map for dark,
+    // Hybrid for light) on every theme switch instead of getting stuck on
+    // whichever default happened to render first.
+    const map = createThemedMap(entry.maps, entry.element, appearance, center, zoom, entry.mapTypeId, function (typeId) {
+      entry.mapTypeId = typeId;
+    });
     entry.map = map;
     entry.markers = createCityMarkers(entry.maps, map, entry.cities, appearance);
     entry.theme = resolved;
-    entry.mapTypeId = mapTypeId;
     if (entry.element) {
       mapByElement.set(entry.element, map);
     }
@@ -858,18 +871,22 @@ window.weatherMap = (function () {
 
       const appearance = mapAppearance(resolvedTheme());
       const resolvedCities = ensureCities(cities);
-      const map = createThemedMap(maps, current, appearance, DEFAULT_CENTER, DEFAULT_ZOOM);
-      const markers = createCityMarkers(maps, map, resolvedCities, appearance);
-      const getLocationUrl = resolveGetLocationUrl(current);
       const entry = {
         maps: maps,
-        map: map,
-        markers: markers,
+        map: null,
+        markers: null,
         element: current,
         cities: resolvedCities,
         theme: resolvedTheme(),
-        getLocationUrl: getLocationUrl,
+        getLocationUrl: resolveGetLocationUrl(current),
       };
+      const map = createThemedMap(maps, current, appearance, DEFAULT_CENTER, DEFAULT_ZOOM, undefined, function (typeId) {
+        entry.mapTypeId = typeId;
+      });
+      const markers = createCityMarkers(maps, map, resolvedCities, appearance);
+      const getLocationUrl = entry.getLocationUrl;
+      entry.map = map;
+      entry.markers = markers;
       bindRightClickAddLocation(maps, map, getLocationUrl);
 
       themedMaps.push(entry);

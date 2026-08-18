@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { cityFromReverseLookup, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from '../data/mapCities';
 import { applyMapColorSchemeCss, createMapOptions } from '../map/darkMapStyles';
 import { loadGoogleMaps } from '../map/loadGoogleMaps';
-import { defaultMapTypeId } from '../map/mapTypeToggle';
 import {
   createLogoPinOverlay,
   logoPinSpinOffsetSec,
@@ -74,7 +73,7 @@ function WeatherMap() {
           createMapOptions(maps, resolvedTheme, {
             center: viewStateRef.current.center,
             zoom: viewStateRef.current.zoom,
-            mapTypeId: defaultMapTypeId(maps, viewStateRef.current.mapTypeId),
+            mapTypeId: viewStateRef.current.mapTypeId,
           })
         );
         map.addListener('maptypeid_changed', () => {
@@ -134,11 +133,15 @@ function WeatherMap() {
         const center = map.getCenter();
         const zoom = typeof map.getZoom === 'function' ? map.getZoom() : null;
         if (center) {
-          const mapTypeId = typeof map.getMapTypeId === 'function' ? map.getMapTypeId() : null;
+          // mapTypeId is intentionally left untouched here: it's only set by
+          // the maptypeid_changed listener below (i.e. an explicit user
+          // pick), so an untouched map keeps re-deriving the theme's default
+          // (Map for dark, Hybrid for light) on every theme switch instead of
+          // getting stuck on whichever default happened to render first.
           viewStateRef.current = {
+            ...viewStateRef.current,
             center: { lat: center.lat(), lng: center.lng() },
             zoom: zoom ?? viewStateRef.current.zoom,
-            mapTypeId: mapTypeId || viewStateRef.current.mapTypeId,
           };
         }
       }
