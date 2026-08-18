@@ -31,7 +31,8 @@ public class AboutControllerTests : IClassFixture<WeatherMcpSrvAppServiceWebAppl
     [Fact]
     public async Task Get_ReturnsUnhealthyNode_WhenMcpSrvAppServiceKeyMissing()
     {
-        using var factory = new WeatherMcpSrvAppServiceWebApplicationFactory();
+        using var factory = new WeatherMcpSrvAppServiceWebApplicationFactory()
+            .WithSetting("MCP_SRV_APP_SERVICE_KEY", "");
         using var client = factory.CreateClient();
 
         var response = await client.GetAsync("/About");
