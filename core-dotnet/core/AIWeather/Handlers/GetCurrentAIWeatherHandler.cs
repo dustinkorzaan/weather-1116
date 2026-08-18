@@ -128,7 +128,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
             ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
 
-            if (response.Status != ResponseStatus.Completed)
+            var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
+            if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
             {
                 throw new InvalidOperationException(
                     $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
@@ -138,14 +139,11 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
             inputItems.AddRange(response.OutputItems);
 
-            foreach (ResponseItem outputItem in response.OutputItems)
+            foreach (FunctionCallResponseItem functionCall in functionCalls)
             {
-                if (outputItem is FunctionCallResponseItem functionCall)
-                {
-                    var functionOutput = await _toolExecutor.ExecuteAsync(functionCall, cancellationToken);
-                    inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
-                    requiresAction = true;
-                }
+                var functionOutput = await _toolExecutor.ExecuteAsync(functionCall, cancellationToken);
+                inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+                requiresAction = true;
             }
 
             if (!requiresAction)
