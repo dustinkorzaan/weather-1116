@@ -60,7 +60,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
             # Tool Protocol
             1. When given a location, immediately call your coordinates resolution tool. It returns ranked matches (rank 1 is best); select the single best-matching place using name, state, and country — normally rank 1, but you may skip rank 1 when a lower rank is clearly correct.
-            2. Use the latitude and longitude from that one selected result (normally rank 1) to invoke your weather fetching tool. Fetch weather for that location only — do not query multiple matches.
+            2. Use the latitude and longitude from the best result (normally rank 1) to invoke your weather fetching tool. Fetch weather for that location only — do not query multiple matches.
             3. You must query these tools whenever real weather data is required to fulfill the request.
 
             # Constraints
