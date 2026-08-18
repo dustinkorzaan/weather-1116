@@ -6,10 +6,7 @@ import { degreesToCompass } from '../../utils/weatherGridFormat';
 
 /** Compass label plus the same rotated ⮛ used on Current AI Weather. */
 function WindDirectionCell({ degrees }) {
-  const numeric = Number(degrees);
-  const rotationDeg = Number.isFinite(numeric)
-    ? Math.round(((numeric % 360) + 360) % 360)
-    : null;
+  const rotationDeg = Number.isFinite(Number(degrees)) ? Number(degrees) : null;
 
   return (
     <span className="inline-flex items-center gap-2">

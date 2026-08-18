@@ -106,9 +106,7 @@
     wrap.appendChild(label);
 
     var numeric = Number(degrees);
-    var rotation = Number.isFinite(numeric)
-      ? Math.round(((numeric % 360) + 360) % 360)
-      : null;
+    var rotation = Number.isFinite(numeric) ? numeric : null;
     if (rotation !== null) {
       var arrow = document.createElement('span');
       arrow.className = 'wind-direction-arrow';

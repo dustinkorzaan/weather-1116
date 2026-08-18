@@ -27,9 +27,8 @@ function CurrentAIWeatherModalTab({ name, lat, lng }) {
       ? error.data.title
       : 'Unable to load AI weather.';
 
-  const windDegrees = Number(data?.windDirectionSourceDegrees);
-  const windRotationDeg = Number.isFinite(windDegrees)
-    ? Math.round(((windDegrees % 360) + 360) % 360)
+  const windRotationDeg = Number.isFinite(Number(data?.windDirectionSourceDegrees))
+    ? Number(data.windDirectionSourceDegrees)
     : null;
 
   return (
