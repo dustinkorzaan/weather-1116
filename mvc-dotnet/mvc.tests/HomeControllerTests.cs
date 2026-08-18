@@ -185,7 +185,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
                 < script.IndexOf("el.appendChild(arrow)", StringComparison.Ordinal),
             "Wind direction arrow should follow the compass label.");
         Assert.Contains("toFixed(2)", script);
-        Assert.Contains("windDirectionFromDegrees", script);
+        Assert.Contains("windDirectionSourceDegrees", script);
         Assert.Contains("data.latitude", script);
         Assert.Contains("data.longitude", script);
     }

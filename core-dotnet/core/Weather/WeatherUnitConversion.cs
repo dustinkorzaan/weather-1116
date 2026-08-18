@@ -18,7 +18,7 @@ public static class WeatherUnitConversion
         "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
     ];
 
-    /// <summary>Converts meteorological from-degrees (0° = from the north) to a 16-point compass abbreviation.</summary>
+    /// <summary>Converts meteorological source degrees (0° = north is the wind source) to a 16-point compass abbreviation.</summary>
     public static string DegreesToCompass(int degrees)
     {
         var normalized = ((degrees % 360) + 360) % 360;

@@ -31,7 +31,7 @@ export function formatWindSpeedMph(value) {
   return `${Math.round(numeric * 10) / 10} mph`;
 }
 
-/** Formats compass plus from-degrees as "SW (224°)". */
+/** Formats compass plus source degrees as "SW (224°)". */
 export function formatWindDirection(compass, degrees) {
   const label = String(compass ?? '').trim();
   const numeric = Number(degrees);
@@ -43,11 +43,11 @@ export function formatWindDirection(compass, degrees) {
   return label ? `${label} ${withDegrees}` : withDegrees;
 }
 
-/** Up-pointing arrow (⮙); rotate from-degrees + 180° so the icon points where wind blows. */
+/** Up-pointing arrow (⮙); rotate source degrees + 180° so the icon points where wind blows. */
 export const WIND_DIRECTION_ARROW = '\u2B99';
 
-export function windArrowRotationDeg(fromDegrees) {
-  const numeric = Number(fromDegrees);
+export function windArrowRotationDeg(sourceDegrees) {
+  const numeric = Number(sourceDegrees);
   if (!Number.isFinite(numeric)) {
     return null;
   }

@@ -18,7 +18,7 @@ function DailyForecastTab({ lat, lng }) {
     low: daily.temperatureLowF[index],
     precipitation: daily.precipitationInch[index],
     windSpeed: daily.windSpeedMPH[index],
-    windDirection: daily.windDirectionFromDegrees[index],
+    windDirection: daily.windDirectionSourceDegrees[index],
   }));
 
   return (

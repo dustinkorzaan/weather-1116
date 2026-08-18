@@ -98,8 +98,8 @@
 
   var WIND_DIRECTION_ARROW = '\u2B99';
 
-  function windArrowRotationDeg(fromDegrees) {
-    var numeric = Number(fromDegrees);
+  function windArrowRotationDeg(sourceDegrees) {
+    var numeric = Number(sourceDegrees);
     if (!Number.isFinite(numeric)) {
       return null;
     }
@@ -148,7 +148,7 @@
         formatTemperatureF(daily.temperatureLowF[index]),
         formatPrecipitationIn(daily.precipitationInch[index]),
         formatWindSpeedMph(daily.windSpeedMPH[index]),
-        createWindDirectionCell(daily.windDirectionFromDegrees[index]),
+        createWindDirectionCell(daily.windDirectionSourceDegrees[index]),
       ];
     });
   }
@@ -165,7 +165,7 @@
         formatTemperatureF(series.temperatureF[index]),
         formatPrecipitationIn(series.precipitationInch[index]),
         formatWindSpeedMph(series.windSpeedMPH[index]),
-        createWindDirectionCell(series.windDirectionFromDegrees[index]),
+        createWindDirectionCell(series.windDirectionSourceDegrees[index]),
       ];
     });
   }

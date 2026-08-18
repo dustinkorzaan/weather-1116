@@ -360,7 +360,7 @@ public sealed class PageSplitTests
                         TemperatureF = 72,
                         WindSpeedMPH = 5,
                         WindDirection = "S",
-                        WindDirectionFromDegrees = 180,
+                        WindDirectionSourceDegrees = 180,
                         Conditions = "Clear",
                         Latitude = 36.1627,
                         Longitude = -86.7816,

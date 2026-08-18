@@ -195,7 +195,7 @@ public sealed class WeatherModalTests
                         TemperatureF = 72,
                         WindSpeedMPH = 5,
                         WindDirection = "S",
-                        WindDirectionFromDegrees = 180,
+                        WindDirectionSourceDegrees = 180,
                         Conditions = "Clear",
                         Latitude = 36.1659,
                         Longitude = -86.7844,
@@ -220,7 +220,7 @@ public sealed class WeatherModalTests
                             TemperatureLowF = [70.1, 71.0],
                             PrecipitationInch = [0.3, 0.0],
                             WindSpeedMPH = [12.3, 10.0],
-                            WindDirectionFromDegrees = [224, 90],
+                            WindDirectionSourceDegrees = [224, 90],
                         },
                         Hourly = new UIWeatherHourlySeries
                         {
@@ -229,7 +229,7 @@ public sealed class WeatherModalTests
                             PrecipitationInch = [0.0],
                             WeatherCode = [1],
                             WindSpeedMPH = [8.2],
-                            WindDirectionFromDegrees = [180],
+                            WindDirectionSourceDegrees = [180],
                         },
                         Minutely15 = new UIWeatherHourlySeries
                         {
@@ -238,7 +238,7 @@ public sealed class WeatherModalTests
                             PrecipitationInch = [0.0],
                             WeatherCode = [1],
                             WindSpeedMPH = [8.5],
-                            WindDirectionFromDegrees = [190],
+                            WindDirectionSourceDegrees = [190],
                         },
                     }),
                 };
@@ -261,7 +261,7 @@ public sealed class WeatherModalTests
                             TemperatureLowF = [70.1, 71.0],
                             PrecipitationInch = [0.3, 0.0],
                             WindSpeedMPH = [12.3, 10.0],
-                            WindDirectionFromDegrees = [224, 90],
+                            WindDirectionSourceDegrees = [224, 90],
                         },
                         Hourly = new UIWeatherHourlySeries
                         {
@@ -270,7 +270,7 @@ public sealed class WeatherModalTests
                             PrecipitationInch = [0.0, 0.0],
                             WeatherCode = [1, 1],
                             WindSpeedMPH = [8.2, 7.0],
-                            WindDirectionFromDegrees = [180, 170],
+                            WindDirectionSourceDegrees = [180, 170],
                         },
                     }),
                 };

@@ -52,7 +52,7 @@ function CurrentAIWeather() {
       ? error.data.title
       : 'Unable to load AI weather.';
 
-  const windRotationDeg = windArrowRotationDeg(data?.windDirectionFromDegrees);
+  const windRotationDeg = windArrowRotationDeg(data?.windDirectionSourceDegrees);
 
   return (
     <section aria-labelledby="current-ai-weather-heading">
@@ -108,7 +108,7 @@ function CurrentAIWeather() {
             <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
               <dt className="font-semibold">Wind Direction</dt>
               <dd className="inline-flex items-center gap-2">
-                <span>{formatWindDirection(data.windDirection, data.windDirectionFromDegrees)}</span>
+                <span>{formatWindDirection(data.windDirection, data.windDirectionSourceDegrees)}</span>
                 {windRotationDeg != null && (
                   <span
                     aria-hidden="true"

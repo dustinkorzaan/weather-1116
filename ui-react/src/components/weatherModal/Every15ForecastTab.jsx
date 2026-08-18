@@ -17,7 +17,7 @@ function Every15ForecastTab({ lat, lng }) {
     temperature: minutely15.temperatureF[index],
     precipitation: minutely15.precipitationInch[index],
     windSpeed: minutely15.windSpeedMPH[index],
-    windDirection: minutely15.windDirectionFromDegrees[index],
+    windDirection: minutely15.windDirectionSourceDegrees[index],
   }));
 
   return (

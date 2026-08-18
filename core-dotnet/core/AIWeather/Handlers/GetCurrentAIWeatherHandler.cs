@@ -73,8 +73,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         - For the place name, prefer a clean, human-friendly city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
         - temperatureF: Current temperature in Fahrenheit (convert from the weather tool).
         - windSpeedMPH: Current wind speed in miles per hour (convert from the weather tool).
-        - windDirection: Compass point such as N, NE, or SW matching the weather tool's meteorological from-direction.
-        - windDirectionFromDegrees: Copy current_weather.winddirection from the weather tool exactly (meteorological from-direction, 0–360). Do not add 180.
+        - windDirection: Compass point such as N, NE, or SW matching the weather tool's meteorological source direction.
+        - windDirectionSourceDegrees: Copy current_weather.winddirection from the weather tool exactly (meteorological source direction, 0–360). Do not add 180.
         - conditions: Short current conditions phrase from the weather tool.
         - latitude: Decimal degrees from your coordinates tool (positive north, negative south).
         - longitude: Decimal degrees from your coordinates tool (positive east, negative west).
