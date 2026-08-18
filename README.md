@@ -1,12 +1,7 @@
 # Weather 1116
 
 Demystifying Foundry, agents, and models: from model-direct, to local
-in-process looping, to remote MCP, to a hosted agent, behind a pin map using
-the following core weather concepts:
-
-- Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
-- Lat/Long → Non-AI Weather `{ temp: 75, conditions: "partly cloudy", ... }`
-- Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
+in-process looping, to remote MCP, to a hosted agent, behind a pin map.
 
 | PROD | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
@@ -29,7 +24,12 @@ relationships, and parity guidance live in
 Presentation reference: [`docs/presentation.md`](docs/presentation.md)
 
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
-against Core weather data (V1–V4) or a hosted Foundry Agent (V5).
+against Core weather data (V1–V4) or a hosted Foundry Agent (V5) using the
+following core weather concepts:
+
+- Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
+- Lat/Long → Non-AI Weather `{ temp: 75, conditions: "partly cloudy", ... }`
+- Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
 
 | Project | Path | Pattern |
 | --- | --- | --- |
