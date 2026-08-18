@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetEnv" Version="3.*" />
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
     <ProjectReference Include="..\..\mediatr-dotnet\mediatr\MediatR.csproj" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.4.1" />
   </ItemGroup>
