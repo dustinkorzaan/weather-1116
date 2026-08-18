@@ -9,7 +9,7 @@ in-process looping, to remote MCP, to a hosted agent, behind a pin map.
 | [Visit](https://weather1116-prod-blazor.azurewebsites.net) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
 | [Visit](https://weather1116-prod-mvc.azurewebsites.net) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
 |  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
-|  | Core | [`core-dotnet/core`](core-dotnet/core) | In API, MVC, worker, and MCP |  |
+|  | Core | [`core-dotnet/core`](core-dotnet/core) | In API, MVC, Worker, and MCP |  |
 |  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |
 |  | MCP Server (App Service) | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
 |  | MCP Server (Function App) | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |

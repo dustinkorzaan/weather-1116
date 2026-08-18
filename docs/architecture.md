@@ -31,7 +31,7 @@ contrast in Foundry Console V5.
 | 3 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
 | 4 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
 | 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire dashboard and servers | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
-| 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | In API, MVC, worker, and MCP |
+| 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | In API, MVC, Worker, and MCP |
 
 ### Adjacent projects (not UI/API dependencies)
 
