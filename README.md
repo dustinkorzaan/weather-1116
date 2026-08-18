@@ -37,7 +37,7 @@ against Core weather data (V1–V4) or a hosted Foundry Agent (V5).
 | V2 | [`Foundry Console V2 Model Direct Unified AI`](FoundryConsoleV2) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
 | V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) | Model-direct: tools handled by in-process via local callbacks |
 | V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools handled by remote MCP servers |
-| V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
+| V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
 ## Chat clients
 

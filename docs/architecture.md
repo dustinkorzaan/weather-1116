@@ -380,7 +380,7 @@ blocks**, not production deployables:
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
 | **V3** | Model-direct: tools handled by in-process via local callbacks (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same tools `Core` exposes |
 | **V4** | Model-direct: tools handled by remote MCP servers — same pattern as API/MVC production |
-| **V5** | Hosted Foundry agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
+| **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
 `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `Program.cs` and `.env.example`).
