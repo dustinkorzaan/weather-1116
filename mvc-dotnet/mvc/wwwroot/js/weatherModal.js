@@ -26,17 +26,19 @@
   }
 
   function formatTemperatureF(value) {
-    if (!Number.isFinite(Number(value))) {
+    var numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
       return '';
     }
-    return value + ' °F';
+    return (Math.round(numeric * 10) / 10) + ' °F';
   }
 
   function formatWindSpeedMph(value) {
-    if (!Number.isFinite(Number(value))) {
+    var numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
       return '';
     }
-    return value + ' mph';
+    return (Math.round(numeric * 10) / 10) + ' mph';
   }
 
   function formatWindDirection(compass, degrees) {
