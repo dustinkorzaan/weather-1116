@@ -5,7 +5,7 @@ namespace Core.Weather;
 /// <summary>
 /// Maps Open-Meteo's metric public weather responses (°C, km/h, mm) into the UI-facing
 /// responses (°F, mph, in) so the UI only formats values instead of converting them.
-/// Wind direction is converted from meteorological from-degrees to destination heading.
+/// Wind direction is converted from meteorological from-degrees to towards heading.
 /// </summary>
 public static class WeatherResponseMapper
 {

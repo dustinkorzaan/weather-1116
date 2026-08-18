@@ -77,7 +77,7 @@ public sealed class WeatherGridFormatTests
     }
 
     [Fact]
-    public void WindArrowRotationDeg_MatchesWindToDegrees()
+    public void WindArrowRotationDeg_MatchesTowardsDegrees()
     {
         Assert.Equal(0, WeatherGridFormat.WindArrowRotationDeg(0));
         Assert.Equal(224, WeatherGridFormat.WindArrowRotationDeg(224));

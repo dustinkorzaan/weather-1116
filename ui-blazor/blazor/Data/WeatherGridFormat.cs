@@ -92,7 +92,7 @@ public static class WeatherGridFormat
         string.Create(CultureInfo.InvariantCulture, $"{DegreesToCompass(degrees)} ({Math.Round(degrees):0}°)");
 
     /// <summary>
-    /// Rotation for the ⮙ wind arrow; 0° (toward north) points up with no offset.
+    /// Rotation for the ⮙ wind arrow; 0° (towards north) points up with no offset.
     /// </summary>
     public static int? WindArrowRotationDeg(double degrees)
     {

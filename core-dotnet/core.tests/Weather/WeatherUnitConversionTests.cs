@@ -22,7 +22,7 @@ public class WeatherUnitConversionTests
     [InlineData(90, "E")]
     [InlineData(180, "S")]
     [InlineData(270, "W")]
-    public void DegreesToCompass_MapsWindToDegrees(int degrees, string expected)
+    public void DegreesToCompass_MapsTowardsDegrees(int degrees, string expected)
     {
         Assert.Equal(expected, WeatherUnitConversion.DegreesToCompass(degrees));
     }
