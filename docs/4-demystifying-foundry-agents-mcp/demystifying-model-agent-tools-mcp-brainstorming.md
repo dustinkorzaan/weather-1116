@@ -1,7 +1,7 @@
 # Brainstorm: demystifying model, agent, tools, and MCP (AI generated, use at your own risk)
 
 Companion scratchpad for [`demystifying-foundry-agents-mcp.md`](demystifying-foundry-agents-mcp.md).
-The main doc includes full tool-callback and agent-to-MCP loop sequences in the V3–V5 diagrams.
+The main doc includes full tool-loop and agent-to-MCP loop sequences in the V3–V5 diagrams.
 
 Scratchpad for presentation ideas. Diagrams progress from **model-only** → **agent
 wraps model** → **tools (local or MCP)** → **agents calling agents**. Mix of
@@ -430,7 +430,7 @@ flowchart TD
 ```mermaid
 flowchart LR
     V1[V1 Model only] --> V2[V2 Unified endpoint]
-    V2 --> V3[V3 In-process tools]
+    V2 --> V3[V3 Local in-process looping]
     V3 --> V4[V4 Model-direct + MCP]
     V4 --> PROD[API / MVC production handler]
     V4 --> V5[V5 Hosted agent contrast]
@@ -465,7 +465,7 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-    subgraph V3["V3 — in-process tool callbacks"]
+    subgraph V3["V3 — local in-process looping"]
         M3[(Model)] --> F3[Functions in API process]
     end
     subgraph V4["V4 — MCP tools"]

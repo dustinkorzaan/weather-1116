@@ -13,11 +13,12 @@ Blazor UI, MVC UI, API, and Worker) plus the shared `Core` class library.
 The goal is feature parity across all UI implementations while keeping each
 project idiomatic for its framework.
 
-The remaining two runnable stacks are the **MCP tool hosts**. Together with
-the **Foundry console demos**, they are not called directly by the UIs, but
-they exercise the same `Core` weather and geo logic and support the
-model-direct AI weather path in API and MVC (V4 pattern) plus the hosted-agent
-learning demo in Foundry Console V5.
+The remaining two runnable stacks are the **MCP tool hosts**. The UIs never
+call them directly. Current AI Weather still depends on them: API and MVC
+declare those hosts as remote tools on the model request (V4
+`GetCurrentAIWeatherHandler`). The **Foundry console demos** are local
+learning apps on the same `Core` weather and geo logic, plus the hosted-agent
+contrast in Foundry Console V5.
 
 ## Projects
 
@@ -34,8 +35,10 @@ learning demo in Foundry Console V5.
 
 ### Adjacent projects (not UI/API dependencies)
 
-These are part of the overall system map but are **not** on the critical path
-for hello/AI weather/map flows in the three UIs.
+Foundry consoles are learning demos, not UI dependencies. MCP hosts are not
+called by the UIs directly, but they **are** on the Current AI Weather path:
+API and MVC declare them as remote tools on the model request (V4). Hello and
+map chrome do not need them.
 
 | Project | Path | Role |
 | --- | --- | --- |
@@ -231,7 +234,7 @@ and layout code instead of sharing it.
 
 | Route | Contents |
 | --- | --- |
-| `/` | Top bar (logo left, person/avatar menu right) above a full-viewport Google Map |
+| `/` | Top bar (logo left, person/avatar menu right) above a full-viewport Google Map. Pin click opens a weather modal (Current AI Weather, forecast, and history). |
 | `/hello-world` | Same top bar, then the hello message — no map |
 | `/current-ai-weather` | Same top bar, then the Current AI Weather widget — no map |
 | `/chat-clients` | Same top bar, then the chat clients (ChatPanel) — no map |
@@ -383,8 +386,8 @@ blocks**, not production deployables:
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same Core code reused in tool |
-| **V4** | Model-direct: tools handled by remote MCP servers — same pattern as API/MVC production |
+| **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same Core code reused in the tools |
+| **V4** | Model-direct: tools handled by remote MCP servers — actual production pattern in `GetCurrentAIWeatherHandler` (API/MVC) |
 | **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the

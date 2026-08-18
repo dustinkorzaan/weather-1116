@@ -71,12 +71,12 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   (`FoundryConsoleV2ModelDirectUnifiedAI.csproj`)
   - Same idea as V1 but uses `ResponsesClient` against the unified AI services
     endpoint.
-  - Shows the newer Foundry / Azure AI inference surface.
+  - Shows the newer Microsoft Foundry unified inference surface.
 
 - **V3 — Local in-process looping** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
   (`FoundryConsoleV3InProcessToolCallbacks.csproj`)
   - Registers `GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as tools
-    answered by local in-process looping (same Core code reused in tool).
+    answered by local in-process looping (same Core code reused in the tools).
   - Model chooses tools that are actually handled locally; no remote MCP servers yet.
 
   **Simple Diagram without Agent/Loop**
@@ -135,7 +135,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 - **V4 — Model-direct + remote MCP tools** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
   (`FoundryConsoleV4MCP.csproj`)
   - Same model-direct call as V3, but the tools are hosted in remote MCP servers
-    declared on the request instead of in-process callbacks.
+    declared on the request instead of local in-process looping.
   - Shows that MCP tooling does not require a Foundry agent.
   - This is the actual pattern used in production `GetCurrentAIWeatherHandler` in API/MVC.
 
