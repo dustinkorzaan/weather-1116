@@ -78,8 +78,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             - windDirectionSourceDegrees: Copy current_weather.winddirection from the weather tool exactly (meteorological source direction — where the wind comes from). Normalize to 0–360 if needed. Do not add 180.
             - windDirectionSource: 16-point compass label derived from windDirectionSourceDegrees. Round normalized degrees to the nearest 22.5° sector and map to one of: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (e.g. 180 → S, 224 → SW).
             - conditions: Short current conditions phrase from the weather tool.
-            - latitude: Decimal degrees from your coordinates tool (positive north, negative south).
-            - longitude: Decimal degrees from your coordinates tool (positive east, negative west).
+            - latitude: Decimal degrees from the best geo result (positive north, negative south).
+            - longitude: Decimal degrees from the best geo result (positive east, negative west).
             """;
 
         var userPrompt = $"What is the current weather in: `{location}`?";

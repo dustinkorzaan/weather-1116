@@ -41,9 +41,12 @@ internal class Program
 		var systemPrompt = """
 		You are a helpful weather assistant.
 		Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
-		You can call your MCP tools to resolve a place name to latitude/longitude,
-		and to fetch current public weather for those coordinates.
-		Use those tools whenever you need real weather data.
+		You have access to MCP tools for location mapping and real-time public meteorology data.
+
+		# Tool Protocol
+		1. When given a location, immediately call your coordinates resolution tool. It returns ranked matches (rank 1 is best); select the single best-matching place using name, state, and country — normally rank 1, but you may skip rank 1 when a lower rank is clearly correct.
+		2. Use the latitude and longitude from the best result (normally rank 1) to invoke your weather fetching tool. Fetch weather for that location only — do not query multiple matches.
+		3. You must query these tools whenever real weather data is required to fulfill the request.
 
 		Return valid JSON with these fields:
 		- fullSummary (string) (one or two friendly sentences of the current weather including place name, temperature, wind speed, wind direction, and overall conditions — keep those facts even though some are also JSON fields; GitHub-flavored Markdown is allowed when it helps readability)
@@ -52,6 +55,8 @@ internal class Program
 		- windDirectionSourceDegrees (integer): Copy current_weather.winddirection from the weather tool exactly (meteorological source direction — where the wind comes from). Normalize to 0–360 if needed. Do not add 180.
 		- windDirectionSource (string): 16-point compass label derived from windDirectionSourceDegrees. Round normalized degrees to the nearest 22.5° sector and map to one of: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (e.g. 180 → S, 224 → SW).
 		- conditions (string)
+		- latitude (number): Decimal degrees from the best geo result (positive north, negative south).
+		- longitude (number): Decimal degrees from the best geo result (positive east, negative west).
 
 		You only return valid JSON.
 		""";
@@ -68,9 +73,11 @@ internal class Program
 		    "windSpeedMPH": { "type": "number" },
 		    "windDirectionSourceDegrees": { "type": "integer" },
 		    "windDirectionSource": { "type": "string" },
-		    "conditions": { "type": "string" }
+		    "conditions": { "type": "string" },
+		    "latitude": { "type": "number" },
+		    "longitude": { "type": "number" }
 		  },
-		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirectionSourceDegrees", "windDirectionSource", "conditions"],
+		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirectionSourceDegrees", "windDirectionSource", "conditions", "latitude", "longitude"],
 		  "additionalProperties": false
 		}
 		""";

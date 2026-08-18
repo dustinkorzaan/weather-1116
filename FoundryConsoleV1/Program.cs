@@ -267,6 +267,8 @@ internal class Program
 		- windDirectionSourceDegrees (integer): Copy current_weather.winddirection from the weather tool exactly (meteorological source direction — where the wind comes from). Normalize to 0–360 if needed. Do not add 180.
 		- windDirectionSource (string): 16-point compass label derived from windDirectionSourceDegrees. Round normalized degrees to the nearest 22.5° sector and map to one of: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (e.g. 180 → S, 224 → SW).
 		- conditions (string)
+		- latitude (number): Decimal degrees from the provided WeatherConditions JSON (positive north, negative south).
+		- longitude (number): Decimal degrees from the provided WeatherConditions JSON (positive east, negative west).
 
 		You only return valid JSON.
 		""";
@@ -286,9 +288,11 @@ internal class Program
 		    "windSpeedMPH": { "type": "number" },
 		    "windDirectionSourceDegrees": { "type": "integer" },
 		    "windDirectionSource": { "type": "string" },
-		    "conditions": { "type": "string" }
+		    "conditions": { "type": "string" },
+		    "latitude": { "type": "number" },
+		    "longitude": { "type": "number" }
 		  },
-		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirectionSourceDegrees", "windDirectionSource", "conditions"],
+		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirectionSourceDegrees", "windDirectionSource", "conditions", "latitude", "longitude"],
 		  "additionalProperties": false
 		}
 		""";
