@@ -3,11 +3,6 @@
 Demystifying Foundry, agents, and models: from model-direct, to local tools,
 to MCP, to a hosted agent, behind a pin map.
 
-This README is intentionally brief. Use it for the project grid and demo
-outline. UI pages, styling stacks, theme, architecture constraints, project
-relationships, and parity guidance live in
-[`docs/architecture.md`](docs/architecture.md).
-
 ## Core Weather Concept
 
 - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
@@ -24,6 +19,11 @@ relationships, and parity guidance live in
 |  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |
 |  | MCP Server on App Service | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
 |  | MCP Server on Functions App | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |
+
+This README is intentionally brief. Use it for the project grid and demo
+outline. UI pages, styling stacks, theme, architecture constraints, project
+relationships, and parity guidance live in
+[`docs/architecture.md`](docs/architecture.md).
 
 ## Foundry console demos
 
