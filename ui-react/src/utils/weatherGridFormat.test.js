@@ -16,8 +16,12 @@ test('formats an already-converted mph value with a lowercase suffix', () => {
   expect(formatWindSpeedMph(Number.NaN)).toBe('');
 });
 
-test('formats an already-converted inches value', () => {
+test('formats an already-converted inches value rounded to the nearest 1/16"', () => {
   expect(formatPrecipitationIn(1)).toBe('1"');
-  expect(formatPrecipitationIn(0.3)).toBe('0.3"');
+  expect(formatPrecipitationIn(0)).toBe('0"');
+  expect(formatPrecipitationIn(1.5)).toBe('1 1/2"');
+  expect(formatPrecipitationIn(2.25)).toBe('2 1/4"');
+  expect(formatPrecipitationIn(3.3125)).toBe('3 5/16"');
+  expect(formatPrecipitationIn(0.0625)).toBe('1/16"');
   expect(formatPrecipitationIn(Number.NaN)).toBe('');
 });

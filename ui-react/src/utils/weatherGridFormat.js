@@ -38,14 +38,33 @@ export function formatClockTime(isoDateTime) {
   });
 }
 
-/** Formats an already-converted inches value (the API returns US customary units). */
+/** Reduces a sixteenths-of-an-inch numerator to lowest terms (denominator is always a power of two). */
+function reduceSixteenths(numerator) {
+  let denominator = 16;
+  while (numerator !== 0 && numerator % 2 === 0 && denominator > 1) {
+    numerator /= 2;
+    denominator /= 2;
+  }
+  return [numerator, denominator];
+}
+
+/** Formats an already-converted inches value (the API returns US customary units) rounded to the nearest 1/16", e.g. "1 1/2"". */
 export function formatPrecipitationIn(inches) {
   const numeric = Number(inches);
   if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${Math.round(numeric * 100) / 100}"`;
+  const sixteenths = Math.round(numeric * 16);
+  const whole = Math.floor(sixteenths / 16);
+  const remainder = sixteenths % 16;
+
+  if (remainder === 0) {
+    return `${whole}"`;
+  }
+
+  const [num, den] = reduceSixteenths(remainder);
+  return whole === 0 ? `${num}/${den}"` : `${whole} ${num}/${den}"`;
 }
 
 /** Formats an already-converted °F value (the API returns US customary units). */
