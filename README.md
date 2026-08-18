@@ -3,8 +3,6 @@
 Demystifying Foundry, agents, and models: from model-direct, to local tools,
 to MCP, to a hosted agent, behind a pin map.
 
-## Core Weather Concept
-
 - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
 - Lat/Long `"36.166° N, 86.784° W"` → Non AI Weather
 - Non AI Weather → AI Summary
