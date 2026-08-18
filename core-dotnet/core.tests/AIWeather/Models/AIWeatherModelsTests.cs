@@ -17,7 +17,7 @@ public class AIWeatherModelsTests
           "fullSummary": "It is 41F in Nashville with light winds from the south.",
           "temperatureF": 41,
           "windSpeedMPH": 7.5,
-          "windDirection": "S",
+          "windDirectionSource": "S",
           "windDirectionSourceDegrees": 180,
           "conditions": "Partly cloudy",
           "latitude": 36.1627,
@@ -31,7 +31,7 @@ public class AIWeatherModelsTests
 
         Assert.NotNull(result);
         Assert.Equal(180, result!.WindDirectionSourceDegrees);
-        Assert.Equal("S", result.WindDirection);
+        Assert.Equal("S", result.WindDirectionSource);
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public class AIWeatherModelsTests
           "fullSummary": "It is 41F in Nashville with light winds from the south.",
           "temperatureF": 41,
           "windSpeedMPH": 7.5,
-          "windDirection": "S",
+          "windDirectionSource": "S",
           "windDirectionSourceDegrees": 180,
           "conditions": "Partly cloudy",
           "latitude": 36.1627,
@@ -55,7 +55,7 @@ public class AIWeatherModelsTests
             JsonDefaults.CaseInsensitive);
 
         Assert.NotNull(result);
-        Assert.Equal("S", result!.WindDirection);
+        Assert.Equal("S", result!.WindDirectionSource);
         Assert.Equal(180, result.WindDirectionSourceDegrees);
     }
 
@@ -67,7 +67,7 @@ public class AIWeatherModelsTests
             FullSummary = "Sunny.",
             TemperatureF = 100,
             WindSpeedMPH = 13,
-            WindDirection = "SW",
+            WindDirectionSource = "SW",
             WindDirectionSourceDegrees = 224,
             Conditions = "Hot",
             Latitude = 36.16,
@@ -79,11 +79,12 @@ public class AIWeatherModelsTests
 
         Assert.Equal(100, root.GetProperty("temperatureF").GetDouble());
         Assert.Equal(13, root.GetProperty("windSpeedMPH").GetDouble());
-        Assert.Equal("SW", root.GetProperty("windDirection").GetString());
+        Assert.Equal("SW", root.GetProperty("windDirectionSource").GetString());
         Assert.Equal(224, root.GetProperty("windDirectionSourceDegrees").GetInt32());
         Assert.Equal(36.16, root.GetProperty("latitude").GetDouble());
         Assert.Equal(-86.78, root.GetProperty("longitude").GetDouble());
         Assert.False(root.TryGetProperty("TemperatureF", out _));
+        Assert.False(root.TryGetProperty("windDirection", out _));
         Assert.False(root.TryGetProperty("windDirectionTowardsDegrees", out _));
         Assert.False(root.TryGetProperty("windDirectionFromDegrees", out _));
         Assert.False(root.TryGetProperty("windDirectionToDegrees", out _));
@@ -95,7 +96,7 @@ public class AIWeatherModelsTests
         var result = new AIWeatherResponse();
 
         Assert.Equal(string.Empty, result.FullSummary);
-        Assert.Equal(string.Empty, result.WindDirection);
+        Assert.Equal(string.Empty, result.WindDirectionSource);
         Assert.Equal(string.Empty, result.Conditions);
     }
 }

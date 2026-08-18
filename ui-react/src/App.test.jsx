@@ -86,7 +86,7 @@ function mockHelloFetch(weather = {}) {
           fullSummary: 'Sunny in Nashville.',
           temperatureF: 72,
           windSpeedMPH: 5,
-          windDirection: 'S',
+          windDirectionSource: 'S',
           windDirectionSourceDegrees: 180,
           conditions: 'Clear',
           locationName: 'Nashville, TN',

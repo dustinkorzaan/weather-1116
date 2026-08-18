@@ -121,7 +121,7 @@
           }
           temperatureEl.textContent = formatTemperatureF(data.temperatureF);
           windSpeedEl.textContent = formatWindSpeedMph(data.windSpeedMPH);
-          renderWindDirection(windDirectionEl, data.windDirection, data.windDirectionSourceDegrees);
+          renderWindDirection(windDirectionEl, data.windDirectionSource, data.windDirectionSourceDegrees);
           conditionsEl.textContent = data.conditions || '';
           if (latLongEl) {
             latLongEl.textContent = formatLatLong(data.latitude, data.longitude);

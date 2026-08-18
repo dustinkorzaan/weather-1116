@@ -13,8 +13,8 @@ public class AIWeatherResponse
     [JsonPropertyName("windSpeedMPH")]
     public double WindSpeedMPH { get; set; }
 
-    [JsonPropertyName("windDirection")]
-    public string WindDirection { get; set; } = string.Empty;
+    [JsonPropertyName("windDirectionSource")]
+    public string WindDirectionSource { get; set; } = string.Empty;
 
     [JsonPropertyName("windDirectionSourceDegrees")]
     public int WindDirectionSourceDegrees { get; set; }

@@ -49,7 +49,7 @@ internal class Program
 		- fullSummary (string) (one or two friendly sentences of the current weather including place name, temperature, wind speed, wind direction, and overall conditions — keep those facts even though some are also JSON fields; GitHub-flavored Markdown is allowed when it helps readability)
 		- temperatureF (number) in Fahrenheit
 		- windSpeedMPH (number) in MPH
-		- windDirection (string)
+		- windDirectionSource (string)
 		- conditions (string)
 
 		You only return valid JSON.
@@ -65,10 +65,10 @@ internal class Program
 		    "fullSummary": { "type": "string" },
 		    "temperatureF": { "type": "number" },
 		    "windSpeedMPH": { "type": "number" },
-		    "windDirection": { "type": "string" },
+		    "windDirectionSource": { "type": "string" },
 		    "conditions": { "type": "string" }
 		  },
-		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirection", "conditions"],
+		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirectionSource", "conditions"],
 		  "additionalProperties": false
 		}
 		""";

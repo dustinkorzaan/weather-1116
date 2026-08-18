@@ -359,7 +359,7 @@ public sealed class PageSplitTests
                         FullSummary = "**Sunny** in Nashville.",
                         TemperatureF = 72,
                         WindSpeedMPH = 5,
-                        WindDirection = "S",
+                        WindDirectionSource = "S",
                         WindDirectionSourceDegrees = 180,
                         Conditions = "Clear",
                         Latitude = 36.1627,

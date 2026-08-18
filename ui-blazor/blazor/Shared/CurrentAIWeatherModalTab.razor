@@ -43,7 +43,7 @@
                 <FluentGridItem xs="12" sm="6">
                     <div class="stat-label">Wind Direction</div>
                     <div class="wind-direction">
-                        @FormatWindDirection(_aiWeather.WindDirection, _aiWeather.WindDirectionSourceDegrees)
+                        @FormatWindDirection(_aiWeather.WindDirectionSource, _aiWeather.WindDirectionSourceDegrees)
                         @if (WeatherGridFormat.WindArrowRotationDeg(_aiWeather.WindDirectionSourceDegrees) is int rotation)
                         {
                             <span class="wind-direction-arrow"
