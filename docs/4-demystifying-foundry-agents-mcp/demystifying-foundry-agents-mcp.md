@@ -25,8 +25,8 @@ building blocks**, not deployables.
 Run from VS Code (**Foundry Console V1** … **V5**) or `dotnet run` in each
 folder. All use the `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `.env.example`).
 
-Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
-`core-dotnet/core/AIWeather` **→ V5**.
+Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherHandler` in
+`core-dotnet/core/AIWeather` (the production V3-pattern handler) **→ V4 → V5**.
 
 - **V1 — Model-direct (legacy endpoint)** — [`FoundryConsoleV1`](../../FoundryConsoleV1)
   (`FoundryConsoleV1ModelDirectLegacy.csproj`)
@@ -78,6 +78,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   - Registers `GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as tools
     answered by local in-process looping (same Core code reused in the tools).
   - Model chooses tools that are actually handled locally; no remote MCP servers yet.
+  - This is the production pattern in `GetCurrentAIWeatherHandler` (API/MVC).
 
   **Simple Diagram without Agent/Loop**
 
@@ -137,7 +138,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   - Same model-direct call as V3, but the tools are hosted in remote MCP servers
     declared on the request instead of local in-process looping.
   - Shows that MCP tooling does not require a Foundry agent.
-  - This is the actual pattern used in production `GetCurrentAIWeatherHandler` in API/MVC.
+  - Chat1b/Chat2b remote-MCP chat tabs still use this pattern; Current AI Weather does not.
 
   **Simple Diagram without Agent/Loop**
 

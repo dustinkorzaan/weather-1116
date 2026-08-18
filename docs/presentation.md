@@ -36,9 +36,9 @@ and the Foundry console learning path (V1 → V5).
    - `GetPublicWeatherCurrentEvent(Lat/Long)` returns Non-AI Weather
 2. **V1 → V2** — model-direct (legacy vs unified endpoint); when the console still owns data prep.
 3. **V3** — local in-process looping; model chooses tools, your console answers them.
-4. **V4** — model-direct with remote MCP tools; same loop, tools run on MCP hosts.
-5. **V5** — hosted Foundry agent demo; agent owns the instructions, response schema, and MCP tools; console sends only the user prompt.
-6. **Production** — V4 model-direct path in `GetCurrentAIWeatherHandler` (API/MVC).
+4. **Production** — that V3 loop in `GetCurrentAIWeatherHandler` (API/MVC).
+5. **V4** — model-direct with remote MCP tools; Chat1b/Chat2b still use this pattern.
+6. **V5** — hosted Foundry agent demo; agent owns the instructions, response schema, and MCP tools; console sends only the user prompt.
 7. **Demos** — React / Blazor / API `GetCurrentAIWeather`; optional MCP inspector on 8110 / 8120.
 8. **Chat clients** — `/chat-clients` in React, Blazor, and MVC; compare Chat1a–Chat2b side by side.
 
