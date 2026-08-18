@@ -201,7 +201,7 @@ and handlers, including:
 
 - `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
 - `core-dotnet/core/Geo/` — geocoding (`GetLatLong`)
-- `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`)
+- `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`), fetched in Open-Meteo's native metric units (°C, km/h, mm) for the AI/MCP tool path. The `WeatherMVC`/`WeatherAPI` Forecast and History HTTP endpoints instead go through `GetUIWeatherForecast`/`GetUIWeatherHistory`, which wrap the same metric fetch and map it via `WeatherResponseMapper` into US customary units (°F, mph, in) so the UIs only format values, not convert them.
 - `core-dotnet/core/AIWeather/` — model-direct AI weather (`GetCurrentAIWeatherHandler`)
 - `core-dotnet/core/About/` — About tree builder and remote about client
 
