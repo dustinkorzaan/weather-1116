@@ -85,7 +85,7 @@ test('logo overlay renders a spinning image without a city-name label', () => {
   const overlay = createLogoPinOverlay(createMaps(pane), {
     lat: 33.749,
     lng: -84.388,
-    cityName: 'Atlanta, GA',
+    cityName: 'Nashville, TN',
     logoUrl: LOGO_PIN_DARK_URL,
     spinOffsetSec: 3.7,
   });
@@ -96,7 +96,7 @@ test('logo overlay renders a spinning image without a city-name label', () => {
   const image = pane.querySelector('.weather-map-logo-pin-image');
   const spinner = pane.querySelector('.weather-map-logo-pin-spin');
 
-  expect(pin?.getAttribute('aria-label')).toBe('Atlanta, GA');
+  expect(pin?.getAttribute('aria-label')).toBe('Nashville, TN');
   expect(image?.src).toContain(LOGO_PIN_DARK_URL);
   expect(spinner?.style.animationDelay).toBe('-3.7s');
   expect(pin?.textContent).toBe('');

@@ -1,38 +1,43 @@
-# Weather
+# Weather 1116
 
-Weather sample app implemented across seven runnable stacks plus one
-shared .NET class library.
+Demystifying Foundry, agents, and models: from model-direct, to local
+in-process looping, to remote MCP, to a hosted agent, behind a pin map.
+
+|  | Project | Path | Stack | Port |
+| --- | --- | --- | --- | --- |
+| [Visit](https://wx.korzaan.com) | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
+| [Visit](https://weather1116-prod-blazor.azurewebsites.net) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
+| [Visit](https://weather1116-prod-mvc.azurewebsites.net) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
+|  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
+|  | Core | [`core-dotnet/core`](core-dotnet/core) | In API, MVC, Worker, and MCP |  |
+|  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |
+|  | MCP Server (App Service) | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
+|  | MCP Server (Function App) | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |
 
 This README is intentionally brief. Use it for the project grid and demo
 outline. UI pages, styling stacks, theme, architecture constraints, project
 relationships, and parity guidance live in
 [`docs/architecture.md`](docs/architecture.md).
 
-| PROD | Project | Path | Stack | Port |
-| --- | --- | --- | --- | --- |
-| [Visit](https://wx.korzaan.com) | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
-| [Visit](https://weather1116-prod-blazor.azurewebsites.net) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
-| [Visit](https://weather1116-prod-mvc.azurewebsites.net) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
-|  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
-|  | Core | [`core-dotnet/core`](core-dotnet/core) | Shared .NET class library referenced by MVC, API, worker, and MCP hosts |  |
-|  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |
-|  | MCP Server on App Service | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
-|  | MCP Server on Functions App | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |
-
 ## Foundry console demos
 
 Presentation reference: [`docs/presentation.md`](docs/presentation.md)
 
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
-against Core weather data (V1–V4) or a hosted Foundry Agent (V5).
+against Core weather data (V1–V4) or a hosted Foundry Agent (V5) using the
+following 3-step core weather progression:
 
-| Project | Path | Pattern |
+- Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
+- Lat/Long → Non-AI Weather `{ temp: 24, ... }`
+- Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
+
+|  | Project | Description |
 | --- | --- | --- |
 | V1 | [`Foundry Console V1 Model Direct Legacy`](FoundryConsoleV1) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | V2 | [`Foundry Console V2 Model Direct Unified AI`](FoundryConsoleV2) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) | In-process tool callbacks answered by the console |
-| V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct, tools target remote MCP servers instead of in-process callbacks |
-| V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
+| V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) | Model-direct: tools handled by local in-process looping |
+| V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools handled by remote MCP servers |
+| V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
 ## Chat clients
 

@@ -58,7 +58,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         var systemPrompt = """
         # Role & Operational Rules
         You are a dedicated weather assistant.
-        Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Do not use C, KPH, or MM.
+        Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
         You have access to 3rd-party Model Context Protocol (MCP) tools for location mapping and real-time public meteorology data.
 
         # Tool Protocol
@@ -76,8 +76,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         # JSON Structure Properties
         - fullSummary: One or two friendly sentences describing the current weather. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields. Do not include latitude or longitude in fullSummary.
         - For the place name, prefer a clean, human-friendly city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
-        - temperatureF: Current temperature in Fahrenheit from the weather tool.
-        - windSpeedMPH: Current wind speed in miles per hour from the weather tool.
+        - temperatureF: Current temperature in Fahrenheit (convert from the weather tool).
+        - windSpeedMPH: Current wind speed in miles per hour (convert from the weather tool).
         - windDirection: Compass point such as N, NE, or SW.
         - windDirectionDegrees: Meteorological wind direction in degrees from the weather tool (0–360).
         - conditions: Short current conditions phrase from the weather tool.

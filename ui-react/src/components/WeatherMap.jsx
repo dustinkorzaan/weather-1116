@@ -11,7 +11,6 @@ import {
 import { useMapPins } from '../map/mapPinsContext';
 import { bindPinHoverCard } from '../map/pinHoverCard';
 import { bindRightClickAddLocation } from '../map/rightClickAddLocation';
-import { Search } from 'lucide-react';
 import { useLazyGetLocationQuery } from '../services/weatherApi';
 import { THEME_CHANGE_EVENT, resolveTheme } from '../theme/theme';
 import { DEFAULT_WEATHER_MODAL_TAB, weatherModalPath } from '../utils/weatherModalLocation';
@@ -189,50 +188,6 @@ function WeatherMap() {
           role="presentation"
           data-status={status}
         />
-        {!apiKey && (
-          <div className="pointer-events-none absolute top-8 left-8 rounded-lg bg-background p-3 shadow-lg ring-1 ring-foreground/10">
-            <div
-              className="weather-map-pin-card flex min-w-[10.5rem] flex-col gap-2"
-              role="dialog"
-              aria-label="Atlanta, GA"
-            >
-              <div className="weather-map-pin-card-header flex items-center justify-between gap-2">
-                <div className="weather-map-pin-card-name text-sm font-semibold leading-none text-foreground">
-                  Atlanta, GA
-                </div>
-                <span
-                  className="weather-map-pin-card-delete inline-flex size-6 shrink-0 items-center justify-center rounded-md leading-none text-muted-foreground [&_svg]:block"
-                  aria-hidden="true"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 6h18" />
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                    <line x1="10" x2="10" y1="11" y2="17" />
-                    <line x1="14" x2="14" y1="11" y2="17" />
-                  </svg>
-                </span>
-              </div>
-              <button
-                type="button"
-                className="weather-map-pin-card-button inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-primary px-2.5 py-1.5 text-left text-sm font-medium text-primary-foreground shadow-sm"
-              >
-                <Search className="size-4" aria-hidden="true" />
-                <span>Weather</span>
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );

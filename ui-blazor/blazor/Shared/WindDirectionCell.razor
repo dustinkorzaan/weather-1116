@@ -1,0 +1,16 @@
+@using WeatherBlazor.Data
+
+<div class="wind-direction">
+    @WeatherGridFormat.FormatWindDirection(Degrees)
+    @if (WeatherGridFormat.WindArrowRotationDeg(Degrees) is int rotation)
+    {
+        <span class="wind-direction-arrow"
+              aria-hidden="true"
+              style="@($"transform: rotate({rotation}deg)")">&#x27A4;</span>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public double Degrees { get; set; }
+}

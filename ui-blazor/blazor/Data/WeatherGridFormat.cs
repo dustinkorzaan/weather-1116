@@ -31,8 +31,8 @@ public static class WeatherGridFormat
     }
 
     /// <summary>
-    /// Formats an Open-Meteo hourly/15-minute timestamp ("2026-08-19T14:00") as "Wed, Aug 19, 2 PM"
-    /// (minutes shown only when non-zero, e.g. "Wed, Aug 19, 2:15 PM").
+    /// Formats an Open-Meteo hourly/15-minute timestamp ("2026-08-19T14:00") as "2 PM"
+    /// (minutes shown only when non-zero, e.g. "2:15 PM").
     /// </summary>
     public static string FormatClockTime(string isoDateTime)
     {
@@ -41,21 +41,42 @@ public static class WeatherGridFormat
             return isoDateTime ?? string.Empty;
         }
 
-        var datePart = dateTime.ToString("ddd, MMM d", CultureInfo.InvariantCulture);
-        var timePart = dateTime.ToString(dateTime.Minute == 0 ? "h tt" : "h:mm tt", CultureInfo.InvariantCulture);
-        return $"{datePart}, {timePart}";
+        return dateTime.ToString(dateTime.Minute == 0 ? "h tt" : "h:mm tt", CultureInfo.InvariantCulture);
     }
 
-    public static string FormatPrecipitationIn(double value) =>
-        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(value, 2)}\"");
+    /// <summary>Open-Meteo °C → °F.</summary>
+    public static double CelsiusToFahrenheit(double celsius) => celsius * 9d / 5d + 32d;
 
-    public static string FormatTemperatureF(double value) =>
-        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(value, 1)} °F");
+    /// <summary>Open-Meteo km/h → mph.</summary>
+    public static double KilometersPerHourToMph(double kilometersPerHour) =>
+        kilometersPerHour / 1.609344;
 
-    public static string FormatWindSpeedMph(double value) =>
-        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(value, 1)} mph");
+    /// <summary>Open-Meteo mm → inches.</summary>
+    public static double MillimetersToInches(double millimeters) => millimeters / 25.4;
+
+    public static string FormatPrecipitationIn(double millimeters) =>
+        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(MillimetersToInches(millimeters), 2)}\"");
+
+    public static string FormatTemperatureF(double celsius) =>
+        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(CelsiusToFahrenheit(celsius), 1)} °F");
+
+    public static string FormatWindSpeedMph(double kilometersPerHour) =>
+        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(KilometersPerHourToMph(kilometersPerHour), 1)} mph");
 
     /// <summary>Formats meteorological degrees as compass plus degrees, e.g. "SW (224°)".</summary>
     public static string FormatWindDirection(double degrees) =>
         string.Create(CultureInfo.InvariantCulture, $"{DegreesToCompass(degrees)} ({Math.Round(degrees):0}°)");
+
+    /// <summary>
+    /// Rotation for the ➤ wind arrow so 0° (north / from the north) points up.
+    /// </summary>
+    public static int? WindArrowRotationDeg(double degrees)
+    {
+        if (double.IsNaN(degrees) || double.IsInfinity(degrees))
+        {
+            return null;
+        }
+
+        return (int)Math.Round(degrees) - 90;
+    }
 }

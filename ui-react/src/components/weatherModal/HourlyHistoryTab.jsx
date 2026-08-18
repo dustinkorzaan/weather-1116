@@ -1,8 +1,8 @@
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGetHistoryQuery } from '../../services/weatherApi';
-import { formatTemperatureF, formatWindDirection, formatWindSpeedMph } from '../../utils/aiWeatherDisplay';
-import { degreesToCompass, formatClockTime, formatPrecipitationIn } from '../../utils/weatherGridFormat';
+import WindDirectionCell from './WindDirectionCell';
+import { formatCalendarDate, formatClockTime, formatPrecipitationIn, formatTemperatureF, formatWindSpeedMph } from '../../utils/weatherGridFormat';
 
 /** Static single-use grid for the Hourly History tab — most recent first. */
 function HourlyHistoryTab({ lat, lng }) {
@@ -47,6 +47,7 @@ function HourlyHistoryTab({ lat, lng }) {
           <table className="w-full border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-border text-muted-foreground">
+                <th className="py-1.5 pr-4 font-semibold">Date</th>
                 <th className="py-1.5 pr-4 font-semibold">Time</th>
                 <th className="py-1.5 pr-4 font-semibold">Temp</th>
                 <th className="py-1.5 pr-4 font-semibold">Precip</th>
@@ -57,12 +58,13 @@ function HourlyHistoryTab({ lat, lng }) {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.time} className="border-b border-border/50">
+                  <td className="py-1.5 pr-4">{formatCalendarDate(row.time)}</td>
                   <td className="py-1.5 pr-4">{formatClockTime(row.time)}</td>
                   <td className="py-1.5 pr-4">{formatTemperatureF(row.temperature)}</td>
                   <td className="py-1.5 pr-4">{formatPrecipitationIn(row.precipitation)}</td>
                   <td className="py-1.5 pr-4">{formatWindSpeedMph(row.windSpeed)}</td>
                   <td className="py-1.5">
-                    {formatWindDirection(degreesToCompass(row.windDirection), row.windDirection)}
+                    <WindDirectionCell degrees={row.windDirection} />
                   </td>
                 </tr>
               ))}

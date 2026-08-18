@@ -7,8 +7,8 @@ import {
 } from './currentAiWeatherLocation';
 
 test('encodes a city, state location without cleaning or splitting', () => {
-  expect(currentAiWeatherPath('Atlanta, GA')).toBe(
-    '/current-ai-weather?location=Atlanta%2C%20GA'
+  expect(currentAiWeatherPath('Nashville, TN')).toBe(
+    '/current-ai-weather?location=Nashville%2C%20TN'
   );
   expect(currentAiWeatherPath('New York, NY')).toBe(
     '/current-ai-weather?location=New%20York%2C%20NY'
@@ -16,8 +16,8 @@ test('encodes a city, state location without cleaning or splitting', () => {
   expect(currentAiWeatherPath('nashville tn')).toBe(
     '/current-ai-weather?location=nashville%20tn'
   );
-  expect(currentAiWeatherPath('  Atlanta, GA  ')).toBe(
-    '/current-ai-weather?location=Atlanta%2C%20GA'
+  expect(currentAiWeatherPath('  Nashville, TN  ')).toBe(
+    '/current-ai-weather?location=Nashville%2C%20TN'
   );
   expect(currentAiWeatherPath('')).toBe(CURRENT_AI_WEATHER_PATH);
 });
@@ -26,14 +26,11 @@ test('expands a city name with hemisphere lat/long', () => {
   expect(formatLocationWithLatLong('Nashville, TN', 36.1659, -86.7844)).toBe(
     'Nashville, TN (36.1659° N, 86.7844° W)'
   );
-  expect(formatLocationWithLatLong('Atlanta, GA', 33.749, -84.388)).toBe(
-    'Atlanta, GA (33.7490° N, 84.3880° W)'
-  );
   expect(formatLocationWithLatLong('Sydney, NSW', -33.8688, 151.2093)).toBe(
     'Sydney, NSW (33.8688° S, 151.2093° E)'
   );
-  expect(formatLocationWithLatLong('  Atlanta, GA  ', 33.749, -84.388)).toBe(
-    'Atlanta, GA (33.7490° N, 84.3880° W)'
+  expect(formatLocationWithLatLong('  Nashville, TN  ', 36.1659, -86.7844)).toBe(
+    'Nashville, TN (36.1659° N, 86.7844° W)'
   );
   expect(formatLocationWithLatLong('', 36.1659, -86.7844)).toBe('');
   expect(formatLocationWithLatLong('Nashville, TN', Number.NaN, -86.7844)).toBe('Nashville, TN');
@@ -48,8 +45,8 @@ test('encodes an expanded pin location into the AI weather query', () => {
 });
 
 test('reads a location query without reformatting it', () => {
-  expect(locationFromSearchParams(new URLSearchParams('location=Atlanta%2C%20GA'))).toBe(
-    'Atlanta, GA'
+  expect(locationFromSearchParams(new URLSearchParams('location=Nashville%2C%20TN'))).toBe(
+    'Nashville, TN'
   );
   expect(locationFromSearchParams(new URLSearchParams('location=nashville%20tn'))).toBe(
     'nashville tn'

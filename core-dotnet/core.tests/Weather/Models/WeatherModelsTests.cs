@@ -24,8 +24,8 @@ public class WeatherModelsTests
           "current_weather_units": {
             "time": "iso8601",
             "interval": "seconds",
-            "temperature": "°F",
-            "windspeed": "mp/h",
+            "temperature": "°C",
+            "windspeed": "km/h",
             "winddirection": "°",
             "is_day": "",
             "weathercode": "wmo code"
@@ -51,8 +51,8 @@ public class WeatherModelsTests
         Assert.Equal("America/Chicago", result.Timezone);
         Assert.Equal("CST", result.TimezoneAbbreviation);
 
-        Assert.Equal("°F", result.CurrentWeatherUnits.Temperature);
-        Assert.Equal("mp/h", result.CurrentWeatherUnits.WindSpeed);
+        Assert.Equal("°C", result.CurrentWeatherUnits.Temperature);
+        Assert.Equal("km/h", result.CurrentWeatherUnits.WindSpeed);
 
         Assert.Equal("2024-01-02T03:00", result.CurrentWeather.Time);
         Assert.Equal(900, result.CurrentWeather.Interval);
@@ -89,10 +89,10 @@ public class WeatherModelsTests
           "daily_units": {
             "time": "iso8601",
             "weather_code": "wmo code",
-            "temperature_2m_max": "°F",
-            "temperature_2m_min": "°F",
+            "temperature_2m_max": "°C",
+            "temperature_2m_min": "°C",
             "precipitation_sum": "mm",
-            "wind_speed_10m_max": "mp/h",
+            "wind_speed_10m_max": "km/h",
             "wind_direction_10m_dominant": "°"
           },
           "daily": {
@@ -116,7 +116,7 @@ public class WeatherModelsTests
         Assert.NotNull(result.Daily);
         Assert.Equal(["2026-08-16", "2026-08-17"], result.Daily!.Time);
         Assert.Equal([100.4, 97.9], result.Daily.Temperature2mMax);
-        Assert.Equal("°F", result.DailyUnits!.Temperature2mMax);
+        Assert.Equal("°C", result.DailyUnits!.Temperature2mMax);
     }
 
     [Fact]
@@ -133,10 +133,10 @@ public class WeatherModelsTests
           "elevation": 145.0,
           "hourly_units": {
             "time": "iso8601",
-            "temperature_2m": "°F",
+            "temperature_2m": "°C",
             "precipitation": "mm",
             "weather_code": "wmo code",
-            "wind_speed_10m": "mp/h",
+            "wind_speed_10m": "km/h",
             "wind_direction_10m": "°"
           },
           "hourly": {

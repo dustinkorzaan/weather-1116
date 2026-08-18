@@ -13,13 +13,13 @@ public sealed class SafeGfmMarkdownTests
             | City | Temp |
             | --- | --- |
             | Nashville | 72 |
-            | Atlanta | 80 |
+            | Charlotte | 80 |
             """);
 
         Assert.Contains("<table>", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("<strong>", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Nashville", html);
-        Assert.Contains("Atlanta", html);
+        Assert.Contains("Charlotte", html);
         Assert.DoesNotContain("| City |", html);
     }
 

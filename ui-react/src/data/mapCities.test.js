@@ -45,8 +45,8 @@ test('default map cities use GUID ids', () => {
 });
 
 test('map pin labels encode into the location query with lat/long', () => {
-  expect(currentAiWeatherPath(formatLocationWithLatLong('Atlanta, GA', 33.749, -84.388))).toBe(
-    '/current-ai-weather?location=Atlanta%2C%20GA%20(33.7490%C2%B0%20N%2C%2084.3880%C2%B0%20W)'
+  expect(currentAiWeatherPath(formatLocationWithLatLong('Nashville, TN', 36.1659, -86.7844))).toBe(
+    '/current-ai-weather?location=Nashville%2C%20TN%20(36.1659%C2%B0%20N%2C%2086.7844%C2%B0%20W)'
   );
 });
 

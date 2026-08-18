@@ -2,15 +2,23 @@
 
 ## Purpose
 
-This repository contains one Weather sample implemented as six primary
-projects: five runnable applications plus one shared .NET class library. The
-goal is feature parity across all UI implementations while keeping each project
-idiomatic for its framework.
+This sample demystifies Foundry, agents, and models: from model-direct, to
+local in-process looping, to remote MCP, to a hosted agent, behind a pin map.
 
-The repo also includes **MCP tool hosts** and **Foundry console demos** that
-are not called directly by the UIs, but they exercise the same `Core` weather
-and geo logic and support the model-direct AI weather path in API and MVC (V4
-pattern) plus the hosted-agent learning demo in Foundry Console V5.
+This repository is a Weather sample app implemented across seven runnable
+stacks plus one shared .NET class library.
+
+Six of those projects are primary: five runnable applications (React UI,
+Blazor UI, MVC UI, API, and Worker) plus the shared `Core` class library.
+The goal is feature parity across all UI implementations while keeping each
+project idiomatic for its framework.
+
+The remaining two runnable stacks are the **MCP tool hosts**. The UIs never
+call them directly. Current AI Weather still depends on them: API and MVC
+declare those hosts as remote tools on the model request (V4
+`GetCurrentAIWeatherHandler`). The **Foundry console demos** are local
+learning apps on the same `Core` weather and geo logic, plus the hosted-agent
+contrast in Foundry Console V5.
 
 ## Projects
 
@@ -23,17 +31,19 @@ pattern) plus the hosted-agent learning demo in Foundry Console V5.
 | 3 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
 | 4 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
 | 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire dashboard and servers | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
-| 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | Shared events/handlers referenced by MVC, API, worker, and MCP hosts |
+| 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | In API, MVC, Worker, and MCP |
 
 ### Adjacent projects (not UI/API dependencies)
 
-These are part of the overall system map but are **not** on the critical path
-for hello/AI weather/map flows in the three UIs.
+Foundry consoles are learning demos, not UI dependencies. MCP hosts are not
+called by the UIs directly, but they **are** on the Current AI Weather path:
+API and MVC declare them as remote tools on the model request (V4). Hello and
+map chrome do not need them.
 
 | Project | Path | Role |
 | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | Remote MCP server exposing `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` via `Core` |
-| MCP Server on Functions App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetLatLong` via `Core` |
+| MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetLatLong` via `Core` |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
 Ports for runnable apps are in [`README.md`](../README.md); worker and console
@@ -125,7 +135,7 @@ MediatR handlers the sample uses in-process elsewhere.
 | Host | Path | Tool | Port | Endpoint | Auth |
 | --- | --- | --- | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` | 8110 | `/mcp` | Bearer `MCP_SRV_APP_SERVICE_KEY` (no default — must be set by developer) |
-| MCP Server on Functions App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLong`, `GetLocation` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
+| MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLong`, `GetLocation` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
 
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
@@ -138,7 +148,7 @@ Prod apps: `weather1116-prod-mcp-srv-app-service`, `weather1116-prod-mcp-srv-fun
 Auth examples:
 
 - MCP Server on App Service: `Authorization: Bearer {your MCP_SRV_APP_SERVICE_KEY value}` (`/About` stays open)
-- MCP Server on Functions App (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
+- MCP Server on Function App (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 
 Each host also exposes an anonymous **`/About`** probe that returns a leaf
 `AboutNode` (`mcp-srv-app-service` or `mcp-srv-func-app`) with tool-registration health and
@@ -224,7 +234,7 @@ and layout code instead of sharing it.
 
 | Route | Contents |
 | --- | --- |
-| `/` | Top bar (logo left, person/avatar menu right) above a full-viewport Google Map |
+| `/` | Top bar (logo left, person/avatar menu right) above a full-viewport Google Map. Pin click opens a weather modal (Current AI Weather, forecast, and history). |
 | `/hello-world` | Same top bar, then the hello message — no map |
 | `/current-ai-weather` | Same top bar, then the Current AI Weather widget — no map |
 | `/chat-clients` | Same top bar, then the chat clients (ChatPanel) — no map |
@@ -284,7 +294,9 @@ user explicitly picks a type from the control, that choice is kept across
 Light/Dark/system theme changes; otherwise the default is re-derived from
 the resolved theme on every switch (and on initial load). The map canvas,
 logo contrast, and hover card follow the resolved Light/Dark theme. Header
-chrome keeps the outline `logo.svg`. Weather overlays will come later.
+chrome keeps the outline `logo.svg`. Clicking a pin opens a weather modal with
+Current AI Weather plus forecast and history tabs. Map-canvas weather overlays
+are out of scope.
 
 **API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
 in a Google Cloud project.
@@ -299,9 +311,8 @@ Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
 | Blazor | `GOOGLE_MAPS_API_KEY` in `ui-blazor/blazor/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`ui-blazor/blazor/.env.example`](../ui-blazor/blazor/.env.example)) |
 | MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`mvc-dotnet/mvc/.env.example`](../mvc-dotnet/mvc/.env.example)) |
 
-Without a key, the map container still renders. Each UI shows a short setup
-hint plus a sample Atlanta pin hover card (themed) so the card layout can be
-reviewed without Maps credentials.
+Without a key, the map container still renders and each UI shows a short
+setup hint. Pin hover cards are only created when Maps loads.
 
 ## Local Run Model
 
@@ -358,8 +369,8 @@ mcp-srv-app-service/
   mcp/                       MCP Server on App Service tool host (WeatherMcpSrvAppService.csproj)
   mcp.tests/                 MCP Server on App Service tests (WeatherMcpSrvAppService.Tests.csproj)
 mcp-srv-func-app/
-  mcp/                       MCP Server on Functions App tool host (WeatherMcpSrvFuncApp.csproj)
-  mcp.tests/                 MCP Server on Functions App tests (WeatherMcpSrvFuncApp.Tests.csproj)
+  mcp/                       MCP Server on Function App tool host (WeatherMcpSrvFuncApp.csproj)
+  mcp.tests/                 MCP Server on Function App tests (WeatherMcpSrvFuncApp.Tests.csproj)
 FoundryConsoleV1…V5/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```
@@ -374,9 +385,9 @@ blocks**, not production deployables:
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | In-process tool callbacks (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same tools `Core` exposes, answered locally |
-| **V4** | Model-direct via `ResponsesClient`, tools target remote MCP servers — same pattern as API/MVC production |
-| **V5** | Hosted Foundry agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
+| **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same Core code reused in the tools |
+| **V4** | Model-direct: tools handled by remote MCP servers — actual production pattern in `GetCurrentAIWeatherHandler` (API/MVC) |
+| **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
 `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `Program.cs` and `.env.example`).
@@ -393,12 +404,12 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
-| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
+| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Microsoft Foundry API key |
 | `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes | Hosted model deployment name (e.g. `gpt-5.4-mini`) |
 | `MCP_SRV_FUNC_APP_KEY` | Yes | `mcp_extension` system key for the `McpSrvFuncApp` server (`x-functions-key`) |
 | `MCP_SRV_APP_SERVICE_KEY` | Yes | Bearer token for the `McpSrvAppService` server |
 | `MCP_SRV_APP_SERVICE_URL` | Yes | Base URL for MCP Server on App Service (e.g. `http://localhost:8110`) |
-| `MCP_SRV_FUNC_APP_URL` | Yes | Base URL for MCP Server on Functions App (e.g. `http://localhost:8120`) |
+| `MCP_SRV_FUNC_APP_URL` | Yes | Base URL for MCP Server on Function App (e.g. `http://localhost:8120`) |
 
 **V5 settings** (agent-hosted demo only):
 

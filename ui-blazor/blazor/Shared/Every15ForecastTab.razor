@@ -30,6 +30,7 @@
             <table class="weather-grid">
                 <thead>
                     <tr>
+                        <th>Date</th>
                         <th>Time</th>
                         <th>Temp</th>
                         <th>Precip</th>
@@ -41,11 +42,12 @@
                     @foreach (var row in _rows)
                     {
                         <tr>
+                            <td>@WeatherGridFormat.FormatCalendarDate(row.Time)</td>
                             <td>@WeatherGridFormat.FormatClockTime(row.Time)</td>
                             <td>@WeatherGridFormat.FormatTemperatureF(row.Temperature)</td>
                             <td>@WeatherGridFormat.FormatPrecipitationIn(row.Precipitation)</td>
                             <td>@WeatherGridFormat.FormatWindSpeedMph(row.WindSpeed)</td>
-                            <td>@WeatherGridFormat.FormatWindDirection(row.WindDirection)</td>
+                            <td><WindDirectionCell Degrees="@row.WindDirection" /></td>
                         </tr>
                     }
                 </tbody>

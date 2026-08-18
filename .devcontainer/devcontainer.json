@@ -109,7 +109,7 @@
             "onAutoForward": "ignore"
         },
         "8120": {
-            "label": "Weather MCP Server on Functions App",
+            "label": "Weather MCP Server on Function App",
             "onAutoForward": "ignore"
         },
         "8130": {

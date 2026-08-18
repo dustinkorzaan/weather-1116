@@ -47,7 +47,7 @@
                             <td>@WeatherGridFormat.FormatTemperatureF(row.Low)</td>
                             <td>@WeatherGridFormat.FormatPrecipitationIn(row.Precipitation)</td>
                             <td>@WeatherGridFormat.FormatWindSpeedMph(row.WindSpeed)</td>
-                            <td>@WeatherGridFormat.FormatWindDirection(row.WindDirection)</td>
+                            <td><WindDirectionCell Degrees="@row.WindDirection" /></td>
                         </tr>
                     }
                 </tbody>

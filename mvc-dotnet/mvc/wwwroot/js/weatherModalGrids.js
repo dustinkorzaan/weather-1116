@@ -16,52 +16,54 @@
     return COMPASS_POINTS[index];
   }
 
-  /** Formats an Open-Meteo daily date ("2026-08-19") as "Wed, Aug 19". */
+  /** Formats an Open-Meteo daily date or hourly timestamp as "Wed, Aug 19". */
   function formatCalendarDate(isoDate) {
-    var date = new Date(isoDate + 'T00:00:00');
+    var value = String(isoDate || '');
+    var date = new Date(value.indexOf('T') >= 0 ? value : value + 'T00:00:00');
     if (Number.isNaN(date.getTime())) {
       return isoDate || '';
     }
     return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   }
 
-  /** Formats an Open-Meteo hourly/15-minute timestamp as "Wed, Aug 19, 2 PM" (minutes shown only when non-zero). */
+  /** Formats an Open-Meteo hourly/15-minute timestamp as "2 PM" (minutes shown only when non-zero). */
   function formatClockTime(isoDateTime) {
     var date = new Date(isoDateTime);
     if (Number.isNaN(date.getTime())) {
       return isoDateTime || '';
     }
-    var datePart = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
     var timeOptions = { hour: 'numeric' };
     if (date.getMinutes() !== 0) {
       timeOptions.minute = '2-digit';
     }
-    var timePart = date.toLocaleTimeString(undefined, timeOptions);
-    return datePart + ', ' + timePart;
+    return date.toLocaleTimeString(undefined, timeOptions);
   }
 
-  function formatTemperatureF(value) {
-    var numeric = Number(value);
+  /** Converts Open-Meteo °C to °F, then formats. */
+  function formatTemperatureF(celsius) {
+    var numeric = Number(celsius);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 10) / 10) + ' °F';
+    return (Math.round((numeric * 9 / 5 + 32) * 10) / 10) + ' °F';
   }
 
-  function formatWindSpeedMph(value) {
-    var numeric = Number(value);
+  /** Converts Open-Meteo km/h to mph, then formats. */
+  function formatWindSpeedMph(kilometersPerHour) {
+    var numeric = Number(kilometersPerHour);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 10) / 10) + ' mph';
+    return (Math.round((numeric / 1.609344) * 10) / 10) + ' mph';
   }
 
-  function formatPrecipitationIn(value) {
-    var numeric = Number(value);
+  /** Converts Open-Meteo mm to inches, then formats. */
+  function formatPrecipitationIn(millimeters) {
+    var numeric = Number(millimeters);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 100) / 100) + '"';
+    return (Math.round((numeric / 25.4) * 100) / 100) + '"';
   }
 
   function formatWindDirection(degrees) {
@@ -72,6 +74,35 @@
     }
     var withDegrees = '(' + Math.round(numeric) + '°)';
     return compass ? compass + ' ' + withDegrees : withDegrees;
+  }
+
+  var WIND_DIRECTION_ARROW = '\u27A4';
+
+  function windArrowRotationDeg(degrees) {
+    var numeric = Number(degrees);
+    if (!Number.isFinite(numeric)) {
+      return null;
+    }
+    return Math.round(numeric) - 90;
+  }
+
+  function createWindDirectionCell(degrees) {
+    var wrap = document.createElement('span');
+    wrap.className = 'wind-direction';
+    var label = document.createElement('span');
+    label.textContent = formatWindDirection(degrees);
+    wrap.appendChild(label);
+
+    var rotation = windArrowRotationDeg(degrees);
+    if (rotation !== null) {
+      var arrow = document.createElement('span');
+      arrow.className = 'wind-direction-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = WIND_DIRECTION_ARROW;
+      arrow.style.transform = 'rotate(' + rotation + 'deg)';
+      wrap.appendChild(arrow);
+    }
+    return wrap;
   }
 
   function setHidden(el, hidden) {
@@ -97,23 +128,24 @@
         formatTemperatureF(daily.temperature_2m_min[index]),
         formatPrecipitationIn(daily.precipitation_sum[index]),
         formatWindSpeedMph(daily.wind_speed_10m_max[index]),
-        formatWindDirection(daily.wind_direction_10m_dominant[index]),
+        createWindDirectionCell(daily.wind_direction_10m_dominant[index]),
       ];
     });
   }
 
-  /** Time | Temp | Precip | Wind Speed | Wind Direction — used by the hourly and every-15 tabs. */
+  /** Date | Time | Temp | Precip | Wind Speed | Wind Direction — used by the hourly and every-15 tabs. */
   function subDailyRows(series) {
     if (!series || !series.time) {
       return [];
     }
     return series.time.map(function (time, index) {
       return [
+        formatCalendarDate(time),
         formatClockTime(time),
         formatTemperatureF(series.temperature_2m[index]),
         formatPrecipitationIn(series.precipitation[index]),
         formatWindSpeedMph(series.wind_speed_10m[index]),
-        formatWindDirection(series.wind_direction_10m[index]),
+        createWindDirectionCell(series.wind_direction_10m[index]),
       ];
     });
   }
@@ -122,9 +154,13 @@
     tbody.replaceChildren();
     rows.forEach(function (cells) {
       var tr = document.createElement('tr');
-      cells.forEach(function (text) {
+      cells.forEach(function (cell) {
         var td = document.createElement('td');
-        td.textContent = text;
+        if (cell instanceof Node) {
+          td.appendChild(cell);
+        } else {
+          td.textContent = cell;
+        }
         tr.appendChild(td);
       });
       tbody.appendChild(tr);

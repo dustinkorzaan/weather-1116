@@ -28,7 +28,7 @@ public static class AboutTreeBuilder
     }
 
     /// <summary>
-    /// Single leaf node for the MCP Server on Functions App host (no children).
+    /// Single leaf node for the MCP Server on Function App host (no children).
     /// </summary>
     public static AboutNode BuildMcpSrvFuncAppNode(bool isHealthy = true)
     {

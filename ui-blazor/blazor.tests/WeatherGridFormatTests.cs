@@ -19,41 +19,52 @@ public sealed class WeatherGridFormatTests
     public void FormatCalendarDate_FormatsAsWeekdayMonthDay()
     {
         Assert.Equal("Wed, Aug 19", WeatherGridFormat.FormatCalendarDate("2026-08-19"));
+        Assert.Equal("Wed, Aug 19", WeatherGridFormat.FormatCalendarDate("2026-08-19T14:00"));
     }
 
     [Fact]
     public void FormatClockTime_OmitsMinutesWhenZero()
     {
-        Assert.Equal("Wed, Aug 19, 2 PM", WeatherGridFormat.FormatClockTime("2026-08-19T14:00"));
+        Assert.Equal("2 PM", WeatherGridFormat.FormatClockTime("2026-08-19T14:00"));
     }
 
     [Fact]
     public void FormatClockTime_ShowsMinutesWhenNonZero()
     {
-        Assert.Equal("Wed, Aug 19, 2:15 PM", WeatherGridFormat.FormatClockTime("2026-08-19T14:15"));
+        Assert.Equal("2:15 PM", WeatherGridFormat.FormatClockTime("2026-08-19T14:15"));
     }
 
     [Fact]
-    public void FormatPrecipitationIn_RoundsAwayFloatingPointNoise()
+    public void FormatPrecipitationIn_ConvertsMillimetersAndRounds()
     {
-        Assert.Equal("0.3\"", WeatherGridFormat.FormatPrecipitationIn(0.30000000000000004));
+        Assert.Equal("1\"", WeatherGridFormat.FormatPrecipitationIn(25.4));
+        Assert.Equal("0.3\"", WeatherGridFormat.FormatPrecipitationIn(7.62));
     }
 
     [Fact]
-    public void FormatTemperatureF_RoundsToOneDecimal()
+    public void FormatTemperatureF_ConvertsCelsiusAndRoundsToOneDecimal()
     {
-        Assert.Equal("88.4 °F", WeatherGridFormat.FormatTemperatureF(88.44));
+        Assert.Equal("75.2 °F", WeatherGridFormat.FormatTemperatureF(24));
+        Assert.Equal("32 °F", WeatherGridFormat.FormatTemperatureF(0));
     }
 
     [Fact]
-    public void FormatWindSpeedMph_RoundsToOneDecimal()
+    public void FormatWindSpeedMph_ConvertsKilometersPerHourAndRoundsToOneDecimal()
     {
-        Assert.Equal("12.3 mph", WeatherGridFormat.FormatWindSpeedMph(12.34));
+        Assert.Equal("6.2 mph", WeatherGridFormat.FormatWindSpeedMph(10));
     }
 
     [Fact]
     public void FormatWindDirection_CombinesCompassAndDegrees()
     {
         Assert.Equal("SW (224°)", WeatherGridFormat.FormatWindDirection(224));
+    }
+
+    [Fact]
+    public void WindArrowRotationDeg_PointsNorthUp()
+    {
+        Assert.Equal(-90, WeatherGridFormat.WindArrowRotationDeg(0));
+        Assert.Equal(134, WeatherGridFormat.WindArrowRotationDeg(224));
+        Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.NaN));
     }
 }

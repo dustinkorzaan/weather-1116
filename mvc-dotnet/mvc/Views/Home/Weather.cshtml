@@ -16,10 +16,10 @@
     (string[] Headers, string Endpoint, string Resolution, string Field, bool Reverse) GridConfig(string tab) => tab switch
     {
         "daily-forecast" => (["Date", "High", "Low", "Precip", "Wind Speed", "Wind Direction"], "/Forecast", "Daily", "daily", false),
-        "hourly-forecast" => (["Time", "Temp", "Precip", "Wind Speed", "Wind Direction"], "/Forecast", "Hourly", "hourly", false),
-        "every-15-forecast" => (["Time", "Temp", "Precip", "Wind Speed", "Wind Direction"], "/Forecast", "FifteenMinutes", "minutely_15", false),
+        "hourly-forecast" => (["Date", "Time", "Temp", "Precip", "Wind Speed", "Wind Direction"], "/Forecast", "Hourly", "hourly", false),
+        "every-15-forecast" => (["Date", "Time", "Temp", "Precip", "Wind Speed", "Wind Direction"], "/Forecast", "FifteenMinutes", "minutely_15", false),
         "daily-history" => (["Date", "High", "Low", "Precip", "Wind Speed", "Wind Direction"], "/History", "Daily", "daily", true),
-        "hourly-history" => (["Time", "Temp", "Precip", "Wind Speed", "Wind Direction"], "/History", "Hourly", "hourly", true),
+        "hourly-history" => (["Date", "Time", "Temp", "Precip", "Wind Speed", "Wind Direction"], "/History", "Hourly", "hourly", true),
         _ => ([], "", "", "", false),
     };
 }

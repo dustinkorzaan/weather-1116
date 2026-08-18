@@ -1,8 +1,8 @@
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGetForecastQuery } from '../../services/weatherApi';
-import { formatTemperatureF, formatWindDirection, formatWindSpeedMph } from '../../utils/aiWeatherDisplay';
-import { degreesToCompass, formatCalendarDate, formatPrecipitationIn } from '../../utils/weatherGridFormat';
+import WindDirectionCell from './WindDirectionCell';
+import { formatCalendarDate, formatPrecipitationIn, formatTemperatureF, formatWindSpeedMph } from '../../utils/weatherGridFormat';
 
 /** Static single-use grid for the Daily Forecast tab — soonest first. */
 function DailyForecastTab({ lat, lng }) {
@@ -63,7 +63,7 @@ function DailyForecastTab({ lat, lng }) {
                   <td className="py-1.5 pr-4">{formatPrecipitationIn(row.precipitation)}</td>
                   <td className="py-1.5 pr-4">{formatWindSpeedMph(row.windSpeed)}</td>
                   <td className="py-1.5">
-                    {formatWindDirection(degreesToCompass(row.windDirection), row.windDirection)}
+                    <WindDirectionCell degrees={row.windDirection} />
                   </td>
                 </tr>
               ))}

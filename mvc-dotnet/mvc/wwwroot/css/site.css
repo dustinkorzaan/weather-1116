@@ -552,18 +552,6 @@ html[data-theme="dark"] #weather-map {
   color-scheme: dark;
 }
 
-.weather-map-pin-card-preview {
-  position: absolute;
-  top: 2rem;
-  left: 2rem;
-  padding: 0.75rem 0.85rem;
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
-  color: var(--color-text);
-  box-shadow: var(--shadow-lg);
-  pointer-events: none;
-}
-
 .weather-map-logo-pin {
   position: absolute;
   display: grid;
