@@ -144,7 +144,7 @@ public sealed class PageSplitTests
             Assert.Contains("5 mph", rendered.Markup);
             Assert.Contains("S (180°)", rendered.Markup);
             Assert.Contains("wind-direction-arrow", rendered.Markup);
-            Assert.Contains("rotate(90deg)", rendered.Markup);
+            Assert.Contains("rotate(270deg)", rendered.Markup);
             Assert.Contains("\u27A4", rendered.Markup);
             Assert.True(
                 rendered.Markup.IndexOf("S (180°)", StringComparison.Ordinal)
