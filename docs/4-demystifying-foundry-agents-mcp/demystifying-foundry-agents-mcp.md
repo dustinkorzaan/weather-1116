@@ -137,7 +137,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
   - Same model-direct call as V3, but the tools are hosted in remote MCP servers
     declared on the request instead of in-process callbacks.
   - Shows that MCP tooling does not require a Foundry agent.
-  - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
+  - This is the actual pattern used in production `GetCurrentAIWeatherHandler` in API/MVC.
 
   **Simple Diagram without Agent/Loop**
 
