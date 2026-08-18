@@ -3,6 +3,7 @@ using Core;
 using Core.AIWeather.Models;
 using Core.Geo.Events;
 using Core.Json;
+using Core.Weather;
 using Core.Weather.Events;
 using DotNetEnv;
 using MediatR;
@@ -391,16 +392,19 @@ internal class Program
 				}
 			} while (requiresAction);
 
-			var modelOutput = JsonSerializer.Deserialize<AIWeatherModelResponse>(
+			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
 				finalContent ?? throw new InvalidOperationException("Model finished without producing content."));
 
-			if (modelOutput is null)
+			if (aiWeather is null)
 			{
 				Console.WriteLine("Received empty or invalid JSON response.");
 			}
 			else
 			{
-				var aiWeather = modelOutput.ToApiResponse();
+				aiWeather.WindDirectionSourceDegrees =
+					WeatherUnitConversion.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees);
+				aiWeather.WindDirectionSource =
+					WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionSourceDegrees);
 				Console.WriteLine("\nResponse:");
 				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}

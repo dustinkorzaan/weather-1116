@@ -21,9 +21,10 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.Contains("Do not add 180", prompt, StringComparison.Ordinal);
         Assert.Contains("16-point", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("AIWeatherSystemInstructions", prompt, StringComparison.Ordinal);
-        Assert.Contains("AIWeatherModelResponse", prompt, StringComparison.Ordinal);
-        Assert.Contains("ToApiResponse", prompt, StringComparison.Ordinal);
-        Assert.DoesNotContain("WeatherUnitConversion.DegreesToCompass", prompt, StringComparison.Ordinal);
+        Assert.DoesNotContain("AIWeatherModelResponse", prompt, StringComparison.Ordinal);
+        Assert.Contains("WeatherUnitConversion.NormalizeSourceDegrees", prompt, StringComparison.Ordinal);
+        Assert.Contains("WeatherUnitConversion.DegreesToCompass", prompt, StringComparison.Ordinal);
+        Assert.Contains("windDirectionSource", prompt, StringComparison.Ordinal);
         Assert.DoesNotContain("- windDirectionTowardsDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("- windDirectionFromDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("temperature", prompt, StringComparison.OrdinalIgnoreCase);
@@ -48,8 +49,9 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.Contains("WeatherToolExecutor", source, StringComparison.Ordinal);
         Assert.Contains("WeatherToolDefinitions", source, StringComparison.Ordinal);
         Assert.Contains("AIWeatherResponse", source, StringComparison.Ordinal);
-        Assert.Contains("AIWeatherModelResponse", source, StringComparison.Ordinal);
-        Assert.Contains("ToApiResponse", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("AIWeatherModelResponse", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("ToApiResponse", source, StringComparison.Ordinal);
+        Assert.Contains("properties.Remove(\"windDirectionSource\")", source, StringComparison.Ordinal);
         Assert.Contains("MaxToolLoopTurns = 32", source, StringComparison.Ordinal);
         Assert.DoesNotContain("CreateMcpTool", source, StringComparison.Ordinal);
         Assert.DoesNotContain("MCP_SRV_", source, StringComparison.Ordinal);

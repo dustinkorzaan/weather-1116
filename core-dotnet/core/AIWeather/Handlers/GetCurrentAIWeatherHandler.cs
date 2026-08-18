@@ -158,7 +158,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             }
         } while (requiresAction);
 
-        var modelOutput = JsonSerializer.Deserialize<AIWeatherModelResponse>(
+        var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(
             content ?? throw new InvalidOperationException("Model finished without producing content."));
 
         if (modelOutput is null)
@@ -167,14 +167,19 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
         }
 
-        return modelOutput.ToApiResponse();
+        modelOutput.WindDirectionSourceDegrees =
+            WeatherUnitConversion.NormalizeSourceDegrees(modelOutput.WindDirectionSourceDegrees);
+        modelOutput.WindDirectionSource =
+            WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
+
+        return modelOutput;
     }
 
     private static string BuildAIOutputSchema()
     {
         var schema = JsonSchemaExporter.GetJsonSchemaAsNode(
             JsonSerializerOptions.Default,
-            typeof(AIWeatherModelResponse),
+            typeof(AIWeatherResponse),
             new JsonSchemaExporterOptions
             {
                 TreatNullObliviousAsNonNullable = true,
@@ -182,6 +187,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 {
                     if (schema is JsonObject node && node["properties"] is JsonObject properties)
                     {
+                        properties.Remove("windDirectionSource");
                         node["required"] = new JsonArray(properties.Select(property => (JsonNode)property.Key).ToArray());
                         node["additionalProperties"] = false;
                     }

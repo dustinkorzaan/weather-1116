@@ -10,41 +10,6 @@ namespace Core.Tests.AIWeather.Models;
 public class AIWeatherModelsTests
 {
     [Fact]
-    public void AIWeatherModelResponse_DeserializesStrictModelSchema()
-    {
-        const string json = """
-        {
-          "fullSummary": "It is 41F in Nashville with light winds from the south.",
-          "temperatureF": 41,
-          "windSpeedMPH": 7.5,
-          "windDirectionSourceDegrees": 180,
-          "conditions": "Partly cloudy",
-          "latitude": 36.1627,
-          "longitude": -86.7816
-        }
-        """;
-
-        var result = JsonSerializer.Deserialize<AIWeatherModelResponse>(
-            json,
-            JsonDefaults.CaseInsensitive);
-
-        Assert.NotNull(result);
-        Assert.Equal(180, result!.WindDirectionSourceDegrees);
-    }
-
-    [Fact]
-    public void AIWeatherModelResponse_ToApiResponse_ComputesCompassFromDegrees()
-    {
-        var api = new AIWeatherModelResponse
-        {
-            WindDirectionSourceDegrees = 224,
-        }.ToApiResponse();
-
-        Assert.Equal(224, api.WindDirectionSourceDegrees);
-        Assert.Equal("SW", api.WindDirectionSource);
-    }
-
-    [Fact]
     public void AIWeatherResponse_DeserializesApiContract()
     {
         const string json = """

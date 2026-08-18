@@ -2,6 +2,7 @@
 using Core.AIWeather.Services;
 using Core.AIWeather.Models;
 using Core.Json;
+using Core.Weather;
 using DotNetEnv;
 using OpenAI.Responses;
 using System;
@@ -73,9 +74,9 @@ internal class Program
 		{
 			ResponseResult response = await responseClient.CreateResponseAsync(options);
 			var content = response.GetOutputText();
-			var modelOutput = JsonSerializer.Deserialize<AIWeatherModelResponse>(content);
+			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
-			if (modelOutput is null)
+			if (aiWeather is null)
 			{
 				Console.WriteLine("Received empty or invalid JSON response.");
 				Console.WriteLine("Raw output:");
@@ -83,7 +84,10 @@ internal class Program
 			}
 			else
 			{
-				var aiWeather = modelOutput.ToApiResponse();
+				aiWeather.WindDirectionSourceDegrees =
+					WeatherUnitConversion.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees);
+				aiWeather.WindDirectionSource =
+					WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionSourceDegrees);
 				Console.WriteLine("\nResponse:");
 				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}
