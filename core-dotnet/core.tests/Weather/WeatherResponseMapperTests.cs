@@ -126,6 +126,27 @@ public class WeatherResponseMapperTests
     }
 
     [Fact]
+    public void ToUIForecastResponse_NormalizesWindDirectionSourceDegrees()
+    {
+        var source = new NonAIForecastWeatherResponse
+        {
+            Hourly = new NonAIForecastWeatherHourly
+            {
+                Time = ["2026-08-16T00:00"],
+                Temperature2mC = [0],
+                PrecipitationMm = [0],
+                WeatherCode = [0],
+                WindSpeed10mKmh = [0],
+                WindDirectionSource10m = [-90, 360, 450],
+            },
+        };
+
+        var result = WeatherResponseMapper.ToUIForecastResponse(source);
+
+        Assert.Equal([270, 0, 90], result.Hourly!.WindDirectionSourceDegrees);
+    }
+
+    [Fact]
     public void ToUIHistoryResponse_MissingSeries_MapsToNull()
     {
         var result = WeatherResponseMapper.ToUIHistoryResponse(new NonAIHistoryWeatherResponse());

@@ -14,4 +14,15 @@ public class WeatherUnitConversionTests
     {
         Assert.Equal(expected, WeatherUnitConversion.DegreesToCompass(degrees));
     }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(360, 0)]
+    [InlineData(-90, 270)]
+    [InlineData(450, 90)]
+    [InlineData(720, 0)]
+    public void NormalizeSourceDegrees_MapsToZeroThroughThreeSixty(int degrees, int expected)
+    {
+        Assert.Equal(expected, WeatherUnitConversion.NormalizeSourceDegrees(degrees));
+    }
 }
