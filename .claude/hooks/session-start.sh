@@ -18,7 +18,7 @@ nvm install 24
   echo "export PATH=\"$(dirname "$(nvm which 24)"):\$PATH\""
 } >> "$CLAUDE_ENV_FILE"
 
-npm install -g npm@latest
+# npm install -g npm@latest
 
 dotnet restore Weather.sln
 npm install --prefix ui-react
