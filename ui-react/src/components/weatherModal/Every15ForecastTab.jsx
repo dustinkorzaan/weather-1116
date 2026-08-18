@@ -11,13 +11,13 @@ function Every15ForecastTab({ lat, lng }) {
     { skip: lat == null || lng == null }
   );
 
-  const minutely15 = data?.minutely_15;
+  const minutely15 = data?.minutely15;
   const rows = (minutely15?.time ?? []).map((time, index) => ({
     time,
-    temperature: minutely15.temperature_2m[index],
-    precipitation: minutely15.precipitation[index],
-    windSpeed: minutely15.wind_speed_10m[index],
-    windDirection: minutely15.wind_direction_10m[index],
+    temperature: minutely15.temperatureF[index],
+    precipitation: minutely15.precipitationInch[index],
+    windSpeed: minutely15.windSpeedMPH[index],
+    windDirection: minutely15.windDirectionDegrees[index],
   }));
 
   return (

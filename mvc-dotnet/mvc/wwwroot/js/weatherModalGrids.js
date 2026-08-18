@@ -39,31 +39,31 @@
     return date.toLocaleTimeString(undefined, timeOptions);
   }
 
-  /** Converts Open-Meteo °C to °F, then formats. */
-  function formatTemperatureF(celsius) {
-    var numeric = Number(celsius);
+  /** Formats an already-converted °F value (the API returns US customary units). */
+  function formatTemperatureF(fahrenheit) {
+    var numeric = Number(fahrenheit);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round((numeric * 9 / 5 + 32) * 10) / 10) + ' °F';
+    return (Math.round(numeric * 10) / 10) + ' °F';
   }
 
-  /** Converts Open-Meteo km/h to mph, then formats. */
-  function formatWindSpeedMph(kilometersPerHour) {
-    var numeric = Number(kilometersPerHour);
+  /** Formats an already-converted mph value (the API returns US customary units). */
+  function formatWindSpeedMph(mph) {
+    var numeric = Number(mph);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round((numeric / 1.609344) * 10) / 10) + ' mph';
+    return (Math.round(numeric * 10) / 10) + ' mph';
   }
 
-  /** Converts Open-Meteo mm to inches, then formats. */
-  function formatPrecipitationIn(millimeters) {
-    var numeric = Number(millimeters);
+  /** Formats an already-converted inches value (the API returns US customary units). */
+  function formatPrecipitationIn(inches) {
+    var numeric = Number(inches);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round((numeric / 25.4) * 100) / 100) + '"';
+    return (Math.round(numeric * 100) / 100) + '"';
   }
 
   function formatWindDirection(degrees) {
@@ -124,11 +124,11 @@
     return daily.time.map(function (time, index) {
       return [
         formatCalendarDate(time),
-        formatTemperatureF(daily.temperature_2m_max[index]),
-        formatTemperatureF(daily.temperature_2m_min[index]),
-        formatPrecipitationIn(daily.precipitation_sum[index]),
-        formatWindSpeedMph(daily.wind_speed_10m_max[index]),
-        createWindDirectionCell(daily.wind_direction_10m_dominant[index]),
+        formatTemperatureF(daily.temperatureHighF[index]),
+        formatTemperatureF(daily.temperatureLowF[index]),
+        formatPrecipitationIn(daily.precipitationInch[index]),
+        formatWindSpeedMph(daily.windSpeedMPH[index]),
+        createWindDirectionCell(daily.windDirectionDegrees[index]),
       ];
     });
   }
@@ -142,10 +142,10 @@
       return [
         formatCalendarDate(time),
         formatClockTime(time),
-        formatTemperatureF(series.temperature_2m[index]),
-        formatPrecipitationIn(series.precipitation[index]),
-        formatWindSpeedMph(series.wind_speed_10m[index]),
-        createWindDirectionCell(series.wind_direction_10m[index]),
+        formatTemperatureF(series.temperatureF[index]),
+        formatPrecipitationIn(series.precipitationInch[index]),
+        formatWindSpeedMph(series.windSpeedMPH[index]),
+        createWindDirectionCell(series.windDirectionDegrees[index]),
       ];
     });
   }
@@ -175,7 +175,7 @@
    * @param {string} config.bodyId
    * @param {string} config.endpoint '/Forecast' or '/History'
    * @param {string} config.resolution 'Daily' | 'Hourly' | 'FifteenMinutes'
-   * @param {'daily'|'hourly'|'minutely_15'} config.field which response field holds the series
+   * @param {'daily'|'hourly'|'minutely15'} config.field which response field holds the series
    * @param {boolean} config.reverse most-recent-first (history tabs)
    * @param {number} config.lat
    * @param {number} config.lng

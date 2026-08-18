@@ -17,7 +17,7 @@ public class ForecastController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<ActionResult<PublicWeatherForecastResponse>> Get(
+	public async Task<ActionResult<UIWeatherForecastResponse>> Get(
 		[FromQuery] double? latitude,
 		[FromQuery] double? longitude,
 		[FromQuery] PublicWeatherForecastResolution resolution = PublicWeatherForecastResolution.Daily,
@@ -31,7 +31,7 @@ public class ForecastController : ControllerBase
 		try
 		{
 			var response = await _mediator.Send(
-				new GetPublicWeatherForecastEvent
+				new GetUIWeatherForecastEvent
 				{
 					Latitude = latitude!.Value,
 					Longitude = longitude!.Value,

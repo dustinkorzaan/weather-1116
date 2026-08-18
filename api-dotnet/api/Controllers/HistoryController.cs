@@ -17,7 +17,7 @@ public class HistoryController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<ActionResult<PublicWeatherHistoryResponse>> Get(
+	public async Task<ActionResult<UIWeatherHistoryResponse>> Get(
 		[FromQuery] double? latitude,
 		[FromQuery] double? longitude,
 		[FromQuery] PublicWeatherHistoryResolution resolution = PublicWeatherHistoryResolution.Daily,
@@ -31,7 +31,7 @@ public class HistoryController : ControllerBase
 		try
 		{
 			var response = await _mediator.Send(
-				new GetPublicWeatherHistoryEvent
+				new GetUIWeatherHistoryEvent
 				{
 					Latitude = latitude!.Value,
 					Longitude = longitude!.Value,

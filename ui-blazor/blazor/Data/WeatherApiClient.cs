@@ -49,7 +49,7 @@ public enum PublicWeatherHistoryResolution
     Hourly,
 }
 
-public class PublicWeatherForecastResponse
+public class UIWeatherForecastResponse
 {
     [JsonPropertyName("latitude")]
     public double Latitude { get; set; }
@@ -61,16 +61,16 @@ public class PublicWeatherForecastResponse
     public string Timezone { get; set; } = string.Empty;
 
     [JsonPropertyName("hourly")]
-    public PublicWeatherForecastHourly? Hourly { get; set; }
+    public UIWeatherHourlySeries? Hourly { get; set; }
 
     [JsonPropertyName("daily")]
-    public PublicWeatherForecastDaily? Daily { get; set; }
+    public UIWeatherDailySeries? Daily { get; set; }
 
-    [JsonPropertyName("minutely_15")]
-    public PublicWeatherForecastHourly? Minutely15 { get; set; }
+    [JsonPropertyName("minutely15")]
+    public UIWeatherHourlySeries? Minutely15 { get; set; }
 }
 
-public class PublicWeatherHistoryResponse
+public class UIWeatherHistoryResponse
 {
     [JsonPropertyName("latitude")]
     public double Latitude { get; set; }
@@ -82,57 +82,57 @@ public class PublicWeatherHistoryResponse
     public string Timezone { get; set; } = string.Empty;
 
     [JsonPropertyName("hourly")]
-    public PublicWeatherForecastHourly? Hourly { get; set; }
+    public UIWeatherHourlySeries? Hourly { get; set; }
 
     [JsonPropertyName("daily")]
-    public PublicWeatherForecastDaily? Daily { get; set; }
+    public UIWeatherDailySeries? Daily { get; set; }
 }
 
-/// <summary>Shared shape for the forecast/history "hourly" and "minutely_15" series (Open-Meteo field names).</summary>
-public class PublicWeatherForecastHourly
+/// <summary>Shared shape for the forecast/history "hourly" and "minutely15" series, in US customary units.</summary>
+public class UIWeatherHourlySeries
 {
     [JsonPropertyName("time")]
     public List<string> Time { get; set; } = [];
 
-    [JsonPropertyName("temperature_2m")]
-    public List<double> Temperature2m { get; set; } = [];
+    [JsonPropertyName("temperatureF")]
+    public List<double> TemperatureF { get; set; } = [];
 
-    [JsonPropertyName("precipitation")]
-    public List<double> Precipitation { get; set; } = [];
+    [JsonPropertyName("precipitationInch")]
+    public List<double> PrecipitationInch { get; set; } = [];
 
-    [JsonPropertyName("weather_code")]
+    [JsonPropertyName("weatherCode")]
     public List<int> WeatherCode { get; set; } = [];
 
-    [JsonPropertyName("wind_speed_10m")]
-    public List<double> WindSpeed10m { get; set; } = [];
+    [JsonPropertyName("windSpeedMPH")]
+    public List<double> WindSpeedMPH { get; set; } = [];
 
-    [JsonPropertyName("wind_direction_10m")]
-    public List<int> WindDirection10m { get; set; } = [];
+    [JsonPropertyName("windDirectionDegrees")]
+    public List<int> WindDirectionDegrees { get; set; } = [];
 }
 
-/// <summary>Shared shape for the forecast/history "daily" series (Open-Meteo field names).</summary>
-public class PublicWeatherForecastDaily
+/// <summary>Shared shape for the forecast/history "daily" series, in US customary units.</summary>
+public class UIWeatherDailySeries
 {
     [JsonPropertyName("time")]
     public List<string> Time { get; set; } = [];
 
-    [JsonPropertyName("weather_code")]
+    [JsonPropertyName("weatherCode")]
     public List<int> WeatherCode { get; set; } = [];
 
-    [JsonPropertyName("temperature_2m_max")]
-    public List<double> Temperature2mMax { get; set; } = [];
+    [JsonPropertyName("temperatureHighF")]
+    public List<double> TemperatureHighF { get; set; } = [];
 
-    [JsonPropertyName("temperature_2m_min")]
-    public List<double> Temperature2mMin { get; set; } = [];
+    [JsonPropertyName("temperatureLowF")]
+    public List<double> TemperatureLowF { get; set; } = [];
 
-    [JsonPropertyName("precipitation_sum")]
-    public List<double> PrecipitationSum { get; set; } = [];
+    [JsonPropertyName("precipitationInch")]
+    public List<double> PrecipitationInch { get; set; } = [];
 
-    [JsonPropertyName("wind_speed_10m_max")]
-    public List<double> WindSpeed10mMax { get; set; } = [];
+    [JsonPropertyName("windSpeedMPH")]
+    public List<double> WindSpeedMPH { get; set; } = [];
 
-    [JsonPropertyName("wind_direction_10m_dominant")]
-    public List<int> WindDirection10mDominant { get; set; } = [];
+    [JsonPropertyName("windDirectionDegrees")]
+    public List<int> WindDirectionDegrees { get; set; } = [];
 }
 
 public class WeatherApiClient
@@ -178,7 +178,7 @@ public class WeatherApiClient
         return await response.Content.ReadFromJsonAsync<LocationResponse>(cancellationToken: cancellationToken);
     }
 
-    public async Task<PublicWeatherForecastResponse?> GetForecast(
+    public async Task<UIWeatherForecastResponse?> GetForecast(
         double latitude,
         double longitude,
         PublicWeatherForecastResolution resolution = PublicWeatherForecastResolution.Daily,
@@ -187,10 +187,10 @@ public class WeatherApiClient
         var route = string.Create(
             CultureInfo.InvariantCulture,
             $"Forecast?latitude={latitude}&longitude={longitude}&resolution={resolution}");
-        return await _httpClient.GetFromJsonAsync<PublicWeatherForecastResponse>(route, cancellationToken);
+        return await _httpClient.GetFromJsonAsync<UIWeatherForecastResponse>(route, cancellationToken);
     }
 
-    public async Task<PublicWeatherHistoryResponse?> GetHistory(
+    public async Task<UIWeatherHistoryResponse?> GetHistory(
         double latitude,
         double longitude,
         PublicWeatherHistoryResolution resolution = PublicWeatherHistoryResolution.Daily,
@@ -199,7 +199,7 @@ public class WeatherApiClient
         var route = string.Create(
             CultureInfo.InvariantCulture,
             $"History?latitude={latitude}&longitude={longitude}&resolution={resolution}");
-        return await _httpClient.GetFromJsonAsync<PublicWeatherHistoryResponse>(route, cancellationToken);
+        return await _httpClient.GetFromJsonAsync<UIWeatherHistoryResponse>(route, cancellationToken);
     }
 
     public async Task<AboutNode> GetAbout()

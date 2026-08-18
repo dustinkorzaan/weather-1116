@@ -12,7 +12,7 @@ public class HistoryControllerTests
 	[Fact]
 	public async Task Get_ReturnsHistory()
 	{
-		var response = new PublicWeatherHistoryResponse { Latitude = 36.1627, Longitude = -86.7816 };
+		var response = new UIWeatherHistoryResponse { Latitude = 36.1627, Longitude = -86.7816 };
 		var mediator = new FakeMediator(response);
 		var controller = new HistoryController(mediator);
 
@@ -28,7 +28,7 @@ public class HistoryControllerTests
 	[Fact]
 	public async Task Get_DefaultsResolutionToDaily()
 	{
-		var mediator = new FakeMediator(new PublicWeatherHistoryResponse());
+		var mediator = new FakeMediator(new UIWeatherHistoryResponse());
 		var controller = new HistoryController(mediator);
 
 		await controller.Get(36.1627, -86.7816, cancellationToken: CancellationToken.None);
@@ -39,7 +39,7 @@ public class HistoryControllerTests
 	[Fact]
 	public async Task Get_ReturnsBadRequestWhenCoordinatesAreMissing()
 	{
-		var controller = new HistoryController(new FakeMediator(new PublicWeatherHistoryResponse()));
+		var controller = new HistoryController(new FakeMediator(new UIWeatherHistoryResponse()));
 
 		var result = await controller.Get(null, -86.7816, cancellationToken: CancellationToken.None);
 
@@ -49,7 +49,7 @@ public class HistoryControllerTests
 	[Fact]
 	public async Task Get_ReturnsBadRequestWhenCoordinatesAreOutOfRange()
 	{
-		var controller = new HistoryController(new FakeMediator(new PublicWeatherHistoryResponse()));
+		var controller = new HistoryController(new FakeMediator(new UIWeatherHistoryResponse()));
 
 		var result = await controller.Get(91, 0, cancellationToken: CancellationToken.None);
 
@@ -67,7 +67,7 @@ public class HistoryControllerTests
 		Assert.Equal(StatusCodes.Status502BadGateway, status.StatusCode);
 	}
 
-	private sealed class FakeMediator(PublicWeatherHistoryResponse? response, bool throwInvalidOperation = false) : IMediator
+	private sealed class FakeMediator(UIWeatherHistoryResponse? response, bool throwInvalidOperation = false) : IMediator
 	{
 		public double? LastLatitude { get; private set; }
 
@@ -77,7 +77,7 @@ public class HistoryControllerTests
 
 		public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
 		{
-			if (request is GetPublicWeatherHistoryEvent historyEvent)
+			if (request is GetUIWeatherHistoryEvent historyEvent)
 			{
 				LastLatitude = historyEvent.Latitude;
 				LastLongitude = historyEvent.Longitude;
@@ -87,7 +87,7 @@ public class HistoryControllerTests
 					throw new InvalidOperationException("Non-AI: Weather history API returned empty or invalid JSON.");
 				}
 
-				return Task.FromResult((TResponse)(object)(response ?? new PublicWeatherHistoryResponse()));
+				return Task.FromResult((TResponse)(object)(response ?? new UIWeatherHistoryResponse()));
 			}
 
 			throw new NotSupportedException();

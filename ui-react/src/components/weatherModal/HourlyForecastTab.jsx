@@ -14,10 +14,10 @@ function HourlyForecastTab({ lat, lng }) {
   const hourly = data?.hourly;
   const rows = (hourly?.time ?? []).map((time, index) => ({
     time,
-    temperature: hourly.temperature_2m[index],
-    precipitation: hourly.precipitation[index],
-    windSpeed: hourly.wind_speed_10m[index],
-    windDirection: hourly.wind_direction_10m[index],
+    temperature: hourly.temperatureF[index],
+    precipitation: hourly.precipitationInch[index],
+    windSpeed: hourly.windSpeedMPH[index],
+    windDirection: hourly.windDirectionDegrees[index],
   }));
 
   return (

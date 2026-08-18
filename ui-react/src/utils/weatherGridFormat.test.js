@@ -5,19 +5,19 @@ import {
   formatWindSpeedMph,
 } from './weatherGridFormat';
 
-test('converts Open-Meteo Celsius to a degree Fahrenheit suffix', () => {
-  expect(formatTemperatureF(24)).toBe('75.2 °F');
-  expect(formatTemperatureF(0)).toBe('32 °F');
+test('formats an already-converted Fahrenheit value with a degree suffix', () => {
+  expect(formatTemperatureF(75.2)).toBe('75.2 °F');
+  expect(formatTemperatureF(32)).toBe('32 °F');
   expect(formatTemperatureF(Number.NaN)).toBe('');
 });
 
-test('converts Open-Meteo km/h to a lowercase mph suffix', () => {
-  expect(formatWindSpeedMph(10)).toBe('6.2 mph');
+test('formats an already-converted mph value with a lowercase suffix', () => {
+  expect(formatWindSpeedMph(6.2)).toBe('6.2 mph');
   expect(formatWindSpeedMph(Number.NaN)).toBe('');
 });
 
-test('converts Open-Meteo millimeters to inches', () => {
-  expect(formatPrecipitationIn(25.4)).toBe('1"');
-  expect(formatPrecipitationIn(7.62)).toBe('0.3"');
+test('formats an already-converted inches value', () => {
+  expect(formatPrecipitationIn(1)).toBe('1"');
+  expect(formatPrecipitationIn(0.3)).toBe('0.3"');
   expect(formatPrecipitationIn(Number.NaN)).toBe('');
 });
