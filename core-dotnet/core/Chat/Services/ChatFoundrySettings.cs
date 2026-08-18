@@ -9,12 +9,11 @@ namespace Core.Chat.Services;
 
 public sealed class ChatFoundrySettings
 {
-    public const string DefaultChatAgentName = "wx1116-agent-chat";
-
     public string Endpoint { get; }
     public string ApiKey { get; }
     public string DeploymentName { get; }
-    public string ChatAgentName { get; }
+
+    private readonly string? _chatAgentName;
 
     public ChatFoundrySettings()
     {
@@ -29,10 +28,12 @@ public sealed class ChatFoundrySettings
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_MODEL.");
 
         var chatAgentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME");
-        ChatAgentName = string.IsNullOrWhiteSpace(chatAgentName)
-            ? DefaultChatAgentName
-            : chatAgentName.Trim();
+        _chatAgentName = string.IsNullOrWhiteSpace(chatAgentName) ? null : chatAgentName.Trim();
     }
+
+    public string ChatAgentName =>
+        _chatAgentName
+        ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME.");
 
     public ResponsesClient CreateResponsesClient() => new(
         credential: new ApiKeyCredential(ApiKey),

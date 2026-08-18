@@ -5,25 +5,24 @@ namespace Core.Tests.Chat;
 public class ChatFoundrySettingsTests
 {
     [Fact]
-    public void ChatAgentName_DefaultsToWx1116AgentChat()
+    public void ChatAgentName_ThrowsWhenUnset()
     {
         RunWithFoundryEnvironment(chatAgentName: null, () =>
         {
             var settings = new ChatFoundrySettings();
-
-            Assert.Equal(ChatFoundrySettings.DefaultChatAgentName, settings.ChatAgentName);
-            Assert.Equal("wx1116-agent-chat", settings.ChatAgentName);
+            var ex = Assert.Throws<InvalidOperationException>(() => settings.ChatAgentName);
+            Assert.Equal("Missing AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME.", ex.Message);
         });
     }
 
     [Fact]
-    public void ChatAgentName_UsesOverrideWhenSet()
+    public void ChatAgentName_UsesEnvironmentValue()
     {
-        RunWithFoundryEnvironment(chatAgentName: "my-custom-chat-agent", () =>
+        RunWithFoundryEnvironment(chatAgentName: "wx1116-agent-chat", () =>
         {
             var settings = new ChatFoundrySettings();
 
-            Assert.Equal("my-custom-chat-agent", settings.ChatAgentName);
+            Assert.Equal("wx1116-agent-chat", settings.ChatAgentName);
         });
     }
 

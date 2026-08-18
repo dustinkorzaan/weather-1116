@@ -154,7 +154,7 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | All chat tabs |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | All chat tabs |
 | `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Chat1a–Chat2b (not Chat3) |
-| `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | Chat3 only | GitHub variable + App Service setting. Defaults to `wx1116-agent-chat` when unset. Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. |
+| `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | Chat3 only (required). GitHub var / App Service. Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. |
 | `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b |
 | `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b |
 
@@ -182,8 +182,7 @@ JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form
 1. Open the Microsoft Foundry portal for the same project as
    `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
 2. **Agents → Create** (Prompt agent / Foundry agent).
-3. **Name:** `wx1116-agent-chat` (must match
-   `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME`, default in Core).
+3. **Name:** must match `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` (this repo uses `wx1116-agent-chat`).
 4. **Model:** the same deployment as `AZURE_FOUNDRY_PROD_EUS2_MODEL` (for example `gpt-5.4-mini`).
 5. **Instructions:** paste the Chat3 instructions below (same text as
    `ChatSystemInstructions.WeatherAssistant`).
