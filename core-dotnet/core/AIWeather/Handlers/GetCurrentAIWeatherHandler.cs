@@ -167,7 +167,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
         }
 
-        aiWeather.WindDirectionTowardsDegrees = WeatherUnitConversion.MeteorologicalFromToWindTo(aiWeather.WindDirectionTowardsDegrees);
+        aiWeather.WindDirectionTowardsDegrees = WeatherUnitConversion.MeteorologicalFromToWindTowards(aiWeather.WindDirectionTowardsDegrees);
         aiWeather.WindDirection = WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionTowardsDegrees);
 
         return aiWeather;

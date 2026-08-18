@@ -11,9 +11,9 @@ public class WeatherUnitConversionTests
     [InlineData(224, 44)]
     [InlineData(270, 90)]
     [InlineData(360, 180)]
-    public void MeteorologicalFromToWindTo_Adds180AndWraps(int fromDegrees, int expectedToDegrees)
+    public void MeteorologicalFromToWindTowards_Adds180AndWraps(int fromDegrees, int expectedTowardsDegrees)
     {
-        Assert.Equal(expectedToDegrees, WeatherUnitConversion.MeteorologicalFromToWindTo(fromDegrees));
+        Assert.Equal(expectedTowardsDegrees, WeatherUnitConversion.MeteorologicalFromToWindTowards(fromDegrees));
     }
 
     [Theory]

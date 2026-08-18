@@ -13,10 +13,10 @@ public static class WeatherUnitConversion
     public static double MillimetersToInches(double millimeters) => Math.Round(millimeters / 25.4, 2);
 
     /// <summary>
-    /// Meteorological from-direction (0° = from the north) → destination heading
-    /// (0° = toward the north). Adds 180° and wraps to 0–359.
+    /// Meteorological from-direction (0° = from the north) → towards heading
+    /// (0° = towards the north). Adds 180° and wraps to 0–359.
     /// </summary>
-    public static int MeteorologicalFromToWindTo(int fromDegrees)
+    public static int MeteorologicalFromToWindTowards(int fromDegrees)
     {
         var normalized = ((fromDegrees % 360) + 360) % 360;
         return (normalized + 180) % 360;

@@ -34,7 +34,7 @@ public class GetCurrentAIWeatherHandlerTests
 
         Assert.Contains("WeatherToolExecutor", source, StringComparison.Ordinal);
         Assert.Contains("WeatherToolDefinitions", source, StringComparison.Ordinal);
-        Assert.Contains("MeteorologicalFromToWindTo", source, StringComparison.Ordinal);
+        Assert.Contains("MeteorologicalFromToWindTowards", source, StringComparison.Ordinal);
         Assert.Contains("MaxToolLoopTurns = 32", source, StringComparison.Ordinal);
         Assert.DoesNotContain("CreateMcpTool", source, StringComparison.Ordinal);
         Assert.DoesNotContain("MCP_SRV_", source, StringComparison.Ordinal);
