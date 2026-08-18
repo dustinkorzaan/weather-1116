@@ -51,15 +51,14 @@
     return label ? label + ' ' + withDegrees : withDegrees;
   }
 
-  var WIND_DIRECTION_ARROW = '➤';
+  var WIND_DIRECTION_ARROW = '\u2B99';
 
   function windArrowRotationDeg(degrees) {
     var numeric = Number(degrees);
     if (!Number.isFinite(numeric)) {
       return null;
     }
-    // ➤ points right at 0° CSS; subtract 90 so 0° (toward north) points up.
-    return Math.round(numeric) - 90;
+    return Math.round(numeric);
   }
 
   function renderWindDirection(el, compass, degrees) {
