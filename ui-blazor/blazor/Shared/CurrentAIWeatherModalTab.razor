@@ -69,11 +69,10 @@
     private bool _isLoading;
     private string? _errorMessage;
     private AIWeatherResponse? _aiWeather;
-    private string? _loadedForLocation;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (string.IsNullOrWhiteSpace(Location) || Location == _loadedForLocation)
+        if (!firstRender || string.IsNullOrWhiteSpace(Location))
         {
             return;
         }
@@ -85,7 +84,6 @@
 
     private async Task LoadAsync()
     {
-        _loadedForLocation = Location;
         _isLoading = true;
         _errorMessage = null;
         _aiWeather = null;

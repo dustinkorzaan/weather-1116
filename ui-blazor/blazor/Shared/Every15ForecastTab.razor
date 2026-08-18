@@ -68,17 +68,10 @@
     private bool _isLoading;
     private string? _errorMessage;
     private List<Row> _rows = [];
-    private (double Lat, double Lng)? _loadedFor;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Latitude is null || Longitude is null)
-        {
-            return;
-        }
-
-        var key = (Latitude.Value, Longitude.Value);
-        if (_loadedFor == key)
+        if (!firstRender || Latitude is null || Longitude is null)
         {
             return;
         }
@@ -95,7 +88,6 @@
             return;
         }
 
-        _loadedFor = (Latitude.Value, Longitude.Value);
         _isLoading = true;
         _errorMessage = null;
         StateHasChanged();
