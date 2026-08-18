@@ -14,8 +14,10 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.DoesNotContain("place name, latitude, longitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("- latitude:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("- longitude:", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("- windDirectionTowardsDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("- windDirectionFromDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("current_weather.winddirection", prompt, StringComparison.Ordinal);
         Assert.Contains("Do not add 180", prompt, StringComparison.Ordinal);
+        Assert.DoesNotContain("- windDirectionTowardsDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("temperature", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("wind speed", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("wind direction", prompt, StringComparison.OrdinalIgnoreCase);
@@ -34,7 +36,8 @@ public class GetCurrentAIWeatherHandlerTests
 
         Assert.Contains("WeatherToolExecutor", source, StringComparison.Ordinal);
         Assert.Contains("WeatherToolDefinitions", source, StringComparison.Ordinal);
-        Assert.Contains("MeteorologicalFromToWindTowards", source, StringComparison.Ordinal);
+        Assert.Contains("AIWeatherModelResponse", source, StringComparison.Ordinal);
+        Assert.Contains("ToApiResponse", source, StringComparison.Ordinal);
         Assert.Contains("MaxToolLoopTurns = 32", source, StringComparison.Ordinal);
         Assert.DoesNotContain("CreateMcpTool", source, StringComparison.Ordinal);
         Assert.DoesNotContain("MCP_SRV_", source, StringComparison.Ordinal);

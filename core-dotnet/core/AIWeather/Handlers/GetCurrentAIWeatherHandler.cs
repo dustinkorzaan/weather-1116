@@ -7,7 +7,6 @@ using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.Json;
 using Core.Tools;
-using Core.Weather;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -75,7 +74,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         - temperatureF: Current temperature in Fahrenheit (convert from the weather tool).
         - windSpeedMPH: Current wind speed in miles per hour (convert from the weather tool).
         - windDirection: Compass point such as N, NE, or SW matching the weather tool's meteorological from-direction.
-        - windDirectionTowardsDegrees: Copy the weather tool's winddirection degrees exactly (meteorological from-direction, 0–360). Do not add 180; a server-side mapper converts these to towards-degrees.
+        - windDirectionFromDegrees: Copy current_weather.winddirection from the weather tool exactly (meteorological from-direction, 0–360). Do not add 180.
         - conditions: Short current conditions phrase from the weather tool.
         - latitude: Decimal degrees from your coordinates tool (positive north, negative south).
         - longitude: Decimal degrees from your coordinates tool (positive east, negative west).
@@ -158,26 +157,23 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             }
         } while (requiresAction);
 
-        var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
+        var modelOutput = JsonSerializer.Deserialize<AIWeatherModelResponse>(
             content ?? throw new InvalidOperationException("Model finished without producing content."));
 
-        if (aiWeather is null)
+        if (modelOutput is null)
         {
             throw new InvalidOperationException(
                 $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
         }
 
-        aiWeather.WindDirectionTowardsDegrees = WeatherUnitConversion.MeteorologicalFromToWindTowards(aiWeather.WindDirectionTowardsDegrees);
-        aiWeather.WindDirection = WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionTowardsDegrees);
-
-        return aiWeather;
+        return modelOutput.ToApiResponse();
     }
 
     private static string BuildAIOutputSchema()
     {
         var schema = JsonSchemaExporter.GetJsonSchemaAsNode(
             JsonSerializerOptions.Default,
-            typeof(AIWeatherResponse),
+            typeof(AIWeatherModelResponse),
             new JsonSchemaExporterOptions
             {
                 TreatNullObliviousAsNonNullable = true,
