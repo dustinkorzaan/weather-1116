@@ -433,4 +433,4 @@ Suggested reading order: V1 → V2 → V3 → `GetCurrentAIWeatherHandler` in
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | No | Defaults to `wx1116-agent-chat` (conversational; no JSON schema) |
+| `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | No | Chat3 only. GitHub variable `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` (API/MVC App Service). Defaults to `wx1116-agent-chat`. Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. |
