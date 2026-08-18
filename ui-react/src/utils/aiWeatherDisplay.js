@@ -43,7 +43,7 @@ export function formatWindDirection(compass, degrees) {
   return label ? `${label} ${withDegrees}` : withDegrees;
 }
 
-/** Black Rightwards Arrowhead; rotate so 0° (north / from the north) points up. */
+/** Black Rightwards Arrowhead; rotate so the arrow points where the wind is blowing (to). Meteorological 0° (from the north) points down. */
 export const WIND_DIRECTION_ARROW = '\u27A4';
 
 export function windArrowRotationDeg(degrees) {
@@ -52,5 +52,5 @@ export function windArrowRotationDeg(degrees) {
     return null;
   }
 
-  return Math.round(numeric) - 90;
+  return Math.round(numeric) + 90;
 }

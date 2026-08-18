@@ -103,7 +103,8 @@
     if (!Number.isFinite(numeric)) {
       return null;
     }
-    return Math.round(numeric) - 90;
+    // ➤ points right at 0° CSS; add 90 so meteorological from-degrees point where the wind is blowing.
+    return Math.round(numeric) + 90;
   }
 
   function createWindDirectionCell(degrees) {
