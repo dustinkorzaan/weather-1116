@@ -1,7 +1,6 @@
 namespace WeatherBlazor.Data;
 
 using System.Globalization;
-using Core.Weather;
 
 /// <summary>Formatting helpers for the weather modal's forecast/history grid tabs.</summary>
 public static class WeatherGridFormat
@@ -79,6 +78,13 @@ public static class WeatherGridFormat
         string.Create(CultureInfo.InvariantCulture, $"{compass} ({Math.Round(degrees):0}°)");
 
     /// <summary>CSS rotate degrees for ⮛ from meteorological source degrees; null when not finite.</summary>
-    public static double? WindArrowRotationDeg(double sourceDegrees) =>
-        WeatherUnitConversion.WindArrowRotationDeg(sourceDegrees);
+    public static double? WindArrowRotationDeg(double sourceDegrees)
+    {
+        if (double.IsNaN(sourceDegrees) || double.IsInfinity(sourceDegrees))
+        {
+            return null;
+        }
+
+        return sourceDegrees;
+    }
 }
