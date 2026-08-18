@@ -1,3 +1,4 @@
+using Core.AIWeather.Services;
 using Core.Caching;
 using Core.HelloWorld.Handlers;
 using Core.Http;
@@ -15,6 +16,7 @@ public static class CoreServiceCollectionExtensions
         services.AddHttpClient();
         services.AddSingleton<CacheHelper>();
         services.AddSingleton<TransientRetryHelper>();
+        services.AddScoped<ChatToolExecutor>();
         return services;
     }
 }

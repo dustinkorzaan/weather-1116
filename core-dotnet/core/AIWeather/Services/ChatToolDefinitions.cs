@@ -1,7 +1,7 @@
 using System.Text;
 using OpenAI.Responses;
 
-namespace Core.Chat.Services;
+namespace Core.AIWeather.Services;
 
 public static class ChatToolDefinitions
 {

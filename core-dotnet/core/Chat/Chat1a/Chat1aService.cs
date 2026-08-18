@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Core.AIWeather.Services;
 using Core.Chat.Models;
 using Core.Chat.Services;
 using Microsoft.Extensions.Logging;

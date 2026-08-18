@@ -5,7 +5,7 @@ using Core.Weather.Events;
 using MediatR;
 using OpenAI.Responses;
 
-namespace Core.Chat.Services;
+namespace Core.AIWeather.Services;
 
 public sealed class ChatToolExecutor
 {
