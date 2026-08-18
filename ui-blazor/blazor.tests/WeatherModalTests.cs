@@ -16,12 +16,12 @@ public sealed class WeatherModalTests
     {
         using var context = CreateContext();
         context.Services.GetRequiredService<NavigationManager>()
-            .NavigateTo("/weather?name=Atlanta%2C%20GA&lat=33.749&lng=-84.388&tab=current");
+            .NavigateTo("/weather?name=Nashville%2C%20TN&lat=36.1659&lng=-86.7844&tab=current");
 
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
 
         Assert.Contains("weather-dialog-title", rendered.Markup);
-        Assert.Contains("Atlanta, GA (33.7490° N, 84.3880° W)", rendered.Markup);
+        Assert.Contains("Nashville, TN (36.1659° N, 86.7844° W)", rendered.Markup);
         Assert.Contains("Daily Forecast", rendered.Markup);
         Assert.Contains("Hourly Forecast", rendered.Markup);
         Assert.Contains("Every 15 Forecast", rendered.Markup);
@@ -42,7 +42,7 @@ public sealed class WeatherModalTests
     {
         using var context = CreateContext();
         context.Services.GetRequiredService<NavigationManager>()
-            .NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=daily-forecast");
+            .NavigateTo("/weather?name=Nashville%2C%20TN&lat=36.1659&lng=-86.7844&tab=daily-forecast");
 
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
 
@@ -68,7 +68,7 @@ public sealed class WeatherModalTests
     {
         using var context = CreateContext();
         context.Services.GetRequiredService<NavigationManager>()
-            .NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=daily-history");
+            .NavigateTo("/weather?name=Nashville%2C%20TN&lat=36.1659&lng=-86.7844&tab=daily-history");
 
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
 
@@ -87,7 +87,7 @@ public sealed class WeatherModalTests
     {
         using var context = CreateContext();
         context.Services.GetRequiredService<NavigationManager>()
-            .NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=hourly-forecast");
+            .NavigateTo("/weather?name=Nashville%2C%20TN&lat=36.1659&lng=-86.7844&tab=hourly-forecast");
 
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
 
@@ -104,7 +104,7 @@ public sealed class WeatherModalTests
     {
         using var context = CreateContext();
         context.Services.GetRequiredService<NavigationManager>()
-            .NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=every-15-forecast");
+            .NavigateTo("/weather?name=Nashville%2C%20TN&lat=36.1659&lng=-86.7844&tab=every-15-forecast");
 
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
 
@@ -120,7 +120,7 @@ public sealed class WeatherModalTests
     {
         using var context = CreateContext();
         context.Services.GetRequiredService<NavigationManager>()
-            .NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=hourly-history");
+            .NavigateTo("/weather?name=Nashville%2C%20TN&lat=36.1659&lng=-86.7844&tab=hourly-history");
 
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
 
@@ -139,7 +139,7 @@ public sealed class WeatherModalTests
     {
         using var context = CreateContext();
         var navigation = context.Services.GetRequiredService<NavigationManager>();
-        navigation.NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=current");
+        navigation.NavigateTo("/weather?name=Nashville%2C%20TN&lat=36.1659&lng=-86.7844&tab=current");
 
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
         rendered.Find("button.about-close").Click();
@@ -175,14 +175,14 @@ public sealed class WeatherModalTests
                 {
                     Content = JsonContent.Create(new AIWeatherResponse
                     {
-                        FullSummary = "**Sunny** in Atlanta.",
+                        FullSummary = "**Sunny** in Nashville.",
                         TemperatureF = 72,
                         WindSpeedMPH = 5,
                         WindDirection = "S",
                         WindDirectionDegrees = 180,
                         Conditions = "Clear",
-                        Latitude = 33.749,
-                        Longitude = -84.388,
+                        Latitude = 36.1659,
+                        Longitude = -86.7844,
                     }),
                 });
             }
@@ -193,9 +193,9 @@ public sealed class WeatherModalTests
                 {
                     Content = JsonContent.Create(new PublicWeatherForecastResponse
                     {
-                        Latitude = 33.749,
-                        Longitude = -84.388,
-                        Timezone = "America/New_York",
+                        Latitude = 36.1659,
+                        Longitude = -86.7844,
+                        Timezone = "America/Chicago",
                         Daily = new PublicWeatherForecastDaily
                         {
                             Time = ["2026-08-19", "2026-08-20"],
@@ -234,9 +234,9 @@ public sealed class WeatherModalTests
                 {
                     Content = JsonContent.Create(new PublicWeatherHistoryResponse
                     {
-                        Latitude = 33.749,
-                        Longitude = -84.388,
-                        Timezone = "America/New_York",
+                        Latitude = 36.1659,
+                        Longitude = -86.7844,
+                        Timezone = "America/Chicago",
                         Daily = new PublicWeatherForecastDaily
                         {
                             Time = ["2026-08-19", "2026-08-20"],

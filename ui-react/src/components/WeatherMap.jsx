@@ -194,11 +194,11 @@ function WeatherMap() {
             <div
               className="weather-map-pin-card flex min-w-[10.5rem] flex-col gap-2"
               role="dialog"
-              aria-label="Atlanta, GA"
+              aria-label="Nashville, TN"
             >
               <div className="weather-map-pin-card-header flex items-center justify-between gap-2">
                 <div className="weather-map-pin-card-name text-sm font-semibold leading-none text-foreground">
-                  Atlanta, GA
+                  Nashville, TN
                 </div>
                 <span
                   className="weather-map-pin-card-delete inline-flex size-6 shrink-0 items-center justify-center rounded-md leading-none text-muted-foreground [&_svg]:block"

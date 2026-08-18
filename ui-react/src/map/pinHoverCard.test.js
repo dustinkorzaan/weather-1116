@@ -11,12 +11,12 @@ afterEach(() => {
 });
 
 test('pin hover card shows the city name, delete control, and Weather button', () => {
-  const { card, button, deleteButton } = createPinHoverCard('Atlanta, GA');
+  const { card, button, deleteButton } = createPinHoverCard('Nashville, TN');
 
   expect(card.className).toMatch(/flex-col/);
-  expect(card.querySelector('.weather-map-pin-card-name')?.textContent).toBe('Atlanta, GA');
+  expect(card.querySelector('.weather-map-pin-card-name')?.textContent).toBe('Nashville, TN');
   expect(card.querySelector('.weather-map-pin-card-header')?.className).toMatch(/items-center/);
-  expect(deleteButton.getAttribute('aria-label')).toBe('Remove Atlanta, GA from the map');
+  expect(deleteButton.getAttribute('aria-label')).toBe('Remove Nashville, TN from the map');
   expect(button.textContent).toBe(PIN_HOVER_CARD_BUTTON_LABEL);
   expect(button.textContent).toBe('Weather');
   expect(button.querySelector('svg')).not.toBeNull();
@@ -127,7 +127,7 @@ test('opening another pin closes the previous card', () => {
     maps,
     map,
     marker: secondMarker,
-    cityName: 'Atlanta, GA',
+    cityName: 'Nashville, TN',
     onGetWeather: vi.fn(),
   });
 

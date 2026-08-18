@@ -10,14 +10,14 @@ test('renders GFM tables and emphasis after the markdown is complete', () => {
 | City | Temp |
 | --- | --- |
 | Nashville | 72 |
-| Atlanta | 80 |
+| Charlotte | 80 |
 `}
     </SafeGfmMarkdown>
   );
 
   expect(screen.getByRole('table')).toBeDefined();
   expect(screen.getByText('Nashville')).toBeDefined();
-  expect(screen.getByText('Atlanta')).toBeDefined();
+  expect(screen.getByText('Charlotte')).toBeDefined();
   expect(screen.getByText('Warmest').tagName).toBe('STRONG');
 });
 

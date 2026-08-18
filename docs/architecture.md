@@ -312,7 +312,7 @@ Credentials. Restrict it by HTTP referrer (e.g. `http://localhost:3000/*`,
 | MVC | `GOOGLE_MAPS_API_KEY` in `mvc-dotnet/mvc/appsettings.json`, or env `GOOGLE_MAPS_API_KEY` (see [`mvc-dotnet/mvc/.env.example`](../mvc-dotnet/mvc/.env.example)) |
 
 Without a key, the map container still renders. Each UI shows a short setup
-hint plus a sample Atlanta pin hover card (themed) so the card layout can be
+hint plus a sample Nashville pin hover card (themed) so the card layout can be
 reviewed without Maps credentials.
 
 ## Local Run Model
