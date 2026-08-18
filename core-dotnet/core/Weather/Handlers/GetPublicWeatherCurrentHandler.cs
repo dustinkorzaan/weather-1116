@@ -11,6 +11,8 @@ namespace Core.Weather.Handlers;
 
 /// <summary>
 /// Fetches public current-weather data from Open-Meteo for a given lat/long.
+/// Omits unit query params so Open-Meteo returns its defaults (°C, km/h);
+/// the AI converts to US customary units.
 /// </summary>
 public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCurrentEvent, NonAIWeatherResponse>
 {
@@ -54,5 +56,5 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
     internal static string BuildCurrentWeatherUrl(double latitude, double longitude) =>
         string.Create(
             CultureInfo.InvariantCulture,
-            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch");
+            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true");
 }

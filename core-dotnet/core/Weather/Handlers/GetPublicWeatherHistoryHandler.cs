@@ -11,6 +11,8 @@ namespace Core.Weather.Handlers;
 
 /// <summary>
 /// Fetches recent past public weather from Open-Meteo for a given lat/long.
+/// Omits unit query params so Open-Meteo returns its defaults (°C, km/h, mm);
+/// the AI converts to US customary units.
 /// </summary>
 public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHistoryEvent, PublicWeatherHistoryResponse>
 {
@@ -67,6 +69,6 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
 
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&{query}&timezone=auto&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch");
+            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&{query}&timezone=auto");
     }
 }
