@@ -1,0 +1,136 @@
+@* Current AI Weather tab content for the weather modal. Copied (not shared) from
+   CurrentAIWeather.razor's results rendering, minus the location input/form — the
+   demo page at /current-ai-weather has its own design constraints and evolves separately. *@
+@using System.Globalization
+@using WeatherBlazor.Data
+@inject WeatherApiClient WeatherClient
+
+<section aria-labelledby="current-ai-weather-modal-heading">
+    <div class="inline-row" style="justify-content: space-between;">
+        <h2 id="current-ai-weather-modal-heading" class="section-title" style="margin: 0;">Current AI Weather</h2>
+        <button type="button"
+                class="icon-button"
+                disabled="@_isLoading"
+                @onclick="RefreshAsync"
+                aria-label="Refresh Current AI Weather">
+            <svg class="@(_isLoading ? "is-spinning" : null)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
+            </svg>
+        </button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@_errorMessage</FluentMessageBar>
+    }
+
+    @if (_aiWeather is not null && !_isLoading)
+    {
+        <div class="weather-results">
+            <div class="chat-markdown">@((MarkupString)SafeGfmMarkdown.ToHtml(_aiWeather.FullSummary))</div>
+            <FluentGrid Spacing="2">
+                <FluentGridItem xs="12" sm="6">
+                    <div class="stat-label">Temperature</div>
+                    <div>@FormatTemperatureF(_aiWeather.TemperatureF)</div>
+                </FluentGridItem>
+                <FluentGridItem xs="12" sm="6">
+                    <div class="stat-label">Wind Speed</div>
+                    <div>@FormatWindSpeedMph(_aiWeather.WindSpeedMPH)</div>
+                </FluentGridItem>
+                <FluentGridItem xs="12" sm="6">
+                    <div class="stat-label">Wind Direction</div>
+                    <div class="wind-direction">
+                        @FormatWindDirection(_aiWeather.WindDirection, _aiWeather.WindDirectionDegrees)
+                        <span class="wind-direction-arrow"
+                              aria-hidden="true"
+                              style="@($"transform: rotate({_aiWeather.WindDirectionDegrees - 90}deg)")">&#x27A4;</span>
+                    </div>
+                </FluentGridItem>
+                <FluentGridItem xs="12" sm="6">
+                    <div class="stat-label">Conditions</div>
+                    <div>@_aiWeather.Conditions</div>
+                </FluentGridItem>
+                <FluentGridItem xs="12" sm="6">
+                    <div class="stat-label">Lat/Long</div>
+                    <div>@FormatLatLong(_aiWeather.Latitude, _aiWeather.Longitude)</div>
+                </FluentGridItem>
+            </FluentGrid>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Location { get; set; } = string.Empty;
+
+    private bool _isLoading;
+    private string? _errorMessage;
+    private AIWeatherResponse? _aiWeather;
+    private string? _loadedForLocation;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Location) || Location == _loadedForLocation)
+        {
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task RefreshAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loadedForLocation = Location;
+        _isLoading = true;
+        _errorMessage = null;
+        _aiWeather = null;
+        StateHasChanged();
+
+        try
+        {
+            _aiWeather = await WeatherClient.GetCurrentAIWeather(Location);
+            if (_aiWeather is null)
+            {
+                _errorMessage = "Unable to load AI weather.";
+            }
+        }
+        catch
+        {
+            _aiWeather = null;
+            _errorMessage = "Unable to load AI weather.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private static string FormatTemperatureF(double value) =>
+        string.Create(CultureInfo.InvariantCulture, $"{value} °F");
+
+    private static string FormatWindSpeedMph(double value) =>
+        string.Create(CultureInfo.InvariantCulture, $"{value} mph");
+
+    private static string FormatWindDirection(string compass, int degrees)
+    {
+        var label = (compass ?? string.Empty).Trim();
+        var withDegrees = string.Create(CultureInfo.InvariantCulture, $"({degrees}°)");
+        return label.Length == 0 ? withDegrees : $"{label} {withDegrees}";
+    }
+
+    private static string FormatLatLong(double latitude, double longitude) =>
+        string.Create(
+            CultureInfo.InvariantCulture,
+            $"{FormatHemisphereDegrees(latitude, "N", "S")}, {FormatHemisphereDegrees(longitude, "E", "W")}");
+
+    private static string FormatHemisphereDegrees(double value, string positiveLabel, string negativeLabel)
+    {
+        var hemisphere = value >= 0 ? positiveLabel : negativeLabel;
+        return string.Create(CultureInfo.InvariantCulture, $"{Math.Abs(value):0.00}° {hemisphere}");
+    }
+}

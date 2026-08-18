@@ -1,6 +1,7 @@
 namespace WeatherBlazor.Data;
 
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 public class HelloWorldResponse
 {
@@ -33,6 +34,105 @@ public class LatLongResponse
 public class LocationResponse
 {
     public string Location { get; set; } = string.Empty;
+}
+
+public enum PublicWeatherForecastResolution
+{
+    Daily,
+    Hourly,
+    FifteenMinutes,
+}
+
+public enum PublicWeatherHistoryResolution
+{
+    Daily,
+    Hourly,
+}
+
+public class PublicWeatherForecastResponse
+{
+    [JsonPropertyName("latitude")]
+    public double Latitude { get; set; }
+
+    [JsonPropertyName("longitude")]
+    public double Longitude { get; set; }
+
+    [JsonPropertyName("timezone")]
+    public string Timezone { get; set; } = string.Empty;
+
+    [JsonPropertyName("hourly")]
+    public PublicWeatherForecastHourly? Hourly { get; set; }
+
+    [JsonPropertyName("daily")]
+    public PublicWeatherForecastDaily? Daily { get; set; }
+
+    [JsonPropertyName("minutely_15")]
+    public PublicWeatherForecastHourly? Minutely15 { get; set; }
+}
+
+public class PublicWeatherHistoryResponse
+{
+    [JsonPropertyName("latitude")]
+    public double Latitude { get; set; }
+
+    [JsonPropertyName("longitude")]
+    public double Longitude { get; set; }
+
+    [JsonPropertyName("timezone")]
+    public string Timezone { get; set; } = string.Empty;
+
+    [JsonPropertyName("hourly")]
+    public PublicWeatherForecastHourly? Hourly { get; set; }
+
+    [JsonPropertyName("daily")]
+    public PublicWeatherForecastDaily? Daily { get; set; }
+}
+
+/// <summary>Shared shape for the forecast/history "hourly" and "minutely_15" series (Open-Meteo field names).</summary>
+public class PublicWeatherForecastHourly
+{
+    [JsonPropertyName("time")]
+    public List<string> Time { get; set; } = [];
+
+    [JsonPropertyName("temperature_2m")]
+    public List<double> Temperature2m { get; set; } = [];
+
+    [JsonPropertyName("precipitation")]
+    public List<double> Precipitation { get; set; } = [];
+
+    [JsonPropertyName("weather_code")]
+    public List<int> WeatherCode { get; set; } = [];
+
+    [JsonPropertyName("wind_speed_10m")]
+    public List<double> WindSpeed10m { get; set; } = [];
+
+    [JsonPropertyName("wind_direction_10m")]
+    public List<int> WindDirection10m { get; set; } = [];
+}
+
+/// <summary>Shared shape for the forecast/history "daily" series (Open-Meteo field names).</summary>
+public class PublicWeatherForecastDaily
+{
+    [JsonPropertyName("time")]
+    public List<string> Time { get; set; } = [];
+
+    [JsonPropertyName("weather_code")]
+    public List<int> WeatherCode { get; set; } = [];
+
+    [JsonPropertyName("temperature_2m_max")]
+    public List<double> Temperature2mMax { get; set; } = [];
+
+    [JsonPropertyName("temperature_2m_min")]
+    public List<double> Temperature2mMin { get; set; } = [];
+
+    [JsonPropertyName("precipitation_sum")]
+    public List<double> PrecipitationSum { get; set; } = [];
+
+    [JsonPropertyName("wind_speed_10m_max")]
+    public List<double> WindSpeed10mMax { get; set; } = [];
+
+    [JsonPropertyName("wind_direction_10m_dominant")]
+    public List<int> WindDirection10mDominant { get; set; } = [];
 }
 
 public class WeatherApiClient
@@ -76,6 +176,30 @@ public class WeatherApiClient
         }
 
         return await response.Content.ReadFromJsonAsync<LocationResponse>(cancellationToken: cancellationToken);
+    }
+
+    public async Task<PublicWeatherForecastResponse?> GetForecast(
+        double latitude,
+        double longitude,
+        PublicWeatherForecastResolution resolution = PublicWeatherForecastResolution.Daily,
+        CancellationToken cancellationToken = default)
+    {
+        var route = string.Create(
+            CultureInfo.InvariantCulture,
+            $"Forecast?latitude={latitude}&longitude={longitude}&resolution={resolution}");
+        return await _httpClient.GetFromJsonAsync<PublicWeatherForecastResponse>(route, cancellationToken);
+    }
+
+    public async Task<PublicWeatherHistoryResponse?> GetHistory(
+        double latitude,
+        double longitude,
+        PublicWeatherHistoryResolution resolution = PublicWeatherHistoryResolution.Daily,
+        CancellationToken cancellationToken = default)
+    {
+        var route = string.Create(
+            CultureInfo.InvariantCulture,
+            $"History?latitude={latitude}&longitude={longitude}&resolution={resolution}");
+        return await _httpClient.GetFromJsonAsync<PublicWeatherHistoryResponse>(route, cancellationToken);
     }
 
     public async Task<AboutNode> GetAbout()

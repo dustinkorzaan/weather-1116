@@ -29,8 +29,8 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("<h2 class=\"section-title\">Current AI Weather</h2>", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
-        Assert.Contains("Get Current AI Weather", rendered.Markup);
         Assert.Contains("weather-map-pin-card-preview", rendered.Markup);
+        Assert.Contains(">Weather</span>", rendered.Markup);
         Assert.Contains("weather-map-pin-card-delete", rendered.Markup);
         Assert.Contains("weather-map-pin-card-header", rendered.Markup);
         Assert.Contains("data-get-location-url=\"/Geo/GetLocation\"", rendered.Markup);
@@ -40,11 +40,7 @@ public sealed class PageSplitTests
     public void WeatherMapScript_ShowsDeleteControlAndMutatesPinList()
     {
         var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
-        Assert.Contains("currentAiWeatherPath", script);
-        Assert.Contains("formatLocationWithLatLong", script);
-        Assert.Contains("formatHemisphereDegrees", script);
-        Assert.Contains("toFixed(4)", script);
-        Assert.Contains("Get Current AI Weather", script);
+        Assert.Contains("weatherModalPath", script);
         Assert.Contains("weather-map-pin-card-delete", script);
         Assert.Contains("addCity", script);
         Assert.Contains("removeCity", script);
@@ -169,18 +165,16 @@ public sealed class PageSplitTests
     }
 
     [Fact]
-    public void WeatherMapScript_ShowsHoverCardWithGetCurrentAiWeatherButton()
+    public void WeatherMapScript_ShowsHoverCardWithWeatherButton()
     {
         var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
-        Assert.Contains("currentAiWeatherPath", script);
-        Assert.Contains("formatLocationWithLatLong", script);
+        Assert.Contains("weatherModalPath", script);
         Assert.Contains("city.lat", script);
         Assert.Contains("city.lng", script);
-        Assert.Contains("encodeURIComponent", script);
-        Assert.Contains("/current-ai-weather?location=", script);
+        Assert.Contains("/weather?", script);
         Assert.Contains("marker.addListener('mouseover'", script);
         Assert.Contains("marker.addListener('click', openCard)", script);
-        Assert.Contains("Get Current AI Weather", script);
+        Assert.Contains("SEARCH_ICON_SVG", script);
         Assert.Contains("bindPinHoverCard", script);
         Assert.Contains("bindRightClickAddLocation", script);
         Assert.Contains("Add Location", script);
