@@ -1,5 +1,4 @@
 using System.ClientModel;
-using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -108,8 +107,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             ResponseItem.CreateUserMessageItem(userPrompt),
         };
 
-        var stopwatch = Stopwatch.StartNew();
-
         bool requiresAction;
         string? content = null;
 
@@ -156,12 +153,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 content = response.GetOutputText();
             }
         } while (requiresAction);
-
-        stopwatch.Stop();
-        _logger.LogInformation(
-            "AI Weather: Foundry tool-call loop for {Location} took {ElapsedMs}ms (model turns only; tool calls run in-process)",
-            location,
-            stopwatch.ElapsedMilliseconds);
 
         var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
             content ?? throw new InvalidOperationException("Model finished without producing content."));
