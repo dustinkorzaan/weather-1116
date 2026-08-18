@@ -2,15 +2,19 @@
 
 ## Purpose
 
-This repository contains one Weather sample implemented as six primary
-projects: five runnable applications plus one shared .NET class library. The
-goal is feature parity across all UI implementations while keeping each project
-idiomatic for its framework.
+This repository is a Weather sample app implemented across seven runnable
+stacks plus one shared .NET class library.
 
-The repo also includes **MCP tool hosts** and **Foundry console demos** that
-are not called directly by the UIs, but they exercise the same `Core` weather
-and geo logic and support the model-direct AI weather path in API and MVC (V4
-pattern) plus the hosted-agent learning demo in Foundry Console V5.
+Six of those projects are primary: five runnable applications (React UI,
+Blazor UI, MVC UI, API, and Worker) plus the shared `Core` class library.
+The goal is feature parity across all UI implementations while keeping each
+project idiomatic for its framework.
+
+The remaining two runnable stacks are the **MCP tool hosts**. Together with
+the **Foundry console demos**, they are not called directly by the UIs, but
+they exercise the same `Core` weather and geo logic and support the
+model-direct AI weather path in API and MVC (V4 pattern) plus the hosted-agent
+learning demo in Foundry Console V5.
 
 ## Projects
 
@@ -374,8 +378,8 @@ blocks**, not production deployables:
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | In-process tool callbacks (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same tools `Core` exposes, answered locally |
-| **V4** | Model-direct via `ResponsesClient`, tools target remote MCP servers — same pattern as API/MVC production |
+| **V3** | Model-direct: tools handled in-process via local callbacks (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) — same tools `Core` exposes |
+| **V4** | Model-direct: tools target remote MCP servers — same pattern as API/MVC production |
 | **V5** | Hosted Foundry agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the

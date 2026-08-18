@@ -1,12 +1,18 @@
 # Weather
 
-Weather sample app implemented across seven runnable stacks plus one
-shared .NET class library.
+Demystifying Foundry, agents, and models: from model-direct, to local tools,
+to MCP, to a hosted agent, behind a pin map.
 
 This README is intentionally brief. Use it for the project grid and demo
 outline. UI pages, styling stacks, theme, architecture constraints, project
 relationships, and parity guidance live in
 [`docs/architecture.md`](docs/architecture.md).
+
+## Core Weather Concept
+
+- Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
+- Lat/Long `"36.166° N, 86.784° W"` → Non AI Weather
+- Non AI Weather → AI Summary
 
 | PROD | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
@@ -30,8 +36,8 @@ against Core weather data (V1–V4) or a hosted Foundry Agent (V5).
 | --- | --- | --- |
 | V1 | [`Foundry Console V1 Model Direct Legacy`](FoundryConsoleV1) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | V2 | [`Foundry Console V2 Model Direct Unified AI`](FoundryConsoleV2) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) | In-process tool callbacks answered by the console |
-| V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct, tools target remote MCP servers instead of in-process callbacks |
+| V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) | Model-direct: tools handled in-process via local callbacks |
+| V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools target remote MCP servers instead of in-process callbacks |
 | V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns instructions, response schema, and MCP tools; console sends only the user prompt |
 
 ## Chat clients
