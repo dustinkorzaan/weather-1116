@@ -333,7 +333,7 @@ window.weatherMap = (function () {
       overlay,
       city.name,
       function () {
-        window.location.assign(weatherModalPath(city.name, city.lat, city.lng, 'current'));
+        navigateToWeather(city.name, city.lat, city.lng, 'current');
       },
       function () {
         removeCity(city.id);
@@ -396,6 +396,20 @@ window.weatherMap = (function () {
     }
     params.set('tab', tab || 'current');
     return '/weather?' + params.toString();
+  }
+
+  /**
+   * Uses Blazor's client-side router (already connected on this page) instead
+   * of a full browser navigation, so the pin click reuses the live circuit
+   * rather than round-tripping through a fresh server request.
+   */
+  function navigateToWeather(name, lat, lng, tab) {
+    const path = weatherModalPath(name, lat, lng, tab);
+    if (window.Blazor && typeof window.Blazor.navigateTo === 'function') {
+      window.Blazor.navigateTo(path);
+    } else {
+      window.location.assign(path);
+    }
   }
 
   function newCityId() {

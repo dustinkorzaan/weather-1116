@@ -165,6 +165,8 @@ public sealed class PageSplitTests
     {
         var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
         Assert.Contains("weatherModalPath", script);
+        Assert.Contains("navigateToWeather", script);
+        Assert.Contains("window.Blazor.navigateTo", script);
         Assert.Contains("city.lat", script);
         Assert.Contains("city.lng", script);
         Assert.Contains("/weather?", script);
