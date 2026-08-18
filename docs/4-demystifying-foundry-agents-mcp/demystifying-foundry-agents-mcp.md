@@ -1,10 +1,18 @@
-# Demystifying Microsoft Foundry Agents and MCP
+# Demystifying Foundry, agents, and models
+
+Demystifying Foundry, agents, and models: from model-direct, to local
+in-process looping, to remote MCP, to a hosted agent, behind a pin map using
+the following core weather concepts:
+
+- Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
+- Lat/Long → Non-AI Weather `{ temp: 75, conditions: "partly cloudy", ... }`
+- Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
 
 ## Microsoft reference
 
-[Azure AI Foundry Agents overview](https://learn.microsoft.com/en-us/azure/foundry/agents/overview)
+[Microsoft Foundry Agents overview](https://learn.microsoft.com/en-us/azure/foundry/agents/overview)
 
-![What is an agent? — Azure AI Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
+![What is an agent? — Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/agents/media/what-is-an-agent.png)
 
 See also [`docs/architecture.md`](../architecture.md) and
 [`docs/.../...brainstorming.md`](demystifying-model-agent-tools-mcp-brainstorming.md).
@@ -65,10 +73,10 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
     endpoint.
   - Shows the newer Foundry / Azure AI inference surface.
 
-- **V3 — In-process tool callbacks** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
+- **V3 — Local in-process looping** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
   (`FoundryConsoleV3InProcessToolCallbacks.csproj`)
-  - Registers `GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as in-process tool
-    callbacks (same tools `Core` exposes).
+  - Registers `GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as tools
+    answered by local in-process looping (same tools `Core` exposes).
   - Model chooses tools locally; no remote MCP servers yet.
 
   **Simple Diagram without Agent/Loop**

@@ -1,8 +1,8 @@
 # Weather 1116
 
-Demystifying Foundry, agents, and models: from model-direct, to local MCP tool
-loops, to a hosted agent, behind a pin map using the following core weather
-concepts:
+Demystifying Foundry, agents, and models: from model-direct, to local
+in-process looping, to remote MCP, to a hosted agent, behind a pin map using
+the following core weather concepts:
 
 - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
 - Lat/Long → Non-AI Weather `{ temp: 75, conditions: "partly cloudy", ... }`

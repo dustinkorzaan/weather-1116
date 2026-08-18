@@ -2,6 +2,9 @@
 
 ## Purpose
 
+This sample demystifies Foundry, agents, and models: from model-direct, to
+local in-process looping, to remote MCP, to a hosted agent, behind a pin map.
+
 This repository is a Weather sample app implemented across seven runnable
 stacks plus one shared .NET class library.
 
@@ -27,7 +30,7 @@ learning demo in Foundry Console V5.
 | 3 | MVC UI | [`mvc-dotnet/mvc`](../mvc-dotnet/mvc) | ASP.NET Core MVC | Server-rendered web UI |
 | 4 | API | [`api-dotnet/api`](../api-dotnet/api) | ASP.NET Core Minimal API | JSON API consumed by React and Blazor UI |
 | 5 | Worker | [`worker-dotnet/worker`](../worker-dotnet/worker) | Hangfire dashboard and servers | Hangfire job servers, dashboard (`/hangfire`), and `/About` health leaf |
-| 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | Shared events/handlers referenced by MVC, API, worker, and MCP hosts |
+| 6 | Core | [`core-dotnet/core`](../core-dotnet/core) | .NET class library | Shared Core (API, MVC, worker, and MCP) |
 
 ### Adjacent projects (not UI/API dependencies)
 
@@ -288,7 +291,9 @@ user explicitly picks a type from the control, that choice is kept across
 Light/Dark/system theme changes; otherwise the default is re-derived from
 the resolved theme on every switch (and on initial load). The map canvas,
 logo contrast, and hover card follow the resolved Light/Dark theme. Header
-chrome keeps the outline `logo.svg`. Weather overlays will come later.
+chrome keeps the outline `logo.svg`. Clicking a pin opens a weather modal with
+Current AI Weather plus forecast and history tabs. Map-canvas weather overlays
+are out of scope.
 
 **API to enable:** [Maps JavaScript API](https://console.cloud.google.com/google/maps-apis/api-list)
 in a Google Cloud project.
@@ -397,7 +402,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
-| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Azure AI Foundry API key |
+| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Microsoft Foundry API key |
 | `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes | Hosted model deployment name (e.g. `gpt-5.4-mini`) |
 | `MCP_SRV_FUNC_APP_KEY` | Yes | `mcp_extension` system key for the `McpSrvFuncApp` server (`x-functions-key`) |
 | `MCP_SRV_APP_SERVICE_KEY` | Yes | Bearer token for the `McpSrvAppService` server |
