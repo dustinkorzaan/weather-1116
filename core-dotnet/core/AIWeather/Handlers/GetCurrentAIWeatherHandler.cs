@@ -1,4 +1,5 @@
 using System.ClientModel;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -134,7 +135,13 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             },
         };
 
+        var stopwatch = Stopwatch.StartNew();
         ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
+        stopwatch.Stop();
+        _logger.LogInformation(
+            "AI Weather: Foundry CreateResponseAsync for {Location} took {ElapsedMs}ms (model turns + MCP tool round-trips)",
+            location,
+            stopwatch.ElapsedMilliseconds);
 
         if (response.Status != ResponseStatus.Completed)
         {

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Core.Geo.Events;
 using MediatR;
@@ -24,9 +25,13 @@ public class GetLatLongTool(IMediator mediator, ILogger<GetLatLongTool> logger)
 			true)]
 		string location)
 	{
-		logger.LogInformation("MCP tool GetLatLong invoked for location: {Location}", location);
+		logger.LogInformation("MCP tool GetLatLong invoked for location: {Location} at {Timestamp:o}", location, DateTimeOffset.UtcNow);
 
+		var stopwatch = Stopwatch.StartNew();
 		var result = await mediator.Send(new GetLatLongEvent { Location = location });
+		stopwatch.Stop();
+
+		logger.LogInformation("MCP tool GetLatLong completed for {Location} in {ElapsedMs}ms", location, stopwatch.ElapsedMilliseconds);
 
 		return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
 	}
