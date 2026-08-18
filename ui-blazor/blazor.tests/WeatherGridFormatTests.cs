@@ -35,10 +35,26 @@ public sealed class WeatherGridFormatTests
     }
 
     [Fact]
-    public void FormatPrecipitationIn_RoundsToTwoDecimals()
+    public void FormatPrecipitationIn_RoundsToNearestSixteenth()
     {
         Assert.Equal("1\"", WeatherGridFormat.FormatPrecipitationIn(1));
-        Assert.Equal("0.3\"", WeatherGridFormat.FormatPrecipitationIn(0.3));
+        Assert.Equal("0\"", WeatherGridFormat.FormatPrecipitationIn(0));
+        Assert.Equal("1 1/2\"", WeatherGridFormat.FormatPrecipitationIn(1.5));
+        Assert.Equal("2 1/4\"", WeatherGridFormat.FormatPrecipitationIn(2.25));
+        Assert.Equal("3 5/16\"", WeatherGridFormat.FormatPrecipitationIn(3.3125));
+        Assert.Equal("1/16\"", WeatherGridFormat.FormatPrecipitationIn(0.0625));
+        Assert.Equal("5/16\"", WeatherGridFormat.FormatPrecipitationIn(0.3));
+        Assert.Equal("2\"", WeatherGridFormat.FormatPrecipitationIn(1.9997));
+    }
+
+    [Fact]
+    public void FormatPrecipitationIn_TreatsNegativeAndNonFiniteValuesAsZeroOrEmpty()
+    {
+        Assert.Equal("0\"", WeatherGridFormat.FormatPrecipitationIn(-0.5));
+        Assert.Equal("0\"", WeatherGridFormat.FormatPrecipitationIn(-0.01));
+        Assert.Equal(string.Empty, WeatherGridFormat.FormatPrecipitationIn(double.NaN));
+        Assert.Equal(string.Empty, WeatherGridFormat.FormatPrecipitationIn(double.PositiveInfinity));
+        Assert.Equal(string.Empty, WeatherGridFormat.FormatPrecipitationIn(double.NegativeInfinity));
     }
 
     [Fact]

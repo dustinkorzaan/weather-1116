@@ -47,6 +47,34 @@ public class GetPublicWeatherForecastHandlerTests
         Assert.Empty(response.Daily.WindDirection10mDominant);
     }
 
+    [Fact]
+    public async Task Handle_OpenMeteoReturnsNegativePrecipitation_ClampsToZero()
+    {
+        const string json = """
+        {
+          "latitude": 36.16,
+          "longitude": -86.78,
+          "timezone": "America/Chicago",
+          "daily": {
+            "time": ["2026-08-19"],
+            "weather_code": [0],
+            "temperature_2m_max": [88.4],
+            "temperature_2m_min": [66.0],
+            "precipitation_sum": [-0.1, 0.3],
+            "wind_speed_10m_max": [6.2],
+            "wind_direction_10m_dominant": [224]
+          }
+        }
+        """;
+        var handler = CreateHandler(json);
+
+        var response = await handler.Handle(
+            new GetPublicWeatherForecastEvent { Latitude = 36.16, Longitude = -86.78, Resolution = PublicWeatherForecastResolution.Daily },
+            CancellationToken.None);
+
+        Assert.Equal([0, 0.3], response.Daily!.PrecipitationSum);
+    }
+
     private static GetPublicWeatherForecastHandler CreateHandler(string json) =>
         new(
             new CacheHelper(new MemoryCache(new MemoryCacheOptions())),

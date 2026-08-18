@@ -57,13 +57,33 @@
     return (Math.round(numeric * 10) / 10) + ' mph';
   }
 
-  /** Formats an already-converted inches value (the API returns US customary units). */
+  /** Reduces a sixteenths-of-an-inch numerator to lowest terms (denominator is always a power of two). */
+  function reduceSixteenths(numerator) {
+    var denominator = 16;
+    while (numerator !== 0 && numerator % 2 === 0 && denominator > 1) {
+      numerator /= 2;
+      denominator /= 2;
+    }
+    return [numerator, denominator];
+  }
+
+  /** Formats an already-converted inches value (the API returns US customary units) rounded to the nearest 1/16", e.g. "1 1/2"". Negative values (an upstream data artifact) are treated as zero. */
   function formatPrecipitationIn(inches) {
     var numeric = Number(inches);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 100) / 100) + '"';
+
+    var sixteenths = Math.round(Math.max(0, numeric) * 16);
+    var whole = Math.floor(sixteenths / 16);
+    var remainder = sixteenths % 16;
+
+    if (remainder === 0) {
+      return whole + '"';
+    }
+
+    var reduced = reduceSixteenths(remainder);
+    return whole === 0 ? (reduced[0] + '/' + reduced[1] + '"') : (whole + ' ' + reduced[0] + '/' + reduced[1] + '"');
   }
 
   function formatWindDirection(degrees) {

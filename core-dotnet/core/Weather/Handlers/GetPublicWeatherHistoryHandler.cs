@@ -58,7 +58,8 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
     /// <summary>
     /// Open-Meteo can serialize a series field as JSON null instead of omitting it. This response
     /// gets cached and read by multiple consumers (the UI mapper and MCP tools), so normalize any
-    /// null list to empty here, once, rather than null-checking at every read site.
+    /// null list to empty here, once, rather than null-checking at every read site. Also clamps any
+    /// negative precipitation reading (an Open-Meteo sensor/interpolation artifact) to zero.
     /// </summary>
     private static void NormalizeNullCollections(PublicWeatherHistoryResponse response)
     {
@@ -70,6 +71,7 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
             hourly.WeatherCode ??= [];
             hourly.WindSpeed10m ??= [];
             hourly.WindDirection10m ??= [];
+            ClampNegativeToZero(hourly.Precipitation);
         }
 
         if (response.Daily is { } daily)
@@ -81,6 +83,18 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
             daily.PrecipitationSum ??= [];
             daily.WindSpeed10mMax ??= [];
             daily.WindDirection10mDominant ??= [];
+            ClampNegativeToZero(daily.PrecipitationSum);
+        }
+    }
+
+    private static void ClampNegativeToZero(List<double> values)
+    {
+        for (var i = 0; i < values.Count; i++)
+        {
+            if (values[i] < 0)
+            {
+                values[i] = 0;
+            }
         }
     }
 

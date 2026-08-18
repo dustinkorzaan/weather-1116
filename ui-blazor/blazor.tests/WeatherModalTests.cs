@@ -54,7 +54,7 @@ public sealed class WeatherModalTests
             Assert.Contains("High</th>", rendered.Markup);
             Assert.Contains("Wind Direction</th>", rendered.Markup);
             Assert.Contains("88.4 °F", rendered.Markup);
-            Assert.Contains("0.3\"", rendered.Markup);
+            Assert.Contains("5/16\"", rendered.Markup);
             Assert.Contains("SW (224°)", rendered.Markup);
             Assert.Contains("wind-direction-arrow", rendered.Markup);
             Assert.Contains("rotate(134deg)", rendered.Markup);
