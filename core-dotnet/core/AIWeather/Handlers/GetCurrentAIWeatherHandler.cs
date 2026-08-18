@@ -23,7 +23,7 @@ namespace Core.AIWeather.Handlers;
 public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEvent, AIWeatherResponse>
 {
     private static readonly string DefaultLocation = "Nashville, TN";
-    private const int MaxToolLoopTurns = 8;
+    private const int MaxToolLoopTurns = 32;
 
     private readonly WeatherToolExecutor _toolExecutor;
     private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
