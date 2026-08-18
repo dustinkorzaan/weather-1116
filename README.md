@@ -6,7 +6,7 @@ concepts:
 
 - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
 - → Non-AI weather JSON `{ temp: 75, conditions: "partly cloudy", ... }`
-- → AI Summary
+- → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
 
 | PROD | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
