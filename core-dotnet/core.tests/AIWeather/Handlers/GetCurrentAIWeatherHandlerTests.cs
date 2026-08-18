@@ -15,11 +15,11 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.Contains("- latitude:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("- longitude:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("- windDirectionSourceDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("- windDirectionSource:", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("- windDirectionSource:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("- windDirection:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("current_weather.winddirection", prompt, StringComparison.Ordinal);
         Assert.Contains("Do not add 180", prompt, StringComparison.Ordinal);
-        Assert.Contains("16-point", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("16-point compass", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("AIWeatherSystemInstructions", prompt, StringComparison.Ordinal);
         Assert.DoesNotContain("AIWeatherModelResponse", prompt, StringComparison.Ordinal);
         Assert.Contains("WeatherUnitConversion.NormalizeSourceDegrees", prompt, StringComparison.Ordinal);
