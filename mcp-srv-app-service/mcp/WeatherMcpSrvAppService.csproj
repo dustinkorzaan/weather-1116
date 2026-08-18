@@ -10,6 +10,9 @@
   <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.2.0" />
     <ProjectReference Include="..\..\mediatr-dotnet\mediatr\MediatR.csproj" />
+    <!-- 1.4.1 pulls Microsoft.Extensions.AI.Abstractions 10.5.2. That mix stays in
+         this MCP host only (it does not run Chat2a/Chat2b). Do not let that 10.5.2
+         requirement bump Core's Agent Framework train off 10.4.0. -->
     <PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.4.1" />
   </ItemGroup>
 
