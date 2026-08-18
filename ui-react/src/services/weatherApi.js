@@ -27,6 +27,14 @@ export const weatherApi = createApi({
       query: ({ latitude, longitude }) =>
         `/Geo/GetLocation?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}`,
     }),
+    getForecast: builder.query({
+      query: ({ latitude, longitude, resolution }) =>
+        `/Forecast?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&resolution=${encodeURIComponent(resolution)}`,
+    }),
+    getHistory: builder.query({
+      query: ({ latitude, longitude, resolution }) =>
+        `/History?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&resolution=${encodeURIComponent(resolution)}`,
+    }),
   }),
 });
 
@@ -37,4 +45,6 @@ export const {
   useLazyGetCurrentAIWeatherQuery,
   useLazySearchLocationQuery,
   useLazyGetLocationQuery,
+  useGetForecastQuery,
+  useGetHistoryQuery,
 } = weatherApi;
