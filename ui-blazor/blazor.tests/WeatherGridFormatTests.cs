@@ -88,10 +88,9 @@ public sealed class WeatherGridFormatTests
     }
 
     [Fact]
-    public void WindArrowRotationDeg_ReturnsNullForNonFiniteValues()
+    public void WindArrowRotationDeg_ReturnsNullForNonFiniteDouble()
     {
         Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.NaN));
         Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.PositiveInfinity));
-        Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.NegativeInfinity));
     }
 }

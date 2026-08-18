@@ -22,11 +22,24 @@ public static class WeatherUnitConversion
     public static int NormalizeSourceDegrees(int degrees) =>
         (int)(((degrees % 360) + 360) % 360);
 
-    /// <summary>Converts meteorological source degrees (0° = north is the wind source) to a 16-point compass abbreviation.</summary>
+    /// <summary>Converts normalized meteorological source degrees (0–360) to a 16-point compass abbreviation.</summary>
     public static string DegreesToCompass(int degrees)
     {
-        var normalized = NormalizeSourceDegrees(degrees);
-        var index = (int)Math.Round(normalized / 22.5) % 16;
+        var index = (int)Math.Round(degrees / 22.5) % 16;
         return CompassPoints[index];
+    }
+
+    /// <summary>CSS rotate degrees for ⮛ from normalized meteorological source degrees.</summary>
+    public static int WindArrowRotationDeg(int sourceDegrees) => sourceDegrees;
+
+    /// <summary>CSS rotate degrees for ⮛ from normalized meteorological source degrees; null when not finite.</summary>
+    public static double? WindArrowRotationDeg(double sourceDegrees)
+    {
+        if (double.IsNaN(sourceDegrees) || double.IsInfinity(sourceDegrees))
+        {
+            return null;
+        }
+
+        return sourceDegrees;
     }
 }

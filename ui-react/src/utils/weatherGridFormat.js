@@ -1,18 +1,4 @@
-const COMPASS_POINTS = [
-  'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-  'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW',
-];
-
-/** Converts meteorological source degrees (0° = north is the wind source) to a 16-point compass abbreviation. */
-export function degreesToCompass(degrees) {
-  const numeric = Number(degrees);
-  if (!Number.isFinite(numeric)) {
-    return '';
-  }
-
-  const index = Math.round((((numeric % 360) + 360) % 360) / 22.5) % 16;
-  return COMPASS_POINTS[index];
-}
+export { degreesToCompass } from './windDirectionDisplay';
 
 /** Formats an Open-Meteo daily date ("2026-08-19") or hourly timestamp as "Wed, Aug 19". */
 export function formatCalendarDate(isoDate) {

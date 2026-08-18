@@ -7,6 +7,7 @@ using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.Json;
 using Core.Tools;
+using Core.Weather;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -165,6 +166,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             throw new InvalidOperationException(
                 $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
         }
+
+        modelOutput.WindDirectionSourceDegrees =
+            WeatherUnitConversion.NormalizeSourceDegrees(modelOutput.WindDirectionSourceDegrees);
 
         return modelOutput;
     }

@@ -41,44 +41,6 @@
     return (Math.round(numeric * 10) / 10) + ' mph';
   }
 
-  function formatWindDirection(compass, degrees) {
-    var label = String(compass || '').trim();
-    var numeric = Number(degrees);
-    if (!Number.isFinite(numeric)) {
-      return label;
-    }
-    var withDegrees = '(' + Math.round(numeric) + '°)';
-    return label ? label + ' ' + withDegrees : withDegrees;
-  }
-
-  var WIND_DIRECTION_ARROW = '\u2B9B';
-
-  function windArrowRotationDeg(sourceDegrees) {
-    var numeric = Number(sourceDegrees);
-    return Number.isFinite(numeric) ? numeric : null;
-  }
-
-  function renderWindDirection(el, compass, degrees) {
-    if (!el) {
-      return;
-    }
-
-    el.replaceChildren();
-    var label = document.createElement('span');
-    label.textContent = formatWindDirection(compass, degrees);
-    el.appendChild(label);
-
-    var rotation = windArrowRotationDeg(degrees);
-    if (rotation !== null) {
-      var arrow = document.createElement('span');
-      arrow.className = 'wind-direction-arrow';
-      arrow.setAttribute('aria-hidden', 'true');
-      arrow.textContent = WIND_DIRECTION_ARROW;
-      arrow.style.transform = 'rotate(' + rotation + 'deg)';
-      el.appendChild(arrow);
-    }
-  }
-
   function init(config) {
     var refreshButton = document.getElementById(config.refreshButtonId);
     var errorEl = document.getElementById(config.errorId);
@@ -118,7 +80,10 @@
           }
           temperatureEl.textContent = formatTemperatureF(data.temperatureF);
           windSpeedEl.textContent = formatWindSpeedMph(data.windSpeedMPH);
-          renderWindDirection(windDirectionEl, data.windDirectionSource, data.windDirectionSourceDegrees);
+          window.windDirectionDisplay.renderWindDirection(
+            windDirectionEl,
+            data.windDirectionSource,
+            data.windDirectionSourceDegrees);
           conditionsEl.textContent = data.conditions || '';
           if (latLongEl) {
             latLongEl.textContent = formatLatLong(data.latitude, data.longitude);

@@ -1,23 +1,14 @@
 namespace WeatherBlazor.Data;
 
 using System.Globalization;
+using Core.Weather;
 
 /// <summary>Formatting helpers for the weather modal's forecast/history grid tabs.</summary>
 public static class WeatherGridFormat
 {
-    private static readonly string[] CompassPoints =
-    [
-        "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-        "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
-    ];
-
-    /// <summary>Converts meteorological source degrees (0° = north is the wind source) to a 16-point compass abbreviation.</summary>
-    public static string DegreesToCompass(double degrees)
-    {
-        var normalized = ((degrees % 360) + 360) % 360;
-        var index = (int)Math.Round(normalized / 22.5) % 16;
-        return CompassPoints[index];
-    }
+    /// <summary>Expects source degrees already normalized to 0–360 by the API mapper.</summary>
+    public static string DegreesToCompass(double degrees) =>
+        WeatherUnitConversion.DegreesToCompass((int)Math.Round(degrees));
 
     /// <summary>Formats an Open-Meteo daily date ("2026-08-19") as "Wed, Aug 19".</summary>
     public static string FormatCalendarDate(string isoDate)
@@ -92,13 +83,6 @@ public static class WeatherGridFormat
         string.Create(CultureInfo.InvariantCulture, $"{DegreesToCompass(degrees)} ({Math.Round(degrees):0}°)");
 
     /// <summary>CSS rotate degrees for ⮛ from meteorological source degrees; null when not finite.</summary>
-    public static double? WindArrowRotationDeg(double sourceDegrees)
-    {
-        if (double.IsNaN(sourceDegrees) || double.IsInfinity(sourceDegrees))
-        {
-            return null;
-        }
-
-        return sourceDegrees;
-    }
+    public static double? WindArrowRotationDeg(double sourceDegrees) =>
+        WeatherUnitConversion.WindArrowRotationDeg(sourceDegrees);
 }

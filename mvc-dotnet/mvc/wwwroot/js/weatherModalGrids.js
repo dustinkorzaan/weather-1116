@@ -1,21 +1,6 @@
 (function (window) {
   'use strict';
 
-  var COMPASS_POINTS = [
-    'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-    'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW',
-  ];
-
-  /** Converts meteorological source degrees (0° = north is the wind source) to a 16-point compass abbreviation. */
-  function degreesToCompass(degrees) {
-    var numeric = Number(degrees);
-    if (!Number.isFinite(numeric)) {
-      return '';
-    }
-    var index = Math.round((((numeric % 360) + 360) % 360) / 22.5) % 16;
-    return COMPASS_POINTS[index];
-  }
-
   /** Formats an Open-Meteo daily date or hourly timestamp as "Wed, Aug 19". */
   function formatCalendarDate(isoDate) {
     var value = String(isoDate || '');
@@ -86,40 +71,8 @@
     return whole === 0 ? (reduced[0] + '/' + reduced[1] + '"') : (whole + ' ' + reduced[0] + '/' + reduced[1] + '"');
   }
 
-  function formatWindDirection(degrees) {
-    var compass = degreesToCompass(degrees);
-    var numeric = Number(degrees);
-    if (!Number.isFinite(numeric)) {
-      return compass;
-    }
-    var withDegrees = '(' + Math.round(numeric) + '°)';
-    return compass ? compass + ' ' + withDegrees : withDegrees;
-  }
-
-  var WIND_DIRECTION_ARROW = '\u2B9B';
-
-  function windArrowRotationDeg(sourceDegrees) {
-    var numeric = Number(sourceDegrees);
-    return Number.isFinite(numeric) ? numeric : null;
-  }
-
   function createWindDirectionCell(degrees) {
-    var wrap = document.createElement('span');
-    wrap.className = 'wind-direction';
-    var label = document.createElement('span');
-    label.textContent = formatWindDirection(degrees);
-    wrap.appendChild(label);
-
-    var rotation = windArrowRotationDeg(degrees);
-    if (rotation !== null) {
-      var arrow = document.createElement('span');
-      arrow.className = 'wind-direction-arrow';
-      arrow.setAttribute('aria-hidden', 'true');
-      arrow.textContent = WIND_DIRECTION_ARROW;
-      arrow.style.transform = 'rotate(' + rotation + 'deg)';
-      wrap.appendChild(arrow);
-    }
-    return wrap;
+    return window.windDirectionDisplay.createWindDirectionCell(degrees);
   }
 
   function setHidden(el, hidden) {
