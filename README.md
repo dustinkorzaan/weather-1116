@@ -25,7 +25,7 @@ Presentation reference: [`docs/presentation.md`](docs/presentation.md)
 
 Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
 against Core weather data (V1–V4) or a hosted Foundry Agent (V5) using the
-following core weather concepts:
+following 3-step core weather progression:
 
 - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
 - Lat/Long → Non-AI Weather `{ temp: 24, ... }`

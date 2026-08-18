@@ -2,7 +2,7 @@
 
 Demystifying Foundry, agents, and models: from model-direct, to local
 in-process looping, to remote MCP, to a hosted agent, behind a pin map using
-the following core weather concepts:
+the following 3-step core weather progression:
 
 - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
 - Lat/Long → Non-AI Weather `{ temp: 24, ... }`
