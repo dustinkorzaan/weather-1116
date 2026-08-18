@@ -24,19 +24,20 @@ export function formatCalendarDate(isoDate) {
   return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-/** Formats an Open-Meteo hourly/15-minute timestamp ("2026-08-19T14:00") as "Aug 19, 2:00 PM". */
+/** Formats an Open-Meteo hourly/15-minute timestamp ("2026-08-19T14:00") as "Wed, Aug 19, 2 PM" (minutes shown only when non-zero, e.g. "2:15 PM"). */
 export function formatClockTime(isoDateTime) {
   const date = new Date(isoDateTime);
   if (Number.isNaN(date.getTime())) {
     return isoDateTime ?? '';
   }
 
-  return date.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
+  const datePart = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  const timePart = date.toLocaleTimeString(undefined, {
     hour: 'numeric',
-    minute: '2-digit',
+    ...(date.getMinutes() !== 0 ? { minute: '2-digit' } : {}),
   });
+
+  return `${datePart}, ${timePart}`;
 }
 
 export function formatPrecipitationIn(value) {
@@ -45,5 +46,5 @@ export function formatPrecipitationIn(value) {
     return '';
   }
 
-  return `${Math.round(numeric * 100) / 100} in`;
+  return `${Math.round(numeric * 100) / 100}"`;
 }
