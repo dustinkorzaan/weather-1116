@@ -5,8 +5,8 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
-using Core.AIWeather.Services;
 using Core.Json;
+using Core.Tools;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -17,17 +17,18 @@ namespace Core.AIWeather.Handlers;
 
 /// <summary>
 /// Calls the hosted model directly for current weather (same pattern as Foundry Console V3).
-/// Geo and weather tools run in-process via <see cref="ChatToolExecutor"/>; the model
+/// Geo and weather tools run in-process via <see cref="WeatherToolExecutor"/>; the model
 /// drives the tool-call loop, but no network hop leaves this process to resolve a tool call.
 /// </summary>
 public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEvent, AIWeatherResponse>
 {
     private static readonly string DefaultLocation = "Nashville, TN";
+    private const int MaxToolLoopTurns = 8;
 
-    private readonly ChatToolExecutor _toolExecutor;
+    private readonly WeatherToolExecutor _toolExecutor;
     private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
 
-    public GetCurrentAIWeatherHandler(ChatToolExecutor toolExecutor, ILogger<GetCurrentAIWeatherHandler> logger)
+    public GetCurrentAIWeatherHandler(WeatherToolExecutor toolExecutor, ILogger<GetCurrentAIWeatherHandler> logger)
     {
         _toolExecutor = toolExecutor;
         _logger = logger;
@@ -84,9 +85,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         var aiOutputSchema = BuildAIOutputSchema();
 
         _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, deploymentName);
-        _logger.LogInformation("AI Weather: System prompt for {Location}: {Prompt}", location, systemPrompt);
-        _logger.LogInformation("AI Weather: User prompt for {Location}: {Prompt}", location, userPrompt);
-        _logger.LogInformation("AI Weather: Output schema for {Location}: {Schema}", location, aiOutputSchema);
 
         ResponsesClient client = new(
             credential: new ApiKeyCredential(apiKey),
@@ -95,8 +93,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 Endpoint = endpoint,
             });
 
-        FunctionTool getLatLongTool = ChatToolDefinitions.CreateGetLatLongTool();
-        FunctionTool getPublicWeatherCurrentTool = ChatToolDefinitions.CreateGetPublicWeatherCurrentTool();
+        FunctionTool getLatLongTool = WeatherToolDefinitions.CreateGetLatLongTool();
+        FunctionTool getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();
 
         var inputItems = new List<ResponseItem>
         {
@@ -109,9 +107,16 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
         bool requiresAction;
         string? content = null;
+        var toolLoopTurns = 0;
 
         do
         {
+            if (++toolLoopTurns > MaxToolLoopTurns)
+            {
+                throw new InvalidOperationException(
+                    $"AI Weather tool loop exceeded {MaxToolLoopTurns} model turns.");
+            }
+
             requiresAction = false;
 
             CreateResponseOptions options = new(deploymentName, inputItems)

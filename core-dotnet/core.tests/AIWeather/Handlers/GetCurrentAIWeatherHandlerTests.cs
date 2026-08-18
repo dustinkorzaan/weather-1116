@@ -31,10 +31,14 @@ public class GetCurrentAIWeatherHandlerTests
     {
         var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherHandler.cs"));
 
-        Assert.Contains("ChatToolExecutor", source, StringComparison.Ordinal);
-        Assert.Contains("ChatToolDefinitions", source, StringComparison.Ordinal);
+        Assert.Contains("WeatherToolExecutor", source, StringComparison.Ordinal);
+        Assert.Contains("WeatherToolDefinitions", source, StringComparison.Ordinal);
+        Assert.Contains("MaxToolLoopTurns", source, StringComparison.Ordinal);
         Assert.DoesNotContain("CreateMcpTool", source, StringComparison.Ordinal);
         Assert.DoesNotContain("MCP_SRV_", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("System prompt for {Location}", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("User prompt for {Location}", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("Output schema for {Location}", source, StringComparison.Ordinal);
     }
 
     private static string FindRepoFile(string relativePath)

@@ -1,8 +1,8 @@
 using System.Text;
 using System.Text.Json;
-using Core.AIWeather.Services;
 using Core.Chat.Models;
 using Core.Chat.Services;
+using Core.Tools;
 using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
 
@@ -11,13 +11,13 @@ namespace Core.Chat.Chat1a;
 public sealed class Chat1aService : IChatClientService
 {
     private readonly IChatSessionStore _sessionStore;
-    private readonly ChatToolExecutor _toolExecutor;
+    private readonly WeatherToolExecutor _toolExecutor;
     private readonly ChatFoundrySettings _settings;
     private readonly ILogger<Chat1aService> _logger;
 
     public Chat1aService(
         IChatSessionStore sessionStore,
-        ChatToolExecutor toolExecutor,
+        WeatherToolExecutor toolExecutor,
         ChatFoundrySettings settings,
         ILogger<Chat1aService> logger)
     {
@@ -51,11 +51,11 @@ public sealed class Chat1aService : IChatClientService
         var inputItems = ChatResponsesSessionHelper.BuildInputItems(history.Take(history.Count - 1).ToList(), userMessage);
 
         var client = _settings.CreateResponsesClient();
-        var getLatLongTool = ChatToolDefinitions.CreateGetLatLongTool();
-        var getLocationTool = ChatToolDefinitions.CreateGetLocationTool();
-        var getPublicWeatherCurrentTool = ChatToolDefinitions.CreateGetPublicWeatherCurrentTool();
-        var getPublicWeatherForecastTool = ChatToolDefinitions.CreateGetPublicWeatherForecastTool();
-        var getPublicWeatherHistoryTool = ChatToolDefinitions.CreateGetPublicWeatherHistoryTool();
+        var getLatLongTool = WeatherToolDefinitions.CreateGetLatLongTool();
+        var getLocationTool = WeatherToolDefinitions.CreateGetLocationTool();
+        var getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();
+        var getPublicWeatherForecastTool = WeatherToolDefinitions.CreateGetPublicWeatherForecastTool();
+        var getPublicWeatherHistoryTool = WeatherToolDefinitions.CreateGetPublicWeatherHistoryTool();
 
         var assistantBuilder = new StringBuilder();
         string? errorMessage = null;

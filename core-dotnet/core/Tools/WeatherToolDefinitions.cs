@@ -1,9 +1,9 @@
 using System.Text;
 using OpenAI.Responses;
 
-namespace Core.AIWeather.Services;
+namespace Core.Tools;
 
-public static class ChatToolDefinitions
+public static class WeatherToolDefinitions
 {
     public static FunctionTool CreateGetLatLongTool() => ResponseTool.CreateFunctionTool(
         functionName: "GetLatLong",

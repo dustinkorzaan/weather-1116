@@ -1,7 +1,7 @@
-using Core.AIWeather.Services;
 using Core.Caching;
 using Core.HelloWorld.Handlers;
 using Core.Http;
+using Core.Tools;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,7 +16,7 @@ public static class CoreServiceCollectionExtensions
         services.AddHttpClient();
         services.AddSingleton<CacheHelper>();
         services.AddSingleton<TransientRetryHelper>();
-        services.AddScoped<ChatToolExecutor>();
+        services.AddScoped<WeatherToolExecutor>();
         return services;
     }
 }

@@ -5,13 +5,13 @@ using Core.Weather.Events;
 using MediatR;
 using OpenAI.Responses;
 
-namespace Core.AIWeather.Services;
+namespace Core.Tools;
 
-public sealed class ChatToolExecutor
+public sealed class WeatherToolExecutor
 {
     private readonly IMediator _mediator;
 
-    public ChatToolExecutor(IMediator mediator)
+    public WeatherToolExecutor(IMediator mediator)
     {
         _mediator = mediator;
     }

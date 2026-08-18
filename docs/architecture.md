@@ -72,7 +72,7 @@ All three UIs expose **Current AI Weather**. The request path differs by stack:
 - **React / Blazor** → `WeatherAPI` (`/AIWeather/Current`)
 - **MVC** → local `HomeController` + `Core` (same handler, no API hop)
 - Tools (`GetLatLong`, `GetPublicWeatherCurrent`) run in-process via the
-  shared `ChatToolDefinitions`/`ChatToolExecutor` helpers (V3 pattern) — no
+  shared `WeatherToolDefinitions`/`WeatherToolExecutor` helpers (V3 pattern) — no
   network hop to the MCP hosts.
 
 ## Chat Clients (Chat1a–Chat2b)
@@ -113,7 +113,7 @@ flowchart LR
   API[MVC or WeatherAPI]
   Core[Core GetCurrentAIWeatherHandler]
   Model[Azure OpenAI model]
-  Tools[ChatToolExecutor in-process]
+  Tools[WeatherToolExecutor in-process]
   CoreGeo[Core geo handlers]
   CoreWx[Core weather handlers]
 

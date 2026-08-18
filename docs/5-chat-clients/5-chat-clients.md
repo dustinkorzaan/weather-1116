@@ -39,7 +39,7 @@ flowchart TB
         S2a[Chat2aService]
         S2b[Chat2bService]
         Store[IChatSessionStore]
-        Tools[ChatToolExecutor / MCP factories]
+        Tools[WeatherToolExecutor / MCP factories]
     end
 
     React --> api
@@ -117,7 +117,7 @@ All four tabs expose the same public geo and weather tools (no web search):
 | `GetPublicWeatherForecast` | Upcoming forecast: Daily (7 days), Hourly (48 hours), or FifteenMinutes (48 hours) |
 | `GetPublicWeatherHistory` | Recent past: Daily (previous 7 days) or Hourly (previous 48 hours) |
 
-- **In-process (Chat1a, Chat2a):** Core `ChatToolExecutor` runs MediatR handlers when the model
+- **In-process (Chat1a, Chat2a):** Core `WeatherToolExecutor` runs MediatR handlers when the model
   emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a).
 - **MCP (Chat1b, Chat2b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`) — platform invokes
   tools; no local function-call loop in Chat1b.
