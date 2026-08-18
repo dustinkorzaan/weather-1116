@@ -43,7 +43,7 @@ map chrome do not need them.
 | Project | Path | Role |
 | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | Remote MCP server exposing `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` via `Core` |
-| MCP Server on Functions App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetLatLong` via `Core` |
+| MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetLatLong` via `Core` |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
 Ports for runnable apps are in [`README.md`](../README.md); worker and console
@@ -135,7 +135,7 @@ MediatR handlers the sample uses in-process elsewhere.
 | Host | Path | Tool | Port | Endpoint | Auth |
 | --- | --- | --- | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` | 8110 | `/mcp` | Bearer `MCP_SRV_APP_SERVICE_KEY` (no default — must be set by developer) |
-| MCP Server on Functions App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLong`, `GetLocation` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
+| MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLong`, `GetLocation` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
 
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
@@ -148,7 +148,7 @@ Prod apps: `weather1116-prod-mcp-srv-app-service`, `weather1116-prod-mcp-srv-fun
 Auth examples:
 
 - MCP Server on App Service: `Authorization: Bearer {your MCP_SRV_APP_SERVICE_KEY value}` (`/About` stays open)
-- MCP Server on Functions App (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
+- MCP Server on Function App (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 
 Each host also exposes an anonymous **`/About`** probe that returns a leaf
 `AboutNode` (`mcp-srv-app-service` or `mcp-srv-func-app`) with tool-registration health and
@@ -369,8 +369,8 @@ mcp-srv-app-service/
   mcp/                       MCP Server on App Service tool host (WeatherMcpSrvAppService.csproj)
   mcp.tests/                 MCP Server on App Service tests (WeatherMcpSrvAppService.Tests.csproj)
 mcp-srv-func-app/
-  mcp/                       MCP Server on Functions App tool host (WeatherMcpSrvFuncApp.csproj)
-  mcp.tests/                 MCP Server on Functions App tests (WeatherMcpSrvFuncApp.Tests.csproj)
+  mcp/                       MCP Server on Function App tool host (WeatherMcpSrvFuncApp.csproj)
+  mcp.tests/                 MCP Server on Function App tests (WeatherMcpSrvFuncApp.Tests.csproj)
 FoundryConsoleV1…V5/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```
@@ -409,7 +409,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `MCP_SRV_FUNC_APP_KEY` | Yes | `mcp_extension` system key for the `McpSrvFuncApp` server (`x-functions-key`) |
 | `MCP_SRV_APP_SERVICE_KEY` | Yes | Bearer token for the `McpSrvAppService` server |
 | `MCP_SRV_APP_SERVICE_URL` | Yes | Base URL for MCP Server on App Service (e.g. `http://localhost:8110`) |
-| `MCP_SRV_FUNC_APP_URL` | Yes | Base URL for MCP Server on Functions App (e.g. `http://localhost:8120`) |
+| `MCP_SRV_FUNC_APP_URL` | Yes | Base URL for MCP Server on Function App (e.g. `http://localhost:8120`) |
 
 **V5 settings** (agent-hosted demo only):
 

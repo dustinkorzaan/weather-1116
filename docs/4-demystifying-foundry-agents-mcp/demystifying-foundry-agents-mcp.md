@@ -146,7 +146,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       autonumber
       participant Console
       participant Model as Foundry Model
-      box MCP Server on Functions App
+      box MCP Server on Function App
           participant GetLatLongTool
       end
       box MCP Server on App Service
@@ -169,7 +169,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant Console
       participant AppLoop as Agent/Loop
       participant Model as Foundry Model
-      box MCP Server on Functions App
+      box MCP Server on Function App
           participant GetLatLongTool
       end
       box MCP Server on App Service
@@ -206,7 +206,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       autonumber
       participant Console
       participant Agent as Foundry Agent
-      box MCP Server on Functions App
+      box MCP Server on Function App
           participant GetLatLongTool
       end
       box MCP Server on App Service
@@ -229,7 +229,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
       participant Console
       participant Agent as Foundry Agent
       participant Model as Foundry Model
-      box MCP Server on Functions App
+      box MCP Server on Function App
           participant GetLatLongTool
       end
       box MCP Server on App Service
