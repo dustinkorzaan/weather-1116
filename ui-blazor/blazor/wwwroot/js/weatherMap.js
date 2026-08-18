@@ -333,7 +333,7 @@ window.weatherMap = (function () {
       overlay,
       city.name,
       function () {
-        window.location.assign(weatherModalPath(city.name, city.lat, city.lng, 'current'));
+        navigateToWeather(city.name, city.lat, city.lng, 'current');
       },
       function () {
         removeCity(city.id);
@@ -396,6 +396,23 @@ window.weatherMap = (function () {
     }
     params.set('tab', tab || 'current');
     return '/weather?' + params.toString();
+  }
+
+  /**
+   * Uses Blazor's client-side router (already connected on this page) instead
+   * of a full browser navigation. A full navigation would re-request /weather
+   * from the server, which prerenders the page and blocks on the AI weather
+   * fetch before the browser sees anything, then fetches it a second time
+   * once the interactive circuit reconnects. Client-side nav renders the page
+   * immediately (spinner first) and fetches once.
+   */
+  function navigateToWeather(name, lat, lng, tab) {
+    const path = weatherModalPath(name, lat, lng, tab);
+    if (window.Blazor && typeof window.Blazor.navigateTo === 'function') {
+      window.Blazor.navigateTo(path);
+    } else {
+      window.location.assign(path);
+    }
   }
 
   function newCityId() {
