@@ -5,7 +5,6 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
-using Core.Caching;
 using Core.Json;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using MediatR;
@@ -23,12 +22,10 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 {
     private static readonly string DefaultLocation = "Nashville, TN";
 
-    private readonly CacheHelper _cache;
     private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
 
-    public GetCurrentAIWeatherHandler(CacheHelper cache, ILogger<GetCurrentAIWeatherHandler> logger)
+    public GetCurrentAIWeatherHandler(ILogger<GetCurrentAIWeatherHandler> logger)
     {
-        _cache = cache;
         _logger = logger;
     }
 
@@ -38,16 +35,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             ? DefaultLocation
             : request.Location.Trim();
 
-        var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetCurrentAIWeatherHandler), Location = location });
-        return await _cache.GetOrCreate(
-            cacheKey: cacheKey,
-            cacheDuration: TimeSpan.FromMinutes(5),
-            valueFactory: ct => GetCurrentAIWeather(location, ct),
-            cancellationToken: cancellationToken);
-    }
-
-    private async Task<AIWeatherResponse> GetCurrentAIWeather(string location, CancellationToken cancellationToken)
-    {
         var endpoint = Resolve(
             Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL."));
