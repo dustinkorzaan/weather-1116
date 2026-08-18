@@ -187,7 +187,6 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 {
                     if (schema is JsonObject node && node["properties"] is JsonObject properties)
                     {
-                        properties.Remove("windDirectionSource");
                         node["required"] = new JsonArray(properties.Select(property => (JsonNode)property.Key).ToArray());
                         node["additionalProperties"] = false;
                     }

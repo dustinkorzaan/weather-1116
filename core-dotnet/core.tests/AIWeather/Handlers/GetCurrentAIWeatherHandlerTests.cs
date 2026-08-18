@@ -51,7 +51,7 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.Contains("AIWeatherResponse", source, StringComparison.Ordinal);
         Assert.DoesNotContain("AIWeatherModelResponse", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ToApiResponse", source, StringComparison.Ordinal);
-        Assert.Contains("properties.Remove(\"windDirectionSource\")", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("properties.Remove(\"windDirectionSource\")", source, StringComparison.Ordinal);
         Assert.Contains("MaxToolLoopTurns = 32", source, StringComparison.Ordinal);
         Assert.DoesNotContain("CreateMcpTool", source, StringComparison.Ordinal);
         Assert.DoesNotContain("MCP_SRV_", source, StringComparison.Ordinal);
