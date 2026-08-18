@@ -16,28 +16,27 @@
     return COMPASS_POINTS[index];
   }
 
-  /** Formats an Open-Meteo daily date ("2026-08-19") as "Wed, Aug 19". */
+  /** Formats an Open-Meteo daily date or hourly timestamp as "Wed, Aug 19". */
   function formatCalendarDate(isoDate) {
-    var date = new Date(isoDate + 'T00:00:00');
+    var value = String(isoDate || '');
+    var date = new Date(value.indexOf('T') >= 0 ? value : value + 'T00:00:00');
     if (Number.isNaN(date.getTime())) {
       return isoDate || '';
     }
     return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   }
 
-  /** Formats an Open-Meteo hourly/15-minute timestamp as "Wed, Aug 19, 2 PM" (minutes shown only when non-zero). */
+  /** Formats an Open-Meteo hourly/15-minute timestamp as "2 PM" (minutes shown only when non-zero). */
   function formatClockTime(isoDateTime) {
     var date = new Date(isoDateTime);
     if (Number.isNaN(date.getTime())) {
       return isoDateTime || '';
     }
-    var datePart = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
     var timeOptions = { hour: 'numeric' };
     if (date.getMinutes() !== 0) {
       timeOptions.minute = '2-digit';
     }
-    var timePart = date.toLocaleTimeString(undefined, timeOptions);
-    return datePart + ', ' + timePart;
+    return date.toLocaleTimeString(undefined, timeOptions);
   }
 
   /** Converts Open-Meteo °C to °F, then formats. */
@@ -134,13 +133,14 @@
     });
   }
 
-  /** Time | Temp | Precip | Wind Speed | Wind Direction — used by the hourly and every-15 tabs. */
+  /** Date | Time | Temp | Precip | Wind Speed | Wind Direction — used by the hourly and every-15 tabs. */
   function subDailyRows(series) {
     if (!series || !series.time) {
       return [];
     }
     return series.time.map(function (time, index) {
       return [
+        formatCalendarDate(time),
         formatClockTime(time),
         formatTemperatureF(series.temperature_2m[index]),
         formatPrecipitationIn(series.precipitation[index]),

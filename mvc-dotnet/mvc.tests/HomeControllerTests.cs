@@ -260,6 +260,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("Hourly History</h2>", html);
+        Assert.Contains("<th>Date</th>", html);
         Assert.Contains("<th>Time</th>", html);
         Assert.Contains("<th>Temp</th>", html);
         Assert.Contains("endpoint: \"/History\"", html);

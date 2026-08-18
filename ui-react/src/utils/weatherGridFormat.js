@@ -14,9 +14,10 @@ export function degreesToCompass(degrees) {
   return COMPASS_POINTS[index];
 }
 
-/** Formats an Open-Meteo daily date ("2026-08-19") as "Wed, Aug 19". */
+/** Formats an Open-Meteo daily date ("2026-08-19") or hourly timestamp as "Wed, Aug 19". */
 export function formatCalendarDate(isoDate) {
-  const date = new Date(`${isoDate}T00:00:00`);
+  const value = String(isoDate ?? '');
+  const date = new Date(value.includes('T') ? value : `${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) {
     return isoDate ?? '';
   }
@@ -24,20 +25,17 @@ export function formatCalendarDate(isoDate) {
   return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-/** Formats an Open-Meteo hourly/15-minute timestamp ("2026-08-19T14:00") as "Wed, Aug 19, 2 PM" (minutes shown only when non-zero, e.g. "2:15 PM"). */
+/** Formats an Open-Meteo hourly/15-minute timestamp ("2026-08-19T14:00") as "2 PM" (minutes shown only when non-zero, e.g. "2:15 PM"). */
 export function formatClockTime(isoDateTime) {
   const date = new Date(isoDateTime);
   if (Number.isNaN(date.getTime())) {
     return isoDateTime ?? '';
   }
 
-  const datePart = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-  const timePart = date.toLocaleTimeString(undefined, {
+  return date.toLocaleTimeString(undefined, {
     hour: 'numeric',
     ...(date.getMinutes() !== 0 ? { minute: '2-digit' } : {}),
   });
-
-  return `${datePart}, ${timePart}`;
 }
 
 /** Converts Open-Meteo mm to inches, then formats. */

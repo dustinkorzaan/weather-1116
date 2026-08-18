@@ -31,8 +31,8 @@ public static class WeatherGridFormat
     }
 
     /// <summary>
-    /// Formats an Open-Meteo hourly/15-minute timestamp ("2026-08-19T14:00") as "Wed, Aug 19, 2 PM"
-    /// (minutes shown only when non-zero, e.g. "Wed, Aug 19, 2:15 PM").
+    /// Formats an Open-Meteo hourly/15-minute timestamp ("2026-08-19T14:00") as "2 PM"
+    /// (minutes shown only when non-zero, e.g. "2:15 PM").
     /// </summary>
     public static string FormatClockTime(string isoDateTime)
     {
@@ -41,9 +41,7 @@ public static class WeatherGridFormat
             return isoDateTime ?? string.Empty;
         }
 
-        var datePart = dateTime.ToString("ddd, MMM d", CultureInfo.InvariantCulture);
-        var timePart = dateTime.ToString(dateTime.Minute == 0 ? "h tt" : "h:mm tt", CultureInfo.InvariantCulture);
-        return $"{datePart}, {timePart}";
+        return dateTime.ToString(dateTime.Minute == 0 ? "h tt" : "h:mm tt", CultureInfo.InvariantCulture);
     }
 
     /// <summary>Open-Meteo °C → °F.</summary>

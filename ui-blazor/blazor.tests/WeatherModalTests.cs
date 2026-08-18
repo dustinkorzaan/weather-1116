@@ -96,7 +96,10 @@ public sealed class WeatherModalTests
         rendered.WaitForAssertion(() =>
         {
             Assert.Contains("hourly-forecast-heading", rendered.Markup);
-            Assert.Contains("Wed, Aug 19, 2 PM", rendered.Markup);
+            Assert.Contains(">Date</th>", rendered.Markup);
+            Assert.Contains(">Time</th>", rendered.Markup);
+            Assert.Contains("Wed, Aug 19", rendered.Markup);
+            Assert.Contains(">2 PM<", rendered.Markup);
             Assert.Contains("86.5 °F", rendered.Markup);
         });
     }
@@ -113,7 +116,10 @@ public sealed class WeatherModalTests
         rendered.WaitForAssertion(() =>
         {
             Assert.Contains("every-15-forecast-heading", rendered.Markup);
-            Assert.Contains("Wed, Aug 19, 2:15 PM", rendered.Markup);
+            Assert.Contains(">Date</th>", rendered.Markup);
+            Assert.Contains(">Time</th>", rendered.Markup);
+            Assert.Contains("Wed, Aug 19", rendered.Markup);
+            Assert.Contains(">2:15 PM<", rendered.Markup);
         });
     }
 
@@ -130,8 +136,8 @@ public sealed class WeatherModalTests
         {
             Assert.Contains("hourly-history-heading", rendered.Markup);
             Assert.True(
-                rendered.Markup.IndexOf("Wed, Aug 19, 4 PM", StringComparison.Ordinal)
-                    < rendered.Markup.IndexOf("Wed, Aug 19, 2 PM", StringComparison.Ordinal),
+                rendered.Markup.IndexOf(">4 PM<", StringComparison.Ordinal)
+                    < rendered.Markup.IndexOf(">2 PM<", StringComparison.Ordinal),
                 "History rows should read most-recent-first.");
         });
     }

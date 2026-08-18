@@ -19,18 +19,19 @@ public sealed class WeatherGridFormatTests
     public void FormatCalendarDate_FormatsAsWeekdayMonthDay()
     {
         Assert.Equal("Wed, Aug 19", WeatherGridFormat.FormatCalendarDate("2026-08-19"));
+        Assert.Equal("Wed, Aug 19", WeatherGridFormat.FormatCalendarDate("2026-08-19T14:00"));
     }
 
     [Fact]
     public void FormatClockTime_OmitsMinutesWhenZero()
     {
-        Assert.Equal("Wed, Aug 19, 2 PM", WeatherGridFormat.FormatClockTime("2026-08-19T14:00"));
+        Assert.Equal("2 PM", WeatherGridFormat.FormatClockTime("2026-08-19T14:00"));
     }
 
     [Fact]
     public void FormatClockTime_ShowsMinutesWhenNonZero()
     {
-        Assert.Equal("Wed, Aug 19, 2:15 PM", WeatherGridFormat.FormatClockTime("2026-08-19T14:15"));
+        Assert.Equal("2:15 PM", WeatherGridFormat.FormatClockTime("2026-08-19T14:15"));
     }
 
     [Fact]
