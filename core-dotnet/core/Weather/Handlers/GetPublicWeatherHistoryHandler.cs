@@ -50,7 +50,38 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
         PublicWeatherHistoryResponse weatherData = JsonSerializer.Deserialize<PublicWeatherHistoryResponse>(jsonResponse)
             ?? throw new InvalidOperationException("Non-AI: Weather history API returned empty or invalid JSON.");
 
+        NormalizeNullCollections(weatherData);
+
         return weatherData;
+    }
+
+    /// <summary>
+    /// Open-Meteo can serialize a series field as JSON null instead of omitting it. This response
+    /// gets cached and read by multiple consumers (the UI mapper and MCP tools), so normalize any
+    /// null list to empty here, once, rather than null-checking at every read site.
+    /// </summary>
+    private static void NormalizeNullCollections(PublicWeatherHistoryResponse response)
+    {
+        if (response.Hourly is { } hourly)
+        {
+            hourly.Time ??= [];
+            hourly.Temperature2m ??= [];
+            hourly.Precipitation ??= [];
+            hourly.WeatherCode ??= [];
+            hourly.WindSpeed10m ??= [];
+            hourly.WindDirection10m ??= [];
+        }
+
+        if (response.Daily is { } daily)
+        {
+            daily.Time ??= [];
+            daily.WeatherCode ??= [];
+            daily.Temperature2mMax ??= [];
+            daily.Temperature2mMin ??= [];
+            daily.PrecipitationSum ??= [];
+            daily.WindSpeed10mMax ??= [];
+            daily.WindDirection10mDominant ??= [];
+        }
     }
 
     internal static string BuildHistoryUrl(

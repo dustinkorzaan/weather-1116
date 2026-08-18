@@ -1,10 +1,70 @@
+using System.Net;
+using System.Text;
+using Core.Caching;
+using Core.Http;
 using Core.Weather.Events;
 using Core.Weather.Handlers;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.Tests.Weather;
 
 public class GetPublicWeatherHistoryHandlerTests
 {
+    [Fact]
+    public async Task Handle_OpenMeteoReturnsNullSeriesArrays_NormalizesToEmptyLists()
+    {
+        const string json = """
+        {
+          "latitude": 36.16,
+          "longitude": -86.78,
+          "timezone": "America/Chicago",
+          "hourly": {
+            "time": null,
+            "temperature_2m": null,
+            "precipitation": null,
+            "weather_code": null,
+            "wind_speed_10m": null,
+            "wind_direction_10m": null
+          }
+        }
+        """;
+        var handler = CreateHandler(json);
+
+        var response = await handler.Handle(
+            new GetPublicWeatherHistoryEvent { Latitude = 36.16, Longitude = -86.78, Resolution = PublicWeatherHistoryResolution.Hourly },
+            CancellationToken.None);
+
+        Assert.NotNull(response.Hourly);
+        Assert.Empty(response.Hourly!.Time);
+        Assert.Empty(response.Hourly.Temperature2m);
+        Assert.Empty(response.Hourly.Precipitation);
+        Assert.Empty(response.Hourly.WeatherCode);
+        Assert.Empty(response.Hourly.WindSpeed10m);
+        Assert.Empty(response.Hourly.WindDirection10m);
+    }
+
+    private static GetPublicWeatherHistoryHandler CreateHandler(string json) =>
+        new(
+            new CacheHelper(new MemoryCache(new MemoryCacheOptions())),
+            new TransientRetryHelper(NullLogger<TransientRetryHelper>.Instance),
+            new FakeHttpClientFactory(new StaticResponseHandler(json)));
+
+    private sealed class FakeHttpClientFactory(HttpMessageHandler handler) : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name) => new(handler);
+    }
+
+    private sealed class StaticResponseHandler(string json) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            });
+    }
+
     [Fact]
     public void BuildHistoryUrl_Daily_UsesPreviousSevenDays()
     {

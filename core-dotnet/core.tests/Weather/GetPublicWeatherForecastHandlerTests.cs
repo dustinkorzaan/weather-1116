@@ -1,10 +1,72 @@
+using System.Net;
+using System.Text;
+using Core.Caching;
+using Core.Http;
 using Core.Weather.Events;
 using Core.Weather.Handlers;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.Tests.Weather;
 
 public class GetPublicWeatherForecastHandlerTests
 {
+    [Fact]
+    public async Task Handle_OpenMeteoReturnsNullSeriesArrays_NormalizesToEmptyLists()
+    {
+        const string json = """
+        {
+          "latitude": 36.16,
+          "longitude": -86.78,
+          "timezone": "America/Chicago",
+          "daily": {
+            "time": null,
+            "weather_code": null,
+            "temperature_2m_max": null,
+            "temperature_2m_min": null,
+            "precipitation_sum": null,
+            "wind_speed_10m_max": null,
+            "wind_direction_10m_dominant": null
+          }
+        }
+        """;
+        var handler = CreateHandler(json);
+
+        var response = await handler.Handle(
+            new GetPublicWeatherForecastEvent { Latitude = 36.16, Longitude = -86.78, Resolution = PublicWeatherForecastResolution.Daily },
+            CancellationToken.None);
+
+        Assert.NotNull(response.Daily);
+        Assert.Empty(response.Daily!.Time);
+        Assert.Empty(response.Daily.WeatherCode);
+        Assert.Empty(response.Daily.Temperature2mMax);
+        Assert.Empty(response.Daily.Temperature2mMin);
+        Assert.Empty(response.Daily.PrecipitationSum);
+        Assert.Empty(response.Daily.WindSpeed10mMax);
+        Assert.Empty(response.Daily.WindDirection10mDominant);
+    }
+
+    private static GetPublicWeatherForecastHandler CreateHandler(string json) =>
+        new(
+            new CacheHelper(new MemoryCache(new MemoryCacheOptions())),
+            new TransientRetryHelper(NullLogger<TransientRetryHelper>.Instance),
+            new FakeHttpClientFactory(new StaticResponseHandler(json)));
+
+    private sealed class FakeHttpClientFactory(HttpMessageHandler handler) : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name) => new(handler);
+    }
+
+    private sealed class StaticResponseHandler(string json) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            });
+    }
+
     [Fact]
     public void BuildForecastUrl_Daily_UsesSevenDaysAndAutoTimezone()
     {
