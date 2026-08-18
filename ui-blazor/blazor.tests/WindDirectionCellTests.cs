@@ -14,7 +14,7 @@ public sealed class WindDirectionCellTests
         context.JSInterop.Mode = JSRuntimeMode.Loose;
 
         var rendered = context.Render<WeatherBlazor.Shared.WindDirectionCell>(parameters =>
-            parameters.Add(p => p.Degrees, 224));
+            parameters.Add(p => p.Compass, "SW").Add(p => p.Degrees, 224));
 
         Assert.Contains("SW (224°)", rendered.Markup);
         Assert.Contains("wind-direction-arrow", rendered.Markup);
@@ -30,7 +30,7 @@ public sealed class WindDirectionCellTests
         context.JSInterop.Mode = JSRuntimeMode.Loose;
 
         var rendered = context.Render<WeatherBlazor.Shared.WindDirectionCell>(parameters =>
-            parameters.Add(p => p.Degrees, double.NaN));
+            parameters.Add(p => p.Compass, "SW").Add(p => p.Degrees, double.NaN));
 
         Assert.DoesNotContain("wind-direction-arrow", rendered.Markup);
     }

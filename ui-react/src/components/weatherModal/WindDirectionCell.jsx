@@ -3,15 +3,14 @@ import {
   WIND_DIRECTION_ARROW,
   windArrowRotationDeg,
 } from '../../utils/aiWeatherDisplay';
-import { degreesToCompass } from '../../utils/windDirectionDisplay';
 
 /** Compass label plus the same rotated ⮛ used on Current AI Weather. */
-function WindDirectionCell({ degrees }) {
+function WindDirectionCell({ compass, degrees }) {
   const rotationDeg = windArrowRotationDeg(degrees);
 
   return (
     <span className="inline-flex items-center gap-2">
-      <span>{formatWindDirection(degreesToCompass(degrees), degrees)}</span>
+      <span>{formatWindDirection(compass, degrees)}</span>
       {rotationDeg != null && (
         <span
           aria-hidden="true"

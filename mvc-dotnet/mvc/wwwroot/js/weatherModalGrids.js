@@ -71,8 +71,8 @@
     return whole === 0 ? (reduced[0] + '/' + reduced[1] + '"') : (whole + ' ' + reduced[0] + '/' + reduced[1] + '"');
   }
 
-  function createWindDirectionCell(degrees) {
-    return window.windDirectionDisplay.createWindDirectionCell(degrees);
+  function createWindDirectionCell(compass, degrees) {
+    return window.windDirectionDisplay.createWindDirectionCell(compass, degrees);
   }
 
   function setHidden(el, hidden) {
@@ -98,7 +98,9 @@
         formatTemperatureF(daily.temperatureLowF[index]),
         formatPrecipitationIn(daily.precipitationInch[index]),
         formatWindSpeedMph(daily.windSpeedMPH[index]),
-        createWindDirectionCell(daily.windDirectionSourceDegrees[index]),
+        createWindDirectionCell(
+          daily.windDirectionSource[index],
+          daily.windDirectionSourceDegrees[index]),
       ];
     });
   }
@@ -115,7 +117,9 @@
         formatTemperatureF(series.temperatureF[index]),
         formatPrecipitationIn(series.precipitationInch[index]),
         formatWindSpeedMph(series.windSpeedMPH[index]),
-        createWindDirectionCell(series.windDirectionSourceDegrees[index]),
+        createWindDirectionCell(
+          series.windDirectionSource[index],
+          series.windDirectionSourceDegrees[index]),
       ];
     });
   }

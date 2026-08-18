@@ -4,17 +4,6 @@ namespace WeatherBlazor.Tests;
 
 public sealed class WeatherGridFormatTests
 {
-    [Theory]
-    [InlineData(0, "N")]
-    [InlineData(90, "E")]
-    [InlineData(180, "S")]
-    [InlineData(224, "SW")]
-    [InlineData(360, "N")]
-    public void DegreesToCompass_MapsToSixteenPointCompass(double degrees, string expected)
-    {
-        Assert.Equal(expected, WeatherGridFormat.DegreesToCompass(degrees));
-    }
-
     [Fact]
     public void FormatCalendarDate_FormatsAsWeekdayMonthDay()
     {
@@ -73,7 +62,7 @@ public sealed class WeatherGridFormatTests
     [Fact]
     public void FormatWindDirection_CombinesCompassAndDegrees()
     {
-        Assert.Equal("SW (224°)", WeatherGridFormat.FormatWindDirection(224));
+        Assert.Equal("SW (224°)", WeatherGridFormat.FormatWindDirection("SW", 224));
     }
 
     [Theory]

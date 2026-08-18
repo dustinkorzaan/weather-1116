@@ -108,6 +108,9 @@ public class UIWeatherHourlySeries
 
     [JsonPropertyName("windDirectionSourceDegrees")]
     public List<int> WindDirectionSourceDegrees { get; set; } = [];
+
+    [JsonPropertyName("windDirectionSource")]
+    public List<string> WindDirectionSource { get; set; } = [];
 }
 
 /// <summary>Shared shape for the forecast/history "daily" series, in US customary units.</summary>
@@ -133,6 +136,9 @@ public class UIWeatherDailySeries
 
     [JsonPropertyName("windDirectionSourceDegrees")]
     public List<int> WindDirectionSourceDegrees { get; set; } = [];
+
+    [JsonPropertyName("windDirectionSource")]
+    public List<string> WindDirectionSource { get; set; } = [];
 }
 
 public class WeatherApiClient

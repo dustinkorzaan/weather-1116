@@ -1,22 +1,7 @@
 (function (window) {
   'use strict';
 
-  var COMPASS_POINTS = [
-    'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-    'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW',
-  ];
-
   var WIND_DIRECTION_ARROW = '\u2B9B';
-
-  /** Expects source degrees already normalized to 0–360 by the API mapper. */
-  function degreesToCompass(degrees) {
-    var numeric = Number(degrees);
-    if (!Number.isFinite(numeric)) {
-      return '';
-    }
-    var index = Math.round(numeric / 22.5) % 16;
-    return COMPASS_POINTS[index];
-  }
 
   function windArrowRotationDeg(sourceDegrees) {
     var numeric = Number(sourceDegrees);
@@ -31,16 +16,6 @@
     }
     var withDegrees = '(' + Math.round(numeric) + '\u00B0)';
     return label ? label + ' ' + withDegrees : withDegrees;
-  }
-
-  function formatWindDirectionFromDegrees(degrees) {
-    var compass = degreesToCompass(degrees);
-    var numeric = Number(degrees);
-    if (!Number.isFinite(numeric)) {
-      return compass;
-    }
-    var withDegrees = '(' + Math.round(numeric) + '\u00B0)';
-    return compass ? compass + ' ' + withDegrees : withDegrees;
   }
 
   function renderWindDirection(el, compass, degrees) {
@@ -64,11 +39,11 @@
     }
   }
 
-  function createWindDirectionCell(degrees) {
+  function createWindDirectionCell(compass, degrees) {
     var wrap = document.createElement('span');
     wrap.className = 'wind-direction';
     var label = document.createElement('span');
-    label.textContent = formatWindDirectionFromDegrees(degrees);
+    label.textContent = formatWindDirectionWithCompass(compass, degrees);
     wrap.appendChild(label);
 
     var rotation = windArrowRotationDeg(degrees);
@@ -86,9 +61,7 @@
   window.windDirectionDisplay = {
     WIND_DIRECTION_ARROW: WIND_DIRECTION_ARROW,
     windArrowRotationDeg: windArrowRotationDeg,
-    degreesToCompass: degreesToCompass,
     formatWindDirectionWithCompass: formatWindDirectionWithCompass,
-    formatWindDirectionFromDegrees: formatWindDirectionFromDegrees,
     renderWindDirection: renderWindDirection,
     createWindDirectionCell: createWindDirectionCell,
   };

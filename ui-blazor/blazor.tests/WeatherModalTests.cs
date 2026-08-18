@@ -221,6 +221,7 @@ public sealed class WeatherModalTests
                             PrecipitationInch = [0.3, 0.0],
                             WindSpeedMPH = [12.3, 10.0],
                             WindDirectionSourceDegrees = [224, 90],
+                            WindDirectionSource = ["SW", "E"],
                         },
                         Hourly = new UIWeatherHourlySeries
                         {
@@ -230,6 +231,7 @@ public sealed class WeatherModalTests
                             WeatherCode = [1],
                             WindSpeedMPH = [8.2],
                             WindDirectionSourceDegrees = [180],
+                            WindDirectionSource = ["S"],
                         },
                         Minutely15 = new UIWeatherHourlySeries
                         {
@@ -239,6 +241,7 @@ public sealed class WeatherModalTests
                             WeatherCode = [1],
                             WindSpeedMPH = [8.5],
                             WindDirectionSourceDegrees = [190],
+                            WindDirectionSource = ["S"],
                         },
                     }),
                 };
@@ -262,6 +265,7 @@ public sealed class WeatherModalTests
                             PrecipitationInch = [0.3, 0.0],
                             WindSpeedMPH = [12.3, 10.0],
                             WindDirectionSourceDegrees = [224, 90],
+                            WindDirectionSource = ["SW", "E"],
                         },
                         Hourly = new UIWeatherHourlySeries
                         {
@@ -271,6 +275,7 @@ public sealed class WeatherModalTests
                             WeatherCode = [1, 1],
                             WindSpeedMPH = [8.2, 7.0],
                             WindDirectionSourceDegrees = [180, 170],
+                            WindDirectionSource = ["S", "S"],
                         },
                     }),
                 };

@@ -47,7 +47,7 @@
                             <td>@WeatherGridFormat.FormatTemperatureF(row.Low)</td>
                             <td>@WeatherGridFormat.FormatPrecipitationIn(row.Precipitation)</td>
                             <td>@WeatherGridFormat.FormatWindSpeedMph(row.WindSpeed)</td>
-                            <td><WindDirectionCell Degrees="@row.WindDirection" /></td>
+                            <td><WindDirectionCell Compass="@row.WindDirectionSource" Degrees="@row.WindDirectionSourceDegrees" /></td>
                         </tr>
                     }
                 </tbody>
@@ -63,7 +63,7 @@
     [Parameter]
     public double? Longitude { get; set; }
 
-    private sealed record Row(string Time, double High, double Low, double Precipitation, double WindSpeed, double WindDirection);
+    private sealed record Row(string Time, double High, double Low, double Precipitation, double WindSpeed, string WindDirectionSource, double WindDirectionSourceDegrees);
 
     private bool _isLoading;
     private string? _errorMessage;
@@ -110,6 +110,7 @@
                         daily.TemperatureLowF[i],
                         daily.PrecipitationInch[i],
                         daily.WindSpeedMPH[i],
+                        daily.WindDirectionSource[i],
                         daily.WindDirectionSourceDegrees[i]))
                     .Reverse()
                     .ToList();

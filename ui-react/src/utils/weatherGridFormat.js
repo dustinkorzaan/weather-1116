@@ -1,5 +1,3 @@
-export { degreesToCompass } from './windDirectionDisplay';
-
 /** Formats an Open-Meteo daily date ("2026-08-19") or hourly timestamp as "Wed, Aug 19". */
 export function formatCalendarDate(isoDate) {
   const value = String(isoDate ?? '');

@@ -6,10 +6,6 @@ using Core.Weather;
 /// <summary>Formatting helpers for the weather modal's forecast/history grid tabs.</summary>
 public static class WeatherGridFormat
 {
-    /// <summary>Expects source degrees already normalized to 0–360 by the API mapper.</summary>
-    public static string DegreesToCompass(double degrees) =>
-        WeatherUnitConversion.DegreesToCompass((int)Math.Round(degrees));
-
     /// <summary>Formats an Open-Meteo daily date ("2026-08-19") as "Wed, Aug 19".</summary>
     public static string FormatCalendarDate(string isoDate)
     {
@@ -78,9 +74,9 @@ public static class WeatherGridFormat
     public static string FormatWindSpeedMph(double mph) =>
         string.Create(CultureInfo.InvariantCulture, $"{Math.Round(mph, 1)} mph");
 
-    /// <summary>Formats source degrees as compass plus degrees, e.g. "SW (224°)".</summary>
-    public static string FormatWindDirection(double degrees) =>
-        string.Create(CultureInfo.InvariantCulture, $"{DegreesToCompass(degrees)} ({Math.Round(degrees):0}°)");
+    /// <summary>Formats API-provided compass plus source degrees, e.g. "SW (224°)".</summary>
+    public static string FormatWindDirection(string compass, double degrees) =>
+        string.Create(CultureInfo.InvariantCulture, $"{compass} ({Math.Round(degrees):0}°)");
 
     /// <summary>CSS rotate degrees for ⮛ from meteorological source degrees; null when not finite.</summary>
     public static double? WindArrowRotationDeg(double sourceDegrees) =>

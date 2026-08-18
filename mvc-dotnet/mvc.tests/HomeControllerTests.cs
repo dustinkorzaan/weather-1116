@@ -168,7 +168,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/windDirectionDisplay.js"));
         Assert.Contains("window.windDirectionDisplay", script);
         Assert.Contains("windArrowRotationDeg", script);
-        Assert.Contains("degreesToCompass", script);
+        Assert.DoesNotContain("degreesToCompass", script);
         Assert.Contains("renderWindDirection", script);
         Assert.Contains("createWindDirectionCell", script);
         Assert.Contains("\\u2B9B", script);

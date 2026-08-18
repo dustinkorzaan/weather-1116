@@ -27,6 +27,7 @@ public class UIWeatherModelsTests
                 PrecipitationInch = [0.3],
                 WindSpeedMPH = [12.3],
                 WindDirectionSourceDegrees = [224],
+                WindDirectionSource = ["SW"],
             },
             Hourly = new UIWeatherHourlySeries
             {
@@ -36,6 +37,7 @@ public class UIWeatherModelsTests
                 WeatherCode = [1],
                 WindSpeedMPH = [8.2],
                 WindDirectionSourceDegrees = [180],
+                WindDirectionSource = ["S"],
             },
             Minutely15 = new UIWeatherHourlySeries
             {
@@ -45,6 +47,7 @@ public class UIWeatherModelsTests
                 WeatherCode = [1],
                 WindSpeedMPH = [8.5],
                 WindDirectionSourceDegrees = [190],
+                WindDirectionSource = ["S"],
             },
         });
 
@@ -62,12 +65,14 @@ public class UIWeatherModelsTests
         Assert.Equal(0.3, daily.GetProperty("precipitationInch")[0].GetDouble());
         Assert.Equal(12.3, daily.GetProperty("windSpeedMPH")[0].GetDouble());
         Assert.Equal(224, daily.GetProperty("windDirectionSourceDegrees")[0].GetInt32());
+        Assert.Equal("SW", daily.GetProperty("windDirectionSource")[0].GetString());
         Assert.Equal(1, daily.GetProperty("weatherCode")[0].GetInt32());
 
         var hourly = root.GetProperty("hourly");
         Assert.Equal(86.5, hourly.GetProperty("temperatureF")[0].GetDouble());
         Assert.Equal(8.2, hourly.GetProperty("windSpeedMPH")[0].GetDouble());
         Assert.Equal(180, hourly.GetProperty("windDirectionSourceDegrees")[0].GetInt32());
+        Assert.Equal("S", hourly.GetProperty("windDirectionSource")[0].GetString());
 
         var minutely15 = root.GetProperty("minutely15");
         Assert.Equal(86.7, minutely15.GetProperty("temperatureF")[0].GetDouble());
@@ -98,6 +103,7 @@ public class UIWeatherModelsTests
                 PrecipitationInch = [0.3],
                 WindSpeedMPH = [12.3],
                 WindDirectionSourceDegrees = [224],
+                WindDirectionSource = ["SW"],
             },
             Hourly = new UIWeatherHourlySeries
             {
@@ -107,6 +113,7 @@ public class UIWeatherModelsTests
                 WeatherCode = [1],
                 WindSpeedMPH = [8.2],
                 WindDirectionSourceDegrees = [180],
+                WindDirectionSource = ["S"],
             },
         });
 

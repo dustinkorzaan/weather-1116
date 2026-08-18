@@ -55,6 +55,7 @@ public class WeatherResponseMapperTests
         Assert.Equal([1], result.Daily.PrecipitationInch);
         Assert.Equal([6.2], result.Daily.WindSpeedMPH);
         Assert.Equal([224], result.Daily.WindDirectionSourceDegrees);
+        Assert.Equal(["SW"], result.Daily.WindDirectionSource);
         Assert.Equal([2], result.Daily.WeatherCode);
 
         Assert.NotNull(result.Hourly);
@@ -62,12 +63,14 @@ public class WeatherResponseMapperTests
         Assert.Equal([1], result.Hourly.PrecipitationInch);
         Assert.Equal([6.2], result.Hourly.WindSpeedMPH);
         Assert.Equal([180], result.Hourly.WindDirectionSourceDegrees);
+        Assert.Equal(["S"], result.Hourly.WindDirectionSource);
         Assert.Equal([1], result.Hourly.WeatherCode);
 
         Assert.NotNull(result.Minutely15);
         Assert.Equal([32], result.Minutely15!.TemperatureF);
         Assert.Equal([0.3], result.Minutely15.PrecipitationInch);
         Assert.Equal([90], result.Minutely15.WindDirectionSourceDegrees);
+        Assert.Equal(["E"], result.Minutely15.WindDirectionSource);
     }
 
     [Fact]
@@ -117,12 +120,14 @@ public class WeatherResponseMapperTests
         Assert.Equal([1], result.Daily.PrecipitationInch);
         Assert.Equal([6.2], result.Daily.WindSpeedMPH);
         Assert.Equal([224], result.Daily.WindDirectionSourceDegrees);
+        Assert.Equal(["SW"], result.Daily.WindDirectionSource);
 
         Assert.NotNull(result.Hourly);
         Assert.Equal([75.2], result.Hourly!.TemperatureF);
         Assert.Equal([1], result.Hourly.PrecipitationInch);
         Assert.Equal([6.2], result.Hourly.WindSpeedMPH);
         Assert.Equal([180], result.Hourly.WindDirectionSourceDegrees);
+        Assert.Equal(["S"], result.Hourly.WindDirectionSource);
     }
 
     [Fact]
@@ -144,6 +149,7 @@ public class WeatherResponseMapperTests
         var result = WeatherResponseMapper.ToUIForecastResponse(source);
 
         Assert.Equal([270, 0, 90], result.Hourly!.WindDirectionSourceDegrees);
+        Assert.Equal(["W", "N", "E"], result.Hourly.WindDirectionSource);
     }
 
     [Fact]

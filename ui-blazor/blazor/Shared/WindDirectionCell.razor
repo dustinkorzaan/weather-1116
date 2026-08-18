@@ -1,7 +1,7 @@
 @using WeatherBlazor.Data
 
 <div class="wind-direction">
-    @WeatherGridFormat.FormatWindDirection(Degrees)
+    @WeatherGridFormat.FormatWindDirection(Compass, Degrees)
     @if (WeatherGridFormat.WindArrowRotationDeg(Degrees) is double rotation)
     {
         <span class="wind-direction-arrow"
@@ -11,6 +11,9 @@
 </div>
 
 @code {
+    [Parameter]
+    public string Compass { get; set; } = string.Empty;
+
     [Parameter]
     public double Degrees { get; set; }
 }

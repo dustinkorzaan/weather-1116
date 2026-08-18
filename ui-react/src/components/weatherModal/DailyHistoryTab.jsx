@@ -19,7 +19,8 @@ function DailyHistoryTab({ lat, lng }) {
       low: daily.temperatureLowF[index],
       precipitation: daily.precipitationInch[index],
       windSpeed: daily.windSpeedMPH[index],
-      windDirection: daily.windDirectionSourceDegrees[index],
+      windDirectionSource: daily.windDirectionSource[index],
+      windDirectionSourceDegrees: daily.windDirectionSourceDegrees[index],
     }))
     .reverse();
 
@@ -65,7 +66,10 @@ function DailyHistoryTab({ lat, lng }) {
                   <td className="py-1.5 pr-4">{formatPrecipitationIn(row.precipitation)}</td>
                   <td className="py-1.5 pr-4">{formatWindSpeedMph(row.windSpeed)}</td>
                   <td className="py-1.5">
-                    <WindDirectionCell degrees={row.windDirection} />
+                    <WindDirectionCell
+                      compass={row.windDirectionSource}
+                      degrees={row.windDirectionSourceDegrees}
+                    />
                   </td>
                 </tr>
               ))}

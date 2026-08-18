@@ -169,6 +169,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
 
         modelOutput.WindDirectionSourceDegrees =
             WeatherUnitConversion.NormalizeSourceDegrees(modelOutput.WindDirectionSourceDegrees);
+        modelOutput.WindDirectionSource =
+            WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
 
         return modelOutput;
     }
