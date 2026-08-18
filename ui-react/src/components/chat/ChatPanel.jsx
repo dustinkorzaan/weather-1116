@@ -34,6 +34,12 @@ const TAB_CONFIG = [
     description: 'Remote MCP · Agent Framework · Like Foundry Console V4',
     endpoint: '/Chat2b/messages',
   },
+  {
+    id: 'Chat3',
+    label: 'Chat3',
+    description: 'Hosted Foundry agent · Like Foundry Console V5',
+    endpoint: '/Chat3/messages',
+  },
 ];
 
 const MESSAGE_CLASSES = {
@@ -155,30 +161,15 @@ function ToolChip({ content, details }) {
 }
 
 function createEmptyHistory() {
-  return {
-    Chat1a: [],
-    Chat1b: [],
-    Chat2a: [],
-    Chat2b: [],
-  };
+  return Object.fromEntries(TAB_CONFIG.map((tab) => [tab.id, []]));
 }
 
 function createEmptySessions() {
-  return {
-    Chat1a: null,
-    Chat1b: null,
-    Chat2a: null,
-    Chat2b: null,
-  };
+  return Object.fromEntries(TAB_CONFIG.map((tab) => [tab.id, null]));
 }
 
 function createEmptySendingState() {
-  return {
-    Chat1a: false,
-    Chat1b: false,
-    Chat2a: false,
-    Chat2b: false,
-  };
+  return Object.fromEntries(TAB_CONFIG.map((tab) => [tab.id, false]));
 }
 
 function ChatPanel() {
@@ -347,7 +338,7 @@ function ChatPanel() {
     <div>
       <h2 className="text-xl font-semibold">Chat Clients</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Four standalone chat tabs: Responses API vs Agent Framework, each with in-process (V3) or MCP (V4) tools.
+        Five standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5).
       </p>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3 gap-0">

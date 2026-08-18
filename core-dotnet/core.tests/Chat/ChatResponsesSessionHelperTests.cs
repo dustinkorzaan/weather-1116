@@ -45,4 +45,17 @@ public class ChatResponsesSessionHelperTests
 
         Assert.StartsWith($"{ChatResponsesSessionHelper.Chat2aKind}:", resolved, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void ResolveSessionId_UsesChat3KindPrefix()
+    {
+        var store = new InMemoryChatSessionStore();
+
+        var resolved = ChatResponsesSessionHelper.ResolveSessionId(
+            store,
+            ChatResponsesSessionHelper.Chat3Kind,
+            null);
+
+        Assert.StartsWith($"{ChatResponsesSessionHelper.Chat3Kind}:", resolved, StringComparison.Ordinal);
+    }
 }

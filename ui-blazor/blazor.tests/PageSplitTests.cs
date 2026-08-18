@@ -204,6 +204,7 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
 
         var panelSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/ChatPanel.razor"));
+        Assert.Contains("Hosted Foundry agent · Like Foundry Console V5", panelSource);
         Assert.Contains("chatInput.scrollToBottom", panelSource);
         Assert.Contains("chatInput.getValue", panelSource);
         Assert.Contains("chatInput.setValue", panelSource);

@@ -43,7 +43,7 @@ following 3-step core weather progression:
 
 Presentation reference: [`docs/5-chat-clients/5-chat-clients.md`](docs/5-chat-clients/5-chat-clients.md)
 
-Standalone multi-turn chat page with four tabs:
+Standalone multi-turn chat page with five tabs:
 
 | Tab | Pattern | Stack | Notes |
 | --- | --- | --- | --- |
@@ -51,3 +51,4 @@ Standalone multi-turn chat page with four tabs:
 | Chat1b | Remote MCP | Responses API | Like Foundry Console V4 |
 | Chat2a | In-process | Agent Framework | Like Foundry Console V3 |
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
+| Chat3 | Hosted Foundry agent | Responses for agent | Like Foundry Console V5 (`wx1116-agent-chat`) |

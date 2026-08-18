@@ -46,12 +46,12 @@ test('scrolls the visible chat to the bottom when a turn completes', async () =>
   });
 });
 
-test('scrolls to the bottom when switching among the four chats', async () => {
+test('scrolls to the bottom when switching among the five chats', async () => {
   stubChatMessagesScrollHeight(640);
   const user = userEvent.setup();
   const { container } = render(<ChatPanel />);
 
-  for (const name of ['Chat1b', 'Chat2a', 'Chat2b', 'Chat1a']) {
+  for (const name of ['Chat1b', 'Chat2a', 'Chat2b', 'Chat3', 'Chat1a']) {
     await user.click(screen.getByRole('tab', { name }));
     expect(container.querySelector('[data-chat-messages]').scrollTop).toBe(640);
   }

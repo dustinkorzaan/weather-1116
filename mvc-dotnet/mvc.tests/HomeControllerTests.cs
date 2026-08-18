@@ -291,6 +291,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Chat Clients", html);
         Assert.Contains("In-process · Responses API · Like Foundry Console V3", html);
         Assert.Contains("Remote MCP · Agent Framework · Like Foundry Console V4", html);
+        Assert.Contains("Hosted Foundry agent · Like Foundry Console V5", html);
         Assert.Contains("class=\"page-shell\"", html);
         Assert.Contains("class=\"chat-tab is-active\"", html);
         Assert.Contains("aria-label=\"Enter fullscreen\"", html);

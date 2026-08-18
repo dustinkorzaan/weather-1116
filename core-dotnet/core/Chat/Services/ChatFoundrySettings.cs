@@ -1,4 +1,6 @@
 using System.ClientModel;
+using System.ClientModel.Primitives;
+using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Services;
 using OpenAI;
 using OpenAI.Responses;
@@ -7,9 +9,12 @@ namespace Core.Chat.Services;
 
 public sealed class ChatFoundrySettings
 {
+    public const string DefaultChatAgentName = "wx1116-agent-chat";
+
     public string Endpoint { get; }
     public string ApiKey { get; }
     public string DeploymentName { get; }
+    public string ChatAgentName { get; }
 
     public ChatFoundrySettings()
     {
@@ -22,6 +27,11 @@ public sealed class ChatFoundrySettings
 
         DeploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_MODEL")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_MODEL.");
+
+        var chatAgentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME");
+        ChatAgentName = string.IsNullOrWhiteSpace(chatAgentName)
+            ? DefaultChatAgentName
+            : chatAgentName.Trim();
     }
 
     public ResponsesClient CreateResponsesClient() => new(
@@ -30,4 +40,20 @@ public sealed class ChatFoundrySettings
         {
             Endpoint = new Uri(Endpoint),
         });
+
+    /// <summary>
+    /// Responses client bound to the hosted Foundry agent. Chat3 sends only the
+    /// user prompt; instructions, tools, and model live on the agent.
+    /// </summary>
+    public ProjectResponsesClient CreateProjectResponsesClientForChatAgent()
+    {
+        ProjectOpenAIClient projectOpenAIClient = new(
+            ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(ApiKey), "api-key"),
+            new ProjectOpenAIClientOptions
+            {
+                Endpoint = new Uri(Endpoint),
+            });
+
+        return projectOpenAIClient.GetProjectResponsesClientForAgent(ChatAgentName);
+    }
 }

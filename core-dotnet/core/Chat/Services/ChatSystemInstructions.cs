@@ -16,4 +16,6 @@ public static class ChatSystemInstructions
         GitHub-flavored Markdown (bold, lists, tables, code) is allowed when it makes the answer easier to read. Do not emit raw HTML.
         When you report current weather, use one or two friendly sentences and include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the reply even if a tool also returned them as JSON.
         """;
+    // Keep in sync with the hosted Foundry agent wx1116-agent-chat
+    // (see docs/5-chat-clients/5-chat-clients.md).
 }
