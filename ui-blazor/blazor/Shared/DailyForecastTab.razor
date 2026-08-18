@@ -1,0 +1,135 @@
+@* Static single-use grid for the Daily Forecast tab — soonest first. *@
+@using WeatherBlazor.Data
+@inject WeatherApiClient WeatherClient
+
+<section aria-labelledby="daily-forecast-heading">
+    <div class="inline-row" style="justify-content: space-between;">
+        <h2 id="daily-forecast-heading" class="section-title" style="margin: 0;">Daily Forecast</h2>
+        <button type="button"
+                class="icon-button"
+                disabled="@_isLoading"
+                @onclick="RefreshAsync"
+                aria-label="Refresh Daily Forecast">
+            <svg class="@(_isLoading ? "is-spinning" : null)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
+            </svg>
+        </button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@_errorMessage</FluentMessageBar>
+    }
+
+    @if (_rows.Count > 0)
+    {
+        <div class="weather-grid-wrap">
+            <table class="weather-grid">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>High</th>
+                        <th>Low</th>
+                        <th>Precip</th>
+                        <th>Wind Speed</th>
+                        <th>Wind Direction</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in _rows)
+                    {
+                        <tr>
+                            <td>@WeatherGridFormat.FormatCalendarDate(row.Time)</td>
+                            <td>@WeatherGridFormat.FormatTemperatureF(row.High)</td>
+                            <td>@WeatherGridFormat.FormatTemperatureF(row.Low)</td>
+                            <td>@WeatherGridFormat.FormatPrecipitationIn(row.Precipitation)</td>
+                            <td>@WeatherGridFormat.FormatWindSpeedMph(row.WindSpeed)</td>
+                            <td>@WeatherGridFormat.FormatWindDirection(row.WindDirection)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public double? Latitude { get; set; }
+
+    [Parameter]
+    public double? Longitude { get; set; }
+
+    private sealed record Row(string Time, double High, double Low, double Precipitation, double WindSpeed, double WindDirection);
+
+    private bool _isLoading;
+    private string? _errorMessage;
+    private List<Row> _rows = [];
+    private (double Lat, double Lng)? _loadedFor;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Latitude is null || Longitude is null)
+        {
+            return;
+        }
+
+        var key = (Latitude.Value, Longitude.Value);
+        if (_loadedFor == key)
+        {
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task RefreshAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        if (Latitude is null || Longitude is null)
+        {
+            return;
+        }
+
+        _loadedFor = (Latitude.Value, Longitude.Value);
+        _isLoading = true;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var response = await WeatherClient.GetForecast(Latitude.Value, Longitude.Value, PublicWeatherForecastResolution.Daily);
+            var daily = response?.Daily;
+            if (daily is null)
+            {
+                _rows = [];
+                _errorMessage = "Unable to load daily forecast.";
+            }
+            else
+            {
+                _rows = Enumerable.Range(0, daily.Time.Count)
+                    .Select(i => new Row(
+                        daily.Time[i],
+                        daily.Temperature2mMax[i],
+                        daily.Temperature2mMin[i],
+                        daily.PrecipitationSum[i],
+                        daily.WindSpeed10mMax[i],
+                        daily.WindDirection10mDominant[i]))
+                    .ToList();
+            }
+        }
+        catch
+        {
+            _rows = [];
+            _errorMessage = "Unable to load daily forecast.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

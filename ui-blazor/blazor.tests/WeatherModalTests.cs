@@ -38,7 +38,7 @@ public sealed class WeatherModalTests
     }
 
     [Fact]
-    public void NonCurrentTabShowsComingSoonPlaceholder()
+    public void DailyForecastTabRendersGridSoonestFirst()
     {
         using var context = CreateContext();
         context.Services.GetRequiredService<NavigationManager>()
@@ -46,9 +46,92 @@ public sealed class WeatherModalTests
 
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
 
-        Assert.Contains("Coming soon.", rendered.Markup);
-        Assert.Contains("coming-soon-tab", rendered.Markup);
         Assert.DoesNotContain("current-ai-weather-modal-heading", rendered.Markup);
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("daily-forecast-heading", rendered.Markup);
+            Assert.Contains("High</th>", rendered.Markup);
+            Assert.Contains("Wind Direction</th>", rendered.Markup);
+            Assert.Contains("88.4 °F", rendered.Markup);
+            Assert.Contains("0.3\"", rendered.Markup);
+            Assert.Contains("SW (224°)", rendered.Markup);
+            Assert.True(
+                rendered.Markup.IndexOf("Wed, Aug 19", StringComparison.Ordinal)
+                    < rendered.Markup.IndexOf("Thu, Aug 20", StringComparison.Ordinal),
+                "Forecast rows should read soonest-first.");
+        });
+    }
+
+    [Fact]
+    public void DailyHistoryTabRendersGridMostRecentFirst()
+    {
+        using var context = CreateContext();
+        context.Services.GetRequiredService<NavigationManager>()
+            .NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=daily-history");
+
+        var rendered = context.Render<WeatherBlazor.Pages.Weather>();
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("daily-history-heading", rendered.Markup);
+            Assert.True(
+                rendered.Markup.IndexOf("Thu, Aug 20", StringComparison.Ordinal)
+                    < rendered.Markup.IndexOf("Wed, Aug 19", StringComparison.Ordinal),
+                "History rows should read most-recent-first.");
+        });
+    }
+
+    [Fact]
+    public void HourlyForecastTabRendersClockTimeGrid()
+    {
+        using var context = CreateContext();
+        context.Services.GetRequiredService<NavigationManager>()
+            .NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=hourly-forecast");
+
+        var rendered = context.Render<WeatherBlazor.Pages.Weather>();
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("hourly-forecast-heading", rendered.Markup);
+            Assert.Contains("Wed, Aug 19, 2 PM", rendered.Markup);
+            Assert.Contains("86.5 °F", rendered.Markup);
+        });
+    }
+
+    [Fact]
+    public void Every15ForecastTabRendersClockTimeGrid()
+    {
+        using var context = CreateContext();
+        context.Services.GetRequiredService<NavigationManager>()
+            .NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=every-15-forecast");
+
+        var rendered = context.Render<WeatherBlazor.Pages.Weather>();
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("every-15-forecast-heading", rendered.Markup);
+            Assert.Contains("Wed, Aug 19, 2:15 PM", rendered.Markup);
+        });
+    }
+
+    [Fact]
+    public void HourlyHistoryTabRendersClockTimeGridMostRecentFirst()
+    {
+        using var context = CreateContext();
+        context.Services.GetRequiredService<NavigationManager>()
+            .NavigateTo("/weather?name=Atlanta&lat=33.749&lng=-84.388&tab=hourly-history");
+
+        var rendered = context.Render<WeatherBlazor.Pages.Weather>();
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("hourly-history-heading", rendered.Markup);
+            Assert.True(
+                rendered.Markup.IndexOf("Wed, Aug 19, 4 PM", StringComparison.Ordinal)
+                    < rendered.Markup.IndexOf("Wed, Aug 19, 2 PM", StringComparison.Ordinal),
+                "History rows should read most-recent-first.");
+        });
     }
 
     [Fact]
@@ -100,6 +183,79 @@ public sealed class WeatherModalTests
                         Conditions = "Clear",
                         Latitude = 33.749,
                         Longitude = -84.388,
+                    }),
+                });
+            }
+
+            if (path.Contains("/Forecast", StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = JsonContent.Create(new PublicWeatherForecastResponse
+                    {
+                        Latitude = 33.749,
+                        Longitude = -84.388,
+                        Timezone = "America/New_York",
+                        Daily = new PublicWeatherForecastDaily
+                        {
+                            Time = ["2026-08-19", "2026-08-20"],
+                            WeatherCode = [1, 1],
+                            Temperature2mMax = [88.44, 90.0],
+                            Temperature2mMin = [70.1, 71.0],
+                            PrecipitationSum = [0.30000000000000004, 0.0],
+                            WindSpeed10mMax = [12.34, 10.0],
+                            WindDirection10mDominant = [224, 90],
+                        },
+                        Hourly = new PublicWeatherForecastHourly
+                        {
+                            Time = ["2026-08-19T14:00"],
+                            Temperature2m = [86.5],
+                            Precipitation = [0.0],
+                            WeatherCode = [1],
+                            WindSpeed10m = [8.2],
+                            WindDirection10m = [180],
+                        },
+                        Minutely15 = new PublicWeatherForecastHourly
+                        {
+                            Time = ["2026-08-19T14:15"],
+                            Temperature2m = [86.7],
+                            Precipitation = [0.0],
+                            WeatherCode = [1],
+                            WindSpeed10m = [8.5],
+                            WindDirection10m = [190],
+                        },
+                    }),
+                });
+            }
+
+            if (path.Contains("/History", StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = JsonContent.Create(new PublicWeatherHistoryResponse
+                    {
+                        Latitude = 33.749,
+                        Longitude = -84.388,
+                        Timezone = "America/New_York",
+                        Daily = new PublicWeatherForecastDaily
+                        {
+                            Time = ["2026-08-19", "2026-08-20"],
+                            WeatherCode = [1, 1],
+                            Temperature2mMax = [88.4, 90.0],
+                            Temperature2mMin = [70.1, 71.0],
+                            PrecipitationSum = [0.3, 0.0],
+                            WindSpeed10mMax = [12.3, 10.0],
+                            WindDirection10mDominant = [224, 90],
+                        },
+                        Hourly = new PublicWeatherForecastHourly
+                        {
+                            Time = ["2026-08-19T14:00", "2026-08-19T16:00"],
+                            Temperature2m = [86.5, 84.0],
+                            Precipitation = [0.0, 0.0],
+                            WeatherCode = [1, 1],
+                            WindSpeed10m = [8.2, 7.0],
+                            WindDirection10m = [180, 170],
+                        },
                     }),
                 });
             }

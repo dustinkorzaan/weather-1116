@@ -26,13 +26,26 @@
         </FluentTabs>
 
         <div class="weather-dialog-body">
-            @if (_activeTab == CurrentTabId)
+            @switch (_activeTab)
             {
-                <CurrentAIWeatherModalTab Location="@_locationString" />
-            }
-            else
-            {
-                <ComingSoonTab Label="@CurrentTabLabel" />
+                case CurrentTabId:
+                    <CurrentAIWeatherModalTab Location="@_locationString" />
+                    break;
+                case "daily-forecast":
+                    <DailyForecastTab Latitude="@LatQuery" Longitude="@LngQuery" />
+                    break;
+                case "hourly-forecast":
+                    <HourlyForecastTab Latitude="@LatQuery" Longitude="@LngQuery" />
+                    break;
+                case "every-15-forecast":
+                    <Every15ForecastTab Latitude="@LatQuery" Longitude="@LngQuery" />
+                    break;
+                case "daily-history":
+                    <DailyHistoryTab Latitude="@LatQuery" Longitude="@LngQuery" />
+                    break;
+                case "hourly-history":
+                    <HourlyHistoryTab Latitude="@LatQuery" Longitude="@LngQuery" />
+                    break;
             }
         </div>
     </div>
@@ -67,8 +80,6 @@
     private string _activeTab = CurrentTabId;
     private string _locationString = string.Empty;
     private bool _queryHandled;
-
-    private string CurrentTabLabel => Tabs.First(tab => tab.Id == _activeTab).Label;
 
     private string Title => _locationString.Length == 0 ? "Location" : _locationString;
 
