@@ -44,24 +44,17 @@ public static class WeatherGridFormat
         return dateTime.ToString(dateTime.Minute == 0 ? "h tt" : "h:mm tt", CultureInfo.InvariantCulture);
     }
 
-    /// <summary>Open-Meteo °C → °F.</summary>
-    public static double CelsiusToFahrenheit(double celsius) => celsius * 9d / 5d + 32d;
+    /// <summary>Formats an already-converted inches value (the API returns US customary units).</summary>
+    public static string FormatPrecipitationIn(double inches) =>
+        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(inches, 2)}\"");
 
-    /// <summary>Open-Meteo km/h → mph.</summary>
-    public static double KilometersPerHourToMph(double kilometersPerHour) =>
-        kilometersPerHour / 1.609344;
+    /// <summary>Formats an already-converted °F value (the API returns US customary units).</summary>
+    public static string FormatTemperatureF(double fahrenheit) =>
+        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(fahrenheit, 1)} °F");
 
-    /// <summary>Open-Meteo mm → inches.</summary>
-    public static double MillimetersToInches(double millimeters) => millimeters / 25.4;
-
-    public static string FormatPrecipitationIn(double millimeters) =>
-        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(MillimetersToInches(millimeters), 2)}\"");
-
-    public static string FormatTemperatureF(double celsius) =>
-        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(CelsiusToFahrenheit(celsius), 1)} °F");
-
-    public static string FormatWindSpeedMph(double kilometersPerHour) =>
-        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(KilometersPerHourToMph(kilometersPerHour), 1)} mph");
+    /// <summary>Formats an already-converted mph value (the API returns US customary units).</summary>
+    public static string FormatWindSpeedMph(double mph) =>
+        string.Create(CultureInfo.InvariantCulture, $"{Math.Round(mph, 1)} mph");
 
     /// <summary>Formats meteorological degrees as compass plus degrees, e.g. "SW (224°)".</summary>
     public static string FormatWindDirection(double degrees) =>

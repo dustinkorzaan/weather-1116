@@ -38,32 +38,32 @@ export function formatClockTime(isoDateTime) {
   });
 }
 
-/** Converts Open-Meteo mm to inches, then formats. */
-export function formatPrecipitationIn(millimeters) {
-  const numeric = Number(millimeters);
+/** Formats an already-converted inches value (the API returns US customary units). */
+export function formatPrecipitationIn(inches) {
+  const numeric = Number(inches);
   if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${Math.round((numeric / 25.4) * 100) / 100}"`;
+  return `${Math.round(numeric * 100) / 100}"`;
 }
 
-/** Converts Open-Meteo °C to °F, then formats. */
-export function formatTemperatureF(celsius) {
-  const numeric = Number(celsius);
+/** Formats an already-converted °F value (the API returns US customary units). */
+export function formatTemperatureF(fahrenheit) {
+  const numeric = Number(fahrenheit);
   if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${Math.round((numeric * 9 / 5 + 32) * 10) / 10} \u00B0F`;
+  return `${Math.round(numeric * 10) / 10} \u00B0F`;
 }
 
-/** Converts Open-Meteo km/h to mph, then formats. */
-export function formatWindSpeedMph(kilometersPerHour) {
-  const numeric = Number(kilometersPerHour);
+/** Formats an already-converted mph value (the API returns US customary units). */
+export function formatWindSpeedMph(mph) {
+  const numeric = Number(mph);
   if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${Math.round((numeric / 1.609344) * 10) / 10} mph`;
+  return `${Math.round(numeric * 10) / 10} mph`;
 }

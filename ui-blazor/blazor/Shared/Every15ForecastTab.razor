@@ -114,10 +114,10 @@
                 _rows = Enumerable.Range(0, minutely15.Time.Count)
                     .Select(i => new Row(
                         minutely15.Time[i],
-                        minutely15.Temperature2m[i],
-                        minutely15.Precipitation[i],
-                        minutely15.WindSpeed10m[i],
-                        minutely15.WindDirection10m[i]))
+                        minutely15.TemperatureF[i],
+                        minutely15.PrecipitationInch[i],
+                        minutely15.WindSpeedMPH[i],
+                        minutely15.WindDirectionDegrees[i]))
                     .ToList();
             }
         }

@@ -14,11 +14,11 @@ function DailyForecastTab({ lat, lng }) {
   const daily = data?.daily;
   const rows = (daily?.time ?? []).map((time, index) => ({
     time,
-    high: daily.temperature_2m_max[index],
-    low: daily.temperature_2m_min[index],
-    precipitation: daily.precipitation_sum[index],
-    windSpeed: daily.wind_speed_10m_max[index],
-    windDirection: daily.wind_direction_10m_dominant[index],
+    high: daily.temperatureHighF[index],
+    low: daily.temperatureLowF[index],
+    precipitation: daily.precipitationInch[index],
+    windSpeed: daily.windSpeedMPH[index],
+    windDirection: daily.windDirectionDegrees[index],
   }));
 
   return (

@@ -12,7 +12,7 @@ public class ForecastControllerTests
 	[Fact]
 	public async Task Get_ReturnsForecast()
 	{
-		var response = new PublicWeatherForecastResponse { Latitude = 36.1627, Longitude = -86.7816 };
+		var response = new UIWeatherForecastResponse { Latitude = 36.1627, Longitude = -86.7816 };
 		var mediator = new FakeMediator(response);
 		var controller = new ForecastController(mediator);
 
@@ -28,7 +28,7 @@ public class ForecastControllerTests
 	[Fact]
 	public async Task Get_DefaultsResolutionToDaily()
 	{
-		var mediator = new FakeMediator(new PublicWeatherForecastResponse());
+		var mediator = new FakeMediator(new UIWeatherForecastResponse());
 		var controller = new ForecastController(mediator);
 
 		await controller.Get(36.1627, -86.7816, cancellationToken: CancellationToken.None);
@@ -39,7 +39,7 @@ public class ForecastControllerTests
 	[Fact]
 	public async Task Get_ReturnsBadRequestWhenCoordinatesAreMissing()
 	{
-		var controller = new ForecastController(new FakeMediator(new PublicWeatherForecastResponse()));
+		var controller = new ForecastController(new FakeMediator(new UIWeatherForecastResponse()));
 
 		var result = await controller.Get(null, -86.7816, cancellationToken: CancellationToken.None);
 
@@ -49,7 +49,7 @@ public class ForecastControllerTests
 	[Fact]
 	public async Task Get_ReturnsBadRequestWhenCoordinatesAreOutOfRange()
 	{
-		var controller = new ForecastController(new FakeMediator(new PublicWeatherForecastResponse()));
+		var controller = new ForecastController(new FakeMediator(new UIWeatherForecastResponse()));
 
 		var result = await controller.Get(91, 0, cancellationToken: CancellationToken.None);
 
@@ -67,7 +67,7 @@ public class ForecastControllerTests
 		Assert.Equal(StatusCodes.Status502BadGateway, status.StatusCode);
 	}
 
-	private sealed class FakeMediator(PublicWeatherForecastResponse? response, bool throwInvalidOperation = false) : IMediator
+	private sealed class FakeMediator(UIWeatherForecastResponse? response, bool throwInvalidOperation = false) : IMediator
 	{
 		public double? LastLatitude { get; private set; }
 
@@ -77,7 +77,7 @@ public class ForecastControllerTests
 
 		public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
 		{
-			if (request is GetPublicWeatherForecastEvent forecastEvent)
+			if (request is GetUIWeatherForecastEvent forecastEvent)
 			{
 				LastLatitude = forecastEvent.Latitude;
 				LastLongitude = forecastEvent.Longitude;
@@ -87,7 +87,7 @@ public class ForecastControllerTests
 					throw new InvalidOperationException("Non-AI: Weather forecast API returned empty or invalid JSON.");
 				}
 
-				return Task.FromResult((TResponse)(object)(response ?? new PublicWeatherForecastResponse()));
+				return Task.FromResult((TResponse)(object)(response ?? new UIWeatherForecastResponse()));
 			}
 
 			throw new NotSupportedException();

@@ -114,10 +114,10 @@
                 _rows = Enumerable.Range(0, hourly.Time.Count)
                     .Select(i => new Row(
                         hourly.Time[i],
-                        hourly.Temperature2m[i],
-                        hourly.Precipitation[i],
-                        hourly.WindSpeed10m[i],
-                        hourly.WindDirection10m[i]))
+                        hourly.TemperatureF[i],
+                        hourly.PrecipitationInch[i],
+                        hourly.WindSpeedMPH[i],
+                        hourly.WindDirectionDegrees[i]))
                     .Reverse()
                     .ToList();
             }

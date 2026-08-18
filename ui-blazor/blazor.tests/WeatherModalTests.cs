@@ -199,38 +199,38 @@ public sealed class WeatherModalTests
             {
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = JsonContent.Create(new PublicWeatherForecastResponse
+                    Content = JsonContent.Create(new UIWeatherForecastResponse
                     {
                         Latitude = 36.1659,
                         Longitude = -86.7844,
                         Timezone = "America/Chicago",
-                        Daily = new PublicWeatherForecastDaily
+                        Daily = new UIWeatherDailySeries
                         {
                             Time = ["2026-08-19", "2026-08-20"],
                             WeatherCode = [1, 1],
-                            Temperature2mMax = [(88.44 - 32) * 5 / 9, (90.0 - 32) * 5 / 9],
-                            Temperature2mMin = [(70.1 - 32) * 5 / 9, (71.0 - 32) * 5 / 9],
-                            PrecipitationSum = [0.3 * 25.4, 0.0],
-                            WindSpeed10mMax = [12.34 * 1.609344, 10.0 * 1.609344],
-                            WindDirection10mDominant = [224, 90],
+                            TemperatureHighF = [88.4, 90.0],
+                            TemperatureLowF = [70.1, 71.0],
+                            PrecipitationInch = [0.3, 0.0],
+                            WindSpeedMPH = [12.3, 10.0],
+                            WindDirectionDegrees = [224, 90],
                         },
-                        Hourly = new PublicWeatherForecastHourly
+                        Hourly = new UIWeatherHourlySeries
                         {
                             Time = ["2026-08-19T14:00"],
-                            Temperature2m = [(86.5 - 32) * 5 / 9],
-                            Precipitation = [0.0],
+                            TemperatureF = [86.5],
+                            PrecipitationInch = [0.0],
                             WeatherCode = [1],
-                            WindSpeed10m = [8.2 * 1.609344],
-                            WindDirection10m = [180],
+                            WindSpeedMPH = [8.2],
+                            WindDirectionDegrees = [180],
                         },
-                        Minutely15 = new PublicWeatherForecastHourly
+                        Minutely15 = new UIWeatherHourlySeries
                         {
                             Time = ["2026-08-19T14:15"],
-                            Temperature2m = [(86.7 - 32) * 5 / 9],
-                            Precipitation = [0.0],
+                            TemperatureF = [86.7],
+                            PrecipitationInch = [0.0],
                             WeatherCode = [1],
-                            WindSpeed10m = [8.5 * 1.609344],
-                            WindDirection10m = [190],
+                            WindSpeedMPH = [8.5],
+                            WindDirectionDegrees = [190],
                         },
                     }),
                 });
@@ -240,29 +240,29 @@ public sealed class WeatherModalTests
             {
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = JsonContent.Create(new PublicWeatherHistoryResponse
+                    Content = JsonContent.Create(new UIWeatherHistoryResponse
                     {
                         Latitude = 36.1659,
                         Longitude = -86.7844,
                         Timezone = "America/Chicago",
-                        Daily = new PublicWeatherForecastDaily
+                        Daily = new UIWeatherDailySeries
                         {
                             Time = ["2026-08-19", "2026-08-20"],
                             WeatherCode = [1, 1],
-                            Temperature2mMax = [(88.4 - 32) * 5 / 9, (90.0 - 32) * 5 / 9],
-                            Temperature2mMin = [(70.1 - 32) * 5 / 9, (71.0 - 32) * 5 / 9],
-                            PrecipitationSum = [0.3 * 25.4, 0.0],
-                            WindSpeed10mMax = [12.3 * 1.609344, 10.0 * 1.609344],
-                            WindDirection10mDominant = [224, 90],
+                            TemperatureHighF = [88.4, 90.0],
+                            TemperatureLowF = [70.1, 71.0],
+                            PrecipitationInch = [0.3, 0.0],
+                            WindSpeedMPH = [12.3, 10.0],
+                            WindDirectionDegrees = [224, 90],
                         },
-                        Hourly = new PublicWeatherForecastHourly
+                        Hourly = new UIWeatherHourlySeries
                         {
                             Time = ["2026-08-19T14:00", "2026-08-19T16:00"],
-                            Temperature2m = [(86.5 - 32) * 5 / 9, (84.0 - 32) * 5 / 9],
-                            Precipitation = [0.0, 0.0],
+                            TemperatureF = [86.5, 84.0],
+                            PrecipitationInch = [0.0, 0.0],
                             WeatherCode = [1, 1],
-                            WindSpeed10m = [8.2 * 1.609344, 7.0 * 1.609344],
-                            WindDirection10m = [180, 170],
+                            WindSpeedMPH = [8.2, 7.0],
+                            WindDirectionDegrees = [180, 170],
                         },
                     }),
                 });

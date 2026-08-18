@@ -35,23 +35,23 @@ public sealed class WeatherGridFormatTests
     }
 
     [Fact]
-    public void FormatPrecipitationIn_ConvertsMillimetersAndRounds()
+    public void FormatPrecipitationIn_RoundsToTwoDecimals()
     {
-        Assert.Equal("1\"", WeatherGridFormat.FormatPrecipitationIn(25.4));
-        Assert.Equal("0.3\"", WeatherGridFormat.FormatPrecipitationIn(7.62));
+        Assert.Equal("1\"", WeatherGridFormat.FormatPrecipitationIn(1));
+        Assert.Equal("0.3\"", WeatherGridFormat.FormatPrecipitationIn(0.3));
     }
 
     [Fact]
-    public void FormatTemperatureF_ConvertsCelsiusAndRoundsToOneDecimal()
+    public void FormatTemperatureF_RoundsToOneDecimal()
     {
-        Assert.Equal("75.2 °F", WeatherGridFormat.FormatTemperatureF(24));
-        Assert.Equal("32 °F", WeatherGridFormat.FormatTemperatureF(0));
+        Assert.Equal("75.2 °F", WeatherGridFormat.FormatTemperatureF(75.2));
+        Assert.Equal("32 °F", WeatherGridFormat.FormatTemperatureF(32));
     }
 
     [Fact]
-    public void FormatWindSpeedMph_ConvertsKilometersPerHourAndRoundsToOneDecimal()
+    public void FormatWindSpeedMph_RoundsToOneDecimal()
     {
-        Assert.Equal("6.2 mph", WeatherGridFormat.FormatWindSpeedMph(10));
+        Assert.Equal("6.2 mph", WeatherGridFormat.FormatWindSpeedMph(6.2));
     }
 
     [Fact]
