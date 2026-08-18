@@ -40,28 +40,31 @@
     return datePart + ', ' + timePart;
   }
 
-  function formatTemperatureC(value) {
-    var numeric = Number(value);
+  /** Converts Open-Meteo °C to °F, then formats. */
+  function formatTemperatureF(celsius) {
+    var numeric = Number(celsius);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 10) / 10) + ' °C';
+    return (Math.round((numeric * 9 / 5 + 32) * 10) / 10) + ' °F';
   }
 
-  function formatWindSpeedKmh(value) {
-    var numeric = Number(value);
+  /** Converts Open-Meteo km/h to mph, then formats. */
+  function formatWindSpeedMph(kilometersPerHour) {
+    var numeric = Number(kilometersPerHour);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 10) / 10) + ' km/h';
+    return (Math.round((numeric / 1.609344) * 10) / 10) + ' mph';
   }
 
-  function formatPrecipitationMm(value) {
-    var numeric = Number(value);
+  /** Converts Open-Meteo mm to inches, then formats. */
+  function formatPrecipitationIn(millimeters) {
+    var numeric = Number(millimeters);
     if (!Number.isFinite(numeric)) {
       return '';
     }
-    return (Math.round(numeric * 100) / 100) + ' mm';
+    return (Math.round((numeric / 25.4) * 100) / 100) + '"';
   }
 
   function formatWindDirection(degrees) {
@@ -93,10 +96,10 @@
     return daily.time.map(function (time, index) {
       return [
         formatCalendarDate(time),
-        formatTemperatureC(daily.temperature_2m_max[index]),
-        formatTemperatureC(daily.temperature_2m_min[index]),
-        formatPrecipitationMm(daily.precipitation_sum[index]),
-        formatWindSpeedKmh(daily.wind_speed_10m_max[index]),
+        formatTemperatureF(daily.temperature_2m_max[index]),
+        formatTemperatureF(daily.temperature_2m_min[index]),
+        formatPrecipitationIn(daily.precipitation_sum[index]),
+        formatWindSpeedMph(daily.wind_speed_10m_max[index]),
         formatWindDirection(daily.wind_direction_10m_dominant[index]),
       ];
     });
@@ -110,9 +113,9 @@
     return series.time.map(function (time, index) {
       return [
         formatClockTime(time),
-        formatTemperatureC(series.temperature_2m[index]),
-        formatPrecipitationMm(series.precipitation[index]),
-        formatWindSpeedKmh(series.wind_speed_10m[index]),
+        formatTemperatureF(series.temperature_2m[index]),
+        formatPrecipitationIn(series.precipitation[index]),
+        formatWindSpeedMph(series.wind_speed_10m[index]),
         formatWindDirection(series.wind_direction_10m[index]),
       ];
     });

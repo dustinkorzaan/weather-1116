@@ -53,8 +53,8 @@ public sealed class WeatherModalTests
             Assert.Contains("daily-forecast-heading", rendered.Markup);
             Assert.Contains("High</th>", rendered.Markup);
             Assert.Contains("Wind Direction</th>", rendered.Markup);
-            Assert.Contains("88.4 °C", rendered.Markup);
-            Assert.Contains("0.3 mm", rendered.Markup);
+            Assert.Contains("88.4 °F", rendered.Markup);
+            Assert.Contains("0.3\"", rendered.Markup);
             Assert.Contains("SW (224°)", rendered.Markup);
             Assert.True(
                 rendered.Markup.IndexOf("Wed, Aug 19", StringComparison.Ordinal)
@@ -95,7 +95,7 @@ public sealed class WeatherModalTests
         {
             Assert.Contains("hourly-forecast-heading", rendered.Markup);
             Assert.Contains("Wed, Aug 19, 2 PM", rendered.Markup);
-            Assert.Contains("86.5 °C", rendered.Markup);
+            Assert.Contains("86.5 °F", rendered.Markup);
         });
     }
 
@@ -200,28 +200,28 @@ public sealed class WeatherModalTests
                         {
                             Time = ["2026-08-19", "2026-08-20"],
                             WeatherCode = [1, 1],
-                            Temperature2mMax = [88.44, 90.0],
-                            Temperature2mMin = [70.1, 71.0],
-                            PrecipitationSum = [0.30000000000000004, 0.0],
-                            WindSpeed10mMax = [12.34, 10.0],
+                            Temperature2mMax = [(88.44 - 32) * 5 / 9, (90.0 - 32) * 5 / 9],
+                            Temperature2mMin = [(70.1 - 32) * 5 / 9, (71.0 - 32) * 5 / 9],
+                            PrecipitationSum = [0.3 * 25.4, 0.0],
+                            WindSpeed10mMax = [12.34 * 1.609344, 10.0 * 1.609344],
                             WindDirection10mDominant = [224, 90],
                         },
                         Hourly = new PublicWeatherForecastHourly
                         {
                             Time = ["2026-08-19T14:00"],
-                            Temperature2m = [86.5],
+                            Temperature2m = [(86.5 - 32) * 5 / 9],
                             Precipitation = [0.0],
                             WeatherCode = [1],
-                            WindSpeed10m = [8.2],
+                            WindSpeed10m = [8.2 * 1.609344],
                             WindDirection10m = [180],
                         },
                         Minutely15 = new PublicWeatherForecastHourly
                         {
                             Time = ["2026-08-19T14:15"],
-                            Temperature2m = [86.7],
+                            Temperature2m = [(86.7 - 32) * 5 / 9],
                             Precipitation = [0.0],
                             WeatherCode = [1],
-                            WindSpeed10m = [8.5],
+                            WindSpeed10m = [8.5 * 1.609344],
                             WindDirection10m = [190],
                         },
                     }),
@@ -241,19 +241,19 @@ public sealed class WeatherModalTests
                         {
                             Time = ["2026-08-19", "2026-08-20"],
                             WeatherCode = [1, 1],
-                            Temperature2mMax = [88.4, 90.0],
-                            Temperature2mMin = [70.1, 71.0],
-                            PrecipitationSum = [0.3, 0.0],
-                            WindSpeed10mMax = [12.3, 10.0],
+                            Temperature2mMax = [(88.4 - 32) * 5 / 9, (90.0 - 32) * 5 / 9],
+                            Temperature2mMin = [(70.1 - 32) * 5 / 9, (71.0 - 32) * 5 / 9],
+                            PrecipitationSum = [0.3 * 25.4, 0.0],
+                            WindSpeed10mMax = [12.3 * 1.609344, 10.0 * 1.609344],
                             WindDirection10mDominant = [224, 90],
                         },
                         Hourly = new PublicWeatherForecastHourly
                         {
                             Time = ["2026-08-19T14:00", "2026-08-19T16:00"],
-                            Temperature2m = [86.5, 84.0],
+                            Temperature2m = [(86.5 - 32) * 5 / 9, (84.0 - 32) * 5 / 9],
                             Precipitation = [0.0, 0.0],
                             WeatherCode = [1, 1],
-                            WindSpeed10m = [8.2, 7.0],
+                            WindSpeed10m = [8.2 * 1.609344, 7.0 * 1.609344],
                             WindDirection10m = [180, 170],
                         },
                     }),

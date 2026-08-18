@@ -2,7 +2,7 @@ import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGetHistoryQuery } from '../../services/weatherApi';
 import { formatWindDirection } from '../../utils/aiWeatherDisplay';
-import { degreesToCompass, formatCalendarDate, formatPrecipitationMm, formatTemperatureC, formatWindSpeedKmh } from '../../utils/weatherGridFormat';
+import { degreesToCompass, formatCalendarDate, formatPrecipitationIn, formatTemperatureF, formatWindSpeedMph } from '../../utils/weatherGridFormat';
 
 /** Static single-use grid for the Daily History tab — most recent first. */
 function DailyHistoryTab({ lat, lng }) {
@@ -60,10 +60,10 @@ function DailyHistoryTab({ lat, lng }) {
               {rows.map((row) => (
                 <tr key={row.time} className="border-b border-border/50">
                   <td className="py-1.5 pr-4">{formatCalendarDate(row.time)}</td>
-                  <td className="py-1.5 pr-4">{formatTemperatureC(row.high)}</td>
-                  <td className="py-1.5 pr-4">{formatTemperatureC(row.low)}</td>
-                  <td className="py-1.5 pr-4">{formatPrecipitationMm(row.precipitation)}</td>
-                  <td className="py-1.5 pr-4">{formatWindSpeedKmh(row.windSpeed)}</td>
+                  <td className="py-1.5 pr-4">{formatTemperatureF(row.high)}</td>
+                  <td className="py-1.5 pr-4">{formatTemperatureF(row.low)}</td>
+                  <td className="py-1.5 pr-4">{formatPrecipitationIn(row.precipitation)}</td>
+                  <td className="py-1.5 pr-4">{formatWindSpeedMph(row.windSpeed)}</td>
                   <td className="py-1.5">
                     {formatWindDirection(degreesToCompass(row.windDirection), row.windDirection)}
                   </td>

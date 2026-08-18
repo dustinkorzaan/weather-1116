@@ -1,23 +1,23 @@
 import { expect, test } from 'vitest';
 import {
-  formatPrecipitationMm,
-  formatTemperatureC,
-  formatWindSpeedKmh,
+  formatPrecipitationIn,
+  formatTemperatureF,
+  formatWindSpeedMph,
 } from './weatherGridFormat';
 
-test('formats Open-Meteo temperature with a degree Celsius suffix', () => {
-  expect(formatTemperatureC(88.44)).toBe('88.4 °C');
-  expect(formatTemperatureC(24)).toBe('24 °C');
-  expect(formatTemperatureC(Number.NaN)).toBe('');
+test('converts Open-Meteo Celsius to a degree Fahrenheit suffix', () => {
+  expect(formatTemperatureF(24)).toBe('75.2 °F');
+  expect(formatTemperatureF(0)).toBe('32 °F');
+  expect(formatTemperatureF(Number.NaN)).toBe('');
 });
 
-test('formats Open-Meteo wind speed with a km/h suffix', () => {
-  expect(formatWindSpeedKmh(12.34)).toBe('12.3 km/h');
-  expect(formatWindSpeedKmh(7.5)).toBe('7.5 km/h');
-  expect(formatWindSpeedKmh(Number.NaN)).toBe('');
+test('converts Open-Meteo km/h to a lowercase mph suffix', () => {
+  expect(formatWindSpeedMph(10)).toBe('6.2 mph');
+  expect(formatWindSpeedMph(Number.NaN)).toBe('');
 });
 
-test('formats Open-Meteo precipitation with an mm suffix', () => {
-  expect(formatPrecipitationMm(0.30000000000000004)).toBe('0.3 mm');
-  expect(formatPrecipitationMm(Number.NaN)).toBe('');
+test('converts Open-Meteo millimeters to inches', () => {
+  expect(formatPrecipitationIn(25.4)).toBe('1"');
+  expect(formatPrecipitationIn(7.62)).toBe('0.3"');
+  expect(formatPrecipitationIn(Number.NaN)).toBe('');
 });

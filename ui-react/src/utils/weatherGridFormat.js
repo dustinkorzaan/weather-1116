@@ -40,29 +40,32 @@ export function formatClockTime(isoDateTime) {
   return `${datePart}, ${timePart}`;
 }
 
-export function formatPrecipitationMm(value) {
-  const numeric = Number(value);
+/** Converts Open-Meteo mm to inches, then formats. */
+export function formatPrecipitationIn(millimeters) {
+  const numeric = Number(millimeters);
   if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${Math.round(numeric * 100) / 100} mm`;
+  return `${Math.round((numeric / 25.4) * 100) / 100}"`;
 }
 
-export function formatTemperatureC(value) {
-  const numeric = Number(value);
+/** Converts Open-Meteo °C to °F, then formats. */
+export function formatTemperatureF(celsius) {
+  const numeric = Number(celsius);
   if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${Math.round(numeric * 10) / 10} \u00B0C`;
+  return `${Math.round((numeric * 9 / 5 + 32) * 10) / 10} \u00B0F`;
 }
 
-export function formatWindSpeedKmh(value) {
-  const numeric = Number(value);
+/** Converts Open-Meteo km/h to mph, then formats. */
+export function formatWindSpeedMph(kilometersPerHour) {
+  const numeric = Number(kilometersPerHour);
   if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  return `${Math.round(numeric * 10) / 10} km/h`;
+  return `${Math.round((numeric / 1.609344) * 10) / 10} mph`;
 }
