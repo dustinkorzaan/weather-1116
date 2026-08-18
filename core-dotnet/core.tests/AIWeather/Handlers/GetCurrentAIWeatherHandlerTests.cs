@@ -32,6 +32,8 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.Contains("GitHub-flavored Markdown", prompt);
         Assert.Contains("also JSON fields", prompt);
         Assert.DoesNotContain("Exactly one sentence", prompt, StringComparison.Ordinal);
+        Assert.Contains("normally rank 1", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Fetch weather for that location only", prompt, StringComparison.Ordinal);
         Assert.Contains("Use U.S. customary units only: °F, mph, and \" (e.g. 72°F, 8 mph, 1\"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.", prompt);
     }
 
