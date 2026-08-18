@@ -11,10 +11,9 @@ namespace Core.Weather.Handlers;
 
 /// <summary>
 /// Fetches an upcoming public weather forecast from Open-Meteo for a given lat/long.
-/// Omits unit query params so Open-Meteo returns its defaults (°C, km/h, mm);
-/// the AI converts to US customary units.
+/// Requests Celsius, km/h, and mm explicitly; the AI converts to US customary units.
 /// </summary>
-public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherForecastEvent, PublicWeatherForecastResponse>
+public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherForecastEvent, NonAIForecastWeatherResponse>
 {
     private readonly CacheHelper _cache;
     private readonly TransientRetryHelper _retry;
@@ -30,7 +29,7 @@ public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherF
         _clientFactory = clientFactory;
     }
 
-    public async Task<PublicWeatherForecastResponse> Handle(GetPublicWeatherForecastEvent request, CancellationToken cancellationToken)
+    public async Task<NonAIForecastWeatherResponse> Handle(GetPublicWeatherForecastEvent request, CancellationToken cancellationToken)
     {
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetPublicWeatherForecastHandler), Request = request });
         return await _cache.GetOrCreate(
@@ -40,14 +39,14 @@ public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherF
             cancellationToken: cancellationToken);
     }
 
-    private async Task<PublicWeatherForecastResponse> GetPublicWeatherForecast(GetPublicWeatherForecastEvent request, CancellationToken cancellationToken)
+    private async Task<NonAIForecastWeatherResponse> GetPublicWeatherForecast(GetPublicWeatherForecastEvent request, CancellationToken cancellationToken)
     {
         using var client = _clientFactory.CreateClient();
         string endpoint = BuildForecastUrl(request.Latitude, request.Longitude, request.Resolution);
 
         string jsonResponse = await client.GetStringAsync(endpoint, cancellationToken);
 
-        PublicWeatherForecastResponse weatherData = JsonSerializer.Deserialize<PublicWeatherForecastResponse>(jsonResponse)
+        NonAIForecastWeatherResponse weatherData = JsonSerializer.Deserialize<NonAIForecastWeatherResponse>(jsonResponse)
             ?? throw new InvalidOperationException("Non-AI: Weather forecast API returned empty or invalid JSON.");
 
         NormalizeNullCollections(weatherData);
@@ -61,40 +60,40 @@ public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherF
     /// null list to empty here, once, rather than null-checking at every read site. Also clamps any
     /// negative precipitation reading (an Open-Meteo sensor/interpolation artifact) to zero.
     /// </summary>
-    private static void NormalizeNullCollections(PublicWeatherForecastResponse response)
+    private static void NormalizeNullCollections(NonAIForecastWeatherResponse response)
     {
         if (response.Hourly is { } hourly)
         {
             hourly.Time ??= [];
-            hourly.Temperature2m ??= [];
-            hourly.Precipitation ??= [];
+            hourly.Temperature2mC ??= [];
+            hourly.PrecipitationMm ??= [];
             hourly.WeatherCode ??= [];
-            hourly.WindSpeed10m ??= [];
+            hourly.WindSpeed10mKmh ??= [];
             hourly.WindDirectionSource10m ??= [];
-            ClampNegativeToZero(hourly.Precipitation);
+            ClampNegativeToZero(hourly.PrecipitationMm);
         }
 
         if (response.Daily is { } daily)
         {
             daily.Time ??= [];
             daily.WeatherCode ??= [];
-            daily.Temperature2mMax ??= [];
-            daily.Temperature2mMin ??= [];
-            daily.PrecipitationSum ??= [];
-            daily.WindSpeed10mMax ??= [];
+            daily.Temperature2mMaxC ??= [];
+            daily.Temperature2mMinC ??= [];
+            daily.PrecipitationSumMm ??= [];
+            daily.WindSpeed10mMaxKmh ??= [];
             daily.WindDirectionSource10mDominant ??= [];
-            ClampNegativeToZero(daily.PrecipitationSum);
+            ClampNegativeToZero(daily.PrecipitationSumMm);
         }
 
         if (response.Minutely15 is { } minutely15)
         {
             minutely15.Time ??= [];
-            minutely15.Temperature2m ??= [];
-            minutely15.Precipitation ??= [];
+            minutely15.Temperature2mC ??= [];
+            minutely15.PrecipitationMm ??= [];
             minutely15.WeatherCode ??= [];
-            minutely15.WindSpeed10m ??= [];
+            minutely15.WindSpeed10mKmh ??= [];
             minutely15.WindDirectionSource10m ??= [];
-            ClampNegativeToZero(minutely15.Precipitation);
+            ClampNegativeToZero(minutely15.PrecipitationMm);
         }
     }
 
@@ -127,6 +126,6 @@ public class GetPublicWeatherForecastHandler : IRequestHandler<GetPublicWeatherF
 
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&{query}&timezone=auto");
+            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&{query}&{OpenMeteoUnits.CelsiusKmhMm}&timezone=auto");
     }
 }

@@ -11,10 +11,9 @@ namespace Core.Weather.Handlers;
 
 /// <summary>
 /// Fetches public current-weather data from Open-Meteo for a given lat/long.
-/// Omits unit query params so Open-Meteo returns its defaults (°C, km/h);
-/// the AI converts to US customary units.
+/// Requests Celsius and km/h explicitly; the AI converts to US customary units.
 /// </summary>
-public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCurrentEvent, NonAIWeatherResponse>
+public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCurrentEvent, NonAICurrentWeatherResponse>
 {
     private readonly CacheHelper _cache;
     private readonly TransientRetryHelper _retry;
@@ -30,7 +29,7 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
         _clientFactory = clientFactory;
     }
 
-    public async Task<NonAIWeatherResponse> Handle(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
+    public async Task<NonAICurrentWeatherResponse> Handle(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
     {
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetPublicWeatherCurrentHandler), Request = request });
         return await _cache.GetOrCreate(
@@ -40,14 +39,14 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
             cancellationToken: cancellationToken);
     }
 
-    private async Task<NonAIWeatherResponse> GetPublicWeatherCurrent(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
+    private async Task<NonAICurrentWeatherResponse> GetPublicWeatherCurrent(GetPublicWeatherCurrentEvent request, CancellationToken cancellationToken)
     {
         using var client = _clientFactory.CreateClient();
         string endpoint = BuildCurrentWeatherUrl(request.Latitude, request.Longitude);
 
         string jsonResponse = await client.GetStringAsync(endpoint, cancellationToken);
 
-        NonAIWeatherResponse weatherData = JsonSerializer.Deserialize<NonAIWeatherResponse>(jsonResponse)
+        NonAICurrentWeatherResponse weatherData = JsonSerializer.Deserialize<NonAICurrentWeatherResponse>(jsonResponse)
             ?? throw new InvalidOperationException("Non-AI: Weather API returned empty or invalid JSON.");
 
         return weatherData;
@@ -56,5 +55,5 @@ public class GetPublicWeatherCurrentHandler : IRequestHandler<GetPublicWeatherCu
     internal static string BuildCurrentWeatherUrl(double latitude, double longitude) =>
         string.Create(
             CultureInfo.InvariantCulture,
-            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true");
+            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&{OpenMeteoUnits.CelsiusKmh}");
 }

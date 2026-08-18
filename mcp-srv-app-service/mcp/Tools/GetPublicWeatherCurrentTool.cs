@@ -14,7 +14,7 @@ public class GetPublicWeatherCurrentTool(IMediator mediator)
 {
 	[McpServerTool(Name = "GetPublicWeatherCurrent"),
 	 Description("Get current public weather conditions for a latitude and longitude.")]
-	public async Task<NonAIWeatherResponse> GetPublicWeatherCurrent(
+	public async Task<NonAICurrentWeatherResponse> GetPublicWeatherCurrent(
 		[Description("Latitude in decimal degrees")] double latitude,
 		[Description("Longitude in decimal degrees")] double longitude,
 		CancellationToken cancellationToken)

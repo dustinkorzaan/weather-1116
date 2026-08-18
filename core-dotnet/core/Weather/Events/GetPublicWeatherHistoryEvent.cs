@@ -14,7 +14,7 @@ public enum PublicWeatherHistoryResolution
 /// <summary>
 /// Fetches recent past public weather for a latitude/longitude via Open-Meteo.
 /// </summary>
-public class GetPublicWeatherHistoryEvent : IRequest<PublicWeatherHistoryResponse>
+public class GetPublicWeatherHistoryEvent : IRequest<NonAIHistoryWeatherResponse>
 {
     public required double Latitude { get; set; }
 

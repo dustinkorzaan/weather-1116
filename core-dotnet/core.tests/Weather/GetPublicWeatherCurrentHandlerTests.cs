@@ -14,6 +14,8 @@ public class GetPublicWeatherCurrentHandlerTests
         Assert.Contains("latitude=36.1627", url);
         Assert.Contains("longitude=-86.7816", url);
         Assert.Contains("current_weather=true", url);
+        Assert.Contains("temperature_unit=celsius", url);
+        Assert.Contains("wind_speed_unit=kmh", url);
         Assert.DoesNotContain("timezone=", url);
         Assert.DoesNotContain(',', url);
     }

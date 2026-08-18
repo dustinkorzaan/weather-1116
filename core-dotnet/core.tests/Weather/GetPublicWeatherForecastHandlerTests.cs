@@ -40,10 +40,10 @@ public class GetPublicWeatherForecastHandlerTests
         Assert.NotNull(response.Daily);
         Assert.Empty(response.Daily!.Time);
         Assert.Empty(response.Daily.WeatherCode);
-        Assert.Empty(response.Daily.Temperature2mMax);
-        Assert.Empty(response.Daily.Temperature2mMin);
-        Assert.Empty(response.Daily.PrecipitationSum);
-        Assert.Empty(response.Daily.WindSpeed10mMax);
+        Assert.Empty(response.Daily.Temperature2mMaxC);
+        Assert.Empty(response.Daily.Temperature2mMinC);
+        Assert.Empty(response.Daily.PrecipitationSumMm);
+        Assert.Empty(response.Daily.WindSpeed10mMaxKmh);
         Assert.Empty(response.Daily.WindDirectionSource10mDominant);
     }
 
@@ -72,7 +72,7 @@ public class GetPublicWeatherForecastHandlerTests
             new GetPublicWeatherForecastEvent { Latitude = 36.16, Longitude = -86.78, Resolution = PublicWeatherForecastResolution.Daily },
             CancellationToken.None);
 
-        Assert.Equal([0, 0.3], response.Daily!.PrecipitationSum);
+        Assert.Equal([0, 0.3], response.Daily!.PrecipitationSumMm);
     }
 
     private static GetPublicWeatherForecastHandler CreateHandler(string json) =>
@@ -108,6 +108,9 @@ public class GetPublicWeatherForecastHandlerTests
         Assert.Contains("longitude=-86.7816", url);
         Assert.Contains("daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant", url);
         Assert.Contains("forecast_days=7", url);
+        Assert.Contains("temperature_unit=celsius", url);
+        Assert.Contains("wind_speed_unit=kmh", url);
+        Assert.Contains("precipitation_unit=mm", url);
         Assert.Contains("timezone=auto", url);
         Assert.DoesNotContain("hourly=", url);
         Assert.DoesNotContain("minutely_15=", url);

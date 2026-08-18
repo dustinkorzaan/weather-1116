@@ -10,7 +10,7 @@ namespace Core.Tests.Weather.Models;
 public class WeatherModelsTests
 {
     [Fact]
-    public void NonAIWeatherResponse_DeserializesOpenMeteoForecastShape()
+    public void NonAICurrentWeatherResponse_DeserializesOpenMeteoForecastShape()
     {
         const string json = """
         {
@@ -42,7 +42,7 @@ public class WeatherModelsTests
         }
         """;
 
-        var result = JsonSerializer.Deserialize<NonAIWeatherResponse>(json);
+        var result = JsonSerializer.Deserialize<NonAICurrentWeatherResponse>(json);
 
         Assert.NotNull(result);
         Assert.Equal(36.16, result!.Latitude);
@@ -51,23 +51,23 @@ public class WeatherModelsTests
         Assert.Equal("America/Chicago", result.Timezone);
         Assert.Equal("CST", result.TimezoneAbbreviation);
 
-        Assert.Equal("°C", result.CurrentWeatherUnits.Temperature);
-        Assert.Equal("km/h", result.CurrentWeatherUnits.WindSpeed);
+        Assert.Equal("°C", result.CurrentWeatherUnits.TemperatureC);
+        Assert.Equal("km/h", result.CurrentWeatherUnits.WindSpeedKmh);
         Assert.Equal("°", result.CurrentWeatherUnits.WindDirectionSourceDegrees);
 
         Assert.Equal("2024-01-02T03:00", result.CurrentWeather.Time);
         Assert.Equal(900, result.CurrentWeather.Interval);
-        Assert.Equal(41.2, result.CurrentWeather.Temperature);
-        Assert.Equal(7.5, result.CurrentWeather.WindSpeed);
+        Assert.Equal(41.2, result.CurrentWeather.TemperatureC);
+        Assert.Equal(7.5, result.CurrentWeather.WindSpeedKmh);
         Assert.Equal(200, result.CurrentWeather.WindDirectionSourceDegrees);
         Assert.Equal(1, result.CurrentWeather.IsDay);
         Assert.Equal(3, result.CurrentWeather.WeatherCode);
     }
 
     [Fact]
-    public void NonAIWeatherResponse_MissingNestedObjects_UsesNonNullDefaults()
+    public void NonAICurrentWeatherResponse_MissingNestedObjects_UsesNonNullDefaults()
     {
-        var result = JsonSerializer.Deserialize<NonAIWeatherResponse>("{}");
+        var result = JsonSerializer.Deserialize<NonAICurrentWeatherResponse>("{}");
 
         Assert.NotNull(result);
         Assert.NotNull(result!.CurrentWeather);
@@ -76,7 +76,7 @@ public class WeatherModelsTests
     }
 
     [Fact]
-    public void PublicWeatherForecastResponse_DeserializesOpenMeteoDailyShape()
+    public void NonAIForecastWeatherResponse_DeserializesOpenMeteoDailyShape()
     {
         const string json = """
         {
@@ -108,7 +108,7 @@ public class WeatherModelsTests
         }
         """;
 
-        var result = JsonSerializer.Deserialize<PublicWeatherForecastResponse>(json);
+        var result = JsonSerializer.Deserialize<NonAIForecastWeatherResponse>(json);
 
         Assert.NotNull(result);
         Assert.Equal("America/Chicago", result!.Timezone);
@@ -116,12 +116,12 @@ public class WeatherModelsTests
         Assert.Null(result.Minutely15);
         Assert.NotNull(result.Daily);
         Assert.Equal(["2026-08-16", "2026-08-17"], result.Daily!.Time);
-        Assert.Equal([100.4, 97.9], result.Daily.Temperature2mMax);
-        Assert.Equal("°C", result.DailyUnits!.Temperature2mMax);
+        Assert.Equal([100.4, 97.9], result.Daily.Temperature2mMaxC);
+        Assert.Equal("°C", result.DailyUnits!.Temperature2mMaxC);
     }
 
     [Fact]
-    public void PublicWeatherHistoryResponse_DeserializesOpenMeteoHourlyShape()
+    public void NonAIHistoryWeatherResponse_DeserializesOpenMeteoHourlyShape()
     {
         const string json = """
         {
@@ -151,13 +151,13 @@ public class WeatherModelsTests
         }
         """;
 
-        var result = JsonSerializer.Deserialize<PublicWeatherHistoryResponse>(json);
+        var result = JsonSerializer.Deserialize<NonAIHistoryWeatherResponse>(json);
 
         Assert.NotNull(result);
         Assert.Null(result!.Daily);
         Assert.NotNull(result.Hourly);
         Assert.Equal(["2026-08-16T00:00", "2026-08-16T01:00"], result.Hourly!.Time);
-        Assert.Equal([72.1, 71.5], result.Hourly.Temperature2m);
+        Assert.Equal([72.1, 71.5], result.Hourly.Temperature2mC);
         Assert.Equal([180, 190], result.Hourly.WindDirectionSource10m);
     }
 }

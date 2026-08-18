@@ -10,17 +10,17 @@ public class GetUIWeatherHistoryHandlerTests
     [Fact]
     public async Task Handle_MapsMetricResponseToUSCustomaryUnits()
     {
-        var metric = new PublicWeatherHistoryResponse
+        var metric = new NonAIHistoryWeatherResponse
         {
             Latitude = 36.16,
             Longitude = -86.78,
             Timezone = "America/Chicago",
-            Hourly = new PublicWeatherHistoryHourly
+            Hourly = new NonAIHistoryWeatherHourly
             {
                 Time = ["2026-08-16T00:00"],
-                Temperature2m = [24],
-                Precipitation = [25.4],
-                WindSpeed10m = [10],
+                Temperature2mC = [24],
+                PrecipitationMm = [25.4],
+                WindSpeed10mKmh = [10],
                 WindDirectionSource10m = [180],
                 WeatherCode = [1],
             },
@@ -41,7 +41,7 @@ public class GetUIWeatherHistoryHandlerTests
         Assert.Equal([180], response.Hourly.WindDirectionSourceDegrees);
     }
 
-    private sealed class FakeMediator(PublicWeatherHistoryResponse response) : IMediator
+    private sealed class FakeMediator(NonAIHistoryWeatherResponse response) : IMediator
     {
         public double? LastLatitude { get; private set; }
 

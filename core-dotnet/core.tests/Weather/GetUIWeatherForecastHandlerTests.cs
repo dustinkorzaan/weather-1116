@@ -10,18 +10,18 @@ public class GetUIWeatherForecastHandlerTests
     [Fact]
     public async Task Handle_MapsMetricResponseToUSCustomaryUnits()
     {
-        var metric = new PublicWeatherForecastResponse
+        var metric = new NonAIForecastWeatherResponse
         {
             Latitude = 36.16,
             Longitude = -86.78,
             Timezone = "America/Chicago",
-            Daily = new PublicWeatherForecastDaily
+            Daily = new NonAIForecastWeatherDaily
             {
                 Time = ["2026-08-16"],
-                Temperature2mMax = [24],
-                Temperature2mMin = [0],
-                PrecipitationSum = [25.4],
-                WindSpeed10mMax = [10],
+                Temperature2mMaxC = [24],
+                Temperature2mMinC = [0],
+                PrecipitationSumMm = [25.4],
+                WindSpeed10mMaxKmh = [10],
                 WindDirectionSource10mDominant = [224],
                 WeatherCode = [2],
             },
@@ -41,7 +41,7 @@ public class GetUIWeatherForecastHandlerTests
         Assert.Equal([32], response.Daily.TemperatureLowF);
     }
 
-    private sealed class FakeMediator(PublicWeatherForecastResponse response) : IMediator
+    private sealed class FakeMediator(NonAIForecastWeatherResponse response) : IMediator
     {
         public double? LastLatitude { get; private set; }
 

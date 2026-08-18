@@ -8,37 +8,37 @@ public class WeatherResponseMapperTests
     [Fact]
     public void ToUIForecastResponse_ConvertsDailyHourlyAndMinutely15ToUSCustomaryUnits()
     {
-        var source = new PublicWeatherForecastResponse
+        var source = new NonAIForecastWeatherResponse
         {
             Latitude = 36.16,
             Longitude = -86.78,
             Timezone = "America/Chicago",
-            Daily = new PublicWeatherForecastDaily
+            Daily = new NonAIForecastWeatherDaily
             {
                 Time = ["2026-08-16"],
                 WeatherCode = [2],
-                Temperature2mMax = [24],
-                Temperature2mMin = [0],
-                PrecipitationSum = [25.4],
-                WindSpeed10mMax = [10],
+                Temperature2mMaxC = [24],
+                Temperature2mMinC = [0],
+                PrecipitationSumMm = [25.4],
+                WindSpeed10mMaxKmh = [10],
                 WindDirectionSource10mDominant = [224],
             },
-            Hourly = new PublicWeatherForecastHourly
+            Hourly = new NonAIForecastWeatherHourly
             {
                 Time = ["2026-08-16T00:00"],
-                Temperature2m = [24],
-                Precipitation = [25.4],
+                Temperature2mC = [24],
+                PrecipitationMm = [25.4],
                 WeatherCode = [1],
-                WindSpeed10m = [10],
+                WindSpeed10mKmh = [10],
                 WindDirectionSource10m = [180],
             },
-            Minutely15 = new PublicWeatherForecastMinutely15
+            Minutely15 = new NonAIForecastWeatherMinutely15
             {
                 Time = ["2026-08-16T00:00"],
-                Temperature2m = [0],
-                Precipitation = [7.62],
+                Temperature2mC = [0],
+                PrecipitationMm = [7.62],
                 WeatherCode = [3],
-                WindSpeed10m = [10],
+                WindSpeed10mKmh = [10],
                 WindDirectionSource10m = [90],
             },
         };
@@ -73,7 +73,7 @@ public class WeatherResponseMapperTests
     [Fact]
     public void ToUIForecastResponse_MissingSeries_MapsToNull()
     {
-        var result = WeatherResponseMapper.ToUIForecastResponse(new PublicWeatherForecastResponse());
+        var result = WeatherResponseMapper.ToUIForecastResponse(new NonAIForecastWeatherResponse());
 
         Assert.Null(result.Daily);
         Assert.Null(result.Hourly);
@@ -83,28 +83,28 @@ public class WeatherResponseMapperTests
     [Fact]
     public void ToUIHistoryResponse_ConvertsDailyAndHourlyToUSCustomaryUnits()
     {
-        var source = new PublicWeatherHistoryResponse
+        var source = new NonAIHistoryWeatherResponse
         {
             Latitude = 36.16,
             Longitude = -86.78,
             Timezone = "America/Chicago",
-            Daily = new PublicWeatherHistoryDaily
+            Daily = new NonAIHistoryWeatherDaily
             {
                 Time = ["2026-08-16"],
                 WeatherCode = [2],
-                Temperature2mMax = [24],
-                Temperature2mMin = [0],
-                PrecipitationSum = [25.4],
-                WindSpeed10mMax = [10],
+                Temperature2mMaxC = [24],
+                Temperature2mMinC = [0],
+                PrecipitationSumMm = [25.4],
+                WindSpeed10mMaxKmh = [10],
                 WindDirectionSource10mDominant = [224],
             },
-            Hourly = new PublicWeatherHistoryHourly
+            Hourly = new NonAIHistoryWeatherHourly
             {
                 Time = ["2026-08-16T00:00"],
-                Temperature2m = [24],
-                Precipitation = [25.4],
+                Temperature2mC = [24],
+                PrecipitationMm = [25.4],
                 WeatherCode = [1],
-                WindSpeed10m = [10],
+                WindSpeed10mKmh = [10],
                 WindDirectionSource10m = [180],
             },
         };
@@ -128,7 +128,7 @@ public class WeatherResponseMapperTests
     [Fact]
     public void ToUIHistoryResponse_MissingSeries_MapsToNull()
     {
-        var result = WeatherResponseMapper.ToUIHistoryResponse(new PublicWeatherHistoryResponse());
+        var result = WeatherResponseMapper.ToUIHistoryResponse(new NonAIHistoryWeatherResponse());
 
         Assert.Null(result.Daily);
         Assert.Null(result.Hourly);
