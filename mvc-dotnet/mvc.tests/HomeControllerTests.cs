@@ -125,19 +125,19 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
-    public void WeatherMapScript_ShowsHoverCardWithGetCurrentAiWeatherButton()
+    public void WeatherMapScript_ShowsHoverCardWithWeatherButton()
     {
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
-        Assert.Contains("currentAiWeatherPath", script);
+        Assert.Contains("weatherModalPath", script);
         Assert.Contains("formatLocationWithLatLong", script);
         Assert.Contains("formatHemisphereDegrees", script);
         Assert.Contains("city.lat", script);
         Assert.Contains("city.lng", script);
         Assert.Contains("encodeURIComponent", script);
-        Assert.Contains("/current-ai-weather?location=", script);
+        Assert.Contains("'/weather?'", script);
         Assert.Contains("marker.addListener('mouseover'", script);
         Assert.Contains("marker.addListener('click', openCard)", script);
-        Assert.Contains("Get Current AI Weather", script);
+        Assert.Contains(">Weather</span>", script);
         Assert.Contains("bindPinHoverCard", script);
         Assert.Contains("bindRightClickAddLocation", script);
         Assert.Contains("Add Location", script);
@@ -186,6 +186,56 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("windDirectionDegrees", script);
         Assert.Contains("data.latitude", script);
         Assert.Contains("data.longitude", script);
+    }
+
+    [Fact]
+    public async Task Weather_ReturnsOkWithTabsAndCurrentAIWeatherWiredUp()
+    {
+        var response = await _client.GetAsync("/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=current");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Nashville, TN (36.1627", html);
+        Assert.Contains("N, 86.7816", html);
+        Assert.Contains("W)</h1>", html);
+        Assert.Contains("class=\"weather-modal-tab is-active\"", html);
+        Assert.Contains("Current AI Weather</h2>", html);
+        Assert.Contains("id=\"weatherModalRefresh\"", html);
+        Assert.Contains("weatherModal.js", html);
+        Assert.Contains("safeGfmMarkdown.js", html);
+        Assert.Contains("Daily Forecast", html);
+        Assert.Contains("Hourly Forecast", html);
+        Assert.Contains("Every 15 Forecast", html);
+        Assert.Contains("Daily History", html);
+        Assert.Contains("Hourly History", html);
+        Assert.Contains("tab=daily-forecast", html);
+        Assert.DoesNotContain("Coming soon.", html);
+    }
+
+    [Fact]
+    public async Task Weather_ShowsComingSoonPlaceholderForUnimplementedTabs()
+    {
+        var response = await _client.GetAsync("/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=daily-forecast");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Coming soon.", html);
+        Assert.Contains("weather-modal-coming-soon", html);
+        Assert.DoesNotContain("id=\"weatherModalRefresh\"", html);
+        Assert.DoesNotContain("weatherModal.js", html);
+    }
+
+    [Fact]
+    public async Task Weather_DefaultsToCurrentTabForUnknownTabValue()
+    {
+        var response = await _client.GetAsync("/weather?name=Nashville%2C%20TN&tab=bogus");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Current AI Weather</h2>", html);
     }
 
     [Fact]
