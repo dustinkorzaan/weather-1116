@@ -26,7 +26,7 @@ public class UIWeatherModelsTests
                 TemperatureLowF = [70.1],
                 PrecipitationInch = [0.3],
                 WindSpeedMPH = [12.3],
-                WindDirectionDegrees = [224],
+                WindDirectionToDegrees = [224],
             },
             Hourly = new UIWeatherHourlySeries
             {
@@ -35,7 +35,7 @@ public class UIWeatherModelsTests
                 PrecipitationInch = [0.0],
                 WeatherCode = [1],
                 WindSpeedMPH = [8.2],
-                WindDirectionDegrees = [180],
+                WindDirectionToDegrees = [180],
             },
             Minutely15 = new UIWeatherHourlySeries
             {
@@ -44,7 +44,7 @@ public class UIWeatherModelsTests
                 PrecipitationInch = [0.0],
                 WeatherCode = [1],
                 WindSpeedMPH = [8.5],
-                WindDirectionDegrees = [190],
+                WindDirectionToDegrees = [190],
             },
         });
 
@@ -61,13 +61,13 @@ public class UIWeatherModelsTests
         Assert.Equal(70.1, daily.GetProperty("temperatureLowF")[0].GetDouble());
         Assert.Equal(0.3, daily.GetProperty("precipitationInch")[0].GetDouble());
         Assert.Equal(12.3, daily.GetProperty("windSpeedMPH")[0].GetDouble());
-        Assert.Equal(224, daily.GetProperty("windDirectionDegrees")[0].GetInt32());
+        Assert.Equal(224, daily.GetProperty("windDirectionToDegrees")[0].GetInt32());
         Assert.Equal(1, daily.GetProperty("weatherCode")[0].GetInt32());
 
         var hourly = root.GetProperty("hourly");
         Assert.Equal(86.5, hourly.GetProperty("temperatureF")[0].GetDouble());
         Assert.Equal(8.2, hourly.GetProperty("windSpeedMPH")[0].GetDouble());
-        Assert.Equal(180, hourly.GetProperty("windDirectionDegrees")[0].GetInt32());
+        Assert.Equal(180, hourly.GetProperty("windDirectionToDegrees")[0].GetInt32());
 
         var minutely15 = root.GetProperty("minutely15");
         Assert.Equal(86.7, minutely15.GetProperty("temperatureF")[0].GetDouble());
@@ -76,6 +76,7 @@ public class UIWeatherModelsTests
         Assert.False(root.TryGetProperty("Minutely15", out _));
         Assert.False(root.TryGetProperty("minutely_15", out _));
         Assert.False(daily.TryGetProperty("temperature_2m_max", out _));
+        Assert.False(daily.TryGetProperty("windDirectionDegrees", out _));
     }
 
     [Fact]
@@ -94,7 +95,7 @@ public class UIWeatherModelsTests
                 TemperatureLowF = [70.1],
                 PrecipitationInch = [0.3],
                 WindSpeedMPH = [12.3],
-                WindDirectionDegrees = [224],
+                WindDirectionToDegrees = [224],
             },
             Hourly = new UIWeatherHourlySeries
             {
@@ -103,7 +104,7 @@ public class UIWeatherModelsTests
                 PrecipitationInch = [0.0],
                 WeatherCode = [1],
                 WindSpeedMPH = [8.2],
-                WindDirectionDegrees = [180],
+                WindDirectionToDegrees = [180],
             },
         });
 
@@ -120,7 +121,7 @@ public class UIWeatherModelsTests
         Assert.Equal(86.5, hourly.GetProperty("temperatureF")[0].GetDouble());
         Assert.Equal(0.0, hourly.GetProperty("precipitationInch")[0].GetDouble());
         Assert.Equal(8.2, hourly.GetProperty("windSpeedMPH")[0].GetDouble());
-        Assert.Equal(180, hourly.GetProperty("windDirectionDegrees")[0].GetInt32());
+        Assert.Equal(180, hourly.GetProperty("windDirectionToDegrees")[0].GetInt32());
 
         Assert.False(root.TryGetProperty("minutely15", out _));
     }

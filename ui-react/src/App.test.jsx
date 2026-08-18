@@ -87,7 +87,7 @@ function mockHelloFetch(weather = {}) {
           temperatureF: 72,
           windSpeedMPH: 5,
           windDirection: 'S',
-          windDirectionDegrees: 180,
+          windDirectionToDegrees: 180,
           conditions: 'Clear',
           locationName: 'Nashville, TN',
           latitude: 36.1627,
@@ -275,7 +275,7 @@ test('current AI weather reads location query, clears it, and fetches', async ()
   const windValue = screen.getByText('S (180°)').closest('dd');
   expect(windValue?.textContent).toMatch(/S \(180°\).*\u27A4/);
   expect(windValue?.lastElementChild?.textContent).toBe('\u27A4');
-  expect(windValue?.querySelector('[aria-hidden="true"]')?.style.transform).toBe('rotate(270deg)');
+  expect(windValue?.querySelector('[aria-hidden="true"]')?.style.transform).toBe('rotate(90deg)');
   expect(screen.getByText('Lat/Long')).toBeDefined();
   expect(screen.getByText('36.16° N, 86.78° W')).toBeDefined();
   expect(screen.queryByText('Temperature F')).toBeNull();

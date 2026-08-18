@@ -6,7 +6,7 @@
     'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW',
   ];
 
-  /** Converts meteorological degrees to a 16-point compass abbreviation. */
+  /** Converts wind-to degrees (0° = toward north) to a 16-point compass abbreviation. */
   function degreesToCompass(degrees) {
     var numeric = Number(degrees);
     if (!Number.isFinite(numeric)) {
@@ -103,8 +103,8 @@
     if (!Number.isFinite(numeric)) {
       return null;
     }
-    // ➤ points right at 0° CSS; add 90 so meteorological from-degrees point where the wind is blowing.
-    return Math.round(numeric) + 90;
+    // ➤ points right at 0° CSS; subtract 90 so 0° (toward north) points up.
+    return Math.round(numeric) - 90;
   }
 
   function createWindDirectionCell(degrees) {
@@ -149,7 +149,7 @@
         formatTemperatureF(daily.temperatureLowF[index]),
         formatPrecipitationIn(daily.precipitationInch[index]),
         formatWindSpeedMph(daily.windSpeedMPH[index]),
-        createWindDirectionCell(daily.windDirectionDegrees[index]),
+        createWindDirectionCell(daily.windDirectionToDegrees[index]),
       ];
     });
   }
@@ -166,7 +166,7 @@
         formatTemperatureF(series.temperatureF[index]),
         formatPrecipitationIn(series.precipitationInch[index]),
         formatWindSpeedMph(series.windSpeedMPH[index]),
-        createWindDirectionCell(series.windDirectionDegrees[index]),
+        createWindDirectionCell(series.windDirectionToDegrees[index]),
       ];
     });
   }

@@ -77,10 +77,10 @@ public sealed class WeatherGridFormatTests
     }
 
     [Fact]
-    public void WindArrowRotationDeg_PointsWhereTheWindIsBlowing()
+    public void WindArrowRotationDeg_PointsTowardNorthUp()
     {
-        Assert.Equal(90, WeatherGridFormat.WindArrowRotationDeg(0));
-        Assert.Equal(314, WeatherGridFormat.WindArrowRotationDeg(224));
+        Assert.Equal(-90, WeatherGridFormat.WindArrowRotationDeg(0));
+        Assert.Equal(134, WeatherGridFormat.WindArrowRotationDeg(224));
         Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.NaN));
     }
 }

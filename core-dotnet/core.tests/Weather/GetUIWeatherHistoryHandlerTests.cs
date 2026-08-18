@@ -38,6 +38,7 @@ public class GetUIWeatherHistoryHandlerTests
         Assert.NotNull(response.Hourly);
         Assert.Equal([75.2], response.Hourly!.TemperatureF);
         Assert.Equal([1], response.Hourly.PrecipitationInch);
+        Assert.Equal([0], response.Hourly.WindDirectionToDegrees);
     }
 
     private sealed class FakeMediator(PublicWeatherHistoryResponse response) : IMediator

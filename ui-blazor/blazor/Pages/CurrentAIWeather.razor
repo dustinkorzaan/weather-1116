@@ -51,10 +51,10 @@
                     <FluentGridItem xs="12" sm="6">
                         <div class="stat-label">Wind Direction</div>
                         <div class="wind-direction">
-                            @FormatWindDirection(aiWeather.WindDirection, aiWeather.WindDirectionDegrees)
+                            @FormatWindDirection(aiWeather.WindDirection, aiWeather.WindDirectionToDegrees)
                             <span class="wind-direction-arrow"
                                   aria-hidden="true"
-                                  style="@($"transform: rotate({aiWeather.WindDirectionDegrees + 90}deg)")">&#x27A4;</span>
+                                  style="@($"transform: rotate({aiWeather.WindDirectionToDegrees - 90}deg)")">&#x27A4;</span>
                         </div>
                     </FluentGridItem>
                     <FluentGridItem xs="12" sm="6">

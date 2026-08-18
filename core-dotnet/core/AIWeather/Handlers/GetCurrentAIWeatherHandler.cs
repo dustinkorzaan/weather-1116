@@ -7,6 +7,7 @@ using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.Json;
 using Core.Tools;
+using Core.Weather;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -73,8 +74,8 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
         - For the place name, prefer a clean, human-friendly city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
         - temperatureF: Current temperature in Fahrenheit (convert from the weather tool).
         - windSpeedMPH: Current wind speed in miles per hour (convert from the weather tool).
-        - windDirection: Compass point such as N, NE, or SW.
-        - windDirectionDegrees: Meteorological wind direction in degrees from the weather tool (0–360).
+        - windDirection: Compass point such as N, NE, or SW matching the weather tool's meteorological from-direction.
+        - windDirectionToDegrees: Copy the weather tool's winddirection degrees exactly (meteorological from-direction, 0–360). Do not add 180; a server-side mapper converts this to a destination heading.
         - conditions: Short current conditions phrase from the weather tool.
         - latitude: Decimal degrees from your coordinates tool (positive north, negative south).
         - longitude: Decimal degrees from your coordinates tool (positive east, negative west).
@@ -165,6 +166,9 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             throw new InvalidOperationException(
                 $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
         }
+
+        aiWeather.WindDirectionToDegrees = WeatherUnitConversion.MeteorologicalFromToWindTo(aiWeather.WindDirectionToDegrees);
+        aiWeather.WindDirection = WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionToDegrees);
 
         return aiWeather;
     }

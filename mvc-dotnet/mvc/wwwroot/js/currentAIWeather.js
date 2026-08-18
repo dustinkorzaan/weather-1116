@@ -58,8 +58,8 @@
     if (!Number.isFinite(numeric)) {
       return null;
     }
-    // ➤ points right at 0° CSS; add 90 so meteorological from-degrees point where the wind is blowing.
-    return Math.round(numeric) + 90;
+    // ➤ points right at 0° CSS; subtract 90 so 0° (toward north) points up.
+    return Math.round(numeric) - 90;
   }
 
   function renderWindDirection(el, compass, degrees) {
@@ -130,7 +130,7 @@
           }
           temperatureEl.textContent = formatTemperatureF(data.temperatureF);
           windSpeedEl.textContent = formatWindSpeedMph(data.windSpeedMPH);
-          renderWindDirection(windDirectionEl, data.windDirection, data.windDirectionDegrees);
+          renderWindDirection(windDirectionEl, data.windDirection, data.windDirectionToDegrees);
           conditionsEl.textContent = data.conditions || '';
           if (latLongEl) {
             latLongEl.textContent = formatLatLong(data.latitude, data.longitude);
