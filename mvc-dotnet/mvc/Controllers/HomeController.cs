@@ -45,6 +45,13 @@ public class HomeController : Controller
         return View();
     }
 
+    [Route("weather")]
+    [Route("Home/Weather")]
+    public IActionResult Weather([FromQuery] string? name, [FromQuery] double? lat, [FromQuery] double? lng, [FromQuery] string? tab)
+    {
+        return View(WeatherModalViewModel.Create(name, lat, lng, tab));
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetCurrentAIWeather([FromQuery] string? location, CancellationToken cancellationToken)
     {

@@ -10,6 +10,9 @@ window.weatherMap = (function () {
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
   const PLUS_ICON_SVG =
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
+  const SEARCH_ICON_SVG =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>';
+  const DEFAULT_WEATHER_MODAL_TAB = 'current';
   const DEFAULT_CENTER = { lat: 36.16, lng: -86.78 };
   const DEFAULT_ZOOM = 4;
 
@@ -330,7 +333,7 @@ window.weatherMap = (function () {
       overlay,
       city.name,
       function () {
-        window.location.assign(currentAiWeatherPath(formatLocationWithLatLong(city.name, city.lat, city.lng)));
+        window.location.assign(weatherModalPath(city.name, city.lat, city.lng, DEFAULT_WEATHER_MODAL_TAB));
       },
       function () {
         removeCity(city.id);
@@ -399,12 +402,20 @@ window.weatherMap = (function () {
     );
   }
 
-  function currentAiWeatherPath(location) {
-    var trimmed = String(location || '').trim();
-    if (!trimmed) {
-      return '/current-ai-weather';
+  function weatherModalPath(name, lat, lng, tab) {
+    var params = new URLSearchParams();
+    var trimmedName = String(name || '').trim();
+    if (trimmedName) {
+      params.set('name', trimmedName);
     }
-    return '/current-ai-weather?location=' + encodeURIComponent(trimmed);
+    if (Number.isFinite(Number(lat))) {
+      params.set('lat', lat);
+    }
+    if (Number.isFinite(Number(lng))) {
+      params.set('lng', lng);
+    }
+    params.set('tab', tab || DEFAULT_WEATHER_MODAL_TAB);
+    return '/weather?' + params.toString();
   }
 
   function newCityId() {
@@ -635,7 +646,7 @@ window.weatherMap = (function () {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'weather-map-pin-card-button';
-    button.textContent = 'Get Current AI Weather';
+    button.innerHTML = SEARCH_ICON_SVG + '<span>Weather</span>';
 
     card.appendChild(header);
     card.appendChild(button);
@@ -887,7 +898,7 @@ window.weatherMap = (function () {
     init: init,
     addCity: addCity,
     removeCity: removeCity,
-    currentAiWeatherPath: currentAiWeatherPath,
+    weatherModalPath: weatherModalPath,
     formatLocationWithLatLong: formatLocationWithLatLong,
   };
 })();
