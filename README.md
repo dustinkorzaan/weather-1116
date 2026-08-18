@@ -3,7 +3,7 @@
 Demystifying Foundry, agents, and models: from model-direct, to local
 in-process looping, to remote MCP, to a hosted agent, behind a pin map.
 
-| PROD | Project | Path | Stack | Port |
+|  | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
 | [Visit](https://wx.korzaan.com) | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
 | [Visit](https://weather1116-prod-blazor.azurewebsites.net) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
@@ -31,7 +31,7 @@ following 3-step core weather progression:
 - Lat/Long → Non-AI Weather `{ temp: 24, ... }`
 - Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
 
-| Project | Path | Pattern |
+|  | Project | Description |
 | --- | --- | --- |
 | V1 | [`Foundry Console V1 Model Direct Legacy`](FoundryConsoleV1) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | V2 | [`Foundry Console V2 Model Direct Unified AI`](FoundryConsoleV2) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
