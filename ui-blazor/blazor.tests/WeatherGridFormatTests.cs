@@ -76,12 +76,4 @@ public sealed class WeatherGridFormatTests
         Assert.Equal("SW (224°)", WeatherGridFormat.FormatWindDirection(224));
     }
 
-    [Fact]
-    public void WindArrowRotationDeg_Adds180ToSourceDegrees()
-    {
-        Assert.Equal(180, WeatherGridFormat.WindArrowRotationDeg(0));
-        Assert.Equal(44, WeatherGridFormat.WindArrowRotationDeg(224));
-        Assert.Equal(0, WeatherGridFormat.WindArrowRotationDeg(180));
-        Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.NaN));
-    }
 }

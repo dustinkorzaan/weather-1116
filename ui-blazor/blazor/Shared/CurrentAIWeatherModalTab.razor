@@ -44,11 +44,15 @@
                     <div class="stat-label">Wind Direction</div>
                     <div class="wind-direction">
                         @FormatWindDirection(_aiWeather.WindDirectionSource, _aiWeather.WindDirectionSourceDegrees)
-                        @if (WeatherGridFormat.WindArrowRotationDeg(_aiWeather.WindDirectionSourceDegrees) is int rotation)
+                        @{
+                            var windDegrees = _aiWeather.WindDirectionSourceDegrees;
+                        }
+                        @if (!double.IsNaN(windDegrees) && !double.IsInfinity(windDegrees))
                         {
+                            var rotation = (int)Math.Round((((double)windDegrees % 360) + 360) % 360);
                             <span class="wind-direction-arrow"
                                   aria-hidden="true"
-                                  style="@($"transform: rotate({rotation}deg)")">&#x2B99;</span>
+                                  style="@($"transform: rotate({rotation}deg)")">&#x2B9B;</span>
                         }
                     </div>
                 </FluentGridItem>

@@ -273,9 +273,9 @@ test('current AI weather reads location query, clears it, and fetches', async ()
   expect(screen.getByText('Wind Direction')).toBeDefined();
   expect(screen.getByText('S (180°)')).toBeDefined();
   const windValue = screen.getByText('S (180°)').closest('dd');
-  expect(windValue?.textContent).toMatch(/S \(180°\).*\u2B99/);
-  expect(windValue?.lastElementChild?.textContent).toBe('\u2B99');
-  expect(windValue?.querySelector('[aria-hidden="true"]')?.style.transform).toBe('rotate(0deg)');
+  expect(windValue?.textContent).toMatch(/S \(180°\).*\u2B9B/);
+  expect(windValue?.lastElementChild?.textContent).toBe('\u2B9B');
+  expect(windValue?.querySelector('[aria-hidden="true"]')?.style.transform).toBe('rotate(180deg)');
   expect(screen.getByText('Lat/Long')).toBeDefined();
   expect(screen.getByText('36.16° N, 86.78° W')).toBeDefined();
   expect(screen.queryByText('Temperature F')).toBeNull();

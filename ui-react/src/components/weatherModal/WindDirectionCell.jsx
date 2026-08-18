@@ -1,13 +1,15 @@
 import {
   formatWindDirection,
   WIND_DIRECTION_ARROW,
-  windArrowRotationDeg,
 } from '../../utils/aiWeatherDisplay';
 import { degreesToCompass } from '../../utils/weatherGridFormat';
 
-/** Compass label plus the same rotated ⮙ used on Current AI Weather. */
+/** Compass label plus the same rotated ⮛ used on Current AI Weather. */
 function WindDirectionCell({ degrees }) {
-  const rotationDeg = windArrowRotationDeg(degrees);
+  const numeric = Number(degrees);
+  const rotationDeg = Number.isFinite(numeric)
+    ? Math.round(((numeric % 360) + 360) % 360)
+    : null;
 
   return (
     <span className="inline-flex items-center gap-2">

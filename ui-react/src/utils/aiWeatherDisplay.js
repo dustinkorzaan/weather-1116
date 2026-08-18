@@ -43,14 +43,5 @@ export function formatWindDirection(compass, degrees) {
   return label ? `${label} ${withDegrees}` : withDegrees;
 }
 
-/** Up-pointing arrow (⮙); rotate source degrees + 180° so the icon points where wind blows. */
-export const WIND_DIRECTION_ARROW = '\u2B99';
-
-export function windArrowRotationDeg(sourceDegrees) {
-  const numeric = Number(sourceDegrees);
-  if (!Number.isFinite(numeric)) {
-    return null;
-  }
-
-  return Math.round(((numeric + 180) % 360 + 360) % 360);
-}
+/** Down-pointing arrow (⮛); at 0° rotation the glyph points south (wind from north). */
+export const WIND_DIRECTION_ARROW = '\u2B9B';

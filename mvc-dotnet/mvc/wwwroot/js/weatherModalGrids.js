@@ -96,15 +96,7 @@
     return compass ? compass + ' ' + withDegrees : withDegrees;
   }
 
-  var WIND_DIRECTION_ARROW = '\u2B99';
-
-  function windArrowRotationDeg(sourceDegrees) {
-    var numeric = Number(sourceDegrees);
-    if (!Number.isFinite(numeric)) {
-      return null;
-    }
-    return Math.round(((numeric + 180) % 360 + 360) % 360);
-  }
+  var WIND_DIRECTION_ARROW = '\u2B9B';
 
   function createWindDirectionCell(degrees) {
     var wrap = document.createElement('span');
@@ -113,7 +105,10 @@
     label.textContent = formatWindDirection(degrees);
     wrap.appendChild(label);
 
-    var rotation = windArrowRotationDeg(degrees);
+    var numeric = Number(degrees);
+    var rotation = Number.isFinite(numeric)
+      ? Math.round(((numeric % 360) + 360) % 360)
+      : null;
     if (rotation !== null) {
       var arrow = document.createElement('span');
       arrow.className = 'wind-direction-arrow';

@@ -5,7 +5,6 @@ import {
   formatWindDirection,
   formatWindSpeedMph,
   WIND_DIRECTION_ARROW,
-  windArrowRotationDeg,
 } from './aiWeatherDisplay';
 
 test('formats lat/long with two-decimal hemisphere labels', () => {
@@ -36,12 +35,6 @@ test('formats wind direction as compass plus degrees', () => {
   expect(formatWindDirection('', 224)).toBe('(224°)');
 });
 
-test('rotates the wind arrow source degrees plus 180°', () => {
-  expect(WIND_DIRECTION_ARROW).toBe('\u2B99');
-  expect(windArrowRotationDeg(0)).toBe(180);
-  expect(windArrowRotationDeg(90)).toBe(270);
-  expect(windArrowRotationDeg(180)).toBe(0);
-  expect(windArrowRotationDeg(224)).toBe(44);
-  expect(windArrowRotationDeg(270)).toBe(90);
-  expect(windArrowRotationDeg(Number.NaN)).toBeNull();
+test('uses the down-pointing wind direction arrow glyph', () => {
+  expect(WIND_DIRECTION_ARROW).toBe('\u2B9B');
 });

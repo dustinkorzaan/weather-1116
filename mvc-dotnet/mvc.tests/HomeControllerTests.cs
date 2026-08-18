@@ -175,10 +175,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("formatWindSpeedMph", script);
         Assert.Contains("formatWindDirection", script);
         Assert.Contains("formatLatLong", script);
-        Assert.Contains("windArrowRotationDeg", script);
         Assert.Contains("renderWindDirection", script);
-        Assert.Contains("\\u2B99", script);
-        Assert.Contains("numeric + 180", script);
+        Assert.Contains("\\u2B9B", script);
+        Assert.DoesNotContain("windArrowRotationDeg", script);
+        Assert.DoesNotContain("numeric + 180", script);
         Assert.DoesNotContain("Math.round(numeric) - 90", script);
         Assert.True(
             script.IndexOf("el.appendChild(label)", StringComparison.Ordinal)
@@ -196,9 +196,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherModalGrids.js"));
         Assert.Contains("createWindDirectionCell", script);
         Assert.Contains("wind-direction-arrow", script);
-        Assert.Contains("windArrowRotationDeg", script);
-        Assert.Contains("\\u2B99", script);
-        Assert.Contains("numeric + 180", script);
+        Assert.Contains("\\u2B9B", script);
+        Assert.DoesNotContain("windArrowRotationDeg", script);
+        Assert.DoesNotContain("numeric + 180", script);
         Assert.DoesNotContain("Math.round(numeric) - 90", script);
         Assert.True(
             script.IndexOf("wrap.appendChild(label)", StringComparison.Ordinal)

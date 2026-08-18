@@ -90,18 +90,4 @@ public static class WeatherGridFormat
     /// <summary>Formats source degrees as compass plus degrees, e.g. "SW (224°)".</summary>
     public static string FormatWindDirection(double degrees) =>
         string.Create(CultureInfo.InvariantCulture, $"{DegreesToCompass(degrees)} ({Math.Round(degrees):0}°)");
-
-    /// <summary>
-    /// Rotation for the ⮙ wind arrow; adds 180° to source degrees so the icon points where wind blows.
-    /// </summary>
-    public static int? WindArrowRotationDeg(double sourceDegrees)
-    {
-        if (double.IsNaN(sourceDegrees) || double.IsInfinity(sourceDegrees))
-        {
-            return null;
-        }
-
-        var normalized = ((sourceDegrees % 360) + 360) % 360;
-        return (int)Math.Round((normalized + 180) % 360);
-    }
 }

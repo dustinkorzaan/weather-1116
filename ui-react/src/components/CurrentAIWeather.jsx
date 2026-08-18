@@ -9,7 +9,6 @@ import {
   formatWindDirection,
   formatWindSpeedMph,
   WIND_DIRECTION_ARROW,
-  windArrowRotationDeg,
 } from '../utils/aiWeatherDisplay';
 import { locationFromSearchParams } from '../utils/currentAiWeatherLocation';
 
@@ -52,7 +51,10 @@ function CurrentAIWeather() {
       ? error.data.title
       : 'Unable to load AI weather.';
 
-  const windRotationDeg = windArrowRotationDeg(data?.windDirectionSourceDegrees);
+  const windDegrees = Number(data?.windDirectionSourceDegrees);
+  const windRotationDeg = Number.isFinite(windDegrees)
+    ? Math.round(((windDegrees % 360) + 360) % 360)
+    : null;
 
   return (
     <section aria-labelledby="current-ai-weather-heading">
