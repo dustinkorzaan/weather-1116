@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
-using Core.AIWeather;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.Json;
@@ -72,13 +71,12 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             - Do not ask follow-up questions or offer further assistance.
 
             # JSON Structure Properties
-            - fullSummary: One or two friendly sentences describing the current weather. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields. Do not include latitude or longitude in fullSummary.
-            """ + AIWeatherSystemInstructions.WindDirectionSummaryGuidance + """
-
+            - fullSummary: One or two friendly sentences describing the current weather. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields. Do not include latitude or longitude in fullSummary. When stating wind direction, use the meteorological source compass label from windDirectionSource (where the wind comes from), optionally with source degrees in parentheses (e.g. SW (224°)). Do not add 180 to degrees.
             - For the place name, prefer a clean, human-friendly city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
             - temperatureF: Current temperature in Fahrenheit (convert from the weather tool).
             - windSpeedMPH: Current wind speed in miles per hour (convert from the weather tool).
-            """ + AIWeatherSystemInstructions.WindDirectionJsonFields + """
+            - windDirectionSourceDegrees: Copy current_weather.winddirection from the weather tool exactly (meteorological source direction — where the wind comes from). Normalize to 0–360 if needed. Do not add 180.
+            - windDirectionSource: 16-point compass label derived from windDirectionSourceDegrees. Round normalized degrees to the nearest 22.5° sector and map to one of: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (e.g. 180 → S, 224 → SW).
             - conditions: Short current conditions phrase from the weather tool.
             - latitude: Decimal degrees from your coordinates tool (positive north, negative south).
             - longitude: Decimal degrees from your coordinates tool (positive east, negative west).

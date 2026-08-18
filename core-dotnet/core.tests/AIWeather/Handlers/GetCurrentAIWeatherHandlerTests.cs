@@ -1,5 +1,3 @@
-using Core.AIWeather;
-
 namespace Core.Tests.AIWeather.Handlers;
 
 public class GetCurrentAIWeatherHandlerTests
@@ -7,10 +5,7 @@ public class GetCurrentAIWeatherHandlerTests
     [Fact]
     public void SystemPrompt_UsesFriendlySummaryWithoutLatLong()
     {
-        var handlerSource = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherHandler.cs"));
-        var instructions = AIWeatherSystemInstructions.WindDirectionJsonFields
-            + AIWeatherSystemInstructions.WindDirectionSummaryGuidance;
-        var prompt = handlerSource + instructions;
+        var prompt = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherHandler.cs"));
 
         Assert.Contains("one or two friendly sentences describing the current weather", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("place name", prompt, StringComparison.OrdinalIgnoreCase);
@@ -25,9 +20,9 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.Contains("current_weather.winddirection", prompt, StringComparison.Ordinal);
         Assert.Contains("Do not add 180", prompt, StringComparison.Ordinal);
         Assert.Contains("16-point compass", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("AIWeatherSystemInstructions", handlerSource, StringComparison.Ordinal);
-        Assert.Contains("WeatherUnitConversion.NormalizeSourceDegrees", handlerSource, StringComparison.Ordinal);
-        Assert.Contains("WeatherUnitConversion.DegreesToCompass", handlerSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("AIWeatherSystemInstructions", prompt, StringComparison.Ordinal);
+        Assert.Contains("WeatherUnitConversion.NormalizeSourceDegrees", prompt, StringComparison.Ordinal);
+        Assert.Contains("WeatherUnitConversion.DegreesToCompass", prompt, StringComparison.Ordinal);
         Assert.DoesNotContain("- windDirectionTowardsDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("- windDirectionFromDegrees:", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("temperature", prompt, StringComparison.OrdinalIgnoreCase);

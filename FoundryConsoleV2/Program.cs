@@ -1,5 +1,4 @@
 ﻿using Core;
-using Core.AIWeather;
 using Core.AIWeather.Models;
 using Core.Geo.Events;
 using Core.Json;
@@ -280,7 +279,8 @@ internal class Program
 		- fullSummary (string) (one or two friendly sentences of the current weather including place name, temperature, wind speed, wind direction, and overall conditions — keep those facts even though some are also JSON fields; GitHub-flavored Markdown is allowed when it helps readability)
 		- temperatureF (number) in Fahrenheit
 		- windSpeedMPH (number) in MPH
-		""" + AIWeatherSystemInstructions.WindDirectionJsonFields + """
+		- windDirectionSourceDegrees (integer): Copy current_weather.winddirection from the weather tool exactly (meteorological source direction — where the wind comes from). Normalize to 0–360 if needed. Do not add 180.
+		- windDirectionSource (string): 16-point compass label derived from windDirectionSourceDegrees. Round normalized degrees to the nearest 22.5° sector and map to one of: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (e.g. 180 → S, 224 → SW).
 		- conditions (string)
 
 		You only return valid JSON.
