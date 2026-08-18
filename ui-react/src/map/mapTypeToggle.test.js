@@ -17,11 +17,18 @@ const maps = {
 
 const ALL_BUILT_IN_TYPES = [ROADMAP_MAP_TYPE, SATELLITE_MAP_TYPE, HYBRID_MAP_TYPE, TERRAIN_MAP_TYPE];
 
-test('hybrid (satellite with labels) is the default map type', () => {
+test('hybrid (satellite with labels) is the default map type for light theme', () => {
   expect(defaultMapTypeId(maps)).toBe(HYBRID_MAP_TYPE);
   expect(defaultMapTypeId({})).toBe(HYBRID_MAP_TYPE);
+  expect(defaultMapTypeId(maps, undefined, 'light')).toBe(HYBRID_MAP_TYPE);
   expect(defaultMapTypeId(maps, SATELLITE_MAP_TYPE)).toBe(SATELLITE_MAP_TYPE);
   expect(defaultMapTypeId(maps, ROADMAP_MAP_TYPE)).toBe(ROADMAP_MAP_TYPE);
+});
+
+test('roadmap (themed "Map") is the default map type for dark theme', () => {
+  expect(defaultMapTypeId(maps, undefined, 'dark')).toBe(ROADMAP_MAP_TYPE);
+  expect(defaultMapTypeId({}, undefined, 'dark')).toBe(ROADMAP_MAP_TYPE);
+  expect(defaultMapTypeId(maps, SATELLITE_MAP_TYPE, 'dark')).toBe(SATELLITE_MAP_TYPE);
 });
 
 test('type control offers Google\'s four built-in map types', () => {

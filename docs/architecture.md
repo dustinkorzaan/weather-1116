@@ -277,8 +277,12 @@ use a filled site logo (`logo-solid.svg` / `logo-black-solid.svg`) with no
 city-name label on the map; names appear on the hover card. Logos slowly
 spin. Google's built-in type control (top-left) offers the four native map
 types: **Map** (themed roadmap), **Satellite**, **Hybrid**
-(satellite with labels, default), and **Terrain**.
-The selected view is kept when Light/Dark theme changes. The map canvas,
+(satellite with labels), and **Terrain**. Only Map renders the site's JSON
+styling (Satellite/Hybrid/Terrain show real imagery), so the default type
+follows the resolved theme: **Hybrid** for Light, **Map** for Dark. If the
+user explicitly picks a type from the control, that choice is kept across
+Light/Dark/system theme changes; otherwise the default is re-derived from
+the resolved theme on every switch (and on initial load). The map canvas,
 logo contrast, and hover card follow the resolved Light/Dark theme. Header
 chrome keeps the outline `logo.svg`. Weather overlays will come later.
 

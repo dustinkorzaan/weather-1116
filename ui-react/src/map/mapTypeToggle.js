@@ -5,12 +5,17 @@ export const TERRAIN_MAP_TYPE = 'terrain';
 
 /**
  * Google's built-in type control supports four MapTypeId values:
- * Roadmap, Satellite (aerial), Hybrid (satellite + labels; the default),
- * and Terrain.
+ * Roadmap, Satellite (aerial), Hybrid (satellite + labels; the light-theme
+ * default), and Terrain. Satellite/Hybrid imagery ignores our JSON map
+ * styles, so the dark theme defaults to Roadmap ("Map") instead, which is
+ * the only type that actually renders themed.
  */
-export function defaultMapTypeId(maps, mapTypeId) {
+export function defaultMapTypeId(maps, mapTypeId, resolvedTheme) {
   if (mapTypeId) {
     return mapTypeId;
+  }
+  if (resolvedTheme === 'dark') {
+    return maps?.MapTypeId?.ROADMAP ?? ROADMAP_MAP_TYPE;
   }
   return maps?.MapTypeId?.HYBRID ?? HYBRID_MAP_TYPE;
 }

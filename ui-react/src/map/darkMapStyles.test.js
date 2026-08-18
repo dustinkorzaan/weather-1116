@@ -66,6 +66,24 @@ test('createMapOptions forces raster rendering and LIGHT colorScheme for the lig
   });
 });
 
+test('createMapOptions defaults to the themed roadmap ("Map") for the dark theme', () => {
+  const maps = {
+    ColorScheme: { LIGHT: 'LIGHT', DARK: 'DARK' },
+    RenderingType: { RASTER: 'RASTER', VECTOR: 'VECTOR' },
+    MapTypeId: { ROADMAP: 'roadmap', SATELLITE: 'satellite', HYBRID: 'hybrid', TERRAIN: 'terrain' },
+    MapTypeControlStyle: { HORIZONTAL_BAR: 'HORIZONTAL_BAR' },
+    ControlPosition: { TOP_LEFT: 'TOP_LEFT' },
+  };
+
+  const options = createMapOptions(maps, 'dark', {
+    center: { lat: 1, lng: 2 },
+    zoom: 4,
+  });
+
+  expect(options.mapTypeId).toBe('roadmap');
+  expect(options.styles).toBe(DARK_MAP_STYLES);
+});
+
 test('mapColorScheme and mapRenderingType fall back to strings without the Maps enums', () => {
   expect(mapColorScheme({}, 'light')).toBe('LIGHT');
   expect(mapColorScheme({}, 'dark')).toBe('DARK');
