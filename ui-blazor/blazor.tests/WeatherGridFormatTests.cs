@@ -43,6 +43,8 @@ public sealed class WeatherGridFormatTests
         Assert.Equal("2 1/4\"", WeatherGridFormat.FormatPrecipitationIn(2.25));
         Assert.Equal("3 5/16\"", WeatherGridFormat.FormatPrecipitationIn(3.3125));
         Assert.Equal("1/16\"", WeatherGridFormat.FormatPrecipitationIn(0.0625));
+        Assert.Equal("5/16\"", WeatherGridFormat.FormatPrecipitationIn(0.3));
+        Assert.Equal("2\"", WeatherGridFormat.FormatPrecipitationIn(1.9997));
     }
 
     [Fact]

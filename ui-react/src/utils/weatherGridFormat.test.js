@@ -23,6 +23,8 @@ test('formats an already-converted inches value rounded to the nearest 1/16"', (
   expect(formatPrecipitationIn(2.25)).toBe('2 1/4"');
   expect(formatPrecipitationIn(3.3125)).toBe('3 5/16"');
   expect(formatPrecipitationIn(0.0625)).toBe('1/16"');
+  expect(formatPrecipitationIn(0.3)).toBe('5/16"');
+  expect(formatPrecipitationIn(1.9997)).toBe('2"');
   expect(formatPrecipitationIn(Number.NaN)).toBe('');
 });
 
