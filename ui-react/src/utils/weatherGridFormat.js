@@ -48,14 +48,14 @@ function reduceSixteenths(numerator) {
   return [numerator, denominator];
 }
 
-/** Formats an already-converted inches value (the API returns US customary units) rounded to the nearest 1/16", e.g. "1 1/2"". */
+/** Formats an already-converted inches value (the API returns US customary units) rounded to the nearest 1/16", e.g. "1 1/2"". Negative values (an upstream data artifact) are treated as zero. */
 export function formatPrecipitationIn(inches) {
   const numeric = Number(inches);
   if (!Number.isFinite(numeric)) {
     return '';
   }
 
-  const sixteenths = Math.round(numeric * 16);
+  const sixteenths = Math.round(Math.max(0, numeric) * 16);
   const whole = Math.floor(sixteenths / 16);
   const remainder = sixteenths % 16;
 

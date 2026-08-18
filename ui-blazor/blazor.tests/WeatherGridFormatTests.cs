@@ -46,6 +46,16 @@ public sealed class WeatherGridFormatTests
     }
 
     [Fact]
+    public void FormatPrecipitationIn_TreatsNegativeAndNonFiniteValuesAsZeroOrEmpty()
+    {
+        Assert.Equal("0\"", WeatherGridFormat.FormatPrecipitationIn(-0.5));
+        Assert.Equal("0\"", WeatherGridFormat.FormatPrecipitationIn(-0.01));
+        Assert.Equal(string.Empty, WeatherGridFormat.FormatPrecipitationIn(double.NaN));
+        Assert.Equal(string.Empty, WeatherGridFormat.FormatPrecipitationIn(double.PositiveInfinity));
+        Assert.Equal(string.Empty, WeatherGridFormat.FormatPrecipitationIn(double.NegativeInfinity));
+    }
+
+    [Fact]
     public void FormatTemperatureF_RoundsToOneDecimal()
     {
         Assert.Equal("75.2 °F", WeatherGridFormat.FormatTemperatureF(75.2));

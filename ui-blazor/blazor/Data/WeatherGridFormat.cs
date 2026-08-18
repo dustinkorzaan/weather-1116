@@ -44,10 +44,15 @@ public static class WeatherGridFormat
         return dateTime.ToString(dateTime.Minute == 0 ? "h tt" : "h:mm tt", CultureInfo.InvariantCulture);
     }
 
-    /// <summary>Formats an already-converted inches value (the API returns US customary units) rounded to the nearest 1/16", e.g. "1 1/2"".</summary>
+    /// <summary>Formats an already-converted inches value (the API returns US customary units) rounded to the nearest 1/16", e.g. "1 1/2"". Negative values (an upstream data artifact) are treated as zero.</summary>
     public static string FormatPrecipitationIn(double inches)
     {
-        var sixteenths = (long)Math.Round(inches * 16, MidpointRounding.AwayFromZero);
+        if (double.IsNaN(inches) || double.IsInfinity(inches))
+        {
+            return string.Empty;
+        }
+
+        var sixteenths = (long)Math.Round(Math.Max(0, inches) * 16, MidpointRounding.AwayFromZero);
         var whole = sixteenths / 16;
         var remainder = sixteenths % 16;
 

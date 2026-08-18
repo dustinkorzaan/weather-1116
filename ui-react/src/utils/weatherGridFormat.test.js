@@ -25,3 +25,10 @@ test('formats an already-converted inches value rounded to the nearest 1/16"', (
   expect(formatPrecipitationIn(0.0625)).toBe('1/16"');
   expect(formatPrecipitationIn(Number.NaN)).toBe('');
 });
+
+test('treats negative and non-finite inches values as zero/empty', () => {
+  expect(formatPrecipitationIn(-0.5)).toBe('0"');
+  expect(formatPrecipitationIn(-0.01)).toBe('0"');
+  expect(formatPrecipitationIn(Number.POSITIVE_INFINITY)).toBe('');
+  expect(formatPrecipitationIn(Number.NEGATIVE_INFINITY)).toBe('');
+});
