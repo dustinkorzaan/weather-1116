@@ -26,6 +26,17 @@ public class GetCurrentAIWeatherHandlerTests
         Assert.Contains("Use U.S. customary units only: °F, mph, and \" (e.g. 72°F, 8 mph, 1\"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.", prompt);
     }
 
+    [Fact]
+    public void Handler_UsesInProcessToolLoopNotRemoteMcp()
+    {
+        var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherHandler.cs"));
+
+        Assert.Contains("ChatToolExecutor", source, StringComparison.Ordinal);
+        Assert.Contains("ChatToolDefinitions", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("CreateMcpTool", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("MCP_SRV_", source, StringComparison.Ordinal);
+    }
+
     private static string FindRepoFile(string relativePath)
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
