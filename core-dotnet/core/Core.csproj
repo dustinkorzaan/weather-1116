@@ -15,9 +15,15 @@
   <ItemGroup>
     <PackageReference Include="Hangfire.Core" Version="1.8.24" />
     <PackageReference Include="Azure.AI.Projects" Version="2.1.0-beta.4" />
+    <!-- Chat2a/Chat2b use ResponsesClient.AsAIAgent from Microsoft.Agents.AI.OpenAI 1.0.0,
+         which was compiled against Microsoft.Extensions.AI 10.4.0 and pulls
+         Microsoft.Extensions.AI.OpenAI 10.4.0. PR #223 bumped ME.AI to 10.9.0 alone;
+         NuGet then unified Abstractions to 10.9.0 while the OpenAI adapter stayed on
+         10.4.0, which broke Chat2a/Chat2b. Keep this train together until Agents.AI
+         and OpenAI move as a set (OpenAI 2.10+ needs ResponsesClientOptions). -->
     <PackageReference Include="Microsoft.Agents.AI" Version="1.0.0" />
     <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="10.9.0" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.0" />
     <!-- Hangfire.Core resolves Newtonsoft.Json 11.0.1, which carries a high severity
          advisory (GHSA-5crp-9r3c-p9vr). Pin the patched version for Core and its consumers. -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
