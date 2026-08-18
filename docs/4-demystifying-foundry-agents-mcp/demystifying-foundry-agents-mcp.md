@@ -134,7 +134,7 @@ Suggested order: **V1 → V2 → V3 → V4 →** `GetCurrentAIWeatherHandler` in
 
 - **V4 — Model-direct + remote MCP tools** — [`FoundryConsoleV4`](../../FoundryConsoleV4)
   (`FoundryConsoleV4MCP.csproj`)
-  - Same model-direct call as V3, but the tools are **remote MCP servers**
+  - Same model-direct call as V3, but the tools are hosted in remote MCP servers
     declared on the request instead of in-process callbacks.
   - Shows that MCP tooling does not require a Foundry agent.
   - Same pattern as production `GetCurrentAIWeatherHandler` in API/MVC.
