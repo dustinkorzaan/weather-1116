@@ -27,14 +27,15 @@ public class ConfirmNashvilleAIWeatherHandler : IRequestHandler<ConfirmNashville
         ConfirmNashvilleAIWeatherEvent request,
         CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(
-            new GetCurrentAIWeatherEvent { Location = Location },
-            cancellationToken);
+        var response = request.Version == 3
+            ? await _mediator.Send(new GetCurrentAIWeatherV3Event { Location = Location }, cancellationToken)
+            : await _mediator.Send(new GetCurrentAIWeatherV4Event { Location = Location }, cancellationToken);
 
         ConfirmResponse(response);
 
         _logger.LogInformation(
-            "Confirmed AI weather for {Location}: {Summary}",
+            "Confirmed AI weather V{Version} for {Location}: {Summary}",
+            request.Version,
             Location,
             response.FullSummary);
 

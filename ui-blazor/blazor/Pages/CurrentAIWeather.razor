@@ -115,7 +115,7 @@
         {
             var trimmed = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location.Trim();
             location = trimmed;
-            aiWeather = await WeatherClient.GetCurrentAIWeather(trimmed);
+            aiWeather = await WeatherClient.GetCurrentAIWeatherV3(trimmed);
             if (aiWeather is null)
             {
                 aiWeatherError = "Unable to load AI weather.";

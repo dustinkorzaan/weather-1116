@@ -16,9 +16,13 @@ export const weatherApi = createApi({
       query: () => '/About',
       transformResponse: (apiRoot) => buildUiReactRoot(apiRoot),
     }),
-    getCurrentAIWeather: builder.query({
+    getCurrentAIWeatherV3: builder.query({
       query: (location) =>
-        `/AIWeather/Current?location=${encodeURIComponent(location || 'Nashville, TN')}`,
+        `/AIWeather/CurrentV3?location=${encodeURIComponent(location || 'Nashville, TN')}`,
+    }),
+    getCurrentAIWeatherV4: builder.query({
+      query: (location) =>
+        `/AIWeather/CurrentV4?location=${encodeURIComponent(location || 'Nashville, TN')}`,
     }),
     searchLocation: builder.query({
       query: (location) => `/Geo?location=${encodeURIComponent(location || '')}`,
@@ -41,8 +45,10 @@ export const weatherApi = createApi({
 export const {
   useGetHelloQuery,
   useLazyGetAboutQuery,
-  useGetCurrentAIWeatherQuery,
-  useLazyGetCurrentAIWeatherQuery,
+  useGetCurrentAIWeatherV3Query,
+  useLazyGetCurrentAIWeatherV3Query,
+  useGetCurrentAIWeatherV4Query,
+  useLazyGetCurrentAIWeatherV4Query,
   useLazySearchLocationQuery,
   useLazyGetLocationQuery,
   useGetForecastQuery,

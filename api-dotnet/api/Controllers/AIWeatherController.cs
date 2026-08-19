@@ -16,13 +16,28 @@ public class AIWeatherController : ControllerBase
 		_mediator = mediator;
 	}
 
-	[HttpGet("Current")]
-	public async Task<ActionResult<AIWeatherResponse>> GetCurrent(
+	[HttpGet("CurrentV3")]
+	public async Task<ActionResult<AIWeatherResponse>> GetCurrentV3(
 		[FromQuery] string? location,
 		CancellationToken cancellationToken)
 	{
 		var response = await _mediator.Send(
-			new GetCurrentAIWeatherEvent
+			new GetCurrentAIWeatherV3Event
+			{
+				Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
+			},
+			cancellationToken);
+
+		return Ok(response);
+	}
+
+	[HttpGet("CurrentV4")]
+	public async Task<ActionResult<AIWeatherResponse>> GetCurrentV4(
+		[FromQuery] string? location,
+		CancellationToken cancellationToken)
+	{
+		var response = await _mediator.Send(
+			new GetCurrentAIWeatherV4Event
 			{
 				Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
 			},

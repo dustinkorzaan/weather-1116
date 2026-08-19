@@ -14,7 +14,8 @@ public static class ChatServiceCollectionExtensions
     {
         services.AddSingleton<IChatSessionStore, InMemoryChatSessionStore>();
         services.AddSingleton<ChatFoundrySettings>();
-        services.AddSingleton<ChatMcpToolFactory>();
+        // ChatMcpToolFactory is registered by AddStandardCoreServices (Core needs it for
+        // GetCurrentAIWeatherV4Handler in every host, not just chat-client hosts).
         services.AddSingleton<ChatHostedMcpToolFactory>();
         services.AddSingleton<ChatAgentSessionStore>();
         services.AddSingleton<ChatHostedAgentResponseStore>();

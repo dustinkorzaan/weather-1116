@@ -1,4 +1,5 @@
 using Core.Caching;
+using Core.Chat.Services;
 using Core.HelloWorld.Handlers;
 using Core.Http;
 using Core.Tools;
@@ -17,6 +18,10 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<CacheHelper>();
         services.AddSingleton<TransientRetryHelper>();
         services.AddScoped<WeatherToolExecutor>();
+        // GetCurrentAIWeatherV4Handler (registered above via MediatR assembly scanning) needs
+        // this remote-MCP tool factory in every host that includes Core, not just the ones
+        // that also call AddWeatherChatClients().
+        services.AddSingleton<ChatMcpToolFactory>();
         return services;
     }
 }

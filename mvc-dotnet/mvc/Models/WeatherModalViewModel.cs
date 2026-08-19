@@ -30,7 +30,7 @@ public class WeatherModalViewModel
 
     public required string Title { get; init; }
 
-    /// <summary>The location string passed to GetCurrentAIWeather, e.g. "Nashville, TN (36.1627&#176; N, 86.7816&#176; W)".</summary>
+    /// <summary>The location string passed to GetCurrentAIWeatherV4, e.g. "Nashville, TN (36.1627&#176; N, 86.7816&#176; W)".</summary>
     public required string LocationQuery { get; init; }
 
     public static WeatherModalViewModel Create(string? name, double? lat, double? lng, string? tab)
