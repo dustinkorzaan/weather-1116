@@ -15,20 +15,18 @@ namespace Core.AIWeather.Handlers;
 
 /// <summary>
 /// Calls a hosted Microsoft Foundry Agent for current weather (same pattern as Foundry
-/// Console V5 / Chat3). Instructions, response schema, and MCP tools are configured on the
-/// agent itself (named by <c>AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME</c>) - this handler sends
-/// only the user prompt, so there is no local schema or tool wiring. Hosted MCP tools may
-/// still emit approval requests; this handler auto-approves them (same fallback as Chat3)
-/// and continues until the agent returns JSON.
-/// Unlike V3/V4, this handler cannot strip <c>runLogDetails</c> from the schema the model
-/// sees (there is no local schema to edit): the agent's own response schema must already
-/// match <see cref="AIWeatherResponse"/>'s camelCase fields and must not require
-/// <c>runLogDetails</c>, or deserialization can succeed with empty weather fields.
+/// Console V5). Instructions, response schema, and MCP tools are configured on the agent
+/// itself (named by <c>AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME</c>) - this handler sends only the
+/// user prompt, so there is no local schema, tool wiring, approval loop, or tool-call loop.
+/// Each MCP tool on the agent must use <c>require_approval: never</c>; V5 will not round-trip
+/// approvals (unlike Chat3). Unlike V3/V4, this handler cannot strip <c>runLogDetails</c> from
+/// the schema the model sees (there is no local schema to edit): the agent's own response
+/// schema must already match <see cref="AIWeatherResponse"/>'s camelCase fields and must not
+/// require <c>runLogDetails</c>, or deserialization can succeed with empty weather fields.
 /// </summary>
 public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV5Event, AIWeatherResponse>
 {
     private static readonly string DefaultLocation = "Nashville, TN";
-    private const int MaxApprovalTurns = 32;
 
     private readonly ILogger<GetCurrentAIWeatherV5Handler> _logger;
 
@@ -75,81 +73,33 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
 
         var userPrompt = $"What is the current weather in: `{location}`?";
 
-        // Hosted MCP tools often require approval (Chat3 has the same fallback). Without this
-        // loop, CreateResponseAsync returns as soon as the agent asks to call a tool instead of
-        // after weather JSON is produced. StoredOutputEnabled is required so PreviousResponseId
-        // can continue the approval round-trip.
-        var pendingApprovals = new List<McpToolCallApprovalRequestItem>();
-        string? previousResponseId = null;
-        var sendUserMessage = true;
-        ResponseResult? response = null;
-
-        while (true)
+        CreateResponseOptions options = new()
         {
-            if (toolLoopTurns >= MaxApprovalTurns)
+            InputItems =
             {
-                LogRunLogOnFailure("MCP approval loop exceeded max turns");
-                throw new InvalidOperationException(
-                    $"Hosted agent MCP approval loop exceeded {MaxApprovalTurns} turns.");
-            }
+                ResponseItem.CreateUserMessageItem(userPrompt),
+            },
+        };
 
-            CreateResponseOptions options = new()
-            {
-                StoredOutputEnabled = true,
-            };
+        // The hosted agent supplies instructions, response schema, and MCP tools itself, so a
+        // single call is enough - like V4, there is no local tool-call loop to drive here.
+        runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
+        ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
+        runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
 
-            if (!string.IsNullOrWhiteSpace(previousResponseId))
-            {
-                options.PreviousResponseId = previousResponseId;
-            }
-
-            if (sendUserMessage)
-            {
-                options.InputItems.Add(ResponseItem.CreateUserMessageItem(userPrompt));
-                sendUserMessage = false;
-            }
-            else
-            {
-                foreach (var approvalRequest in pendingApprovals)
-                {
-                    options.InputItems.Add(ResponseItem.CreateMcpApprovalResponseItem(
-                        approvalRequestId: approvalRequest.Id,
-                        approved: true));
-                }
-
-                pendingApprovals.Clear();
-            }
-
-            runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
-            response = await client.CreateResponseAsync(options, cancellationToken);
-            runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
-
-            if (!string.IsNullOrWhiteSpace(response.Id))
-            {
-                previousResponseId = response.Id;
-            }
-
-            foreach (ResponseItem item in response.OutputItems)
-            {
-                if (item is McpToolCallApprovalRequestItem approvalRequest)
-                {
-                    _logger.LogInformation(
-                        "V5 auto-approving MCP tool {ToolName} on {ServerLabel}",
-                        approvalRequest.ToolName,
-                        approvalRequest.ServerLabel);
-                    pendingApprovals.Add(approvalRequest);
-                }
-            }
-
-            if (pendingApprovals.Count == 0)
-            {
-                break;
-            }
-
-            toolLoopTurns++;
+        var approvalRequests = response.OutputItems.OfType<McpToolCallApprovalRequestItem>().ToList();
+        if (approvalRequests.Count > 0)
+        {
+            LogRunLogOnFailure("hosted agent requested MCP tool approval");
+            var tools = string.Join(", ", approvalRequests.Select(item => $"{item.ServerLabel}/{item.ToolName}"));
+            throw new InvalidOperationException(
+                $"Hosted agent '{agentName}' requested MCP tool approval ({tools}). " +
+                "V5 sends only the user prompt and does not round-trip approvals. " +
+                "On the agent, set each MCP tool to require_approval: never " +
+                "(Foundry portal: Agents → this agent → Tools → MCP → Approval = Never), then publish a new version.");
         }
 
-        if (response!.Status != ResponseStatus.Completed)
+        if (response.Status != ResponseStatus.Completed)
         {
             LogRunLogOnFailure("model response did not complete");
             throw new InvalidOperationException(

@@ -8,7 +8,6 @@ using OpenAI.Responses;
 using System;
 using System.ClientModel;
 using System.ClientModel.Primitives;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -52,7 +51,6 @@ internal class Program
 		Console.WriteLine("- Instructions");
 		Console.WriteLine("- Response schema");
 		Console.WriteLine("- MCP tools (lat/long + current weather)");
-		Console.WriteLine("- This console auto-approves MCP tool calls (same fallback as Chat3)");
 		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
 
 		ProjectOpenAIClient projectOpenAIClient = new(
@@ -64,81 +62,53 @@ internal class Program
 
 		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
+		CreateResponseOptions options = new()
+		{
+			InputItems =
+			{
+				ResponseItem.CreateUserMessageItem(userPrompt),
+			},
+		};
+
 		try
 		{
-			var pendingApprovals = new List<McpToolCallApprovalRequestItem>();
-			string? previousResponseId = null;
-			var sendUserMessage = true;
-			ResponseResult? response = null;
+			ResponseResult response = await responseClient.CreateResponseAsync(options);
 
-			while (true)
+			var requestedApproval = false;
+			foreach (ResponseItem item in response.OutputItems)
 			{
-				CreateResponseOptions options = new()
+				if (item is McpToolCallApprovalRequestItem)
 				{
-					StoredOutputEnabled = true,
-				};
-
-				if (!string.IsNullOrWhiteSpace(previousResponseId))
-				{
-					options.PreviousResponseId = previousResponseId;
-				}
-
-				if (sendUserMessage)
-				{
-					options.InputItems.Add(ResponseItem.CreateUserMessageItem(userPrompt));
-					sendUserMessage = false;
-				}
-				else
-				{
-					foreach (var approvalRequest in pendingApprovals)
-					{
-						options.InputItems.Add(ResponseItem.CreateMcpApprovalResponseItem(
-							approvalRequestId: approvalRequest.Id,
-							approved: true));
-					}
-
-					pendingApprovals.Clear();
-				}
-
-				response = await responseClient.CreateResponseAsync(options);
-
-				if (!string.IsNullOrWhiteSpace(response.Id))
-				{
-					previousResponseId = response.Id;
-				}
-
-				foreach (ResponseItem item in response.OutputItems)
-				{
-					if (item is McpToolCallApprovalRequestItem approvalRequest)
-					{
-						Console.WriteLine($"Auto-approving MCP tool {approvalRequest.ToolName} on {approvalRequest.ServerLabel}");
-						pendingApprovals.Add(approvalRequest);
-					}
-				}
-
-				if (pendingApprovals.Count == 0)
-				{
+					requestedApproval = true;
 					break;
 				}
 			}
 
-			var content = response!.GetOutputText();
-			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
-
-			if (aiWeather is null)
+			if (requestedApproval)
 			{
-				Console.WriteLine("Received empty or invalid JSON response.");
-				Console.WriteLine("Raw output:");
-				Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty)" : content);
+				Console.WriteLine("The agent requested MCP tool approval. V5 does not round-trip approvals.");
+				Console.WriteLine("Set each MCP tool on the agent to require_approval: never (Foundry portal: Agents → this agent → Tools → MCP → Approval = Never), then publish a new version.");
 			}
 			else
 			{
-				aiWeather.WindDirectionSourceDegrees =
-					WeatherUnitConversion.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees);
-				aiWeather.WindDirectionSource =
-					WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionSourceDegrees);
-				Console.WriteLine("\nResponse:");
-				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
+				var content = response.GetOutputText();
+				var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
+
+				if (aiWeather is null)
+				{
+					Console.WriteLine("Received empty or invalid JSON response.");
+					Console.WriteLine("Raw output:");
+					Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty)" : content);
+				}
+				else
+				{
+					aiWeather.WindDirectionSourceDegrees =
+						WeatherUnitConversion.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees);
+					aiWeather.WindDirectionSource =
+						WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionSourceDegrees);
+					Console.WriteLine("\nResponse:");
+					Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
+				}
 			}
 		}
 		catch (Exception ex)

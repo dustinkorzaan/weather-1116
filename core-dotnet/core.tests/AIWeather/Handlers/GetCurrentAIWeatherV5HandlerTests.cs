@@ -3,7 +3,7 @@ namespace Core.Tests.AIWeather.Handlers;
 public class GetCurrentAIWeatherV5HandlerTests
 {
     [Fact]
-    public void Handler_CallsHostedAgentWithUserPromptOnlyAndAutoApprovesMcpTools()
+    public void Handler_CallsHostedAgentWithUserPromptOnlyAndNoLocalToolLoop()
     {
         var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));
 
@@ -11,14 +11,14 @@ public class GetCurrentAIWeatherV5HandlerTests
         Assert.Contains("GetProjectResponsesClientForAgent", source, StringComparison.Ordinal);
         Assert.Contains("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME", source, StringComparison.Ordinal);
         Assert.Contains("AIWeatherResponse", source, StringComparison.Ordinal);
-        Assert.Contains("McpToolCallApprovalRequestItem", source, StringComparison.Ordinal);
-        Assert.Contains("CreateMcpApprovalResponseItem", source, StringComparison.Ordinal);
-        Assert.Contains("StoredOutputEnabled = true", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ChatMcpToolFactory", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolExecutor", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolDefinitions", source, StringComparison.Ordinal);
         Assert.DoesNotContain("MaxToolLoopTurns", source, StringComparison.Ordinal);
         Assert.DoesNotContain("do\n        {", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("CreateMcpApprovalResponseItem", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("StoredOutputEnabled", source, StringComparison.Ordinal);
+        Assert.Contains("require_approval: never", source, StringComparison.Ordinal);
         // Instructions, response schema, and MCP tools live on the hosted agent - this handler
         // has no local schema to build, unlike V3/V4.
         Assert.DoesNotContain("BuildAIOutputSchema", source, StringComparison.Ordinal);

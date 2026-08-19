@@ -92,9 +92,7 @@ All three UIs expose **Current AI Weather**, in three versions:
 - **V5** (`GetCurrentAIWeatherV5Handler`), which calls a hosted Foundry agent
   (`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`) that owns its own instructions,
   response schema, and MCP tools - this handler sends only the user prompt,
-  matching the Foundry Console V5 / Chat3 pattern. If the hosted MCP tools
-  request approval, the handler auto-approves (same fallback as Chat3) and
-  continues until the agent returns JSON.
+  matching the Foundry Console V5 pattern.
 
 **`/current-ai-weather`** exposes all three as tabs (V3/V4/V5). The
 **`/weather`** modal's "current" tab uses **V4** only.
@@ -434,7 +432,7 @@ V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
 | **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` |
 | **V4** | Model-direct: tools handled by remote MCP servers - used by the Chat1b/Chat2b remote-MCP chat tabs, and the production pattern in `GetCurrentAIWeatherV4Handler` (used by `/weather` and the V4 tab on `/current-ai-weather`) |
-| **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`) sends only the user prompt and auto-approves MCP tool calls (same fallback as Chat3) |
+| **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`) sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
 `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `Program.cs` and `.env.example`).
@@ -455,7 +453,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes (V3/V4) | Hosted model deployment name (e.g. `gpt-5.4-mini`); not used by V5, which sends only the user prompt |
 | `MCP_SRV_FUNC_APP_URL` / `MCP_SRV_FUNC_APP_KEY` | V4 only | `McpSrvFuncApp` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_APP_SERVICE_URL` / `MCP_SRV_APP_SERVICE_KEY` | V4 only | `McpSrvAppService` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
-| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-default`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. |
+| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-default`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
 
 `GetCurrentAIWeatherV3Handler` runs tools in-process and does not need
 `MCP_SRV_*`. `GetCurrentAIWeatherV4Handler` (used by `/weather` and the V4 tab
@@ -465,6 +463,22 @@ on `/current-ai-weather`) needs the same `MCP_SRV_FUNC_APP_*`/
 The confirm-nashville-ai-weather-v4 worker recurring job needs them too.
 `GetCurrentAIWeatherV5Handler` needs `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`
 instead - the agent owns tool resolution, so no `MCP_SRV_*` variables apply.
+
+**V5 agent: MCP approval must be Never.** V5 is a one-shot handoff: the app
+sends only the user prompt. The hosted agent (`wx1116-agent-default`) must run
+MCP tools without asking this app to approve.
+
+1. Open the Microsoft Foundry portal for the same project as
+   `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
+2. **Agents** → `wx1116-agent-default` (or `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
+3. For each MCP server (`McpSrvFuncApp`, `McpSrvAppService`): set **Approval**
+   to **Never** (`require_approval: never`).
+4. Create / publish a version. V5 calls the agent **by name** (project default
+   version).
+
+Same MCP JSON shape as Chat3 (`require_approval: never` on each server). Chat3
+still auto-approves in app code if a request appears; V5 does not, because that
+round-trip would break the V5 teaching point.
 
 Suggested reading order: V1 → V2 → V3 → `GetCurrentAIWeatherV3Handler` in
 `core-dotnet/core/AIWeather` (the production V3-pattern handler) → V4 →
