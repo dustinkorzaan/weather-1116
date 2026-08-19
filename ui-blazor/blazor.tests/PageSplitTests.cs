@@ -247,6 +247,13 @@ public sealed class PageSplitTests
         Assert.Contains("scheduleHide", chatInput);
         Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", chatInput);
 
+        // The hover card must follow the chat window into (and back out of)
+        // native fullscreen, including WebKit's prefixed API, or it renders
+        // invisible outside the fullscreen top layer.
+        Assert.Contains("document.webkitFullscreenElement", chatInput);
+        Assert.Contains("document.addEventListener('fullscreenchange', onFullscreenChange)", chatInput);
+        Assert.Contains("document.addEventListener('webkitfullscreenchange', onFullscreenChange)", chatInput);
+
         var fullscreen = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatFullscreen.js"));
         Assert.Contains("data-chat-fullscreen-button", fullscreen);
         Assert.Contains("requestFullscreen", fullscreen);

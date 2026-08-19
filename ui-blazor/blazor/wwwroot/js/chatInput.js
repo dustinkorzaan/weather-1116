@@ -141,6 +141,7 @@ window.chatToolHover = (function () {
   var wrap = null;
   var card = null;
   var hideTimer = null;
+  var lastAnchor = null;
 
   function cancelHide() {
     if (hideTimer !== null) {
@@ -161,35 +162,42 @@ window.chatToolHover = (function () {
     hideTimer = window.setTimeout(hide, TOOL_HOVER_CLOSE_DELAY_MS);
   }
 
-  function ensureCard() {
-    if (card) {
-      return card;
-    }
-
-    wrap = document.createElement('div');
-    wrap.className = 'chat-tool-hover-wrap';
-    wrap.hidden = true;
-    wrap.addEventListener('mouseenter', cancelHide);
-    wrap.addEventListener('mouseleave', scheduleHide);
-
-    card = document.createElement('pre');
-    card.className = 'chat-tool-hover-card';
-    card.setAttribute('role', 'tooltip');
-    wrap.appendChild(card);
-    document.body.appendChild(wrap);
-    return card;
+  function fullscreenTarget() {
+    return document.fullscreenElement || document.webkitFullscreenElement || document.body;
   }
 
-  function show(anchor) {
-    var text = anchor && anchor.getAttribute('data-tool-details');
-    if (!text) {
+  // A native-fullscreen chat window only paints its own subtree, so the
+  // hover card must live inside it (not document.body) while active.
+  function reparent() {
+    if (!wrap) {
       return;
     }
 
-    cancelHide();
-    var el = ensureCard();
-    el.textContent = text;
-    wrap.hidden = false;
+    var container = fullscreenTarget();
+    if (wrap.parentNode !== container) {
+      container.appendChild(wrap);
+    }
+  }
+
+  function ensureCard() {
+    if (!card) {
+      wrap = document.createElement('div');
+      wrap.className = 'chat-tool-hover-wrap';
+      wrap.hidden = true;
+      wrap.addEventListener('mouseenter', cancelHide);
+      wrap.addEventListener('mouseleave', scheduleHide);
+
+      card = document.createElement('pre');
+      card.className = 'chat-tool-hover-card';
+      card.setAttribute('role', 'tooltip');
+      wrap.appendChild(card);
+    }
+
+    reparent();
+    return card;
+  }
+
+  function position(anchor) {
     wrap.classList.remove('is-above');
     wrap.style.top = '';
     wrap.style.bottom = '';
@@ -210,6 +218,30 @@ window.chatToolHover = (function () {
     }
     if (wrapRect.left < 8) {
       wrap.style.left = (8 + (wrapRect.width / 2)) + 'px';
+    }
+  }
+
+  function show(anchor) {
+    var text = anchor && anchor.getAttribute('data-tool-details');
+    if (!text) {
+      return;
+    }
+
+    cancelHide();
+    var el = ensureCard();
+    el.textContent = text;
+    wrap.hidden = false;
+    lastAnchor = anchor;
+    position(anchor);
+  }
+
+  // Fires while the card is open (nothing else would move it) and while
+  // it's hidden (so a stale reparented node doesn't linger in the former
+  // fullscreen element after exiting).
+  function onFullscreenChange() {
+    reparent();
+    if (wrap && !wrap.hidden && lastAnchor) {
+      position(lastAnchor);
     }
   }
 
@@ -260,6 +292,8 @@ window.chatToolHover = (function () {
       }
       hide();
     }, true);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
   }
 
   if (document.readyState === 'loading') {

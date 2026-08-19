@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-function nativeFullscreenElement() {
+export function nativeFullscreenElement() {
   return document.fullscreenElement || document.webkitFullscreenElement || null;
 }
 

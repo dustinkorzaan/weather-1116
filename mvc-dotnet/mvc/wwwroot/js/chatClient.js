@@ -225,6 +225,7 @@
   let toolHoverWrap = null;
   let toolHoverCard = null;
   let toolHoverHideTimer = null;
+  let toolHoverLastAnchor = null;
 
   function cancelToolHoverHide() {
     if (toolHoverHideTimer !== null) {
@@ -255,36 +256,43 @@
     return !!(related.closest && related.closest('[data-tool-details]'));
   }
 
-  function ensureToolHoverCard() {
-    if (toolHoverCard) {
-      return toolHoverCard;
-    }
-
-    toolHoverWrap = document.createElement('div');
-    toolHoverWrap.id = 'chat-tool-hover-card';
-    toolHoverWrap.className = 'chat-tool-hover-wrap';
-    toolHoverWrap.hidden = true;
-    toolHoverWrap.addEventListener('mouseenter', cancelToolHoverHide);
-    toolHoverWrap.addEventListener('mouseleave', scheduleToolHoverHide);
-
-    toolHoverCard = document.createElement('pre');
-    toolHoverCard.className = 'chat-tool-hover-card';
-    toolHoverCard.setAttribute('role', 'tooltip');
-    toolHoverWrap.appendChild(toolHoverCard);
-    document.body.appendChild(toolHoverWrap);
-    return toolHoverCard;
+  function toolHoverFullscreenTarget() {
+    return document.fullscreenElement || document.webkitFullscreenElement || document.body;
   }
 
-  function showToolHover(anchor) {
-    const text = anchor && anchor.getAttribute('data-tool-details');
-    if (!text) {
+  // A native-fullscreen chat window only paints its own subtree, so the
+  // hover card must live inside it (not document.body) while active.
+  function reparentToolHover() {
+    if (!toolHoverWrap) {
       return;
     }
 
-    cancelToolHoverHide();
-    const card = ensureToolHoverCard();
-    card.textContent = text;
-    toolHoverWrap.hidden = false;
+    const container = toolHoverFullscreenTarget();
+    if (toolHoverWrap.parentNode !== container) {
+      container.appendChild(toolHoverWrap);
+    }
+  }
+
+  function ensureToolHoverCard() {
+    if (!toolHoverCard) {
+      toolHoverWrap = document.createElement('div');
+      toolHoverWrap.id = 'chat-tool-hover-card';
+      toolHoverWrap.className = 'chat-tool-hover-wrap';
+      toolHoverWrap.hidden = true;
+      toolHoverWrap.addEventListener('mouseenter', cancelToolHoverHide);
+      toolHoverWrap.addEventListener('mouseleave', scheduleToolHoverHide);
+
+      toolHoverCard = document.createElement('pre');
+      toolHoverCard.className = 'chat-tool-hover-card';
+      toolHoverCard.setAttribute('role', 'tooltip');
+      toolHoverWrap.appendChild(toolHoverCard);
+    }
+
+    reparentToolHover();
+    return toolHoverCard;
+  }
+
+  function positionToolHover(anchor) {
     toolHoverWrap.classList.remove('is-above');
     toolHoverWrap.style.top = '';
     toolHoverWrap.style.bottom = '';
@@ -307,6 +315,33 @@
       toolHoverWrap.style.left = `${8 + (wrapRect.width / 2)}px`;
     }
   }
+
+  function showToolHover(anchor) {
+    const text = anchor && anchor.getAttribute('data-tool-details');
+    if (!text) {
+      return;
+    }
+
+    cancelToolHoverHide();
+    const card = ensureToolHoverCard();
+    card.textContent = text;
+    toolHoverWrap.hidden = false;
+    toolHoverLastAnchor = anchor;
+    positionToolHover(anchor);
+  }
+
+  // Fires while the card is open (nothing else would move it) and while
+  // it's hidden (so a stale reparented node doesn't linger in the former
+  // fullscreen element after exiting).
+  function onToolHoverFullscreenChange() {
+    reparentToolHover();
+    if (toolHoverWrap && !toolHoverWrap.hidden && toolHoverLastAnchor) {
+      positionToolHover(toolHoverLastAnchor);
+    }
+  }
+
+  document.addEventListener('fullscreenchange', onToolHoverFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', onToolHoverFullscreenChange);
 
   messagesEl.addEventListener('mouseover', (event) => {
     const chip = event.target.closest('[data-tool-details]');

@@ -7,7 +7,34 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
 import { formatToolHoverText, TOOL_HOVER_CLOSE_DELAY_MS } from '../../utils/chatToolHover';
 import { streamChatMessage } from '../../utils/chatStream';
-import { useChatFullscreen } from './useChatFullscreen';
+import { nativeFullscreenElement, useChatFullscreen } from './useChatFullscreen';
+
+// Tracks the element the tooltip portal should mount into: the current
+// native-fullscreen element (which only paints its own subtree) or
+// document.body otherwise. Recomputed on fullscreenchange so a tooltip
+// that is already open gets reparented immediately, not just on next hover.
+function usePortalContainer() {
+  const [container, setContainer] = useState(() => nativeFullscreenElement() || document.body);
+
+  // useLayoutEffect (not useEffect) so the reparent + reposition happen
+  // before paint, matching the synchronous reparent in the Blazor/MVC
+  // fullscreenchange listeners and avoiding a frame where the tooltip
+  // renders detached from the (now-hidden) fullscreen subtree.
+  useLayoutEffect(() => {
+    function onChange() {
+      setContainer(nativeFullscreenElement() || document.body);
+    }
+
+    document.addEventListener('fullscreenchange', onChange);
+    document.addEventListener('webkitfullscreenchange', onChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      document.removeEventListener('webkitfullscreenchange', onChange);
+    };
+  }, []);
+
+  return container;
+}
 
 const TAB_CONFIG = [
   {
@@ -67,7 +94,7 @@ function scrollElementToBottom(element) {
   element.scrollTop = element.scrollHeight;
 }
 
-function ToolChip({ content, details }) {
+function ToolChip({ content, details, portalContainer }) {
   const chipRef = useRef(null);
   const tooltipRef = useRef(null);
   const hideTimerRef = useRef(null);
@@ -112,6 +139,9 @@ function ToolChip({ content, details }) {
       return undefined;
     }
 
+    // Entering/exiting fullscreen reflows the chat window (and moves the
+    // chip), and reparents this tooltip via portalContainer, so both must
+    // trigger a fresh measurement — not just scroll/resize.
     updatePosition();
     const onReposition = (event) => {
       if (tooltipRef.current && event.target && tooltipRef.current.contains(event.target)) {
@@ -125,7 +155,7 @@ function ToolChip({ content, details }) {
       window.removeEventListener('scroll', onReposition, true);
       window.removeEventListener('resize', onReposition);
     };
-  }, [open, details]);
+  }, [open, details, portalContainer]);
 
   return (
     <div
@@ -153,7 +183,7 @@ function ToolChip({ content, details }) {
                 {details}
               </pre>
             </div>,
-            document.body,
+            portalContainer,
           )
         : null}
     </div>
@@ -182,6 +212,7 @@ function ChatPanel() {
   const messagesRef = useRef(null);
   const windowRef = useRef(null);
   const { isFullscreen, isCssFullscreen, toggle: toggleFullscreen } = useChatFullscreen(windowRef);
+  const portalContainer = usePortalContainer();
   const activeTabRef = useRef(activeTab);
   activeTabRef.current = activeTab;
 
@@ -395,6 +426,7 @@ function ChatPanel() {
                     key={`${activeTab}-${index}`}
                     content={entry.content}
                     details={formatToolHoverText(entry)}
+                    portalContainer={portalContainer}
                   />
                 ) : (
                   <div key={`${activeTab}-${index}`} className={messageClasses(entry)}>
