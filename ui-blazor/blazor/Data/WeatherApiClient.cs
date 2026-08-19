@@ -14,8 +14,8 @@ public class AIWeatherResponse
     public string FullSummary { get; set; } = string.Empty;
     public double TemperatureF { get; set; }
     public double WindSpeedMPH { get; set; }
-    public string WindDirection { get; set; } = string.Empty;
-    public int WindDirectionDegrees { get; set; }
+    public string WindDirectionSource { get; set; } = string.Empty;
+    public int WindDirectionSourceDegrees { get; set; }
     public string Conditions { get; set; } = string.Empty;
     public double Latitude { get; set; }
     public double Longitude { get; set; }
@@ -106,8 +106,11 @@ public class UIWeatherHourlySeries
     [JsonPropertyName("windSpeedMPH")]
     public List<double> WindSpeedMPH { get; set; } = [];
 
-    [JsonPropertyName("windDirectionDegrees")]
-    public List<int> WindDirectionDegrees { get; set; } = [];
+    [JsonPropertyName("windDirectionSourceDegrees")]
+    public List<int> WindDirectionSourceDegrees { get; set; } = [];
+
+    [JsonPropertyName("windDirectionSource")]
+    public List<string> WindDirectionSource { get; set; } = [];
 }
 
 /// <summary>Shared shape for the forecast/history "daily" series, in US customary units.</summary>
@@ -131,8 +134,11 @@ public class UIWeatherDailySeries
     [JsonPropertyName("windSpeedMPH")]
     public List<double> WindSpeedMPH { get; set; } = [];
 
-    [JsonPropertyName("windDirectionDegrees")]
-    public List<int> WindDirectionDegrees { get; set; } = [];
+    [JsonPropertyName("windDirectionSourceDegrees")]
+    public List<int> WindDirectionSourceDegrees { get; set; } = [];
+
+    [JsonPropertyName("windDirectionSource")]
+    public List<string> WindDirectionSource { get; set; } = [];
 }
 
 public class WeatherApiClient

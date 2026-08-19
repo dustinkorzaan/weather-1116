@@ -57,7 +57,7 @@ public sealed class WeatherModalTests
             Assert.Contains("5/16\"", rendered.Markup);
             Assert.Contains("SW (224°)", rendered.Markup);
             Assert.Contains("wind-direction-arrow", rendered.Markup);
-            Assert.Contains("rotate(134deg)", rendered.Markup);
+            Assert.Contains("rotate(224deg)", rendered.Markup);
             Assert.True(
                 rendered.Markup.IndexOf("Wed, Aug 19", StringComparison.Ordinal)
                     < rendered.Markup.IndexOf("Thu, Aug 20", StringComparison.Ordinal),
@@ -194,8 +194,8 @@ public sealed class WeatherModalTests
                         FullSummary = "**Sunny** in Nashville.",
                         TemperatureF = 72,
                         WindSpeedMPH = 5,
-                        WindDirection = "S",
-                        WindDirectionDegrees = 180,
+                        WindDirectionSource = "S",
+                        WindDirectionSourceDegrees = 180,
                         Conditions = "Clear",
                         Latitude = 36.1659,
                         Longitude = -86.7844,
@@ -220,7 +220,8 @@ public sealed class WeatherModalTests
                             TemperatureLowF = [70.1, 71.0],
                             PrecipitationInch = [0.3, 0.0],
                             WindSpeedMPH = [12.3, 10.0],
-                            WindDirectionDegrees = [224, 90],
+                            WindDirectionSourceDegrees = [224, 90],
+                            WindDirectionSource = ["SW", "E"],
                         },
                         Hourly = new UIWeatherHourlySeries
                         {
@@ -229,7 +230,8 @@ public sealed class WeatherModalTests
                             PrecipitationInch = [0.0],
                             WeatherCode = [1],
                             WindSpeedMPH = [8.2],
-                            WindDirectionDegrees = [180],
+                            WindDirectionSourceDegrees = [180],
+                            WindDirectionSource = ["S"],
                         },
                         Minutely15 = new UIWeatherHourlySeries
                         {
@@ -238,7 +240,8 @@ public sealed class WeatherModalTests
                             PrecipitationInch = [0.0],
                             WeatherCode = [1],
                             WindSpeedMPH = [8.5],
-                            WindDirectionDegrees = [190],
+                            WindDirectionSourceDegrees = [190],
+                            WindDirectionSource = ["S"],
                         },
                     }),
                 };
@@ -261,7 +264,8 @@ public sealed class WeatherModalTests
                             TemperatureLowF = [70.1, 71.0],
                             PrecipitationInch = [0.3, 0.0],
                             WindSpeedMPH = [12.3, 10.0],
-                            WindDirectionDegrees = [224, 90],
+                            WindDirectionSourceDegrees = [224, 90],
+                            WindDirectionSource = ["SW", "E"],
                         },
                         Hourly = new UIWeatherHourlySeries
                         {
@@ -270,7 +274,8 @@ public sealed class WeatherModalTests
                             PrecipitationInch = [0.0, 0.0],
                             WeatherCode = [1, 1],
                             WindSpeedMPH = [8.2, 7.0],
-                            WindDirectionDegrees = [180, 170],
+                            WindDirectionSourceDegrees = [180, 170],
+                            WindDirectionSource = ["S", "S"],
                         },
                     }),
                 };

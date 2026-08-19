@@ -5,10 +5,11 @@ namespace Core.Weather;
 /// <summary>
 /// Maps Open-Meteo's metric public weather responses (°C, km/h, mm) into the UI-facing
 /// responses (°F, mph, in) so the UI only formats values instead of converting them.
+/// Wind direction is normalized to 0–360° source degrees (Open-Meteo convention).
 /// </summary>
 public static class WeatherResponseMapper
 {
-    public static UIWeatherForecastResponse ToUIForecastResponse(PublicWeatherForecastResponse source) => new()
+    public static UIWeatherForecastResponse ToUIForecastResponse(NonAIForecastWeatherResponse source) => new()
     {
         Latitude = source.Latitude,
         Longitude = source.Longitude,
@@ -18,7 +19,7 @@ public static class WeatherResponseMapper
         Minutely15 = ToHourlySeries(source.Minutely15),
     };
 
-    public static UIWeatherHistoryResponse ToUIHistoryResponse(PublicWeatherHistoryResponse source) => new()
+    public static UIWeatherHistoryResponse ToUIHistoryResponse(NonAIHistoryWeatherResponse source) => new()
     {
         Latitude = source.Latitude,
         Longitude = source.Longitude,
@@ -27,95 +28,110 @@ public static class WeatherResponseMapper
         Daily = ToDailySeries(source.Daily),
     };
 
-    private static UIWeatherHourlySeries? ToHourlySeries(PublicWeatherForecastHourly? source)
+    private static UIWeatherHourlySeries? ToHourlySeries(NonAIForecastWeatherHourly? source)
     {
         if (source is null)
         {
             return null;
         }
+
+        var windDirectionSourceDegrees = source.WindDirectionSource10m.ConvertAll(WeatherUnitConversion.NormalizeSourceDegrees);
 
         return new UIWeatherHourlySeries
         {
             Time = [.. source.Time],
-            TemperatureF = source.Temperature2m.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
-            PrecipitationInch = source.Precipitation.ConvertAll(WeatherUnitConversion.MillimetersToInches),
+            TemperatureF = source.Temperature2mC.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
+            PrecipitationInch = source.PrecipitationMm.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WeatherCode = [.. source.WeatherCode],
-            WindSpeedMPH = source.WindSpeed10m.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = [.. source.WindDirection10m],
+            WindSpeedMPH = source.WindSpeed10mKmh.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
+            WindDirectionSourceDegrees = windDirectionSourceDegrees,
+            WindDirectionSource = windDirectionSourceDegrees.ConvertAll(WeatherUnitConversion.DegreesToCompass),
         };
     }
 
-    private static UIWeatherHourlySeries? ToHourlySeries(PublicWeatherForecastMinutely15? source)
+    private static UIWeatherHourlySeries? ToHourlySeries(NonAIForecastWeatherMinutely15? source)
     {
         if (source is null)
         {
             return null;
         }
+
+        var windDirectionSourceDegrees = source.WindDirectionSource10m.ConvertAll(WeatherUnitConversion.NormalizeSourceDegrees);
 
         return new UIWeatherHourlySeries
         {
             Time = [.. source.Time],
-            TemperatureF = source.Temperature2m.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
-            PrecipitationInch = source.Precipitation.ConvertAll(WeatherUnitConversion.MillimetersToInches),
+            TemperatureF = source.Temperature2mC.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
+            PrecipitationInch = source.PrecipitationMm.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WeatherCode = [.. source.WeatherCode],
-            WindSpeedMPH = source.WindSpeed10m.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = [.. source.WindDirection10m],
+            WindSpeedMPH = source.WindSpeed10mKmh.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
+            WindDirectionSourceDegrees = windDirectionSourceDegrees,
+            WindDirectionSource = windDirectionSourceDegrees.ConvertAll(WeatherUnitConversion.DegreesToCompass),
         };
     }
 
-    private static UIWeatherHourlySeries? ToHourlySeries(PublicWeatherHistoryHourly? source)
+    private static UIWeatherHourlySeries? ToHourlySeries(NonAIHistoryWeatherHourly? source)
     {
         if (source is null)
         {
             return null;
         }
+
+        var windDirectionSourceDegrees = source.WindDirectionSource10m.ConvertAll(WeatherUnitConversion.NormalizeSourceDegrees);
 
         return new UIWeatherHourlySeries
         {
             Time = [.. source.Time],
-            TemperatureF = source.Temperature2m.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
-            PrecipitationInch = source.Precipitation.ConvertAll(WeatherUnitConversion.MillimetersToInches),
+            TemperatureF = source.Temperature2mC.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
+            PrecipitationInch = source.PrecipitationMm.ConvertAll(WeatherUnitConversion.MillimetersToInches),
             WeatherCode = [.. source.WeatherCode],
-            WindSpeedMPH = source.WindSpeed10m.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = [.. source.WindDirection10m],
+            WindSpeedMPH = source.WindSpeed10mKmh.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
+            WindDirectionSourceDegrees = windDirectionSourceDegrees,
+            WindDirectionSource = windDirectionSourceDegrees.ConvertAll(WeatherUnitConversion.DegreesToCompass),
         };
     }
 
-    private static UIWeatherDailySeries? ToDailySeries(PublicWeatherForecastDaily? source)
+    private static UIWeatherDailySeries? ToDailySeries(NonAIForecastWeatherDaily? source)
     {
         if (source is null)
         {
             return null;
         }
+
+        var windDirectionSourceDegrees = source.WindDirectionSource10mDominant.ConvertAll(WeatherUnitConversion.NormalizeSourceDegrees);
 
         return new UIWeatherDailySeries
         {
             Time = [.. source.Time],
             WeatherCode = [.. source.WeatherCode],
-            TemperatureHighF = source.Temperature2mMax.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
-            TemperatureLowF = source.Temperature2mMin.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
-            PrecipitationInch = source.PrecipitationSum.ConvertAll(WeatherUnitConversion.MillimetersToInches),
-            WindSpeedMPH = source.WindSpeed10mMax.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = [.. source.WindDirection10mDominant],
+            TemperatureHighF = source.Temperature2mMaxC.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
+            TemperatureLowF = source.Temperature2mMinC.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
+            PrecipitationInch = source.PrecipitationSumMm.ConvertAll(WeatherUnitConversion.MillimetersToInches),
+            WindSpeedMPH = source.WindSpeed10mMaxKmh.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
+            WindDirectionSourceDegrees = windDirectionSourceDegrees,
+            WindDirectionSource = windDirectionSourceDegrees.ConvertAll(WeatherUnitConversion.DegreesToCompass),
         };
     }
 
-    private static UIWeatherDailySeries? ToDailySeries(PublicWeatherHistoryDaily? source)
+    private static UIWeatherDailySeries? ToDailySeries(NonAIHistoryWeatherDaily? source)
     {
         if (source is null)
         {
             return null;
         }
 
+        var windDirectionSourceDegrees = source.WindDirectionSource10mDominant.ConvertAll(WeatherUnitConversion.NormalizeSourceDegrees);
+
         return new UIWeatherDailySeries
         {
             Time = [.. source.Time],
             WeatherCode = [.. source.WeatherCode],
-            TemperatureHighF = source.Temperature2mMax.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
-            TemperatureLowF = source.Temperature2mMin.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
-            PrecipitationInch = source.PrecipitationSum.ConvertAll(WeatherUnitConversion.MillimetersToInches),
-            WindSpeedMPH = source.WindSpeed10mMax.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
-            WindDirectionDegrees = [.. source.WindDirection10mDominant],
+            TemperatureHighF = source.Temperature2mMaxC.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
+            TemperatureLowF = source.Temperature2mMinC.ConvertAll(WeatherUnitConversion.CelsiusToFahrenheit),
+            PrecipitationInch = source.PrecipitationSumMm.ConvertAll(WeatherUnitConversion.MillimetersToInches),
+            WindSpeedMPH = source.WindSpeed10mMaxKmh.ConvertAll(WeatherUnitConversion.KilometersPerHourToMph),
+            WindDirectionSourceDegrees = windDirectionSourceDegrees,
+            WindDirectionSource = windDirectionSourceDegrees.ConvertAll(WeatherUnitConversion.DegreesToCompass),
         };
     }
 }

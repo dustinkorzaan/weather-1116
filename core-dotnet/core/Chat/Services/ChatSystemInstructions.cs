@@ -15,6 +15,7 @@ public static class ChatSystemInstructions
         Be conversational, concise, and helpful.
         GitHub-flavored Markdown (bold, lists, tables, code) is allowed when it makes the answer easier to read. Do not emit raw HTML.
         When you report current weather, use one or two friendly sentences and include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the reply even if a tool also returned them as JSON.
+        When stating wind direction, use the meteorological source compass label from windDirectionSource (where the wind comes from), optionally with source degrees in parentheses (e.g. SW (224°)). Do not add 180 to degrees.
         """;
     // Keep in sync with the hosted Foundry chat agent
     // (AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME; see docs/5-chat-clients/5-chat-clients.md).

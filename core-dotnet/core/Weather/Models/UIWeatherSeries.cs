@@ -20,8 +20,11 @@ public class UIWeatherHourlySeries
     [JsonPropertyName("windSpeedMPH")]
     public List<double> WindSpeedMPH { get; set; } = [];
 
-    [JsonPropertyName("windDirectionDegrees")]
-    public List<int> WindDirectionDegrees { get; set; } = [];
+    [JsonPropertyName("windDirectionSourceDegrees")]
+    public List<int> WindDirectionSourceDegrees { get; set; } = [];
+
+    [JsonPropertyName("windDirectionSource")]
+    public List<string> WindDirectionSource { get; set; } = [];
 }
 
 /// <summary>UI-facing daily weather series, in US customary units.</summary>
@@ -45,6 +48,9 @@ public class UIWeatherDailySeries
     [JsonPropertyName("windSpeedMPH")]
     public List<double> WindSpeedMPH { get; set; } = [];
 
-    [JsonPropertyName("windDirectionDegrees")]
-    public List<int> WindDirectionDegrees { get; set; } = [];
+    [JsonPropertyName("windDirectionSourceDegrees")]
+    public List<int> WindDirectionSourceDegrees { get; set; } = [];
+
+    [JsonPropertyName("windDirectionSource")]
+    public List<string> WindDirectionSource { get; set; } = [];
 }

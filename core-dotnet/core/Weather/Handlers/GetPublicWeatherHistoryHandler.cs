@@ -11,10 +11,9 @@ namespace Core.Weather.Handlers;
 
 /// <summary>
 /// Fetches recent past public weather from Open-Meteo for a given lat/long.
-/// Omits unit query params so Open-Meteo returns its defaults (°C, km/h, mm);
-/// the AI converts to US customary units.
+/// Requests Celsius, km/h, and mm explicitly; the AI converts to US customary units.
 /// </summary>
-public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHistoryEvent, PublicWeatherHistoryResponse>
+public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHistoryEvent, NonAIHistoryWeatherResponse>
 {
     private readonly CacheHelper _cache;
     private readonly TransientRetryHelper _retry;
@@ -30,7 +29,7 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
         _clientFactory = clientFactory;
     }
 
-    public async Task<PublicWeatherHistoryResponse> Handle(GetPublicWeatherHistoryEvent request, CancellationToken cancellationToken)
+    public async Task<NonAIHistoryWeatherResponse> Handle(GetPublicWeatherHistoryEvent request, CancellationToken cancellationToken)
     {
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetPublicWeatherHistoryHandler), Request = request });
         return await _cache.GetOrCreate(
@@ -40,14 +39,14 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
             cancellationToken: cancellationToken);
     }
 
-    private async Task<PublicWeatherHistoryResponse> GetPublicWeatherHistory(GetPublicWeatherHistoryEvent request, CancellationToken cancellationToken)
+    private async Task<NonAIHistoryWeatherResponse> GetPublicWeatherHistory(GetPublicWeatherHistoryEvent request, CancellationToken cancellationToken)
     {
         using var client = _clientFactory.CreateClient();
         string endpoint = BuildHistoryUrl(request.Latitude, request.Longitude, request.Resolution);
 
         string jsonResponse = await client.GetStringAsync(endpoint, cancellationToken);
 
-        PublicWeatherHistoryResponse weatherData = JsonSerializer.Deserialize<PublicWeatherHistoryResponse>(jsonResponse)
+        NonAIHistoryWeatherResponse weatherData = JsonSerializer.Deserialize<NonAIHistoryWeatherResponse>(jsonResponse)
             ?? throw new InvalidOperationException("Non-AI: Weather history API returned empty or invalid JSON.");
 
         NormalizeNullCollections(weatherData);
@@ -61,29 +60,29 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
     /// null list to empty here, once, rather than null-checking at every read site. Also clamps any
     /// negative precipitation reading (an Open-Meteo sensor/interpolation artifact) to zero.
     /// </summary>
-    private static void NormalizeNullCollections(PublicWeatherHistoryResponse response)
+    private static void NormalizeNullCollections(NonAIHistoryWeatherResponse response)
     {
         if (response.Hourly is { } hourly)
         {
             hourly.Time ??= [];
-            hourly.Temperature2m ??= [];
-            hourly.Precipitation ??= [];
+            hourly.Temperature2mC ??= [];
+            hourly.PrecipitationMm ??= [];
             hourly.WeatherCode ??= [];
-            hourly.WindSpeed10m ??= [];
-            hourly.WindDirection10m ??= [];
-            ClampNegativeToZero(hourly.Precipitation);
+            hourly.WindSpeed10mKmh ??= [];
+            hourly.WindDirectionSource10m ??= [];
+            ClampNegativeToZero(hourly.PrecipitationMm);
         }
 
         if (response.Daily is { } daily)
         {
             daily.Time ??= [];
             daily.WeatherCode ??= [];
-            daily.Temperature2mMax ??= [];
-            daily.Temperature2mMin ??= [];
-            daily.PrecipitationSum ??= [];
-            daily.WindSpeed10mMax ??= [];
-            daily.WindDirection10mDominant ??= [];
-            ClampNegativeToZero(daily.PrecipitationSum);
+            daily.Temperature2mMaxC ??= [];
+            daily.Temperature2mMinC ??= [];
+            daily.PrecipitationSumMm ??= [];
+            daily.WindSpeed10mMaxKmh ??= [];
+            daily.WindDirectionSource10mDominant ??= [];
+            ClampNegativeToZero(daily.PrecipitationSumMm);
         }
     }
 
@@ -114,6 +113,6 @@ public class GetPublicWeatherHistoryHandler : IRequestHandler<GetPublicWeatherHi
 
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&{query}&timezone=auto");
+            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&{query}&{OpenMeteoUnits.CelsiusKmhMm}&timezone=auto");
     }
 }

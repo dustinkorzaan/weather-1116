@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace Core.Weather.Models;
 
 /// <summary>
-/// UI-facing weather history, mapped from <see cref="PublicWeatherHistoryResponse"/> into
+/// UI-facing weather history, mapped from <see cref="NonAIHistoryWeatherResponse"/> into
 /// US customary units (°F, mph, in) so the UI only needs to format values, not convert them.
 /// </summary>
 public class UIWeatherHistoryResponse

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace Core.Weather.Models;
 
 /// <summary>
-/// UI-facing weather forecast, mapped from <see cref="PublicWeatherForecastResponse"/> into
+/// UI-facing weather forecast, mapped from <see cref="NonAIForecastWeatherResponse"/> into
 /// US customary units (°F, mph, in) so the UI only needs to format values, not convert them.
 /// </summary>
 public class UIWeatherForecastResponse

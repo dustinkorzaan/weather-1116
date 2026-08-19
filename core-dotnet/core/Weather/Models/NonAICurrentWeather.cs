@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Core.Weather.Models;
 
+/// <summary>Open-Meteo <c>current_weather</c> block (metric units requested explicitly).</summary>
 public class NonAICurrentWeather
 {
     [JsonPropertyName("time")]
@@ -11,13 +12,13 @@ public class NonAICurrentWeather
     public int Interval { get; set; }
 
     [JsonPropertyName("temperature")]
-    public double Temperature { get; set; }
+    public double TemperatureC { get; set; }
 
     [JsonPropertyName("windspeed")]
-    public double WindSpeed { get; set; }
+    public double WindSpeedKmh { get; set; }
 
     [JsonPropertyName("winddirection")]
-    public int WindDirection { get; set; }
+    public int WindDirectionSourceDegrees { get; set; }
 
     [JsonPropertyName("is_day")]
     public int IsDay { get; set; }

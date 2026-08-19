@@ -17,7 +17,8 @@ function HourlyForecastTab({ lat, lng }) {
     temperature: hourly.temperatureF[index],
     precipitation: hourly.precipitationInch[index],
     windSpeed: hourly.windSpeedMPH[index],
-    windDirection: hourly.windDirectionDegrees[index],
+    windDirectionSource: hourly.windDirectionSource[index],
+    windDirectionSourceDegrees: hourly.windDirectionSourceDegrees[index],
   }));
 
   return (
@@ -62,7 +63,10 @@ function HourlyForecastTab({ lat, lng }) {
                   <td className="py-1.5 pr-4">{formatPrecipitationIn(row.precipitation)}</td>
                   <td className="py-1.5 pr-4">{formatWindSpeedMph(row.windSpeed)}</td>
                   <td className="py-1.5">
-                    <WindDirectionCell degrees={row.windDirection} />
+                    <WindDirectionCell
+                      compass={row.windDirectionSource}
+                      degrees={row.windDirectionSourceDegrees}
+                    />
                   </td>
                 </tr>
               ))}

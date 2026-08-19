@@ -16,7 +16,7 @@ public class ConfirmNashvilleAIWeatherHandlerTests
             FullSummary = "It is 72F in Nashville with light winds from the south.",
             TemperatureF = 72,
             WindSpeedMPH = 5,
-            WindDirection = "S",
+            WindDirectionSource = "S",
             Conditions = "Sunny",
         });
         var handler = new ConfirmNashvilleAIWeatherHandler(

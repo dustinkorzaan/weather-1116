@@ -4,17 +4,6 @@ namespace WeatherBlazor.Tests;
 
 public sealed class WeatherGridFormatTests
 {
-    [Theory]
-    [InlineData(0, "N")]
-    [InlineData(90, "E")]
-    [InlineData(180, "S")]
-    [InlineData(224, "SW")]
-    [InlineData(360, "N")]
-    public void DegreesToCompass_MapsToSixteenPointCompass(double degrees, string expected)
-    {
-        Assert.Equal(expected, WeatherGridFormat.DegreesToCompass(degrees));
-    }
-
     [Fact]
     public void FormatCalendarDate_FormatsAsWeekdayMonthDay()
     {
@@ -73,14 +62,21 @@ public sealed class WeatherGridFormatTests
     [Fact]
     public void FormatWindDirection_CombinesCompassAndDegrees()
     {
-        Assert.Equal("SW (224°)", WeatherGridFormat.FormatWindDirection(224));
+        Assert.Equal("SW (224°)", WeatherGridFormat.FormatWindDirection("SW", 224));
+        Assert.Equal("S (180°)", WeatherGridFormat.FormatWindDirection("S", 540));
+        Assert.Equal("N (0°)", WeatherGridFormat.FormatWindDirection("N", double.NaN));
+        Assert.Equal("(0°)", WeatherGridFormat.FormatWindDirection("  ", double.PositiveInfinity));
     }
 
     [Fact]
-    public void WindArrowRotationDeg_PointsNorthUp()
+    public void NormalizeSourceDegrees_WrapsAndTreatsNonFiniteAsZero()
     {
-        Assert.Equal(-90, WeatherGridFormat.WindArrowRotationDeg(0));
-        Assert.Equal(134, WeatherGridFormat.WindArrowRotationDeg(224));
-        Assert.Null(WeatherGridFormat.WindArrowRotationDeg(double.NaN));
+        Assert.Equal(224, WeatherGridFormat.NormalizeSourceDegrees(224));
+        Assert.Equal(180, WeatherGridFormat.NormalizeSourceDegrees(540));
+        Assert.Equal(270, WeatherGridFormat.NormalizeSourceDegrees(-90));
+        Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(360));
+        Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(double.NaN));
+        Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(double.PositiveInfinity));
+        Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(double.NegativeInfinity));
     }
 }

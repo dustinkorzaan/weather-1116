@@ -17,7 +17,8 @@ function Every15ForecastTab({ lat, lng }) {
     temperature: minutely15.temperatureF[index],
     precipitation: minutely15.precipitationInch[index],
     windSpeed: minutely15.windSpeedMPH[index],
-    windDirection: minutely15.windDirectionDegrees[index],
+    windDirectionSource: minutely15.windDirectionSource[index],
+    windDirectionSourceDegrees: minutely15.windDirectionSourceDegrees[index],
   }));
 
   return (
@@ -62,7 +63,10 @@ function Every15ForecastTab({ lat, lng }) {
                   <td className="py-1.5 pr-4">{formatPrecipitationIn(row.precipitation)}</td>
                   <td className="py-1.5 pr-4">{formatWindSpeedMph(row.windSpeed)}</td>
                   <td className="py-1.5">
-                    <WindDirectionCell degrees={row.windDirection} />
+                    <WindDirectionCell
+                      compass={row.windDirectionSource}
+                      degrees={row.windDirectionSourceDegrees}
+                    />
                   </td>
                 </tr>
               ))}

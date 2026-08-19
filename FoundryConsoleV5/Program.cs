@@ -2,6 +2,7 @@
 using Core.AIWeather.Services;
 using Core.AIWeather.Models;
 using Core.Json;
+using Core.Weather;
 using DotNetEnv;
 using OpenAI.Responses;
 using System;
@@ -83,6 +84,10 @@ internal class Program
 			}
 			else
 			{
+				aiWeather.WindDirectionSourceDegrees =
+					WeatherUnitConversion.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees);
+				aiWeather.WindDirectionSource =
+					WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionSourceDegrees);
 				Console.WriteLine("\nResponse:");
 				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}

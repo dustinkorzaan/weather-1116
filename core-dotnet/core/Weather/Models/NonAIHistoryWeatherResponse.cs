@@ -2,7 +2,8 @@ using System.Text.Json.Serialization;
 
 namespace Core.Weather.Models;
 
-public class PublicWeatherHistoryResponse
+/// <summary>Open-Meteo forecast API response for past weather series.</summary>
+public class NonAIHistoryWeatherResponse
 {
     [JsonPropertyName("latitude")]
     public double Latitude { get; set; }
@@ -26,61 +27,61 @@ public class PublicWeatherHistoryResponse
     public double Elevation { get; set; }
 
     [JsonPropertyName("hourly_units")]
-    public PublicWeatherHistoryHourlyUnits? HourlyUnits { get; set; }
+    public NonAIHistoryWeatherHourlyUnits? HourlyUnits { get; set; }
 
     [JsonPropertyName("hourly")]
-    public PublicWeatherHistoryHourly? Hourly { get; set; }
+    public NonAIHistoryWeatherHourly? Hourly { get; set; }
 
     [JsonPropertyName("daily_units")]
-    public PublicWeatherHistoryDailyUnits? DailyUnits { get; set; }
+    public NonAIHistoryWeatherDailyUnits? DailyUnits { get; set; }
 
     [JsonPropertyName("daily")]
-    public PublicWeatherHistoryDaily? Daily { get; set; }
+    public NonAIHistoryWeatherDaily? Daily { get; set; }
 }
 
-public class PublicWeatherHistoryHourlyUnits
+public class NonAIHistoryWeatherHourlyUnits
 {
     [JsonPropertyName("time")]
     public string Time { get; set; } = string.Empty;
 
     [JsonPropertyName("temperature_2m")]
-    public string Temperature2m { get; set; } = string.Empty;
+    public string Temperature2mC { get; set; } = string.Empty;
 
     [JsonPropertyName("precipitation")]
-    public string Precipitation { get; set; } = string.Empty;
+    public string PrecipitationMm { get; set; } = string.Empty;
 
     [JsonPropertyName("weather_code")]
     public string WeatherCode { get; set; } = string.Empty;
 
     [JsonPropertyName("wind_speed_10m")]
-    public string WindSpeed10m { get; set; } = string.Empty;
+    public string WindSpeed10mKmh { get; set; } = string.Empty;
 
     [JsonPropertyName("wind_direction_10m")]
-    public string WindDirection10m { get; set; } = string.Empty;
+    public string WindDirectionSource10m { get; set; } = string.Empty;
 }
 
-public class PublicWeatherHistoryHourly
+public class NonAIHistoryWeatherHourly
 {
     [JsonPropertyName("time")]
     public List<string> Time { get; set; } = [];
 
     [JsonPropertyName("temperature_2m")]
-    public List<double> Temperature2m { get; set; } = [];
+    public List<double> Temperature2mC { get; set; } = [];
 
     [JsonPropertyName("precipitation")]
-    public List<double> Precipitation { get; set; } = [];
+    public List<double> PrecipitationMm { get; set; } = [];
 
     [JsonPropertyName("weather_code")]
     public List<int> WeatherCode { get; set; } = [];
 
     [JsonPropertyName("wind_speed_10m")]
-    public List<double> WindSpeed10m { get; set; } = [];
+    public List<double> WindSpeed10mKmh { get; set; } = [];
 
     [JsonPropertyName("wind_direction_10m")]
-    public List<int> WindDirection10m { get; set; } = [];
+    public List<int> WindDirectionSource10m { get; set; } = [];
 }
 
-public class PublicWeatherHistoryDailyUnits
+public class NonAIHistoryWeatherDailyUnits
 {
     [JsonPropertyName("time")]
     public string Time { get; set; } = string.Empty;
@@ -89,22 +90,22 @@ public class PublicWeatherHistoryDailyUnits
     public string WeatherCode { get; set; } = string.Empty;
 
     [JsonPropertyName("temperature_2m_max")]
-    public string Temperature2mMax { get; set; } = string.Empty;
+    public string Temperature2mMaxC { get; set; } = string.Empty;
 
     [JsonPropertyName("temperature_2m_min")]
-    public string Temperature2mMin { get; set; } = string.Empty;
+    public string Temperature2mMinC { get; set; } = string.Empty;
 
     [JsonPropertyName("precipitation_sum")]
-    public string PrecipitationSum { get; set; } = string.Empty;
+    public string PrecipitationSumMm { get; set; } = string.Empty;
 
     [JsonPropertyName("wind_speed_10m_max")]
-    public string WindSpeed10mMax { get; set; } = string.Empty;
+    public string WindSpeed10mMaxKmh { get; set; } = string.Empty;
 
     [JsonPropertyName("wind_direction_10m_dominant")]
-    public string WindDirection10mDominant { get; set; } = string.Empty;
+    public string WindDirectionSource10mDominant { get; set; } = string.Empty;
 }
 
-public class PublicWeatherHistoryDaily
+public class NonAIHistoryWeatherDaily
 {
     [JsonPropertyName("time")]
     public List<string> Time { get; set; } = [];
@@ -113,17 +114,17 @@ public class PublicWeatherHistoryDaily
     public List<int> WeatherCode { get; set; } = [];
 
     [JsonPropertyName("temperature_2m_max")]
-    public List<double> Temperature2mMax { get; set; } = [];
+    public List<double> Temperature2mMaxC { get; set; } = [];
 
     [JsonPropertyName("temperature_2m_min")]
-    public List<double> Temperature2mMin { get; set; } = [];
+    public List<double> Temperature2mMinC { get; set; } = [];
 
     [JsonPropertyName("precipitation_sum")]
-    public List<double> PrecipitationSum { get; set; } = [];
+    public List<double> PrecipitationSumMm { get; set; } = [];
 
     [JsonPropertyName("wind_speed_10m_max")]
-    public List<double> WindSpeed10mMax { get; set; } = [];
+    public List<double> WindSpeed10mMaxKmh { get; set; } = [];
 
     [JsonPropertyName("wind_direction_10m_dominant")]
-    public List<int> WindDirection10mDominant { get; set; } = [];
+    public List<int> WindDirectionSource10mDominant { get; set; } = [];
 }

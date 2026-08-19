@@ -105,6 +105,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("id=\"ai-weather-form\"", html);
         Assert.Contains("id=\"ai-weather-location\"", html);
+        Assert.Contains("windDirectionDisplay.js", html);
         Assert.Contains("currentAIWeather.js", html);
     }
 
@@ -162,6 +163,21 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
+    public void WindDirectionDisplayScript_ExportsSharedWindHelpers()
+    {
+        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/windDirectionDisplay.js"));
+        Assert.Contains("window.windDirectionDisplay", script);
+        Assert.DoesNotContain("windArrowRotationDeg", script);
+        Assert.DoesNotContain("degreesToCompass", script);
+        Assert.Contains("normalizeSourceDegrees", script);
+        Assert.Contains("Math.round(((numeric % 360) + 360) % 360)", script);
+        Assert.Contains("renderWindDirection", script);
+        Assert.Contains("createWindDirectionCell", script);
+        Assert.Contains("\\u2B9B", script);
+        Assert.DoesNotContain("numeric + 180", script);
+    }
+
+    [Fact]
     public void CurrentAIWeatherScript_ConsumesLocationQueryAndClearsUrl()
     {
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/currentAIWeather.js"));
@@ -173,17 +189,13 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("summaryEl.innerHTML", script);
         Assert.Contains("formatTemperatureF", script);
         Assert.Contains("formatWindSpeedMph", script);
-        Assert.Contains("formatWindDirection", script);
         Assert.Contains("formatLatLong", script);
-        Assert.Contains("windArrowRotationDeg", script);
-        Assert.Contains("renderWindDirection", script);
-        Assert.Contains("\\u27A4", script);
-        Assert.True(
-            script.IndexOf("el.appendChild(label)", StringComparison.Ordinal)
-                < script.IndexOf("el.appendChild(arrow)", StringComparison.Ordinal),
-            "Wind direction arrow should follow the compass label.");
+        Assert.Contains("windDirectionDisplay.renderWindDirection", script);
+        Assert.DoesNotContain("function windArrowRotationDeg", script);
+        Assert.DoesNotContain("numeric + 180", script);
+        Assert.DoesNotContain("Math.round(numeric) - 90", script);
         Assert.Contains("toFixed(2)", script);
-        Assert.Contains("windDirectionDegrees", script);
+        Assert.Contains("windDirectionSourceDegrees", script);
         Assert.Contains("data.latitude", script);
         Assert.Contains("data.longitude", script);
     }
@@ -192,14 +204,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     public void WeatherModalGridsScript_RendersRotatedWindArrow()
     {
         var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherModalGrids.js"));
-        Assert.Contains("createWindDirectionCell", script);
-        Assert.Contains("wind-direction-arrow", script);
-        Assert.Contains("windArrowRotationDeg", script);
-        Assert.Contains("\\u27A4", script);
-        Assert.True(
-            script.IndexOf("wrap.appendChild(label)", StringComparison.Ordinal)
-                < script.IndexOf("wrap.appendChild(arrow)", StringComparison.Ordinal),
-            "Wind direction arrow should follow the compass label.");
+        Assert.Contains("windDirectionDisplay.createWindDirectionCell", script);
+        Assert.DoesNotContain("function windArrowRotationDeg", script);
+        Assert.DoesNotContain("numeric + 180", script);
+        Assert.DoesNotContain("Math.round(numeric) - 90", script);
     }
 
     [Fact]

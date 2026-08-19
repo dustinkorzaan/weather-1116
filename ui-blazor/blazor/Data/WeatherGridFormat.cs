@@ -5,20 +5,6 @@ using System.Globalization;
 /// <summary>Formatting helpers for the weather modal's forecast/history grid tabs.</summary>
 public static class WeatherGridFormat
 {
-    private static readonly string[] CompassPoints =
-    [
-        "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-        "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
-    ];
-
-    /// <summary>Converts meteorological degrees to a 16-point compass abbreviation.</summary>
-    public static string DegreesToCompass(double degrees)
-    {
-        var normalized = ((degrees % 360) + 360) % 360;
-        var index = (int)Math.Round(normalized / 22.5) % 16;
-        return CompassPoints[index];
-    }
-
     /// <summary>Formats an Open-Meteo daily date ("2026-08-19") as "Wed, Aug 19".</summary>
     public static string FormatCalendarDate(string isoDate)
     {
@@ -87,20 +73,22 @@ public static class WeatherGridFormat
     public static string FormatWindSpeedMph(double mph) =>
         string.Create(CultureInfo.InvariantCulture, $"{Math.Round(mph, 1)} mph");
 
-    /// <summary>Formats meteorological degrees as compass plus degrees, e.g. "SW (224°)".</summary>
-    public static string FormatWindDirection(double degrees) =>
-        string.Create(CultureInfo.InvariantCulture, $"{DegreesToCompass(degrees)} ({Math.Round(degrees):0}°)");
-
-    /// <summary>
-    /// Rotation for the ➤ wind arrow so 0° (north / from the north) points up.
-    /// </summary>
-    public static int? WindArrowRotationDeg(double degrees)
+    /// <summary>Wraps meteorological source degrees to 0–360. NaN / Infinity become 0.</summary>
+    public static int NormalizeSourceDegrees(double degrees)
     {
         if (double.IsNaN(degrees) || double.IsInfinity(degrees))
         {
-            return null;
+            return 0;
         }
 
-        return (int)Math.Round(degrees) - 90;
+        return (int)Math.Round(((degrees % 360d) + 360d) % 360d, MidpointRounding.AwayFromZero);
+    }
+
+    /// <summary>Formats API-provided compass plus source degrees, e.g. "SW (224°)".</summary>
+    public static string FormatWindDirection(string compass, double degrees)
+    {
+        var label = (compass ?? string.Empty).Trim();
+        var withDegrees = string.Create(CultureInfo.InvariantCulture, $"({NormalizeSourceDegrees(degrees)}°)");
+        return label.Length == 0 ? withDegrees : $"{label} {withDegrees}";
     }
 }

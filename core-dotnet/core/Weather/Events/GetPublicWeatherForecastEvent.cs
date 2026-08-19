@@ -15,7 +15,7 @@ public enum PublicWeatherForecastResolution
 /// <summary>
 /// Fetches an upcoming public weather forecast for a latitude/longitude via Open-Meteo.
 /// </summary>
-public class GetPublicWeatherForecastEvent : IRequest<PublicWeatherForecastResponse>
+public class GetPublicWeatherForecastEvent : IRequest<NonAIForecastWeatherResponse>
 {
     public required double Latitude { get; set; }
 

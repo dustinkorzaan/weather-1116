@@ -2,7 +2,8 @@ using System.Text.Json.Serialization;
 
 namespace Core.Weather.Models;
 
-public class NonAIWeatherResponse
+/// <summary>Open-Meteo forecast API response when requesting current weather only.</summary>
+public class NonAICurrentWeatherResponse
 {
     [JsonPropertyName("latitude")]
     public double Latitude { get; set; }
