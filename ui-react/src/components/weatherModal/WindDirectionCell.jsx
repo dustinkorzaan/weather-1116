@@ -1,13 +1,22 @@
-import { formatWindDirection, normalizeSourceDegrees } from '../../utils/aiWeatherDisplay';
-import WindDirectionArrow from '../WindDirectionArrow';
+import {
+  formatWindDirection,
+  WIND_DIRECTION_ARROW,
+  normalizeSourceDegrees,
+} from '../../utils/aiWeatherDisplay';
 
-/** Compass label plus the same rotated arrow used on Current AI Weather. */
+/** Compass label plus the same rotated letter V used on Current AI Weather. */
 function WindDirectionCell({ compass, degrees }) {
   const rotationDeg = normalizeSourceDegrees(degrees);
   return (
     <span className="inline-flex items-center gap-2">
       <span>{formatWindDirection(compass, rotationDeg)}</span>
-      <WindDirectionArrow degrees={degrees} />
+      <span
+        aria-hidden="true"
+        className="inline-block origin-center"
+        style={{ transform: `rotate(${rotationDeg}deg)` }}
+      >
+        {WIND_DIRECTION_ARROW}
+      </span>
     </span>
   );
 }

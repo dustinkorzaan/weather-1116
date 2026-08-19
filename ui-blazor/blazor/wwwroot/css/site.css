@@ -405,11 +405,7 @@ fluent-menu-item a {
 
 .wind-direction-arrow {
     display: inline-block;
-    width: 1.15em;
-    height: 1.15em;
-    flex-shrink: 0;
     transform-origin: center;
-    vertical-align: middle;
 }
 
 .inline-row {

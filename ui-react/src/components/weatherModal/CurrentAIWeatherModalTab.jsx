@@ -7,9 +7,10 @@ import {
   formatTemperatureF,
   formatWindDirection,
   formatWindSpeedMph,
+  WIND_DIRECTION_ARROW,
+  normalizeSourceDegrees,
 } from '../../utils/aiWeatherDisplay';
 import { formatLocationWithLatLong } from '../../utils/currentAiWeatherLocation';
-import WindDirectionArrow from '../WindDirectionArrow';
 
 /**
  * Current AI Weather tab content for the weather modal. Copied (not shared) from
@@ -65,7 +66,13 @@ function CurrentAIWeatherModalTab({ name, lat, lng }) {
               <dt className="font-semibold">Wind Direction</dt>
               <dd className="inline-flex items-center gap-2">
                 <span>{formatWindDirection(data.windDirectionSource, data.windDirectionSourceDegrees)}</span>
-                <WindDirectionArrow degrees={data.windDirectionSourceDegrees} />
+                <span
+                  aria-hidden="true"
+                  className="inline-block origin-center"
+                  style={{ transform: `rotate(${normalizeSourceDegrees(data.windDirectionSourceDegrees)}deg)` }}
+                >
+                  {WIND_DIRECTION_ARROW}
+                </span>
               </dd>
             </div>
             <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
