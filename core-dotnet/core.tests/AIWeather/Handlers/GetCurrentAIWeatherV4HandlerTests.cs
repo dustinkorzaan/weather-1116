@@ -5,7 +5,7 @@ public class GetCurrentAIWeatherV4HandlerTests
     [Fact]
     public void SystemPrompt_UsesFriendlySummaryWithoutLatLong()
     {
-        var prompt = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV4Handler.cs"));
+        var prompt = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV4Handler.cs"));
 
         Assert.Contains("one or two friendly sentences describing the current weather", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("place name", prompt, StringComparison.OrdinalIgnoreCase);
@@ -25,7 +25,7 @@ public class GetCurrentAIWeatherV4HandlerTests
     [Fact]
     public void Handler_UsesRemoteMcpToolsWithNoLocalToolLoop()
     {
-        var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV4Handler.cs"));
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV4Handler.cs"));
 
         Assert.Contains("ChatMcpToolFactory", source, StringComparison.Ordinal);
         Assert.Contains("_mcpToolFactory.CreateTools()", source, StringComparison.Ordinal);
@@ -39,7 +39,7 @@ public class GetCurrentAIWeatherV4HandlerTests
     [Fact]
     public void Handler_RecordsRunLogAndExcludesItFromModelSchema()
     {
-        var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV4Handler.cs"));
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV4Handler.cs"));
 
         Assert.Contains("runLog.AddLog(", source, StringComparison.Ordinal);
         Assert.Contains("properties.Remove(\"runLogDetails\")", source, StringComparison.Ordinal);
@@ -47,20 +47,4 @@ public class GetCurrentAIWeatherV4HandlerTests
         Assert.DoesNotContain("AddLog(1,", source, StringComparison.Ordinal);
     }
 
-    private static string FindRepoFile(string relativePath)
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            var candidate = Path.Combine(dir.FullName, relativePath);
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            dir = dir.Parent;
-        }
-
-        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
-    }
 }

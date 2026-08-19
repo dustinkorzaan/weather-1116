@@ -37,7 +37,7 @@ public sealed class WeatherModalTests
             Assert.DoesNotContain("Connecting to Microsoft Foundry", rendered.Markup);
         });
 
-        var tabSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/CurrentAIWeatherModalTab.razor"));
+        var tabSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Shared/CurrentAIWeatherModalTab.razor"));
         Assert.Contains("Connecting to Microsoft Foundry...", tabSource);
     }
 
@@ -158,23 +158,6 @@ public sealed class WeatherModalTests
         rendered.Find("button.about-close").Click();
 
         Assert.Equal("http://localhost/", navigation.Uri);
-    }
-
-    private static string FindRepoFile(string relativePath)
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            var candidate = Path.Combine(dir.FullName, relativePath);
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            dir = dir.Parent;
-        }
-
-        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
     }
 
     private static BunitContext CreateContext()

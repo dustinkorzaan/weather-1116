@@ -6,23 +6,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 {
     private readonly HttpClient _client = factory.CreateClient();
 
-    private static string FindRepoFile(string relativePath)
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            var candidate = Path.Combine(dir.FullName, relativePath);
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            dir = dir.Parent;
-        }
-
-        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
-    }
-
     [Fact]
     public async Task Index_ReturnsOkWithMapAndWithoutSplitPageContent()
     {
@@ -148,7 +131,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("loadingId: 'ai-weather-loading-v4'", html);
         Assert.Contains("loadingId: 'ai-weather-loading-v5'", html);
 
-        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/currentAIWeather.js"));
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/currentAIWeather.js"));
         Assert.Contains("config.loadingId", script);
         Assert.Contains("setHidden(loadingEl, false)", script);
         Assert.Contains("setHidden(loadingEl, true)", script);
@@ -157,7 +140,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     [Fact]
     public void IndexView_UsesCityAndStateMapPinLabels()
     {
-        var view = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/Views/Home/Index.cshtml"));
+        var view = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/Views/Home/Index.cshtml"));
         Assert.Contains("Atlanta, GA", view);
         Assert.Contains("New York, NY", view);
         Assert.Contains("Toronto, ON", view);
@@ -173,7 +156,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     [Fact]
     public void WeatherMapScript_ShowsHoverCardWithWeatherButton()
     {
-        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
         Assert.Contains("weatherModalPath", script);
         Assert.Contains("formatLocationWithLatLong", script);
         Assert.Contains("formatHemisphereDegrees", script);
@@ -210,7 +193,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     [Fact]
     public void WindDirectionDisplayScript_ExportsSharedWindHelpers()
     {
-        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/windDirectionDisplay.js"));
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/windDirectionDisplay.js"));
         Assert.Contains("window.windDirectionDisplay", script);
         Assert.DoesNotContain("windArrowRotationDeg", script);
         Assert.DoesNotContain("degreesToCompass", script);
@@ -225,7 +208,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     [Fact]
     public void CurrentAIWeatherScript_ConsumesLocationQueryAndClearsUrl()
     {
-        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/currentAIWeather.js"));
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/currentAIWeather.js"));
         Assert.Contains("consumeLocationQuery", script);
         Assert.Contains("params.get('location')", script);
         Assert.Contains("history.replaceState", script);
@@ -248,7 +231,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     [Fact]
     public void WeatherModalGridsScript_RendersRotatedWindArrow()
     {
-        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherModalGrids.js"));
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherModalGrids.js"));
         Assert.Contains("windDirectionDisplay.createWindDirectionCell", script);
         Assert.DoesNotContain("function windArrowRotationDeg", script);
         Assert.DoesNotContain("numeric + 180", script);
@@ -281,7 +264,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("loadingId: 'weatherModalLoading'", html);
         Assert.DoesNotContain("Coming soon.", html);
 
-        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherModal.js"));
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherModal.js"));
         Assert.Contains("config.loadingId", script);
         Assert.Contains("setHidden(loadingEl, false)", script);
         Assert.Contains("setHidden(loadingEl, true)", script);
@@ -365,7 +348,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.DoesNotContain("Current AI Weather</h2>", html);
         Assert.DoesNotContain("id=\"weather-map\"", html);
 
-        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatClient.js"));
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatClient.js"));
         Assert.Contains("function scrollToBottom()", script);
         Assert.Contains("function requestScrollToBottom(tabId)", script);
         Assert.Contains("payload.type === 'done'", script);
@@ -388,12 +371,12 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("document.addEventListener('fullscreenchange', onToolHoverFullscreenChange)", script);
         Assert.Contains("document.addEventListener('webkitfullscreenchange', onToolHoverFullscreenChange)", script);
 
-        var markdown = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/markdown/safeGfmMarkdown.js"));
+        var markdown = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/markdown/safeGfmMarkdown.js"));
         Assert.Contains("marked.parse", markdown);
         Assert.Contains("gfm: true", markdown);
         Assert.Contains("DOMPurify.sanitize", markdown);
 
-        var fullscreen = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatFullscreen.js"));
+        var fullscreen = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatFullscreen.js"));
         Assert.Contains("data-chat-fullscreen-button", fullscreen);
         Assert.Contains("requestFullscreen", fullscreen);
         Assert.Contains("is-css-fullscreen", fullscreen);
@@ -421,12 +404,12 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.DoesNotContain("flex-1", html);
         Assert.DoesNotContain("rounded-xl", html);
 
-        var layoutSource = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/Views/Shared/_Layout.cshtml"));
+        var layoutSource = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/Views/Shared/_Layout.cshtml"));
         Assert.Contains("avatar.svg", layoutSource);
         Assert.Contains("isMapPage", layoutSource);
         Assert.DoesNotContain("stroke-width=\"2.25\"", layoutSource);
 
-        var avatarSvg = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/avatar.svg"));
+        var avatarSvg = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/avatar.svg"));
         Assert.Contains("<path ", avatarSvg);
         Assert.DoesNotContain("<circle ", avatarSvg);
     }
