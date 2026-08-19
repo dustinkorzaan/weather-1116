@@ -1,6 +1,8 @@
 import { expect, test } from 'vitest';
 import {
   formatLatLong,
+  formatRunLogMs,
+  formatRunLogTimestamp,
   formatTemperatureF,
   formatWindDirection,
   formatWindSpeedMph,
@@ -33,4 +35,16 @@ test('formats wind direction as compass plus degrees', () => {
   expect(formatWindDirection('SW', Number.NaN)).toBe('SW (0°)');
   expect(formatWindDirection('SW', 540)).toBe('SW (180°)');
   expect(formatWindDirection('', 224)).toBe('(224°)');
+});
+
+test('formats a run-log timestamp as UTC time-of-day with milliseconds', () => {
+  expect(formatRunLogTimestamp('2026-08-19T14:32:07.123Z')).toBe('14:32:07.123');
+  expect(formatRunLogTimestamp('not-a-date')).toBe('');
+});
+
+test('formats a run-log millisecond duration with thousands separators', () => {
+  expect(formatRunLogMs(0)).toBe('0');
+  expect(formatRunLogMs(1234)).toBe('1,234');
+  expect(formatRunLogMs(1234.6)).toBe('1,235');
+  expect(formatRunLogMs(Number.NaN)).toBe('');
 });

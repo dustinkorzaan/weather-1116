@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
+using Core.AIWeather.Services;
 using Core.Json;
 using Core.Tools;
 using Core.Weather;
@@ -37,6 +38,14 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
 
     public async Task<AIWeatherResponse> Handle(GetCurrentAIWeatherV3Event request, CancellationToken cancellationToken)
     {
+        var runLog = new AIRunLogRecorder();
+        runLog.AddLog(0, $"Start {nameof(GetCurrentAIWeatherV3Handler)}", null);
+
+        void LogRunLogOnFailure(string reason) => _logger.LogWarning(
+            "AI Weather run log at failure ({Reason}): {RunLog}",
+            reason,
+            JsonSerializer.Serialize(runLog.HydrateRuntimes()));
+
         var location = string.IsNullOrWhiteSpace(request.Location)
             ? DefaultLocation
             : request.Location.Trim();
@@ -115,9 +124,12 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         {
             if (++toolLoopTurns > MaxToolLoopTurns)
             {
+                LogRunLogOnFailure("tool loop exceeded max turns");
                 throw new InvalidOperationException(
                     $"AI Weather tool loop exceeded {MaxToolLoopTurns} model turns.");
             }
+
+            runLog.AddLog(toolLoopTurns, $"Start loop {toolLoopTurns}", null);
 
             requiresAction = false;
 
@@ -133,11 +145,14 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                 },
             };
 
+            runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
             ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
+            runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
 
             var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
             if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
             {
+                LogRunLogOnFailure("model response did not complete");
                 throw new InvalidOperationException(
                     $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
                     $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
@@ -159,11 +174,17 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             }
         } while (requiresAction);
 
-        var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(
-            content ?? throw new InvalidOperationException("Model finished without producing content."));
+        if (content is null)
+        {
+            LogRunLogOnFailure("model finished without producing content");
+            throw new InvalidOperationException("Model finished without producing content.");
+        }
+
+        var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
         if (modelOutput is null)
         {
+            LogRunLogOnFailure("model returned empty or invalid JSON");
             throw new InvalidOperationException(
                 $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
         }
@@ -172,6 +193,9 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             WeatherUnitConversion.NormalizeSourceDegrees(modelOutput.WindDirectionSourceDegrees);
         modelOutput.WindDirectionSource =
             WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
+
+        runLog.AddLog(toolLoopTurns, $"Finish {nameof(GetCurrentAIWeatherV3Handler)}", null);
+        modelOutput.RunLogDetails = runLog.HydrateRuntimes();
 
         return modelOutput;
     }
@@ -188,6 +212,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                 {
                     if (schema is JsonObject node && node["properties"] is JsonObject properties)
                     {
+                        properties.Remove("runLogDetails");
                         node["required"] = new JsonArray(properties.Select(property => (JsonNode)property.Key).ToArray());
                         node["additionalProperties"] = false;
                     }

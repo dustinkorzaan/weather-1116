@@ -60,6 +60,16 @@ public class GetCurrentAIWeatherV3HandlerTests
         Assert.DoesNotContain("Output schema for {Location}", source, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Handler_RecordsRunLogAndExcludesItFromModelSchema()
+    {
+        var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV3Handler.cs"));
+
+        Assert.Contains("runLog.AddLog(", source, StringComparison.Ordinal);
+        Assert.Contains("properties.Remove(\"runLogDetails\")", source, StringComparison.Ordinal);
+        Assert.Contains("modelOutput.RunLogDetails = runLog.HydrateRuntimes();", source, StringComparison.Ordinal);
+    }
+
     private static string FindRepoFile(string relativePath)
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

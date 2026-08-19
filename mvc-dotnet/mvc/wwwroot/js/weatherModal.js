@@ -41,6 +41,44 @@
     return (Math.round(numeric * 10) / 10) + ' mph';
   }
 
+  function formatRunLogTimestamp(dateTimeUtc) {
+    var date = new Date(dateTimeUtc);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    return date.toISOString().slice(11, 23);
+  }
+
+  function formatRunLogMs(ms) {
+    return Number.isFinite(ms) ? Math.round(ms).toLocaleString() : '';
+  }
+
+  function renderRunLogRows(tbody, runLogDetails) {
+    tbody.replaceChildren();
+    runLogDetails.forEach(function (entry) {
+      var cells = [
+        formatRunLogTimestamp(entry.dateTimeUtc),
+        entry.loopNumber,
+        entry.message,
+        entry.inputTokenCount != null ? entry.inputTokenCount : '',
+        entry.cachedTokenCount != null ? entry.cachedTokenCount : '',
+        entry.outputTokenCount != null ? entry.outputTokenCount : '',
+        entry.reasoningTokenCount != null ? entry.reasoningTokenCount : '',
+        entry.totalTokenCount != null ? entry.totalTokenCount : '',
+        formatRunLogMs(entry.runtimeMs),
+        formatRunLogMs(entry.loopRuntimeMs),
+        formatRunLogMs(entry.runningTotalMs),
+      ];
+      var tr = document.createElement('tr');
+      cells.forEach(function (cell) {
+        var td = document.createElement('td');
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
   function init(config) {
     var refreshButton = document.getElementById(config.refreshButtonId);
     var errorEl = document.getElementById(config.errorId);
@@ -51,6 +89,9 @@
     var windDirectionEl = document.getElementById(config.windDirectionId);
     var conditionsEl = document.getElementById(config.conditionsId);
     var latLongEl = document.getElementById(config.latLongId);
+    var runLogWrapEl = document.getElementById(config.runLogWrapId);
+    var runLogBodyEl = document.getElementById(config.runLogBodyId);
+    var runLogTotalEl = document.getElementById(config.runLogTotalId);
 
     if (!refreshButton) {
       return;
@@ -87,6 +128,19 @@
           conditionsEl.textContent = data.conditions || '';
           if (latLongEl) {
             latLongEl.textContent = formatLatLong(data.latitude, data.longitude);
+          }
+          var runLogDetails = data.runLogDetails || [];
+          if (runLogWrapEl && runLogBodyEl) {
+            if (runLogDetails.length > 0) {
+              renderRunLogRows(runLogBodyEl, runLogDetails);
+              if (runLogTotalEl) {
+                runLogTotalEl.textContent = 'Total Runtime: ' +
+                  formatRunLogMs(runLogDetails[runLogDetails.length - 1].runningTotalMs) + ' ms';
+              }
+              setHidden(runLogWrapEl, false);
+            } else {
+              setHidden(runLogWrapEl, true);
+            }
           }
           setHidden(resultsEl, false);
         })

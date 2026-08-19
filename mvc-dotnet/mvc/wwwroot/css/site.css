@@ -894,6 +894,12 @@ html[data-theme="dark"] .weather-map-logo-pin {
   font-weight: 600;
 }
 
+.weather-run-log-total {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
 /* Content / error pages */
 
 .page-shell {

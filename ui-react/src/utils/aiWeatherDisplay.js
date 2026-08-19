@@ -40,4 +40,19 @@ export function formatWindDirection(compass, degrees) {
   return label ? `${label} ${withDegrees}` : withDegrees;
 }
 
+/** Formats a run-log UTC timestamp, e.g. "14:32:07.123". */
+export function formatRunLogTimestamp(dateTimeUtc) {
+  const date = new Date(dateTimeUtc);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toISOString().slice(11, 23);
+}
+
+/** Formats a millisecond duration with thousands separators, e.g. "1,234". */
+export function formatRunLogMs(ms) {
+  return Number.isFinite(ms) ? Math.round(ms).toLocaleString() : '';
+}
+
 export { WIND_DIRECTION_ARROW, normalizeSourceDegrees } from './windDirectionDisplay';

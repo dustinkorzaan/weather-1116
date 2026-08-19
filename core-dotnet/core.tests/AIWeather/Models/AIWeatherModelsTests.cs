@@ -74,4 +74,53 @@ public class AIWeatherModelsTests
         Assert.Equal(string.Empty, result.WindDirectionSource);
         Assert.Equal(string.Empty, result.Conditions);
     }
+
+    [Fact]
+    public void AIWeatherResponse_DefaultsRunLogDetailsToEmptyList()
+    {
+        var result = new AIWeatherResponse();
+
+        Assert.Empty(result.RunLogDetails);
+    }
+
+    [Fact]
+    public void AIWeatherResponse_SerializesRunLogDetailsCamelCaseContract()
+    {
+        var json = JsonSerializer.Serialize(new AIWeatherResponse
+        {
+            RunLogDetails =
+            [
+                new RunLogDetail
+                {
+                    DateTimeUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    LoopNumber = 1,
+                    Message = "Start loop 1",
+                    InputTokenCount = 42,
+                    CachedTokenCount = 10,
+                    OutputTokenCount = 20,
+                    ReasoningTokenCount = 5,
+                    TotalTokenCount = 62,
+                    RuntimeMs = 100,
+                    LoopRuntimeMs = 50,
+                    RunningTotalMs = 150,
+                },
+            ],
+        });
+
+        using var document = JsonDocument.Parse(json);
+        var entry = document.RootElement.GetProperty("runLogDetails")[0];
+
+        Assert.Equal(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry.GetProperty("dateTimeUtc").GetDateTime());
+        Assert.Equal(1, entry.GetProperty("loopNumber").GetInt32());
+        Assert.Equal("Start loop 1", entry.GetProperty("message").GetString());
+        Assert.Equal(42, entry.GetProperty("inputTokenCount").GetInt32());
+        Assert.Equal(10, entry.GetProperty("cachedTokenCount").GetInt32());
+        Assert.Equal(20, entry.GetProperty("outputTokenCount").GetInt32());
+        Assert.Equal(5, entry.GetProperty("reasoningTokenCount").GetInt32());
+        Assert.Equal(62, entry.GetProperty("totalTokenCount").GetInt32());
+        Assert.Equal(100, entry.GetProperty("runtimeMs").GetInt32());
+        Assert.Equal(50, entry.GetProperty("loopRuntimeMs").GetInt32());
+        Assert.Equal(150, entry.GetProperty("runningTotalMs").GetInt32());
+        Assert.False(entry.TryGetProperty("LoopNumber", out _));
+    }
 }

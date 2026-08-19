@@ -85,6 +85,19 @@
                                 <dd id="weatherModalLatLong"></dd>
                             </div>
                         </dl>
+                        <div id="weatherModalRunLogWrap" class="weather-modal-grid-wrap" hidden>
+                            <table class="weather-modal-grid">
+                                <thead>
+                                    <tr>
+                                        <th>Time (UTC)</th><th>Loop</th><th>Message</th><th>Input</th><th>Cached</th>
+                                        <th>Output</th><th>Reasoning</th><th>Total</th>
+                                        <th>Runtime (ms)</th><th>Loop Runtime (ms)</th><th>Running Total (ms)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="weatherModalRunLogBody"></tbody>
+                            </table>
+                            <p id="weatherModalRunLogTotal" class="weather-run-log-total"></p>
+                        </div>
                     </div>
                 </section>
             }
@@ -140,7 +153,10 @@
                 windSpeedId: 'weatherModalWindSpeed',
                 windDirectionId: 'weatherModalWindDirection',
                 conditionsId: 'weatherModalConditions',
-                latLongId: 'weatherModalLatLong'
+                latLongId: 'weatherModalLatLong',
+                runLogWrapId: 'weatherModalRunLogWrap',
+                runLogBodyId: 'weatherModalRunLogBody',
+                runLogTotalId: 'weatherModalRunLogTotal'
             });
         </script>
     }
