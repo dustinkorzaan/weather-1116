@@ -4,6 +4,8 @@ import SafeGfmMarkdown from '../markdown/SafeGfmMarkdown';
 import { useGetCurrentAIWeatherV4Query } from '../../services/weatherApi';
 import {
   formatLatLong,
+  formatRunLogMs,
+  formatRunLogTimestamp,
   formatTemperatureF,
   formatWindDirection,
   formatWindSpeedMph,
@@ -84,6 +86,48 @@ function CurrentAIWeatherModalTab({ name, lat, lng }) {
               <dd>{formatLatLong(data.latitude, data.longitude)}</dd>
             </div>
           </dl>
+
+          {data.runLogDetails?.length > 0 && (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full border-collapse text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border text-muted-foreground">
+                    <th className="py-1.5 pr-4 font-semibold">Time (UTC)</th>
+                    <th className="py-1.5 pr-4 font-semibold">Loop</th>
+                    <th className="py-1.5 pr-4 font-semibold">Message</th>
+                    <th className="py-1.5 pr-4 font-semibold">Input</th>
+                    <th className="py-1.5 pr-4 font-semibold">Cached</th>
+                    <th className="py-1.5 pr-4 font-semibold">Output</th>
+                    <th className="py-1.5 pr-4 font-semibold">Reasoning</th>
+                    <th className="py-1.5 pr-4 font-semibold">Total</th>
+                    <th className="py-1.5 pr-4 font-semibold">Runtime (ms)</th>
+                    <th className="py-1.5 pr-4 font-semibold">Loop Runtime (ms)</th>
+                    <th className="py-1.5 font-semibold">Running Total (ms)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.runLogDetails.map((entry, index) => (
+                    <tr key={index} className="border-b border-border/50">
+                      <td className="py-1.5 pr-4">{formatRunLogTimestamp(entry.dateTimeUtc)}</td>
+                      <td className="py-1.5 pr-4">{entry.loopNumber}</td>
+                      <td className="py-1.5 pr-4">{entry.message}</td>
+                      <td className="py-1.5 pr-4">{entry.inputTokenCount ?? ''}</td>
+                      <td className="py-1.5 pr-4">{entry.cachedTokenCount ?? ''}</td>
+                      <td className="py-1.5 pr-4">{entry.outputTokenCount ?? ''}</td>
+                      <td className="py-1.5 pr-4">{entry.reasoningTokenCount ?? ''}</td>
+                      <td className="py-1.5 pr-4">{entry.totalTokenCount ?? ''}</td>
+                      <td className="py-1.5 pr-4">{formatRunLogMs(entry.runtimeMs)}</td>
+                      <td className="py-1.5 pr-4">{formatRunLogMs(entry.loopRuntimeMs)}</td>
+                      <td className="py-1.5">{formatRunLogMs(entry.runningTotalMs)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Total Runtime: {formatRunLogMs(data.runLogDetails[data.runLogDetails.length - 1].runningTotalMs)} ms
+              </p>
+            </div>
+          )}
         </div>
       )}
     </section>

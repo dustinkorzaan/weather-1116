@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
+using Core.AIWeather.Services;
 using Core.Chat.Services;
 using Core.Json;
 using Core.Weather;
@@ -36,6 +37,15 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
     public async Task<AIWeatherResponse> Handle(GetCurrentAIWeatherV4Event request, CancellationToken cancellationToken)
     {
+        var runLog = new AIRunLogRecorder();
+        var toolLoopTurns = 0;
+        runLog.AddLog(toolLoopTurns, $"Start {nameof(GetCurrentAIWeatherV4Handler)}", null);
+
+        void LogRunLogOnFailure(string reason) => _logger.LogWarning(
+            "AI Weather run log at failure ({Reason}): {RunLog}",
+            reason,
+            JsonSerializer.Serialize(runLog.HydrateRuntimes()));
+
         var location = string.IsNullOrWhiteSpace(request.Location)
             ? DefaultLocation
             : request.Location.Trim();
@@ -119,10 +129,13 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
         // The remote MCP servers execute tool calls on the model host's side, so a single
         // call is enough — unlike V3, there is no local tool-call loop to drive here.
+        runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
         ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
+        runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
 
         if (response.Status != ResponseStatus.Completed)
         {
+            LogRunLogOnFailure("model response did not complete");
             throw new InvalidOperationException(
                 $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
                 $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
@@ -134,6 +147,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
         if (modelOutput is null)
         {
+            LogRunLogOnFailure("model returned empty or invalid JSON");
             throw new InvalidOperationException(
                 $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
         }
@@ -142,6 +156,9 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
             WeatherUnitConversion.NormalizeSourceDegrees(modelOutput.WindDirectionSourceDegrees);
         modelOutput.WindDirectionSource =
             WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
+
+        runLog.AddLog(toolLoopTurns, $"Finish {nameof(GetCurrentAIWeatherV4Handler)}", null);
+        modelOutput.RunLogDetails = runLog.HydrateRuntimes();
 
         return modelOutput;
     }
@@ -158,6 +175,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
                 {
                     if (schema is JsonObject node && node["properties"] is JsonObject properties)
                     {
+                        properties.Remove("runLogDetails");
                         node["required"] = new JsonArray(properties.Select(property => (JsonNode)property.Key).ToArray());
                         node["additionalProperties"] = false;
                     }

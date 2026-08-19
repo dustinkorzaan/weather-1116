@@ -66,6 +66,39 @@
                         <div>@FormatLatLong(aiWeather.Latitude, aiWeather.Longitude)</div>
                     </FluentGridItem>
                 </FluentGrid>
+                @if (aiWeather.RunLogDetails.Count > 0)
+                {
+                    <div class="weather-grid-wrap" style="margin-top: 1rem;">
+                        <table class="weather-grid">
+                            <thead>
+                                <tr>
+                                    <th>Time (UTC)</th><th>Loop</th><th>Message</th><th>Input</th><th>Cached</th>
+                                    <th>Output</th><th>Reasoning</th><th>Total</th>
+                                    <th>Runtime (ms)</th><th>Loop Runtime (ms)</th><th>Running Total (ms)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var entry in aiWeather.RunLogDetails)
+                                {
+                                    <tr>
+                                        <td>@WeatherGridFormat.FormatRunLogTimestamp(entry.DateTimeUtc)</td>
+                                        <td>@entry.LoopNumber</td>
+                                        <td>@entry.Message</td>
+                                        <td>@entry.InputTokenCount</td>
+                                        <td>@entry.CachedTokenCount</td>
+                                        <td>@entry.OutputTokenCount</td>
+                                        <td>@entry.ReasoningTokenCount</td>
+                                        <td>@entry.TotalTokenCount</td>
+                                        <td>@WeatherGridFormat.FormatRunLogMs(entry.RuntimeMs)</td>
+                                        <td>@WeatherGridFormat.FormatRunLogMs(entry.LoopRuntimeMs)</td>
+                                        <td>@WeatherGridFormat.FormatRunLogMs(entry.RunningTotalMs)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <p class="stat-label" style="margin-top: 0.5rem;">Total Runtime: @WeatherGridFormat.FormatRunLogMs(aiWeather.RunLogDetails[^1].RunningTotalMs) ms</p>
+                    </div>
+                }
             </div>
         }
     </FluentCard>

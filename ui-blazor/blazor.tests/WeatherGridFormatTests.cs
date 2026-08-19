@@ -79,4 +79,27 @@ public sealed class WeatherGridFormatTests
         Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(double.PositiveInfinity));
         Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(double.NegativeInfinity));
     }
+
+    [Fact]
+    public void FormatRunLogTimestamp_FormatsAsUtcTimeOfDayWithMilliseconds()
+    {
+        var utc = new DateTime(2026, 8, 19, 14, 32, 7, 123, DateTimeKind.Utc);
+        Assert.Equal("14:32:07.123", WeatherGridFormat.FormatRunLogTimestamp(utc));
+    }
+
+    [Fact]
+    public void FormatRunLogTimestamp_ConvertsNonUtcKindToUtc()
+    {
+        var unspecified = new DateTime(2026, 8, 19, 14, 32, 7, 123, DateTimeKind.Unspecified);
+        Assert.Equal(
+            unspecified.ToUniversalTime().ToString("HH:mm:ss.fff"),
+            WeatherGridFormat.FormatRunLogTimestamp(unspecified));
+    }
+
+    [Fact]
+    public void FormatRunLogMs_FormatsWithThousandsSeparators()
+    {
+        Assert.Equal("0", WeatherGridFormat.FormatRunLogMs(0));
+        Assert.Equal("1,234", WeatherGridFormat.FormatRunLogMs(1234));
+    }
 }

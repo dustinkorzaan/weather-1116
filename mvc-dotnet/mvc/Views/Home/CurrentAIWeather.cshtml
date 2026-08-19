@@ -44,6 +44,19 @@
                     <dd id="ai-weather-lat-long"></dd>
                 </div>
             </dl>
+            <div id="ai-weather-run-log-wrap" class="weather-modal-grid-wrap" hidden>
+                <table class="weather-modal-grid">
+                    <thead>
+                        <tr>
+                            <th>Time (UTC)</th><th>Loop</th><th>Message</th><th>Input</th><th>Cached</th>
+                            <th>Output</th><th>Reasoning</th><th>Total</th>
+                            <th>Runtime (ms)</th><th>Loop Runtime (ms)</th><th>Running Total (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ai-weather-run-log-body"></tbody>
+                </table>
+                <p id="ai-weather-run-log-total" class="weather-run-log-total"></p>
+            </div>
         </div>
     </section>
 </div>
@@ -68,6 +81,9 @@
             windDirectionId: 'ai-weather-wind-direction',
             conditionsId: 'ai-weather-conditions',
             latLongId: 'ai-weather-lat-long',
+            runLogWrapId: 'ai-weather-run-log-wrap',
+            runLogBodyId: 'ai-weather-run-log-body',
+            runLogTotalId: 'ai-weather-run-log-total',
             endpoint: '@Url.Action("GetCurrentAIWeatherV3", "Home")'
         });
     </script>

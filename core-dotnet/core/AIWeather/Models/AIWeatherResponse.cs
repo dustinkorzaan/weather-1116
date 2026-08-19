@@ -27,4 +27,7 @@ public class AIWeatherResponse
 
     [JsonPropertyName("longitude")]
     public double Longitude { get; set; }
+
+    [JsonPropertyName("runLogDetails")]
+    public List<RunLogDetail> RunLogDetails { get; set; } = [];
 }

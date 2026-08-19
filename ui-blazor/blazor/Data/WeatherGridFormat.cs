@@ -91,4 +91,12 @@ public static class WeatherGridFormat
         var withDegrees = string.Create(CultureInfo.InvariantCulture, $"({NormalizeSourceDegrees(degrees)}°)");
         return label.Length == 0 ? withDegrees : $"{label} {withDegrees}";
     }
+
+    /// <summary>Formats a run-log timestamp as UTC, e.g. "14:32:07.123", regardless of the input's DateTimeKind.</summary>
+    public static string FormatRunLogTimestamp(DateTime utc) =>
+        utc.ToUniversalTime().ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture);
+
+    /// <summary>Formats a millisecond duration with thousands separators, e.g. "1,234".</summary>
+    public static string FormatRunLogMs(int milliseconds) =>
+        milliseconds.ToString("#,##0", CultureInfo.InvariantCulture);
 }
