@@ -8,7 +8,11 @@ vi.mock('../../utils/chatStream', () => ({
   streamChatMessage: vi.fn(),
 }));
 
+let restoreFullscreenStub = null;
+
 afterEach(() => {
+  restoreFullscreenStub?.();
+  restoreFullscreenStub = null;
   vi.restoreAllMocks();
   vi.resetAllMocks();
   vi.useRealTimers();
@@ -23,8 +27,17 @@ function stubChatMessagesScrollHeight(height) {
   });
 }
 
+// jsdom has no real Fullscreen API: document.fullscreenElement is a
+// prototype getter that always returns null, and requestFullscreen/
+// exitFullscreen are unimplemented. Stub them for one test at a time and
+// restore the originals afterward so later tests still exercise the CSS
+// fullscreen fallback path.
 function stubNativeFullscreen() {
   let current = null;
+  const originalFullscreenElementDescriptor = Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
+  const originalRequestFullscreen = HTMLElement.prototype.requestFullscreen;
+  const originalExitFullscreen = document.exitFullscreen;
+
   Object.defineProperty(document, 'fullscreenElement', {
     configurable: true,
     get: () => current,
@@ -39,6 +52,24 @@ function stubNativeFullscreen() {
     document.dispatchEvent(new Event('fullscreenchange'));
     return Promise.resolve();
   });
+
+  restoreFullscreenStub = () => {
+    if (originalFullscreenElementDescriptor) {
+      Object.defineProperty(document, 'fullscreenElement', originalFullscreenElementDescriptor);
+    } else {
+      delete document.fullscreenElement;
+    }
+    if (originalRequestFullscreen) {
+      HTMLElement.prototype.requestFullscreen = originalRequestFullscreen;
+    } else {
+      delete HTMLElement.prototype.requestFullscreen;
+    }
+    if (originalExitFullscreen) {
+      document.exitFullscreen = originalExitFullscreen;
+    } else {
+      delete document.exitFullscreen;
+    }
+  };
 }
 
 test('scrolls the visible chat to the bottom when a turn completes', async () => {
@@ -181,6 +212,35 @@ test('keeps the tool details tooltip visible inside a native-fullscreen chat win
   expect(chatWindow?.contains(tooltip)).toBe(true);
 
   await user.click(screen.getByRole('button', { name: /exit fullscreen/i }));
+});
+
+test('reparents an already-open tooltip when fullscreen is toggled mid-hover', async () => {
+  stubNativeFullscreen();
+  const user = userEvent.setup();
+  const chip = await renderFinishedToolChip(user);
+  const chatWindow = document.querySelector('.chat-window');
+
+  await user.hover(chip);
+  let tooltip = await screen.findByRole('tooltip');
+  expect(chatWindow?.contains(tooltip)).toBe(false);
+  expect(document.body.contains(tooltip)).toBe(true);
+
+  await user.click(screen.getByRole('button', { name: /enter fullscreen/i }));
+
+  // The fullscreenchange listener must reparent the still-open tooltip on
+  // its own; nothing forces another hover to trigger the move.
+  await waitFor(() => {
+    tooltip = screen.getByRole('tooltip');
+    expect(chatWindow?.contains(tooltip)).toBe(true);
+  });
+
+  await user.click(screen.getByRole('button', { name: /exit fullscreen/i }));
+
+  await waitFor(() => {
+    tooltip = screen.getByRole('tooltip');
+    expect(document.body.contains(tooltip)).toBe(true);
+    expect(chatWindow?.contains(tooltip)).toBe(false);
+  });
 });
 
 test('does not close tool details until the pointer leaves the popup', async () => {
