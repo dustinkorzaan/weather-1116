@@ -202,8 +202,11 @@ Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherV3Handler` in
     (`wx1116-agent-default` by default).
   - Instructions, response schema, and MCP tools (`mcp-srv-func-app`, `mcp-srv-app-service`)
     are configured on the agent in Azure.
-  - The console sends **only the user prompt** — Responses `instructions` and
+  - The console sends **only the user prompt** - Responses `instructions` and
     `text` fields are rejected when an agent is specified.
+  - Each MCP tool on the agent must use `require_approval: never`. V5 and Chat3
+    do not round-trip approvals in app code. See `docs/architecture.md` (V5 agent:
+    MCP approval must be Never).
   - This is the production pattern in `GetCurrentAIWeatherV5Handler` (API/MVC, the third tab on `/current-ai-weather`).
 
   **Simple Diagram without Agent/Loop**

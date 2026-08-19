@@ -44,7 +44,7 @@ public sealed class ChatFoundrySettings
 
     /// <summary>
     /// Responses client bound to the hosted Foundry agent. Chat3 sends only the
-    /// user prompt; instructions, tools, and model live on the agent.
+    /// user prompt; instructions, tools, model, and MCP approval live on the agent.
     /// </summary>
     public ProjectResponsesClient CreateProjectResponsesClientForChatAgent()
     {

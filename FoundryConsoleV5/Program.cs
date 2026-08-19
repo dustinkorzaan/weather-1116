@@ -73,23 +73,42 @@ internal class Program
 		try
 		{
 			ResponseResult response = await responseClient.CreateResponseAsync(options);
-			var content = response.GetOutputText();
-			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
-			if (aiWeather is null)
+			var requestedApproval = false;
+			foreach (ResponseItem item in response.OutputItems)
 			{
-				Console.WriteLine("Received empty or invalid JSON response.");
-				Console.WriteLine("Raw output:");
-				Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty)" : content);
+				if (item is McpToolCallApprovalRequestItem)
+				{
+					requestedApproval = true;
+					break;
+				}
+			}
+
+			if (requestedApproval)
+			{
+				Console.WriteLine("The agent requested MCP tool approval. V5 does not round-trip approvals.");
+				Console.WriteLine("Set each MCP tool on the agent to require_approval: never (Foundry portal: Agents → this agent → Tools → MCP → Approval = Never), then publish a new version.");
 			}
 			else
 			{
-				aiWeather.WindDirectionSourceDegrees =
-					WeatherUnitConversion.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees);
-				aiWeather.WindDirectionSource =
-					WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionSourceDegrees);
-				Console.WriteLine("\nResponse:");
-				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
+				var content = response.GetOutputText();
+				var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
+
+				if (aiWeather is null)
+				{
+					Console.WriteLine("Received empty or invalid JSON response.");
+					Console.WriteLine("Raw output:");
+					Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty)" : content);
+				}
+				else
+				{
+					aiWeather.WindDirectionSourceDegrees =
+						WeatherUnitConversion.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees);
+					aiWeather.WindDirectionSource =
+						WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionSourceDegrees);
+					Console.WriteLine("\nResponse:");
+					Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
+				}
 			}
 		}
 		catch (Exception ex)

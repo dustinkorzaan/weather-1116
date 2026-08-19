@@ -191,7 +191,8 @@ JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form
 7. **Tools:** add two **MCP** servers (same hosts Chat1b/Chat2b/V4 use). Foundry runs in
    Azure, so these URLs must be the **public** MCP apps, not `localhost`.
 8. Set MCP **approval to never** (`require_approval: never`) so Chat3 does not stall.
-   Chat3 will auto-approve if a request still appears.
+   Chat3 does not round-trip approvals in app code (same as V5). If a request still
+   appears, the tab errors with this config instruction.
 9. Create / publish a version. Chat3 calls the agent **by name** (project default version).
 
 ### MCP tools on the agent
