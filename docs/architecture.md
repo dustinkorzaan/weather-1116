@@ -92,7 +92,9 @@ All three UIs expose **Current AI Weather**, in three versions:
 - **V5** (`GetCurrentAIWeatherV5Handler`), which calls a hosted Foundry agent
   (`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`) that owns its own instructions,
   response schema, and MCP tools - this handler sends only the user prompt,
-  matching the Foundry Console V5 pattern.
+  matching the Foundry Console V5 / Chat3 pattern. If the hosted MCP tools
+  request approval, the handler auto-approves (same fallback as Chat3) and
+  continues until the agent returns JSON.
 
 **`/current-ai-weather`** exposes all three as tabs (V3/V4/V5). The
 **`/weather`** modal's "current" tab uses **V4** only.
@@ -432,7 +434,7 @@ V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
 | **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` |
 | **V4** | Model-direct: tools handled by remote MCP servers - used by the Chat1b/Chat2b remote-MCP chat tabs, and the production pattern in `GetCurrentAIWeatherV4Handler` (used by `/weather` and the V4 tab on `/current-ai-weather`) |
-| **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`) sends only the user prompt |
+| **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`) sends only the user prompt and auto-approves MCP tool calls (same fallback as Chat3) |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
 `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `Program.cs` and `.env.example`).

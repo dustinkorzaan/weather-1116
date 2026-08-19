@@ -15,9 +15,11 @@ namespace Core.AIWeather.Handlers;
 
 /// <summary>
 /// Calls a hosted Microsoft Foundry Agent for current weather (same pattern as Foundry
-/// Console V5). Instructions, response schema, and MCP tools are configured on the agent
-/// itself (named by <c>AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME</c>) - this handler sends only the
-/// user prompt, so there is no local schema, tool wiring, or tool-call loop to drive here.
+/// Console V5 / Chat3). Instructions, response schema, and MCP tools are configured on the
+/// agent itself (named by <c>AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME</c>) - this handler sends
+/// only the user prompt, so there is no local schema or tool wiring. Hosted MCP tools may
+/// still emit approval requests; this handler auto-approves them (same fallback as Chat3)
+/// and continues until the agent returns JSON.
 /// Unlike V3/V4, this handler cannot strip <c>runLogDetails</c> from the schema the model
 /// sees (there is no local schema to edit): the agent's own response schema must already
 /// match <see cref="AIWeatherResponse"/>'s camelCase fields and must not require
@@ -26,6 +28,7 @@ namespace Core.AIWeather.Handlers;
 public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV5Event, AIWeatherResponse>
 {
     private static readonly string DefaultLocation = "Nashville, TN";
+    private const int MaxApprovalTurns = 32;
 
     private readonly ILogger<GetCurrentAIWeatherV5Handler> _logger;
 
@@ -72,21 +75,81 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
 
         var userPrompt = $"What is the current weather in: `{location}`?";
 
-        CreateResponseOptions options = new()
+        // Hosted MCP tools often require approval (Chat3 has the same fallback). Without this
+        // loop, CreateResponseAsync returns as soon as the agent asks to call a tool instead of
+        // after weather JSON is produced. StoredOutputEnabled is required so PreviousResponseId
+        // can continue the approval round-trip.
+        var pendingApprovals = new List<McpToolCallApprovalRequestItem>();
+        string? previousResponseId = null;
+        var sendUserMessage = true;
+        ResponseResult? response = null;
+
+        while (true)
         {
-            InputItems =
+            if (toolLoopTurns >= MaxApprovalTurns)
             {
-                ResponseItem.CreateUserMessageItem(userPrompt),
-            },
-        };
+                LogRunLogOnFailure("MCP approval loop exceeded max turns");
+                throw new InvalidOperationException(
+                    $"Hosted agent MCP approval loop exceeded {MaxApprovalTurns} turns.");
+            }
 
-        // The hosted agent supplies instructions, response schema, and MCP tools itself, so a
-        // single call is enough - like V4, there is no local tool-call loop to drive here.
-        runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
-        ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
-        runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
+            CreateResponseOptions options = new()
+            {
+                StoredOutputEnabled = true,
+            };
 
-        if (response.Status != ResponseStatus.Completed)
+            if (!string.IsNullOrWhiteSpace(previousResponseId))
+            {
+                options.PreviousResponseId = previousResponseId;
+            }
+
+            if (sendUserMessage)
+            {
+                options.InputItems.Add(ResponseItem.CreateUserMessageItem(userPrompt));
+                sendUserMessage = false;
+            }
+            else
+            {
+                foreach (var approvalRequest in pendingApprovals)
+                {
+                    options.InputItems.Add(ResponseItem.CreateMcpApprovalResponseItem(
+                        approvalRequestId: approvalRequest.Id,
+                        approved: true));
+                }
+
+                pendingApprovals.Clear();
+            }
+
+            runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
+            response = await client.CreateResponseAsync(options, cancellationToken);
+            runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
+
+            if (!string.IsNullOrWhiteSpace(response.Id))
+            {
+                previousResponseId = response.Id;
+            }
+
+            foreach (ResponseItem item in response.OutputItems)
+            {
+                if (item is McpToolCallApprovalRequestItem approvalRequest)
+                {
+                    _logger.LogInformation(
+                        "V5 auto-approving MCP tool {ToolName} on {ServerLabel}",
+                        approvalRequest.ToolName,
+                        approvalRequest.ServerLabel);
+                    pendingApprovals.Add(approvalRequest);
+                }
+            }
+
+            if (pendingApprovals.Count == 0)
+            {
+                break;
+            }
+
+            toolLoopTurns++;
+        }
+
+        if (response!.Status != ResponseStatus.Completed)
         {
             LogRunLogOnFailure("model response did not complete");
             throw new InvalidOperationException(

@@ -3,7 +3,7 @@ namespace Core.Tests.AIWeather.Handlers;
 public class GetCurrentAIWeatherV5HandlerTests
 {
     [Fact]
-    public void Handler_CallsHostedAgentWithUserPromptOnlyAndNoLocalToolLoop()
+    public void Handler_CallsHostedAgentWithUserPromptOnlyAndAutoApprovesMcpTools()
     {
         var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));
 
@@ -11,6 +11,9 @@ public class GetCurrentAIWeatherV5HandlerTests
         Assert.Contains("GetProjectResponsesClientForAgent", source, StringComparison.Ordinal);
         Assert.Contains("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME", source, StringComparison.Ordinal);
         Assert.Contains("AIWeatherResponse", source, StringComparison.Ordinal);
+        Assert.Contains("McpToolCallApprovalRequestItem", source, StringComparison.Ordinal);
+        Assert.Contains("CreateMcpApprovalResponseItem", source, StringComparison.Ordinal);
+        Assert.Contains("StoredOutputEnabled = true", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ChatMcpToolFactory", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolExecutor", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolDefinitions", source, StringComparison.Ordinal);

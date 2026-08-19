@@ -202,8 +202,10 @@ Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherV3Handler` in
     (`wx1116-agent-default` by default).
   - Instructions, response schema, and MCP tools (`mcp-srv-func-app`, `mcp-srv-app-service`)
     are configured on the agent in Azure.
-  - The console sends **only the user prompt** — Responses `instructions` and
+  - The console sends **only the user prompt** - Responses `instructions` and
     `text` fields are rejected when an agent is specified.
+  - If hosted MCP tools request approval, the console auto-approves (same fallback
+    as Chat3) and continues until the agent returns JSON.
   - This is the production pattern in `GetCurrentAIWeatherV5Handler` (API/MVC, the third tab on `/current-ai-weather`).
 
   **Simple Diagram without Agent/Loop**

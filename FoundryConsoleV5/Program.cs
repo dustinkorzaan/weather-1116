@@ -8,6 +8,7 @@ using OpenAI.Responses;
 using System;
 using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -51,6 +52,7 @@ internal class Program
 		Console.WriteLine("- Instructions");
 		Console.WriteLine("- Response schema");
 		Console.WriteLine("- MCP tools (lat/long + current weather)");
+		Console.WriteLine("- This console auto-approves MCP tool calls (same fallback as Chat3)");
 		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
 
 		ProjectOpenAIClient projectOpenAIClient = new(
@@ -62,18 +64,65 @@ internal class Program
 
 		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
-		CreateResponseOptions options = new()
-		{
-			InputItems =
-			{
-				ResponseItem.CreateUserMessageItem(userPrompt),
-			},
-		};
-
 		try
 		{
-			ResponseResult response = await responseClient.CreateResponseAsync(options);
-			var content = response.GetOutputText();
+			var pendingApprovals = new List<McpToolCallApprovalRequestItem>();
+			string? previousResponseId = null;
+			var sendUserMessage = true;
+			ResponseResult? response = null;
+
+			while (true)
+			{
+				CreateResponseOptions options = new()
+				{
+					StoredOutputEnabled = true,
+				};
+
+				if (!string.IsNullOrWhiteSpace(previousResponseId))
+				{
+					options.PreviousResponseId = previousResponseId;
+				}
+
+				if (sendUserMessage)
+				{
+					options.InputItems.Add(ResponseItem.CreateUserMessageItem(userPrompt));
+					sendUserMessage = false;
+				}
+				else
+				{
+					foreach (var approvalRequest in pendingApprovals)
+					{
+						options.InputItems.Add(ResponseItem.CreateMcpApprovalResponseItem(
+							approvalRequestId: approvalRequest.Id,
+							approved: true));
+					}
+
+					pendingApprovals.Clear();
+				}
+
+				response = await responseClient.CreateResponseAsync(options);
+
+				if (!string.IsNullOrWhiteSpace(response.Id))
+				{
+					previousResponseId = response.Id;
+				}
+
+				foreach (ResponseItem item in response.OutputItems)
+				{
+					if (item is McpToolCallApprovalRequestItem approvalRequest)
+					{
+						Console.WriteLine($"Auto-approving MCP tool {approvalRequest.ToolName} on {approvalRequest.ServerLabel}");
+						pendingApprovals.Add(approvalRequest);
+					}
+				}
+
+				if (pendingApprovals.Count == 0)
+				{
+					break;
+				}
+			}
+
+			var content = response!.GetOutputText();
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
 			if (aiWeather is null)
