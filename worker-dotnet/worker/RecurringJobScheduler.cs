@@ -18,9 +18,16 @@ public class RecurringJobScheduler : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _recurringJobs.AddOrUpdateMediatREvent<ConfirmNashvilleAIWeatherEvent>(
-            "confirm-nashville-ai-weather",
+        _recurringJobs.AddOrUpdateMediatREvent(
+            "confirm-nashville-ai-weather-v3",
             Cron.Daily(2),
+            new ConfirmNashvilleAIWeatherEvent { Version = 3 },
+            queue: "batch-multi");
+
+        _recurringJobs.AddOrUpdateMediatREvent(
+            "confirm-nashville-ai-weather-v4",
+            Cron.Daily(2),
+            new ConfirmNashvilleAIWeatherEvent { Version = 4 },
             queue: "batch-multi");
 
         return Task.CompletedTask;

@@ -17,13 +17,13 @@ public class HangfireMediatREventSerializerTests
     [Fact]
     public void SerializeAndDeserialize_RoundTripsEventPayload()
     {
-        var @event = new GetCurrentAIWeatherEvent { Location = "Nashville, TN" };
-        var typeName = HangfireMediatREventSerializer.GetTypeName(typeof(GetCurrentAIWeatherEvent));
+        var @event = new GetCurrentAIWeatherV3Event { Location = "Nashville, TN" };
+        var typeName = HangfireMediatREventSerializer.GetTypeName(typeof(GetCurrentAIWeatherV3Event));
         var json = HangfireMediatREventSerializer.Serialize(@event);
 
         var deserialized = HangfireMediatREventSerializer.Deserialize(typeName, json);
 
-        var roundTripped = Assert.IsType<GetCurrentAIWeatherEvent>(deserialized);
+        var roundTripped = Assert.IsType<GetCurrentAIWeatherV3Event>(deserialized);
         Assert.Equal("Nashville, TN", roundTripped.Location);
     }
 

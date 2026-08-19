@@ -53,10 +53,23 @@ public class HomeController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetCurrentAIWeather([FromQuery] string? location, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCurrentAIWeatherV3([FromQuery] string? location, CancellationToken cancellationToken)
     {
         var response = await _mediator.Send(
-            new GetCurrentAIWeatherEvent
+            new GetCurrentAIWeatherV3Event
+            {
+                Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
+            },
+            cancellationToken);
+
+        return Json(response);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetCurrentAIWeatherV4([FromQuery] string? location, CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(
+            new GetCurrentAIWeatherV4Event
             {
                 Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
             },

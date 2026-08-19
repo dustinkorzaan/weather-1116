@@ -84,11 +84,12 @@ if (!string.IsNullOrWhiteSpace(dbConnectionString))
 
 var app = builder.Build();
 
-// Drop legacy recurring job from shared SQL storage (handler removed with forecast demo).
+// Drop legacy recurring jobs from shared SQL storage (superseded by newer job ids).
 using (var scope = app.Services.CreateScope())
 {
-	scope.ServiceProvider.GetRequiredService<IRecurringJobManager>()
-		.RemoveIfExists("weather-forecast");
+	var recurringJobs = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+	recurringJobs.RemoveIfExists("weather-forecast");
+	recurringJobs.RemoveIfExists("confirm-nashville-ai-weather");
 }
 
 // Hangfire dashboard, open to all (POC — no auth). It reads the shared storage,

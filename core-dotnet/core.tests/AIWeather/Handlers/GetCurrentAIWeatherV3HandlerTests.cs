@@ -1,11 +1,11 @@
 namespace Core.Tests.AIWeather.Handlers;
 
-public class GetCurrentAIWeatherHandlerTests
+public class GetCurrentAIWeatherV3HandlerTests
 {
     [Fact]
     public void SystemPrompt_UsesFriendlySummaryWithoutLatLong()
     {
-        var prompt = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherHandler.cs"));
+        var prompt = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV3Handler.cs"));
 
         Assert.Contains("one or two friendly sentences describing the current weather", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("place name", prompt, StringComparison.OrdinalIgnoreCase);
@@ -44,7 +44,7 @@ public class GetCurrentAIWeatherHandlerTests
     [Fact]
     public void Handler_UsesInProcessToolLoopNotRemoteMcp()
     {
-        var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherHandler.cs"));
+        var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV3Handler.cs"));
 
         Assert.Contains("WeatherToolExecutor", source, StringComparison.Ordinal);
         Assert.Contains("WeatherToolDefinitions", source, StringComparison.Ordinal);

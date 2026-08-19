@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import SafeGfmMarkdown from './markdown/SafeGfmMarkdown';
-import { useLazyGetCurrentAIWeatherQuery } from '../services/weatherApi';
+import { useLazyGetCurrentAIWeatherV3Query } from '../services/weatherApi';
 import {
   formatLatLong,
   formatTemperatureF,
@@ -17,7 +17,7 @@ function CurrentAIWeather() {
   const [location, setLocation] = useState(
     () => locationFromSearchParams(searchParams) || 'Nashville, TN'
   );
-  const [trigger, { data, isFetching, isError, error }] = useLazyGetCurrentAIWeatherQuery();
+  const [trigger, { data, isFetching, isError, error }] = useLazyGetCurrentAIWeatherV3Query();
   const queryHandledRef = useRef(false);
 
   const requestWeather = (rawLocation) => {

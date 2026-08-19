@@ -60,6 +60,8 @@ jobs:
     needs: build
     environment: prod
     env:
+      MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
+      MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
       BUILD_START: ${{ needs.build.outputs.build_start }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -100,12 +102,6 @@ jobs:
               exit 1
             fi
 
-            az webapp config appsettings delete \
-              --name weather1116-prod-worker \
-              --resource-group "$APP_RG" \
-              --setting-names MCP_SRV_FUNC_APP_URL MCP_SRV_FUNC_APP_KEY MCP_SRV_APP_SERVICE_URL MCP_SRV_APP_SERVICE_KEY \
-              --output none
-
             az webapp config appsettings set \
               --name weather1116-prod-worker \
               --resource-group "$APP_RG" \
@@ -114,6 +110,10 @@ jobs:
                 AZURE_FOUNDRY_PROD_EUS2_PROJ_URL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
                 AZURE_FOUNDRY_PROD_EUS2_KEY="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}" \
                 AZURE_FOUNDRY_PROD_EUS2_MODEL="${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}" \
+                MCP_SRV_APP_SERVICE_URL="${{ env.MCP_SRV_APP_SERVICE_URL }}" \
+                MCP_SRV_FUNC_APP_URL="${{ env.MCP_SRV_FUNC_APP_URL }}" \
+                MCP_SRV_FUNC_APP_KEY="${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}" \
+                MCP_SRV_APP_SERVICE_KEY="${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}" \
                 ASPNETCORE_ENVIRONMENT=Production \
                 ASPNETCORE_DETAILEDERRORS=false \
                 BUILD_NUMBER="${{ env.BUILD_NUMBER }}" \

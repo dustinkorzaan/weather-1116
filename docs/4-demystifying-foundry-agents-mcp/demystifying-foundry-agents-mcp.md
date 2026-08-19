@@ -25,8 +25,10 @@ building blocks**, not deployables.
 Run from VS Code (**Foundry Console V1** … **V5**) or `dotnet run` in each
 folder. All use the `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `.env.example`).
 
-Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherHandler` in
-`core-dotnet/core/AIWeather` (the production V3-pattern handler) **→ V4 → V5**.
+Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherV3Handler` in
+`core-dotnet/core/AIWeather` (the production V3-pattern handler, used by
+`/current-ai-weather`) **→ V4 →** `GetCurrentAIWeatherV4Handler` (the
+production V4-pattern handler, used by `/weather` and other use cases) **→ V5**.
 
 - **V1 — Model-direct (legacy endpoint)** — [`FoundryConsoleV1`](../../FoundryConsoleV1)
   (`FoundryConsoleV1ModelDirectLegacy.csproj`)
@@ -78,7 +80,7 @@ Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherHandler` in
   - Registers `GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as tools
     answered by local in-process looping (same Core code reused in the tools).
   - Model chooses tools that are actually handled locally; no remote MCP servers yet.
-  - This is the production pattern in `GetCurrentAIWeatherHandler` (API/MVC).
+  - This is the production pattern in `GetCurrentAIWeatherV3Handler` (API/MVC, used by `/current-ai-weather`).
 
   **Simple Diagram without Agent/Loop**
 

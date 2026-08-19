@@ -5,8 +5,8 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
+using Core.Chat.Services;
 using Core.Json;
-using Core.Tools;
 using Core.Weather;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using MediatR;
@@ -17,25 +17,24 @@ using OpenAI.Responses;
 namespace Core.AIWeather.Handlers;
 
 /// <summary>
-/// Calls the hosted model directly for current weather (same pattern as Foundry Console V3).
-/// Geo and weather tools run in-process via <see cref="WeatherToolExecutor"/>; the model
-/// drives the tool-call loop, but no network hop leaves this process to resolve a tool call.
+/// Calls the hosted model directly for current weather (same pattern as Foundry Console V4).
+/// Remote MCP tools (resolved via <see cref="ChatMcpToolFactory"/>) resolve geo and weather
+/// data; the model host executes those tool calls itself, so there is no local tool-call loop.
 /// </summary>
-public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEvent, AIWeatherResponse>
+public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV4Event, AIWeatherResponse>
 {
     private static readonly string DefaultLocation = "Nashville, TN";
-    private const int MaxToolLoopTurns = 32;
 
-    private readonly WeatherToolExecutor _toolExecutor;
-    private readonly ILogger<GetCurrentAIWeatherHandler> _logger;
+    private readonly ChatMcpToolFactory _mcpToolFactory;
+    private readonly ILogger<GetCurrentAIWeatherV4Handler> _logger;
 
-    public GetCurrentAIWeatherHandler(WeatherToolExecutor toolExecutor, ILogger<GetCurrentAIWeatherHandler> logger)
+    public GetCurrentAIWeatherV4Handler(ChatMcpToolFactory mcpToolFactory, ILogger<GetCurrentAIWeatherV4Handler> logger)
     {
-        _toolExecutor = toolExecutor;
+        _mcpToolFactory = mcpToolFactory;
         _logger = logger;
     }
 
-    public async Task<AIWeatherResponse> Handle(GetCurrentAIWeatherEvent request, CancellationToken cancellationToken)
+    public async Task<AIWeatherResponse> Handle(GetCurrentAIWeatherV4Event request, CancellationToken cancellationToken)
     {
         var location = string.IsNullOrWhiteSpace(request.Location)
             ? DefaultLocation
@@ -56,7 +55,7 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
             # Role & Operational Rules
             You are a dedicated weather assistant.
             Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
-            You have access to tools for location mapping and real-time public meteorology data.
+            You have access to 3rd-party Model Context Protocol (MCP) tools for location mapping and real-time public meteorology data.
 
             # Tool Protocol
             1. When given a location, immediately call your coordinates resolution tool. It returns ranked matches (rank 1 is best); select the single best-matching place using name, state, and country — normally rank 1, but you may skip rank 1 when a lower rank is clearly correct.
@@ -95,72 +94,43 @@ public class GetCurrentAIWeatherHandler : IRequestHandler<GetCurrentAIWeatherEve
                 Endpoint = endpoint,
             });
 
-        FunctionTool getLatLongTool = WeatherToolDefinitions.CreateGetLatLongTool();
-        FunctionTool getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();
+        var (getLatLongTool, getWeatherTool) = _mcpToolFactory.CreateTools();
 
         var inputItems = new List<ResponseItem>
         {
             ResponseItem.CreateSystemMessageItem(systemPrompt),
             // Placing the dynamic query at the absolute end ensures the unchanging system instructions,
-            // response schema, and tool schemas form a stable hash that qualifies for Azure OpenAI
+            // response schema, and MCP tool schemas form a stable hash that qualifies for Azure OpenAI
             // Prompt Caching (1,024+ token threshold).
             ResponseItem.CreateUserMessageItem(userPrompt),
         };
 
-        bool requiresAction;
-        string? content = null;
-        var toolLoopTurns = 0;
-
-        do
+        CreateResponseOptions options = new(deploymentName, inputItems)
         {
-            if (++toolLoopTurns > MaxToolLoopTurns)
+            Tools = { getLatLongTool, getWeatherTool },
+            TextOptions = new ResponseTextOptions
             {
-                throw new InvalidOperationException(
-                    $"AI Weather tool loop exceeded {MaxToolLoopTurns} model turns.");
-            }
+                TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+                    jsonSchemaFormatName: "ai_weather_response",
+                    jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+                    jsonSchemaIsStrict: true),
+            },
+        };
 
-            requiresAction = false;
+        // The remote MCP servers execute tool calls on the model host's side, so a single
+        // call is enough — unlike V3, there is no local tool-call loop to drive here.
+        ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
 
-            CreateResponseOptions options = new(deploymentName, inputItems)
-            {
-                Tools = { getLatLongTool, getPublicWeatherCurrentTool },
-                TextOptions = new ResponseTextOptions
-                {
-                    TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
-                        jsonSchemaFormatName: "ai_weather_response",
-                        jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
-                        jsonSchemaIsStrict: true),
-                },
-            };
+        if (response.Status != ResponseStatus.Completed)
+        {
+            throw new InvalidOperationException(
+                $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
+                $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
+                $"error: {response.Error?.Message ?? "(none)"}");
+        }
 
-            ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
-
-            var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
-            if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
-            {
-                throw new InvalidOperationException(
-                    $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
-                    $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
-                    $"error: {response.Error?.Message ?? "(none)"}");
-            }
-
-            inputItems.AddRange(response.OutputItems);
-
-            foreach (FunctionCallResponseItem functionCall in functionCalls)
-            {
-                var functionOutput = await _toolExecutor.ExecuteAsync(functionCall, cancellationToken);
-                inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
-                requiresAction = true;
-            }
-
-            if (!requiresAction)
-            {
-                content = response.GetOutputText();
-            }
-        } while (requiresAction);
-
-        var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(
-            content ?? throw new InvalidOperationException("Model finished without producing content."));
+        var content = response.GetOutputText();
+        var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
         if (modelOutput is null)
         {
