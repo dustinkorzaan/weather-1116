@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import SafeGfmMarkdown from '../markdown/SafeGfmMarkdown';
@@ -16,7 +16,11 @@ import { nativeFullscreenElement, useChatFullscreen } from './useChatFullscreen'
 function usePortalContainer() {
   const [container, setContainer] = useState(() => nativeFullscreenElement() || document.body);
 
-  useEffect(() => {
+  // useLayoutEffect (not useEffect) so the reparent + reposition happen
+  // before paint, matching the synchronous reparent in the Blazor/MVC
+  // fullscreenchange listeners and avoiding a frame where the tooltip
+  // renders detached from the (now-hidden) fullscreen subtree.
+  useLayoutEffect(() => {
     function onChange() {
       setContainer(nativeFullscreenElement() || document.body);
     }
@@ -135,6 +139,9 @@ function ToolChip({ content, details, portalContainer }) {
       return undefined;
     }
 
+    // Entering/exiting fullscreen reflows the chat window (and moves the
+    // chip), and reparents this tooltip via portalContainer, so both must
+    // trigger a fresh measurement — not just scroll/resize.
     updatePosition();
     const onReposition = (event) => {
       if (tooltipRef.current && event.target && tooltipRef.current.contains(event.target)) {
@@ -148,7 +155,7 @@ function ToolChip({ content, details, portalContainer }) {
       window.removeEventListener('scroll', onReposition, true);
       window.removeEventListener('resize', onReposition);
     };
-  }, [open, details]);
+  }, [open, details, portalContainer]);
 
   return (
     <div

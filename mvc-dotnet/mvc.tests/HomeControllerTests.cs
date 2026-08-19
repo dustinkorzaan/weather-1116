@@ -328,6 +328,13 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("safeGfmMarkdown.render", script);
         Assert.Contains("streaming", script);
 
+        // The hover card must follow the chat window into (and back out of)
+        // native fullscreen, including WebKit's prefixed API, or it renders
+        // invisible outside the fullscreen top layer.
+        Assert.Contains("document.webkitFullscreenElement", script);
+        Assert.Contains("document.addEventListener('fullscreenchange', onToolHoverFullscreenChange)", script);
+        Assert.Contains("document.addEventListener('webkitfullscreenchange', onToolHoverFullscreenChange)", script);
+
         var markdown = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/markdown/safeGfmMarkdown.js"));
         Assert.Contains("marked.parse", markdown);
         Assert.Contains("gfm: true", markdown);

@@ -208,13 +208,15 @@ test('keeps the tool details tooltip visible inside a native-fullscreen chat win
   const tooltip = await screen.findByRole('tooltip');
 
   // A native-fullscreen element only paints its own subtree, so a tooltip
-  // portaled outside it (e.g. to document.body) would be invisible.
-  expect(chatWindow?.contains(tooltip)).toBe(true);
+  // portaled outside it (e.g. to document.body) would be invisible. Check
+  // the direct parent, not .contains(), since chatWindow is itself inside
+  // document.body and would satisfy a containment check either way.
+  expect(tooltip.parentElement).toBe(chatWindow);
 
   await user.click(screen.getByRole('button', { name: /exit fullscreen/i }));
 });
 
-test('reparents an already-open tooltip when fullscreen is toggled mid-hover', async () => {
+test('reparents and repositions an already-open tooltip when fullscreen is toggled mid-hover', async () => {
   stubNativeFullscreen();
   const user = userEvent.setup();
   const chip = await renderFinishedToolChip(user);
@@ -222,24 +224,33 @@ test('reparents an already-open tooltip when fullscreen is toggled mid-hover', a
 
   await user.hover(chip);
   let tooltip = await screen.findByRole('tooltip');
-  expect(chatWindow?.contains(tooltip)).toBe(false);
-  expect(document.body.contains(tooltip)).toBe(true);
+  expect(tooltip.parentElement).toBe(document.body);
+  const preFullscreenTop = tooltip.style.top;
+
+  // Simulate the chip moving as the chat window expands into fullscreen
+  // layout, so a stale (pre-toggle) position would be caught below.
+  const rectSpy = vi
+    .spyOn(chip, 'getBoundingClientRect')
+    .mockReturnValue({ top: 400, bottom: 420, left: 100, right: 200, width: 100, height: 20 });
 
   await user.click(screen.getByRole('button', { name: /enter fullscreen/i }));
 
-  // The fullscreenchange listener must reparent the still-open tooltip on
-  // its own; nothing forces another hover to trigger the move.
+  // The fullscreenchange listener must reparent AND reposition the
+  // still-open tooltip on its own; nothing forces another hover.
   await waitFor(() => {
     tooltip = screen.getByRole('tooltip');
-    expect(chatWindow?.contains(tooltip)).toBe(true);
+    expect(tooltip.parentElement).toBe(chatWindow);
   });
+  expect(rectSpy).toHaveBeenCalled();
+  expect(tooltip.style.top).toBe('420px');
+  expect(tooltip.style.top).not.toBe(preFullscreenTop);
 
+  rectSpy.mockRestore();
   await user.click(screen.getByRole('button', { name: /exit fullscreen/i }));
 
   await waitFor(() => {
     tooltip = screen.getByRole('tooltip');
-    expect(document.body.contains(tooltip)).toBe(true);
-    expect(chatWindow?.contains(tooltip)).toBe(false);
+    expect(tooltip.parentElement).toBe(document.body);
   });
 });
 
