@@ -52,3 +52,11 @@ Standalone multi-turn chat page with five tabs:
 | Chat2a | In-process | Agent Framework | Like Foundry Console V3 |
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Responses for agent | Like Foundry Console V5 (`wx1116-agent-chat`) |
+
+## Out of Scope
+
+- **Authentication** — Login/identity provider (e.g. Auth0)
+- **Per-user custom map pins** — Map pins scoped to individual user accounts
+- **Per-pin photo uploads** — Image upload/download per pin via blob storage SAS URIs
+- **Infrastructure as Code** — Provisioning Azure resources via Bicep
+- **Foundry config as code** — Managing Foundry models, tools, and agents via `azure.yaml`
