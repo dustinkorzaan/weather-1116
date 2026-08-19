@@ -45,4 +45,19 @@ public class AIWeatherController : ControllerBase
 
 		return Ok(response);
 	}
+
+	[HttpGet("CurrentV5")]
+	public async Task<ActionResult<AIWeatherResponse>> GetCurrentV5(
+		[FromQuery] string? location,
+		CancellationToken cancellationToken)
+	{
+		var response = await _mediator.Send(
+			new GetCurrentAIWeatherV5Event
+			{
+				Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
+			},
+			cancellationToken);
+
+		return Ok(response);
+	}
 }

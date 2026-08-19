@@ -20,15 +20,18 @@ See also [`docs/architecture.md`](../architecture.md) and
 ## Foundry console demos (learning path)
 
 Five standalone console apps in `Weather.sln` show how the production AI weather
-path was built up, with **V5** as a hosted-agent contrast. They are **training
-building blocks**, not deployables.
+path was built up. They are **training building blocks**, not deployables. V1
+and V2 stay console-only; V3, V4, and V5 also back a production handler.
 Run from VS Code (**Foundry Console V1** … **V5**) or `dotnet run` in each
 folder. All use the `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `.env.example`).
 
 Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherV3Handler` in
-`core-dotnet/core/AIWeather` (the production V3-pattern handler, used by
-`/current-ai-weather`) **→ V4 →** `GetCurrentAIWeatherV4Handler` (the
-production V4-pattern handler, used by `/weather` and other use cases) **→ V5**.
+`core-dotnet/core/AIWeather` (the production V3-pattern handler) **→ V4 →**
+`GetCurrentAIWeatherV4Handler` (the production V4-pattern handler, used by
+`/weather` and the V4 tab on `/current-ai-weather`) **→ V5 →**
+`GetCurrentAIWeatherV5Handler` (the production V5-pattern handler, the third
+`/current-ai-weather` tab; sends only the user prompt to
+`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
 
 - **V1 — Model-direct (legacy endpoint)** — [`FoundryConsoleV1`](../../FoundryConsoleV1)
   (`FoundryConsoleV1ModelDirectLegacy.csproj`)
@@ -80,7 +83,7 @@ production V4-pattern handler, used by `/weather` and other use cases) **→ V5*
   - Registers `GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as tools
     answered by local in-process looping (same Core code reused in the tools).
   - Model chooses tools that are actually handled locally; no remote MCP servers yet.
-  - This is the production pattern in `GetCurrentAIWeatherV3Handler` (API/MVC, used by `/current-ai-weather`).
+  - This is the production pattern in `GetCurrentAIWeatherV3Handler` (API/MVC, a tab on `/current-ai-weather`).
 
   **Simple Diagram without Agent/Loop**
 
@@ -201,6 +204,7 @@ production V4-pattern handler, used by `/weather` and other use cases) **→ V5*
     are configured on the agent in Azure.
   - The console sends **only the user prompt** — Responses `instructions` and
     `text` fields are rejected when an agent is specified.
+  - This is the production pattern in `GetCurrentAIWeatherV5Handler` (API/MVC, the third tab on `/current-ai-weather`).
 
   **Simple Diagram without Agent/Loop**
 

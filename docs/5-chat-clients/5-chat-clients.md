@@ -1,8 +1,9 @@
 # Chat Clients (Chat1a–Chat2b and Chat3)
 
 Standalone multi-turn chat in all three UIs (React, MVC, Blazor). This feature is **separate**
-from the existing **Current AI Weather** widget (`/AIWeather/CurrentV3` on `/current-ai-weather`,
-`/AIWeather/CurrentV4` elsewhere), which remains a one-shot structured JSON response.
+from the existing **Current AI Weather** widget (`/AIWeather/CurrentV3`, `/CurrentV4`, or
+`/CurrentV5` - V3/V4/V5 tabs on `/current-ai-weather`, V4 only on `/weather`), which remains
+a one-shot structured JSON response.
 
 ## The matrix
 
@@ -255,7 +256,7 @@ Keep this in sync with `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs
 
 | | Current AI Weather | Chat clients |
 | --- | --- | --- |
-| Endpoint | `GET /AIWeather/CurrentV3` or `/CurrentV4` | `POST /Chat1a/messages`, etc. |
+| Endpoint | `GET /AIWeather/CurrentV3`, `/CurrentV4`, or `/CurrentV5` | `POST /Chat1a/messages`, etc. |
 | Output | Strict `AIWeatherResponse` JSON | Conversational text (streamed) |
 | Memory | None (single shot) | Per-tab session history |
 | UI | `/current-ai-weather` page | `/chat-clients` chat panel (five tabs, per-tab session) |
