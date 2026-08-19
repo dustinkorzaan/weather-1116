@@ -1032,9 +1032,11 @@ html[data-theme="dark"] .weather-map-logo-pin {
 
 .wind-direction-arrow {
   display: inline-block;
-  font-size: 1.15em;
-  line-height: 1;
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
   transform-origin: center;
+  vertical-align: middle;
 }
 
 /* Chat */
