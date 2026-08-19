@@ -110,6 +110,30 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
+    public async Task CurrentAIWeather_HasV3V4V5Tabs()
+    {
+        var response = await _client.GetAsync("/current-ai-weather");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains("data-ai-weather-tab=\"v3\"", html);
+        Assert.Contains("data-ai-weather-tab=\"v4\"", html);
+        Assert.Contains("data-ai-weather-tab=\"v5\"", html);
+        Assert.Contains("In-process tool loop · Like Foundry Console V3", html);
+        Assert.Contains("Remote MCP tools · Like Foundry Console V4", html);
+        Assert.Contains("Hosted Foundry agent · Like Foundry Console V5", html);
+        Assert.Contains("id=\"ai-weather-form-v4\"", html);
+        Assert.Contains("id=\"ai-weather-location-v4\"", html);
+        Assert.Contains("id=\"ai-weather-form-v5\"", html);
+        Assert.Contains("id=\"ai-weather-location-v5\"", html);
+        Assert.Contains("currentAIWeatherTabs.js", html);
+        Assert.Contains("GetCurrentAIWeatherV3", html);
+        Assert.Contains("GetCurrentAIWeatherV4", html);
+        Assert.Contains("GetCurrentAIWeatherV5", html);
+    }
+
+    [Fact]
     public void IndexView_UsesCityAndStateMapPinLabels()
     {
         var view = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/Views/Home/Index.cshtml"));

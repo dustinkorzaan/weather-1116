@@ -10,6 +10,14 @@
     <FluentCard Class="weather-card">
         <h2 class="section-title">Current AI Weather</h2>
 
+        <FluentTabs @bind-ActiveTabId="ActiveTab">
+            @foreach (var tab in _tabs)
+            {
+                <FluentTab Id="@tab.Id" Label="@tab.Label"></FluentTab>
+            }
+        </FluentTabs>
+        <p class="muted tab-description">@_tabs.First(tab => tab.Id == _activeTab).Description</p>
+
         <EditForm Model="this" OnValidSubmit="GetCurrentAIWeather" @onsubmit:preventDefault="true">
             <div class="form-row">
                 <FluentTextField @bind-Value="location"
@@ -105,10 +113,61 @@
 </div>
 
 @code {
-    private string location = "Nashville, TN";
-    private bool isAiWeatherLoading;
-    private string? aiWeatherError;
-    private AIWeatherResponse? aiWeather;
+    private sealed record AiWeatherTab(string Id, string Label, string Description);
+
+    private readonly AiWeatherTab[] _tabs =
+    [
+        new("v3", "V3", "In-process tool loop · Like Foundry Console V3"),
+        new("v4", "V4", "Remote MCP tools · Like Foundry Console V4"),
+        new("v5", "V5", "Hosted Foundry agent · Like Foundry Console V5"),
+    ];
+
+    private string _activeTab = "v3";
+
+    private string ActiveTab
+    {
+        get => _activeTab;
+        set => _activeTab = value;
+    }
+
+    private readonly Dictionary<string, string> _locations = new()
+    {
+        ["v3"] = "Nashville, TN",
+        ["v4"] = "Nashville, TN",
+        ["v5"] = "Nashville, TN",
+    };
+
+    private readonly Dictionary<string, AIWeatherResponse?> _results = new()
+    {
+        ["v3"] = null,
+        ["v4"] = null,
+        ["v5"] = null,
+    };
+
+    private readonly Dictionary<string, string?> _errors = new()
+    {
+        ["v3"] = null,
+        ["v4"] = null,
+        ["v5"] = null,
+    };
+
+    private readonly Dictionary<string, bool> _loading = new()
+    {
+        ["v3"] = false,
+        ["v4"] = false,
+        ["v5"] = false,
+    };
+
+    private string location
+    {
+        get => _locations[_activeTab];
+        set => _locations[_activeTab] = value;
+    }
+
+    private AIWeatherResponse? aiWeather => _results[_activeTab];
+    private string? aiWeatherError => _errors[_activeTab];
+    private bool isAiWeatherLoading => _loading[_activeTab];
+
     private bool queryHandled;
 
     [SupplyParameterFromQuery(Name = "location")]
@@ -141,29 +200,42 @@
 
     private async Task GetCurrentAIWeather()
     {
-        isAiWeatherLoading = true;
-        aiWeatherError = null;
-        aiWeather = null;
+        var tab = _activeTab;
+        _loading[tab] = true;
+        _errors[tab] = null;
+        _results[tab] = null;
         StateHasChanged();
 
         try
         {
-            var trimmed = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location.Trim();
-            location = trimmed;
-            aiWeather = await WeatherClient.GetCurrentAIWeatherV3(trimmed);
-            if (aiWeather is null)
+            var trimmed = string.IsNullOrWhiteSpace(_locations[tab]) ? "Nashville, TN" : _locations[tab].Trim();
+            _locations[tab] = trimmed;
+
+            AIWeatherResponse? response = tab switch
             {
-                aiWeatherError = "Unable to load AI weather.";
+                "v3" => await WeatherClient.GetCurrentAIWeatherV3(trimmed),
+                "v4" => await WeatherClient.GetCurrentAIWeatherV4(trimmed),
+                "v5" => await WeatherClient.GetCurrentAIWeatherV5(trimmed),
+                _ => null,
+            };
+
+            if (response is null)
+            {
+                _errors[tab] = "Unable to load AI weather.";
+            }
+            else
+            {
+                _results[tab] = response;
             }
         }
         catch
         {
-            aiWeather = null;
-            aiWeatherError = "Unable to load AI weather.";
+            _results[tab] = null;
+            _errors[tab] = "Unable to load AI weather.";
         }
         finally
         {
-            isAiWeatherLoading = false;
+            _loading[tab] = false;
         }
     }
 

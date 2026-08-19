@@ -106,6 +106,26 @@ public sealed class PageSplitTests
     }
 
     [Fact]
+    public void CurrentAIWeather_HasV3V4V5Tabs()
+    {
+        using var context = CreateContext();
+        var rendered = context.Render<WeatherBlazor.Pages.CurrentAIWeather>();
+
+        Assert.Contains("In-process tool loop · Like Foundry Console V3", rendered.Markup);
+
+        var pageSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Pages/CurrentAIWeather.razor"));
+        Assert.Contains("FluentTabs", pageSource);
+        Assert.Contains("\"v3\"", pageSource);
+        Assert.Contains("\"v4\"", pageSource);
+        Assert.Contains("\"v5\"", pageSource);
+        Assert.Contains("Remote MCP tools · Like Foundry Console V4", pageSource);
+        Assert.Contains("Hosted Foundry agent · Like Foundry Console V5", pageSource);
+        Assert.Contains("WeatherClient.GetCurrentAIWeatherV3(trimmed)", pageSource);
+        Assert.Contains("WeatherClient.GetCurrentAIWeatherV4(trimmed)", pageSource);
+        Assert.Contains("WeatherClient.GetCurrentAIWeatherV5(trimmed)", pageSource);
+    }
+
+    [Fact]
     public void CurrentAIWeather_LoadingPutsSpinnerInStartSlotBesideTheLabel()
     {
         using var context = CreateContext(holdWeather: true);

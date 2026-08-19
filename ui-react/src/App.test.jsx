@@ -282,6 +282,31 @@ test('current AI weather reads location query, clears it, and fetches', async ()
   expect(screen.queryByText('Wind Speed MPH')).toBeNull();
 });
 
+test('current AI weather page has V3/V4/V5 tabs that call their own endpoint', async () => {
+  const user = userEvent.setup();
+  const fetchMock = mockHelloFetch();
+  renderApp('/current-ai-weather');
+
+  expect(screen.getByRole('tab', { name: 'V3' })).toBeDefined();
+  expect(screen.getByRole('tab', { name: 'V4' })).toBeDefined();
+  expect(screen.getByRole('tab', { name: 'V5' })).toBeDefined();
+  expect(screen.getByText('In-process tool loop · Like Foundry Console V3')).toBeDefined();
+
+  await user.click(screen.getByRole('tab', { name: 'V5' }));
+  expect(screen.getByText('Hosted Foundry agent · Like Foundry Console V5')).toBeDefined();
+
+  await user.click(screen.getByRole('button', { name: /get current ai weather/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText('Sunny in Nashville.')).toBeDefined();
+  });
+
+  const weatherUrl = fetchMock.mock.calls
+    .map(([input]) => requestUrl(input))
+    .find((url) => url.includes('/AIWeather/Current'));
+  expect(weatherUrl).toContain('/AIWeather/CurrentV5');
+});
+
 test('current AI weather renders the full summary as GitHub-flavored Markdown', async () => {
   mockHelloFetch({
     fullSummary: `**Sunny** in Nashville.

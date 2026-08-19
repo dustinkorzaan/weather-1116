@@ -183,6 +183,12 @@ public class WeatherApiClient
         return await _httpClient.GetFromJsonAsync<AIWeatherResponse>(route);
     }
 
+    public async Task<AIWeatherResponse?> GetCurrentAIWeatherV5(string location)
+    {
+        var route = $"AIWeather/CurrentV5?location={Uri.EscapeDataString(location)}";
+        return await _httpClient.GetFromJsonAsync<AIWeatherResponse>(route);
+    }
+
     public async Task<LatLongResponse?> SearchLocation(string location)
     {
         var route = $"Geo?location={Uri.EscapeDataString(location)}";

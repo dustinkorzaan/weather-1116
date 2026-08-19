@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import SafeGfmMarkdown from './markdown/SafeGfmMarkdown';
-import { useLazyGetCurrentAIWeatherV3Query } from '../services/weatherApi';
+import SafeGfmMarkdown from '../markdown/SafeGfmMarkdown';
+import { useLazyGetCurrentAIWeatherV5Query } from '../../services/weatherApi';
 import {
   formatLatLong,
   formatRunLogMs,
@@ -12,37 +11,23 @@ import {
   formatWindSpeedMph,
   WIND_DIRECTION_ARROW,
   normalizeSourceDegrees,
-} from '../utils/aiWeatherDisplay';
-import { locationFromSearchParams } from '../utils/currentAiWeatherLocation';
+} from '../../utils/aiWeatherDisplay';
 
-function CurrentAIWeather() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [location, setLocation] = useState(
-    () => locationFromSearchParams(searchParams) || 'Nashville, TN'
-  );
-  const [trigger, { data, isFetching, isError, error }] = useLazyGetCurrentAIWeatherV3Query();
-  const queryHandledRef = useRef(false);
+/**
+ * V5 tab: hosted Microsoft Foundry agent — instructions, response schema, and
+ * MCP tools are configured on the agent itself (like Foundry Console V5).
+ * Copied (not shared) from the V3/V4 tabs — this repo duplicates each AI
+ * weather variant rather than parameterizing one generic component.
+ */
+function CurrentAIWeatherV5Tab() {
+  const [location, setLocation] = useState('Nashville, TN');
+  const [trigger, { data, isFetching, isError, error }] = useLazyGetCurrentAIWeatherV5Query();
 
   const requestWeather = (rawLocation) => {
     const trimmed = (rawLocation ?? location).trim() || 'Nashville, TN';
     setLocation(trimmed);
     trigger(trimmed);
   };
-
-  useEffect(() => {
-    if (queryHandledRef.current) {
-      return;
-    }
-
-    const fromQuery = locationFromSearchParams(searchParams);
-    if (!fromQuery) {
-      return;
-    }
-
-    queryHandledRef.current = true;
-    setSearchParams({}, { replace: true });
-    requestWeather(fromQuery);
-  }, [searchParams, setSearchParams, trigger]);
 
   const onSubmit = (event) => {
     event.preventDefault();
@@ -175,4 +160,4 @@ function CurrentAIWeather() {
   );
 }
 
-export default CurrentAIWeather;
+export default CurrentAIWeatherV5Tab;
