@@ -19,7 +19,7 @@ namespace Core.AIWeather.Handlers;
 /// itself (named by <c>AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME</c>) - this handler sends only the
 /// user prompt, so there is no local schema, tool wiring, approval loop, or tool-call loop.
 /// Each MCP tool on the agent must use <c>require_approval: never</c>; V5 will not round-trip
-/// approvals (unlike Chat3). Unlike V3/V4, this handler cannot strip <c>runLogDetails</c> from
+/// approvals (same as Chat3). Unlike V3/V4, this handler cannot strip <c>runLogDetails</c> from
 /// the schema the model sees (there is no local schema to edit): the agent's own response
 /// schema must already match <see cref="AIWeatherResponse"/>'s camelCase fields and must not
 /// require <c>runLogDetails</c>, or deserialization can succeed with empty weather fields.

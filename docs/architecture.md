@@ -477,8 +477,8 @@ MCP tools without asking this app to approve.
    version).
 
 Same MCP JSON shape as Chat3 (`require_approval: never` on each server). Chat3
-still auto-approves in app code if a request appears; V5 does not, because that
-round-trip would break the V5 teaching point.
+and V5 both leave approval on the hosted agent; neither round-trips approvals
+in app code.
 
 Suggested reading order: V1 → V2 → V3 → `GetCurrentAIWeatherV3Handler` in
 `core-dotnet/core/AIWeather` (the production V3-pattern handler) → V4 →
@@ -491,4 +491,4 @@ Suggested reading order: V1 → V2 → V3 → `GetCurrentAIWeatherV3Handler` in
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | Yes (Chat3) | Chat3 only. GitHub variable `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` (API/MVC App Service). Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. |
+| `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | Yes (Chat3) | Chat3 only. GitHub variable `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` (API/MVC App Service). Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. MCP tools on this agent must use `require_approval: never`; Chat3 does not round-trip approvals. |
