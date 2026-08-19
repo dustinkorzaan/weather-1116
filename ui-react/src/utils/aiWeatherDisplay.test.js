@@ -30,6 +30,7 @@ test('formats wind direction as compass plus degrees', () => {
   expect(formatWindDirection('SW', 224)).toBe('SW (224°)');
   expect(formatWindDirection('S', 180)).toBe('S (180°)');
   expect(formatWindDirection(' N ', 10.4)).toBe('N (10°)');
-  expect(formatWindDirection('SW', Number.NaN)).toBe('SW');
+  expect(formatWindDirection('SW', Number.NaN)).toBe('SW (0°)');
+  expect(formatWindDirection('SW', 540)).toBe('SW (180°)');
   expect(formatWindDirection('', 224)).toBe('(224°)');
 });

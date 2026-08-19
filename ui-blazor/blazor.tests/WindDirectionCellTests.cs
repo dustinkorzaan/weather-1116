@@ -21,4 +21,18 @@ public sealed class WindDirectionCellTests
         Assert.Contains("rotate(224deg)", rendered.Markup);
         Assert.Contains("\u2B9B", rendered.Markup);
     }
+
+    [Fact]
+    public void NormalizesWraparoundDegreesForArrowRotation()
+    {
+        using var context = new BunitContext();
+        context.Services.AddFluentUIComponents();
+        context.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var rendered = context.Render<WeatherBlazor.Shared.WindDirectionCell>(parameters =>
+            parameters.Add(p => p.Compass, "S").Add(p => p.Degrees, 540));
+
+        Assert.Contains("S (180°)", rendered.Markup);
+        Assert.Contains("rotate(180deg)", rendered.Markup);
+    }
 }

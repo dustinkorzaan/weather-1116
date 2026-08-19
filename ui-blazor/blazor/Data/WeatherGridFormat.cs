@@ -73,7 +73,22 @@ public static class WeatherGridFormat
     public static string FormatWindSpeedMph(double mph) =>
         string.Create(CultureInfo.InvariantCulture, $"{Math.Round(mph, 1)} mph");
 
+    /// <summary>Wraps meteorological source degrees to 0–360. NaN / Infinity become 0.</summary>
+    public static int NormalizeSourceDegrees(double degrees)
+    {
+        if (double.IsNaN(degrees) || double.IsInfinity(degrees))
+        {
+            return 0;
+        }
+
+        return (int)Math.Round(((degrees % 360d) + 360d) % 360d, MidpointRounding.AwayFromZero);
+    }
+
     /// <summary>Formats API-provided compass plus source degrees, e.g. "SW (224°)".</summary>
-    public static string FormatWindDirection(string compass, double degrees) =>
-        string.Create(CultureInfo.InvariantCulture, $"{compass} ({Math.Round(degrees):0}°)");
+    public static string FormatWindDirection(string compass, double degrees)
+    {
+        var label = (compass ?? string.Empty).Trim();
+        var withDegrees = string.Create(CultureInfo.InvariantCulture, $"({NormalizeSourceDegrees(degrees)}°)");
+        return label.Length == 0 ? withDegrees : $"{label} {withDegrees}";
+    }
 }

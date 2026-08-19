@@ -51,10 +51,10 @@
                     <FluentGridItem xs="12" sm="6">
                         <div class="stat-label">Wind Direction</div>
                         <div class="wind-direction">
-                            @FormatWindDirection(aiWeather.WindDirectionSource, aiWeather.WindDirectionSourceDegrees)
+                            @WeatherGridFormat.FormatWindDirection(aiWeather.WindDirectionSource, aiWeather.WindDirectionSourceDegrees)
                             <span class="wind-direction-arrow"
                                   aria-hidden="true"
-                                  style="@($"transform: rotate({aiWeather.WindDirectionSourceDegrees}deg)")">&#x2B9B;</span>
+                                  style="@($"transform: rotate({WeatherGridFormat.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees)}deg)")">&#x2B9B;</span>
                         </div>
                     </FluentGridItem>
                     <FluentGridItem xs="12" sm="6">
@@ -139,13 +139,6 @@
 
     private static string FormatWindSpeedMph(double value) =>
         string.Create(CultureInfo.InvariantCulture, $"{value} mph");
-
-    private static string FormatWindDirection(string compass, int degrees)
-    {
-        var label = (compass ?? string.Empty).Trim();
-        var withDegrees = string.Create(CultureInfo.InvariantCulture, $"({degrees}°)");
-        return label.Length == 0 ? withDegrees : $"{label} {withDegrees}";
-    }
 
     private static string FormatLatLong(double latitude, double longitude) =>
         string.Create(

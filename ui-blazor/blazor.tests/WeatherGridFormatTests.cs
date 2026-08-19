@@ -63,5 +63,20 @@ public sealed class WeatherGridFormatTests
     public void FormatWindDirection_CombinesCompassAndDegrees()
     {
         Assert.Equal("SW (224°)", WeatherGridFormat.FormatWindDirection("SW", 224));
+        Assert.Equal("S (180°)", WeatherGridFormat.FormatWindDirection("S", 540));
+        Assert.Equal("N (0°)", WeatherGridFormat.FormatWindDirection("N", double.NaN));
+        Assert.Equal("(0°)", WeatherGridFormat.FormatWindDirection("  ", double.PositiveInfinity));
+    }
+
+    [Fact]
+    public void NormalizeSourceDegrees_WrapsAndTreatsNonFiniteAsZero()
+    {
+        Assert.Equal(224, WeatherGridFormat.NormalizeSourceDegrees(224));
+        Assert.Equal(180, WeatherGridFormat.NormalizeSourceDegrees(540));
+        Assert.Equal(270, WeatherGridFormat.NormalizeSourceDegrees(-90));
+        Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(360));
+        Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(double.NaN));
+        Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(double.PositiveInfinity));
+        Assert.Equal(0, WeatherGridFormat.NormalizeSourceDegrees(double.NegativeInfinity));
     }
 }

@@ -8,6 +8,7 @@ import {
   formatWindDirection,
   formatWindSpeedMph,
   WIND_DIRECTION_ARROW,
+  normalizeSourceDegrees,
 } from '../../utils/aiWeatherDisplay';
 import { formatLocationWithLatLong } from '../../utils/currentAiWeatherLocation';
 
@@ -68,7 +69,7 @@ function CurrentAIWeatherModalTab({ name, lat, lng }) {
                 <span
                   aria-hidden="true"
                   className="inline-block origin-center text-[1.15em] leading-none"
-                  style={{ transform: `rotate(${data.windDirectionSourceDegrees}deg)` }}
+                  style={{ transform: `rotate(${normalizeSourceDegrees(data.windDirectionSourceDegrees)}deg)` }}
                 >
                   {WIND_DIRECTION_ARROW}
                 </span>

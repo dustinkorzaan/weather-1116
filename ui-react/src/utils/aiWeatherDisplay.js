@@ -1,3 +1,5 @@
+import { normalizeSourceDegrees } from './windDirectionDisplay';
+
 function formatHemisphereDegrees(value, positiveLabel, negativeLabel) {
   const numeric = Number(value);
   const hemisphere = numeric >= 0 ? positiveLabel : negativeLabel;
@@ -34,13 +36,8 @@ export function formatWindSpeedMph(value) {
 /** Formats compass plus source degrees as "SW (224°)". */
 export function formatWindDirection(compass, degrees) {
   const label = String(compass ?? '').trim();
-  const numeric = Number(degrees);
-  if (!Number.isFinite(numeric)) {
-    return label;
-  }
-
-  const withDegrees = `(${Math.round(numeric)}\u00B0)`;
+  const withDegrees = `(${normalizeSourceDegrees(degrees)}\u00B0)`;
   return label ? `${label} ${withDegrees}` : withDegrees;
 }
 
-export { WIND_DIRECTION_ARROW } from './windDirectionDisplay';
+export { WIND_DIRECTION_ARROW, normalizeSourceDegrees } from './windDirectionDisplay';
