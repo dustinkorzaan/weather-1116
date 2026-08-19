@@ -61,6 +61,7 @@
                         </button>
                     </div>
                     <p id="weatherModalError" class="form-error" hidden></p>
+                    <p id="weatherModalLoading" class="form-loading" hidden>Connecting to Microsoft Foundry...</p>
                     <div id="weatherModalResults" class="weather-results" hidden>
                         <div id="weatherModalSummary" class="weather-summary chat-markdown"></div>
                         <dl class="weather-stats">
@@ -147,6 +148,7 @@
                 endpoint: '@Url.Action("GetCurrentAIWeatherV4", "Home")',
                 refreshButtonId: 'weatherModalRefresh',
                 errorId: 'weatherModalError',
+                loadingId: 'weatherModalLoading',
                 resultsId: 'weatherModalResults',
                 summaryId: 'weatherModalSummary',
                 temperatureId: 'weatherModalTemperature',

@@ -84,6 +84,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("class=\"wind-direction\"", html);
         Assert.Contains("<dt>Lat/Long</dt>", html);
         Assert.Contains("id=\"ai-weather-lat-long\"", html);
+        Assert.Contains("id=\"ai-weather-loading\"", html);
+        Assert.Contains("Connecting to Microsoft Foundry...", html);
         Assert.DoesNotContain("Temperature F", html);
         Assert.DoesNotContain("Wind Speed MPH", html);
         Assert.DoesNotContain("aria-label=\"Add location\"", html);
@@ -248,6 +250,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("class=\"weather-modal-tab is-active\"", html);
         Assert.Contains("Current AI Weather</h2>", html);
         Assert.Contains("id=\"weatherModalRefresh\"", html);
+        Assert.Contains("id=\"weatherModalLoading\"", html);
+        Assert.Contains("Connecting to Microsoft Foundry...", html);
         Assert.Contains("weatherModal.js", html);
         Assert.Contains("safeGfmMarkdown.js", html);
         Assert.Contains("Daily Forecast", html);
@@ -280,6 +284,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("field: \"daily\"", html);
         Assert.Contains("reverse: false", html);
         Assert.DoesNotContain("weatherModal.js", html);
+        Assert.DoesNotContain("Connecting to Microsoft Foundry", html);
         Assert.DoesNotContain("Coming soon.", html);
     }
 

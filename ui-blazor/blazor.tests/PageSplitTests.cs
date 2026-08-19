@@ -140,6 +140,7 @@ public sealed class PageSplitTests
             Assert.Contains("ai-weather-submit", rendered.Markup);
             Assert.Contains("fluent-progress-ring", rendered.Markup, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("slot=\"start\"", rendered.Markup, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Connecting to Microsoft Foundry...", rendered.Markup);
         });
     }
 

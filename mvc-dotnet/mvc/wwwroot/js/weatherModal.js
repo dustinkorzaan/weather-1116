@@ -82,6 +82,7 @@
   function init(config) {
     var refreshButton = document.getElementById(config.refreshButtonId);
     var errorEl = document.getElementById(config.errorId);
+    var loadingEl = document.getElementById(config.loadingId);
     var resultsEl = document.getElementById(config.resultsId);
     var summaryEl = document.getElementById(config.summaryId);
     var temperatureEl = document.getElementById(config.temperatureId);
@@ -100,6 +101,7 @@
     function requestWeather() {
       setHidden(errorEl, true);
       setHidden(resultsEl, true);
+      setHidden(loadingEl, false);
       refreshButton.disabled = true;
       refreshButton.classList.add('is-spinning');
 
@@ -149,6 +151,7 @@
           setHidden(errorEl, false);
         })
         .finally(function () {
+          setHidden(loadingEl, true);
           refreshButton.disabled = false;
           refreshButton.classList.remove('is-spinning');
         });
