@@ -13,7 +13,7 @@ public class AIRunLogRecorder(TimeProvider? timeProvider = null)
     private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
     private readonly List<AIRunLogDetail> _entries = [];
 
-    public void AddLog(int loopNumber, string message, ResponseResult? response) => _entries.Add(new AIRunLogDetail
+    public void AddLog(string message, ResponseResult? response, int loopNumber = 0) => _entries.Add(new AIRunLogDetail
     {
         DateTimeUtc = _timeProvider.GetUtcNow().UtcDateTime,
         LoopNumber = loopNumber,

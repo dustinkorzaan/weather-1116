@@ -10,7 +10,7 @@ public class AIRunLogRecorderTests
         var clock = new FakeTimeProvider(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         var recorder = new AIRunLogRecorder(clock);
 
-        recorder.AddLog(0, "Start", null);
+        recorder.AddLog("Start", null);
         var entries = recorder.Hydrate();
 
         Assert.Equal(0, entries[0].RuntimeMs);
@@ -25,9 +25,9 @@ public class AIRunLogRecorderTests
         var clock = new FakeTimeProvider(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         var recorder = new AIRunLogRecorder(clock);
 
-        recorder.AddLog(0, "Start handler", null);
+        recorder.AddLog("Start handler", null);
         clock.Advance(TimeSpan.FromMilliseconds(100));
-        recorder.AddLog(1, "Start loop 1", null);
+        recorder.AddLog("Start loop 1", null, 1);
 
         var entries = recorder.Hydrate();
 
@@ -41,9 +41,9 @@ public class AIRunLogRecorderTests
         var clock = new FakeTimeProvider(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         var recorder = new AIRunLogRecorder(clock);
 
-        recorder.AddLog(0, "Start", null);
-        recorder.AddLog(1, "Finish CreateResponse", null);
-        recorder.AddLog(1, "Start loop 2", null);
+        recorder.AddLog("Start", null);
+        recorder.AddLog("Finish CreateResponse", null, 1);
+        recorder.AddLog("Start loop 2", null, 1);
 
         var entries = recorder.Hydrate();
         entries[1].TotalTokenCount = 10;
@@ -61,11 +61,11 @@ public class AIRunLogRecorderTests
         var clock = new FakeTimeProvider(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         var recorder = new AIRunLogRecorder(clock);
 
-        recorder.AddLog(0, "Start handler", null);
+        recorder.AddLog("Start handler", null);
         clock.Advance(TimeSpan.FromMilliseconds(100));
-        recorder.AddLog(1, "Start loop 1", null);
+        recorder.AddLog("Start loop 1", null, 1);
         clock.Advance(TimeSpan.FromMilliseconds(50));
-        recorder.AddLog(1, "Finish loop 1", null);
+        recorder.AddLog("Finish loop 1", null, 1);
 
         var entries = recorder.Hydrate();
 
@@ -82,9 +82,9 @@ public class AIRunLogRecorderTests
         var clock = new FakeTimeProvider(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         var recorder = new AIRunLogRecorder(clock);
 
-        recorder.AddLog(1, "Start loop 1", null);
+        recorder.AddLog("Start loop 1", null, 1);
         clock.Advance(TimeSpan.FromMilliseconds(200));
-        recorder.AddLog(2, "Start loop 2", null);
+        recorder.AddLog("Start loop 2", null, 2);
 
         var entries = recorder.Hydrate();
 
@@ -99,11 +99,11 @@ public class AIRunLogRecorderTests
         var clock = new FakeTimeProvider(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         var recorder = new AIRunLogRecorder(clock);
 
-        recorder.AddLog(1, "Start loop 1", null);
+        recorder.AddLog("Start loop 1", null, 1);
         clock.Advance(TimeSpan.FromMilliseconds(30));
-        recorder.AddLog(2, "Start loop 2", null);
+        recorder.AddLog("Start loop 2", null, 2);
         clock.Advance(TimeSpan.FromMilliseconds(40));
-        recorder.AddLog(1, "Revisit loop 1", null);
+        recorder.AddLog("Revisit loop 1", null, 1);
 
         var entries = recorder.Hydrate();
 

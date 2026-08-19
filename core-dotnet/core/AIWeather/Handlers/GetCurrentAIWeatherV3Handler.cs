@@ -39,7 +39,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
     public async Task<AIWeatherResponse> Handle(GetCurrentAIWeatherV3Event request, CancellationToken cancellationToken)
     {
         var runLog = new AIRunLogRecorder();
-        runLog.AddLog(0, $"Start {nameof(GetCurrentAIWeatherV3Handler)}", null);
+        runLog.AddLog($"Start {nameof(GetCurrentAIWeatherV3Handler)}", null);
 
         void LogRunLogOnFailure(string reason) => _logger.LogWarning(
             "AI Weather run log at failure ({Reason}): {RunLog}",
@@ -129,7 +129,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                     $"AI Weather tool loop exceeded {MaxToolLoopTurns} model turns.");
             }
 
-            runLog.AddLog(toolLoopTurns, $"Start loop {toolLoopTurns}", null);
+            runLog.AddLog($"Start loop {toolLoopTurns}", null, toolLoopTurns);
 
             requiresAction = false;
 
@@ -145,9 +145,9 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                 },
             };
 
-            runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
+            runLog.AddLog("Start CreateResponse", null, toolLoopTurns);
             ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
-            runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
+            runLog.AddLog("Finish CreateResponse", response, toolLoopTurns);
 
             var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
             if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
@@ -194,7 +194,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         modelOutput.WindDirectionSource =
             WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
 
-        runLog.AddLog(toolLoopTurns, $"Finish {nameof(GetCurrentAIWeatherV3Handler)}", null);
+        runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV3Handler)}", null, toolLoopTurns);
         modelOutput.RunLogDetails = runLog.Hydrate();
 
         return modelOutput;

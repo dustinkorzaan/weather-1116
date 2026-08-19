@@ -38,8 +38,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
     public async Task<AIWeatherResponse> Handle(GetCurrentAIWeatherV4Event request, CancellationToken cancellationToken)
     {
         var runLog = new AIRunLogRecorder();
-        var toolLoopTurns = 0;
-        runLog.AddLog(toolLoopTurns, $"Start {nameof(GetCurrentAIWeatherV4Handler)}", null);
+        runLog.AddLog($"Start {nameof(GetCurrentAIWeatherV4Handler)}", null);
 
         void LogRunLogOnFailure(string reason) => _logger.LogWarning(
             "AI Weather run log at failure ({Reason}): {RunLog}",
@@ -129,9 +128,9 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
         // The remote MCP servers execute tool calls on the model host's side, so a single
         // call is enough — unlike V3, there is no local tool-call loop to drive here.
-        runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
+        runLog.AddLog("Start CreateResponse", null);
         ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
-        runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
+        runLog.AddLog("Finish CreateResponse", response);
 
         if (response.Status != ResponseStatus.Completed)
         {
@@ -157,7 +156,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         modelOutput.WindDirectionSource =
             WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
 
-        runLog.AddLog(toolLoopTurns, $"Finish {nameof(GetCurrentAIWeatherV4Handler)}", null);
+        runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV4Handler)}", null);
         modelOutput.RunLogDetails = runLog.Hydrate();
 
         return modelOutput;
