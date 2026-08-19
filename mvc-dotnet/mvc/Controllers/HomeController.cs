@@ -78,6 +78,19 @@ public class HomeController : Controller
         return Json(response);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetCurrentAIWeatherV5([FromQuery] string? location, CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(
+            new GetCurrentAIWeatherV5Event
+            {
+                Location = string.IsNullOrWhiteSpace(location) ? "Nashville, TN" : location,
+            },
+            cancellationToken);
+
+        return Json(response);
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
