@@ -16,7 +16,7 @@ public class GetCurrentAIWeatherV5HandlerTests
         Assert.DoesNotContain("WeatherToolDefinitions", source, StringComparison.Ordinal);
         Assert.DoesNotContain("MaxToolLoopTurns", source, StringComparison.Ordinal);
         Assert.DoesNotContain("do\n        {", source, StringComparison.Ordinal);
-        // Instructions, response schema, and MCP tools live on the hosted agent — this handler
+        // Instructions, response schema, and MCP tools live on the hosted agent - this handler
         // has no local schema to build, unlike V3/V4.
         Assert.DoesNotContain("BuildAIOutputSchema", source, StringComparison.Ordinal);
         Assert.DoesNotContain("JsonSchemaExporter", source, StringComparison.Ordinal);

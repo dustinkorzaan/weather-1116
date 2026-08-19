@@ -2,7 +2,7 @@
 
 Standalone multi-turn chat in all three UIs (React, MVC, Blazor). This feature is **separate**
 from the existing **Current AI Weather** widget (`/AIWeather/CurrentV3`, `/CurrentV4`, or
-`/CurrentV5` — V3/V4/V5 tabs on `/current-ai-weather`, V4 only on `/weather`), which remains
+`/CurrentV5` - V3/V4/V5 tabs on `/current-ai-weather`, V4 only on `/weather`), which remains
 a one-shot structured JSON response.
 
 ## The matrix

@@ -55,8 +55,8 @@ Standalone multi-turn chat page with five tabs:
 
 ## Out of Scope
 
-- **Authentication** — Login/identity provider (e.g. Auth0)
-- **Per-user custom map pins** — Map pins scoped to individual user accounts
-- **Per-pin photo uploads** — Image upload/download per pin via blob storage SAS URIs
-- **Infrastructure as Code** — Provisioning Azure resources via Bicep
-- **Foundry config as code** — Managing Foundry models, tools, and agents via `azure.yaml`
+- **Authentication**: Login/identity provider (e.g. Auth0)
+- **Per-user custom map pins**: Map pins scoped to individual user accounts
+- **Per-pin photo uploads**: Image upload/download per pin via blob storage SAS URIs
+- **Infrastructure as Code**: Provisioning Azure resources via Bicep
+- **Foundry config as code**: Managing Foundry models, tools, and agents via `azure.yaml`

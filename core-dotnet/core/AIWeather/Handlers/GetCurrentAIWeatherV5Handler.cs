@@ -16,7 +16,7 @@ namespace Core.AIWeather.Handlers;
 /// <summary>
 /// Calls a hosted Microsoft Foundry Agent for current weather (same pattern as Foundry
 /// Console V5). Instructions, response schema, and MCP tools are configured on the agent
-/// itself (named by <c>AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME</c>) — this handler sends only the
+/// itself (named by <c>AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME</c>) - this handler sends only the
 /// user prompt, so there is no local schema, tool wiring, or tool-call loop to drive here.
 /// Unlike V3/V4, this handler cannot strip <c>runLogDetails</c> from the schema the model
 /// sees (there is no local schema to edit): the agent's own response schema must already
@@ -81,7 +81,7 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         };
 
         // The hosted agent supplies instructions, response schema, and MCP tools itself, so a
-        // single call is enough — like V4, there is no local tool-call loop to drive here.
+        // single call is enough - like V4, there is no local tool-call loop to drive here.
         runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
         ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
         runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
