@@ -53,6 +53,10 @@
     return Number.isFinite(ms) ? Math.round(ms).toLocaleString() : '';
   }
 
+  function formatRunLogTokenCount(tokens) {
+    return Number.isFinite(tokens) ? Math.round(tokens).toLocaleString() : '';
+  }
+
   function renderRunLogRows(tbody, runLogDetails) {
     tbody.replaceChildren();
     runLogDetails.forEach(function (entry) {
@@ -60,11 +64,12 @@
         formatRunLogTimestamp(entry.dateTimeUtc),
         entry.loopNumber,
         entry.message,
-        entry.inputTokenCount != null ? entry.inputTokenCount : '',
-        entry.cachedTokenCount != null ? entry.cachedTokenCount : '',
-        entry.outputTokenCount != null ? entry.outputTokenCount : '',
-        entry.reasoningTokenCount != null ? entry.reasoningTokenCount : '',
-        entry.totalTokenCount != null ? entry.totalTokenCount : '',
+        formatRunLogTokenCount(entry.inputTokenCount),
+        formatRunLogTokenCount(entry.cachedTokenCount),
+        formatRunLogTokenCount(entry.outputTokenCount),
+        formatRunLogTokenCount(entry.reasoningTokenCount),
+        formatRunLogTokenCount(entry.totalTokenCount),
+        formatRunLogTokenCount(entry.runningTotalTokenCount),
         formatRunLogMs(entry.runtimeMs),
         formatRunLogMs(entry.loopRuntimeMs),
         formatRunLogMs(entry.runningTotalMs),

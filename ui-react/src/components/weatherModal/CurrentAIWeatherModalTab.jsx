@@ -6,6 +6,7 @@ import {
   formatLatLong,
   formatRunLogMs,
   formatRunLogTimestamp,
+  formatRunLogTokenCount,
   formatTemperatureF,
   formatWindDirection,
   formatWindSpeedMph,
@@ -105,11 +106,12 @@ function CurrentAIWeatherModalTab({ name, lat, lng }) {
                     <th className="py-1.5 pr-4 font-semibold">Time (UTC)</th>
                     <th className="py-1.5 pr-4 font-semibold">Loop</th>
                     <th className="py-1.5 pr-4 font-semibold">Message</th>
-                    <th className="py-1.5 pr-4 font-semibold">Input</th>
-                    <th className="py-1.5 pr-4 font-semibold">Cached</th>
-                    <th className="py-1.5 pr-4 font-semibold">Output</th>
-                    <th className="py-1.5 pr-4 font-semibold">Reasoning</th>
-                    <th className="py-1.5 pr-4 font-semibold">Total</th>
+                    <th className="py-1.5 pr-4 font-semibold">Input (tokens)</th>
+                    <th className="py-1.5 pr-4 font-semibold">Cached (tokens)</th>
+                    <th className="py-1.5 pr-4 font-semibold">Output (tokens)</th>
+                    <th className="py-1.5 pr-4 font-semibold">Reasoning (tokens)</th>
+                    <th className="py-1.5 pr-4 font-semibold">Total (tokens)</th>
+                    <th className="py-1.5 pr-4 font-semibold">Running Total (tokens)</th>
                     <th className="py-1.5 pr-4 font-semibold">Runtime (ms)</th>
                     <th className="py-1.5 pr-4 font-semibold">Loop Runtime (ms)</th>
                     <th className="py-1.5 font-semibold">Running Total (ms)</th>
@@ -121,11 +123,12 @@ function CurrentAIWeatherModalTab({ name, lat, lng }) {
                       <td className="py-1.5 pr-4">{formatRunLogTimestamp(entry.dateTimeUtc)}</td>
                       <td className="py-1.5 pr-4">{entry.loopNumber}</td>
                       <td className="py-1.5 pr-4">{entry.message}</td>
-                      <td className="py-1.5 pr-4">{entry.inputTokenCount ?? ''}</td>
-                      <td className="py-1.5 pr-4">{entry.cachedTokenCount ?? ''}</td>
-                      <td className="py-1.5 pr-4">{entry.outputTokenCount ?? ''}</td>
-                      <td className="py-1.5 pr-4">{entry.reasoningTokenCount ?? ''}</td>
-                      <td className="py-1.5 pr-4">{entry.totalTokenCount ?? ''}</td>
+                      <td className="py-1.5 pr-4">{formatRunLogTokenCount(entry.inputTokenCount)}</td>
+                      <td className="py-1.5 pr-4">{formatRunLogTokenCount(entry.cachedTokenCount)}</td>
+                      <td className="py-1.5 pr-4">{formatRunLogTokenCount(entry.outputTokenCount)}</td>
+                      <td className="py-1.5 pr-4">{formatRunLogTokenCount(entry.reasoningTokenCount)}</td>
+                      <td className="py-1.5 pr-4">{formatRunLogTokenCount(entry.totalTokenCount)}</td>
+                      <td className="py-1.5 pr-4">{formatRunLogTokenCount(entry.runningTotalTokenCount)}</td>
                       <td className="py-1.5 pr-4">{formatRunLogMs(entry.runtimeMs)}</td>
                       <td className="py-1.5 pr-4">{formatRunLogMs(entry.loopRuntimeMs)}</td>
                       <td className="py-1.5">{formatRunLogMs(entry.runningTotalMs)}</td>

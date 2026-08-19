@@ -55,4 +55,9 @@ export function formatRunLogMs(ms) {
   return Number.isFinite(ms) ? Math.round(ms).toLocaleString() : '';
 }
 
+/** Formats a run-log token count with thousands separators, e.g. "1,234". */
+export function formatRunLogTokenCount(tokens) {
+  return Number.isFinite(tokens) ? Math.round(tokens).toLocaleString() : '';
+}
+
 export { WIND_DIRECTION_ARROW, normalizeSourceDegrees } from './windDirectionDisplay';

@@ -3,6 +3,7 @@ import {
   formatLatLong,
   formatRunLogMs,
   formatRunLogTimestamp,
+  formatRunLogTokenCount,
   formatTemperatureF,
   formatWindDirection,
   formatWindSpeedMph,
@@ -47,4 +48,11 @@ test('formats a run-log millisecond duration with thousands separators', () => {
   expect(formatRunLogMs(1234)).toBe('1,234');
   expect(formatRunLogMs(1234.6)).toBe('1,235');
   expect(formatRunLogMs(Number.NaN)).toBe('');
+});
+
+test('formats a run-log token count with thousands separators', () => {
+  expect(formatRunLogTokenCount(0)).toBe('0');
+  expect(formatRunLogTokenCount(1234)).toBe('1,234');
+  expect(formatRunLogTokenCount(null)).toBe('');
+  expect(formatRunLogTokenCount(undefined)).toBe('');
 });
