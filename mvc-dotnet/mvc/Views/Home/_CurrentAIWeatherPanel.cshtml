@@ -1,0 +1,58 @@
+@model CurrentAIWeatherPanelViewModel
+
+<div data-ai-weather-panel="@Model.PanelKey"@(Model.Hidden ? Html.Raw(" hidden") : null)>
+    <form id="@Model.ElementId("form")" class="weather-form">
+        <label class="field-label" for="@Model.ElementId("location")">Location:</label>
+        <input id="@Model.ElementId("location")"
+               class="text-input"
+               type="text"
+               value="Nashville, TN"
+               autocomplete="address-level2" />
+        <button id="@Model.ElementId("button")"
+                type="submit"
+                class="btn">
+            <span id="@Model.ElementId("spinner")" class="spinner spinner-on-muted" hidden aria-hidden="true"></span>
+            <span>Get Current AI Weather</span>
+        </button>
+    </form>
+    <p id="@Model.ElementId("error")" class="form-error" hidden></p>
+    <p id="@Model.ElementId("loading")" class="form-loading" hidden>Connecting to Microsoft Foundry...</p>
+    <div id="@Model.ElementId("results")" class="weather-results" hidden>
+        <div id="@Model.ElementId("summary")" class="weather-summary chat-markdown"></div>
+        <dl class="weather-stats">
+            <div class="weather-stat">
+                <dt>Temperature</dt>
+                <dd id="@Model.ElementId("temperature")"></dd>
+            </div>
+            <div class="weather-stat">
+                <dt>Wind Speed</dt>
+                <dd id="@Model.ElementId("wind-speed")"></dd>
+            </div>
+            <div class="weather-stat">
+                <dt>Wind Direction</dt>
+                <dd id="@Model.ElementId("wind-direction")" class="wind-direction"></dd>
+            </div>
+            <div class="weather-stat">
+                <dt>Conditions</dt>
+                <dd id="@Model.ElementId("conditions")"></dd>
+            </div>
+            <div class="weather-stat">
+                <dt>Lat/Long</dt>
+                <dd id="@Model.ElementId("lat-long")"></dd>
+            </div>
+        </dl>
+        <div id="@Model.ElementId("run-log-wrap")" class="weather-modal-grid-wrap" hidden>
+            <table class="weather-modal-grid">
+                <thead>
+                    <tr>
+                        <th>Time (UTC)</th><th>Loop</th><th>Message</th><th>Input (tokens)</th><th>Cached (tokens)</th>
+                        <th>Output (tokens)</th><th>Reasoning (tokens)</th><th>Total (tokens)</th><th>Running Total (tokens)</th>
+                        <th>Runtime (ms)</th><th>Loop Runtime (ms)</th><th>Running Total (ms)</th>
+                    </tr>
+                </thead>
+                <tbody id="@Model.ElementId("run-log-body")"></tbody>
+            </table>
+            <p id="@Model.ElementId("run-log-total")" class="weather-run-log-total"></p>
+        </div>
+    </div>
+</div>
