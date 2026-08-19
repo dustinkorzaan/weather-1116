@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Core.AIWeather.Models;
 
-public class RunLogDetail
+public class AIRunLogDetail
 {
     [JsonPropertyName("dateTimeUtc")]
     public DateTime DateTimeUtc { get; set; }
@@ -27,6 +27,9 @@ public class RunLogDetail
 
     [JsonPropertyName("totalTokenCount")]
     public int? TotalTokenCount { get; set; }
+
+    [JsonPropertyName("runningTotalTokenCount")]
+    public int RunningTotalTokenCount { get; set; }
 
     [JsonPropertyName("runtimeMs")]
     public int RuntimeMs { get; set; }

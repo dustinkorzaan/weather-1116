@@ -90,7 +90,7 @@ public class AIWeatherModelsTests
         {
             RunLogDetails =
             [
-                new RunLogDetail
+                new AIRunLogDetail
                 {
                     DateTimeUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     LoopNumber = 1,
@@ -100,6 +100,7 @@ public class AIWeatherModelsTests
                     OutputTokenCount = 20,
                     ReasoningTokenCount = 5,
                     TotalTokenCount = 62,
+                    RunningTotalTokenCount = 62,
                     RuntimeMs = 100,
                     LoopRuntimeMs = 50,
                     RunningTotalMs = 150,
@@ -118,6 +119,7 @@ public class AIWeatherModelsTests
         Assert.Equal(20, entry.GetProperty("outputTokenCount").GetInt32());
         Assert.Equal(5, entry.GetProperty("reasoningTokenCount").GetInt32());
         Assert.Equal(62, entry.GetProperty("totalTokenCount").GetInt32());
+        Assert.Equal(62, entry.GetProperty("runningTotalTokenCount").GetInt32());
         Assert.Equal(100, entry.GetProperty("runtimeMs").GetInt32());
         Assert.Equal(50, entry.GetProperty("loopRuntimeMs").GetInt32());
         Assert.Equal(150, entry.GetProperty("runningTotalMs").GetInt32());

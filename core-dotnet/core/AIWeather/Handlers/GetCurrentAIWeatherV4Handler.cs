@@ -44,7 +44,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         void LogRunLogOnFailure(string reason) => _logger.LogWarning(
             "AI Weather run log at failure ({Reason}): {RunLog}",
             reason,
-            JsonSerializer.Serialize(runLog.HydrateRuntimes()));
+            JsonSerializer.Serialize(runLog.Hydrate()));
 
         var location = string.IsNullOrWhiteSpace(request.Location)
             ? DefaultLocation
@@ -158,7 +158,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
             WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
 
         runLog.AddLog(toolLoopTurns, $"Finish {nameof(GetCurrentAIWeatherV4Handler)}", null);
-        modelOutput.RunLogDetails = runLog.HydrateRuntimes();
+        modelOutput.RunLogDetails = runLog.Hydrate();
 
         return modelOutput;
     }

@@ -19,10 +19,10 @@ public class AIWeatherResponse
     public string Conditions { get; set; } = string.Empty;
     public double Latitude { get; set; }
     public double Longitude { get; set; }
-    public List<RunLogDetail> RunLogDetails { get; set; } = [];
+    public List<AIRunLogDetail> RunLogDetails { get; set; } = [];
 }
 
-public class RunLogDetail
+public class AIRunLogDetail
 {
     public DateTime DateTimeUtc { get; set; }
     public int LoopNumber { get; set; }
@@ -32,6 +32,7 @@ public class RunLogDetail
     public int? OutputTokenCount { get; set; }
     public int? ReasoningTokenCount { get; set; }
     public int? TotalTokenCount { get; set; }
+    public int RunningTotalTokenCount { get; set; }
     public int RuntimeMs { get; set; }
     public int LoopRuntimeMs { get; set; }
     public int RunningTotalMs { get; set; }

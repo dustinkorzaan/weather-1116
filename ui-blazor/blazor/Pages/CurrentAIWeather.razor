@@ -86,7 +86,7 @@
                             <thead>
                                 <tr>
                                     <th>Time (UTC)</th><th>Loop</th><th>Message</th><th>Input</th><th>Cached</th>
-                                    <th>Output</th><th>Reasoning</th><th>Total</th>
+                                    <th>Output</th><th>Reasoning</th><th>Total</th><th>Running Total Tokens</th>
                                     <th>Runtime (ms)</th><th>Loop Runtime (ms)</th><th>Running Total (ms)</th>
                                 </tr>
                             </thead>
@@ -97,11 +97,12 @@
                                         <td>@WeatherGridFormat.FormatRunLogTimestamp(entry.DateTimeUtc)</td>
                                         <td>@entry.LoopNumber</td>
                                         <td>@entry.Message</td>
-                                        <td>@entry.InputTokenCount</td>
-                                        <td>@entry.CachedTokenCount</td>
-                                        <td>@entry.OutputTokenCount</td>
-                                        <td>@entry.ReasoningTokenCount</td>
-                                        <td>@entry.TotalTokenCount</td>
+                                        <td>@WeatherGridFormat.FormatRunLogTokenCount(entry.InputTokenCount)</td>
+                                        <td>@WeatherGridFormat.FormatRunLogTokenCount(entry.CachedTokenCount)</td>
+                                        <td>@WeatherGridFormat.FormatRunLogTokenCount(entry.OutputTokenCount)</td>
+                                        <td>@WeatherGridFormat.FormatRunLogTokenCount(entry.ReasoningTokenCount)</td>
+                                        <td>@WeatherGridFormat.FormatRunLogTokenCount(entry.TotalTokenCount)</td>
+                                        <td>@WeatherGridFormat.FormatRunLogTokenCount(entry.RunningTotalTokenCount)</td>
                                         <td>@WeatherGridFormat.FormatRunLogMs(entry.RuntimeMs)</td>
                                         <td>@WeatherGridFormat.FormatRunLogMs(entry.LoopRuntimeMs)</td>
                                         <td>@WeatherGridFormat.FormatRunLogMs(entry.RunningTotalMs)</td>
