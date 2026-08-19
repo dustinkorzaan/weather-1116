@@ -40,4 +40,4 @@ export function formatWindDirection(compass, degrees) {
   return label ? `${label} ${withDegrees}` : withDegrees;
 }
 
-export { normalizeSourceDegrees } from './windDirectionDisplay';
+export { WIND_DIRECTION_ARROW, normalizeSourceDegrees } from './windDirectionDisplay';

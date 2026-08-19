@@ -19,8 +19,7 @@ public sealed class WindDirectionCellTests
         Assert.Contains("SW (224°)", rendered.Markup);
         Assert.Contains("wind-direction-arrow", rendered.Markup);
         Assert.Contains("rotate(224deg)", rendered.Markup);
-        Assert.Contains("M6 11 1.2 2.5h9.6Z", rendered.Markup);
-        Assert.DoesNotContain("\u2B9B", rendered.Markup);
+        Assert.Contains(">v</span>", rendered.Markup);
     }
 
     [Fact]

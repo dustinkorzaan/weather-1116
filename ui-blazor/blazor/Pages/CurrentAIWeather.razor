@@ -52,7 +52,9 @@
                         <div class="stat-label">Wind Direction</div>
                         <div class="wind-direction">
                             @WeatherGridFormat.FormatWindDirection(aiWeather.WindDirectionSource, aiWeather.WindDirectionSourceDegrees)
-                            <WindDirectionArrow Degrees="@aiWeather.WindDirectionSourceDegrees" />
+                            <span class="wind-direction-arrow"
+                                  aria-hidden="true"
+                                  style="@($"transform: rotate({WeatherGridFormat.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees)}deg)")">v</span>
                         </div>
                     </FluentGridItem>
                     <FluentGridItem xs="12" sm="6">

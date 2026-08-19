@@ -2,7 +2,9 @@
 
 <div class="wind-direction">
     @WeatherGridFormat.FormatWindDirection(Compass, Degrees)
-    <WindDirectionArrow Degrees="@Degrees" />
+    <span class="wind-direction-arrow"
+          aria-hidden="true"
+          style="@($"transform: rotate({WeatherGridFormat.NormalizeSourceDegrees(Degrees)}deg)")">v</span>
 </div>
 
 @code {

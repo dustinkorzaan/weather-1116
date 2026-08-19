@@ -173,9 +173,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Math.round(((numeric % 360) + 360) % 360)", script);
         Assert.Contains("renderWindDirection", script);
         Assert.Contains("createWindDirectionCell", script);
-        Assert.Contains("createElementNS", script);
-        Assert.Contains("M6 11 1.2 2.5h9.6Z", script);
-        Assert.DoesNotContain("\\u2B9B", script);
+        Assert.Contains("WIND_DIRECTION_ARROW = 'v'", script);
         Assert.DoesNotContain("numeric + 180", script);
     }
 
@@ -397,6 +395,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".weather-map-pin-card-delete svg", css);
         Assert.Contains(".weather-map-add-location-button", css);
         Assert.Contains(".wind-direction-arrow", css);
+        Assert.DoesNotContain("font-size: 1.15em", css);
         Assert.Contains(".add-location-panel", css);
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
