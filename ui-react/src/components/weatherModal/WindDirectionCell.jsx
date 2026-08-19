@@ -4,7 +4,7 @@ import {
   normalizeSourceDegrees,
 } from '../../utils/aiWeatherDisplay';
 
-/** Compass label plus the same rotated letter V used on Current AI Weather. */
+/** Compass label plus the same rotated letter v used on Current AI Weather. */
 function WindDirectionCell({ compass, degrees }) {
   const rotationDeg = normalizeSourceDegrees(degrees);
   return (

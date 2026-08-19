@@ -1,7 +1,7 @@
 (function (window) {
   'use strict';
 
-  var WIND_DIRECTION_ARROW = 'V';
+  var WIND_DIRECTION_ARROW = 'v';
 
   function normalizeSourceDegrees(deg) {
     var numeric = Number(deg);

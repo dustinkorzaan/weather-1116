@@ -95,7 +95,7 @@ public sealed class PageSplitTests
                 < pageSource.IndexOf("wind-direction-arrow", StringComparison.Ordinal),
             "Wind direction arrow should follow the compass label.");
         Assert.Contains("WindDirectionSourceDegrees", pageSource);
-        Assert.Contains(">V</span>", pageSource);
+        Assert.Contains(">v</span>", pageSource);
         Assert.DoesNotContain("Temperature F", pageSource);
         Assert.DoesNotContain("Wind Speed MPH", pageSource);
         Assert.DoesNotContain("protected override async Task OnParametersSetAsync", pageSource);
@@ -145,7 +145,7 @@ public sealed class PageSplitTests
             Assert.Contains("S (180°)", rendered.Markup);
             Assert.Contains("wind-direction-arrow", rendered.Markup);
             Assert.Contains("rotate(180deg)", rendered.Markup);
-            Assert.Contains(">V</span>", rendered.Markup);
+            Assert.Contains(">v</span>", rendered.Markup);
             Assert.True(
                 rendered.Markup.IndexOf("S (180°)", StringComparison.Ordinal)
                     < rendered.Markup.IndexOf("wind-direction-arrow", StringComparison.Ordinal),

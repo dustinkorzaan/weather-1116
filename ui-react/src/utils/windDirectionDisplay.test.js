@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest';
 import { WIND_DIRECTION_ARROW, normalizeSourceDegrees } from './windDirectionDisplay';
 
-test('uses a letter V as the down-pointing wind direction marker', () => {
-  expect(WIND_DIRECTION_ARROW).toBe('V');
+test('uses a letter v as the down-pointing wind direction marker', () => {
+  expect(WIND_DIRECTION_ARROW).toBe('v');
 });
 
 test('normalizes source degrees to 0–360 and treats non-finite as 0', () => {
