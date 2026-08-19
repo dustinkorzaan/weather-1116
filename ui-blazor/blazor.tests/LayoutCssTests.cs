@@ -69,7 +69,7 @@ public sealed class LayoutCssTests
         Assert.Contains("class=\"about-close\"", rendered.Markup);
         Assert.Contains("aria-label=\"Close\"", rendered.Markup);
 
-        var layoutSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/MainLayout.razor"));
+        var layoutSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Shared/MainLayout.razor"));
         Assert.Contains("Label=\"Home\"", layoutSource);
         Assert.Contains("Hello World", layoutSource);
         Assert.Contains("Current AI Weather", layoutSource);
@@ -87,22 +87,22 @@ public sealed class LayoutCssTests
         Assert.Contains("SearchLocation", layoutSource);
         Assert.DoesNotContain("FluentButton", layoutSource);
 
-        var programSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Program.cs"));
+        var programSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Program.cs"));
         Assert.Contains("MapGet(\"/Geo/GetLocation\"", programSource);
         Assert.Contains("client.GetLocation", programSource);
 
-        var weatherClient = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Data/WeatherApiClient.cs"));
+        var weatherClient = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Data/WeatherApiClient.cs"));
         Assert.Contains("Geo/GetLocation?latitude=", weatherClient);
 
-        var avatarSvg = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/avatar.svg"));
+        var avatarSvg = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/wwwroot/avatar.svg"));
         Assert.Contains("<path ", avatarSvg);
         Assert.DoesNotContain("<circle ", avatarSvg);
 
-        var host = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Pages/_Host.cshtml"));
+        var host = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Pages/_Host.cshtml"));
         Assert.Contains("--body-font:", host);
         Assert.Contains("chatFullscreen.js", host);
 
-        var app = File.ReadAllText(FindRepoFile("ui-blazor/blazor/App.razor"));
+        var app = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/App.razor"));
         Assert.Contains("Selector=\".section-title\"", app);
     }
 
@@ -136,23 +136,6 @@ public sealed class LayoutCssTests
         {
             Assert.DoesNotContain("aria-label=\"Add location\"", rendered.Markup);
         });
-    }
-
-    private static string FindRepoFile(string relativePath)
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            var candidate = Path.Combine(dir.FullName, relativePath);
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            dir = dir.Parent;
-        }
-
-        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
     }
 
     [Fact]

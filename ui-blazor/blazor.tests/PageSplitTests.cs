@@ -35,7 +35,7 @@ public sealed class PageSplitTests
     [Fact]
     public void WeatherMapScript_ShowsDeleteControlAndMutatesPinList()
     {
-        var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
         Assert.Contains("weatherModalPath", script);
         Assert.Contains("weather-map-pin-card-delete", script);
         Assert.Contains("addCity", script);
@@ -75,7 +75,7 @@ public sealed class PageSplitTests
         Assert.Contains("Current AI Weather", rendered.Markup);
         Assert.Contains("Get Current AI Weather", rendered.Markup);
 
-        var pageSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Pages/CurrentAIWeather.razor"));
+        var pageSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Pages/CurrentAIWeather.razor"));
         Assert.Contains("Class=\"ai-weather-submit\"", pageSource);
         Assert.Contains("Slot=\"start\"", pageSource);
         Assert.Contains("chat-markdown", pageSource);
@@ -113,7 +113,7 @@ public sealed class PageSplitTests
 
         Assert.Contains("In-process tool loop · Like Foundry Console V3", rendered.Markup);
 
-        var pageSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Pages/CurrentAIWeather.razor"));
+        var pageSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Pages/CurrentAIWeather.razor"));
         Assert.Contains("FluentTabs", pageSource);
         Assert.Contains("\"v3\"", pageSource);
         Assert.Contains("\"v4\"", pageSource);
@@ -185,7 +185,7 @@ public sealed class PageSplitTests
     [Fact]
     public void WeatherMapScript_ShowsHoverCardWithWeatherButton()
     {
-        var script = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/wwwroot/js/weatherMap.js"));
         Assert.Contains("weatherModalPath", script);
         Assert.Contains("navigateToWeather", script);
         Assert.Contains("window.Blazor.navigateTo", script);
@@ -225,7 +225,7 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
         Assert.DoesNotContain("id=\"weather-map\"", rendered.Markup);
 
-        var panelSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/ChatPanel.razor"));
+        var panelSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Shared/ChatPanel.razor"));
         Assert.Contains("Hosted Foundry agent · Like Foundry Console V5", panelSource);
         Assert.Contains("chatInput.scrollToBottom", panelSource);
         Assert.Contains("chatInput.getValue", panelSource);
@@ -247,7 +247,7 @@ public sealed class PageSplitTests
         Assert.Contains("Enter fullscreen", panelSource);
         Assert.Contains("chat-window", panelSource);
 
-        var markdown = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Markdown/SafeGfmMarkdown.cs"));
+        var markdown = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Markdown/SafeGfmMarkdown.cs"));
         Assert.Contains("UsePipeTables", markdown);
         Assert.Contains("UseEmphasisExtras", markdown);
         Assert.Contains("UseAutoLinks", markdown);
@@ -258,7 +258,7 @@ public sealed class PageSplitTests
         Assert.Contains("DisableHtml", markdown);
         Assert.Contains("IsSafeUrl", markdown);
 
-        var chatInput = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
+        var chatInput = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/wwwroot/js/chatInput.js"));
         Assert.Contains("function scrollToBottom(element)", chatInput);
         Assert.Contains("element.scrollTop = element.scrollHeight", chatInput);
         Assert.Contains("function getValue(element)", chatInput);
@@ -276,27 +276,10 @@ public sealed class PageSplitTests
         Assert.Contains("document.addEventListener('fullscreenchange', onFullscreenChange)", chatInput);
         Assert.Contains("document.addEventListener('webkitfullscreenchange', onFullscreenChange)", chatInput);
 
-        var fullscreen = File.ReadAllText(FindRepoFile("ui-blazor/blazor/wwwroot/js/chatFullscreen.js"));
+        var fullscreen = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/wwwroot/js/chatFullscreen.js"));
         Assert.Contains("data-chat-fullscreen-button", fullscreen);
         Assert.Contains("requestFullscreen", fullscreen);
         Assert.Contains("is-css-fullscreen", fullscreen);
-    }
-
-    private static string FindRepoFile(string relativePath)
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            var candidate = Path.Combine(dir.FullName, relativePath);
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            dir = dir.Parent;
-        }
-
-        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
     }
 
     private static BunitContext CreateContext(bool holdWeather = false)
