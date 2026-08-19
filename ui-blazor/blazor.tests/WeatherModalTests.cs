@@ -34,7 +34,11 @@ public sealed class WeatherModalTests
             Assert.Contains("current-ai-weather-modal-heading", rendered.Markup);
             Assert.Contains("<strong>Sunny</strong>", rendered.Markup);
             Assert.Contains("72 °F", rendered.Markup);
+            Assert.DoesNotContain("Connecting to Microsoft Foundry", rendered.Markup);
         });
+
+        var tabSource = File.ReadAllText(FindRepoFile("ui-blazor/blazor/Shared/CurrentAIWeatherModalTab.razor"));
+        Assert.Contains("Connecting to Microsoft Foundry...", tabSource);
     }
 
     [Fact]
@@ -47,6 +51,7 @@ public sealed class WeatherModalTests
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
 
         Assert.DoesNotContain("current-ai-weather-modal-heading", rendered.Markup);
+        Assert.DoesNotContain("Connecting to Microsoft Foundry", rendered.Markup);
 
         rendered.WaitForAssertion(() =>
         {
@@ -153,6 +158,23 @@ public sealed class WeatherModalTests
         rendered.Find("button.about-close").Click();
 
         Assert.Equal("http://localhost/", navigation.Uri);
+    }
+
+    private static string FindRepoFile(string relativePath)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            var candidate = Path.Combine(dir.FullName, relativePath);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            dir = dir.Parent;
+        }
+
+        throw new FileNotFoundException($"Could not find {relativePath} from {AppContext.BaseDirectory}");
     }
 
     private static BunitContext CreateContext()

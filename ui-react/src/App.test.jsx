@@ -282,6 +282,44 @@ test('current AI weather reads location query, clears it, and fetches', async ()
   expect(screen.queryByText('Wind Speed MPH')).toBeNull();
 });
 
+test('current AI weather page shows the Foundry connecting message while fetching', async () => {
+  const user = userEvent.setup();
+  mockHelloFetch();
+  renderApp('/current-ai-weather');
+
+  expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
+
+  await user.click(screen.getByRole('button', { name: /get current ai weather/i }));
+
+  expect(screen.getByText('Connecting to Microsoft Foundry...')).toBeDefined();
+
+  await waitFor(() => {
+    expect(screen.getByText('Sunny in Nashville.')).toBeDefined();
+  });
+
+  expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
+});
+
+test('weather modal current tab shows the Foundry connecting message while fetching', async () => {
+  mockHelloFetch();
+  renderApp('/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=current');
+
+  expect(screen.getByText('Connecting to Microsoft Foundry...')).toBeDefined();
+
+  await waitFor(() => {
+    expect(screen.getByText('Sunny in Nashville.')).toBeDefined();
+  });
+
+  expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
+});
+
+test('weather modal forecast tab has no Foundry connecting message', async () => {
+  mockHelloFetch();
+  renderApp('/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=daily-forecast');
+
+  expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
+});
+
 test('current AI weather page has V3/V4/V5 tabs that call their own endpoint', async () => {
   const user = userEvent.setup();
   const fetchMock = mockHelloFetch();

@@ -994,6 +994,11 @@ html[data-theme="dark"] .weather-map-logo-pin {
   color: var(--color-danger);
 }
 
+.form-loading {
+  margin: 0.75rem 0 0;
+  color: var(--color-text-muted);
+}
+
 .weather-results {
   margin-top: 1rem;
 }
