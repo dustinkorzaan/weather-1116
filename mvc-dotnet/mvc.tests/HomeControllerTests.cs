@@ -134,6 +134,27 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
+    public async Task CurrentAIWeather_HasFoundryLoadingTextForEachVersion()
+    {
+        var response = await _client.GetAsync("/current-ai-weather");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains("id=\"ai-weather-loading\" class=\"form-loading\" hidden>Connecting to Microsoft Foundry...", html);
+        Assert.Contains("id=\"ai-weather-loading-v4\" class=\"form-loading\" hidden>Connecting to Microsoft Foundry...", html);
+        Assert.Contains("id=\"ai-weather-loading-v5\" class=\"form-loading\" hidden>Connecting to Microsoft Foundry...", html);
+        Assert.Contains("loadingId: 'ai-weather-loading'", html);
+        Assert.Contains("loadingId: 'ai-weather-loading-v4'", html);
+        Assert.Contains("loadingId: 'ai-weather-loading-v5'", html);
+
+        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/currentAIWeather.js"));
+        Assert.Contains("config.loadingId", script);
+        Assert.Contains("setHidden(loadingEl, false)", script);
+        Assert.Contains("setHidden(loadingEl, true)", script);
+    }
+
+    [Fact]
     public void IndexView_UsesCityAndStateMapPinLabels()
     {
         var view = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/Views/Home/Index.cshtml"));
@@ -256,7 +277,14 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Daily History", html);
         Assert.Contains("Hourly History", html);
         Assert.Contains("tab=daily-forecast", html);
+        Assert.Contains("id=\"weatherModalLoading\" class=\"form-loading\" hidden>Connecting to Microsoft Foundry...", html);
+        Assert.Contains("loadingId: 'weatherModalLoading'", html);
         Assert.DoesNotContain("Coming soon.", html);
+
+        var script = File.ReadAllText(FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherModal.js"));
+        Assert.Contains("config.loadingId", script);
+        Assert.Contains("setHidden(loadingEl, false)", script);
+        Assert.Contains("setHidden(loadingEl, true)", script);
     }
 
     [Fact]
@@ -279,6 +307,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("resolution: \"Daily\"", html);
         Assert.Contains("field: \"daily\"", html);
         Assert.Contains("reverse: false", html);
+        Assert.DoesNotContain("Connecting to Microsoft Foundry", html);
         Assert.DoesNotContain("weatherModal.js", html);
         Assert.DoesNotContain("Coming soon.", html);
     }

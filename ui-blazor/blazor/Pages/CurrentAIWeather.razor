@@ -43,6 +43,11 @@
             <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@aiWeatherError</FluentMessageBar>
         }
 
+        @if (isAiWeatherLoading)
+        {
+            <p class="stat-label stack-gap">Connecting to Microsoft Foundry...</p>
+        }
+
         @if (aiWeather is not null && !isAiWeatherLoading)
         {
             <div class="weather-results">

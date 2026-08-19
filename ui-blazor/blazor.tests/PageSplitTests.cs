@@ -140,6 +140,7 @@ public sealed class PageSplitTests
             Assert.Contains("ai-weather-submit", rendered.Markup);
             Assert.Contains("fluent-progress-ring", rendered.Markup, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("slot=\"start\"", rendered.Markup, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Connecting to Microsoft Foundry...", rendered.Markup);
         });
     }
 
@@ -174,6 +175,7 @@ public sealed class PageSplitTests
             Assert.Contains("36.16° N, 86.78° W", rendered.Markup);
             Assert.DoesNotContain("Temperature F", rendered.Markup);
             Assert.DoesNotContain("Wind Speed MPH", rendered.Markup);
+            Assert.DoesNotContain("Connecting to Microsoft Foundry", rendered.Markup);
         });
 
         Assert.Contains("nashville tn", rendered.Markup);

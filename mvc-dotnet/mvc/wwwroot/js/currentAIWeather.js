@@ -85,6 +85,7 @@
     var button = document.getElementById(config.buttonId);
     var spinner = document.getElementById(config.spinnerId);
     var errorEl = document.getElementById(config.errorId);
+    var loadingEl = document.getElementById(config.loadingId);
     var resultsEl = document.getElementById(config.resultsId);
     var summaryEl = document.getElementById(config.summaryId);
     var temperatureEl = document.getElementById(config.temperatureId);
@@ -107,6 +108,7 @@
       setHidden(errorEl, true);
       setHidden(resultsEl, true);
       setHidden(spinner, false);
+      setHidden(loadingEl, false);
       button.disabled = true;
       button.setAttribute('aria-busy', 'true');
       locationInput.disabled = true;
@@ -158,6 +160,7 @@
         })
         .finally(function () {
           setHidden(spinner, true);
+          setHidden(loadingEl, true);
           button.disabled = false;
           button.removeAttribute('aria-busy');
           locationInput.disabled = false;
