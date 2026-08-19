@@ -102,4 +102,12 @@ public sealed class WeatherGridFormatTests
         Assert.Equal("0", WeatherGridFormat.FormatRunLogMs(0));
         Assert.Equal("1,234", WeatherGridFormat.FormatRunLogMs(1234));
     }
+
+    [Fact]
+    public void FormatRunLogTokenCount_FormatsWithThousandsSeparators()
+    {
+        Assert.Equal("0", WeatherGridFormat.FormatRunLogTokenCount(0));
+        Assert.Equal("1,234", WeatherGridFormat.FormatRunLogTokenCount(1234));
+        Assert.Equal(string.Empty, WeatherGridFormat.FormatRunLogTokenCount(null));
+    }
 }

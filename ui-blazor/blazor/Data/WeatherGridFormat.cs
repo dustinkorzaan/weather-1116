@@ -99,4 +99,8 @@ public static class WeatherGridFormat
     /// <summary>Formats a millisecond duration with thousands separators, e.g. "1,234".</summary>
     public static string FormatRunLogMs(int milliseconds) =>
         milliseconds.ToString("#,##0", CultureInfo.InvariantCulture);
+
+    /// <summary>Formats a run-log token count with thousands separators, e.g. "1,234". Null becomes an empty string.</summary>
+    public static string FormatRunLogTokenCount(int? tokens) =>
+        tokens?.ToString("#,##0", CultureInfo.InvariantCulture) ?? string.Empty;
 }

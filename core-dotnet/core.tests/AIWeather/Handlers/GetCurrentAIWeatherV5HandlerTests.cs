@@ -32,7 +32,7 @@ public class GetCurrentAIWeatherV5HandlerTests
         var source = File.ReadAllText(FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));
 
         Assert.Contains("runLog.AddLog(", source, StringComparison.Ordinal);
-        Assert.Contains("modelOutput.RunLogDetails = runLog.HydrateRuntimes();", source, StringComparison.Ordinal);
+        Assert.Contains("modelOutput.RunLogDetails = runLog.Hydrate();", source, StringComparison.Ordinal);
         Assert.DoesNotContain("AddLog(1,", source, StringComparison.Ordinal);
     }
 
