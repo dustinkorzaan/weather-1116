@@ -5,7 +5,7 @@ namespace Core.AIWeather.Services;
 
 /// <summary>
 /// Collects timestamped run-log entries during a GetCurrentAIWeather handler's execution
-/// (both V3 and V4), then hydrates elapsed-time and running-total-token fields across the
+/// (V3, V4, and V5), then hydrates elapsed-time and running-total-token fields across the
 /// collected entries.
 /// </summary>
 public class AIRunLogRecorder(TimeProvider? timeProvider = null)

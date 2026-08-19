@@ -36,6 +36,26 @@ public class AIRunLogRecorderTests
     }
 
     [Fact]
+    public void Hydrate_NonZeroTotalTokenCounts_AccumulatesRunningTotalTokenCount()
+    {
+        var clock = new FakeTimeProvider(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        var recorder = new AIRunLogRecorder(clock);
+
+        recorder.AddLog(0, "Start", null);
+        recorder.AddLog(1, "Finish CreateResponse", null);
+        recorder.AddLog(1, "Start loop 2", null);
+
+        var entries = recorder.Hydrate();
+        entries[1].TotalTokenCount = 10;
+        entries[2].TotalTokenCount = 20;
+        entries = recorder.Hydrate();
+
+        Assert.Equal(0, entries[0].RunningTotalTokenCount);
+        Assert.Equal(10, entries[1].RunningTotalTokenCount);
+        Assert.Equal(30, entries[2].RunningTotalTokenCount);
+    }
+
+    [Fact]
     public void Hydrate_SameLoop_AccumulatesLoopRuntimeFromLoopStart()
     {
         var clock = new FakeTimeProvider(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
