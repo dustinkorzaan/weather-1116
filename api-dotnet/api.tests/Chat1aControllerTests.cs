@@ -119,6 +119,56 @@ public class Chat3ControllerTests(ChatApiWebApplicationFactory factory) : IClass
     }
 }
 
+public class Chat3ErrorStreamTests(Chat3ThrowingWebApplicationFactory factory)
+    : IClassFixture<Chat3ThrowingWebApplicationFactory>
+{
+    private readonly HttpClient _client = factory.CreateClient();
+
+    [Fact]
+    public async Task PostMessage_WritesErrorEvent_WhenServiceThrowsAfterSession()
+    {
+        using var response = await _client.PostAsJsonAsync(
+            "/Chat3/messages",
+            new ChatSendMessageRequest { Message = "Hi" });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/event-stream", response.Content.Headers.ContentType?.MediaType);
+
+        var body = await response.Content.ReadAsStringAsync();
+        var events = ParseSsePayloads(body);
+        Assert.Collection(
+            events,
+            sessionEvent =>
+            {
+                Assert.Equal("session", sessionEvent.GetProperty("type").GetString());
+                Assert.Equal("Chat3:test-session", sessionEvent.GetProperty("sessionId").GetString());
+            },
+            errorEvent =>
+            {
+                Assert.Equal("error", errorEvent.GetProperty("type").GetString());
+                Assert.Equal("hosted agent boom", errorEvent.GetProperty("errorMessage").GetString());
+            });
+    }
+
+    private static List<JsonElement> ParseSsePayloads(string body)
+    {
+        var events = new List<JsonElement>();
+
+        foreach (var block in body.Split("\n\n", StringSplitOptions.RemoveEmptyEntries))
+        {
+            var line = block.Trim();
+            if (!line.StartsWith("data:", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            events.Add(JsonDocument.Parse(line["data:".Length..].Trim()).RootElement.Clone());
+        }
+
+        return events;
+    }
+}
+
 public class ChatApiWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -156,5 +206,31 @@ internal sealed class StubChat3ClientService : IChatClientService
         yield return ChatStreamEvent.Session("Chat3:test-session");
         yield return ChatStreamEvent.Token("Hello from Chat3");
         yield return ChatStreamEvent.Done();
+    }
+}
+
+public class Chat3ThrowingWebApplicationFactory : WebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Development");
+        builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IAboutClient>();
+            services.AddSingleton<IAboutClient, WeatherApiWebApplicationFactory.StubAboutClient>();
+
+            services.Replace(ServiceDescriptor.KeyedScoped<IChatClientService, ThrowingAfterSessionChat3Service>("Chat3"));
+        });
+    }
+}
+
+internal sealed class ThrowingAfterSessionChat3Service : IChatClientService
+{
+    public async IAsyncEnumerable<ChatStreamEvent> SendMessageAsync(
+        ChatSendMessageRequest request,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        yield return ChatStreamEvent.Session("Chat3:test-session");
+        throw new InvalidOperationException("hosted agent boom");
     }
 }

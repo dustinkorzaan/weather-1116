@@ -1,4 +1,5 @@
 using System.Text;
+using Azure.AI.Extensions.OpenAI;
 using Core.Chat.Models;
 using Core.Chat.Services;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,8 @@ namespace Core.Chat.Chat3;
 /// <summary>
 /// Hosted Microsoft Foundry agent (Foundry Console V5 pattern). The app sends
 /// only the user prompt; instructions, model, and MCP tools are defined on
-/// the agent named by <c>AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME</c>.
+/// the agent named by <c>AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME</c>
+/// (defaults to <c>wx1116-agent-chat</c>).
 /// </summary>
 public sealed class Chat3Service : IChatClientService
 {
@@ -50,7 +52,24 @@ public sealed class Chat3Service : IChatClientService
 
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
-        var client = _settings.CreateProjectResponsesClientForChatAgent();
+        ProjectResponsesClient? client = null;
+        string? setupError = null;
+        try
+        {
+            client = _settings.CreateProjectResponsesClientForChatAgent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Chat3 failed to create the hosted-agent client");
+            setupError = ex.Message;
+        }
+
+        if (setupError is not null)
+        {
+            yield return ChatStreamEvent.Error(setupError);
+            yield break;
+        }
+
         var assistantBuilder = new StringBuilder();
         var pendingApprovals = new List<McpToolCallApprovalRequestItem>();
         var previousResponseId = _responseStore.GetPreviousResponseId(sessionId);
@@ -90,7 +109,7 @@ public sealed class Chat3Service : IChatClientService
             string? errorOnStart = null;
             try
             {
-                updates = client.CreateResponseStreamingAsync(options, cancellationToken);
+                updates = client!.CreateResponseStreamingAsync(options, cancellationToken);
             }
             catch (Exception ex)
             {

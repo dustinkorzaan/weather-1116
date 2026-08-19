@@ -33,5 +33,16 @@ public abstract class ChatStreamControllerBase : ControllerBase
         {
             // Client disconnected mid-stream.
         }
+        catch (Exception ex)
+        {
+            try
+            {
+                await WriteSseEventAsync(Response, ChatStreamEvent.Error(ex.Message), cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // Client disconnected while writing the error event.
+            }
+        }
     }
 }
