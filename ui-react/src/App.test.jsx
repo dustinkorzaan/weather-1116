@@ -307,6 +307,25 @@ test('current AI weather page has V3/V4/V5 tabs that call their own endpoint', a
   expect(weatherUrl).toContain('/AIWeather/CurrentV5');
 });
 
+test('current AI weather keeps a tab result after switching away and back', async () => {
+  const user = userEvent.setup();
+  mockHelloFetch();
+  renderApp('/current-ai-weather');
+
+  await user.click(screen.getByRole('tab', { name: 'V4' }));
+  await user.click(screen.getByRole('button', { name: /get current ai weather/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText('Sunny in Nashville.')).toBeDefined();
+  });
+
+  await user.click(screen.getByRole('tab', { name: 'V3' }));
+  expect(screen.queryByText('Sunny in Nashville.')).toBeNull();
+
+  await user.click(screen.getByRole('tab', { name: 'V4' }));
+  expect(screen.getByText('Sunny in Nashville.')).toBeDefined();
+});
+
 test('current AI weather renders the full summary as GitHub-flavored Markdown', async () => {
   mockHelloFetch({
     fullSummary: `**Sunny** in Nashville.

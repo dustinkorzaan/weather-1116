@@ -18,6 +18,10 @@ namespace Core.AIWeather.Handlers;
 /// Console V5). Instructions, response schema, and MCP tools are configured on the agent
 /// itself (named by <c>AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME</c>) — this handler sends only the
 /// user prompt, so there is no local schema, tool wiring, or tool-call loop to drive here.
+/// Unlike V3/V4, this handler cannot strip <c>runLogDetails</c> from the schema the model
+/// sees (there is no local schema to edit): the agent's own response schema must already
+/// match <see cref="AIWeatherResponse"/>'s camelCase fields and must not require
+/// <c>runLogDetails</c>, or deserialization can succeed with empty weather fields.
 /// </summary>
 public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV5Event, AIWeatherResponse>
 {
