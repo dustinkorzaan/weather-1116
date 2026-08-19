@@ -153,7 +153,9 @@ function ToolChip({ content, details }) {
                 {details}
               </pre>
             </div>,
-            document.body,
+            // A native-fullscreen chat window only paints its own subtree, so a
+            // tooltip portaled to document.body would be invisible while active.
+            document.fullscreenElement || document.body,
           )
         : null}
     </div>

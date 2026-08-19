@@ -162,21 +162,26 @@ window.chatToolHover = (function () {
   }
 
   function ensureCard() {
-    if (card) {
-      return card;
+    if (!card) {
+      wrap = document.createElement('div');
+      wrap.className = 'chat-tool-hover-wrap';
+      wrap.hidden = true;
+      wrap.addEventListener('mouseenter', cancelHide);
+      wrap.addEventListener('mouseleave', scheduleHide);
+
+      card = document.createElement('pre');
+      card.className = 'chat-tool-hover-card';
+      card.setAttribute('role', 'tooltip');
+      wrap.appendChild(card);
     }
 
-    wrap = document.createElement('div');
-    wrap.className = 'chat-tool-hover-wrap';
-    wrap.hidden = true;
-    wrap.addEventListener('mouseenter', cancelHide);
-    wrap.addEventListener('mouseleave', scheduleHide);
+    // A native-fullscreen chat window only paints its own subtree, so the
+    // hover card must live inside it (not document.body) while active.
+    var container = document.fullscreenElement || document.body;
+    if (wrap.parentNode !== container) {
+      container.appendChild(wrap);
+    }
 
-    card = document.createElement('pre');
-    card.className = 'chat-tool-hover-card';
-    card.setAttribute('role', 'tooltip');
-    wrap.appendChild(card);
-    document.body.appendChild(wrap);
     return card;
   }
 

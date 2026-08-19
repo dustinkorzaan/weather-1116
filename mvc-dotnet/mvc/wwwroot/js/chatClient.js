@@ -256,22 +256,27 @@
   }
 
   function ensureToolHoverCard() {
-    if (toolHoverCard) {
-      return toolHoverCard;
+    if (!toolHoverCard) {
+      toolHoverWrap = document.createElement('div');
+      toolHoverWrap.id = 'chat-tool-hover-card';
+      toolHoverWrap.className = 'chat-tool-hover-wrap';
+      toolHoverWrap.hidden = true;
+      toolHoverWrap.addEventListener('mouseenter', cancelToolHoverHide);
+      toolHoverWrap.addEventListener('mouseleave', scheduleToolHoverHide);
+
+      toolHoverCard = document.createElement('pre');
+      toolHoverCard.className = 'chat-tool-hover-card';
+      toolHoverCard.setAttribute('role', 'tooltip');
+      toolHoverWrap.appendChild(toolHoverCard);
     }
 
-    toolHoverWrap = document.createElement('div');
-    toolHoverWrap.id = 'chat-tool-hover-card';
-    toolHoverWrap.className = 'chat-tool-hover-wrap';
-    toolHoverWrap.hidden = true;
-    toolHoverWrap.addEventListener('mouseenter', cancelToolHoverHide);
-    toolHoverWrap.addEventListener('mouseleave', scheduleToolHoverHide);
+    // A native-fullscreen chat window only paints its own subtree, so the
+    // hover card must live inside it (not document.body) while active.
+    const container = document.fullscreenElement || document.body;
+    if (toolHoverWrap.parentNode !== container) {
+      container.appendChild(toolHoverWrap);
+    }
 
-    toolHoverCard = document.createElement('pre');
-    toolHoverCard.className = 'chat-tool-hover-card';
-    toolHoverCard.setAttribute('role', 'tooltip');
-    toolHoverWrap.appendChild(toolHoverCard);
-    document.body.appendChild(toolHoverWrap);
     return toolHoverCard;
   }
 

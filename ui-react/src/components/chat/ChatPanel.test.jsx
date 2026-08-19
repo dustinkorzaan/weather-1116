@@ -23,6 +23,24 @@ function stubChatMessagesScrollHeight(height) {
   });
 }
 
+function stubNativeFullscreen() {
+  let current = null;
+  Object.defineProperty(document, 'fullscreenElement', {
+    configurable: true,
+    get: () => current,
+  });
+  HTMLElement.prototype.requestFullscreen = vi.fn(function requestFullscreen() {
+    current = this;
+    document.dispatchEvent(new Event('fullscreenchange'));
+    return Promise.resolve();
+  });
+  document.exitFullscreen = vi.fn(() => {
+    current = null;
+    document.dispatchEvent(new Event('fullscreenchange'));
+    return Promise.resolve();
+  });
+}
+
 test('scrolls the visible chat to the bottom when a turn completes', async () => {
   stubChatMessagesScrollHeight(800);
   streamChatMessage.mockImplementation(async ({ onEvent }) => {
@@ -144,6 +162,25 @@ test('chat window has a fullscreen control that expands the conversation', async
   await user.click(screen.getByRole('button', { name: /exit fullscreen/i }));
   expect(container.querySelector('.chat-window')?.classList.contains('is-css-fullscreen')).toBe(false);
   expect(screen.getByRole('button', { name: /enter fullscreen/i })).toBeDefined();
+});
+
+test('keeps the tool details tooltip visible inside a native-fullscreen chat window', async () => {
+  stubNativeFullscreen();
+  const user = userEvent.setup();
+  const chip = await renderFinishedToolChip(user);
+  const chatWindow = document.querySelector('.chat-window');
+
+  await user.click(screen.getByRole('button', { name: /enter fullscreen/i }));
+  expect(document.fullscreenElement).toBe(chatWindow);
+
+  await user.hover(chip);
+  const tooltip = await screen.findByRole('tooltip');
+
+  // A native-fullscreen element only paints its own subtree, so a tooltip
+  // portaled outside it (e.g. to document.body) would be invisible.
+  expect(chatWindow?.contains(tooltip)).toBe(true);
+
+  await user.click(screen.getByRole('button', { name: /exit fullscreen/i }));
 });
 
 test('does not close tool details until the pointer leaves the popup', async () => {
