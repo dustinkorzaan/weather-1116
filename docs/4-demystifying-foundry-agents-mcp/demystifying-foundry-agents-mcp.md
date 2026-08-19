@@ -20,8 +20,8 @@ See also [`docs/architecture.md`](../architecture.md) and
 ## Foundry console demos (learning path)
 
 Five standalone console apps in `Weather.sln` show how the production AI weather
-path was built up. They are **training building blocks**, not deployables —
-but all five patterns, including V5, now also back a production handler.
+path was built up. They are **training building blocks**, not deployables. V1
+and V2 stay console-only; V3, V4, and V5 also back a production handler.
 Run from VS Code (**Foundry Console V1** … **V5**) or `dotnet run` in each
 folder. All use the `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `.env.example`).
 

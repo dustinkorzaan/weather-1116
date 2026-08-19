@@ -421,8 +421,8 @@ docs/                        Documentation (including this file)
 ## Foundry Console Demos (learning path)
 
 Five standalone console apps demonstrate how the production AI weather path was
-built up. They are **training building blocks**, not production deployables —
-but all five patterns, including V5, now also back a production handler
+built up. They are **training building blocks**, not production deployables.
+V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 (`GetCurrentAIWeatherV3Handler`/`V4Handler`/`V5Handler`, API/MVC, tabs on
 `/current-ai-weather`):
 
