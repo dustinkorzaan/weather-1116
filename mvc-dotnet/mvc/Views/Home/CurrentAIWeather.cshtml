@@ -1,5 +1,12 @@
 @{
     ViewData["Title"] = "Current AI Weather";
+
+    var panels = new[]
+    {
+        new CurrentAIWeatherPanelViewModel { PanelKey = "v3", IdSuffix = "-v3", Action = "GetCurrentAIWeatherV3" },
+        new CurrentAIWeatherPanelViewModel { PanelKey = "v4", IdSuffix = "-v4", Action = "GetCurrentAIWeatherV4", Hidden = true },
+        new CurrentAIWeatherPanelViewModel { PanelKey = "v5", IdSuffix = "-v5", Action = "GetCurrentAIWeatherV5", Hidden = true },
+    };
 }
 
 <div class="page-shell">
@@ -17,176 +24,10 @@
             <p class="chat-tab-description" data-ai-weather-description="v5" hidden>Hosted Foundry agent · Like Foundry Console V5</p>
         </div>
 
-        <div data-ai-weather-panel="v3">
-            <form id="ai-weather-form" class="weather-form">
-                <label class="field-label" for="ai-weather-location">Location:</label>
-                <input id="ai-weather-location"
-                       class="text-input"
-                       type="text"
-                       value="Nashville, TN"
-                       autocomplete="address-level2" />
-                <button id="ai-weather-button"
-                        type="submit"
-                        class="btn">
-                    <span id="ai-weather-spinner" class="spinner spinner-on-muted" hidden aria-hidden="true"></span>
-                    <span>Get Current AI Weather</span>
-                </button>
-            </form>
-            <p id="ai-weather-error" class="form-error" hidden></p>
-            <p id="ai-weather-loading" class="form-loading" hidden>Connecting to Microsoft Foundry...</p>
-            <div id="ai-weather-results" class="weather-results" hidden>
-                <div id="ai-weather-summary" class="weather-summary chat-markdown"></div>
-                <dl class="weather-stats">
-                    <div class="weather-stat">
-                        <dt>Temperature</dt>
-                        <dd id="ai-weather-temperature"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Wind Speed</dt>
-                        <dd id="ai-weather-wind-speed"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Wind Direction</dt>
-                        <dd id="ai-weather-wind-direction" class="wind-direction"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Conditions</dt>
-                        <dd id="ai-weather-conditions"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Lat/Long</dt>
-                        <dd id="ai-weather-lat-long"></dd>
-                    </div>
-                </dl>
-                <div id="ai-weather-run-log-wrap" class="weather-modal-grid-wrap" hidden>
-                    <table class="weather-modal-grid">
-                        <thead>
-                            <tr>
-                                <th>Time (UTC)</th><th>Loop</th><th>Message</th><th>Input (tokens)</th><th>Cached (tokens)</th>
-                                <th>Output (tokens)</th><th>Reasoning (tokens)</th><th>Total (tokens)</th><th>Running Total (tokens)</th>
-                                <th>Runtime (ms)</th><th>Loop Runtime (ms)</th><th>Running Total (ms)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ai-weather-run-log-body"></tbody>
-                    </table>
-                    <p id="ai-weather-run-log-total" class="weather-run-log-total"></p>
-                </div>
-            </div>
-        </div>
-
-        <div data-ai-weather-panel="v4" hidden>
-            <form id="ai-weather-form-v4" class="weather-form">
-                <label class="field-label" for="ai-weather-location-v4">Location:</label>
-                <input id="ai-weather-location-v4"
-                       class="text-input"
-                       type="text"
-                       value="Nashville, TN"
-                       autocomplete="address-level2" />
-                <button id="ai-weather-button-v4"
-                        type="submit"
-                        class="btn">
-                    <span id="ai-weather-spinner-v4" class="spinner spinner-on-muted" hidden aria-hidden="true"></span>
-                    <span>Get Current AI Weather</span>
-                </button>
-            </form>
-            <p id="ai-weather-error-v4" class="form-error" hidden></p>
-            <p id="ai-weather-loading-v4" class="form-loading" hidden>Connecting to Microsoft Foundry...</p>
-            <div id="ai-weather-results-v4" class="weather-results" hidden>
-                <div id="ai-weather-summary-v4" class="weather-summary chat-markdown"></div>
-                <dl class="weather-stats">
-                    <div class="weather-stat">
-                        <dt>Temperature</dt>
-                        <dd id="ai-weather-temperature-v4"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Wind Speed</dt>
-                        <dd id="ai-weather-wind-speed-v4"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Wind Direction</dt>
-                        <dd id="ai-weather-wind-direction-v4" class="wind-direction"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Conditions</dt>
-                        <dd id="ai-weather-conditions-v4"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Lat/Long</dt>
-                        <dd id="ai-weather-lat-long-v4"></dd>
-                    </div>
-                </dl>
-                <div id="ai-weather-run-log-wrap-v4" class="weather-modal-grid-wrap" hidden>
-                    <table class="weather-modal-grid">
-                        <thead>
-                            <tr>
-                                <th>Time (UTC)</th><th>Loop</th><th>Message</th><th>Input (tokens)</th><th>Cached (tokens)</th>
-                                <th>Output (tokens)</th><th>Reasoning (tokens)</th><th>Total (tokens)</th><th>Running Total (tokens)</th>
-                                <th>Runtime (ms)</th><th>Loop Runtime (ms)</th><th>Running Total (ms)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ai-weather-run-log-body-v4"></tbody>
-                    </table>
-                    <p id="ai-weather-run-log-total-v4" class="weather-run-log-total"></p>
-                </div>
-            </div>
-        </div>
-
-        <div data-ai-weather-panel="v5" hidden>
-            <form id="ai-weather-form-v5" class="weather-form">
-                <label class="field-label" for="ai-weather-location-v5">Location:</label>
-                <input id="ai-weather-location-v5"
-                       class="text-input"
-                       type="text"
-                       value="Nashville, TN"
-                       autocomplete="address-level2" />
-                <button id="ai-weather-button-v5"
-                        type="submit"
-                        class="btn">
-                    <span id="ai-weather-spinner-v5" class="spinner spinner-on-muted" hidden aria-hidden="true"></span>
-                    <span>Get Current AI Weather</span>
-                </button>
-            </form>
-            <p id="ai-weather-error-v5" class="form-error" hidden></p>
-            <p id="ai-weather-loading-v5" class="form-loading" hidden>Connecting to Microsoft Foundry...</p>
-            <div id="ai-weather-results-v5" class="weather-results" hidden>
-                <div id="ai-weather-summary-v5" class="weather-summary chat-markdown"></div>
-                <dl class="weather-stats">
-                    <div class="weather-stat">
-                        <dt>Temperature</dt>
-                        <dd id="ai-weather-temperature-v5"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Wind Speed</dt>
-                        <dd id="ai-weather-wind-speed-v5"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Wind Direction</dt>
-                        <dd id="ai-weather-wind-direction-v5" class="wind-direction"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Conditions</dt>
-                        <dd id="ai-weather-conditions-v5"></dd>
-                    </div>
-                    <div class="weather-stat">
-                        <dt>Lat/Long</dt>
-                        <dd id="ai-weather-lat-long-v5"></dd>
-                    </div>
-                </dl>
-                <div id="ai-weather-run-log-wrap-v5" class="weather-modal-grid-wrap" hidden>
-                    <table class="weather-modal-grid">
-                        <thead>
-                            <tr>
-                                <th>Time (UTC)</th><th>Loop</th><th>Message</th><th>Input (tokens)</th><th>Cached (tokens)</th>
-                                <th>Output (tokens)</th><th>Reasoning (tokens)</th><th>Total (tokens)</th><th>Running Total (tokens)</th>
-                                <th>Runtime (ms)</th><th>Loop Runtime (ms)</th><th>Running Total (ms)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ai-weather-run-log-body-v5"></tbody>
-                    </table>
-                    <p id="ai-weather-run-log-total-v5" class="weather-run-log-total"></p>
-                </div>
-            </div>
-        </div>
+        @foreach (var panel in panels)
+        {
+            <partial name="_CurrentAIWeatherPanel" model="panel" />
+        }
     </section>
 </div>
 
@@ -198,63 +39,30 @@
     <script src="~/js/currentAIWeather.js" asp-append-version="true"></script>
     <script src="~/js/currentAIWeatherTabs.js" asp-append-version="true"></script>
     <script>
+        @foreach (var panel in panels)
+        {
+        <text>
         currentAIWeather.init({
-            formId: 'ai-weather-form',
-            locationId: 'ai-weather-location',
-            buttonId: 'ai-weather-button',
-            spinnerId: 'ai-weather-spinner',
-            errorId: 'ai-weather-error',
-            loadingId: 'ai-weather-loading',
-            resultsId: 'ai-weather-results',
-            summaryId: 'ai-weather-summary',
-            temperatureId: 'ai-weather-temperature',
-            windSpeedId: 'ai-weather-wind-speed',
-            windDirectionId: 'ai-weather-wind-direction',
-            conditionsId: 'ai-weather-conditions',
-            latLongId: 'ai-weather-lat-long',
-            runLogWrapId: 'ai-weather-run-log-wrap',
-            runLogBodyId: 'ai-weather-run-log-body',
-            runLogTotalId: 'ai-weather-run-log-total',
-            endpoint: '@Url.Action("GetCurrentAIWeatherV3", "Home")'
+            formId: '@panel.ElementId("form")',
+            locationId: '@panel.ElementId("location")',
+            buttonId: '@panel.ElementId("button")',
+            spinnerId: '@panel.ElementId("spinner")',
+            errorId: '@panel.ElementId("error")',
+            loadingId: '@panel.ElementId("loading")',
+            resultsId: '@panel.ElementId("results")',
+            summaryId: '@panel.ElementId("summary")',
+            temperatureId: '@panel.ElementId("temperature")',
+            windSpeedId: '@panel.ElementId("wind-speed")',
+            windDirectionId: '@panel.ElementId("wind-direction")',
+            conditionsId: '@panel.ElementId("conditions")',
+            latLongId: '@panel.ElementId("lat-long")',
+            runLogWrapId: '@panel.ElementId("run-log-wrap")',
+            runLogBodyId: '@panel.ElementId("run-log-body")',
+            runLogTotalId: '@panel.ElementId("run-log-total")',
+            endpoint: '@Url.Action(panel.Action, "Home")'
         });
-        currentAIWeather.init({
-            formId: 'ai-weather-form-v4',
-            locationId: 'ai-weather-location-v4',
-            buttonId: 'ai-weather-button-v4',
-            spinnerId: 'ai-weather-spinner-v4',
-            errorId: 'ai-weather-error-v4',
-            loadingId: 'ai-weather-loading-v4',
-            resultsId: 'ai-weather-results-v4',
-            summaryId: 'ai-weather-summary-v4',
-            temperatureId: 'ai-weather-temperature-v4',
-            windSpeedId: 'ai-weather-wind-speed-v4',
-            windDirectionId: 'ai-weather-wind-direction-v4',
-            conditionsId: 'ai-weather-conditions-v4',
-            latLongId: 'ai-weather-lat-long-v4',
-            runLogWrapId: 'ai-weather-run-log-wrap-v4',
-            runLogBodyId: 'ai-weather-run-log-body-v4',
-            runLogTotalId: 'ai-weather-run-log-total-v4',
-            endpoint: '@Url.Action("GetCurrentAIWeatherV4", "Home")'
-        });
-        currentAIWeather.init({
-            formId: 'ai-weather-form-v5',
-            locationId: 'ai-weather-location-v5',
-            buttonId: 'ai-weather-button-v5',
-            spinnerId: 'ai-weather-spinner-v5',
-            errorId: 'ai-weather-error-v5',
-            loadingId: 'ai-weather-loading-v5',
-            resultsId: 'ai-weather-results-v5',
-            summaryId: 'ai-weather-summary-v5',
-            temperatureId: 'ai-weather-temperature-v5',
-            windSpeedId: 'ai-weather-wind-speed-v5',
-            windDirectionId: 'ai-weather-wind-direction-v5',
-            conditionsId: 'ai-weather-conditions-v5',
-            latLongId: 'ai-weather-lat-long-v5',
-            runLogWrapId: 'ai-weather-run-log-wrap-v5',
-            runLogBodyId: 'ai-weather-run-log-body-v5',
-            runLogTotalId: 'ai-weather-run-log-total-v5',
-            endpoint: '@Url.Action("GetCurrentAIWeatherV5", "Home")'
-        });
+        </text>
+        }
         currentAIWeatherTabs.init();
     </script>
 }

@@ -23,7 +23,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("data-theme-option=\"dark\"", html);
         Assert.Contains("data-theme-option=\"system\"", html);
         Assert.DoesNotContain("Hello, from WeatherMVC", html);
-        Assert.DoesNotContain("id=\"ai-weather-form\"", html);
+        Assert.DoesNotContain("id=\"ai-weather-form-v3\"", html);
         Assert.DoesNotContain("id=\"chat-messages\"", html);
         Assert.DoesNotContain("Hello World</h2>", html);
         Assert.DoesNotContain("Current AI Weather</h2>", html);
@@ -66,7 +66,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("<dt>Wind Direction</dt>", html);
         Assert.Contains("class=\"wind-direction\"", html);
         Assert.Contains("<dt>Lat/Long</dt>", html);
-        Assert.Contains("id=\"ai-weather-lat-long\"", html);
+        Assert.Contains("id=\"ai-weather-lat-long-v3\"", html);
         Assert.DoesNotContain("Temperature F", html);
         Assert.DoesNotContain("Wind Speed MPH", html);
         Assert.DoesNotContain("aria-label=\"Add location\"", html);
@@ -86,8 +86,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var html = await response.Content.ReadAsStringAsync();
-        Assert.Contains("id=\"ai-weather-form\"", html);
-        Assert.Contains("id=\"ai-weather-location\"", html);
+        Assert.Contains("id=\"ai-weather-form-v3\"", html);
+        Assert.Contains("id=\"ai-weather-location-v3\"", html);
         Assert.Contains("windDirectionDisplay.js", html);
         Assert.Contains("currentAIWeather.js", html);
     }
@@ -124,10 +124,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var html = await response.Content.ReadAsStringAsync();
-        Assert.Contains("id=\"ai-weather-loading\" class=\"form-loading\" hidden>Connecting to Microsoft Foundry...", html);
+        Assert.Contains("id=\"ai-weather-loading-v3\" class=\"form-loading\" hidden>Connecting to Microsoft Foundry...", html);
         Assert.Contains("id=\"ai-weather-loading-v4\" class=\"form-loading\" hidden>Connecting to Microsoft Foundry...", html);
         Assert.Contains("id=\"ai-weather-loading-v5\" class=\"form-loading\" hidden>Connecting to Microsoft Foundry...", html);
-        Assert.Contains("loadingId: 'ai-weather-loading'", html);
+        Assert.Contains("loadingId: 'ai-weather-loading-v3'", html);
         Assert.Contains("loadingId: 'ai-weather-loading-v4'", html);
         Assert.Contains("loadingId: 'ai-weather-loading-v5'", html);
 
