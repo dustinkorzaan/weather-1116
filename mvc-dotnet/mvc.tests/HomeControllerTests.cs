@@ -173,7 +173,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Math.round(((numeric % 360) + 360) % 360)", script);
         Assert.Contains("renderWindDirection", script);
         Assert.Contains("createWindDirectionCell", script);
-        Assert.Contains("\\u2B9B", script);
+        Assert.Contains("createElementNS", script);
+        Assert.Contains("M6 11 1.2 2.5h9.6Z", script);
+        Assert.DoesNotContain("\\u2B9B", script);
         Assert.DoesNotContain("numeric + 180", script);
     }
 

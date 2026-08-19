@@ -1,0 +1,16 @@
+@using WeatherBlazor.Data
+
+@* Down-pointing filled arrowhead. SVG instead of U+2B9B, which many mobile fonts lack. At 0° it points south (wind from north). *@
+<svg class="wind-direction-arrow"
+     aria-hidden="true"
+     viewBox="0 0 12 12"
+     width="1.15em"
+     height="1.15em"
+     style="@($"transform: rotate({WeatherGridFormat.NormalizeSourceDegrees(Degrees)}deg)")">
+    <path fill="currentColor" d="M6 11 1.2 2.5h9.6Z" />
+</svg>
+
+@code {
+    [Parameter]
+    public double Degrees { get; set; }
+}
