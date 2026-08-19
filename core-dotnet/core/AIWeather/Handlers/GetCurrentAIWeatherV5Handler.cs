@@ -38,8 +38,9 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
     public async Task<AIWeatherResponse> Handle(GetCurrentAIWeatherV5Event request, CancellationToken cancellationToken)
     {
         var runLog = new AIRunLogRecorder();
-        var toolLoopTurns = 0;
-        runLog.AddLog(toolLoopTurns, $"Start {nameof(GetCurrentAIWeatherV5Handler)}", null);
+        // V5 has no local tool loop; the hosted agent resolves tools, so every entry is turn 0.
+        const int runLogTurn = 0;
+        runLog.AddLog(runLogTurn, $"Start {nameof(GetCurrentAIWeatherV5Handler)}", null);
 
         void LogRunLogOnFailure(string reason) => _logger.LogWarning(
             "AI Weather run log at failure ({Reason}): {RunLog}",
@@ -83,9 +84,9 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
 
         // The hosted agent supplies instructions, response schema, and MCP tools itself, so a
         // single call is enough - like V4, there is no local tool-call loop to drive here.
-        runLog.AddLog(toolLoopTurns, "Start CreateResponse", null);
+        runLog.AddLog(runLogTurn, "Start CreateResponse", null);
         ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
-        runLog.AddLog(toolLoopTurns, "Finish CreateResponse", response);
+        runLog.AddLog(runLogTurn, "Finish CreateResponse", response);
 
         var approvalRequests = response.OutputItems.OfType<McpToolCallApprovalRequestItem>().ToList();
         if (approvalRequests.Count > 0)
@@ -123,7 +124,7 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         modelOutput.WindDirectionSource =
             WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
 
-        runLog.AddLog(toolLoopTurns, $"Finish {nameof(GetCurrentAIWeatherV5Handler)}", null);
+        runLog.AddLog(runLogTurn, $"Finish {nameof(GetCurrentAIWeatherV5Handler)}", null);
         modelOutput.RunLogDetails = runLog.Hydrate();
 
         return modelOutput;
