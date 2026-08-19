@@ -348,6 +348,39 @@ test('current AI weather renders the full summary as GitHub-flavored Markdown', 
   });
 });
 
+test('current AI weather page shows a Foundry loading message while fetching', async () => {
+  mockHelloFetch();
+  const user = userEvent.setup();
+  renderApp('/current-ai-weather');
+
+  expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
+
+  await user.click(screen.getByRole('button', { name: /get current ai weather/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText('Connecting to Microsoft Foundry...')).toBeDefined();
+  });
+
+  await waitFor(() => {
+    expect(screen.getByText('Sunny in Nashville.')).toBeDefined();
+    expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
+  });
+});
+
+test('weather modal current AI weather tab shows the same Foundry loading message', async () => {
+  mockHelloFetch();
+  renderApp('/weather?name=Nashville&lat=36.1627&lng=-86.7816&tab=current');
+
+  await waitFor(() => {
+    expect(screen.getByText('Connecting to Microsoft Foundry...')).toBeDefined();
+  });
+
+  await waitFor(() => {
+    expect(screen.getByText('Sunny in Nashville.')).toBeDefined();
+    expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
+  });
+});
+
 test('renders chat clients on its own page', () => {
   mockHelloFetch();
   renderApp('/chat-clients');

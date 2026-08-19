@@ -135,6 +135,16 @@ function CurrentAIWeatherPage() {
 
         {isError && <p className="mt-2 text-destructive">{errorMessage}</p>}
 
+        {isFetching && (
+          <p className="mt-2 inline-flex items-center gap-2 text-muted-foreground">
+            <span
+              className="size-4 animate-spin rounded-full border-2 border-border border-t-foreground"
+              aria-hidden="true"
+            />
+            <span>Connecting to Microsoft Foundry...</span>
+          </p>
+        )}
+
         {data && !isFetching && (
           <div className="mt-3.5">
             <div className="chat-markdown mb-2.5 text-base">
