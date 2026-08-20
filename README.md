@@ -1,9 +1,8 @@
 # Weather 1116
 
 Demystifying Foundry, agents, and models: from model-direct, to local
-in-process looping, to remote MCP, to a hosted agent, behind a pin map.
-
-## Foundry console demos
+in-process looping, to remote MCP, to a hosted agent. From console demos
+to live map pin demo.
 
 Presentation reference: [`docs/presentation.md`](docs/presentation.md)
 
@@ -39,7 +38,7 @@ Standalone multi-turn chat page with five tabs:
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Responses for agent | Like Foundry Console V5 (`wx1116-agent-chat`) |
 
-## Projects and Architecture
+## Projects, Architecture, and live demos in a Weather Pin App
 
 |  | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
