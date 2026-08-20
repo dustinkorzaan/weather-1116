@@ -1,25 +1,9 @@
 # Weather 1116
 
+## Foundry console demos
+
 Demystifying Foundry, agents, and models: from model-direct, to local
 in-process looping, to remote MCP, to a hosted agent, behind a pin map.
-
-|  | Project | Path | Stack | Port |
-| --- | --- | --- | --- | --- |
-| [Visit](https://wx.korzaan.com) | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
-| [Visit](https://weather1116-prod-blazor.azurewebsites.net) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
-| [Visit](https://weather1116-prod-mvc.azurewebsites.net) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
-|  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
-|  | Core | [`core-dotnet/core`](core-dotnet/core) | In API, MVC, Worker, and MCP |  |
-|  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |
-|  | MCP Server (App Service) | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
-|  | MCP Server (Function App) | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |
-
-This README is intentionally brief. Use it for the project grid and demo
-outline. UI pages, styling stacks, theme, architecture constraints, project
-relationships, and parity guidance live in
-[`docs/architecture.md`](docs/architecture.md).
-
-## Foundry console demos
 
 Presentation reference: [`docs/presentation.md`](docs/presentation.md)
 
@@ -39,6 +23,8 @@ following 3-step core weather progression:
 | V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools handled by remote MCP servers |
 | V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
+[Visit](https://wx.korzaan.com/current-ai-weather) the React UI, wired to V3, V4, and V5.
+
 ## Chat clients
 
 Presentation reference: [`docs/5-chat-clients/5-chat-clients.md`](docs/5-chat-clients/5-chat-clients.md)
@@ -52,6 +38,24 @@ Standalone multi-turn chat page with five tabs:
 | Chat2a | In-process | Agent Framework | Like Foundry Console V3 |
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Responses for agent | Like Foundry Console V5 (`wx1116-agent-chat`) |
+
+## Projects and Architecture
+
+|  | Project | Path | Stack | Port |
+| --- | --- | --- | --- | --- |
+| [Visit](https://wx.korzaan.com) | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
+| [Visit](https://weather1116-prod-blazor.azurewebsites.net) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
+| [Visit](https://weather1116-prod-mvc.azurewebsites.net) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
+|  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
+|  | Core | [`core-dotnet/core`](core-dotnet/core) | In API, MVC, Worker, and MCP |  |
+|  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |
+|  | MCP Server (App Service) | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
+|  | MCP Server (Function App) | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |
+
+This README is intentionally brief. Use it for the project grid and demo
+outline. UI pages, styling stacks, theme, architecture constraints, project
+relationships, and parity guidance live in
+[`docs/architecture.md`](docs/architecture.md).
 
 ## Out of Scope
 
