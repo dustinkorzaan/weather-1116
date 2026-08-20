@@ -2,7 +2,7 @@
 
 ## Wireframes & UI Design
 
-| Vendor | Project Name | Best For | Category | Code Output |
+| Company | Project Name | Best For | Category | Code Output |
 | :--- | :--- | :--- | :--- | :--- |
 | **Balsamiq** | [Balsamiq](https://balsamiq.com) | Low-fidelity, sketch-style wireframes | Pure wireframes | None (layout ideation only) |
 | **Figma** | [Figma](https://figma.com) | High-fidelity UI, design systems, dev handoff | Full UI design | Via plugins (Anima, Locofy, etc.) |
@@ -24,9 +24,9 @@
 <br>
 <br>
 
-# Quick App Generator / Rapid Prototyping
+## Quick App Generator / Rapid Prototyping
 
-| Vendor | Project Name | Best For | Tech Stack | Database & Backend | Code Ownership & Export |
+| Company | Project Name | Best For | Tech Stack | Database & Backend | Code Ownership & Export |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Lovable** | [Lovable.dev](https://lovable.dev) | High-end SaaS MVPs and client-ready web apps | React + Vite + Tailwind CSS | Native Supabase Integration | **Excellent** (Full GitHub sync & clean ZIP export) |
 | **Vercel** | [v0.app](https://v0.app/) *(fka v0.dev)* | Pixel-perfect UI engineering and agentic full-stack shipping | Next.js + React + Shadcn UI | Integrated One-Click DBs (Supabase, Neon, Upstash) | **Excellent** (Instant Vercel push, GitHub branch PRs, local CLI pull) |
@@ -40,13 +40,13 @@
 <br>
 <br>
 
-# Developer Centric
+## Developer Centric
 
 | Company | Cloud Version Name | Desktop/CLI Version Name | Current / Supported Models |
 | :--- | :--- | :--- | :--- |
-| **Anysphere** *(SpaceX)* | Cursor Cloud / Background Agents | **[Cursor IDE](https://cursor.com)** *(Editor)* | **Composer 2.5**, Cursor Tab, Claude (Fable 5 / Opus 4.8), OpenAI (GPT-5.5) |
-| **Cognition** | [Devin Cloud](https://devin.ai) | **[Devin Desktop](https://devin.ai)** *(Editor, fka Windsurf)* | **Devin Local Engine**, Cognition SWE 1.6, Claude (Fable 5), OpenAI GPT-5, DeepSeek-R1 |
-| **Anthropic** | Claude.ai / Projects | **[Claude Code](https://anthropic.com)** *(Terminal Agent)* | **Claude Fable 5**, Claude Opus 4.8, Claude 3.5 Sonnet |
+| **Anysphere** *(SpaceX)* *(SpaceXAI)* | Cursor Cloud / Background Agents | **[Cursor IDE](https://cursor.com)** *(Editor)* | **Composer 2.5**, Cursor Tab, Claude (Fable 5 / Opus 4.8), OpenAI (GPT-5.5) |
+| **Cognition** | [Devin Cloud](https://devin.ai) | **[Devin Desktop](https://devin.ai)** *(Editor, fka Windsurf by Codeium)* | **Devin Local Engine**, Cognition SWE 1.6, Claude (Fable 5), OpenAI GPT-5, DeepSeek-R1 |
+| **Anthropic** | Claude.ai / Projects | **[Claude Code](https://anthropic.com)** *(Terminal Agent)* | **Claude Fable 5**, Claude Opus 5, Claude Sonnet 5 |
 | **GitHub / Microsoft** | [Copilot Workspace](https://github.com) | **GitHub Copilot** *(IDE Extension)* | OpenAI GPT-5.5, customized GitHub specialized engineering models |
 | **Google** | [Google Jules](https://jules.google) *(Async GitHub Agent)* | **[Google Antigravity](https://thenewstack.io)** *(IDE / Agent Command App)* | **Gemini 3.6 Flash** (New Default), Gemini 3.5 Flash-Lite, Gemini 3.5 Flash Cyber |
 | **OpenAI** | [Codex in ChatGPT](https://openai.com) / Cloud Tasks | **[OpenAI Codex App](https://openai.com)** *(Desktop, CLI, & Extension)* | **GPT-5.5**, GPT-5, GPT-4o, Custom Agentic Models |

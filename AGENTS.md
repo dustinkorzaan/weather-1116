@@ -4,8 +4,10 @@
 
 This repo is one Weather sample implemented across seven runnable stacks plus
 one shared `Core` class library (see `README.md` and `docs/architecture.md`).
-The five primary apps are React UI, Blazor UI, MVC UI, API, and Worker; the
-other two runnable stacks are the MCP hosts (App Service and Function App).
+Six of those projects are primary: five runnable applications (React UI,
+Blazor UI, MVC UI, API, and Worker) plus the shared `Core` class library;
+the other two runnable stacks are the MCP hosts (App Service and Function
+App).
 
 ## Git / PR policy
 

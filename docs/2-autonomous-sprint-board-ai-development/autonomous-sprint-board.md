@@ -15,7 +15,7 @@ planning, execution, and review without a traditional "you type every line" loop
 
 - Not intended for production, only designed for learning
 - Too synchronous - GitHub Actions runs the full length of the request
-- Use Copilot Agent instead of Copilot CLI
+- Use **GitHub Copilot Agent** instead of Copilot CLI
 
 ## Trello Rule Details
 
@@ -32,7 +32,7 @@ https://api.github.com/repos/dustinkorzaan/weather-1116/dispatches
 
 ```json
 {
-    "Authorization": "Bearer github_pat_...",
+    "Authorization": "Bearer <YOUR_GITHUB_PAT>",
     "Accept": "application/vnd.github+json",
     "User-Agent": "dustinkorzaan",
     "Content-Type": "application/json"
