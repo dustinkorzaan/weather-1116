@@ -34,6 +34,7 @@ and the Foundry console learning path (V1 → V5).
    - Lat/Long → Non-AI Weather `{ temp: 24, ... }`
      - `GetPublicWeatherCurrentEvent(Lat/Long)` returns Non-AI Weather
    - Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
+     - Model derives and returns summary
 2. **V1 → V2**: model-direct (legacy vs unified endpoint); when the console still owns data prep.
 3. **V3**: local in-process tool loops; model chooses tools, your console answers them.
 4. **V4**: model-direct with remote MCP tools
