@@ -68,4 +68,4 @@ relationships, and parity guidance live in
 - **Per-user custom map pins**: Map pins scoped to individual user accounts
 - **Per-pin photo uploads**: Image upload/download per pin via blob storage SAS URIs
 - **Infrastructure as Code**: Provisioning Azure resources via Bicep
-- **Foundry config as code**: Managing Foundry models, tools, and agents via Azure Developer CLI (`azd`) templates
+- **Foundry config as code**: Managing Foundry models, tools, and agents via Azure Developer CLI (azd) templates
