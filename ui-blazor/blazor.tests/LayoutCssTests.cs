@@ -25,6 +25,7 @@ public sealed class LayoutCssTests
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
         Assert.Contains(".chat-message.tool", css);
+        Assert.Contains(".chat-usage-chip", css);
         Assert.Contains(".chat-markdown", css);
         Assert.Contains(".chat-fullscreen-button", css);
         Assert.Contains(".chat-form textarea.chat-input", css);

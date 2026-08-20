@@ -50,6 +50,7 @@ public sealed class Chat2bService : IChatClientService
 
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
+        var usage = new ChatUsageAccumulator();
         var responsesClient = _settings.CreateResponsesClient();
 
         AIAgent? agent = null;
@@ -110,6 +111,8 @@ public sealed class Chat2bService : IChatClientService
 
             foreach (var content in update.Contents)
             {
+                usage.Add(content);
+
                 switch (content)
                 {
                     case McpServerToolCallContent mcpCall:
@@ -134,7 +137,7 @@ public sealed class Chat2bService : IChatClientService
             _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "assistant", Content = assistantText });
         }
 
-        yield return ChatStreamEvent.Done();
+        yield return ChatStreamEvent.Done(usage.ToChatUsage());
     }
 
     private sealed record PendingToolCall(string Name, string? Arguments);

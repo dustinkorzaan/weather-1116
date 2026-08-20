@@ -83,7 +83,7 @@ flowchart TB
    - `token` — streamed assistant text delta
    - `tool_start` / `tool_end` — tool invocation status (when the stream surfaces MCP calls)
    - `error` — failure message
-   - `done` — turn complete
+   - `done` — turn complete; includes `usage` (`runtimeMs` plus token counts when the model reported them)
 3. Core stores conversation history per session in `InMemoryChatSessionStore` (demo-friendly;
    replace with Redis/SQL for production).
 

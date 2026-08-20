@@ -235,6 +235,9 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("@bind-Value=\"_input\"", panelSource);
         Assert.DoesNotContain("@oninput", panelSource);
         Assert.Contains("Type == \"done\"", panelSource);
+        Assert.Contains("assistantEntry.Usage = streamEvent.Usage", panelSource);
+        Assert.Contains("chat-usage-chip", panelSource);
+        Assert.Contains("FormatChatUsageChip", panelSource);
         Assert.Contains("RequestScrollToBottom", panelSource);
         Assert.Contains("data-tool-details", panelSource);
         Assert.Contains("ToolHoverAttributes", panelSource);

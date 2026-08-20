@@ -16,6 +16,8 @@ public class ChatStreamEvent
 
     public string? ErrorMessage { get; init; }
 
+    public ChatUsage? Usage { get; init; }
+
     public static ChatStreamEvent Session(string sessionId) => new()
     {
         Type = "session",
@@ -43,9 +45,10 @@ public class ChatStreamEvent
         ToolResult = toolResult,
     };
 
-    public static ChatStreamEvent Done() => new()
+    public static ChatStreamEvent Done(ChatUsage? usage = null) => new()
     {
         Type = "done",
+        Usage = usage,
     };
 
     public static ChatStreamEvent Error(string message) => new()

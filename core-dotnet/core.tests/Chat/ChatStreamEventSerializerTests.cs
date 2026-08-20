@@ -54,4 +54,43 @@ public class ChatStreamEventSerializerTests
         Assert.True(root.TryGetProperty("sessionId", out var sessionId));
         Assert.Equal("Chat1a:abc123", sessionId.GetString());
     }
+
+    [Fact]
+    public void Serialize_DoneWithoutUsage_OmitsUsageProperty()
+    {
+        var json = ChatStreamEventSerializer.Serialize(ChatStreamEvent.Done());
+
+        using var document = JsonDocument.Parse(json);
+        var root = document.RootElement;
+
+        Assert.Equal("done", root.GetProperty("type").GetString());
+        Assert.False(root.TryGetProperty("usage", out _));
+    }
+
+    [Fact]
+    public void Serialize_DoneWithUsage_UsesCamelCaseNestedProperties()
+    {
+        var json = ChatStreamEventSerializer.Serialize(ChatStreamEvent.Done(new ChatUsage
+        {
+            InputTokenCount = 3100,
+            CachedTokenCount = 200,
+            OutputTokenCount = 1118,
+            ReasoningTokenCount = 40,
+            TotalTokenCount = 4218,
+            RuntimeMs = 1240,
+        }));
+
+        using var document = JsonDocument.Parse(json);
+        var root = document.RootElement;
+        var usage = root.GetProperty("usage");
+
+        Assert.Equal("done", root.GetProperty("type").GetString());
+        Assert.Equal(3100, usage.GetProperty("inputTokenCount").GetInt32());
+        Assert.Equal(200, usage.GetProperty("cachedTokenCount").GetInt32());
+        Assert.Equal(1118, usage.GetProperty("outputTokenCount").GetInt32());
+        Assert.Equal(40, usage.GetProperty("reasoningTokenCount").GetInt32());
+        Assert.Equal(4218, usage.GetProperty("totalTokenCount").GetInt32());
+        Assert.Equal(1240, usage.GetProperty("runtimeMs").GetInt32());
+        Assert.False(usage.TryGetProperty("InputTokenCount", out _));
+    }
 }

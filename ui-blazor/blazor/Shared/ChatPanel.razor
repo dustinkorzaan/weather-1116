@@ -45,7 +45,13 @@
             {
                 @if (entry.Role == "assistant" && !entry.Streaming)
                 {
-                    <div class="chat-message assistant chat-markdown">@((MarkupString)SafeGfmMarkdown.ToHtml(entry.Content))</div>
+                    <div class="chat-message assistant chat-markdown">
+                        @((MarkupString)SafeGfmMarkdown.ToHtml(entry.Content))
+                        @if (!string.IsNullOrEmpty(WeatherGridFormat.FormatChatUsageChip(entry.Usage)))
+                        {
+                            <span class="chat-usage-chip" @attributes="UsageHoverAttributes(entry)">@WeatherGridFormat.FormatChatUsageChip(entry.Usage)</span>
+                        }
+                    </div>
                 }
                 else
                 {
@@ -146,6 +152,7 @@
         public string? ToolResult { get; set; }
         public bool Running { get; set; }
         public bool Streaming { get; set; }
+        public ChatUsage? Usage { get; set; }
     }
 
     private static string MessageClass(string role) => role switch
@@ -212,6 +219,21 @@
         return new Dictionary<string, object>
         {
             ["data-tool-details"] = hoverText,
+            ["tabindex"] = 0,
+        };
+    }
+
+    private static Dictionary<string, object>? UsageHoverAttributes(ChatEntry entry)
+    {
+        var details = WeatherGridFormat.FormatChatUsageDetails(entry.Usage);
+        if (string.IsNullOrEmpty(details) || string.IsNullOrEmpty(WeatherGridFormat.FormatChatUsageChip(entry.Usage)))
+        {
+            return null;
+        }
+
+        return new Dictionary<string, object>
+        {
+            ["data-tool-details"] = details,
             ["tabindex"] = 0,
         };
     }
@@ -324,6 +346,7 @@
                     if (assistantEntry is not null)
                     {
                         assistantEntry.Streaming = false;
+                        assistantEntry.Usage = streamEvent.Usage;
                     }
 
                     RequestScrollToBottom(tabId);

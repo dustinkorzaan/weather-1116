@@ -103,4 +103,59 @@ public static class WeatherGridFormat
     /// <summary>Formats a run-log token count with thousands separators, e.g. "1,234". Null becomes an empty string.</summary>
     public static string FormatRunLogTokenCount(int? tokens) =>
         tokens?.ToString("#,##0", CultureInfo.InvariantCulture) ?? string.Empty;
+
+    /// <summary>Formats a compact duration, e.g. "842ms" or "1.24s".</summary>
+    public static string FormatChatRuntime(int milliseconds)
+    {
+        if (milliseconds < 1000)
+        {
+            return string.Create(CultureInfo.InvariantCulture, $"{milliseconds}ms");
+        }
+
+        var seconds = milliseconds / 1000.0;
+        return string.Create(CultureInfo.InvariantCulture, $"{seconds:0.##}s");
+    }
+
+    /// <summary>Formats the visible assistant-row chip, e.g. "1.24s · 4,218 tok".</summary>
+    public static string FormatChatUsageChip(ChatUsage? usage)
+    {
+        if (usage is null)
+        {
+            return string.Empty;
+        }
+
+        var runtime = FormatChatRuntime(usage.RuntimeMs);
+        var tokens = FormatRunLogTokenCount(usage.TotalTokenCount);
+        return string.IsNullOrEmpty(tokens) ? runtime : $"{runtime} · {tokens} tok";
+    }
+
+    /// <summary>Formats the hover breakdown for a usage chip.</summary>
+    public static string FormatChatUsageDetails(ChatUsage? usage)
+    {
+        if (usage is null)
+        {
+            return string.Empty;
+        }
+
+        var lines = new List<string>
+        {
+            $"Runtime: {FormatRunLogMs(usage.RuntimeMs)} ms",
+        };
+
+        AddTokenLine(lines, "Input", usage.InputTokenCount);
+        AddTokenLine(lines, "Cached", usage.CachedTokenCount);
+        AddTokenLine(lines, "Output", usage.OutputTokenCount);
+        AddTokenLine(lines, "Reasoning", usage.ReasoningTokenCount);
+        AddTokenLine(lines, "Total", usage.TotalTokenCount);
+        return string.Join('\n', lines);
+    }
+
+    private static void AddTokenLine(List<string> lines, string label, int? tokens)
+    {
+        var formatted = FormatRunLogTokenCount(tokens);
+        if (formatted.Length > 0)
+        {
+            lines.Add($"{label}: {formatted}");
+        }
+    }
 }

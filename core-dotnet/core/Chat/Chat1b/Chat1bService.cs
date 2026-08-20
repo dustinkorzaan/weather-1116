@@ -45,6 +45,7 @@ public sealed class Chat1bService : IChatClientService
 
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
+        var usage = new ChatUsageAccumulator();
         var history = _sessionStore.GetMessages(sessionId);
         var inputItems = ChatResponsesSessionHelper.BuildInputItems(history.Take(history.Count - 1).ToList(), userMessage);
 
@@ -80,6 +81,8 @@ public sealed class Chat1bService : IChatClientService
 
         await foreach (StreamingResponseUpdate update in updates!)
         {
+            usage.Add(update);
+
             if (update is StreamingResponseOutputTextDeltaUpdate textDelta && !string.IsNullOrEmpty(textDelta.Delta))
             {
                 assistantBuilder.Append(textDelta.Delta);
@@ -105,6 +108,6 @@ public sealed class Chat1bService : IChatClientService
             _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "assistant", Content = assistantText });
         }
 
-        yield return ChatStreamEvent.Done();
+        yield return ChatStreamEvent.Done(usage.ToChatUsage());
     }
 }

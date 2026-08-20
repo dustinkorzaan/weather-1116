@@ -299,6 +299,39 @@ test('assistant replies grow with their text instead of shrinking inside the tra
   expect(container.querySelector('[data-chat-messages]')?.className).toContain('overflow-y-auto');
 });
 
+test('renders a usage chip on the assistant row when done includes usage', async () => {
+  streamChatMessage.mockImplementation(async ({ onEvent }) => {
+    onEvent({ type: 'token', text: 'Nashville looks clear.' });
+    onEvent({
+      type: 'done',
+      usage: {
+        runtimeMs: 1240,
+        inputTokenCount: 3100,
+        cachedTokenCount: 200,
+        outputTokenCount: 1118,
+        reasoningTokenCount: 40,
+        totalTokenCount: 4218,
+      },
+    });
+  });
+
+  const user = userEvent.setup();
+  render(<ChatPanel />);
+
+  await user.type(screen.getByLabelText(/message/i), 'weather in nashville');
+  await user.click(screen.getByRole('button', { name: /^send$/i }));
+
+  const chip = await screen.findByText('1.24s · 4,218 tok');
+  expect(chip.className).toContain('text-xs');
+  expect(chip.className).toContain('text-muted-foreground');
+
+  await user.hover(chip);
+  await waitFor(() => {
+    expect(screen.getByRole('tooltip').textContent).toContain('Runtime: 1,240 ms');
+    expect(screen.getByRole('tooltip').textContent).toContain('Total: 4,218');
+  });
+});
+
 test('renders assistant markdown after the stream finishes, including tables', async () => {
   let finish;
   streamChatMessage.mockImplementation(async ({ onEvent }) => {

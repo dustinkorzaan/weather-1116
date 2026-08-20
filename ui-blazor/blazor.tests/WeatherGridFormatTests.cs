@@ -110,4 +110,42 @@ public sealed class WeatherGridFormatTests
         Assert.Equal("1,234", WeatherGridFormat.FormatRunLogTokenCount(1234));
         Assert.Equal(string.Empty, WeatherGridFormat.FormatRunLogTokenCount(null));
     }
+
+    [Fact]
+    public void FormatChatRuntime_UsesMsBelowOneSecondAndSecondsAfter()
+    {
+        Assert.Equal("0ms", WeatherGridFormat.FormatChatRuntime(0));
+        Assert.Equal("842ms", WeatherGridFormat.FormatChatRuntime(842));
+        Assert.Equal("1s", WeatherGridFormat.FormatChatRuntime(1000));
+        Assert.Equal("1.24s", WeatherGridFormat.FormatChatRuntime(1240));
+        Assert.Equal("10s", WeatherGridFormat.FormatChatRuntime(10000));
+    }
+
+    [Fact]
+    public void FormatChatUsageChip_CombinesRuntimeAndTotalTokens()
+    {
+        Assert.Equal(
+            "1.24s · 4,218 tok",
+            WeatherGridFormat.FormatChatUsageChip(new ChatUsage
+            {
+                RuntimeMs = 1240,
+                TotalTokenCount = 4218,
+            }));
+        Assert.Equal("842ms", WeatherGridFormat.FormatChatUsageChip(new ChatUsage { RuntimeMs = 842 }));
+        Assert.Equal(string.Empty, WeatherGridFormat.FormatChatUsageChip(null));
+    }
+
+    [Fact]
+    public void FormatChatUsageDetails_OmitsMissingTokenFields()
+    {
+        Assert.Equal(
+            "Runtime: 1,240 ms\nInput: 3,100\nTotal: 4,218",
+            WeatherGridFormat.FormatChatUsageDetails(new ChatUsage
+            {
+                RuntimeMs = 1240,
+                InputTokenCount = 3100,
+                TotalTokenCount = 4218,
+            }));
+        Assert.Equal(string.Empty, WeatherGridFormat.FormatChatUsageDetails(null));
+    }
 }

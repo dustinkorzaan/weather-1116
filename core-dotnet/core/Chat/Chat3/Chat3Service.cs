@@ -52,6 +52,7 @@ public sealed class Chat3Service : IChatClientService
 
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
+        var usage = new ChatUsageAccumulator();
         var client = _settings.CreateProjectResponsesClientForChatAgent();
         var assistantBuilder = new StringBuilder();
         var previousResponseId = _responseStore.GetPreviousResponseId(sessionId);
@@ -92,6 +93,8 @@ public sealed class Chat3Service : IChatClientService
         string? approvalError = null;
         await foreach (StreamingResponseUpdate update in updates!)
         {
+            usage.Add(update);
+
             if (update is StreamingResponseCreatedUpdate created
                 && !string.IsNullOrWhiteSpace(created.Response?.Id))
             {
@@ -153,6 +156,6 @@ public sealed class Chat3Service : IChatClientService
             _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "assistant", Content = assistantText });
         }
 
-        yield return ChatStreamEvent.Done();
+        yield return ChatStreamEvent.Done(usage.ToChatUsage());
     }
 }
