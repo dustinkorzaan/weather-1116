@@ -24,7 +24,7 @@
 <br>
 <br>
 
-# Quick App Generator / Rapid Prototyping
+## Quick App Generator / Rapid Prototyping
 
 | Vendor | Project Name | Best For | Tech Stack | Database & Backend | Code Ownership & Export |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -40,7 +40,7 @@
 <br>
 <br>
 
-# Developer Centric
+## Developer Centric
 
 | Company | Cloud Version Name | Desktop/CLI Version Name | Current / Supported Models |
 | :--- | :--- | :--- | :--- |
