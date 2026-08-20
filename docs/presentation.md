@@ -12,7 +12,7 @@ and the Foundry console learning path (V1 → V5).
 
 ## Sections
 
-| # | Title | Doc | Role in the talk |
+| | Title | Doc | Role in the talk |
 | --- | --- | --- | --- |
 | 1 | Laptop-free Engineering | [`laptop-free.md`](1-laptop-free-engineering/laptop-free.md) | Introduce — context for cloud / Codespaces / VPC |
 | 2 | Autonomous Sprint Board AI Development | [`autonomous-sprint-board.md`](2-autonomous-sprint-board-ai-development/autonomous-sprint-board.md) | Introduce — placeholder for sprint-board + agents story |
