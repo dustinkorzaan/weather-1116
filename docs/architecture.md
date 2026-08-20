@@ -3,7 +3,7 @@
 ## Purpose
 
 This sample demystifies Foundry, agents, and models: from model-direct, to
-local in-process looping, to remote MCP, to a hosted agent, behind a pin map.
+local in-process tool loops, to remote MCP, to a hosted agent, behind a pin map.
 
 This repository is a Weather sample app implemented across seven runnable
 stacks plus one shared .NET class library.
@@ -430,7 +430,7 @@ V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | Model-direct: tools handled by local in-process looping (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` |
+| **V3** | Model-direct: tools handled by local in-process tool loops (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` |
 | **V4** | Model-direct: tools handled by remote MCP servers - used by the Chat1b/Chat2b remote-MCP chat tabs, and the production pattern in `GetCurrentAIWeatherV4Handler` (used by `/weather` and the V4 tab on `/current-ai-weather`) |
 | **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`) sends only the user prompt |
 
