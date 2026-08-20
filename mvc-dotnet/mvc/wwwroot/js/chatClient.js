@@ -75,6 +75,73 @@
     scrollToBottom();
   }
 
+  function formatRunLogMs(ms) {
+    return Number.isFinite(ms) ? Math.round(ms).toLocaleString() : '';
+  }
+
+  function formatRunLogTokenCount(tokens) {
+    return Number.isFinite(tokens) ? Math.round(tokens).toLocaleString() : '';
+  }
+
+  function formatChatRuntime(ms) {
+    if (!Number.isFinite(ms)) {
+      return '';
+    }
+
+    const rounded = Math.round(ms);
+    if (rounded < 1000) {
+      return `${rounded}ms`;
+    }
+
+    let seconds = (rounded / 1000).toFixed(2);
+    seconds = seconds.replace(/\.?0+$/, '');
+    return `${seconds}s`;
+  }
+
+  function formatChatUsageChip(usage) {
+    if (!usage) {
+      return '';
+    }
+
+    const parts = [];
+    const runtime = formatChatRuntime(usage.runtimeMs);
+    if (runtime) {
+      parts.push(runtime);
+    }
+
+    const tokens = formatRunLogTokenCount(usage.totalTokenCount);
+    if (tokens) {
+      parts.push(`${tokens} tok`);
+    }
+
+    return parts.join(' · ');
+  }
+
+  function formatChatUsageDetails(usage) {
+    if (!usage) {
+      return '';
+    }
+
+    const lines = [];
+    if (Number.isFinite(usage.runtimeMs)) {
+      lines.push(`Runtime: ${formatRunLogMs(usage.runtimeMs)} ms`);
+    }
+
+    [
+      ['Input', usage.inputTokenCount],
+      ['Cached', usage.cachedTokenCount],
+      ['Output', usage.outputTokenCount],
+      ['Reasoning', usage.reasoningTokenCount],
+      ['Total', usage.totalTokenCount],
+    ].forEach(([label, tokens]) => {
+      const formatted = formatRunLogTokenCount(tokens);
+      if (formatted) {
+        lines.push(`${label}: ${formatted}`);
+      }
+    });
+    return lines.join('\n');
+  }
+
   function formatToolHoverText(entry) {
     const sections = [];
     if (entry.toolArguments) {
@@ -104,6 +171,19 @@
       if (details) {
         item.dataset.toolDetails = details;
         item.tabIndex = 0;
+      }
+    } else if (role === 'assistant' && !entry.streaming) {
+      const chipText = formatChatUsageChip(entry.usage);
+      const details = formatChatUsageDetails(entry.usage);
+      if (chipText) {
+        const chip = document.createElement('span');
+        chip.className = 'chat-usage-chip';
+        chip.textContent = chipText;
+        if (details) {
+          chip.dataset.toolDetails = details;
+          chip.tabIndex = 0;
+        }
+        item.appendChild(chip);
       }
     }
     messagesEl.appendChild(item);
@@ -211,6 +291,7 @@
         } else if (payload.type === 'done') {
           if (assistantEntry) {
             assistantEntry.streaming = false;
+            assistantEntry.usage = payload.usage || null;
             if (tabId === activeTab) {
               renderMessages();
             }

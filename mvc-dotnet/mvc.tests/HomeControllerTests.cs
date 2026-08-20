@@ -353,6 +353,9 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("function requestScrollToBottom(tabId)", script);
         Assert.Contains("payload.type === 'done'", script);
         Assert.Contains("requestScrollToBottom(tabId)", script);
+        Assert.Contains("function formatChatUsageChip(usage)", script);
+        Assert.Contains("assistantEntry.usage = payload.usage || null", script);
+        Assert.Contains("chat-usage-chip", script);
         Assert.Contains("function formatToolHoverText(entry)", script);
         Assert.Contains("dataset.toolDetails", script);
         Assert.Contains("payload.toolArguments", script);
@@ -436,6 +439,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".chat-tool-hover-card", css);
         Assert.Contains(".chat-tool-hover-wrap", css);
         Assert.Contains(".chat-markdown", css);
+        Assert.Contains(".chat-usage-chip", css);
         Assert.Contains(".chat-fullscreen-button", css);
         Assert.Contains("flex: 0 0 auto", css);
         Assert.Contains("height: max-content", css);

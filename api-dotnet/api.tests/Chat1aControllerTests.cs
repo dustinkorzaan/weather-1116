@@ -42,7 +42,14 @@ public class Chat1aControllerTests(ChatApiWebApplicationFactory factory) : IClas
                 Assert.Equal("token", tokenEvent.GetProperty("type").GetString());
                 Assert.Equal("Hello", tokenEvent.GetProperty("text").GetString());
             },
-            doneEvent => Assert.Equal("done", doneEvent.GetProperty("type").GetString()));
+            doneEvent =>
+            {
+                Assert.Equal("done", doneEvent.GetProperty("type").GetString());
+                var usage = doneEvent.GetProperty("usage");
+                Assert.Equal(10, usage.GetProperty("inputTokenCount").GetInt32());
+                Assert.Equal(15, usage.GetProperty("totalTokenCount").GetInt32());
+                Assert.Equal(42, usage.GetProperty("runtimeMs").GetInt32());
+            });
 
         Assert.DoesNotContain("\"Type\"", body, StringComparison.Ordinal);
         Assert.DoesNotContain("\"SessionId\"", body, StringComparison.Ordinal);
@@ -143,7 +150,13 @@ internal sealed class StubChatClientService : IChatClientService
     {
         yield return ChatStreamEvent.Session("Chat1a:test-session");
         yield return ChatStreamEvent.Token("Hello");
-        yield return ChatStreamEvent.Done();
+        yield return ChatStreamEvent.Done(new ChatUsage
+        {
+            InputTokenCount = 10,
+            OutputTokenCount = 5,
+            TotalTokenCount = 15,
+            RuntimeMs = 42,
+        });
     }
 }
 

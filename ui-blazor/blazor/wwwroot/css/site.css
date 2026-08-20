@@ -1100,6 +1100,16 @@ html[data-theme="dark"] .weather-map-logo-pin {
     cursor: help;
 }
 
+.chat-usage-chip {
+    display: block;
+    width: fit-content;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--wx-muted);
+    cursor: help;
+    white-space: nowrap;
+}
+
 .chat-tool-hover-wrap {
     position: fixed;
     z-index: 40;

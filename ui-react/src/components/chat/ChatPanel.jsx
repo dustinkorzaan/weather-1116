@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { findLastIndex } from '../../utils/array';
 import { formatToolHoverText, TOOL_HOVER_CLOSE_DELAY_MS } from '../../utils/chatToolHover';
 import { streamChatMessage } from '../../utils/chatStream';
+import { formatChatUsageChip, formatChatUsageDetails } from '../../utils/chatUsage';
 import { nativeFullscreenElement, useChatFullscreen } from './useChatFullscreen';
 
 // Tracks the element the tooltip portal should mount into: the current
@@ -94,7 +95,7 @@ function scrollElementToBottom(element) {
   element.scrollTop = element.scrollHeight;
 }
 
-function ToolChip({ content, details, portalContainer }) {
+function ToolChip({ content, details, portalContainer, className }) {
   const chipRef = useRef(null);
   const tooltipRef = useRef(null);
   const hideTimerRef = useRef(null);
@@ -160,7 +161,7 @@ function ToolChip({ content, details, portalContainer }) {
   return (
     <div
       ref={chipRef}
-      className={`${MESSAGE_CLASSES.tool} cursor-help`}
+      className={`${className ?? MESSAGE_CLASSES.tool} cursor-help`}
       data-tool-details={details || undefined}
       tabIndex={details ? 0 : undefined}
       onMouseEnter={details ? show : undefined}
@@ -240,6 +241,7 @@ function ChatPanel() {
     const tabId = activeTab;
     const endpoint = activeConfig.endpoint;
     let assistantText = '';
+    let usage = null;
 
     setInput('');
     setSendingTabs((current) => ({ ...current, [tabId]: true }));
@@ -325,6 +327,7 @@ function ChatPanel() {
           }
 
           if (payload.type === 'done') {
+            usage = payload.usage ?? null;
             requestScrollToBottom(tabId);
           }
         },
@@ -335,9 +338,9 @@ function ChatPanel() {
           const tabHistory = [...current[tabId]];
           const last = tabHistory[tabHistory.length - 1];
           if (last?.role === 'assistant' && last.streaming) {
-            tabHistory[tabHistory.length - 1] = { role: 'assistant', content: assistantText };
+            tabHistory[tabHistory.length - 1] = { role: 'assistant', content: assistantText, usage };
           } else {
-            tabHistory.push({ role: 'assistant', content: assistantText });
+            tabHistory.push({ role: 'assistant', content: assistantText, usage });
           }
           return { ...current, [tabId]: tabHistory };
         });
@@ -435,6 +438,14 @@ function ChatPanel() {
                     ) : (
                       entry.content
                     )}
+                    {entry.role === 'assistant' && !entry.streaming && formatChatUsageChip(entry.usage) ? (
+                      <ToolChip
+                        content={formatChatUsageChip(entry.usage)}
+                        details={formatChatUsageDetails(entry.usage)}
+                        portalContainer={portalContainer}
+                        className="mt-1.5 w-fit text-xs text-muted-foreground"
+                      />
+                    ) : null}
                   </div>
                 )
               ))}

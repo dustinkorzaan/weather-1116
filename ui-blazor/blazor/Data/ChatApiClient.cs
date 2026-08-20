@@ -19,6 +19,23 @@ public class ChatStreamEvent
     public string? ToolArguments { get; set; }
     public string? ToolResult { get; set; }
     public string? ErrorMessage { get; set; }
+
+    public ChatUsage? Usage { get; set; }
+}
+
+public class ChatUsage
+{
+    public int? InputTokenCount { get; set; }
+
+    public int? CachedTokenCount { get; set; }
+
+    public int? OutputTokenCount { get; set; }
+
+    public int? ReasoningTokenCount { get; set; }
+
+    public int? TotalTokenCount { get; set; }
+
+    public int RuntimeMs { get; set; }
 }
 
 public class ChatApiClient

@@ -56,6 +56,7 @@ public sealed class Chat2aService : IChatClientService
 
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
+        var usage = new ChatUsageAccumulator();
         var responsesClient = _settings.CreateResponsesClient();
         AIAgent agent = responsesClient.AsAIAgent(
             name: "Chat2a",
@@ -112,6 +113,8 @@ public sealed class Chat2aService : IChatClientService
 
             foreach (var content in update.Contents)
             {
+                usage.Add(content);
+
                 switch (content)
                 {
                     case FunctionCallContent functionCall:
@@ -136,7 +139,7 @@ public sealed class Chat2aService : IChatClientService
             _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "assistant", Content = assistantText });
         }
 
-        yield return ChatStreamEvent.Done();
+        yield return ChatStreamEvent.Done(usage.ToChatUsage());
     }
 
     private sealed record PendingToolCall(string Name, string? Arguments);
