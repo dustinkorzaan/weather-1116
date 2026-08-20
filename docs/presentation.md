@@ -36,10 +36,9 @@ and the Foundry console learning path (V1 → V5).
    - Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
 2. **V1 → V2**: model-direct (legacy vs unified endpoint); when the console still owns data prep.
 3. **V3**: local in-process tool loops; model chooses tools, your console answers them.
-4. **Production (V3)**: `GetCurrentAIWeatherV3Handler` (API/MVC) runs that same V3 tool loop in production, exposed as a tab on `/current-ai-weather`.
-5. **V4**: model-direct with remote MCP tools; Chat1b/Chat2b use this pattern, as does `GetCurrentAIWeatherV4Handler` (API/MVC), used by `/weather` and the V4 tab on `/current-ai-weather`.
-6. **V5**: hosted Foundry agent; agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`, the third `/current-ai-weather` tab) send only the user prompt.
-7. **Demos**: React / Blazor / API `GetCurrentAIWeatherV3`/`GetCurrentAIWeatherV4`/`GetCurrentAIWeatherV5`; optional MCP inspector on 8110 / 8120.
-8. **Chat clients**: `/chat-clients` in React, Blazor, and MVC; compare Chat1a-Chat3 side by side.
+4. **V4**: model-direct with remote MCP tools; Chat1b/Chat2b use this pattern, as does `GetCurrentAIWeatherV4Handler` (API/MVC), used by `/weather` and the V4 tab on `/current-ai-weather`.
+5. **V5**: hosted Foundry agent; agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`, the third `/current-ai-weather` tab) send only the user prompt.
+6. **Demos**: React / Blazor / API `GetCurrentAIWeatherV3`/`GetCurrentAIWeatherV4`/`GetCurrentAIWeatherV5`; optional MCP inspector on 8110 / 8120.
+7. **Chat clients**: `/chat-clients` in React, Blazor, and MVC; compare Chat1a-Chat3 side by side.
 
-Adjust 1–3 to taste, keep the main pallet focused on 4–6, and finish the menu with hands-on paths in the repo.
+Adjust 1–2 to taste, keep the main pallet focused on 3–5, and finish the menu with hands-on paths in the repo.
