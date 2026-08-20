@@ -44,9 +44,9 @@
 
 | Company | Cloud Version Name | Desktop/CLI Version Name | Current / Supported Models |
 | :--- | :--- | :--- | :--- |
-| **Anysphere** *(SpaceX)* | Cursor Cloud / Background Agents | **[Cursor IDE](https://cursor.com)** *(Editor)* | **Composer 2.5**, Cursor Tab, Claude (Fable 5 / Opus 4.8), OpenAI (GPT-5.5) |
-| **Cognition** | [Devin Cloud](https://devin.ai) | **[Devin Desktop](https://devin.ai)** *(Editor, fka Windsurf)* | **Devin Local Engine**, Cognition SWE 1.6, Claude (Fable 5), OpenAI GPT-5, DeepSeek-R1 |
-| **Anthropic** | Claude.ai / Projects | **[Claude Code](https://anthropic.com)** *(Terminal Agent)* | **Claude Fable 5**, Claude Opus 4.8, Claude 3.5 Sonnet |
+| **Anysphere** *(SpaceX)* *(SpaceXAI)* | Cursor Cloud / Background Agents | **[Cursor IDE](https://cursor.com)** *(Editor)* | **Composer 2.5**, Cursor Tab, Claude (Fable 5 / Opus 4.8), OpenAI (GPT-5.5) |
+| **Cognition** | [Devin Cloud](https://devin.ai) | **[Devin Desktop](https://devin.ai)** *(Editor, fka Windsurf by Codeium)* | **Devin Local Engine**, Cognition SWE 1.6, Claude (Fable 5), OpenAI GPT-5, DeepSeek-R1 |
+| **Anthropic** | Claude.ai / Projects | **[Claude Code](https://anthropic.com)** *(Terminal Agent)* | **Claude Fable 5**, Claude Opus 5, Claude Sonnet 5 |
 | **GitHub / Microsoft** | [Copilot Workspace](https://github.com) | **GitHub Copilot** *(IDE Extension)* | OpenAI GPT-5.5, customized GitHub specialized engineering models |
 | **Google** | [Google Jules](https://jules.google) *(Async GitHub Agent)* | **[Google Antigravity](https://thenewstack.io)** *(IDE / Agent Command App)* | **Gemini 3.6 Flash** (New Default), Gemini 3.5 Flash-Lite, Gemini 3.5 Flash Cyber |
 | **OpenAI** | [Codex in ChatGPT](https://openai.com) / Cloud Tasks | **[OpenAI Codex App](https://openai.com)** *(Desktop, CLI, & Extension)* | **GPT-5.5**, GPT-5, GPT-4o, Custom Agentic Models |
