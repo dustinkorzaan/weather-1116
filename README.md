@@ -1,9 +1,9 @@
 # Weather 1116
 
-## Foundry console demos
-
 Demystifying Foundry, agents, and models: from model-direct, to local
 in-process looping, to remote MCP, to a hosted agent, behind a pin map.
+
+## Foundry console demos
 
 Presentation reference: [`docs/presentation.md`](docs/presentation.md)
 
