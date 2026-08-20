@@ -30,10 +30,10 @@ and the Foundry console learning path (V1 → V5).
 
 1. **Problem**: AI weather needs real lat/long and public weather data, not hallucination.
    - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
+     - `GetLatLongEvent(location)` returns ranked lat/long matches (default 5; V1/V2 use top 1)
    - Lat/Long → Non-AI Weather `{ temp: 24, ... }`
+     - `GetPublicWeatherCurrentEvent(Lat/Long)` returns Non-AI Weather
    - Non-AI Weather → AI Summary `"Currently it is 75 °F in Nashville, TN ..."`
-   - `GetLatLongEvent(location)` returns ranked lat/long matches (default 5; V1/V2 use top 1)
-   - `GetPublicWeatherCurrentEvent(Lat/Long)` returns Non-AI Weather
 2. **V1 → V2**: model-direct (legacy vs unified endpoint); when the console still owns data prep.
 3. **V3**: local in-process tool loops; model chooses tools, your console answers them.
 4. **Production (V3)**: that V3 tool loop in `GetCurrentAIWeatherV3Handler` (API/MVC), a tab on `/current-ai-weather`.
