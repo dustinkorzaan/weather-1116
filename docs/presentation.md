@@ -44,4 +44,4 @@ and the Foundry console learning path (V1 → V5).
    - Current AI Weather links: [React UI](https://wx.korzaan.com/current-ai-weather), [Blazor UI](https://weather1116-prod-blazor.azurewebsites.net/current-ai-weather), [MVC UI](https://weather1116-prod-mvc.azurewebsites.net/current-ai-weather)
    - Chat links: [React UI](https://wx.korzaan.com/chat-clients), [Blazor UI](https://weather1116-prod-blazor.azurewebsites.net/chat-clients), [MVC UI](https://weather1116-prod-mvc.azurewebsites.net/chat-clients)
 
-Adjust 1–2 to taste, keep the main pallet focused on 3–5, and finish the menu with hands-on paths in the repo.
+Adjust 1–2 to taste, keep the main pallet focused on 3–5, and finish the menu with live UI demos.
