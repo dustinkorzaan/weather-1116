@@ -1,14 +1,20 @@
 # Weather 1116
 
-Demystifying Foundry, agents, and models: from model-direct, to local
-in-process looping, to remote MCP, to a hosted agent. From console demos
-to live map pin demo.
+Demystify Microsoft Foundry, AI agents, and AI Models. This repository
+provides an evolution across architectural patterns: model-direct
+execution, local in-process tool loops, remote Model Context Protocol
+(MCP) integrations, and fully hosted remote agents.
 
-Presentation reference: [`docs/presentation.md`](docs/presentation.md)
+Start with local console prototypes, end with a live UI demo.
 
-Local console apps that exercise Microsoft Foundry / Azure OpenAI patterns
-against Core weather data (V1–V4) or a hosted Foundry Agent (V5) using the
-following 3-step core weather progression:
+Presentation Reference: [`docs/presentation.md`](docs/presentation.md)
+
+## Console Demos
+
+This repository features local console applications built with Microsoft
+Foundry and Azure OpenAI. It contrasts local implementations (V1–V4)
+against a fully remote, hosted Foundry Agent (V5) through a 3-step core
+weather progression:
 
 - Location `"Nashville, TN"` → Lat/Long `"36.166° N, 86.784° W"`
 - Lat/Long → Non-AI Weather `{ temp: 24, ... }`
