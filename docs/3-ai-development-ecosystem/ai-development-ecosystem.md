@@ -2,7 +2,7 @@
 
 ## Wireframes & UI Design
 
-| Vendor | Project Name | Best For | Category | Code Output |
+| Company | Project Name | Best For | Category | Code Output |
 | :--- | :--- | :--- | :--- | :--- |
 | **Balsamiq** | [Balsamiq](https://balsamiq.com) | Low-fidelity, sketch-style wireframes | Pure wireframes | None (layout ideation only) |
 | **Figma** | [Figma](https://figma.com) | High-fidelity UI, design systems, dev handoff | Full UI design | Via plugins (Anima, Locofy, etc.) |
@@ -26,7 +26,7 @@
 
 ## Quick App Generator / Rapid Prototyping
 
-| Vendor | Project Name | Best For | Tech Stack | Database & Backend | Code Ownership & Export |
+| Company | Project Name | Best For | Tech Stack | Database & Backend | Code Ownership & Export |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Lovable** | [Lovable.dev](https://lovable.dev) | High-end SaaS MVPs and client-ready web apps | React + Vite + Tailwind CSS | Native Supabase Integration | **Excellent** (Full GitHub sync & clean ZIP export) |
 | **Vercel** | [v0.app](https://v0.app/) *(fka v0.dev)* | Pixel-perfect UI engineering and agentic full-stack shipping | Next.js + React + Shadcn UI | Integrated One-Click DBs (Supabase, Neon, Upstash) | **Excellent** (Instant Vercel push, GitHub branch PRs, local CLI pull) |
