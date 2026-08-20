@@ -24,7 +24,7 @@ weather progression:
 | --- | --- | --- |
 | V1 | [`Foundry Console V1 Model Direct Legacy`](FoundryConsoleV1) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | V2 | [`Foundry Console V2 Model Direct Unified AI`](FoundryConsoleV2) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) | Model-direct: tools handled by local in-process looping |
+| V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) | Model-direct: tools handled by local in-process tool loops |
 | V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools handled by remote MCP servers |
 | V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
@@ -42,7 +42,7 @@ Standalone multi-turn chat page with five tabs:
 | Chat1b | Remote MCP | Responses API | Like Foundry Console V4 |
 | Chat2a | In-process | Agent Framework | Like Foundry Console V3 |
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
-| Chat3 | Hosted Foundry agent | Responses for agent | Like Foundry Console V5 (`wx1116-agent-chat`) |
+| Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-chat`) |
 
 ## Projects, Architecture, and live demos in a Weather Pin App
 
@@ -68,4 +68,4 @@ relationships, and parity guidance live in
 - **Per-user custom map pins**: Map pins scoped to individual user accounts
 - **Per-pin photo uploads**: Image upload/download per pin via blob storage SAS URIs
 - **Infrastructure as Code**: Provisioning Azure resources via Bicep
-- **Foundry config as code**: Managing Foundry models, tools, and agents via `azure.yaml`
+- **Foundry config as code**: Managing Foundry models, tools, and agents via Azure Developer CLI (`azd`) templates
