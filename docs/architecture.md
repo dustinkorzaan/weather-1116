@@ -30,7 +30,7 @@ the same `Core` weather and geo logic that this production path mirrors.
 
 ### Deployable applications and shared library
 
-| # | Project | Path | Stack | Role |
+|  | Project | Path | Stack | Role |
 | - | --- | --- | --- | --- |
 | 1 | React UI | [`ui-react`](../ui-react) | React + Vite | Client-rendered single-page app |
 | 2 | Blazor UI | [`ui-blazor/blazor`](../ui-blazor/blazor) | Blazor | Interactive server-rendered UI in C# |
