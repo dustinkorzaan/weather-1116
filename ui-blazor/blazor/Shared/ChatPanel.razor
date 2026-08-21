@@ -11,8 +11,8 @@
     <FluentTabs @bind-ActiveTabId="ActiveTab">
         @foreach (var tab in _tabs)
         {
-            <FluentTab Id="@tab.Id" Label="@tab.Label">
-                <Header><span title="@tab.Label">@tab.ShortLabel</span></Header>
+            <FluentTab Id="@tab.Id" Label="@tab.Label" title="@tab.Label">
+                <Header>@tab.ShortLabel</Header>
             </FluentTab>
         }
     </FluentTabs>

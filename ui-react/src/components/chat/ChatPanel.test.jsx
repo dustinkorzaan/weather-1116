@@ -106,6 +106,22 @@ test('scrolls to the bottom when switching among the five chats', async () => {
   }
 });
 
+test('chat tab buttons show a short visible label under the full accessible name', () => {
+  render(<ChatPanel />);
+
+  const shortLabelByAccessibleName = {
+    Chat1a: '1a',
+    Chat1b: '1b',
+    Chat2a: '2a',
+    Chat2b: '2b',
+    Chat3: '3',
+  };
+
+  for (const [name, shortLabel] of Object.entries(shortLabelByAccessibleName)) {
+    expect(screen.getByRole('tab', { name }).textContent).toBe(shortLabel);
+  }
+});
+
 test('shows tool arguments and result on hover', async () => {
   streamChatMessage.mockImplementation(async ({ onEvent }) => {
     onEvent({
