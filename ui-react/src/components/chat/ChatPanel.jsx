@@ -41,30 +41,35 @@ const TAB_CONFIG = [
   {
     id: 'Chat1a',
     label: 'Chat1a',
+    shortLabel: '1a',
     description: 'In-process · Responses API · Like Foundry Console V3',
     endpoint: '/Chat1a/messages',
   },
   {
     id: 'Chat1b',
     label: 'Chat1b',
+    shortLabel: '1b',
     description: 'Remote MCP · Responses API · Like Foundry Console V4',
     endpoint: '/Chat1b/messages',
   },
   {
     id: 'Chat2a',
     label: 'Chat2a',
+    shortLabel: '2a',
     description: 'In-process · Agent Framework · Like Foundry Console V3',
     endpoint: '/Chat2a/messages',
   },
   {
     id: 'Chat2b',
     label: 'Chat2b',
+    shortLabel: '2b',
     description: 'Remote MCP · Agent Framework · Like Foundry Console V4',
     endpoint: '/Chat2b/messages',
   },
   {
     id: 'Chat3',
     label: 'Chat3',
+    shortLabel: '3',
     description: 'Hosted Foundry agent · Like Foundry Console V5',
     endpoint: '/Chat3/messages',
   },
@@ -385,9 +390,11 @@ function ChatPanel() {
             <TabsTrigger
               key={tab.id}
               value={tab.id}
+              aria-label={tab.label}
+              title={tab.label}
               className="h-auto flex-none cursor-pointer rounded-md border-2 border-border bg-muted px-3 py-1.5 text-sm font-medium text-foreground shadow-sm after:hidden hover:border-foreground/40 hover:bg-accent hover:text-accent-foreground group-data-[variant=line]/tabs-list:bg-muted group-data-[variant=line]/tabs-list:hover:bg-accent group-data-[variant=line]/tabs-list:data-active:bg-primary group-data-[variant=line]/tabs-list:data-active:text-primary-foreground data-active:border-primary data-active:bg-primary data-active:text-primary-foreground data-active:shadow-none data-active:hover:bg-primary/80 data-active:hover:text-primary-foreground"
             >
-              {tab.label}
+              {tab.shortLabel}
             </TabsTrigger>
           ))}
         </TabsList>
