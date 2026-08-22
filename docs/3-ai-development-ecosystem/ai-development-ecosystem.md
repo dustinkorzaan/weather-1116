@@ -35,6 +35,8 @@
 | **StackBlitz** | [Bolt.new](https://bolt.new) | Rapid sandboxed frontends and multi-platform mobile mockups | React, Next.js, or Vite + Expo | In-browser WebContainers / External Supabase | **Good** (One-click StackBlitz workspace or instant git push) |
 | **FlutterFlow** | [FlutterFlow](https://totalum.app) | Native mobile apps destined for the iOS and Android app stores | Dart + Flutter | Firebase or Supabase | **Excellent** (Directly compiles down to real, downloadable Flutter source code) |
 | **Google** | [Google AI Studio](https://google.dev) *(Build Mode)* | Throwaway prototypes, single-page mockups, and quick ideas | Vanilla HTML/CSS/JS or baseline React | None (Client-side mocking only) | **Basic** (Requires manual copy-pasting of isolated code blocks) |
+| **Uizard** | [Uizard](https://uizard.io) | AI-generated wireframes and clickable product prototypes | Uizard visual editor + component presets | None (prototype-first, optional external integrations) | **Basic** (Prototype assets and starter exports, not full production ownership) |
+| **Microsoft** | [Power Apps](https://powerapps.microsoft.com) | Internal business apps, forms, and workflow-driven tools | Low-code Canvas / Model-driven apps + Power Fx | Native Dataverse, plus connectors for Microsoft 365, SQL, and SharePoint | **Moderate** (App/package export supported, but runtime remains Power Platform-centric) |
 
 <br>
 <br>
