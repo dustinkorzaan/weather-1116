@@ -260,6 +260,8 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("Daily History", html);
         Assert.Contains("Hourly History", html);
         Assert.Contains("tab=daily-forecast", html);
+        Assert.Contains("GetCurrentAIWeatherV3", html);
+        Assert.DoesNotContain("GetCurrentAIWeatherV4", html);
         Assert.Contains("id=\"weatherModalLoading\" class=\"form-loading\" hidden>Connecting to Microsoft Foundry...", html);
         Assert.Contains("loadingId: 'weatherModalLoading'", html);
         Assert.DoesNotContain("Coming soon.", html);

@@ -16,9 +16,9 @@ project idiomatic for its framework.
 The remaining two runnable stacks are the **MCP tool hosts**. The UIs never
 call them directly. Current AI Weather now ships three handler versions side
 by side: `GetCurrentAIWeatherV3Handler` resolves geo/weather tools in-process
-(V3 pattern), `GetCurrentAIWeatherV4Handler` calls the remote MCP hosts via
-`ChatMcpToolFactory` (V4 pattern, used by the `/weather` modal's "current"
-tab), and `GetCurrentAIWeatherV5Handler` calls a hosted Foundry agent that
+(V3 pattern, used by the `/weather` modal's "current" tab),
+`GetCurrentAIWeatherV4Handler` calls the remote MCP hosts via
+`ChatMcpToolFactory` (V4 pattern), and `GetCurrentAIWeatherV5Handler` calls a hosted Foundry agent that
 owns its own instructions, response schema, and MCP tools (V5 pattern). All
 three are wired into the standalone `/current-ai-weather` page as tabs. The
 MCP hosts remain required for the Chat1b/Chat2b remote-MCP chat tabs and for
@@ -43,9 +43,10 @@ the same `Core` weather and geo logic that this production path mirrors.
 
 Foundry consoles are learning demos, not UI dependencies. MCP hosts are not
 called by the UIs directly. They **are** on the Current AI Weather path for
-the V4 handler (`GetCurrentAIWeatherV4Handler`, used by `/weather` and the V4
-tab on `/current-ai-weather`) - the V3 handler
-(`GetCurrentAIWeatherV3Handler`) resolves tools in-process and the V5 handler
+the V4 handler (`GetCurrentAIWeatherV4Handler`, used by the V4 tab on
+`/current-ai-weather`). The V3 handler (`GetCurrentAIWeatherV3Handler`,
+used by `/weather`) resolves tools in-process and does not call the MCP
+hosts. The V5 handler
 (`GetCurrentAIWeatherV5Handler`) delegates tool resolution to the hosted
 Foundry agent, so neither calls the MCP hosts from this app. They also remain
 required for the Chat1b/Chat2b remote-MCP chat tabs. Hello and map chrome do
@@ -71,9 +72,9 @@ auth/env details are in this doc and each project's `.env.example`.
   (events/handlers) provided by `Core`, which both MVC and API reference.
 - **MCP hosts are not called by any UI directly.** `GetCurrentAIWeatherV3Handler`
   resolves its `GetLatLong` and `GetPublicWeatherCurrent` tools in-process (V3
-  pattern, see below). `GetCurrentAIWeatherV4Handler` calls the same tools on
-  the remote MCP hosts (V4 pattern) and is used by the `/weather` modal.
-  `GetCurrentAIWeatherV5Handler` sends only the user prompt to a hosted
+  pattern, see below) and is used by the `/weather` modal.
+  `GetCurrentAIWeatherV4Handler` calls the same tools on
+  the remote MCP hosts (V4 pattern). `GetCurrentAIWeatherV5Handler` sends only the user prompt to a hosted
   Foundry agent, which owns its own tool resolution (V5 pattern). All three
   are tabs on `/current-ai-weather`. The MCP hosts also remain required for
   the Chat1b/Chat2b remote-MCP chat tabs.
@@ -95,7 +96,7 @@ All three UIs expose **Current AI Weather**, in three versions:
   matching the Foundry Console V5 pattern.
 
 **`/current-ai-weather`** exposes all three as tabs (V3/V4/V5). The
-**`/weather`** modal's "current" tab uses **V4** only.
+**`/weather`** modal's "current" tab uses **V3** only.
 
 The request path differs by stack:
 
@@ -151,7 +152,7 @@ flowchart LR
   CoreWx[Core weather handlers]
 
   UI -- "/current-ai-weather (V3/V4/V5 tabs)" --> API
-  UI -- "/weather modal (V4)" --> API
+  UI -- "/weather modal (V3)" --> API
   API --> V3
   API --> V4
   API --> V5
@@ -430,8 +431,8 @@ V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | Model-direct: tools handled by local in-process tool loops (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` |
-| **V4** | Model-direct: tools handled by remote MCP servers - used by the Chat1b/Chat2b remote-MCP chat tabs, and the production pattern in `GetCurrentAIWeatherV4Handler` (used by `/weather` and the V4 tab on `/current-ai-weather`) |
+| **V3** | Model-direct: tools handled by local in-process tool loops (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on `/current-ai-weather`) |
+| **V4** | Model-direct: tools handled by remote MCP servers - used by the Chat1b/Chat2b remote-MCP chat tabs, and the production pattern in `GetCurrentAIWeatherV4Handler` (the V4 tab on `/current-ai-weather`) |
 | **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`) sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
@@ -455,9 +456,10 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `MCP_SRV_APP_SERVICE_URL` / `MCP_SRV_APP_SERVICE_KEY` | V4 only | `McpSrvAppService` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-default`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
 
-`GetCurrentAIWeatherV3Handler` runs tools in-process and does not need
-`MCP_SRV_*`. `GetCurrentAIWeatherV4Handler` (used by `/weather` and the V4 tab
-on `/current-ai-weather`) needs the same `MCP_SRV_FUNC_APP_*`/
+`GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on
+`/current-ai-weather`) runs tools in-process and does not need
+`MCP_SRV_*`. `GetCurrentAIWeatherV4Handler` (the V4 tab on
+`/current-ai-weather`) needs the same `MCP_SRV_FUNC_APP_*`/
 `MCP_SRV_APP_SERVICE_*` variables as the Chat1b/Chat2b remote-MCP chat tabs
 (see [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)).
 The confirm-nashville-ai-weather-v4 worker recurring job needs them too.
@@ -481,9 +483,10 @@ and V5 both leave approval on the hosted agent; neither round-trips approvals
 in app code.
 
 Suggested reading order: V1 → V2 → V3 → `GetCurrentAIWeatherV3Handler` in
-`core-dotnet/core/AIWeather` (the production V3-pattern handler) → V4 →
-`GetCurrentAIWeatherV4Handler` (the production V4-pattern handler, used by
-`/weather` and the V4 tab on `/current-ai-weather`) → V5 →
+`core-dotnet/core/AIWeather` (the production V3-pattern handler, used by
+`/weather` and the V3 tab on `/current-ai-weather`) → V4 →
+`GetCurrentAIWeatherV4Handler` (the production V4-pattern handler, the V4 tab
+on `/current-ai-weather`) → V5 →
 `GetCurrentAIWeatherV5Handler` (the production V5-pattern handler, the third
 `/current-ai-weather` tab) → Chat3 (`wx1116-agent-chat`).
 

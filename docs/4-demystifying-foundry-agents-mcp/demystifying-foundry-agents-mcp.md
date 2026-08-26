@@ -26,9 +26,10 @@ Run from VS Code (**Foundry Console V1** … **V5**) or `dotnet run` in each
 folder. All use the `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `.env.example`).
 
 Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherV3Handler` in
-`core-dotnet/core/AIWeather` (the production V3-pattern handler) **→ V4 →**
-`GetCurrentAIWeatherV4Handler` (the production V4-pattern handler, used by
-`/weather` and the V4 tab on `/current-ai-weather`) **→ V5 →**
+`core-dotnet/core/AIWeather` (the production V3-pattern handler, used by
+`/weather` and the V3 tab on `/current-ai-weather`) **→ V4 →**
+`GetCurrentAIWeatherV4Handler` (the production V4-pattern handler, the V4 tab
+on `/current-ai-weather`) **→ V5 →**
 `GetCurrentAIWeatherV5Handler` (the production V5-pattern handler, the third
 `/current-ai-weather` tab; sends only the user prompt to
 `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).

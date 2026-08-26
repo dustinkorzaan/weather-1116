@@ -1,7 +1,7 @@
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SafeGfmMarkdown from '../markdown/SafeGfmMarkdown';
-import { useGetCurrentAIWeatherV4Query } from '../../services/weatherApi';
+import { useGetCurrentAIWeatherV3Query } from '../../services/weatherApi';
 import {
   formatLatLong,
   formatRunLogMs,
@@ -22,7 +22,7 @@ import { formatLocationWithLatLong } from '../../utils/currentAiWeatherLocation'
  */
 function CurrentAIWeatherModalTab({ name, lat, lng }) {
   const locationString = formatLocationWithLatLong(name, lat, lng);
-  const { data, isFetching, isError, error, refetch } = useGetCurrentAIWeatherV4Query(locationString, {
+  const { data, isFetching, isError, error, refetch } = useGetCurrentAIWeatherV3Query(locationString, {
     skip: !locationString,
   });
 

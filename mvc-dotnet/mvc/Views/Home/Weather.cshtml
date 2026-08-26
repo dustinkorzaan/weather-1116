@@ -145,7 +145,7 @@
         <script>
             weatherModal.init({
                 location: @Json.Serialize(Model.LocationQuery),
-                endpoint: '@Url.Action("GetCurrentAIWeatherV4", "Home")',
+                endpoint: '@Url.Action("GetCurrentAIWeatherV3", "Home")',
                 refreshButtonId: 'weatherModalRefresh',
                 errorId: 'weatherModalError',
                 loadingId: 'weatherModalLoading',

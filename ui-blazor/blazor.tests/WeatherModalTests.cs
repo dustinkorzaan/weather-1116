@@ -38,6 +38,8 @@ public sealed class WeatherModalTests
         });
 
         var tabSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Shared/CurrentAIWeatherModalTab.razor"));
+        Assert.Contains("GetCurrentAIWeatherV3", tabSource);
+        Assert.DoesNotContain("GetCurrentAIWeatherV4", tabSource);
         Assert.Contains("Connecting to Microsoft Foundry...", tabSource);
     }
 
