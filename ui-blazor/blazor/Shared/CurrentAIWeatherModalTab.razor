@@ -130,7 +130,7 @@
 
         try
         {
-            _aiWeather = await WeatherClient.GetCurrentAIWeatherV4(Location);
+            _aiWeather = await WeatherClient.GetCurrentAIWeatherV3(Location);
             if (_aiWeather is null)
             {
                 _errorMessage = "Unable to load AI weather.";

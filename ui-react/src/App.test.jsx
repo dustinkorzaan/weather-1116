@@ -301,7 +301,7 @@ test('current AI weather page shows the Foundry connecting message while fetchin
 });
 
 test('weather modal current tab shows the Foundry connecting message while fetching', async () => {
-  mockHelloFetch();
+  const fetchMock = mockHelloFetch();
   renderApp('/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=current');
 
   expect(screen.getByText('Connecting to Microsoft Foundry...')).toBeDefined();
@@ -309,6 +309,11 @@ test('weather modal current tab shows the Foundry connecting message while fetch
   await waitFor(() => {
     expect(screen.getByText('Sunny in Nashville.')).toBeDefined();
   });
+
+  const weatherUrl = fetchMock.mock.calls
+    .map(([input]) => requestUrl(input))
+    .find((url) => url.includes('/AIWeather/Current'));
+  expect(weatherUrl).toContain('/AIWeather/CurrentV3');
 
   expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
 });
