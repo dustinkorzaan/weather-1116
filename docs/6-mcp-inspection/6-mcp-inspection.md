@@ -2,12 +2,11 @@
 
 How to examine this repo's two remote MCP hosts (`mcp-srv-app-service`,
 `mcp-srv-func-app`) directly - outside a chat tab or Foundry console - with
-the MCP Inspector, MCP Playground, Postman, and curl.
+the MCP Inspector, Postman, and curl.
 
 ## MCP 2026-07-28 vs Legacy
 
 * [MCP spec changelog - 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/changelog)
-* [MCP stateless 2026 release candidate](https://mcpplaygroundonline.com/blog/mcp-stateless-2026-release-candidate)
 * [MCP 2026-07-28: the big architectural shift](https://securityboulevard.com/2026/08/mcp-2026-07-28-the-big-architectural-shift)
 
 `mcp-srv-app-service` already runs in **stateless** mode
@@ -19,15 +18,11 @@ transport only accepts `POST`. Keep that in mind when comparing behavior
 against the legacy (stateful, session-and-SSE) transport described in the
 links above.
 
-## MCP Inspection
-
-### MCP Inspector
+## MCP Inspector
 
 * [`modelcontextprotocol.io/docs/2026-07-28/tools/inspector`](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector)
 
-```bash
-npx @modelcontextprotocol/inspector
-```
+* bash `npx @modelcontextprotocol/inspector`
 
 Point it at:
 
@@ -38,18 +33,9 @@ Point it at:
 * Prod hosts - see [`docs/architecture.md`](../architecture.md#mcp-tool-hosts)
   for the production URLs and auth headers
 
-### MCP Playground
+## Postman
 
-* [`mcpplaygroundonline.com/mcp-test-server`](https://mcpplaygroundonline.com/mcp-test-server)
-
-Same idea as the Inspector - a hosted, no-install way to connect to an MCP
-endpoint, list its tools, and call one, when you'd rather not run `npx`
-locally.
-
-### Postman
-
-Add a request to a Postman collection pointed at the `/mcp` endpoint (local
-`http://localhost:8110/mcp`, or a prod host such as
+Add a request to a Postman collection pointed at the `/mcp` endpoint (
 `https://weather1116-prod-mcp-srv-app-service-<slot>.westus2-01.azurewebsites.net/mcp`):
 
 * Method **POST**, header `Authorization: Bearer <MCP_SRV_APP_SERVICE_KEY>`
@@ -69,51 +55,41 @@ stateless mode), and the `tools/call` `POST`s for
 `GetPublicWeatherCurrent`/`GetPublicWeatherHistory` returning `200` with the
 tool's JSON content.
 
-> The screenshot referenced above (`postman-mcp-tools.png`) still needs to
-> be added to this folder - see the note at the end of this doc.
-
-### curl
-
-Local `mcp-srv-app-service` (Bearer token):
+## curl example
 
 ```bash
-curl -s http://localhost:8110/mcp \
-  -H "Authorization: Bearer $MCP_SRV_APP_SERVICE_KEY" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -d '{
+curl -sS -N -X POST "https://weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3du.westus2-01.azurewebsites.net/mcp" \
+  -H "accept: application/json, text/event-stream" \
+  -H "authorization: Bearer ..." \
+  -H "content-type: application/json" \
+  -H "mcp-protocol-version: 2025-11-25" \
+  --data '{
     "jsonrpc": "2.0",
     "id": 1,
-    "method": "tools/call",
+    "method": "initialize",
     "params": {
-      "name": "GetPublicWeatherCurrent",
-      "arguments": { "latitude": 36.1659, "longitude": -86.7844 }
+      "protocolVersion": "2025-11-25",
+      "capabilities": {},
+      "clientInfo": {
+        "name": "curl",
+        "version": "1.0"
+      }
     }
-  }'
+  }' \
+  | sed -n 's/^[[:space:]]*data:[[:space:]]*//p' \
+  | python -m json.tool
 ```
-
-Local `mcp-srv-func-app` (Functions system key):
 
 ```bash
-curl -s "http://localhost:8120/runtime/webhooks/mcp" \
-  -H "x-functions-key: $MCP_SRV_FUNC_APP_KEY" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/call",
-    "params": {
-      "name": "GetLatLong",
-      "arguments": { "location": "Nashville, TN" }
-    }
-  }'
+curl -sS -X POST "https://weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3du.westus2-01.azurewebsites.net/mcp" \
+  -H "accept: application/json, text/event-stream" \
+  -H "authorization: Bearer ..." \
+  -H "content-type: application/json" \
+  -H "mcp-protocol-version: 2025-11-25" \
+  --data '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+  | sed -n 's/^[[:space:]]*data:[[:space:]]*//p' \
+  | python -m json.tool
 ```
-
-Swap in a prod URL/key from [`docs/architecture.md`](../architecture.md#mcp-tool-hosts)
-to hit the deployed hosts instead of localhost. `tools/list` (no `params`)
-is the quickest way to confirm a host is reachable and which tools it
-registered before calling one.
 
 ## Related docs
 
