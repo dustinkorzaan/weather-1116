@@ -1,5 +1,5 @@
-using System.Text.Json;
 using Core.Geo.Events;
+using Core.Geo.Models;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
@@ -13,7 +13,7 @@ namespace WeatherMcpSrvFuncApp;
 public class GetLocationTool(IMediator mediator, ILogger<GetLocationTool> logger)
 {
 	[Function(nameof(GetLocation))]
-	public async Task<string> GetLocation(
+	public async Task<NonAILocationResponse> GetLocation(
 		[McpToolTrigger(
 			"GetLocation",
 			"Turn a latitude and longitude into a simple place label. Prefers City, State in the US (City, State, Country elsewhere), then a feature name, then a formatted coordinate such as 35.51° N, 86.58° W.")]
@@ -37,6 +37,6 @@ public class GetLocationTool(IMediator mediator, ILogger<GetLocationTool> logger
 
 		logger.LogInformation("MCP tool GetLocation returned {Location}", result.Location);
 
-		return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+		return result;
 	}
 }
