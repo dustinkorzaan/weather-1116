@@ -18,8 +18,7 @@ public class RecurringJobScheduler : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _recurringJobs.RemoveIfExists("weather-forecast");
-        _recurringJobs.RemoveIfExists("confirm-nashville-ai-weather");
+        _recurringJobs.RemoveIfExists("");
 
         _recurringJobs.AddOrUpdateMediatREvent(
             "confirm-nashville-ai-weather-v3",
