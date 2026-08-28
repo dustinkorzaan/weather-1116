@@ -19,7 +19,7 @@ and the Foundry console learning path (V1 → V5).
 | 3 | AI Development Ecosystem | [`ai-development-ecosystem.md`](3-ai-development-ecosystem/ai-development-ecosystem.md) | Introduce — landscape of tools (wireframes, rapid app gen, IDEs) |
 | 4 | Demystifying Foundry, agents, and models | [`demystifying-foundry-agents-mcp.md`](4-demystifying-foundry-agents-mcp/demystifying-foundry-agents-mcp.md), [`brainstorming`](4-demystifying-foundry-agents-mcp/demystifying-model-agent-tools-mcp-brainstorming.md) | **Focus** — Foundry consoles, agents, MCP hosts in this repo |
 | 5 | Chat Clients (Chat1a–Chat3) | [`5-chat-clients.md`](5-chat-clients/5-chat-clients.md) | **Hands-on** — five chat tabs in React/MVC/Blazor |
-| 6 | MCP Inspection | [`6-mcp-inspection.md`](6-mcp-inspection/6-mcp-inspection.md) | **Hands-on** — Inspector, Playground, Postman, and curl against the MCP hosts |
+| 6 | MCP Inspection | [`6-mcp-inspection.md`](6-mcp-inspection/6-mcp-inspection.md) | **Hands-on** - Inspector, Playground, Postman, and curl against the MCP hosts |
 
 ## Supporting material
 

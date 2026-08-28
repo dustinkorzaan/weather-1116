@@ -48,8 +48,8 @@ Standalone multi-turn chat page with five tabs:
 
 Presentation reference: [`docs/6-mcp-inspection/6-mcp-inspection.md`](docs/6-mcp-inspection/6-mcp-inspection.md)
 
-How to poke at `mcp-srv-app-service` and `mcp-srv-func-app` directly with the
-MCP Inspector, MCP Playground, Postman, or curl — outside a chat tab or
+How to examine `mcp-srv-app-service` and `mcp-srv-func-app` directly with the
+MCP Inspector, MCP Playground, Postman, or curl - outside a chat tab or
 Foundry console.
 
 ## Projects, Architecture, and live demos in a Weather Pin App
