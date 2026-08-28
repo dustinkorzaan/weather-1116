@@ -1,5 +1,5 @@
-using System.Text.Json;
 using Core.Geo.Events;
+using Core.Geo.Models;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
@@ -13,7 +13,7 @@ namespace WeatherMcpSrvFuncApp;
 public class GetLatLongTool(IMediator mediator, ILogger<GetLatLongTool> logger)
 {
 	[Function(nameof(GetLatLong))]
-	public async Task<string> GetLatLong(
+	public async Task<NonAILatLongListResponse> GetLatLong(
 		[McpToolTrigger(
 			"GetLatLong",
 			"Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.")]
@@ -26,8 +26,6 @@ public class GetLatLongTool(IMediator mediator, ILogger<GetLatLongTool> logger)
 	{
 		logger.LogInformation("MCP tool GetLatLong invoked");
 
-		var result = await mediator.Send(new GetLatLongEvent { Location = location });
-
-		return JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+		return await mediator.Send(new GetLatLongEvent { Location = location });
 	}
 }
