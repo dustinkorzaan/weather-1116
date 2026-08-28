@@ -122,6 +122,42 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "build weatherworker",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/worker-dotnet/worker/WeatherWorkerDotNet.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish weatherworker",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/worker-dotnet/worker/WeatherWorkerDotNet.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch weatherworker",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/worker-dotnet/worker/WeatherWorkerDotNet.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "build mcp srv func app",
             "command": "dotnet",
             "type": "process",

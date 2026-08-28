@@ -86,6 +86,24 @@
             }
         },
         {
+            "name": "WeatherWorkerDotNet",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build weatherworker",
+            "program": "${workspaceFolder}/worker-dotnet/worker/bin/Debug/net10.0/WeatherWorkerDotNet.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/worker-dotnet/worker",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/About"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        {
             "name": "WeatherMcpSrvAppService",
             "type": "coreclr",
             "request": "launch",
