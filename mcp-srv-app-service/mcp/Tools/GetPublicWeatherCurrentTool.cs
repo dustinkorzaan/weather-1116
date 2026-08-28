@@ -12,7 +12,7 @@ namespace WeatherMcpSrvAppService.Tools;
 [McpServerToolType]
 public class GetPublicWeatherCurrentTool(IMediator mediator)
 {
-	[McpServerTool(Name = "GetPublicWeatherCurrent"),
+	[McpServerTool(Name = "GetPublicWeatherCurrent", UseStructuredContent = true),
 	 Description("Get current public weather conditions for a latitude and longitude.")]
 	public async Task<NonAICurrentWeatherResponse> GetPublicWeatherCurrent(
 		[Description("Latitude in decimal degrees")] double latitude,

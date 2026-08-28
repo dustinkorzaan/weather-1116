@@ -12,7 +12,7 @@ namespace WeatherMcpSrvAppService.Tools;
 [McpServerToolType]
 public class GetPublicWeatherHistoryTool(IMediator mediator)
 {
-	[McpServerTool(Name = "GetPublicWeatherHistory"),
+	[McpServerTool(Name = "GetPublicWeatherHistory", UseStructuredContent = true),
 	 Description("Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail.")]
 	public async Task<NonAIHistoryWeatherResponse> GetPublicWeatherHistory(
 		[Description("Latitude in decimal degrees")] double latitude,
