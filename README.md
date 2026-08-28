@@ -44,6 +44,14 @@ Standalone multi-turn chat page with five tabs:
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-chat`) |
 
+## MCP inspection
+
+Presentation reference: [`docs/6-mcp-inspection/6-mcp-inspection.md`](docs/6-mcp-inspection/6-mcp-inspection.md)
+
+How to examine `mcp-srv-app-service` and `mcp-srv-func-app` directly with the
+MCP Inspector, MCP Playground, Postman, or curl - outside a chat tab or
+Foundry console.
+
 ## Projects, Architecture, and live demos in a Weather Pin App
 
 |  | Project | Path | Stack | Port |
