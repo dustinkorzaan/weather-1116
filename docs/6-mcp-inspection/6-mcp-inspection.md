@@ -2,7 +2,7 @@
 
 How to examine this repo's two remote MCP hosts (`mcp-srv-app-service`,
 `mcp-srv-func-app`) directly - outside a chat tab or Foundry console - with
-the MCP Inspector, MCP Playground, Postman, and curl.
+the MCP Inspector, Postman, and curl.
 
 ## MCP 2026-07-28 vs Legacy
 
@@ -37,14 +37,6 @@ Point it at:
   header `x-functions-key: <mcp_extension system key>`
 * Prod hosts - see [`docs/architecture.md`](../architecture.md#mcp-tool-hosts)
   for the production URLs and auth headers
-
-### MCP Playground
-
-* [`mcpplaygroundonline.com/mcp-test-server`](https://mcpplaygroundonline.com/mcp-test-server)
-
-Same idea as the Inspector - a hosted, no-install way to connect to an MCP
-endpoint, list its tools, and call one, when you'd rather not run `npx`
-locally.
 
 ### Postman
 
