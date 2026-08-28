@@ -84,14 +84,6 @@ if (!string.IsNullOrWhiteSpace(dbConnectionString))
 
 var app = builder.Build();
 
-// Drop legacy recurring jobs from shared SQL storage (superseded by newer job ids).
-using (var scope = app.Services.CreateScope())
-{
-	var recurringJobs = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
-	recurringJobs.RemoveIfExists("weather-forecast");
-	recurringJobs.RemoveIfExists("confirm-nashville-ai-weather");
-}
-
 // Hangfire dashboard, open to all (POC — no auth). It reads the shared storage,
 // so it also shows jobs enqueued by the api/mvc clients.
 app.UseHangfireDashboard("/hangfire", new DashboardOptions

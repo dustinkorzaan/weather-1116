@@ -18,6 +18,8 @@ public class RecurringJobScheduler : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        _recurringJobs.RemoveIfExists("");
+
         _recurringJobs.AddOrUpdateMediatREvent(
             "confirm-nashville-ai-weather-v3",
             Cron.Daily(2),
