@@ -12,7 +12,7 @@ namespace WeatherMcpSrvAppService.Tools;
 [McpServerToolType]
 public class GetPublicWeatherForecastTool(IMediator mediator)
 {
-	[McpServerTool(Name = "GetPublicWeatherForecast"),
+	[McpServerTool(Name = "GetPublicWeatherForecast", UseStructuredContent = true),
 	 Description("Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute steps. Use Daily unless the user asks for hourly or 15-minute detail.")]
 	public async Task<NonAIForecastWeatherResponse> GetPublicWeatherForecast(
 		[Description("Latitude in decimal degrees")] double latitude,
