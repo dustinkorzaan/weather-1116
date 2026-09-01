@@ -3,14 +3,13 @@ using Core.Geo.Models;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
-using Microsoft.Extensions.Logging;
 
 namespace WeatherMcpSrvFuncApp;
 
 /// <summary>
 /// MCP tool that resolves a location name to ranked latitude/longitude matches via Core/MediatR.
 /// </summary>
-public class GetLatLongTool(IMediator mediator, ILogger<GetLatLongTool> logger)
+public class GetLatLongTool(IMediator mediator)
 {
 	[Function(nameof(GetLatLong))]
 	public async Task<NonAILatLongListResponse> GetLatLong(
@@ -24,8 +23,6 @@ public class GetLatLongTool(IMediator mediator, ILogger<GetLatLongTool> logger)
 			true)]
 		string location)
 	{
-		logger.LogInformation("MCP tool GetLatLong invoked");
-
 		return await mediator.Send(new GetLatLongEvent { Location = location });
 	}
 }
