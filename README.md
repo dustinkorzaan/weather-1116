@@ -46,7 +46,7 @@ Standalone multi-turn chat page with five tabs:
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-chat`) |
 
-[Visit](https://wx.korzaan.com/chat-clients) the UI Chat wired to variations of V3, V4, and V5
+Visit the [React UI](https://wx.korzaan.com/chat-clients) Chat wired to variations of V3, V4, and V5
 
 ## MCP inspection
 
