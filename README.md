@@ -28,9 +28,9 @@ weather progression:
 | V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools handled by remote MCP servers |
 | V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
-Visit the UI to view Current Weather Wired to V3, V4, and V5.
+[Visit](https://wx.korzaan.com/current-ai-weather) the UI to view Current Weather Wired to V3, V4, and V5.
 
-Visit the Map UI wired specifically to V3.
+[Visit](https://wx.korzaan.com) the Map UI wired specifically to V3.
 
 ## Chat clients
 
