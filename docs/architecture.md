@@ -174,7 +174,7 @@ See deploy workflows and `.env.example` files under `api-dotnet/api`,
 
 Ultra-simple remote MCP servers that expose `Core` tools over the Model Context
 Protocol. They exist so a Foundry project (or MCP Inspector) can call the same
-MediatR handlers the sample uses in-process elsewhere.
+CQMediator handlers the sample uses in-process elsewhere.
 
 | Host | Path | Tool | Port | Endpoint | Auth |
 | --- | --- | --- | --- | --- | --- |
@@ -240,7 +240,7 @@ and `children`.
 ## Core Project
 
 `Core` (`core-dotnet/core`) is a .NET class library referenced by
-`WeatherMVC`, `WeatherAPI`, `worker-dotnet`, and both MCP hosts. It hosts shared MediatR events
+`WeatherMVC`, `WeatherAPI`, `worker-dotnet`, and both MCP hosts. It hosts shared CQMediator events
 and handlers, including:
 
 - `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)

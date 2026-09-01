@@ -1,9 +1,9 @@
 using System.Reflection;
-using MediatR;
+using CQMediator;
 
 namespace Core.Hangfire;
 
-internal static class MediatRSendExtensions
+internal static class CQMediatorSendExtensions
 {
     private static readonly MethodInfo GenericSendMethod = typeof(IMediator)
         .GetMethods()
@@ -45,7 +45,7 @@ internal static class MediatRSendExtensions
 
         if (requestInterface is null)
         {
-            throw new InvalidOperationException($"'{requestType.Name}' is not a MediatR request type.");
+            throw new InvalidOperationException($"'{requestType.Name}' is not a CQMediator request type.");
         }
 
         return requestInterface.GetGenericArguments()[0];

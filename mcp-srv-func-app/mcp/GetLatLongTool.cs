@@ -1,13 +1,13 @@
 using Core.Geo.Events;
 using Core.Geo.Models;
-using MediatR;
+using CQMediator;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
 
 namespace WeatherMcpSrvFuncApp;
 
 /// <summary>
-/// MCP tool that resolves a location name to ranked latitude/longitude matches via Core/MediatR.
+/// MCP tool that resolves a location name to ranked latitude/longitude matches via Core/CQMediator.
 /// </summary>
 public class GetLatLongTool(IMediator mediator)
 {

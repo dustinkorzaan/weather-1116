@@ -1,5 +1,5 @@
 using Core.AIWeather.Models;
-using MediatR;
+using CQMediator;
 
 namespace Core.AIWeather.Events;
 

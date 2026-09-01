@@ -5,21 +5,21 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddMediatR(
+    public static IServiceCollection AddCQMediator(
         this IServiceCollection services,
-        Action<MediatR.MediatRServiceConfiguration> configuration)
+        Action<CQMediator.CQMediatorServiceConfiguration> configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        var mediatRConfiguration = new MediatR.MediatRServiceConfiguration();
-        configuration(mediatRConfiguration);
+        var cqMediatorConfiguration = new CQMediator.CQMediatorServiceConfiguration();
+        configuration(cqMediatorConfiguration);
 
         // Transient so Mediator resolves handlers from the current request/scope,
         // matching the NuGet MediatR lifetime and avoiding root-provider capture.
-        services.AddTransient<MediatR.IMediator, MediatR.Mediator>();
+        services.AddTransient<CQMediator.IMediator, CQMediator.Mediator>();
 
-        foreach (var assembly in mediatRConfiguration.Assemblies)
+        foreach (var assembly in cqMediatorConfiguration.Assemblies)
         {
             RegisterHandlersFromAssembly(services, assembly);
         }
@@ -44,8 +44,8 @@ public static class ServiceCollectionExtensions
                 }
 
                 var genericDefinition = serviceType.GetGenericTypeDefinition();
-                if (genericDefinition == typeof(MediatR.IRequestHandler<,>)
-                    || genericDefinition == typeof(MediatR.IRequestHandler<>))
+                if (genericDefinition == typeof(CQMediator.IRequestHandler<,>)
+                    || genericDefinition == typeof(CQMediator.IRequestHandler<>))
                 {
                     services.TryAddTransient(serviceType, type);
                 }

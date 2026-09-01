@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace Core.Hangfire;
 
-internal static class HangfireMediatREventSerializer
+internal static class HangfireCQMediatorEventSerializer
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -23,7 +23,7 @@ internal static class HangfireMediatREventSerializer
 
     public static object Deserialize(string eventTypeName, string eventJson)
     {
-        var eventType = MediatREventTypeResolver.Resolve(eventTypeName);
+        var eventType = CQMediatorEventTypeResolver.Resolve(eventTypeName);
         return JsonSerializer.Deserialize(eventJson, eventType, JsonOptions)
             ?? throw new InvalidOperationException($"Could not deserialize event '{eventType.Name}'.");
     }

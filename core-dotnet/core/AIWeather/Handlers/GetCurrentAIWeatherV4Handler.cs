@@ -10,7 +10,7 @@ using Core.Chat.Services;
 using Core.Json;
 using Core.Weather;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
-using MediatR;
+using CQMediator;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using OpenAI.Responses;

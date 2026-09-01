@@ -1,15 +1,15 @@
 using System.Reflection;
-using MediatR;
+using CQMediator;
 
 namespace Core.Hangfire;
 
-internal static class MediatREventTypeResolver
+internal static class CQMediatorEventTypeResolver
 {
     public static Type Resolve(string assemblyQualifiedName)
     {
         var eventType = Type.GetType(assemblyQualifiedName, AssemblyResolver, typeResolver: null)
             ?? throw new InvalidOperationException(
-                $"Could not resolve MediatR event type '{assemblyQualifiedName}'.");
+                $"Could not resolve CQMediator event type '{assemblyQualifiedName}'.");
 
         ValidateIsRequest(eventType);
         return eventType;
@@ -26,7 +26,7 @@ internal static class MediatREventTypeResolver
     {
         if (eventType.IsAbstract)
         {
-            throw new InvalidOperationException($"'{eventType.Name}' must be a concrete MediatR request type.");
+            throw new InvalidOperationException($"'{eventType.Name}' must be a concrete CQMediator request type.");
         }
 
         if (typeof(IRequest).IsAssignableFrom(eventType))
@@ -41,6 +41,6 @@ internal static class MediatREventTypeResolver
             return;
         }
 
-        throw new InvalidOperationException($"'{eventType.Name}' is not a MediatR request type.");
+        throw new InvalidOperationException($"'{eventType.Name}' is not a CQMediator request type.");
     }
 }

@@ -1,7 +1,7 @@
 using Core.AIWeather.Events;
 using Core.AIWeather.Handlers;
 using Core.AIWeather.Models;
-using MediatR;
+using CQMediator;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.Tests.AIWeather.Handlers;

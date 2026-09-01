@@ -20,13 +20,13 @@ public class RecurringJobScheduler : IHostedService
     {
         _recurringJobs.RemoveIfExists("");
 
-        _recurringJobs.AddOrUpdateMediatREvent(
+        _recurringJobs.AddOrUpdateCQMediatorEvent(
             "confirm-nashville-ai-weather-v3",
             Cron.Daily(2),
             new ConfirmNashvilleAIWeatherEvent { Version = 3 },
             queue: "batch-multi");
 
-        _recurringJobs.AddOrUpdateMediatREvent(
+        _recurringJobs.AddOrUpdateCQMediatorEvent(
             "confirm-nashville-ai-weather-v4",
             Cron.Daily(2),
             new ConfirmNashvilleAIWeatherEvent { Version = 4 },

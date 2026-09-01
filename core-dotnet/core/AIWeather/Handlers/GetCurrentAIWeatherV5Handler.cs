@@ -7,7 +7,7 @@ using Core.AIWeather.Models;
 using Core.AIWeather.Services;
 using Core.Weather;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
-using MediatR;
+using CQMediator;
 using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
 

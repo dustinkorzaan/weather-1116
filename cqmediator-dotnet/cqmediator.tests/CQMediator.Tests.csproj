@@ -5,8 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <RootNamespace>MediatR.Tests</RootNamespace>
-    <AssemblyName>MediatR.Tests</AssemblyName>
+    <RootNamespace>CQMediator.Tests</RootNamespace>
+    <AssemblyName>CQMediator.Tests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\mediatr\MediatR.csproj" />
+    <ProjectReference Include="..\cqmediator\CQMediator.csproj" />
   </ItemGroup>
 
   <ItemGroup>

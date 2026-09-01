@@ -1,13 +1,13 @@
 using System.ComponentModel;
 using Core.Weather.Events;
 using Core.Weather.Models;
-using MediatR;
+using CQMediator;
 using ModelContextProtocol.Server;
 
 namespace WeatherMcpSrvAppService.Tools;
 
 /// <summary>
-/// MCP tool that fetches recent past public weather via Core/MediatR.
+/// MCP tool that fetches recent past public weather via Core/CQMediator.
 /// </summary>
 [McpServerToolType]
 public class GetPublicWeatherHistoryTool(IMediator mediator)

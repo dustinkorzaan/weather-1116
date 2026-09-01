@@ -5,7 +5,7 @@ using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
-using MediatR;
+using CQMediator;
 using WeatherWorkerDotNet;
 
 Env.TraversePath().Load();

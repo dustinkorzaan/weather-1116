@@ -4,10 +4,11 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- Deliberately named MediatR so existing call sites and usings stay unchanged.
-         This conflicts with the real MediatR package, which must never be referenced. -->
-    <RootNamespace>MediatR</RootNamespace>
-    <AssemblyName>MediatR</AssemblyName>
+    <!-- Homegrown mediator-pattern implementation. Must never depend on the real
+         MediatR NuGet package (github.com/jbogard/MediatR) — do not add a
+         PackageReference to it. -->
+    <RootNamespace>CQMediator</RootNamespace>
+    <AssemblyName>CQMediator</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

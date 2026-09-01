@@ -1,15 +1,15 @@
 using System.Reflection;
 
-namespace MediatR;
+namespace CQMediator;
 
-public sealed class MediatRServiceConfiguration
+public sealed class CQMediatorServiceConfiguration
 {
     private readonly List<Assembly> _assemblies = [];
 
-    public MediatRServiceConfiguration RegisterServicesFromAssemblyContaining<T>()
+    public CQMediatorServiceConfiguration RegisterServicesFromAssemblyContaining<T>()
         => RegisterServicesFromAssembly(typeof(T).Assembly);
 
-    public MediatRServiceConfiguration RegisterServicesFromAssembly(Assembly assembly)
+    public CQMediatorServiceConfiguration RegisterServicesFromAssembly(Assembly assembly)
     {
         ArgumentNullException.ThrowIfNull(assembly);
 

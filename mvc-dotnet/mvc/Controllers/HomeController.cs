@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Core.AIWeather.Events;
 using Core.HelloWorld.Events;
-using MediatR;
+using CQMediator;
 using Microsoft.AspNetCore.Mvc;
 using WeatherMVC.Models;
 

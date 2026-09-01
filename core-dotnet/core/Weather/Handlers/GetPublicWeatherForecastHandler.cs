@@ -4,7 +4,7 @@ using Core.Caching;
 using Core.Http;
 using Core.Weather.Events;
 using Core.Weather.Models;
-using MediatR;
+using CQMediator;
 using Microsoft.Extensions.Http;
 
 namespace Core.Weather.Handlers;

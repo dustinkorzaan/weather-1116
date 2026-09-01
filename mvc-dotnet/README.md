@@ -1,7 +1,7 @@
 # Weather MVC
 
 ASP.NET Core MVC UI (port 8100). Standalone: it duplicates backend logic through
-`Core`/MediatR instead of calling the Weather API.
+`Core`/CQMediator instead of calling the Weather API.
 
 Run it:
 

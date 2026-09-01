@@ -1,6 +1,6 @@
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
-using MediatR;
+using CQMediator;
 using Microsoft.Extensions.Logging;
 
 namespace Core.AIWeather.Handlers;
