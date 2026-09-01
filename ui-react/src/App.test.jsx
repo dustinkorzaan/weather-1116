@@ -397,7 +397,7 @@ test('renders chat clients on its own page', () => {
 
   expect(screen.getByRole('heading', { name: /chat clients/i })).toBeDefined();
   expect(screen.getByRole('tab', { name: 'Chat1a' })).toBeDefined();
-  expect(screen.getByText('In-process · Responses API · Like Foundry Console V3')).toBeDefined();
+  expect(screen.getByText('Responses API · In-process · Like Foundry Console V3')).toBeDefined();
   expect(screen.queryByRole('heading', { name: /^hello world$/i })).toBeNull();
   expect(screen.queryByRole('heading', { name: /current ai weather/i })).toBeNull();
   expect(screen.queryByRole('region', { name: /map/i })).toBeNull();

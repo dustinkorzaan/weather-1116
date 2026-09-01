@@ -28,7 +28,9 @@ weather progression:
 | V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools handled by remote MCP servers |
 | V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
-[Visit](https://wx.korzaan.com/current-ai-weather) the React UI, wired to V3, V4, and V5.
+Visit the [React UI](https://wx.korzaan.com/current-ai-weather) to view Current Weather Wired to V3, V4, and V5.
+
+Visit the Map in [React UI](https://wx.korzaan.com/), [Blazor UI](https://weather1116-prod-blazor.azurewebsites.net/), and [MVC UI](https://weather1116-prod-mvc.azurewebsites.net/) wired specifically to V3.
 
 ## Chat clients
 
@@ -43,6 +45,8 @@ Standalone multi-turn chat page with five tabs:
 | Chat2a | In-process | Agent Framework | Like Foundry Console V3 |
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-chat`) |
+
+Visit the [React UI](https://wx.korzaan.com/chat-clients) Chat wired to variations of V3, V4, and V5
 
 ## MCP inspection
 
