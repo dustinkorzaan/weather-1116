@@ -55,7 +55,7 @@ hot reload); React uses `npm start`. Ports come from each project's
  the Blazor UI (`API_DOTNET_URL` in `ui-blazor/blazor/appsettings.json`)
  depend on it. Without the API, React shows "Unable to load hello message" and
  Blazor's hello call fails.
-- `WeatherMVC` is standalone (duplicates backend logic via `Core`/MediatR) and
+- `WeatherMVC` is standalone (duplicates backend logic via `Core`/CQMediator) and
   does not call the API.
 - `worker-dotnet` runs Hangfire job servers and exposes `/hangfire` (dashboard,
   POC — no auth) and `/About`. API and MVC are Hangfire clients only (shared

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MediatR.Tests;
+namespace CQMediator.Tests;
 
 public class MediatorTests
 {
@@ -42,7 +42,7 @@ public class MediatorTests
     public async Task Send_ThrowsWhenNoHandlerIsRegistered()
     {
         var mediator = new ServiceCollection()
-            .AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<MediatorTests>())
+            .AddCQMediator(cfg => cfg.RegisterServicesFromAssemblyContaining<MediatorTests>())
             .BuildServiceProvider()
             .GetRequiredService<IMediator>();
 
@@ -61,7 +61,7 @@ public class MediatorTests
     }
 
     [Fact]
-    public void AddMediatR_RegistersMediatorAsTransient()
+    public void AddCQMediator_RegistersMediatorAsTransient()
     {
         var descriptor = Assert.Single(
             BuildServices(),
@@ -71,9 +71,9 @@ public class MediatorTests
     }
 
     [Fact]
-    public void AddMediatR_RegisteringSameAssemblyTwiceDoesNotDuplicateHandlers()
+    public void AddCQMediator_RegisteringSameAssemblyTwiceDoesNotDuplicateHandlers()
     {
-        var services = new ServiceCollection().AddMediatR(cfg => cfg
+        var services = new ServiceCollection().AddCQMediator(cfg => cfg
             .RegisterServicesFromAssemblyContaining<PingHandler>()
             .RegisterServicesFromAssemblyContaining<PingHandler>());
 
@@ -138,7 +138,7 @@ public class MediatorTests
         => BuildServices().BuildServiceProvider().GetRequiredService<IMediator>();
 
     private static IServiceCollection BuildServices()
-        => new ServiceCollection().AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<PingHandler>());
+        => new ServiceCollection().AddCQMediator(cfg => cfg.RegisterServicesFromAssemblyContaining<PingHandler>());
 }
 
 public sealed class PingEvent : IRequest<PingResponse>

@@ -6,7 +6,7 @@ using Core.Chat.Services;
 using Core.Geo.Events;
 using Core.Json;
 using Core.Weather.Events;
-using MediatR;
+using CQMediator;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;

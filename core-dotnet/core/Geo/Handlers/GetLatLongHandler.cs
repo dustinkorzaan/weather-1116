@@ -3,7 +3,7 @@ using Core.Caching;
 using Core.Geo.Events;
 using Core.Geo.Models;
 using Core.Http;
-using MediatR;
+using CQMediator;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 

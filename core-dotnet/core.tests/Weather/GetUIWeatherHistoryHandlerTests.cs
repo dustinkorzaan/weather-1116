@@ -1,7 +1,7 @@
 using Core.Weather.Events;
 using Core.Weather.Handlers;
 using Core.Weather.Models;
-using MediatR;
+using CQMediator;
 
 namespace Core.Tests.Weather;
 

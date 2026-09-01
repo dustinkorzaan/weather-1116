@@ -30,7 +30,7 @@
          advisory (GHSA-5crp-9r3c-p9vr). Pin the patched version for Core and its consumers. -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="OpenAI" Version="2.9.1" />
-    <ProjectReference Include="..\..\mediatr-dotnet\mediatr\MediatR.csproj" />
+    <ProjectReference Include="..\..\cqmediator-dotnet\cqmediator\CQMediator.csproj" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.11" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.11" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11" />

@@ -1,6 +1,6 @@
 using Core.Weather.Events;
 using Core.Weather.Models;
-using MediatR;
+using CQMediator;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WeatherAPI.Controllers;

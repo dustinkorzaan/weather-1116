@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace MediatR;
+namespace CQMediator;
 
 internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
 {

@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         project:
-          - mediatr-dotnet/mediatr/MediatR.csproj
+          - cqmediator-dotnet/cqmediator/CQMediator.csproj
           - core-dotnet/core/Core.csproj
           - api-dotnet/api/WeatherAPI.csproj
           - ui-blazor/blazor/WeatherBlazor.csproj
@@ -51,8 +51,8 @@ jobs:
       - name: Build project
         run: dotnet build ${{ matrix.project }} --no-restore --configuration Release
 
-  test-mediatr:
-    name: Test MediatR Library
+  test-cqmediator:
+    name: Test CQMediator Library
     runs-on: ubuntu-latest
 
     steps:
@@ -64,8 +64,8 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Run MediatR tests
-        run: dotnet test mediatr-dotnet/mediatr.tests/MediatR.Tests.csproj --configuration Release --verbosity normal
+      - name: Run CQMediator tests
+        run: dotnet test cqmediator-dotnet/cqmediator.tests/CQMediator.Tests.csproj --configuration Release --verbosity normal
 
   test-weather-api:
     name: Test Weather API
@@ -220,7 +220,7 @@ jobs:
     if: ${{ always() }}
     needs:
       - build
-      - test-mediatr
+      - test-cqmediator
       - test-weather-api
       - test-core
       - test-worker

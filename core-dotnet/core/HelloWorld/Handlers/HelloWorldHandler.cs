@@ -1,6 +1,6 @@
 using Core.HelloWorld.Events;
 using Core.HelloWorld.Models;
-using MediatR;
+using CQMediator;
 
 namespace Core.HelloWorld.Handlers;
 

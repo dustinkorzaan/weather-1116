@@ -79,11 +79,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FoundryConsoleV4", "Foundry
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoundryConsoleV4MCP", "FoundryConsoleV4\FoundryConsoleV4MCP.csproj", "{BF02C070-5AE2-4426-855D-EFC5EE6F012F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mediatr-dotnet", "mediatr-dotnet", "{3961B67E-76FB-C118-F2C5-378574731DFD}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cqmediator-dotnet", "cqmediator-dotnet", "{3961B67E-76FB-C118-F2C5-378574731DFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR", "mediatr-dotnet\mediatr\MediatR.csproj", "{E50ED8F8-6415-41DE-8979-8B984406DAA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CQMediator", "cqmediator-dotnet\cqmediator\CQMediator.csproj", "{E50ED8F8-6415-41DE-8979-8B984406DAA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Tests", "mediatr-dotnet\mediatr.tests\MediatR.Tests.csproj", "{65E22385-890F-4FAE-BD74-F117306DDA29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CQMediator.Tests", "cqmediator-dotnet\cqmediator.tests\CQMediator.Tests.csproj", "{65E22385-890F-4FAE-BD74-F117306DDA29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

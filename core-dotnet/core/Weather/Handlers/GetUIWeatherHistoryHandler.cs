@@ -1,6 +1,6 @@
 using Core.Weather.Events;
 using Core.Weather.Models;
-using MediatR;
+using CQMediator;
 
 namespace Core.Weather.Handlers;
 

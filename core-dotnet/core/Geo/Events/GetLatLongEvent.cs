@@ -1,5 +1,5 @@
 using Core.Geo.Models;
-using MediatR;
+using CQMediator;
 
 namespace Core.Geo.Events;
 

@@ -2,7 +2,7 @@ using System.Text.Json;
 using Core.Geo.Events;
 using Core.Json;
 using Core.Weather.Events;
-using MediatR;
+using CQMediator;
 using OpenAI.Responses;
 
 namespace Core.Tools;

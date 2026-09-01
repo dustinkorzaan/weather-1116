@@ -6,7 +6,7 @@ using Core.Json;
 using Core.Weather;
 using Core.Weather.Events;
 using DotNetEnv;
-using MediatR;
+using CQMediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenAI;

@@ -4,9 +4,9 @@ using Hangfire.States;
 
 namespace Core.Hangfire;
 
-public static class HangfireMediatRExtensions
+public static class HangfireCQMediatorExtensions
 {
-    public static void AddOrUpdateMediatREvent<TEvent>(
+    public static void AddOrUpdateCQMediatorEvent<TEvent>(
         this IRecurringJobManager recurringJobs,
         string recurringJobId,
         string cronExpression,
@@ -19,28 +19,28 @@ public static class HangfireMediatRExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(cronExpression);
         ArgumentNullException.ThrowIfNull(@event);
 
-        var eventDisplayName = HangfireMediatREventSerializer.GetDisplayName(typeof(TEvent));
-        var eventTypeName = HangfireMediatREventSerializer.GetTypeName(typeof(TEvent));
-        var eventJson = HangfireMediatREventSerializer.Serialize(@event);
+        var eventDisplayName = HangfireCQMediatorEventSerializer.GetDisplayName(typeof(TEvent));
+        var eventTypeName = HangfireCQMediatorEventSerializer.GetTypeName(typeof(TEvent));
+        var eventJson = HangfireCQMediatorEventSerializer.Serialize(@event);
 
-        recurringJobs.AddOrUpdate<HangfireMediatREventJob>(
+        recurringJobs.AddOrUpdate<HangfireCQMediatorEventJob>(
             recurringJobId,
             queue,
             job => job.SendAsync(eventDisplayName, eventTypeName, eventJson, CancellationToken.None),
             cronExpression);
     }
 
-    public static void AddOrUpdateMediatREvent<TEvent>(
+    public static void AddOrUpdateCQMediatorEvent<TEvent>(
         this IRecurringJobManager recurringJobs,
         string recurringJobId,
         string cronExpression,
         string queue = "default")
         where TEvent : class, new()
     {
-        recurringJobs.AddOrUpdateMediatREvent(recurringJobId, cronExpression, new TEvent(), queue);
+        recurringJobs.AddOrUpdateCQMediatorEvent(recurringJobId, cronExpression, new TEvent(), queue);
     }
 
-    public static string EnqueueMediatREvent<TEvent>(
+    public static string EnqueueCQMediatorEvent<TEvent>(
         this IBackgroundJobClient backgroundJobs,
         TEvent @event,
         string queue = "default")
@@ -49,12 +49,12 @@ public static class HangfireMediatRExtensions
         ArgumentNullException.ThrowIfNull(backgroundJobs);
         ArgumentNullException.ThrowIfNull(@event);
 
-        var eventDisplayName = HangfireMediatREventSerializer.GetDisplayName(typeof(TEvent));
-        var eventTypeName = HangfireMediatREventSerializer.GetTypeName(typeof(TEvent));
-        var eventJson = HangfireMediatREventSerializer.Serialize(@event);
+        var eventDisplayName = HangfireCQMediatorEventSerializer.GetDisplayName(typeof(TEvent));
+        var eventTypeName = HangfireCQMediatorEventSerializer.GetTypeName(typeof(TEvent));
+        var eventJson = HangfireCQMediatorEventSerializer.Serialize(@event);
 
         return backgroundJobs.Create(
-            Job.FromExpression<HangfireMediatREventJob>(
+            Job.FromExpression<HangfireCQMediatorEventJob>(
                 job => job.SendAsync(eventDisplayName, eventTypeName, eventJson, CancellationToken.None)),
             new EnqueuedState(queue));
     }

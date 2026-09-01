@@ -1,4 +1,4 @@
-namespace MediatR;
+namespace CQMediator;
 
 public interface IMediator
 {

@@ -1,6 +1,6 @@
 using Core.Geo.Events;
 using Core.Geo.Models;
-using MediatR;
+using CQMediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WeatherAPI.Controllers;

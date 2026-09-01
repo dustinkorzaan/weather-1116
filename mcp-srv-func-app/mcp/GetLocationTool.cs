@@ -1,13 +1,13 @@
 using Core.Geo.Events;
 using Core.Geo.Models;
-using MediatR;
+using CQMediator;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
 
 namespace WeatherMcpSrvFuncApp;
 
 /// <summary>
-/// MCP tool that reverse-geocodes lat/long to a simple place label via Core/MediatR.
+/// MCP tool that reverse-geocodes lat/long to a simple place label via Core/CQMediator.
 /// </summary>
 public class GetLocationTool(IMediator mediator)
 {
