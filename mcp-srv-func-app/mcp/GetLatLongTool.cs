@@ -24,8 +24,6 @@ public class GetLatLongTool(IMediator mediator, ILogger<GetLatLongTool> logger)
 			true)]
 		string location)
 	{
-		logger.LogInformation("MCP tool GetLatLong invoked");
-
 		return await mediator.Send(new GetLatLongEvent { Location = location });
 	}
 }
