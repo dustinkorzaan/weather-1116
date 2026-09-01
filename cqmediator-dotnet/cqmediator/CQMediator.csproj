@@ -4,9 +4,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- Homegrown mediator-pattern implementation. Must never depend on a
-         third-party mediator-pattern NuGet package — do not add a
-         PackageReference to one. -->
     <RootNamespace>CQMediator</RootNamespace>
     <AssemblyName>CQMediator</AssemblyName>
   </PropertyGroup>
