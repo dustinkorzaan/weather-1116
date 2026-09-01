@@ -7,7 +7,6 @@ the MCP Inspector, Postman, and curl.
 ## MCP 2026-07-28 vs Legacy
 
 * [MCP spec changelog - 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/changelog)
-* [MCP stateless 2026 release candidate](https://mcpplaygroundonline.com/blog/mcp-stateless-2026-release-candidate)
 * [MCP 2026-07-28: the big architectural shift](https://securityboulevard.com/2026/08/mcp-2026-07-28-the-big-architectural-shift)
 
 `mcp-srv-app-service` already runs in **stateless** mode
