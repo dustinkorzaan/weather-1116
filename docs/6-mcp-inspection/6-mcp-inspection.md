@@ -61,9 +61,6 @@ stateless mode), and the `tools/call` `POST`s for
 `GetPublicWeatherCurrent`/`GetPublicWeatherHistory` returning `200` with the
 tool's JSON content.
 
-> The screenshot referenced above (`postman-mcp-tools.png`) still needs to
-> be added to this folder - see the note at the end of this doc.
-
 ### curl
 
 Local `mcp-srv-app-service` (Bearer token):
@@ -100,6 +97,43 @@ curl -s "http://localhost:8120/runtime/webhooks/mcp" \
       "arguments": { "location": "Nashville, TN" }
     }
   }'
+```
+
+Prod `mcp-srv-app-service`, showing the full stateless handshake (`initialize`
+then `tools/list`):
+
+```bash
+curl -sS -N -X POST "https://weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3du.westus2-01.azurewebsites.net/mcp" \
+  -H "accept: application/json, text/event-stream" \
+  -H "authorization: Bearer ..." \
+  -H "content-type: application/json" \
+  -H "mcp-protocol-version: 2025-11-25" \
+  --data '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2025-11-25",
+      "capabilities": {},
+      "clientInfo": {
+        "name": "curl",
+        "version": "1.0"
+      }
+    }
+  }' \
+  | sed -n 's/^[[:space:]]*data:[[:space:]]*//p' \
+  | python -m json.tool
+```
+
+```bash
+curl -sS -X POST "https://weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3du.westus2-01.azurewebsites.net/mcp" \
+  -H "accept: application/json, text/event-stream" \
+  -H "authorization: Bearer ..." \
+  -H "content-type: application/json" \
+  -H "mcp-protocol-version: 2025-11-25" \
+  --data '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+  | sed -n 's/^[[:space:]]*data:[[:space:]]*//p' \
+  | python -m json.tool
 ```
 
 Swap in a prod URL/key from [`docs/architecture.md`](../architecture.md#mcp-tool-hosts)
