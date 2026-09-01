@@ -28,7 +28,7 @@ weather progression:
 | V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools handled by remote MCP servers |
 | V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
 
-Visit the [React](https://wx.korzaan.com/current-ai-weather) UI to view Current Weather Wired to V3, V4, and V5.
+Visit the [React UI](https://wx.korzaan.com/current-ai-weather) to view Current Weather Wired to V3, V4, and V5.
 
 Visit the Map UI in [React](https://wx.korzaan.com/), [Blazor](https://weather1116-prod-blazor.azurewebsites.net/), and [MVC](https://weather1116-prod-mvc.azurewebsites.net/) wired specifically to V3.
 
