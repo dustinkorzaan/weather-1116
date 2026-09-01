@@ -30,7 +30,7 @@ weather progression:
 
 Visit the [React UI](https://wx.korzaan.com/current-ai-weather) to view Current Weather Wired to V3, V4, and V5.
 
-Visit the Map UI in [React](https://wx.korzaan.com/), [Blazor](https://weather1116-prod-blazor.azurewebsites.net/), and [MVC](https://weather1116-prod-mvc.azurewebsites.net/) wired specifically to V3.
+Visit the Map in [React UI](https://wx.korzaan.com/), [Blazor UI](https://weather1116-prod-blazor.azurewebsites.net/), and [MVC UI](https://weather1116-prod-mvc.azurewebsites.net/) wired specifically to V3.
 
 ## Chat clients
 
