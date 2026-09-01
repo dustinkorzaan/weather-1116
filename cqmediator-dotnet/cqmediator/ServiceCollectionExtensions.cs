@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
         configuration(cqMediatorConfiguration);
 
         // Transient so Mediator resolves handlers from the current request/scope,
-        // matching the NuGet MediatR lifetime and avoiding root-provider capture.
+        // avoiding root-provider capture.
         services.AddTransient<CQMediator.IMediator, CQMediator.Mediator>();
 
         foreach (var assembly in cqMediatorConfiguration.Assemblies)
