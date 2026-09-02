@@ -33,9 +33,7 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		const string host = "https://wx1116-prd-res-eu2.services.ai.azure.com";
-		const string projectId = "wx1116-prd-prj-eu2";
-		const string projectUrl = $"{host}/api/projects/{projectId}";
+		const string projectUrl = "https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/" + "wx1116-prd-prj-eu2";
 		var endpoint = FoundryOpenAiEndpoint.Resolve(projectUrl);
 		const string agentName = "wx1116-agent-default";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
