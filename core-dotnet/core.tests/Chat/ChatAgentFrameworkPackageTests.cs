@@ -30,7 +30,7 @@ public class ChatAgentFrameworkPackageTests
         Assert.Equal("Microsoft.Extensions.AI.OpenAI", adapter.Name);
         Assert.Equal(new Version(10, 9, 0, 0), adapter.Version);
         Assert.Equal("OpenAI", openai.Name);
-        Assert.Equal(new Version(2, 13, 0, 0), openai.Version);
+        Assert.Equal(new Version(2, 12, 0, 0), openai.Version);
     }
 
     [Fact]
