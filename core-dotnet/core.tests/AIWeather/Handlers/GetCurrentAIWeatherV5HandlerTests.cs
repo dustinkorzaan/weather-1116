@@ -14,7 +14,7 @@ public class GetCurrentAIWeatherV5HandlerTests
         Assert.DoesNotContain("ChatMcpToolFactory", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolExecutor", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolDefinitions", source, StringComparison.Ordinal);
-        Assert.DoesNotContain("MaxToolLoopTurns", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("MaxToolLoopIterations", source, StringComparison.Ordinal);
         Assert.DoesNotContain("do\n        {", source, StringComparison.Ordinal);
         Assert.DoesNotContain("CreateMcpApprovalResponseItem", source, StringComparison.Ordinal);
         Assert.DoesNotContain("StoredOutputEnabled", source, StringComparison.Ordinal);
