@@ -1,5 +1,4 @@
 ﻿using Azure.AI.Extensions.OpenAI;
-using Core.AIWeather.Services;
 using Core.AIWeather.Models;
 using Core.Json;
 using Core.Weather;
