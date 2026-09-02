@@ -33,8 +33,7 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		const string projectUrl = "https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/" + "wx1116-prd-prj-eu2";
-		var endpoint = FoundryOpenAiEndpoint.Resolve(projectUrl);
+		var endpoint = FoundryOpenAiEndpoint.Resolve("https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/" + "wx1116-prd-prj-eu2");
 		const string agentName = "wx1116-agent-default";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
@@ -43,7 +42,6 @@ internal class Program
 		What is today's weather in: {location}?
 		""";
 
-		Console.WriteLine($"\nProject URL: {projectUrl}");
 		Console.WriteLine($"OpenAI endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
 		Console.WriteLine("\nConfigured on the agent (not sent by this console):");
