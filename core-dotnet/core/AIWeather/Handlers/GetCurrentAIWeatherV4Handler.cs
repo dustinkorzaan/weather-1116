@@ -98,7 +98,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
         ResponsesClient client = new(
             credential: new ApiKeyCredential(apiKey),
-            options: new OpenAIClientOptions
+            options: new ResponsesClientOptions
             {
                 Endpoint = endpoint,
             });

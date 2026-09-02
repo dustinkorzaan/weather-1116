@@ -98,7 +98,7 @@ internal class Program
 
 		ResponsesClient client = new(
 			credential: new ApiKeyCredential(apiKey),
-			options: new OpenAIClientOptions()
+			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});

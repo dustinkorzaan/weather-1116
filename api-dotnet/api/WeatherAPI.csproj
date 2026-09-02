@@ -9,9 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.2.0" />
-    <PackageReference Include="Hangfire.NetCore" Version="1.8.24" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
-    <PackageReference Include="Hangfire.SqlServer" Version="1.8.24" />
+    <PackageReference Include="Hangfire.NetCore" Version="1.8.25" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.25" />
     <ProjectReference Include="..\..\cqmediator-dotnet\cqmediator\CQMediator.csproj" />
     <!-- Override Hangfire's vulnerable transitive Newtonsoft.Json (NU1903). -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
