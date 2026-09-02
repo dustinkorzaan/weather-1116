@@ -9,7 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <PackageReference Include="Azure.AI.Projects" Version="2.0.1" />
+=======
+>>>>>>> 1cf1ac8 (Replace Azure.AI.Projects with OpenAI client in Foundry Console V3)
     <PackageReference Include="DotNetEnv" Version="3.2.0" />
     <ProjectReference Include="..\cqmediator-dotnet\cqmediator\CQMediator.csproj" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />

@@ -1,5 +1,4 @@
-﻿using Azure.AI.Extensions.OpenAI;
-using Core;
+﻿using Core;
 using Core.AIWeather.Models;
 using Core.Geo.Events;
 using Core.Json;
@@ -13,11 +12,11 @@ using OpenAI;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
-using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 
 internal class Program
 {
@@ -110,18 +109,22 @@ internal class Program
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
-		const string deploymentName = "gpt-5.4-mini";
-		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2/openai/v1";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var endpoint = Resolve(
+			Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
+			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL."));
 
-		ProjectOpenAIClient projectOpenAIClient = new(
-			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-			new ProjectOpenAIClientOptions
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
+			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
+
+		var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_MODEL")
+			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_MODEL.");
+
+		ResponsesClient client = new(
+			credential: new ApiKeyCredential(apiKey),
+			options: new OpenAIClientOptions
 			{
-				Endpoint = new Uri(endpoint),
+				Endpoint = endpoint,
 			});
-
-		ProjectResponsesClient client = projectOpenAIClient.GetProjectResponsesClientForModel(deploymentName);
 
 		FunctionTool getLatLongTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetLatLong",
