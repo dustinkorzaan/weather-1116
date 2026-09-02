@@ -67,7 +67,37 @@ internal class Program
 
 		try
 		{
-			var response = (await responseClient.CreateResponseAsync(options)).Value;
+			ResponseResult? response;
+			// response = (await responseClient.CreateResponseAsync(options)).Value;
+
+			Console.WriteLine("\nStreaming response:");
+			response = null;
+
+			await foreach (var update in responseClient.CreateResponseStreamingAsync(options))
+			{
+				if (update is StreamingResponseOutputTextDeltaUpdate delta)
+				{
+					Console.Write(delta.Delta);
+				}
+				else if (update is StreamingResponseCompletedUpdate completed)
+				{
+					response = completed.Response;
+				}
+				else if (update is StreamingResponseFailedUpdate failed)
+				{
+					response = failed.Response;
+				}
+			}
+
+			Console.WriteLine();
+
+			if (response is null)
+			{
+				Console.WriteLine("Streaming ended without a completed response.");
+				Console.WriteLine("\nPress any key to continue.");
+				Console.ReadKey(true);
+				return;
+			}
 
 			var requestedApproval = false;
 			foreach (var item in response.OutputItems)
