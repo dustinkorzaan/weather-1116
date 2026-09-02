@@ -63,8 +63,8 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		const string modelName = "gpt-5.4-mini";
 		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		const string modelName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		ResponsesClient client = new(
@@ -129,8 +129,8 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		const string modelName = "gpt-5.4-mini";
 		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		const string modelName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		ResponsesClient client = new(
@@ -210,8 +210,8 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		const string modelName = "gpt-5.4-mini";
 		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		const string modelName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		ResponsesClient client = new(
@@ -322,8 +322,8 @@ internal class Program
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
-		const string modelName = "gpt-5.4-mini";
 		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		const string modelName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		ResponsesClient client = new(
