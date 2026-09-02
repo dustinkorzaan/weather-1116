@@ -28,7 +28,7 @@ internal class Program
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 
-		string location = "Nashville, TN";
+		var location = "Nashville, TN";
 
 		await GetWeatherWillFail(location);
 		await GetWeatherMakeUpSomething(location);
@@ -67,14 +67,14 @@ internal class Program
 		const string deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		ResponsesClient client = new(
+		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
 			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			Model = deploymentName,
 			Instructions = systemPrompt,
@@ -86,7 +86,7 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
 			Console.WriteLine("\nResponse:");
 			Console.WriteLine(response.GetOutputText());
 		}
@@ -133,14 +133,14 @@ internal class Program
 		const string deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		ResponsesClient client = new(
+		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
 			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			Model = deploymentName,
 			Instructions = systemPrompt,
@@ -152,7 +152,7 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
 			Console.WriteLine("\nResponse:");
 			Console.WriteLine(response.GetOutputText());
 		}
@@ -214,14 +214,14 @@ internal class Program
 		const string deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		ResponsesClient client = new(
+		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
 			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			Model = deploymentName,
 			Instructions = systemPrompt,
@@ -233,7 +233,7 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
 			Console.WriteLine("\nResponse:");
 			Console.WriteLine(response.GetOutputText());
 		}
@@ -326,14 +326,14 @@ internal class Program
 		const string deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		ResponsesClient client = new(
+		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
 			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			Model = deploymentName,
 			Instructions = systemPrompt,
@@ -352,7 +352,7 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
 			var content = response.GetOutputText();
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
 				content,

@@ -17,7 +17,7 @@ internal class Program
 	{
 		Env.TraversePath().Load();
 
-		string location = "Nashville, TN";
+		var location = "Nashville, TN";
 
 		await GetWeatherWithMcpTools(location);
 	}
@@ -96,7 +96,7 @@ internal class Program
 		const string deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		ResponsesClient client = new(
+		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
 			options: new ResponsesClientOptions()
 			{
@@ -106,13 +106,13 @@ internal class Program
 		var mcpSrvFuncAppKey = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_KEY") ?? throw new InvalidOperationException("MCP_SRV_FUNC_APP_KEY not found in environment variables.");
 		var mcpSrvAppServiceKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY") ?? throw new InvalidOperationException("MCP_SRV_APP_SERVICE_KEY not found in environment variables.");
 
-		McpTool myMcpSrvFuncApp = ResponseTool.CreateMcpTool(
+		var myMcpSrvFuncApp = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvFuncApp",
 			serverUri: new Uri("https://weather1116-prod-mcp-srv-func-app-b3a6f0cmhqcya3bw.westus2-01.azurewebsites.net/runtime/webhooks/mcp"),
 			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
-		McpTool myMcpSrvAppService = ResponseTool.CreateMcpTool(
+		var myMcpSrvAppService = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvAppService",
 			serverUri: new Uri("https://weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3du.westus2-01.azurewebsites.net/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
@@ -126,7 +126,7 @@ internal class Program
 			ResponseItem.CreateUserMessageItem(userPrompt),
 		};
 
-		CreateResponseOptions options = new(deploymentName, inputItems)
+		var options = new CreateResponseOptions(deploymentName, inputItems)
 		{
 			Tools = { myMcpSrvFuncApp, myMcpSrvAppService },
 			TextOptions = new ResponseTextOptions
@@ -140,7 +140,7 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
 
 			var content = response.GetOutputText();
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);

@@ -16,7 +16,7 @@ internal class Program
 	{
 		Env.TraversePath().Load();
 
-		string location = "Nashville, TN";
+		var location = "Nashville, TN";
 		await AskFoundryAgent(location);
 	}
 
@@ -49,16 +49,16 @@ internal class Program
 		Console.WriteLine("- MCP tools (lat/long + current weather)");
 		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
 
-		ProjectOpenAIClient projectOpenAIClient = new(
+		var projectOpenAIClient = new ProjectOpenAIClient(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+		var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			InputItems =
 			{
@@ -68,10 +68,10 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await responseClient.CreateResponseAsync(options);
+			var response = (await responseClient.CreateResponseAsync(options)).Value;
 
 			var requestedApproval = false;
-			foreach (ResponseItem item in response.OutputItems)
+			foreach (var item in response.OutputItems)
 			{
 				if (item is McpToolCallApprovalRequestItem)
 				{

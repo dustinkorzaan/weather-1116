@@ -29,7 +29,7 @@ internal class Program
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 
-		string location = "Nashville, TN";
+		var location = "Nashville, TN";
 
 		await GetWeatherWillFail(location);
 		await GetWeatherMakeUpSomething(location);
@@ -69,10 +69,10 @@ internal class Program
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		AzureOpenAIClient azureClient = new(
+		var azureClient = new AzureOpenAIClient(
 			endpoint,
 			new AzureKeyCredential(apiKey));
-		ChatClient chatClient = azureClient.GetChatClient(deploymentName);
+		var chatClient = azureClient.GetChatClient(deploymentName);
 
 		var messages = new List<ChatMessage>()
 		{
@@ -129,10 +129,10 @@ internal class Program
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		AzureOpenAIClient azureClient = new(
+		var azureClient = new AzureOpenAIClient(
 			endpoint,
 			new AzureKeyCredential(apiKey));
-		ChatClient chatClient = azureClient.GetChatClient(deploymentName);
+		var chatClient = azureClient.GetChatClient(deploymentName);
 
 		var messages = new List<ChatMessage>()
 		{
@@ -204,10 +204,10 @@ internal class Program
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		AzureOpenAIClient azureClient = new(
+		var azureClient = new AzureOpenAIClient(
 			endpoint,
 			new AzureKeyCredential(apiKey));
-		ChatClient chatClient = azureClient.GetChatClient(deploymentName);
+		var chatClient = azureClient.GetChatClient(deploymentName);
 
 		var messages = new List<ChatMessage>()
 		{
@@ -311,10 +311,10 @@ internal class Program
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		AzureOpenAIClient azureClient = new(
+		var azureClient = new AzureOpenAIClient(
 			endpoint,
 			new AzureKeyCredential(apiKey));
-		ChatClient chatClient = azureClient.GetChatClient(deploymentName);
+		var chatClient = azureClient.GetChatClient(deploymentName);
 
 		var messages = new List<ChatMessage>()
 		{
@@ -322,7 +322,7 @@ internal class Program
 			new UserChatMessage(userPrompt),
 		};
 
-		ChatCompletionOptions options = new()
+		var options = new ChatCompletionOptions()
 		{
 			ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
 				jsonSchemaFormatName: "ai_weather_response",
