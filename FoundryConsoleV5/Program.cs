@@ -68,9 +68,6 @@ internal class Program
 		try
 		{
 			ResponseResult? response;
-
-			// Non-streaming (demo toggle): comment out the streaming block below and
-			// uncomment this line to wait for the full response instead.
 			// response = (await responseClient.CreateResponseAsync(options)).Value;
 
 			Console.WriteLine("\nStreaming response:");
