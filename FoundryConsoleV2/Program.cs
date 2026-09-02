@@ -28,7 +28,7 @@ internal class Program
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 
-		string location = "Nashville, TN";
+		var location = "Nashville, TN";
 
 		await GetWeatherWillFail(location);
 		await GetWeatherMakeUpSomething(location);
@@ -51,6 +51,10 @@ internal class Program
 		 - This is expected to fail because it doesn't have supporting data.
 		""");
 
+		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var deploymentName = "gpt-5.4-mini";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
 		// AI prep
 		var systemPrompt = "You are a helpful weather assistant.";
 		var userPrompt = $"""
@@ -63,18 +67,14 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		const string deploymentName = "gpt-5.4-mini";
-		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
-
-		ResponsesClient client = new(
+		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
 			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			Model = deploymentName,
 			Instructions = systemPrompt,
@@ -86,7 +86,7 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
 			Console.WriteLine("\nResponse:");
 			Console.WriteLine(response.GetOutputText());
 		}
@@ -113,6 +113,10 @@ internal class Program
 		 - Ask it to make something up because it doesn't have supporting data.
 		""");
 
+		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var deploymentName = "gpt-5.4-mini";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
 		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
@@ -129,18 +133,14 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		const string deploymentName = "gpt-5.4-mini";
-		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
-
-		ResponsesClient client = new(
+		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
 			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			Model = deploymentName,
 			Instructions = systemPrompt,
@@ -152,7 +152,7 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
 			Console.WriteLine("\nResponse:");
 			Console.WriteLine(response.GetOutputText());
 		}
@@ -179,6 +179,10 @@ internal class Program
 		 - Provide raw JSON input from a weather API
 		 - String output from AI
 		""");
+
+		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var deploymentName = "gpt-5.4-mini";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });
@@ -210,18 +214,14 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		const string deploymentName = "gpt-5.4-mini";
-		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
-
-		ResponsesClient client = new(
+		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
 			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			Model = deploymentName,
 			Instructions = systemPrompt,
@@ -233,7 +233,7 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
 			Console.WriteLine("\nResponse:");
 			Console.WriteLine(response.GetOutputText());
 		}
@@ -260,6 +260,10 @@ internal class Program
 		 - Provide raw JSON input from a weather API
 		 - JSON output from AI
 		""");
+
+		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var deploymentName = "gpt-5.4-mini";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });
@@ -322,18 +326,14 @@ internal class Program
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
-		const string deploymentName = "gpt-5.4-mini";
-		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
-
-		ResponsesClient client = new(
+		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
 			options: new ResponsesClientOptions()
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			Model = deploymentName,
 			Instructions = systemPrompt,
@@ -352,7 +352,7 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await client.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
 			var content = response.GetOutputText();
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
 				content,

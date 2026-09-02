@@ -1,5 +1,4 @@
-﻿using Azure.AI.Extensions.OpenAI;
-using Core;
+﻿using Core;
 using Core.AIWeather.Models;
 using Core.Geo.Events;
 using Core.Json;
@@ -13,7 +12,6 @@ using OpenAI;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
-using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
@@ -31,7 +29,7 @@ internal class Program
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 
-		string location = "Nashville, TN";
+		var location = "Nashville, TN";
 
 		await GetWeatherJsonInJsonOut(mediator, location);
 	}
@@ -50,6 +48,10 @@ internal class Program
 		 - Model can call tools to derive lat/long, label a coordinate, and fetch public weather
 		 - JSON output from AI
 		""");
+
+		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var deploymentName = "gpt-5.4-mini";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// AI prep
 		var systemPrompt = """
@@ -110,20 +112,14 @@ internal class Program
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
-		const string deploymentName = "gpt-5.4-mini";
-		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2/openai/v1";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
-
-		ProjectOpenAIClient projectOpenAIClient = new(
-			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-			new ProjectOpenAIClientOptions
+		var client = new ResponsesClient(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions
 			{
 				Endpoint = new Uri(endpoint),
 			});
 
-		ProjectResponsesClient client = projectOpenAIClient.GetProjectResponsesClientForModel(deploymentName);
-
-		FunctionTool getLatLongTool = ResponseTool.CreateFunctionTool(
+		var getLatLongTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetLatLong",
 			functionDescription: "Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
@@ -141,7 +137,7 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
-		FunctionTool getLocationTool = ResponseTool.CreateFunctionTool(
+		var getLocationTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetLocation",
 			functionDescription: "Turn a latitude and longitude into a simple place label. Prefers City, State in the US (City, State, Country elsewhere), then a feature name, then a formatted coordinate such as 35.51° N, 86.58° W.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
@@ -163,7 +159,7 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
-		FunctionTool getPublicWeatherCurrentTool = ResponseTool.CreateFunctionTool(
+		var getPublicWeatherCurrentTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetPublicWeatherCurrent",
 			functionDescription: "Get current public weather conditions for a latitude and longitude.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
@@ -185,7 +181,7 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
-		FunctionTool getPublicWeatherForecastTool = ResponseTool.CreateFunctionTool(
+		var getPublicWeatherForecastTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetPublicWeatherForecast",
 			functionDescription: "Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute steps. Use Daily unless the user asks for hourly or 15-minute detail.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
@@ -212,7 +208,7 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
-		FunctionTool getPublicWeatherHistoryTool = ResponseTool.CreateFunctionTool(
+		var getPublicWeatherHistoryTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetPublicWeatherHistory",
 			functionDescription: "Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
@@ -239,21 +235,21 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
-		List<ResponseItem> inputItems =
-		[
+		var inputItems = new List<ResponseItem>
+		{
 			ResponseItem.CreateUserMessageItem(userPrompt),
-		];
+		};
 
 		try
 		{
-			bool requiresAction;
+			var requiresAction = false;
 			string? finalContent = null;
 
 			do
 			{
 				requiresAction = false;
 
-				CreateResponseOptions options = new(deploymentName, inputItems)
+				var options = new CreateResponseOptions(deploymentName, inputItems)
 				{
 					Instructions = systemPrompt,
 					Tools = { getLatLongTool, getLocationTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool },
@@ -267,12 +263,12 @@ internal class Program
 				};
 
 				Console.WriteLine("\nCreating response with options...");
-				ResponseResult response = await client.CreateResponseAsync(options);
+				var response = (await client.CreateResponseAsync(options)).Value;
 
 				Console.WriteLine("Adding response output items to input items...");
 				inputItems.AddRange(response.OutputItems);
 
-				foreach (ResponseItem outputItem in response.OutputItems)
+				foreach (var outputItem in response.OutputItems)
 				{
 					if (outputItem is FunctionCallResponseItem functionCall)
 					{
@@ -280,13 +276,13 @@ internal class Program
 						{
 							case "GetLatLong":
 								{
-									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
-									string toolLocation = argumentsJson.RootElement.GetProperty("location").GetString()
+									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									var toolLocation = argumentsJson.RootElement.GetProperty("location").GetString()
 										?? throw new InvalidOperationException("GetLatLong requires a location argument.");
 
 									Console.WriteLine($"\nTool call: GetLatLong({toolLocation})");
 									var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = toolLocation });
-									string functionOutput = JsonSerializer.Serialize(latLongMatches, JsonDefaults.Pretty);
+									var functionOutput = JsonSerializer.Serialize(latLongMatches, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
@@ -294,9 +290,9 @@ internal class Program
 
 							case "GetLocation":
 								{
-									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
-									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
-									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									var latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									var longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 
 									Console.WriteLine($"\nTool call: GetLocation({latitude}, {longitude})");
 									var locationData = await mediator.Send(new GetLocationEvent
@@ -304,7 +300,7 @@ internal class Program
 										Latitude = latitude,
 										Longitude = longitude,
 									});
-									string functionOutput = JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
+									var functionOutput = JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
@@ -312,9 +308,9 @@ internal class Program
 
 							case "GetPublicWeatherCurrent":
 								{
-									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
-									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
-									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									var latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									var longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 
 									Console.WriteLine($"\nTool call: GetPublicWeatherCurrent({latitude}, {longitude})");
 									var weatherData = await mediator.Send(new GetPublicWeatherCurrentEvent
@@ -322,7 +318,7 @@ internal class Program
 										Latitude = latitude,
 										Longitude = longitude,
 									});
-									string functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
+									var functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
@@ -330,9 +326,9 @@ internal class Program
 
 							case "GetPublicWeatherForecast":
 								{
-									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
-									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
-									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									var latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									var longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 									var resolution = PublicWeatherForecastResolution.Daily;
 									if (argumentsJson.RootElement.TryGetProperty("resolution", out var resolutionElement)
 										&& resolutionElement.GetString() is string resolutionText
@@ -348,7 +344,7 @@ internal class Program
 										Longitude = longitude,
 										Resolution = resolution,
 									});
-									string functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
+									var functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;
@@ -356,9 +352,9 @@ internal class Program
 
 							case "GetPublicWeatherHistory":
 								{
-									using JsonDocument argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
-									double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
-									double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									var latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									var longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 									var resolution = PublicWeatherHistoryResolution.Daily;
 									if (argumentsJson.RootElement.TryGetProperty("resolution", out var resolutionElement)
 										&& resolutionElement.GetString() is string resolutionText
@@ -374,7 +370,7 @@ internal class Program
 										Longitude = longitude,
 										Resolution = resolution,
 									});
-									string functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
+									var functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;

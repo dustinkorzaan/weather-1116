@@ -1,5 +1,4 @@
 ﻿using Azure.AI.Extensions.OpenAI;
-using Core.AIWeather.Services;
 using Core.AIWeather.Models;
 using Core.Json;
 using Core.Weather;
@@ -17,7 +16,7 @@ internal class Program
 	{
 		Env.TraversePath().Load();
 
-		string location = "Nashville, TN";
+		var location = "Nashville, TN";
 		await AskFoundryAgent(location);
 	}
 
@@ -33,19 +32,15 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = FoundryOpenAiEndpoint.Resolve(Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
-			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL."));
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
-			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
-
-		var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
-			?? "wx1116-agent-default";
+		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2/openai/v1"; // pragma: allowlist secret
+		var agentName = "wx1116-agent-default";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		var userPrompt = $"""
 		What is today's weather in: {location}?
 		""";
 
-		Console.WriteLine($"\nProject endpoint: {endpoint}");
+		Console.WriteLine($"OpenAI endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
 		Console.WriteLine("\nConfigured on the agent (not sent by this console):");
 		Console.WriteLine("- Instructions");
@@ -53,16 +48,16 @@ internal class Program
 		Console.WriteLine("- MCP tools (lat/long + current weather)");
 		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
 
-		ProjectOpenAIClient projectOpenAIClient = new(
+		var projectOpenAIClient = new ProjectOpenAIClient(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
-				Endpoint = endpoint,
+				Endpoint = new Uri(endpoint),
 			});
 
-		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+		var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
-		CreateResponseOptions options = new()
+		var options = new CreateResponseOptions()
 		{
 			InputItems =
 			{
@@ -72,10 +67,10 @@ internal class Program
 
 		try
 		{
-			ResponseResult response = await responseClient.CreateResponseAsync(options);
+			var response = (await responseClient.CreateResponseAsync(options)).Value;
 
 			var requestedApproval = false;
-			foreach (ResponseItem item in response.OutputItems)
+			foreach (var item in response.OutputItems)
 			{
 				if (item is McpToolCallApprovalRequestItem)
 				{
