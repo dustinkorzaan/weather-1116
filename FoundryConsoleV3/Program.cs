@@ -16,7 +16,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 
 internal class Program
 {
@@ -109,21 +108,16 @@ internal class Program
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
-		var endpoint = Resolve(
-			Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
-			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL."));
-
+		const string deploymentName = "gpt-5.4-mini";
+		const string endpoint = "[REDACTED]/openai/v1";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
-			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
-
-		var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_MODEL")
-			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_MODEL.");
+			?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		ResponsesClient client = new(
 			credential: new ApiKeyCredential(apiKey),
 			options: new OpenAIClientOptions
 			{
-				Endpoint = endpoint,
+				Endpoint = new Uri(endpoint),
 			});
 
 		FunctionTool getLatLongTool = ResponseTool.CreateFunctionTool(
