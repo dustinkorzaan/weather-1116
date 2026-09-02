@@ -116,7 +116,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             ResponseItem.CreateUserMessageItem(userPrompt),
         };
 
-        bool requiresAction;
+        bool requiresAnotherLoop;
         string? content = null;
         var toolLoopIteration = 0;
 
@@ -131,7 +131,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
 
             runLog.AddLog($"Start loop {toolLoopIteration}", null, toolLoopIteration);
 
-            requiresAction = false;
+            requiresAnotherLoop = false;
 
             CreateResponseOptions options = new(deploymentName, inputItems)
             {
@@ -165,14 +165,14 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             {
                 var functionOutput = await _toolExecutor.ExecuteAsync(functionCall, cancellationToken);
                 inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
-                requiresAction = true;
+                requiresAnotherLoop = true;
             }
 
-            if (!requiresAction)
+            if (!requiresAnotherLoop)
             {
                 content = response.GetOutputText();
             }
-        } while (requiresAction);
+        } while (requiresAnotherLoop);
 
         if (content is null)
         {

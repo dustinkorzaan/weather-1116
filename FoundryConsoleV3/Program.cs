@@ -242,12 +242,12 @@ internal class Program
 
 		try
 		{
-			var requiresAction = false;
+			var requiresAnotherLoop = false;
 			string? finalContent = null;
 
 			do
 			{
-				requiresAction = false;
+				requiresAnotherLoop = false;
 
 				var options = new CreateResponseOptions(deploymentName, inputItems)
 				{
@@ -380,15 +380,15 @@ internal class Program
 								throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}");
 						}
 
-						requiresAction = true;
+						requiresAnotherLoop = true;
 					}
 				}
 
-				if (!requiresAction)
+				if (!requiresAnotherLoop)
 				{
 					finalContent = response.GetOutputText();
 				}
-			} while (requiresAction);
+			} while (requiresAnotherLoop);
 
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(
 				finalContent ?? throw new InvalidOperationException("Model finished without producing content."));
