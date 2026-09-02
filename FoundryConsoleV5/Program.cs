@@ -1,6 +1,5 @@
 ﻿using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Models;
-using Core.AIWeather.Services;
 using Core.Json;
 using Core.Weather;
 using DotNetEnv;
@@ -33,7 +32,7 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = FoundryOpenAiEndpoint.Resolve("https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2"); // pragma: allowlist secret
+		const string endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2/openai/v1"; // pragma: allowlist secret
 		const string agentName = "wx1116-agent-default";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
@@ -54,7 +53,7 @@ internal class Program
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
-				Endpoint = endpoint,
+				Endpoint = new Uri(endpoint),
 			});
 
 		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
