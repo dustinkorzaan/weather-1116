@@ -37,7 +37,7 @@ public sealed class ChatFoundrySettings
 
     public ResponsesClient CreateResponsesClient() => new(
         credential: new ApiKeyCredential(ApiKey),
-        options: new OpenAIClientOptions
+        options: new ResponsesClientOptions
         {
             Endpoint = new Uri(Endpoint),
         });

@@ -11,7 +11,7 @@ namespace Core.Tests.Chat;
 public class ChatAgentFrameworkPackageTests
 {
     [Fact]
-    public void ExtensionsAi_StaysOnAgentFramework_1_0_0_Train()
+    public void ExtensionsAi_StaysOnAgentFramework_1_20_0_Train()
     {
         var abstractions = typeof(AIFunctionFactory).Assembly.GetName();
         var extensionsAi = typeof(ChatClientBuilder).Assembly.GetName();
@@ -21,16 +21,16 @@ public class ChatAgentFrameworkPackageTests
         var adapter = Assembly.Load("Microsoft.Extensions.AI.OpenAI").GetName();
 
         Assert.Equal("Microsoft.Extensions.AI.Abstractions", abstractions.Name);
-        Assert.Equal(new Version(10, 4, 0, 0), abstractions.Version);
+        Assert.Equal(new Version(10, 9, 0, 0), abstractions.Version);
         Assert.Equal("Microsoft.Extensions.AI", extensionsAi.Name);
-        Assert.Equal(new Version(10, 4, 0, 0), extensionsAi.Version);
-        Assert.Equal(new Version(1, 0, 0, 0), agentsAi.Version);
+        Assert.Equal(new Version(10, 9, 0, 0), extensionsAi.Version);
+        Assert.Equal(new Version(1, 20, 0, 0), agentsAi.Version);
         Assert.Equal("Microsoft.Agents.AI.OpenAI", agentsOpenAi.Name);
-        Assert.Equal(new Version(1, 0, 0, 0), agentsOpenAi.Version);
+        Assert.Equal(new Version(1, 20, 0, 0), agentsOpenAi.Version);
         Assert.Equal("Microsoft.Extensions.AI.OpenAI", adapter.Name);
-        Assert.Equal(new Version(10, 4, 0, 0), adapter.Version);
+        Assert.Equal(new Version(10, 9, 0, 0), adapter.Version);
         Assert.Equal("OpenAI", openai.Name);
-        Assert.Equal(new Version(2, 9, 1, 0), openai.Version);
+        Assert.Equal(new Version(2, 12, 0, 0), openai.Version);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class ChatAgentFrameworkPackageTests
         var adapter = AppDomain.CurrentDomain.GetAssemblies()
             .Select(assembly => assembly.GetName())
             .Single(name => name.Name == "Microsoft.Extensions.AI.OpenAI");
-        Assert.Equal(new Version(10, 4, 0, 0), adapter.Version);
+        Assert.Equal(new Version(10, 9, 0, 0), adapter.Version);
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class ChatAgentFrameworkPackageTests
 
     private static ResponsesClient CreateResponsesClient() => new(
         credential: new ApiKeyCredential("test-key"),
-        options: new OpenAIClientOptions
+        options: new ResponsesClientOptions
         {
             Endpoint = new Uri("https://example.invalid/"),
         });
