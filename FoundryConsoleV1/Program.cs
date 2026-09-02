@@ -65,12 +65,12 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
+		const string endpoint = "https://wx1116-prd-res-eu2.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		var azureClient = new AzureOpenAIClient(
-			endpoint,
+			new Uri(endpoint),
 			new AzureKeyCredential(apiKey));
 		var chatClient = azureClient.GetChatClient(deploymentName);
 
@@ -125,12 +125,12 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
+		const string endpoint = "https://wx1116-prd-res-eu2.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		var azureClient = new AzureOpenAIClient(
-			endpoint,
+			new Uri(endpoint),
 			new AzureKeyCredential(apiKey));
 		var chatClient = azureClient.GetChatClient(deploymentName);
 
@@ -200,12 +200,12 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
+		const string endpoint = "https://wx1116-prd-res-eu2.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		var azureClient = new AzureOpenAIClient(
-			endpoint,
+			new Uri(endpoint),
 			new AzureKeyCredential(apiKey));
 		var chatClient = azureClient.GetChatClient(deploymentName);
 
@@ -307,12 +307,12 @@ internal class Program
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
-		var endpoint = new Uri("https://wx1116-prd-res-eu2.cognitiveservices.azure.com/");
+		const string endpoint = "https://wx1116-prd-res-eu2.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		var azureClient = new AzureOpenAIClient(
-			endpoint,
+			new Uri(endpoint),
 			new AzureKeyCredential(apiKey));
 		var chatClient = azureClient.GetChatClient(deploymentName);
 
