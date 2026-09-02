@@ -109,7 +109,7 @@ internal class Program
 		Console.WriteLine(aiOutputSchema);
 
 		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
-		const string deploymentName = "gpt-5.4-mini";
+		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("API key not found in environment variables.");
 
