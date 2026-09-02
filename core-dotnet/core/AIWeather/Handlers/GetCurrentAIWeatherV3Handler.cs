@@ -25,7 +25,7 @@ namespace Core.AIWeather.Handlers;
 public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV3Event, AIWeatherResponse>
 {
     private static readonly string DefaultLocation = "Nashville, TN";
-    private const int MaxToolLoopTurns = 32;
+    private const int MaxToolLoopIterations = 32;
 
     private readonly WeatherToolExecutor _toolExecutor;
     private readonly ILogger<GetCurrentAIWeatherV3Handler> _logger;
@@ -116,22 +116,22 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             ResponseItem.CreateUserMessageItem(userPrompt),
         };
 
-        bool requiresAction;
+        bool requiresAnotherLoop;
         string? content = null;
-        var toolLoopTurns = 0;
+        var toolLoopIteration = 0;
 
         do
         {
-            if (++toolLoopTurns > MaxToolLoopTurns)
+            if (++toolLoopIteration > MaxToolLoopIterations)
             {
-                LogRunLogOnFailure("tool loop exceeded max turns");
+                LogRunLogOnFailure("tool loop exceeded max iterations");
                 throw new InvalidOperationException(
-                    $"AI Weather tool loop exceeded {MaxToolLoopTurns} model turns.");
+                    $"AI Weather tool loop exceeded {MaxToolLoopIterations} iterations.");
             }
 
-            runLog.AddLog($"Start loop {toolLoopTurns}", null, toolLoopTurns);
+            runLog.AddLog($"Start loop {toolLoopIteration}", null, toolLoopIteration);
 
-            requiresAction = false;
+            requiresAnotherLoop = false;
 
             CreateResponseOptions options = new(deploymentName, inputItems)
             {
@@ -145,9 +145,9 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                 },
             };
 
-            runLog.AddLog("Start CreateResponse", null, toolLoopTurns);
+            runLog.AddLog("Start CreateResponse", null, toolLoopIteration);
             ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
-            runLog.AddLog("Finish CreateResponse", response, toolLoopTurns);
+            runLog.AddLog("Finish CreateResponse", response, toolLoopIteration);
 
             var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
             if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
@@ -165,14 +165,14 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             {
                 var functionOutput = await _toolExecutor.ExecuteAsync(functionCall, cancellationToken);
                 inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
-                requiresAction = true;
+                requiresAnotherLoop = true;
             }
 
-            if (!requiresAction)
+            if (!requiresAnotherLoop)
             {
                 content = response.GetOutputText();
             }
-        } while (requiresAction);
+        } while (requiresAnotherLoop);
 
         if (content is null)
         {
@@ -194,7 +194,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         modelOutput.WindDirectionSource =
             WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
 
-        runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV3Handler)}", null, toolLoopTurns);
+        runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV3Handler)}", null, toolLoopIteration);
         modelOutput.RunLogDetails = runLog.Hydrate();
 
         return modelOutput;

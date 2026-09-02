@@ -60,11 +60,11 @@ public sealed class Chat1aService : IChatClientService
 
         var assistantBuilder = new StringBuilder();
         string? errorMessage = null;
-        bool requiresAction;
+        bool requiresAnotherLoop;
 
         do
         {
-            requiresAction = false;
+            requiresAnotherLoop = false;
 
             CreateResponseOptions options = new(_settings.DeploymentName, inputItems)
             {
@@ -108,7 +108,7 @@ public sealed class Chat1aService : IChatClientService
                             functionCall.FunctionName,
                             toolArguments,
                             ChatToolPayload.Format(functionOutput));
-                        requiresAction = true;
+                        requiresAnotherLoop = true;
                     }
                 }
             }
@@ -118,7 +118,7 @@ public sealed class Chat1aService : IChatClientService
                 yield return ChatStreamEvent.Error(errorMessage);
                 yield break;
             }
-        } while (requiresAction);
+        } while (requiresAnotherLoop);
 
         var assistantText = assistantBuilder.ToString();
         if (!string.IsNullOrWhiteSpace(assistantText))

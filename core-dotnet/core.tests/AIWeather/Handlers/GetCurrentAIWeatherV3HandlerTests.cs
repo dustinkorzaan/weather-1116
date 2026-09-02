@@ -52,7 +52,7 @@ public class GetCurrentAIWeatherV3HandlerTests
         Assert.DoesNotContain("AIWeatherModelResponse", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ToApiResponse", source, StringComparison.Ordinal);
         Assert.DoesNotContain("properties.Remove(\"windDirectionSource\")", source, StringComparison.Ordinal);
-        Assert.Contains("MaxToolLoopTurns = 32", source, StringComparison.Ordinal);
+        Assert.Contains("MaxToolLoopIterations = 32", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ProjectOpenAIClient", source, StringComparison.Ordinal);
         Assert.DoesNotContain("GetProjectResponsesClientForModel", source, StringComparison.Ordinal);
         Assert.Contains("ResponsesClient", source, StringComparison.Ordinal);
