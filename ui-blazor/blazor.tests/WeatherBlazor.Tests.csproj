@@ -8,8 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- bunit 2.9.0 otherwise restores the Components stack at 10.0.10; pin the
-         10.0.11 servicing train used by the rest of the solution. -->
     <PackageReference Include="bunit" Version="2.9.0" />
     <PackageReference Include="coverlet.collector" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.11" />
