@@ -32,22 +32,21 @@ internal class Program
 		 - JSON output from AI
 		""");
 
+		var endpoint = "[REDACTED]/openai/v1"; // pragma: allowlist secret
+		var agentName = "wx1116-agent-default";
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
 		var userPrompt = $"""
 		What is today's weather in: {location}?
 		""";
 
+		Console.WriteLine($"OpenAI endpoint: {endpoint}");
+		Console.WriteLine($"Agent: {agentName}");
 		Console.WriteLine("\nConfigured on the agent (not sent by this console):");
 		Console.WriteLine("- Instructions");
 		Console.WriteLine("- Response schema");
 		Console.WriteLine("- MCP tools (lat/long + current weather)");
 		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
-
-		var endpoint = "[REDACTED]/openai/v1"; // pragma: allowlist secret
-		var agentName = "wx1116-agent-default";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
-
-		Console.WriteLine($"OpenAI endpoint: {endpoint}");
-		Console.WriteLine($"Agent: {agentName}");
 
 		var projectOpenAIClient = new ProjectOpenAIClient(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
