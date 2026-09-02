@@ -56,7 +56,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
 
-        var modelName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_MODEL")
+        var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_MODEL")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_MODEL.");
 
         var systemPrompt =
@@ -94,7 +94,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
         var aiOutputSchema = BuildAIOutputSchema();
 
-        _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, model {ModelName}", endpoint, modelName);
+        _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, deploymentName);
 
         ResponsesClient client = new(
             credential: new ApiKeyCredential(apiKey),
@@ -114,7 +114,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
             ResponseItem.CreateUserMessageItem(userPrompt),
         };
 
-        CreateResponseOptions options = new(modelName, inputItems)
+        CreateResponseOptions options = new(deploymentName, inputItems)
         {
             Tools = { getLatLongTool, getWeatherTool },
             TextOptions = new ResponseTextOptions
