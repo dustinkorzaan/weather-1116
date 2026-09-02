@@ -33,7 +33,7 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = FoundryOpenAiEndpoint.Resolve("https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/" + "wx1116-prd-prj-eu2");
+		var endpoint = FoundryOpenAiEndpoint.Resolve("https://wx1116-prd-res-eu2.services.ai.azure.com/api/projects/wx1116-prd-prj-eu2"); // pragma: allowlist secret
 		const string agentName = "wx1116-agent-default";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
 			?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
