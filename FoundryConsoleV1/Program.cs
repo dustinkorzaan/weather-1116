@@ -52,9 +52,11 @@ internal class Program
 		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
 		 - This is expected to fail because it doesn't have supporting data.
 		""");
+
 		var endpoint = "https://wx1116-prd-res-eu2.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
 		// AI prep
 		var systemPrompt = "You are a helpful weather assistant.";
 		var userPrompt = $"""
@@ -66,7 +68,6 @@ internal class Program
 
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
-
 
 		var azureClient = new AzureOpenAIClient(
 			new Uri(endpoint),
@@ -107,9 +108,11 @@ internal class Program
 		 - Model Direct (using legacy AzureOpenAIClient against cognitiveservices endpoint)
 		 - Ask it to make something up because it doesn't have supporting data.
 		""");
+
 		var endpoint = "https://wx1116-prd-res-eu2.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
 		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
@@ -125,7 +128,6 @@ internal class Program
 
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
-
 
 		var azureClient = new AzureOpenAIClient(
 			new Uri(endpoint),
@@ -167,9 +169,11 @@ internal class Program
 		 - Provide raw JSON input from a weather API
 		 - String output from AI
 		""");
+
 		var endpoint = "https://wx1116-prd-res-eu2.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });
 		var latLong = latLongMatches.Results[0];
@@ -199,7 +203,6 @@ internal class Program
 
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
-
 
 		var azureClient = new AzureOpenAIClient(
 			new Uri(endpoint),
@@ -242,9 +245,11 @@ internal class Program
 		 - Provide raw JSON input from a weather API
 		 - JSON output from AI
 		""");
+
 		var endpoint = "https://wx1116-prd-res-eu2.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });
 		var latLong = latLongMatches.Results[0];
@@ -305,7 +310,6 @@ internal class Program
 
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
-
 
 		var azureClient = new AzureOpenAIClient(
 			new Uri(endpoint),

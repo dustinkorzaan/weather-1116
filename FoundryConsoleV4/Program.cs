@@ -37,9 +37,11 @@ internal class Program
 		 - The service calls the MCP servers, so there is no local tool-call loop
 		 - JSON output from AI
 		""");
+
 		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+
 		// AI prep
 		var systemPrompt = """
 		You are a helpful weather assistant.
@@ -93,7 +95,6 @@ internal class Program
 
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
-
 
 		var client = new ResponsesClient(
 			credential: new ApiKeyCredential(apiKey),
