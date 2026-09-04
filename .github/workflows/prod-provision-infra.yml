@@ -8,11 +8,17 @@
 # wx1116-prod-rg lives in the same tenant/subscription as the
 # weather1116-prod-* deploys below.
 #
-# No SQL admin secrets are needed: infra/main.bicep registers no Entra admin
-# on the SQL server, and its admin login password is generated internally
-# (never surfaced) -- see modules/sql.bicep for details and for the manual
-# step required before contained users can be created for the SQL-touching
-# apps.
+# No SQL admin secrets are needed: infra/main.bicep registers
+# wx1116-prod-github-actions-mi itself as the SQL server's Entra admin (its
+# principal ID is already known from modules/managed-identity.bicep, no new
+# secret required), and the SQL-native admin login's password is generated
+# internally by Bicep and never surfaced. After provisioning, this workflow
+# uses that same identity's Entra-authenticated connection to run
+# infra/scripts/create-contained-users.sql, which creates contained
+# database users for api/mvc/worker's managed identities and grants them
+# db_owner -- a SQL-native login cannot do this (Azure SQL only allows
+# CREATE USER ... FROM EXTERNAL PROVIDER over an Entra-authenticated
+# connection), which is exactly why the Entra admin registration exists.
 #
 # The "prod" GitHub Environment gate below is required, not stylistic: the
 # federated credential on wx1116-prod-github-actions-mi is scoped to the
@@ -86,3 +92,24 @@ jobs:
       - name: azd provision
         shell: bash
         run: azd provision --no-prompt
+
+      - name: Login to Azure (for a database-scoped access token)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Create SQL contained users for api/mvc/worker
+        shell: pwsh
+        run: |
+          Install-Module -Name SqlServer -Force -Scope CurrentUser -AllowClobber -Repository PSGallery
+          $accessToken = az account get-access-token --resource https://database.windows.net/ --query accessToken -o tsv
+          Invoke-Sqlcmd `
+            -ServerInstance "$env:SQL_SERVER_NAME.database.windows.net" `
+            -Database "$env:SQL_DATABASE_NAME" `
+            -AccessToken $accessToken `
+            -InputFile "infra/scripts/create-contained-users.sql"
+        env:
+          SQL_SERVER_NAME: wx1116-prod-sql-server
+          SQL_DATABASE_NAME: wx1116-prod-sql-database

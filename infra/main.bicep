@@ -132,6 +132,8 @@ module sql 'modules/sql.bicep' = {
     databaseName: '${namePrefix}-${environmentName}-sql-database'
     location: location
     administratorLogin: sqlAdministratorLogin
+    entraAdminPrincipalId: githubActionsIdentity.outputs.principalId
+    entraAdminLoginName: githubActionsIdentityName
   }
 }
 
