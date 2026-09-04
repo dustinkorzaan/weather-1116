@@ -4,12 +4,11 @@
 # Deploy workflows trigger on provision completion (linear chain:
 # build-and-test → provision → deploy).
 #
-# TEMPORARY: the infra-changed filter below is commented out, so azd
-# provision now runs on every build-and-test success (every release), not
-# just when infra/** or azure.yaml changed. Un-comment "Detect infra file
-# changes" and "Skip azd provision (no infra changes)", and restore the
-# `steps.infra.outputs.changed == 'true'` half of each step's `if:` below,
-# to bring the filter back.
+# TEMPORARY: "Detect infra file changes" below always reports changed=true,
+# so azd provision now runs on every build-and-test success (every
+# release) instead of only when infra/** or azure.yaml changed. Restore
+# the real git-diff check in that step (left commented out in place) to
+# bring the filter back.
 #
 # Reuses the existing AZURE_GITHUB_CLIENTID / AZURE_TENANTID /
 # AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_CLIENTID has been updated to
@@ -91,25 +90,28 @@ jobs:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
           fetch-depth: 2
 
-      # - name: Detect infra file changes
-      #   id: infra
-      #   if: github.event_name == 'workflow_run'
-      #   shell: bash
-      #   run: |
-      #     if git diff --name-only HEAD^ HEAD -- infra/ azure.yaml | grep -q .; then
-      #       echo "changed=true" >> "$GITHUB_OUTPUT"
-      #     else
-      #       echo "changed=false" >> "$GITHUB_OUTPUT"
-      #     fi
+      - name: Detect infra file changes
+        id: infra
+        if: github.event_name == 'workflow_run'
+        shell: bash
+        run: |
+          # TEMPORARY: always report changed=true so azd provision runs on
+          # every release regardless of infra/** changes. Restore the real
+          # diff check below (and remove this line) to bring the filter back.
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          # if git diff --name-only HEAD^ HEAD -- infra/ azure.yaml | grep -q .; then
+          #   echo "changed=true" >> "$GITHUB_OUTPUT"
+          # else
+          #   echo "changed=false" >> "$GITHUB_OUTPUT"
+          # fi
 
-      # - name: Skip azd provision (no infra changes)
-      #   if: github.event_name == 'workflow_run' && steps.infra.outputs.changed == 'false'
-      #   shell: bash
-      #   run: echo "No infra changes in this commit; skipping azd provision."
+      - name: Skip azd provision (no infra changes)
+        if: github.event_name == 'workflow_run' && steps.infra.outputs.changed == 'false'
+        shell: bash
+        run: echo "No infra changes in this commit; skipping azd provision."
 
       - name: Debug Azure OIDC secret lengths
-        # TEMP: always run (filter disabled above); restore
-        # `if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'`
+        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         env:
           AZURE_GITHUB_CLIENTID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
@@ -121,13 +123,11 @@ jobs:
           echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
 
       - name: Install azd
-        # TEMP: always run (filter disabled above); restore
-        # `if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'`
+        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         uses: Azure/setup-azd@v2
 
       - name: Log in with azd (federated credentials)
-        # TEMP: always run (filter disabled above); restore
-        # `if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'`
+        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: |
           azd auth login \
@@ -139,8 +139,7 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANTID }}
 
       - name: Create or select azd environment
-        # TEMP: always run (filter disabled above); restore
-        # `if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'`
+        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: |
           azd env select "$AZURE_ENV_NAME" 2>/dev/null || \
@@ -159,24 +158,21 @@ jobs:
       # azd needs to be told which pre-existing resource group to target;
       # without this it defaults to (and tries to create) rg-prod.
       - name: Point azd at the pre-existing resource group
-        # TEMP: always run (filter disabled above); restore
-        # `if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'`
+        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: azd env set AZURE_RESOURCE_GROUP "$AZURE_RESOURCE_GROUP"
         env:
           AZURE_RESOURCE_GROUP: wx1116-prod-rg
 
       - name: Set required azd parameter values
-        # TEMP: always run (filter disabled above); restore
-        # `if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'`
+        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: azd env set SQL_ADMINISTRATOR_LOGIN "$SQL_ADMINISTRATOR_LOGIN"
         env:
           SQL_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_SQL_ADMIN_LOGIN_NAME }}
 
       - name: azd provision
-        # TEMP: always run (filter disabled above); restore
-        # `if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'`
+        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: azd provision --no-prompt
 
