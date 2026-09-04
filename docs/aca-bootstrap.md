@@ -96,7 +96,7 @@ Run deploy workflows (or wait for the provision → deploy chain):
 | `prod-deploy-blazor.yml` | Container App + ACR image |
 | `prod-deploy-worker.yml` | Container App + ACR image |
 | `prod-deploy-mcp-srv-app.yml` | Container App + ACR image |
-| `prod-deploy-mcp-srv-func.yml` | Functions-on-ACA package deploy |
+| `prod-deploy-mcp-srv-func.yml` | Functions-on-ACA container image (ACR) |
 | `prod-deploy-react.yml` | Static Web App |
 
 After the MCP func deploy, retrieve the `mcp_extension` key if needed:
@@ -119,7 +119,11 @@ deploy-time values onto Bicep-provisioned vars (App Insights, UAMI storage
 settings, etc.) via `.github/scripts/aca-container-configure.sh`. Do not call
 `--set-env-vars` directly in workflows without merging first.
 
-The Functions deploy workflow uses the same merge script for build metadata.
+The Functions deploy workflow builds a .NET 10 isolated-worker container image
+(`mcp-srv-func-app/mcp/Dockerfile`) and pushes it to ACR. Functions-on-ACA
+requires container images; zip/package deploy via `Azure/functions-action` targets
+App Service (`Microsoft.Web/sites`), not `Microsoft.App/containerApps`.
+
 `aca-functions-mcp-key.sh` checks that `az containerapp function keys` exists
 before creating the `mcp_extension` system key; if the CLI command group is
 missing, the job fails with manual-setup guidance instead of silently skipping

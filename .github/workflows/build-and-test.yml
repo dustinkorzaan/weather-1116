@@ -219,6 +219,7 @@ jobs:
           - dockerfile: ui-blazor/blazor/Dockerfile
           - dockerfile: worker-dotnet/worker/Dockerfile
           - dockerfile: mcp-srv-app-service/mcp/Dockerfile
+          - dockerfile: mcp-srv-func-app/mcp/Dockerfile
 
     steps:
       - name: Checkout repository

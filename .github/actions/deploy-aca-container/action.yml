@@ -1,5 +1,5 @@
 name: Build and push container image to ACR
-description: Remote-build a Dockerfile with az acr build, merge secrets/env on the Container App, and update the image.
+description: Remote-build a Dockerfile with az acr build, merge secrets/env on the Container App, and update the image in one revision.
 
 inputs:
   acr_name:
@@ -46,8 +46,7 @@ runs:
           --file "${{ inputs.dockerfile }}" \
           .
 
-    - name: Configure secrets and merged environment
-      if: inputs.secrets_multiline != '' || inputs.env_overlay_multiline != ''
+    - name: Configure secrets and deploy container revision
       shell: bash
       env:
         ACA_SECRETS_MULTILINE: ${{ inputs.secrets_multiline }}
@@ -63,16 +62,10 @@ runs:
           ENV_OVERLAY_FILE="${RUNNER_TEMP}/aca-env-overlay.env"
           printf '%s\n' "${ACA_ENV_OVERLAY_MULTILINE}" > "${ENV_OVERLAY_FILE}"
         fi
+        IMAGE="${{ inputs.acr_name }}.azurecr.io/${{ inputs.image_name }}:${{ inputs.image_tag }}"
         bash "${GITHUB_WORKSPACE}/.github/scripts/aca-container-configure.sh" \
           --container-app "${{ inputs.container_app_name }}" \
           --resource-group "${{ inputs.resource_group }}" \
+          --image "${IMAGE}" \
           ${SECRETS_FILE:+--secrets-file "${SECRETS_FILE}"} \
           ${ENV_OVERLAY_FILE:+--env-overlay-file "${ENV_OVERLAY_FILE}"}
-
-    - name: Update Container App image
-      shell: bash
-      run: |
-        az containerapp update \
-          --name "${{ inputs.container_app_name }}" \
-          --resource-group "${{ inputs.resource_group }}" \
-          --image "${{ inputs.acr_name }}.azurecr.io/${{ inputs.image_name }}:${{ inputs.image_tag }}"

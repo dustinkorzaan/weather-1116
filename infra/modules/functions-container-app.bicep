@@ -1,5 +1,5 @@
 // Functions-on-ACA host for mcp-srv-func-app (MCP extension + x-functions-key auth).
-// Code deploys via GitHub Actions (dotnet publish + Azure/functions-action), not ACR images.
+// App code deploys as a custom container image built from mcp-srv-func-app/mcp/Dockerfile.
 
 @description('Container app name, e.g. wx1116-prod-mcp-srv-func-app.')
 param name string
@@ -23,12 +23,15 @@ param userAssignedIdentityClientId string
 
 param appInsightsConnectionString string
 
+@description('ACR login server for registry identity, e.g. wx1116prodacr.azurecr.io.')
+param acrLoginServer string
+
 var storageBlobDataOwnerRoleId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
 var storageQueueDataContributorRoleId = '974c5e8b-45b9-4653-ba55-5f855dd0fb88'
 var storageTableDataContributorRoleId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
 
-// Placeholder until the first Functions package deploy lands.
-var placeholderImage = 'mcr.microsoft.com/azure-functions/dotnet-isolated4:4-dotnet-isolated9.0'
+// Placeholder until the first ACR image deploy lands (must match net10.0 worker).
+var placeholderImage = 'mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName
@@ -64,6 +67,12 @@ resource functionContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
         allowInsecure: false
       }
       secrets: []
+      registries: [
+        {
+          server: acrLoginServer
+          identity: userAssignedIdentityId
+        }
+      ]
     }
     template: {
       containers: [
@@ -78,6 +87,10 @@ resource functionContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'FUNCTIONS_WORKER_RUNTIME'
               value: 'dotnet-isolated'
+            }
+            {
+              name: 'AZURE_FUNCTIONS_ENVIRONMENT'
+              value: 'Production'
             }
             {
               name: 'AzureWebJobsSecretStorageType'

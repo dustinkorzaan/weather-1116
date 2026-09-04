@@ -17,8 +17,9 @@ concurrency:
 
 env:
   RESOURCE_GROUP: wx1116-prod-rg
+  ACR_NAME: wx1116prodacr
   CONTAINER_APP_NAME: wx1116-prod-mcp-srv-func-app
-  DOTNET_VERSION: '10.x'
+  IMAGE_NAME: wx1116-mcp-func
   BUILD_NUMBER: ${{ github.run_number }}
   BUILD_BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
 
@@ -49,27 +50,6 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Build
-        run: dotnet build ./mcp-srv-func-app/mcp/WeatherMcpSrvFuncApp.csproj --configuration Release
-
-      - name: Publish Functions package
-        run: dotnet publish ./mcp-srv-func-app/mcp/WeatherMcpSrvFuncApp.csproj -c Release -o "${{ github.workspace }}/publish/mcp-srv-func-app"
-
-      - name: Verify Functions package contents
-        shell: bash
-        run: |
-          PACKAGE_DIR="${{ github.workspace }}/publish/mcp-srv-func-app"
-          if [ ! -d "$PACKAGE_DIR/.azurefunctions" ]; then
-            echo "Missing required .azurefunctions directory in publish package:" >&2
-            ls -la "$PACKAGE_DIR" >&2
-            exit 1
-          fi
-
       - name: Login to Azure
         uses: azure/login@v3
         with:
@@ -77,26 +57,19 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
-      - name: Deploy to Functions on Container Apps
-        uses: Azure/functions-action@v1
+      - name: Build, push, and update Functions container app
+        uses: ./.github/actions/deploy-aca-container
         with:
-          app-name: ${{ env.CONTAINER_APP_NAME }}
-          package: ${{ github.workspace }}/publish/mcp-srv-func-app
-
-      - name: Set build metadata on Functions container app
-        shell: bash
-        run: |
-          ENV_OVERLAY_FILE="${RUNNER_TEMP}/aca-env-overlay.env"
-          {
-            echo "AZURE_FUNCTIONS_ENVIRONMENT=Production"
-            echo "BUILD_NUMBER=${{ env.BUILD_NUMBER }}"
-            echo "BUILD_START=${{ steps.build_start.outputs.build_start }}"
-            echo "BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}"
-          } > "${ENV_OVERLAY_FILE}"
-          bash "${GITHUB_WORKSPACE}/.github/scripts/aca-container-configure.sh" \
-            --container-app "${{ env.CONTAINER_APP_NAME }}" \
-            --resource-group "${{ env.RESOURCE_GROUP }}" \
-            --env-overlay-file "${ENV_OVERLAY_FILE}"
+          acr_name: ${{ env.ACR_NAME }}
+          image_name: ${{ env.IMAGE_NAME }}
+          image_tag: ${{ github.run_number }}
+          dockerfile: mcp-srv-func-app/mcp/Dockerfile
+          container_app_name: ${{ env.CONTAINER_APP_NAME }}
+          resource_group: ${{ env.RESOURCE_GROUP }}
+          env_overlay_multiline: |
+            BUILD_NUMBER=${{ env.BUILD_NUMBER }}
+            BUILD_START=${{ steps.build_start.outputs.build_start }}
+            BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}
 
       - name: Ensure mcp_extension system key exists
         shell: bash

@@ -117,6 +117,16 @@ module acrPullForApps 'modules/acr-role-assignment.bicep' = [for (cfg, i) in con
   }
 }]
 
+module acrPullForFunctionsApp 'modules/acr-role-assignment.bicep' = {
+  name: 'acr-pull-mcp-srv-func-app'
+  params: {
+    registryName: acr.outputs.name
+    principalId: appIdentities[5].outputs.principalId
+    roleDefinitionId: acrPullRoleId
+    assignmentName: guid(acr.outputs.id, appIdentities[5].outputs.principalId, acrPullRoleId)
+  }
+}
+
 module containerApps 'modules/container-app.bicep' = [for (cfg, i) in containerAppsConfig: {
   name: 'container-app-${cfg.key}'
   params: {
@@ -146,6 +156,7 @@ module functionsContainerApp 'modules/functions-container-app.bicep' = {
     userAssignedIdentityPrincipalId: appIdentities[5].outputs.principalId
     userAssignedIdentityClientId: appIdentities[5].outputs.clientId
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
+    acrLoginServer: acr.outputs.loginServer
   }
 }
 
