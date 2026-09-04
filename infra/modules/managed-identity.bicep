@@ -14,6 +14,9 @@ param githubRepository string
 @description('GitHub Environment name used by the deploy jobs (matches `environment:` in the workflow YAML).')
 param githubEnvironmentName string = 'prod'
 
+@description('When false, a federated credential with the same issuer/subject already exists on this identity (common when bootstrap created it by hand). Bicep skips creation in that case.')
+param createFederatedCredential bool = true
+
 var contributorRoleId = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 var userAccessAdministratorRoleId = '18d7d88d-d35e-4fb5-a5c3-7773c20a72d9'
 
@@ -21,7 +24,7 @@ resource githubActionsIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
   name: githubActionsIdentityName
 }
 
-resource federatedCredential 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = {
+resource federatedCredential 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = if (createFederatedCredential) {
   parent: githubActionsIdentity
   name: 'github-actions-${githubEnvironmentName}'
   properties: {

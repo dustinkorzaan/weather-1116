@@ -25,6 +25,9 @@
     },
     "existingContainerAppKeys": {
       "value": "${EXISTING_CONTAINER_APP_KEYS}"
+    },
+    "createGithubFederatedCredential": {
+      "value": "${CREATE_GITHUB_FEDERATED_CREDENTIAL=true}"
     }
   }
 }

@@ -35,6 +35,9 @@ param sqlAdministratorLogin string
 @description('Comma-separated keys of the container apps that already exist, e.g. api,mvc,worker. Set by infra/scripts/capture-existing-container-apps.sh before azd provision; empty means first provision.')
 param existingContainerAppKeys string = ''
 
+@description('When false, the GitHub Actions federated credential already exists on wx1116-prod-github-actions-mi. Set by infra/scripts/capture-existing-federated-credential.sh before azd provision.')
+param createGithubFederatedCredential bool = true
+
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var acrPushRoleId = '8311e349-0899-44f8-b5e2-9be9d40fb000'
 
@@ -70,6 +73,7 @@ module githubActionsIdentity 'modules/managed-identity.bicep' = {
     githubActionsIdentityName: githubActionsIdentityName
     githubRepository: githubRepository
     githubEnvironmentName: environmentName
+    createFederatedCredential: createGithubFederatedCredential
   }
 }
 
