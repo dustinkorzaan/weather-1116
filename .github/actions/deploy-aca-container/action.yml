@@ -1,5 +1,5 @@
 name: Build and push container image to ACR
-description: Remote-build a Dockerfile with az acr build and update the target Container App image.
+description: Remote-build a Dockerfile with az acr build, merge secrets/env on the Container App, and update the image.
 
 inputs:
   acr_name:
@@ -21,6 +21,18 @@ inputs:
     description: Azure resource group containing the Container App.
     required: true
     default: wx1116-prod-rg
+  secrets_multiline:
+    description: |
+      Multiline secret-name=secret-value lines for az containerapp secret set.
+      Reference secrets from env_overlay_multiline with secretref:secret-name.
+    required: false
+    default: ''
+  env_overlay_multiline:
+    description: |
+      Multiline NAME=VALUE env vars merged on top of Bicep-provisioned values.
+      Values may use secretref:SECRET_NAME for secret references.
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -33,6 +45,29 @@ runs:
           --image "${{ inputs.image_name }}:${{ inputs.image_tag }}" \
           --file "${{ inputs.dockerfile }}" \
           .
+
+    - name: Configure secrets and merged environment
+      if: inputs.secrets_multiline != '' || inputs.env_overlay_multiline != ''
+      shell: bash
+      env:
+        ACA_SECRETS_MULTILINE: ${{ inputs.secrets_multiline }}
+        ACA_ENV_OVERLAY_MULTILINE: ${{ inputs.env_overlay_multiline }}
+      run: |
+        SECRETS_FILE=""
+        ENV_OVERLAY_FILE=""
+        if [ -n "${ACA_SECRETS_MULTILINE}" ]; then
+          SECRETS_FILE="${RUNNER_TEMP}/aca-secrets.env"
+          printf '%s\n' "${ACA_SECRETS_MULTILINE}" > "${SECRETS_FILE}"
+        fi
+        if [ -n "${ACA_ENV_OVERLAY_MULTILINE}" ]; then
+          ENV_OVERLAY_FILE="${RUNNER_TEMP}/aca-env-overlay.env"
+          printf '%s\n' "${ACA_ENV_OVERLAY_MULTILINE}" > "${ENV_OVERLAY_FILE}"
+        fi
+        bash "${GITHUB_WORKSPACE}/.github/scripts/aca-container-configure.sh" \
+          --container-app "${{ inputs.container_app_name }}" \
+          --resource-group "${{ inputs.resource_group }}" \
+          ${SECRETS_FILE:+--secrets-file "${SECRETS_FILE}"} \
+          ${ENV_OVERLAY_FILE:+--env-overlay-file "${ENV_OVERLAY_FILE}"}
 
     - name: Update Container App image
       shell: bash

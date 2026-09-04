@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: prod-deploy-mcp-srv-func-app
+  group: prod-deploy-mcp-srv-func
   cancel-in-progress: true
 
 env:
@@ -84,38 +84,23 @@ jobs:
           package: ${{ github.workspace }}/publish/mcp-srv-func-app
 
       - name: Set build metadata on Functions container app
-        uses: azure/cli@v3
-        with:
-          inlineScript: |
-            az containerapp update \
-              --name "$CONTAINER_APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --set-env-vars \
-                "AZURE_FUNCTIONS_ENVIRONMENT=Production" \
-                "BUILD_NUMBER=${{ env.BUILD_NUMBER }}" \
-                "BUILD_START=${{ steps.build_start.outputs.build_start }}" \
-                "BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}"
+        shell: bash
+        run: |
+          ENV_OVERLAY_FILE="${RUNNER_TEMP}/aca-env-overlay.env"
+          {
+            echo "AZURE_FUNCTIONS_ENVIRONMENT=Production"
+            echo "BUILD_NUMBER=${{ env.BUILD_NUMBER }}"
+            echo "BUILD_START=${{ steps.build_start.outputs.build_start }}"
+            echo "BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}"
+          } > "${ENV_OVERLAY_FILE}"
+          bash "${GITHUB_WORKSPACE}/.github/scripts/aca-container-configure.sh" \
+            --container-app "${{ env.CONTAINER_APP_NAME }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --env-overlay-file "${ENV_OVERLAY_FILE}"
 
       - name: Ensure mcp_extension system key exists
-        uses: azure/cli@v3
-        with:
-          inlineScript: |
-            set -euo pipefail
-            KEY_VALUE=$(az containerapp function keys list \
-              --name "$CONTAINER_APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --key-type systemKey \
-              --query "keys[?name=='mcp_extension'].value | [0]" -o tsv 2>/dev/null || true)
-
-            if [ -z "$KEY_VALUE" ] || [ "$KEY_VALUE" = "None" ]; then
-              KEY_VALUE=$(openssl rand -base64 32)
-              az containerapp function keys set \
-                --name "$CONTAINER_APP_NAME" \
-                --resource-group "$RESOURCE_GROUP" \
-                --key-type systemKey \
-                --key-name mcp_extension \
-                --key-value "$KEY_VALUE"
-              echo "::notice::Created new mcp_extension system key. Update GitHub secret PROD_MCP_SRV_FUNC_APP_KEY if this is the first deploy."
-            else
-              echo "::notice::mcp_extension system key already present."
-            fi
+        shell: bash
+        run: |
+          bash "${GITHUB_WORKSPACE}/.github/scripts/aca-functions-mcp-key.sh" \
+            "${{ env.CONTAINER_APP_NAME }}" \
+            "${{ env.RESOURCE_GROUP }}"

@@ -66,24 +66,11 @@ jobs:
           dockerfile: mcp-srv-app-service/mcp/Dockerfile
           container_app_name: ${{ env.CONTAINER_APP_NAME }}
           resource_group: ${{ env.RESOURCE_GROUP }}
-
-      - name: Set Container App secrets and environment
-        uses: azure/cli@v3
-        with:
-          inlineScript: |
-            az containerapp secret set \
-              --name "$CONTAINER_APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --secrets \
-                mcp-app-key="${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}"
-
-            az containerapp update \
-              --name "$CONTAINER_APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --set-env-vars \
-                "MCP_SRV_APP_SERVICE_KEY=secretref:mcp-app-key" \
-                "ASPNETCORE_ENVIRONMENT=Production" \
-                "ASPNETCORE_DETAILEDERRORS=false" \
-                "BUILD_NUMBER=${{ env.BUILD_NUMBER }}" \
-                "BUILD_START=${{ steps.build_start.outputs.build_start }}" \
-                "BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}"
+          secrets_multiline: |
+            mcp-app-key=${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
+          env_overlay_multiline: |
+            MCP_SRV_APP_SERVICE_KEY=secretref:mcp-app-key
+            ASPNETCORE_DETAILEDERRORS=false
+            BUILD_NUMBER=${{ env.BUILD_NUMBER }}
+            BUILD_START=${{ steps.build_start.outputs.build_start }}
+            BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}

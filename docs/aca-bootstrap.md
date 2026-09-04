@@ -111,6 +111,20 @@ az containerapp function keys list \
 
 Update `PROD_MCP_SRV_FUNC_APP_KEY` and redeploy api/mvc/worker.
 
+### Container App environment variables
+
+Unlike App Service `az webapp config appsettings set`, `az containerapp update
+--set-env-vars` **replaces** the entire env-var list. Deploy workflows merge
+deploy-time values onto Bicep-provisioned vars (App Insights, UAMI storage
+settings, etc.) via `.github/scripts/aca-container-configure.sh`. Do not call
+`--set-env-vars` directly in workflows without merging first.
+
+The Functions deploy workflow uses the same merge script for build metadata.
+`aca-functions-mcp-key.sh` checks that `az containerapp function keys` exists
+before creating the `mcp_extension` system key; if the CLI command group is
+missing, the job fails with manual-setup guidance instead of silently skipping
+MCP auth.
+
 ## Step 6 — Foundry MCP servers
 
 In the Foundry portal, configure MCP servers for agents:

@@ -66,35 +66,16 @@ jobs:
           dockerfile: ui-blazor/blazor/Dockerfile
           container_app_name: ${{ env.CONTAINER_APP_NAME }}
           resource_group: ${{ env.RESOURCE_GROUP }}
-
-      - name: Set Container App secrets and environment
-        uses: azure/cli@v3
-        env:
-          API_DOTNET_URL: ${{ vars.PROD_API_DOTNET_URL }}
-          UI_REACT_URL: ${{ vars.PROD_UI_REACT_URL }}
-          UI_BLAZOR_URL: ${{ vars.PROD_UI_BLAZOR_URL }}
-          MVC_DOTNET_URL: ${{ vars.PROD_MVC_DOTNET_URL }}
-          WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
-        with:
-          inlineScript: |
-            az containerapp secret set \
-              --name "$CONTAINER_APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --secrets \
-                google-maps-key="${{ secrets.GOOGLE_MAPS_API_KEY }}"
-
-            az containerapp update \
-              --name "$CONTAINER_APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --set-env-vars \
-                "API_DOTNET_URL=$API_DOTNET_URL" \
-                "UI_REACT_URL=$UI_REACT_URL" \
-                "UI_BLAZOR_URL=$UI_BLAZOR_URL" \
-                "MVC_URL=$MVC_DOTNET_URL" \
-                "WORKER_DOTNET_URL=$WORKER_DOTNET_URL" \
-                "GOOGLE_MAPS_API_KEY=secretref:google-maps-key" \
-                "ASPNETCORE_ENVIRONMENT=Production" \
-                "ASPNETCORE_DETAILEDERRORS=false" \
-                "BUILD_NUMBER=${{ env.BUILD_NUMBER }}" \
-                "BUILD_START=${{ steps.build_start.outputs.build_start }}" \
-                "BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}"
+          secrets_multiline: |
+            google-maps-key=${{ secrets.GOOGLE_MAPS_API_KEY }}
+          env_overlay_multiline: |
+            API_DOTNET_URL=${{ vars.PROD_API_DOTNET_URL }}
+            UI_REACT_URL=${{ vars.PROD_UI_REACT_URL }}
+            UI_BLAZOR_URL=${{ vars.PROD_UI_BLAZOR_URL }}
+            MVC_URL=${{ vars.PROD_MVC_DOTNET_URL }}
+            WORKER_DOTNET_URL=${{ vars.PROD_WORKER_DOTNET_URL }}
+            GOOGLE_MAPS_API_KEY=secretref:google-maps-key
+            ASPNETCORE_DETAILEDERRORS=false
+            BUILD_NUMBER=${{ env.BUILD_NUMBER }}
+            BUILD_START=${{ steps.build_start.outputs.build_start }}
+            BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}
