@@ -94,7 +94,17 @@ jobs:
 
       # The azure.yaml preprovision hook queries the resource group with `az`,
       # so it needs its own login alongside azd's.
-      - name: Login to Azure
+      - name: Login to Azure (attempt 1)
+        id: azure_login_attempt_1
+        continue-on-error: true
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Login to Azure (retry after transient OIDC timeout)
+        if: steps.azure_login_attempt_1.outcome == 'failure'
         uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
