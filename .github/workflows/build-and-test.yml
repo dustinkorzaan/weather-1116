@@ -189,8 +189,9 @@ jobs:
 
       - name: Install Bicep CLI
         run: |
-          curl -sSL -o /usr/local/bin/bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
-          chmod +x /usr/local/bin/bicep
+          curl -sSL -o "$RUNNER_TEMP/bicep" https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+          chmod +x "$RUNNER_TEMP/bicep"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
           bicep --version
 
       - name: Build every Bicep file (fails on any error or lint warning)
