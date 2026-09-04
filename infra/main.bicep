@@ -19,9 +19,6 @@ param resourceGroupName string = 'wx1116-prod-rg'
 @description('Name of the pre-existing GitHub Actions managed identity. Created manually, not by this template.')
 param githubActionsIdentityName string = 'wx1116-prod-github-actions-mi'
 
-@description('GitHub repository in owner/repo form, used for the federated credential subject.')
-param githubRepository string = 'dustinkorzaan/weather-1116'
-
 @description('Globally unique ACR name (alphanumeric only).')
 param acrName string = 'wx1116prodacr'
 
@@ -34,9 +31,6 @@ param sqlAdministratorLogin string
 
 @description('Comma-separated keys of the container apps that already exist, e.g. api,mvc,worker. Set by infra/scripts/capture-existing-container-apps.sh before azd provision; empty means first provision.')
 param existingContainerAppKeys string = ''
-
-@description('When false, the GitHub Actions federated credential already exists on wx1116-prod-github-actions-mi. Set by infra/scripts/capture-existing-federated-credential.sh before azd provision.')
-param createGithubFederatedCredential bool = true
 
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var acrPushRoleId = '8311e349-0899-44f8-b5e2-9be9d40fb000'
@@ -71,9 +65,6 @@ module githubActionsIdentity 'modules/managed-identity.bicep' = {
   name: 'github-actions-identity'
   params: {
     githubActionsIdentityName: githubActionsIdentityName
-    githubRepository: githubRepository
-    githubEnvironmentName: environmentName
-    createFederatedCredential: createGithubFederatedCredential
   }
 }
 

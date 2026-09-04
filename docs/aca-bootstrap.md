@@ -1,8 +1,14 @@
 # ACA + ACR greenfield bootstrap
 
-First-time deployment into an empty `wx1116-prod-rg` (only
-`wx1116-prod-github-actions-mi` exists beforehand, usually with its GitHub OIDC
-federated credential already configured for `repo:<owner>/<repo>:environment:prod`).
+First-time deployment into an empty `wx1116-prod-rg`. Two resources must exist
+**before** the first provision or deploy can run at all:
+
+- `wx1116-prod-github-actions-mi` (user-assigned managed identity)
+- Its GitHub OIDC federated credential for `repo:<owner>/<repo>:environment:prod`
+
+Without both, `azure/login` and `azd auth login` in the workflows cannot
+authenticate. Bicep never creates either one — it only references the identity
+and assigns Contributor + User Access Administrator on this resource group.
 
 ## What gets provisioned
 
@@ -186,24 +192,6 @@ Consequences worth knowing:
   `env_overlay_multiline`. Putting the same name in both makes provision win.
 - Deleting a container app by hand is fine: the next capture pass simply omits
   it and provision recreates it from the placeholder.
-
-### GitHub OIDC federated credential
-
-`infra/modules/managed-identity.bicep` can create a federated credential named
-`github-actions-prod` on the pre-existing `wx1116-prod-github-actions-mi`.
-Azure allows only **one** credential per issuer+subject pair on an identity, so
-if bootstrap already added `repo:<owner>/<repo>:environment:prod` (under any
-name), a second create fails with:
-
-```text
-Conflict: Issuer and subject combination already exists for this Managed Identity.
-```
-
-The `preprovision` hook runs
-`infra/scripts/capture-existing-federated-credential.sh`, which lists credentials
-on the identity and sets `CREATE_GITHUB_FEDERATED_CREDENTIAL=false` when a
-matching issuer/subject is already present. Re-run `azd provision` after that
-change; no portal cleanup is required.
 
 The Functions deploy workflow builds a .NET 10 isolated-worker container image
 (`mcp-srv-func-app/mcp/Dockerfile`) and pushes it to ACR. Functions-on-ACA

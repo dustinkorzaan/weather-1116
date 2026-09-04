@@ -19,9 +19,7 @@
 # live image, env vars, and secrets back through
 # modules/existing-container-app.bicep and hands them straight through. That
 # hook needs an authenticated `az`, which is why this workflow logs in with
-# azure/login as well as azd. The same hook also skips GitHub OIDC federated
-# credential creation when bootstrap already registered repo:...:environment:prod
-# on wx1116-prod-github-actions-mi.
+# azure/login as well as azd.
 #
 # Reuses the existing AZURE_GITHUB_CLIENTID / AZURE_TENANTID /
 # AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_CLIENTID has been updated to

@@ -24,8 +24,6 @@ infra:
 hooks:
   preprovision:
     shell: sh
-    run: |
-      bash ./infra/scripts/capture-existing-container-apps.sh
-      bash ./infra/scripts/capture-existing-federated-credential.sh
+    run: bash ./infra/scripts/capture-existing-container-apps.sh
     continueOnError: false
     interactive: false
