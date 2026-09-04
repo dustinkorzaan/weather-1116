@@ -32,9 +32,19 @@ param storageAccountName string = 'wx1116prodblob'
 @description('SQL admin login username. Supply via azd env set / --parameters at deploy time.')
 param sqlAdministratorLogin string
 
+@description('Comma-separated keys of the container apps that already exist, e.g. api,mvc,worker. Set by infra/scripts/capture-existing-container-apps.sh before azd provision; empty means first provision.')
+param existingContainerAppKeys string = ''
+
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var acrPushRoleId = '8311e349-0899-44f8-b5e2-9be9d40fb000'
-var placeholderImage = 'mcr.microsoft.com/dotnet/aspnet:10.0'
+
+// First create only. dotnet/samples:aspnetapp is a runnable ASP.NET app that
+// serves on 8080, the same port the real images use, so the first revision goes
+// healthy. A bare runtime image such as dotnet/aspnet:10.0 has no entrypoint app
+// and crash-loops instead.
+var placeholderImage = 'mcr.microsoft.com/dotnet/samples:aspnetapp'
+
+var existingKeys = empty(existingContainerAppKeys) ? [] : split(existingContainerAppKeys, ',')
 
 // Per-app identity configuration. Index 5 is the Functions-on-ACA MCP host.
 var appIdentityConfig = [
@@ -127,6 +137,27 @@ module acrPullForFunctionsApp 'modules/acr-role-assignment.bicep' = {
   }
 }
 
+// Provision owns whether these apps exist and their ingress/scale/identity
+// wiring; prod-deploy-*.yml owns their image, deploy-time env vars, and secrets.
+// Since a Bicep deployment is a PUT, the deploy-owned half has to be read back
+// and handed straight through, or every provision would revert the apps to the
+// placeholder image with no app settings.
+module existingContainerApps 'modules/existing-container-app.bicep' = [for cfg in containerAppsConfig: {
+  name: 'existing-container-app-${cfg.key}'
+  params: {
+    name: '${namePrefix}-${environmentName}-${cfg.key}'
+    exists: contains(existingKeys, cfg.key)
+  }
+}]
+
+module existingFunctionsContainerApp 'modules/existing-container-app.bicep' = {
+  name: 'existing-container-app-mcp-srv-func-app'
+  params: {
+    name: '${namePrefix}-${environmentName}-mcp-srv-func-app'
+    exists: contains(existingKeys, 'mcp-srv-func-app')
+  }
+}
+
 module containerApps 'modules/container-app.bicep' = [for (cfg, i) in containerAppsConfig: {
   name: 'container-app-${cfg.key}'
   params: {
@@ -134,6 +165,9 @@ module containerApps 'modules/container-app.bicep' = [for (cfg, i) in containerA
     location: location
     managedEnvironmentId: acaEnvironment.outputs.id
     containerImage: placeholderImage
+    existingImage: existingContainerApps[i].outputs.image
+    existingEnv: existingContainerApps[i].outputs.env
+    existingSecrets: existingContainerApps[i].outputs.secrets
     minReplicas: cfg.minReplicas
     maxReplicas: cfg.maxReplicas
     stickySessions: cfg.stickySessions
@@ -157,6 +191,9 @@ module functionsContainerApp 'modules/functions-container-app.bicep' = {
     userAssignedIdentityClientId: appIdentities[5].outputs.clientId
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
     acrLoginServer: acr.outputs.loginServer
+    existingImage: existingFunctionsContainerApp.outputs.image
+    existingEnv: existingFunctionsContainerApp.outputs.env
+    existingSecrets: existingFunctionsContainerApp.outputs.secrets
   }
 }
 

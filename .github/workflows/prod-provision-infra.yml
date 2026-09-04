@@ -7,9 +7,19 @@
 # wx-1116-build-and-test-success required check via branch protection, so
 # that's the test gate. The deploy workflows are likewise triggered
 # directly on push to main, independently of this workflow rather than
-# chained off its completion -- azd provision is idempotent, so having
-# both run on every push to main (rather than only when infra/** changed)
-# is intentional, not a placeholder.
+# chained off its completion -- provision is safe to re-run on every push to
+# main (rather than only when infra/** changed), and that is intentional
+# rather than a placeholder.
+#
+# "Safe to re-run" is not free, though: a Bicep deployment is a PUT, so
+# provision would reassert the placeholder image and a bare app-settings list
+# over whatever the deploy workflows had set. The preprovision hook in
+# azure.yaml runs infra/scripts/capture-existing-container-apps.sh to record
+# which container apps already exist, and infra/main.bicep then reads their
+# live image, env vars, and secrets back through
+# modules/existing-container-app.bicep and hands them straight through. That
+# hook needs an authenticated `az`, which is why this workflow logs in with
+# azure/login as well as azd.
 #
 # Reuses the existing AZURE_GITHUB_CLIENTID / AZURE_TENANTID /
 # AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_CLIENTID has been updated to
@@ -81,6 +91,15 @@ jobs:
 
       - name: Install azd
         uses: Azure/setup-azd@v2
+
+      # The azure.yaml preprovision hook queries the resource group with `az`,
+      # so it needs its own login alongside azd's.
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
       - name: Log in with azd (federated credentials)
         shell: bash

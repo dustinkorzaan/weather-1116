@@ -8,8 +8,18 @@ param location string
 @description('Resource ID of the Container Apps Environment.')
 param managedEnvironmentId string
 
-@description('Full image reference, e.g. mcr.microsoft.com/dotnet/aspnet:10.0 for the initial placeholder.')
+@description('Full image reference used on first create only, before any deploy has pushed an image.')
 param containerImage string
+
+@description('Image the deploy workflow last pushed, read back by modules/existing-container-app.bicep. Empty on first provision, which falls back to containerImage.')
+param existingImage string = ''
+
+@description('Env vars currently on the live app. Names this module does not own are carried forward.')
+param existingEnv array = []
+
+@secure()
+@description('Secrets currently on the live app as { list: [{ name, value }] }. Carried forward verbatim; this module never authors secrets itself.')
+param existingSecrets object = {}
 
 @description('Container port. ASP.NET apps listen on 8080.')
 param targetPort int = 8080
@@ -55,7 +65,15 @@ var clientIdEnvVar = [
   }
 ]
 
-var envVars = setAzureClientId ? concat(baseEnvVars, clientIdEnvVar) : baseEnvVars
+var provisionEnvVars = setAzureClientId ? concat(baseEnvVars, clientIdEnvVar) : baseEnvVars
+var provisionEnvNames = map(provisionEnvVars, envVar => envVar.name)
+
+// Names above stay owned by provision, so changes to them (a rotated App
+// Insights connection string, say) still land. Everything else on the live app
+// was set by prod-deploy-*.yml and has to survive this PUT.
+var envVars = concat(provisionEnvVars, filter(existingEnv, envVar => !contains(provisionEnvNames, envVar.name)))
+
+var image = empty(existingImage) ? containerImage : existingImage
 
 resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: name
@@ -79,6 +97,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           affinity: stickySessions ? 'sticky' : 'none'
         }
       }
+      secrets: existingSecrets.?list ?? []
       registries: [
         {
           server: acrLoginServer
@@ -90,7 +109,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       containers: [
         {
           name: name
-          image: containerImage
+          image: image
           env: envVars
           resources: {
             cpu: json('0.5')
