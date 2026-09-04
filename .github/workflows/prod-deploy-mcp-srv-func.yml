@@ -56,8 +56,10 @@ jobs:
             BUILD_START=${{ steps.build_start.outputs.build_start }}
             BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}
 
-      - name: Ensure mcp_extension system key exists
+      - name: Apply mcp_extension system key from GitHub secret
         shell: bash
+        env:
+          MCP_EXTENSION_KEY: ${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
         run: |
           bash "${GITHUB_WORKSPACE}/.github/scripts/aca-functions-mcp-key.sh" \
             "${{ env.CONTAINER_APP_NAME }}" \

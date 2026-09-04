@@ -37,7 +37,7 @@ First-time deployment into an empty `wx1116-prod-rg` (only
 | `AZURE_SQL_DB_CONNECTION_STRING` | Hangfire + SQL for api/mvc/worker |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Foundry API key |
 | `PROD_MCP_SRV_APP_SERVICE_KEY` | Bearer token for MCP app-service host |
-| `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key (set after first func deploy) |
+| `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key — you choose the value; deploy applies it |
 | `GOOGLE_MAPS_API_KEY` | Maps on React/MVC/Blazor |
 | `AZURE_UI_REACT_TOKEN` | SWA deploy token (after provision) |
 
@@ -103,17 +103,26 @@ provision), or run them directly via `workflow_dispatch`:
 | `prod-deploy-mcp-srv-func.yml` | Functions-on-ACA container image (ACR) |
 | `prod-deploy-react.yml` | Static Web App |
 
-After the MCP func deploy, retrieve the `mcp_extension` key if needed:
+### MCP `mcp_extension` key
+
+`PROD_MCP_SRV_FUNC_APP_KEY` is the source of truth for the Functions
+`x-functions-key`, not something read back out of Azure. Generate a value and
+store it as that GitHub secret **before** the first func deploy:
 
 ```bash
-az containerapp function keys list \
-  --name wx1116-prod-mcp-srv-func-app \
-  --resource-group wx1116-prod-rg \
-  --key-type systemKey \
-  --query "keys[?name=='mcp_extension'].value | [0]" -o tsv
+openssl rand -base64 32
 ```
 
-Update `PROD_MCP_SRV_FUNC_APP_KEY` and redeploy api/mvc/worker.
+`prod-deploy-mcp-srv-func.yml` then applies it to the Functions host's
+`mcp_extension` system key on every deploy, and api/mvc/worker read the same
+secret into their own container app secrets. Because both sides come from one
+GitHub secret, there is no copy-back step and no redeploy ordering requirement.
+
+To rotate: update the GitHub secret, then re-run the func deploy plus the
+api/mvc/worker deploys.
+
+If the secret is unset, the func deploy fails with that instruction rather than
+generating a key nothing else knows about.
 
 ### Container App environment variables
 
@@ -129,7 +138,7 @@ requires container images; zip/package deploy via `Azure/functions-action` targe
 App Service (`Microsoft.Web/sites`), not `Microsoft.App/containerApps`.
 
 `aca-functions-mcp-key.sh` checks that `az containerapp function keys` exists
-before creating the `mcp_extension` system key; if the CLI command group is
+before setting the `mcp_extension` system key; if the CLI command group is
 missing, the job fails with manual-setup guidance instead of silently skipping
 MCP auth.
 
