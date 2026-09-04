@@ -1,8 +1,8 @@
 # Provisions the wx1116-prod-* Azure resources (infra/main.bicep) via azd.
 # Runs after build-and-test succeeds on main. The provision job always runs;
 # when infra/** or azure.yaml did not change it exits early without azd.
-# Deploy workflows trigger on build-and-test and provision completion and
-# wait for both to succeed for the commit before deploying.
+# Deploy workflows trigger on provision completion (linear chain:
+# build-and-test → provision → deploy).
 #
 # Reuses the existing AZURE_GITHUB_CLIENTID / AZURE_TENANTID /
 # AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_CLIENTID has been updated to
