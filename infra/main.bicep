@@ -10,6 +10,9 @@ param environmentName string = 'prod'
 @description('Azure region for every resource in this environment.')
 param location string = 'eastus2'
 
+@description('Azure region for the SQL logical server. Defaults to eastus because East US 2 periodically blocks new SQL server creation (RegionDoesNotAllowProvisioning) while other resources stay in eastus2.')
+param sqlLocation string = 'eastus'
+
 @description('Short name prefix used to build resource names.')
 param namePrefix string = 'wx1116'
 
@@ -33,7 +36,7 @@ param sqlAdministratorLogin string
 param existingContainerAppKeys string = ''
 
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
-var acrPushRoleId = '8311e349-0899-44f8-b5e2-9be9d40fb000'
+var acrPushRoleId = '8311e382-0749-4cb8-61a8-304f252e45ec'
 
 // First create only. dotnet/samples:aspnetapp is a runnable ASP.NET app that
 // serves on 8080, the same port the real images use, so the first revision goes
@@ -153,6 +156,7 @@ module existingFunctionsContainerApp 'modules/existing-container-app.bicep' = {
   }
 }
 
+@batchSize(1)
 module containerApps 'modules/container-app.bicep' = [for (cfg, i) in containerAppsConfig: {
   name: 'container-app-${cfg.key}'
   params: {
@@ -197,7 +201,7 @@ module sql 'modules/sql.bicep' = {
   params: {
     serverName: '${namePrefix}-${environmentName}-sql-server'
     databaseName: '${namePrefix}-${environmentName}-sql-database'
-    location: location
+    location: sqlLocation
     administratorLogin: sqlAdministratorLogin
     entraAdminPrincipalId: githubActionsIdentity.outputs.principalId
     entraAdminLoginName: githubActionsIdentityName

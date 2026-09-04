@@ -21,7 +21,7 @@ and assigns Contributor + User Access Administrator on this resource group.
 | Container Apps (ASP.NET) | `wx1116-prod-api`, `-mvc`, `-blazor`, `-worker`, `-mcp-srv-app-service` |
 | Functions on ACA | `wx1116-prod-mcp-srv-func-app` |
 | Static Web App | `wx1116-prod-react` |
-| SQL Server + database | `wx1116-prod-sql-server` / `wx1116-prod-sql-database` |
+| SQL Server + database | `wx1116-prod-sql-server` / `wx1116-prod-sql-database` (in **East US**, not East US 2 — that region periodically blocks new SQL servers) |
 | App Insights + Log Analytics | `wx1116-prod-eastus2-appinsights` |
 | AI Foundry | `wx1116-prod-eastus2-res` / `-prj` |
 | Six runtime managed identities | `wx1116-prod-*-mi` |
