@@ -17,9 +17,6 @@
     "githubRepository": {
       "value": "${GITHUB_REPOSITORY=dustinkorzaan/weather-1116}"
     },
-    "githubEnvironmentName": {
-      "value": "${GITHUB_ENVIRONMENT_NAME=prod}"
-    },
     "storageAccountName": {
       "value": "${STORAGE_ACCOUNT_NAME=wx1116prodblob}"
     },

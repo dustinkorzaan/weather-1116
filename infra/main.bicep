@@ -26,9 +26,6 @@ param githubActionsIdentityName string = 'wx1116-prod-github-actions-mi'
 @description('GitHub repository in owner/repo form, used for the federated credential subject.')
 param githubRepository string = 'dustinkorzaan/weather-1116'
 
-@description('GitHub Environment name used by the deploy jobs.')
-param githubEnvironmentName string = 'prod'
-
 @description('App Service Plan SKU for the shared Linux plan.')
 param appServicePlanSkuName string = 'B2'
 
@@ -74,7 +71,7 @@ module githubActionsIdentity 'modules/managed-identity.bicep' = {
   params: {
     githubActionsIdentityName: githubActionsIdentityName
     githubRepository: githubRepository
-    githubEnvironmentName: githubEnvironmentName
+    githubEnvironmentName: environmentName
   }
 }
 
