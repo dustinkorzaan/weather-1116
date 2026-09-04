@@ -1,5 +1,5 @@
-// Azure Container Registry for the five ASP.NET container apps.
-// Functions-on-ACA deploys via dotnet publish, not custom images from this registry.
+// Azure Container Registry for all six container apps, including the
+// Functions-on-ACA MCP host (Functions on ACA deploys custom images, not packages).
 
 @description('Globally unique ACR name, e.g. wx1116prodacr (alphanumeric only, 5-50 chars).')
 param name string
