@@ -1,0 +1,97 @@
+# Provisions the wx1116-prod-* Azure resources (infra/main.bicep) via azd.
+# Separate from the existing prod-deploy-*.yml workflows, which only deploy
+# app code to weather1116-prod-* and don't touch infra at all.
+#
+# Requires these GitHub secrets to already exist (none of them do yet):
+#   AZURE_WX1116_GITHUB_CLIENTID          -- wx1116-prod-github-actions-mi's client ID
+#   WX1116_SQL_ADMIN_LOGIN_NAME           -- Entra admin login/UPN for wx1116-prod-sql-server
+#   WX1116_SQL_ADMIN_OBJECT_ID            -- that Entra admin's object ID
+#   WX1116_SQL_ADMINISTRATOR_LOGIN_PASSWORD -- password for the SQL login side of the hybrid auth
+# Reuses the existing AZURE_TENANTID / AZURE_SUBSCRIPTIONID secrets, on the
+# assumption wx1116-prod-rg lives in the same tenant/subscription as the
+# weather1116-prod-* deploys below -- if that's wrong, those need their own
+# wx1116-scoped secrets too.
+#
+# The "prod" GitHub Environment gate below is required, not stylistic: the
+# federated credential on wx1116-prod-github-actions-mi is scoped to the
+# subject repo:dustinkorzaan/weather-1116:environment:prod, so azd auth
+# login fails without it.
+
+name: provision-wx1116-prod-infra
+run-name: Provision wx1116-prod infra
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+      - 'azure.yaml'
+  workflow_dispatch:
+
+concurrency:
+  group: prod-provision-infra
+  cancel-in-progress: true
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Debug Azure OIDC secret lengths
+        shell: bash
+        env:
+          AZURE_WX1116_GITHUB_CLIENTID: ${{ secrets.AZURE_WX1116_GITHUB_CLIENTID }}
+          AZURE_TENANTID: ${{ secrets.AZURE_TENANTID }}
+          AZURE_SUBSCRIPTIONID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+        run: |
+          echo "AZURE_WX1116_GITHUB_CLIENTID length=${#AZURE_WX1116_GITHUB_CLIENTID}"
+          echo "AZURE_TENANTID length=${#AZURE_TENANTID}"
+          echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
+
+      - name: Install azd
+        uses: Azure/setup-azd@v2
+
+      - name: Log in with azd (federated credentials)
+        shell: bash
+        run: |
+          azd auth login \
+            --client-id "$AZURE_CLIENT_ID" \
+            --federated-credential-provider "github" \
+            --tenant-id "$AZURE_TENANT_ID"
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_WX1116_GITHUB_CLIENTID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANTID }}
+
+      - name: Create azd environment
+        shell: bash
+        run: |
+          azd env new "$AZURE_ENV_NAME" \
+            --subscription "$AZURE_SUBSCRIPTION_ID" \
+            --location "$AZURE_LOCATION" \
+            --no-prompt
+        env:
+          AZURE_ENV_NAME: prod
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+          AZURE_LOCATION: eastus2
+
+      - name: Set required azd parameter values
+        shell: bash
+        run: |
+          azd env set SQL_ADMIN_LOGIN_NAME "$SQL_ADMIN_LOGIN_NAME"
+          azd env set SQL_ADMIN_OBJECT_ID "$SQL_ADMIN_OBJECT_ID"
+          azd env set SQL_ADMINISTRATOR_LOGIN_PASSWORD "$SQL_ADMINISTRATOR_LOGIN_PASSWORD"
+        env:
+          SQL_ADMIN_LOGIN_NAME: ${{ secrets.WX1116_SQL_ADMIN_LOGIN_NAME }}
+          SQL_ADMIN_OBJECT_ID: ${{ secrets.WX1116_SQL_ADMIN_OBJECT_ID }}
+          SQL_ADMINISTRATOR_LOGIN_PASSWORD: ${{ secrets.WX1116_SQL_ADMINISTRATOR_LOGIN_PASSWORD }}
+
+      - name: azd provision
+        shell: bash
+        run: azd provision --no-prompt
