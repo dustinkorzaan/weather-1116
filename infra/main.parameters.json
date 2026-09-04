@@ -21,16 +21,7 @@
       "value": "${STORAGE_ACCOUNT_NAME=wx1116prodblob}"
     },
     "sqlAdministratorLogin": {
-      "value": "${SQL_ADMINISTRATOR_LOGIN=wx1116sqladmin}"
-    },
-    "sqlAdministratorLoginPassword": {
-      "value": "${SQL_ADMINISTRATOR_LOGIN_PASSWORD}"
-    },
-    "sqlAdminLoginName": {
-      "value": "${SQL_ADMIN_LOGIN_NAME}"
-    },
-    "sqlAdminObjectId": {
-      "value": "${SQL_ADMIN_OBJECT_ID}"
+      "value": "${SQL_ADMINISTRATOR_LOGIN=wx116-sa-42}"
     }
   }
 }
