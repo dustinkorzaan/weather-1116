@@ -1,7 +1,14 @@
 # ACA + ACR greenfield bootstrap
 
-First-time deployment into an empty `wx1116-prod-rg` (only
-`wx1116-prod-github-actions-mi` exists beforehand).
+First-time deployment into an empty `wx1116-prod-rg`. Two resources must exist
+**before** the first provision or deploy can run at all:
+
+- `wx1116-prod-github-actions-mi` (user-assigned managed identity)
+- Its GitHub OIDC federated credential for `repo:<owner>/<repo>:environment:prod`
+
+Without both, `azure/login` and `azd auth login` in the workflows cannot
+authenticate. Bicep never creates either one — it only references the identity
+and assigns Contributor + User Access Administrator on this resource group.
 
 ## What gets provisioned
 

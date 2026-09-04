@@ -19,9 +19,6 @@ param resourceGroupName string = 'wx1116-prod-rg'
 @description('Name of the pre-existing GitHub Actions managed identity. Created manually, not by this template.')
 param githubActionsIdentityName string = 'wx1116-prod-github-actions-mi'
 
-@description('GitHub repository in owner/repo form, used for the federated credential subject.')
-param githubRepository string = 'dustinkorzaan/weather-1116'
-
 @description('Globally unique ACR name (alphanumeric only).')
 param acrName string = 'wx1116prodacr'
 
@@ -68,8 +65,6 @@ module githubActionsIdentity 'modules/managed-identity.bicep' = {
   name: 'github-actions-identity'
   params: {
     githubActionsIdentityName: githubActionsIdentityName
-    githubRepository: githubRepository
-    githubEnvironmentName: environmentName
   }
 }
 
