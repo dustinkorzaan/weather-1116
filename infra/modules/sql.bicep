@@ -63,6 +63,28 @@ resource sqlEntraAdmin 'Microsoft.Sql/servers/administrators@2023-08-01' = {
   }
 }
 
+// Special-cased firewall rule: 0.0.0.0-0.0.0.0 is not a literal IP, it's
+// the documented Azure SQL convention for "allow any Azure-hosted
+// resource" (in any subscription, not just this one) -- this is what the
+// Portal creates when you check "Allow Azure services and resources to
+// access this server". Coarse but necessary for api/mvc/worker to reach
+// the database at all today. Individual developer/office IP rules are
+// deliberately NOT managed here -- add those manually (Portal/az cli) as
+// needed, not through source control: they're personal and change often,
+// and Azure's own Activity Log already audits who added/removed one and
+// when, which fits that churn better than a git history that would
+// otherwise carry personal IPs forever. The real fix for this rule's
+// breadth is Private Endpoint + VNet integration, removing public network
+// access entirely -- a good candidate for a future hardening pass.
+resource allowAzureServicesFirewallRule 'Microsoft.Sql/servers/firewallRules@2023-08-01' = {
+  parent: sqlServer
+  name: 'AllowAllWindowsAzureIps'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
 resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-08-01' = {
   parent: sqlServer
   name: databaseName
