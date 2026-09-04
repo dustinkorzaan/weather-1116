@@ -1,5 +1,5 @@
-name: cicd-weather1116-prod-blazor
-run-name: CICD weather1116-prod-blazor
+name: cicd-wx1116-prod-blazor
+run-name: CICD wx1116-prod-blazor
 
 on:
   workflow_run:
@@ -99,20 +99,20 @@ jobs:
         uses: azure/cli@v3
         with:
           inlineScript: |
-            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-blazor'].resourceGroup | [0]" -o tsv)
+            APP_RG=$(az webapp list --query "[?name=='wx1116-prod-blazor'].resourceGroup | [0]" -o tsv)
             if [ -z "$APP_RG" ]; then
-              echo "Could not resolve resource group for weather1116-prod-blazor" >&2
+              echo "Could not resolve resource group for wx1116-prod-blazor" >&2
               exit 1
             fi
 
-            # Blazor Server needs WebSockets on Windows App Service (default is Off).
+            # Blazor Server needs WebSockets enabled (default is Off on App Service).
             az webapp config set \
-              --name weather1116-prod-blazor \
+              --name wx1116-prod-blazor \
               --resource-group "$APP_RG" \
               --web-sockets-enabled true
 
             az webapp config appsettings set \
-              --name weather1116-prod-blazor \
+              --name wx1116-prod-blazor \
               --resource-group "$APP_RG" \
               --settings API_DOTNET_URL="${{ env.API_DOTNET_URL }}" UI_REACT_URL="${{ env.UI_REACT_URL }}" UI_BLAZOR_URL="${{ env.UI_BLAZOR_URL }}" MVC_URL="${{ env.MVC_DOTNET_URL }}" WORKER_DOTNET_URL="${{ env.WORKER_DOTNET_URL }}" GOOGLE_MAPS_API_KEY="${{ secrets.GOOGLE_MAPS_API_KEY }}" ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_DETAILEDERRORS=false BUILD_NUMBER="${{ env.BUILD_NUMBER }}" BUILD_START="${{ env.BUILD_START }}" BUILD_BRANCH_NAME="${{ env.BUILD_BRANCH_NAME }}"
 
@@ -120,7 +120,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'weather1116-prod-blazor'
+          app-name: 'wx1116-prod-blazor'
           slot-name: 'Production'
           package: ${{ github.workspace }}/publish/ui-blazor
           

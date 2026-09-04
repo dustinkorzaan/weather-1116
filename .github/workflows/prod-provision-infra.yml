@@ -1,0 +1,119 @@
+# Provisions the wx1116-prod-* Azure resources (infra/main.bicep) via azd.
+# Separate from the prod-deploy-*.yml workflows, which handle app code
+# deploys (now retargeted to these same wx1116-prod-* resources, except
+# prod-deploy-ui-react-static-web-app.yml, still on the old
+# weather1116-prod-react Static Web App pending a new deployment token)
+# and don't touch infra at all.
+#
+# Reuses the existing AZURE_GITHUB_CLIENTID / AZURE_TENANTID /
+# AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_CLIENTID has been updated to
+# hold wx1116-prod-github-actions-mi's client ID, on the assumption
+# wx1116-prod-rg lives in the same tenant/subscription as the
+# wx1116-prod-* deploys below.
+#
+# Requires one additional GitHub secret:
+#   WX1116_SQL_ADMIN_LOGIN_NAME -- the SQL-native admin username. Treated as
+#     sensitive and never committed anywhere -- a non-default, non-obvious
+#     username is itself part of the security posture here, not just the
+#     password. Its password needs no secret at all: infra/main.bicep
+#     generates it internally (newGuid()) and never surfaces it.
+#
+# No other SQL admin secrets are needed: infra/main.bicep registers
+# wx1116-prod-github-actions-mi itself as the SQL server's Entra admin (its
+# principal ID is already known from modules/managed-identity.bicep, no new
+# secret required for that part) -- but this workflow does NOT run
+# infra/scripts/create-contained-users.sql itself. That's a deliberate
+# manual step, run once by hand (as the Entra admin, e.g. via
+# `az account get-access-token` + `Invoke-Sqlcmd -AccessToken`) rather than
+# automated here -- a SQL-native login cannot run it (Azure SQL only allows
+# CREATE USER ... FROM EXTERNAL PROVIDER over an Entra-authenticated
+# connection), which is exactly why the Entra admin registration exists,
+# but that doesn't require this workflow to be the one invoking it.
+#
+# The "prod" GitHub Environment gate below is required, not stylistic: the
+# federated credential on wx1116-prod-github-actions-mi is scoped to the
+# subject repo:dustinkorzaan/weather-1116:environment:prod, so azd auth
+# login fails without it.
+
+name: provision-wx1116-prod-infra
+run-name: Provision wx1116-prod infra
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+      - 'azure.yaml'
+  workflow_dispatch:
+
+concurrency:
+  group: prod-provision-infra
+  cancel-in-progress: true
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Debug Azure OIDC secret lengths
+        shell: bash
+        env:
+          AZURE_GITHUB_CLIENTID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          AZURE_TENANTID: ${{ secrets.AZURE_TENANTID }}
+          AZURE_SUBSCRIPTIONID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+        run: |
+          echo "AZURE_GITHUB_CLIENTID length=${#AZURE_GITHUB_CLIENTID}"
+          echo "AZURE_TENANTID length=${#AZURE_TENANTID}"
+          echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
+
+      - name: Install azd
+        uses: Azure/setup-azd@v2
+
+      - name: Log in with azd (federated credentials)
+        shell: bash
+        run: |
+          azd auth login \
+            --client-id "$AZURE_CLIENT_ID" \
+            --federated-credential-provider "github" \
+            --tenant-id "$AZURE_TENANT_ID"
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANTID }}
+
+      - name: Create or select azd environment
+        shell: bash
+        run: |
+          azd env select "$AZURE_ENV_NAME" 2>/dev/null || \
+          azd env new "$AZURE_ENV_NAME" \
+            --subscription "$AZURE_SUBSCRIPTION_ID" \
+            --location "$AZURE_LOCATION" \
+            --no-prompt
+        env:
+          AZURE_ENV_NAME: prod
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+          AZURE_LOCATION: eastus2
+
+      - name: Set required azd parameter values
+        shell: bash
+        run: azd env set SQL_ADMINISTRATOR_LOGIN "$SQL_ADMINISTRATOR_LOGIN"
+        env:
+          SQL_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_SQL_ADMIN_LOGIN_NAME }}
+
+      - name: azd provision
+        shell: bash
+        run: azd provision --no-prompt
+
+      # infra/scripts/create-contained-users.sql is deliberately NOT run
+      # here -- run it manually, once, as the Entra admin
+      # (wx1116-prod-github-actions-mi or another Entra admin on the
+      # server), e.g.:
+      #   az login
+      #   $accessToken = az account get-access-token --resource https://database.windows.net/ --query accessToken -o tsv
+      #   Invoke-Sqlcmd -ServerInstance wx1116-prod-sql-server.database.windows.net -Database wx1116-prod-sql-database -AccessToken $accessToken -InputFile infra/scripts/create-contained-users.sql

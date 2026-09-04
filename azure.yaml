@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: weather1116
+
+# Infra-only: azd provisions the wx1116-prod-* resources below via Bicep.
+# There is deliberately no `services:` block, so `azd deploy` has nothing
+# to do. Application code deploys stay on the existing hand-written
+# GitHub Actions workflows (OIDC + az cli / azure/webapps-deploy /
+# Azure/functions-action / Azure/static-web-apps-deploy) for now -- a
+# future workflow can point at these wx1116-prod-* resources once app
+# code is ready.
+infra:
+  provider: bicep
+  path: infra
+  module: main

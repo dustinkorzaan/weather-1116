@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME=prod}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION=eastus2}"
+    },
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prod-rg}"
+    },
+    "githubActionsIdentityName": {
+      "value": "${GITHUB_ACTIONS_IDENTITY_NAME=wx1116-prod-github-actions-mi}"
+    },
+    "githubRepository": {
+      "value": "${GITHUB_REPOSITORY=dustinkorzaan/weather-1116}"
+    },
+    "storageAccountName": {
+      "value": "${STORAGE_ACCOUNT_NAME=wx1116prodblob}"
+    },
+    "sqlAdministratorLogin": {
+      "value": "${SQL_ADMINISTRATOR_LOGIN}"
+    }
+  }
+}

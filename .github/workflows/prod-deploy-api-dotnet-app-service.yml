@@ -1,5 +1,5 @@
-name: cicd-weather1116-prod-api
-run-name: CICD weather1116-prod-api
+name: cicd-wx1116-prod-api
+run-name: CICD wx1116-prod-api
 
 on:
   workflow_run:
@@ -98,14 +98,14 @@ jobs:
         uses: azure/cli@v3
         with:
           inlineScript: |
-            APP_RG=$(az webapp list --query "[?name=='weather1116-prod-api'].resourceGroup | [0]" -o tsv)
+            APP_RG=$(az webapp list --query "[?name=='wx1116-prod-api'].resourceGroup | [0]" -o tsv)
             if [ -z "$APP_RG" ]; then
-              echo "Could not resolve resource group for weather1116-prod-api" >&2
+              echo "Could not resolve resource group for wx1116-prod-api" >&2
               exit 1
             fi
 
             az webapp config appsettings set \
-              --name weather1116-prod-api \
+              --name wx1116-prod-api \
               --resource-group "$APP_RG" \
               --settings \
                 Cors__AllowedOrigins__0="${{ env.UI_REACT_URL }}" \
@@ -129,7 +129,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'weather1116-prod-api'
+          app-name: 'wx1116-prod-api'
           slot-name: 'Production'
           package: ${{ github.workspace }}/publish/api-dotnet
           
