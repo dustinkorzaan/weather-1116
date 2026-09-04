@@ -46,12 +46,21 @@ First-time deployment into an empty `wx1116-prod-rg` (only
 Merge to `main` or run `provision-wx1116-prod-infra` via `workflow_dispatch`.
 Provisioning and app deploys each trigger independently on push to `main` (no
 `workflow_run` chain between them) and both run unconditionally on every
-push — `azd provision` is idempotent, so this is intentional, not wasteful.
+push. That is intentional, not wasteful — see
+[Provision vs. deploy ownership](#provision-vs-deploy-ownership) for what makes
+re-provisioning safe.
+
+Provisioning locally needs the same pre-pass the workflow runs:
+
+```bash
+az login   # the preprovision hook queries the resource group with `az`
+azd env select prod
+azd provision
+```
 
 Capture outputs from the provision job or:
 
 ```bash
-azd env select prod
 azd env get-values
 ```
 
@@ -131,6 +140,51 @@ Unlike App Service `az webapp config appsettings set`, `az containerapp update
 deploy-time values onto Bicep-provisioned vars (App Insights, UAMI storage
 settings, etc.) via `.github/scripts/aca-container-configure.sh`. Do not call
 `--set-env-vars` directly in workflows without merging first.
+
+### Provision vs. deploy ownership
+
+Two pipelines write to the same container apps, so each field has exactly one
+owner:
+
+| Field | Owner |
+| --- | --- |
+| App existence, ingress, scale, identity, ACR registry | `infra/main.bicep` (provision) |
+| Functions host settings, `ASPNETCORE_ENVIRONMENT`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, `AZURE_CLIENT_ID` | `infra/main.bicep` (provision) |
+| Container image | `prod-deploy-*.yml` (deploy) |
+| All other env vars, and every secret | `prod-deploy-*.yml` (deploy) |
+
+The catch is that an ARM/Bicep deployment is a **PUT**, not a PATCH: any
+property the template sets wins over whatever was configured out of band. Left
+alone, every provision would reset all six apps to the placeholder image with
+only the provision-owned env vars and no secrets — an outage on every push to
+`main`, with the deploy workflows racing to repair it.
+
+So provision reads the deploy-owned fields back and hands them through:
+
+1. The `preprovision` hook in `azure.yaml` runs
+   `infra/scripts/capture-existing-container-apps.sh`, which lists the resource
+   group and sets `EXISTING_CONTAINER_APP_KEYS` (e.g. `api,mvc,worker`) in the
+   azd environment. It needs an authenticated `az`, and fails the provision
+   rather than reporting apps as absent if it cannot list them.
+2. `infra/modules/existing-container-app.bicep` resolves each listed app as an
+   `existing` reference and returns its live image, env vars, and secrets.
+3. `container-app.bicep` / `functions-container-app.bicep` reuse the live image,
+   pass the live secrets straight through, and union the env lists —
+   provision-owned names are reasserted (so a rotated App Insights connection
+   string still lands) while every other name is carried forward.
+
+Consequences worth knowing:
+
+- The placeholder image applies on **first create only**. It is
+  `mcr.microsoft.com/dotnet/samples:aspnetapp`, a runnable ASP.NET app that
+  serves on port 8080 like the real images, so the first revision goes healthy;
+  a bare runtime image such as `dotnet/aspnet:10.0` has no app to run and
+  crash-loops instead.
+- Adding a provision-owned env var means adding it to the module's
+  `provisionEnvVars`. Adding a deploy-time var means adding it to the workflow's
+  `env_overlay_multiline`. Putting the same name in both makes provision win.
+- Deleting a container app by hand is fine: the next capture pass simply omits
+  it and provision recreates it from the placeholder.
 
 The Functions deploy workflow builds a .NET 10 isolated-worker container image
 (`mcp-srv-func-app/mcp/Dockerfile`) and pushes it to ACR. Functions-on-ACA
