@@ -12,7 +12,7 @@
       "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prod-rg}"
     },
     "githubActionsIdentityName": {
-      "value": "${GITHUB_ACTIONS_IDENTITY_NAME=wx1116-prod-mi-github-actions}"
+      "value": "${GITHUB_ACTIONS_IDENTITY_NAME=wx1116-prod-github-actions-mi}"
     },
     "githubRepository": {
       "value": "${GITHUB_REPOSITORY=dustinkorzaan/weather-1116}"

@@ -5,7 +5,7 @@
 // scoped to this resource group. This module never creates the identity
 // itself.
 
-@description('Name of the pre-existing GitHub Actions managed identity (e.g. wx1116-prod-mi-github-actions). Created manually, not by this template.')
+@description('Name of the pre-existing GitHub Actions managed identity (e.g. wx1116-prod-github-actions-mi). Created manually, not by this template.')
 param githubActionsIdentityName string
 
 @description('GitHub repository in owner/repo form, used to build the federated credential subject.')

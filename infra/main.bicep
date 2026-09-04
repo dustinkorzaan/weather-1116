@@ -21,7 +21,7 @@ param namePrefix string = 'wx1116'
 param resourceGroupName string = 'wx1116-prod-rg'
 
 @description('Name of the pre-existing GitHub Actions managed identity. Created manually, not by this template.')
-param githubActionsIdentityName string = 'wx1116-prod-mi-github-actions'
+param githubActionsIdentityName string = 'wx1116-prod-github-actions-mi'
 
 @description('GitHub repository in owner/repo form, used for the federated credential subject.')
 param githubRepository string = 'dustinkorzaan/weather-1116'
@@ -52,12 +52,12 @@ param sqlAdminObjectId string
 // app-identity loop (indices 0-4 below) and the web-app loop -- index 5 is
 // the Function App's identity, consumed separately.
 var appIdentityConfig = [
-  { key: 'api', name: '${namePrefix}-${environmentName}-mi-api' }
-  { key: 'mvc', name: '${namePrefix}-${environmentName}-mi-mvc' }
-  { key: 'blazor', name: '${namePrefix}-${environmentName}-mi-blazor' }
-  { key: 'worker', name: '${namePrefix}-${environmentName}-mi-worker' }
-  { key: 'mcp-srv-app-service', name: '${namePrefix}-${environmentName}-mi-mcp-srv-app-service' }
-  { key: 'mcp-srv-func-app', name: '${namePrefix}-${environmentName}-mi-mcp-srv-func-app' }
+  { key: 'api', name: '${namePrefix}-${environmentName}-api-mi' }
+  { key: 'mvc', name: '${namePrefix}-${environmentName}-mvc-mi' }
+  { key: 'blazor', name: '${namePrefix}-${environmentName}-blazor-mi' }
+  { key: 'worker', name: '${namePrefix}-${environmentName}-worker-mi' }
+  { key: 'mcp-srv-app-service', name: '${namePrefix}-${environmentName}-mcp-srv-app-service-mi' }
+  { key: 'mcp-srv-func-app', name: '${namePrefix}-${environmentName}-mcp-srv-func-app-mi' }
 ]
 
 var webAppsConfig = [
