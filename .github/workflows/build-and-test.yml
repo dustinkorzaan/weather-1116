@@ -179,6 +179,32 @@ jobs:
       - name: Run MCP Server on Function App tests
         run: dotnet test mcp-srv-func-app/mcp.tests/WeatherMcpSrvFuncApp.Tests.csproj --configuration Release --verbosity normal
 
+  bicep-validate:
+    name: Validate Bicep Templates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Bicep CLI
+        run: |
+          curl -sSL -o /usr/local/bin/bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+          chmod +x /usr/local/bin/bicep
+          bicep --version
+
+      - name: Build every Bicep file (fails on any error or lint warning)
+        run: |
+          set -e
+          for f in $(find infra -name '*.bicep' | sort); do
+            echo "::group::bicep build $f"
+            bicep build "$f" --stdout > /dev/null
+            echo "::endgroup::"
+          done
+
+      - name: Validate main.parameters.json is well-formed
+        run: jq empty infra/main.parameters.json
+
   build-and-test-react:
     name: Build and Test React Project
     runs-on: ubuntu-latest
@@ -229,6 +255,7 @@ jobs:
       - test-mcp-srv-app-service
       - test-mcp-srv-func-app
       - build-and-test-react
+      - bicep-validate
     steps:
       - name: Verify all jobs succeeded
         run: |
