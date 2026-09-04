@@ -1,12 +1,17 @@
-// Subscription-scoped: targets the pre-existing wx1116-prod-rg resource
-// group by name (never creates it) and wires every module into it. The
-// resource group and the GitHub Actions managed identity are both created
-// manually, along with a one-time Owner grant on the resource group -- see
-// modules/managed-identity.bicep for how that identity's durable
-// least-privilege footprint (Contributor + User Access Administrator) gets
-// codified here instead.
+// Resource-group-scoped: deploys directly into the pre-existing
+// wx1116-prod-rg resource group (never creates it -- azd is told about it
+// via the AZURE_RESOURCE_GROUP environment value, set once by the
+// provisioning workflow). The resource group and the GitHub Actions
+// managed identity are both created manually, along with a one-time Owner
+// grant on the resource group -- see modules/managed-identity.bicep for
+// how that identity's durable least-privilege footprint (Contributor +
+// User Access Administrator, scoped to this resource group only) gets
+// codified here instead. Deliberately NOT subscription-scoped: nothing
+// here needs subscription-level resources, and staying resource-group-
+// scoped means the deployment itself only ever needs the RG-scoped
+// Contributor role already granted -- no subscription-wide permissions.
 
-targetScope = 'subscription'
+targetScope = 'resourceGroup'
 
 @description('azd environment name.')
 param environmentName string = 'prod'
@@ -58,7 +63,6 @@ var webAppsConfig = [
 
 module githubActionsIdentity 'modules/managed-identity.bicep' = {
   name: 'github-actions-identity'
-  scope: resourceGroup(resourceGroupName)
   params: {
     githubActionsIdentityName: githubActionsIdentityName
     githubRepository: githubRepository
@@ -68,7 +72,6 @@ module githubActionsIdentity 'modules/managed-identity.bicep' = {
 
 module appIdentities 'modules/app-identity.bicep' = [for cfg in appIdentityConfig: {
   name: 'app-identity-${cfg.key}'
-  scope: resourceGroup(resourceGroupName)
   params: {
     name: cfg.name
     location: location
@@ -77,7 +80,6 @@ module appIdentities 'modules/app-identity.bicep' = [for cfg in appIdentityConfi
 
 module monitoring 'modules/monitoring.bicep' = {
   name: 'monitoring'
-  scope: resourceGroup(resourceGroupName)
   params: {
     logAnalyticsName: '${namePrefix}-${environmentName}-eastus2-log'
     appInsightsName: '${namePrefix}-${environmentName}-eastus2-appinsights'
@@ -87,7 +89,6 @@ module monitoring 'modules/monitoring.bicep' = {
 
 module appServicePlan 'modules/app-service-plan.bicep' = {
   name: 'app-service-plan'
-  scope: resourceGroup(resourceGroupName)
   params: {
     name: '${namePrefix}-${environmentName}-asp'
     location: location
@@ -97,7 +98,6 @@ module appServicePlan 'modules/app-service-plan.bicep' = {
 
 module webApps 'modules/web-app.bicep' = [for (cfg, i) in webAppsConfig: {
   name: 'web-app-${cfg.key}'
-  scope: resourceGroup(resourceGroupName)
   params: {
     name: '${namePrefix}-${environmentName}-${cfg.key}'
     location: location
@@ -111,7 +111,6 @@ module webApps 'modules/web-app.bicep' = [for (cfg, i) in webAppsConfig: {
 
 module functionApp 'modules/function-app.bicep' = {
   name: 'function-app'
-  scope: resourceGroup(resourceGroupName)
   params: {
     name: '${namePrefix}-${environmentName}-mcp-srv-func-app'
     storageAccountName: storageAccountName
@@ -126,7 +125,6 @@ module functionApp 'modules/function-app.bicep' = {
 
 module sql 'modules/sql.bicep' = {
   name: 'sql'
-  scope: resourceGroup(resourceGroupName)
   params: {
     serverName: '${namePrefix}-${environmentName}-sql-server'
     databaseName: '${namePrefix}-${environmentName}-sql-database'
@@ -139,7 +137,6 @@ module sql 'modules/sql.bicep' = {
 
 module staticWebApp 'modules/static-web-app.bicep' = {
   name: 'static-web-app'
-  scope: resourceGroup(resourceGroupName)
   params: {
     name: '${namePrefix}-${environmentName}-react'
     location: location
@@ -148,7 +145,6 @@ module staticWebApp 'modules/static-web-app.bicep' = {
 
 module aiFoundry 'modules/ai-foundry.bicep' = {
   name: 'ai-foundry'
-  scope: resourceGroup(resourceGroupName)
   params: {
     accountName: '${namePrefix}-${environmentName}-eastus2-res'
     projectName: '${namePrefix}-${environmentName}-eastus2-prj'
