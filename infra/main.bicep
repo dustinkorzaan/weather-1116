@@ -11,6 +11,8 @@
 // scoped means the deployment itself only ever needs the RG-scoped
 // Contributor role already granted -- no subscription-wide permissions.
 
+targetScope = 'resourceGroup'
+
 @description('azd environment name.')
 param environmentName string = 'prod'
 
