@@ -21,7 +21,7 @@
       "value": "${STORAGE_ACCOUNT_NAME=wx1116prodblob}"
     },
     "sqlAdministratorLogin": {
-      "value": "${SQL_ADMINISTRATOR_LOGIN=wx116-sa-42}"
+      "value": "${SQL_ADMINISTRATOR_LOGIN}"
     }
   }
 }

@@ -20,7 +20,8 @@ param databaseName string
 
 param location string
 
-@description('SQL admin login username.')
+@secure()
+@description('SQL admin login username. Treated as sensitive -- a non-default, non-obvious username is itself part of the security posture here, not just the password.')
 param administratorLogin string
 
 @secure()

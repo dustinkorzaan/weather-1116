@@ -8,12 +8,18 @@
 # wx1116-prod-rg lives in the same tenant/subscription as the
 # weather1116-prod-* deploys below.
 #
-# No SQL admin secrets are needed: infra/main.bicep registers
+# Requires one additional GitHub secret:
+#   WX1116_SQL_ADMIN_LOGIN_NAME -- the SQL-native admin username. Treated as
+#     sensitive and never committed anywhere -- a non-default, non-obvious
+#     username is itself part of the security posture here, not just the
+#     password. Its password needs no secret at all: infra/main.bicep
+#     generates it internally (newGuid()) and never surfaces it.
+#
+# No other SQL admin secrets are needed: infra/main.bicep registers
 # wx1116-prod-github-actions-mi itself as the SQL server's Entra admin (its
 # principal ID is already known from modules/managed-identity.bicep, no new
-# secret required), and the SQL-native admin login's password is generated
-# internally by Bicep and never surfaced. After provisioning, this workflow
-# uses that same identity's Entra-authenticated connection to run
+# secret required for that part). After provisioning, this workflow uses
+# that same identity's Entra-authenticated connection to run
 # infra/scripts/create-contained-users.sql, which creates contained
 # database users for api/mvc/worker's managed identities and grants them
 # db_owner -- a SQL-native login cannot do this (Azure SQL only allows
@@ -88,6 +94,12 @@ jobs:
           AZURE_ENV_NAME: prod
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
           AZURE_LOCATION: eastus2
+
+      - name: Set required azd parameter values
+        shell: bash
+        run: azd env set SQL_ADMINISTRATOR_LOGIN "$SQL_ADMINISTRATOR_LOGIN"
+        env:
+          SQL_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_SQL_ADMIN_LOGIN_NAME }}
 
       - name: azd provision
         shell: bash

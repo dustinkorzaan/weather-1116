@@ -32,8 +32,9 @@ param appServicePlanSkuName string = 'B2'
 @description('Name of the storage account backing the Function App\'s AzureWebJobsStorage. Must be globally unique, <=24 chars, lowercase alphanumeric only.')
 param storageAccountName string = 'wx1116prodblob'
 
-@description('SQL admin login username. No Entra admin is registered by this template -- see modules/sql.bicep for why, and for the manual step needed before contained users can be created for the SQL-touching apps.')
-param sqlAdministratorLogin string = 'wx116-sa-42'
+@secure()
+@description('SQL admin login username. Treated as sensitive -- supply via azd env set / --parameters at deploy time, never committed. A non-default, non-obvious username is itself part of the security posture here, not just the password.')
+param sqlAdministratorLogin string
 
 // Per-app identity + web app configuration, in a fixed order shared by the
 // app-identity loop (indices 0-4 below) and the web-app loop -- index 5 is
