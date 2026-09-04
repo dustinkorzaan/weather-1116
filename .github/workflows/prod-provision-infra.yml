@@ -142,6 +142,18 @@ jobs:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
           AZURE_LOCATION: eastus2
 
+      # infra/main.bicep is resource-group-scoped, not subscription-scoped
+      # (deliberately -- wx1116-prod-github-actions-mi only holds Contributor
+      # + User Access Administrator on wx1116-prod-rg, not the subscription).
+      # azd needs to be told which pre-existing resource group to target;
+      # without this it defaults to (and tries to create) rg-prod.
+      - name: Point azd at the pre-existing resource group
+        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
+        shell: bash
+        run: azd env set AZURE_RESOURCE_GROUP "$AZURE_RESOURCE_GROUP"
+        env:
+          AZURE_RESOURCE_GROUP: wx1116-prod-rg
+
       - name: Set required azd parameter values
         if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
