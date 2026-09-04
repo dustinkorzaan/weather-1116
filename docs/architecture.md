@@ -184,10 +184,9 @@ CQMediator handlers the sample uses in-process elsewhere.
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
 
-Prod apps: `weather1116-prod-mcp-srv-app-service`, `weather1116-prod-mcp-srv-func-app`
-(`weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3du.westus2-01.azurewebsites.net`,
-`weather1116-prod-mcp-srv-func-app-b3a6f0cmhqcya3bw.westus2-01.azurewebsites.net`; see
-`prod-deploy-mcp-*.yml`).
+Prod apps (ACA): `wx1116-prod-mcp-srv-app-service`, `wx1116-prod-mcp-srv-func-app`
+(`https://<MCP_SRV_APP_SERVICE_HOSTNAME>`, `https://<MCP_SRV_FUNC_APP_HOSTNAME>` from
+`azd provision` outputs; see `docs/aca-bootstrap.md` and `prod-deploy-mcp-srv-*.yml`).
 
 Auth examples:
 
@@ -228,8 +227,8 @@ so they can enqueue jobs without running servers; the worker processes them.
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
 - **Production:** set `DB_CONNECTION_STRING` to the same Azure SQL connection
-  string on the worker, API, and MVC. Prod app: `weather1116-prod-worker`
-  (see `prod-deploy-worker-app-service.yml`).
+  string on the worker, API, and MVC. Prod app: `wx1116-prod-worker` on ACA
+  (see `prod-deploy-worker.yml`).
 
 ## About and Health
 
@@ -385,10 +384,11 @@ builds on every push:
 - `WeatherBlazor.Tests` component tests.
 - `WeatherMcpSrvAppService.Tests` and `WeatherMcpSrvFuncApp.Tests` About/tool-registration tests.
 
-Production deploy workflows (`prod-deploy-*.yml`) auto-deploy when **build-and-test**
-completes successfully on `main`. Each deploy workflow can also be triggered manually
+Production deploy workflows (`prod-deploy-*.yml`) auto-deploy when **build-and-test** completes successfully on `main` (after
+`provision-wx1116-prod-infra`). Each deploy workflow can also be triggered manually
 via `workflow_dispatch` on any branch. Deployables include API, MVC, React, Blazor,
-worker-dotnet, and both MCP hosts.
+worker-dotnet, and both MCP hosts on **Azure Container Apps + ACR** (Functions-on-ACA
+for `mcp-srv-func-app`). Bootstrap: [`docs/aca-bootstrap.md`](aca-bootstrap.md).
 
 ## Repository Layout
 

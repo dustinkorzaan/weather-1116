@@ -22,6 +22,9 @@
     },
     "sqlAdministratorLogin": {
       "value": "${SQL_ADMINISTRATOR_LOGIN}"
+    },
+    "existingContainerAppKeys": {
+      "value": "${EXISTING_CONTAINER_APP_KEYS}"
     }
   }
 }

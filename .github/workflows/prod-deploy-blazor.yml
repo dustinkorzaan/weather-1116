@@ -1,0 +1,66 @@
+name: cicd-wx1116-prod-blazor
+run-name: CICD wx1116-prod-blazor (ACA)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: prod-deploy-blazor
+  cancel-in-progress: true
+
+env:
+  RESOURCE_GROUP: wx1116-prod-rg
+  ACR_NAME: wx1116prodacr
+  CONTAINER_APP_NAME: wx1116-prod-blazor
+  IMAGE_NAME: wx1116-blazor
+  BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_BRANCH_NAME: ${{ github.ref_name }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Record build start time
+        id: build_start
+        shell: bash
+        run: echo "build_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Build, push, and update Container App image
+        uses: ./.github/actions/deploy-aca-container
+        with:
+          acr_name: ${{ env.ACR_NAME }}
+          image_name: ${{ env.IMAGE_NAME }}
+          image_tag: ${{ github.run_number }}
+          dockerfile: ui-blazor/blazor/Dockerfile
+          container_app_name: ${{ env.CONTAINER_APP_NAME }}
+          resource_group: ${{ env.RESOURCE_GROUP }}
+          secrets_multiline: |
+            google-maps-key=${{ secrets.GOOGLE_MAPS_API_KEY }}
+          env_overlay_multiline: |
+            API_DOTNET_URL=${{ vars.PROD_API_DOTNET_URL }}
+            UI_REACT_URL=${{ vars.PROD_UI_REACT_URL }}
+            UI_BLAZOR_URL=${{ vars.PROD_UI_BLAZOR_URL }}
+            MVC_URL=${{ vars.PROD_MVC_DOTNET_URL }}
+            WORKER_DOTNET_URL=${{ vars.PROD_WORKER_DOTNET_URL }}
+            GOOGLE_MAPS_API_KEY=secretref:google-maps-key
+            ASPNETCORE_DETAILEDERRORS=false
+            BUILD_NUMBER=${{ env.BUILD_NUMBER }}
+            BUILD_START=${{ steps.build_start.outputs.build_start }}
+            BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}

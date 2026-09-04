@@ -1,15 +1,6 @@
-// Resource-group-scoped: deploys directly into the pre-existing
-// wx1116-prod-rg resource group (never creates it -- azd is told about it
-// via the AZURE_RESOURCE_GROUP environment value, set once by the
-// provisioning workflow). The resource group and the GitHub Actions
-// managed identity are both created manually, along with a one-time Owner
-// grant on the resource group -- see modules/managed-identity.bicep for
-// how that identity's durable least-privilege footprint (Contributor +
-// User Access Administrator, scoped to this resource group only) gets
-// codified here instead. Deliberately NOT subscription-scoped: nothing
-// here needs subscription-level resources, and staying resource-group-
-// scoped means the deployment itself only ever needs the RG-scoped
-// Contributor role already granted -- no subscription-wide permissions.
+// Resource-group-scoped greenfield ACA + ACR deployment into the pre-existing
+// wx1116-prod-rg resource group. Only wx1116-prod-github-actions-mi exists
+// before first provision; everything else is created here.
 
 targetScope = 'resourceGroup'
 
@@ -31,19 +22,31 @@ param githubActionsIdentityName string = 'wx1116-prod-github-actions-mi'
 @description('GitHub repository in owner/repo form, used for the federated credential subject.')
 param githubRepository string = 'dustinkorzaan/weather-1116'
 
-@description('App Service Plan SKU for the shared Linux plan.')
-param appServicePlanSkuName string = 'B2'
+@description('Globally unique ACR name (alphanumeric only).')
+param acrName string = 'wx1116prodacr'
 
-@description('Name of the storage account backing the Function App\'s AzureWebJobsStorage. Must be globally unique, <=24 chars, lowercase alphanumeric only.')
+@description('Name of the storage account backing the Functions-on-ACA AzureWebJobsStorage.')
 param storageAccountName string = 'wx1116prodblob'
 
 @secure()
-@description('SQL admin login username. Treated as sensitive -- supply via azd env set / --parameters at deploy time, never committed. A non-default, non-obvious username is itself part of the security posture here, not just the password.')
+@description('SQL admin login username. Supply via azd env set / --parameters at deploy time.')
 param sqlAdministratorLogin string
 
-// Per-app identity + web app configuration, in a fixed order shared by the
-// app-identity loop (indices 0-4 below) and the web-app loop -- index 5 is
-// the Function App's identity, consumed separately.
+@description('Comma-separated keys of the container apps that already exist, e.g. api,mvc,worker. Set by infra/scripts/capture-existing-container-apps.sh before azd provision; empty means first provision.')
+param existingContainerAppKeys string = ''
+
+var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+var acrPushRoleId = '8311e349-0899-44f8-b5e2-9be9d40fb000'
+
+// First create only. dotnet/samples:aspnetapp is a runnable ASP.NET app that
+// serves on 8080, the same port the real images use, so the first revision goes
+// healthy. A bare runtime image such as dotnet/aspnet:10.0 has no entrypoint app
+// and crash-loops instead.
+var placeholderImage = 'mcr.microsoft.com/dotnet/samples:aspnetapp'
+
+var existingKeys = empty(existingContainerAppKeys) ? [] : split(existingContainerAppKeys, ',')
+
+// Per-app identity configuration. Index 5 is the Functions-on-ACA MCP host.
 var appIdentityConfig = [
   { key: 'api', name: '${namePrefix}-${environmentName}-api-mi' }
   { key: 'mvc', name: '${namePrefix}-${environmentName}-mvc-mi' }
@@ -53,12 +56,12 @@ var appIdentityConfig = [
   { key: 'mcp-srv-func-app', name: '${namePrefix}-${environmentName}-mcp-srv-func-app-mi' }
 ]
 
-var webAppsConfig = [
-  { key: 'api', setAzureClientId: true }
-  { key: 'mvc', setAzureClientId: true }
-  { key: 'blazor', setAzureClientId: false }
-  { key: 'worker', setAzureClientId: true }
-  { key: 'mcp-srv-app-service', setAzureClientId: false }
+var containerAppsConfig = [
+  { key: 'api', setAzureClientId: true, minReplicas: 0, maxReplicas: 3, stickySessions: false }
+  { key: 'mvc', setAzureClientId: true, minReplicas: 0, maxReplicas: 3, stickySessions: false }
+  { key: 'blazor', setAzureClientId: false, minReplicas: 1, maxReplicas: 3, stickySessions: true }
+  { key: 'worker', setAzureClientId: true, minReplicas: 1, maxReplicas: 1, stickySessions: false }
+  { key: 'mcp-srv-app-service', setAzureClientId: false, minReplicas: 0, maxReplicas: 2, stickySessions: false }
 ]
 
 module githubActionsIdentity 'modules/managed-identity.bicep' = {
@@ -87,39 +90,110 @@ module monitoring 'modules/monitoring.bicep' = {
   }
 }
 
-module appServicePlan 'modules/app-service-plan.bicep' = {
-  name: 'app-service-plan'
+module acr 'modules/acr.bicep' = {
+  name: 'acr'
   params: {
-    name: '${namePrefix}-${environmentName}-asp'
+    name: acrName
     location: location
-    skuName: appServicePlanSkuName
   }
 }
 
-module webApps 'modules/web-app.bicep' = [for (cfg, i) in webAppsConfig: {
-  name: 'web-app-${cfg.key}'
+module acaEnvironment 'modules/aca-environment.bicep' = {
+  name: 'aca-environment'
+  params: {
+    name: '${namePrefix}-${environmentName}-aca-env'
+    location: location
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+  }
+}
+
+module acrPushForGitHubActions 'modules/acr-role-assignment.bicep' = {
+  name: 'acr-push-github-actions'
+  params: {
+    registryName: acr.outputs.name
+    principalId: githubActionsIdentity.outputs.principalId
+    roleDefinitionId: acrPushRoleId
+    assignmentName: guid(acr.outputs.id, githubActionsIdentity.outputs.principalId, acrPushRoleId)
+  }
+}
+
+module acrPullForApps 'modules/acr-role-assignment.bicep' = [for (cfg, i) in containerAppsConfig: {
+  name: 'acr-pull-${cfg.key}'
+  params: {
+    registryName: acr.outputs.name
+    principalId: appIdentities[i].outputs.principalId
+    roleDefinitionId: acrPullRoleId
+    assignmentName: guid(acr.outputs.id, appIdentities[i].outputs.principalId, acrPullRoleId)
+  }
+}]
+
+module acrPullForFunctionsApp 'modules/acr-role-assignment.bicep' = {
+  name: 'acr-pull-mcp-srv-func-app'
+  params: {
+    registryName: acr.outputs.name
+    principalId: appIdentities[5].outputs.principalId
+    roleDefinitionId: acrPullRoleId
+    assignmentName: guid(acr.outputs.id, appIdentities[5].outputs.principalId, acrPullRoleId)
+  }
+}
+
+// Provision owns whether these apps exist and their ingress/scale/identity
+// wiring; prod-deploy-*.yml owns their image, deploy-time env vars, and secrets.
+// Since a Bicep deployment is a PUT, the deploy-owned half has to be read back
+// and handed straight through, or every provision would revert the apps to the
+// placeholder image with no app settings.
+module existingContainerApps 'modules/existing-container-app.bicep' = [for cfg in containerAppsConfig: {
+  name: 'existing-container-app-${cfg.key}'
+  params: {
+    name: '${namePrefix}-${environmentName}-${cfg.key}'
+    exists: contains(existingKeys, cfg.key)
+  }
+}]
+
+module existingFunctionsContainerApp 'modules/existing-container-app.bicep' = {
+  name: 'existing-container-app-mcp-srv-func-app'
+  params: {
+    name: '${namePrefix}-${environmentName}-mcp-srv-func-app'
+    exists: contains(existingKeys, 'mcp-srv-func-app')
+  }
+}
+
+module containerApps 'modules/container-app.bicep' = [for (cfg, i) in containerAppsConfig: {
+  name: 'container-app-${cfg.key}'
   params: {
     name: '${namePrefix}-${environmentName}-${cfg.key}'
     location: location
-    appServicePlanId: appServicePlan.outputs.id
+    managedEnvironmentId: acaEnvironment.outputs.id
+    containerImage: placeholderImage
+    existingImage: existingContainerApps[i].outputs.image
+    existingEnv: existingContainerApps[i].outputs.env
+    existingSecrets: existingContainerApps[i].outputs.secrets
+    minReplicas: cfg.minReplicas
+    maxReplicas: cfg.maxReplicas
+    stickySessions: cfg.stickySessions
     userAssignedIdentityId: appIdentities[i].outputs.id
     userAssignedIdentityClientId: appIdentities[i].outputs.clientId
     setAzureClientId: cfg.setAzureClientId
+    acrLoginServer: acr.outputs.loginServer
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
   }
 }]
 
-module functionApp 'modules/function-app.bicep' = {
-  name: 'function-app'
+module functionsContainerApp 'modules/functions-container-app.bicep' = {
+  name: 'functions-container-app'
   params: {
     name: '${namePrefix}-${environmentName}-mcp-srv-func-app'
-    storageAccountName: storageAccountName
     location: location
-    appServicePlanId: appServicePlan.outputs.id
+    managedEnvironmentId: acaEnvironment.outputs.id
+    storageAccountName: storageAccountName
     userAssignedIdentityId: appIdentities[5].outputs.id
     userAssignedIdentityPrincipalId: appIdentities[5].outputs.principalId
     userAssignedIdentityClientId: appIdentities[5].outputs.clientId
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
+    acrLoginServer: acr.outputs.loginServer
+    existingImage: existingFunctionsContainerApp.outputs.image
+    existingEnv: existingFunctionsContainerApp.outputs.env
+    existingSecrets: existingFunctionsContainerApp.outputs.secrets
   }
 }
 
@@ -162,16 +236,21 @@ module aiFoundry 'modules/ai-foundry.bicep' = {
 
 output AZURE_RESOURCE_GROUP string = resourceGroupName
 
-output API_HOSTNAME string = webApps[0].outputs.defaultHostname
-output MVC_HOSTNAME string = webApps[1].outputs.defaultHostname
-output BLAZOR_HOSTNAME string = webApps[2].outputs.defaultHostname
-output WORKER_HOSTNAME string = webApps[3].outputs.defaultHostname
-output MCP_SRV_APP_SERVICE_HOSTNAME string = webApps[4].outputs.defaultHostname
-output MCP_SRV_FUNC_APP_HOSTNAME string = functionApp.outputs.defaultHostname
+output ACR_LOGIN_SERVER string = acr.outputs.loginServer
+output ACR_NAME string = acr.outputs.name
+output ACA_ENVIRONMENT_NAME string = acaEnvironment.outputs.name
+output ACA_DEFAULT_DOMAIN string = acaEnvironment.outputs.defaultDomain
+
+output API_HOSTNAME string = containerApps[0].outputs.fqdn
+output MVC_HOSTNAME string = containerApps[1].outputs.fqdn
+output BLAZOR_HOSTNAME string = containerApps[2].outputs.fqdn
+output WORKER_HOSTNAME string = containerApps[3].outputs.fqdn
+output MCP_SRV_APP_SERVICE_HOSTNAME string = containerApps[4].outputs.fqdn
+output MCP_SRV_FUNC_APP_HOSTNAME string = functionsContainerApp.outputs.fqdn
 
 output SQL_SERVER_FQDN string = sql.outputs.serverFullyQualifiedDomainName
 output SQL_DATABASE_NAME string = sql.outputs.databaseName
-output STORAGE_ACCOUNT_NAME string = functionApp.outputs.storageAccountName
+output STORAGE_ACCOUNT_NAME string = functionsContainerApp.outputs.storageAccountName
 output APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 
 output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name

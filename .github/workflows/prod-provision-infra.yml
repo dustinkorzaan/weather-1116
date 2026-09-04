@@ -1,14 +1,25 @@
 # Provisions the wx1116-prod-* Azure resources (infra/main.bicep) via azd.
-# Runs after build-and-test succeeds on main. The provision job always runs;
-# when infra/** or azure.yaml did not change it exits early without azd.
-# Deploy workflows trigger on provision completion (linear chain:
-# build-and-test → provision → deploy).
+# Creates ACA + ACR + SQL + SWA + Foundry in wx1116-prod-rg (greenfield).
 #
-# TEMPORARY: "Detect infra file changes" below always reports changed=true,
-# so azd provision now runs on every build-and-test success (every
-# release) instead of only when infra/** or azure.yaml changed. Restore
-# the real git-diff check in that step (left commented out in place) to
-# bring the filter back.
+# Triggers directly on push to main (not chained off build-and-test via
+# workflow_run) and runs unconditionally on every such push -- main only
+# ever receives merged PRs, and merges are gated on the
+# wx-1116-build-and-test-success required check via branch protection, so
+# that's the test gate. The deploy workflows are likewise triggered
+# directly on push to main, independently of this workflow rather than
+# chained off its completion -- provision is safe to re-run on every push to
+# main (rather than only when infra/** changed), and that is intentional
+# rather than a placeholder.
+#
+# "Safe to re-run" is not free, though: a Bicep deployment is a PUT, so
+# provision would reassert the placeholder image and a bare app-settings list
+# over whatever the deploy workflows had set. The preprovision hook in
+# azure.yaml runs infra/scripts/capture-existing-container-apps.sh to record
+# which container apps already exist, and infra/main.bicep then reads their
+# live image, env vars, and secrets back through
+# modules/existing-container-app.bicep and hands them straight through. That
+# hook needs an authenticated `az`, which is why this workflow logs in with
+# azure/login as well as azd.
 #
 # Reuses the existing AZURE_GITHUB_CLIENTID / AZURE_TENANTID /
 # AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_CLIENTID has been updated to
@@ -44,13 +55,9 @@ name: provision-wx1116-prod-infra
 run-name: Provision wx1116-prod infra
 
 on:
-  workflow_run:
-    workflows:
-      - build-and-test
+  push:
     branches:
       - main
-    types:
-      - completed
   workflow_dispatch:
 
 concurrency:
@@ -61,23 +68,7 @@ permissions:
   contents: read
 
 jobs:
-  gate:
-    runs-on: ubuntu-latest
-    steps:
-      # Fail (do not skip) when build-and-test failed: an all-skipped workflow
-      # run reports conclusion success, which would unblock prod deploys.
-      - name: Require build-and-test success
-        if: github.event_name == 'workflow_run'
-        shell: bash
-        run: |
-          if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
-            echo "build-and-test conclusion was ${{ github.event.workflow_run.conclusion }}; refusing to provision." >&2
-            exit 1
-          fi
-
   provision:
-    needs: gate
-    if: always() && needs.gate.result == 'success'
     runs-on: ubuntu-latest
     environment: prod
     permissions:
@@ -86,32 +77,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
-          fetch-depth: 2
-
-      - name: Detect infra file changes
-        id: infra
-        if: github.event_name == 'workflow_run'
-        shell: bash
-        run: |
-          # TEMPORARY: always report changed=true so azd provision runs on
-          # every release regardless of infra/** changes. Restore the real
-          # diff check below (and remove this line) to bring the filter back.
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-          # if git diff --name-only HEAD^ HEAD -- infra/ azure.yaml | grep -q .; then
-          #   echo "changed=true" >> "$GITHUB_OUTPUT"
-          # else
-          #   echo "changed=false" >> "$GITHUB_OUTPUT"
-          # fi
-
-      - name: Skip azd provision (no infra changes)
-        if: github.event_name == 'workflow_run' && steps.infra.outputs.changed == 'false'
-        shell: bash
-        run: echo "No infra changes in this commit; skipping azd provision."
 
       - name: Debug Azure OIDC secret lengths
-        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         env:
           AZURE_GITHUB_CLIENTID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
@@ -123,11 +90,18 @@ jobs:
           echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
 
       - name: Install azd
-        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         uses: Azure/setup-azd@v2
 
+      # The azure.yaml preprovision hook queries the resource group with `az`,
+      # so it needs its own login alongside azd's.
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
       - name: Log in with azd (federated credentials)
-        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: |
           azd auth login \
@@ -139,7 +113,6 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANTID }}
 
       - name: Create or select azd environment
-        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: |
           azd env select "$AZURE_ENV_NAME" 2>/dev/null || \
@@ -158,21 +131,18 @@ jobs:
       # azd needs to be told which pre-existing resource group to target;
       # without this it defaults to (and tries to create) rg-prod.
       - name: Point azd at the pre-existing resource group
-        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: azd env set AZURE_RESOURCE_GROUP "$AZURE_RESOURCE_GROUP"
         env:
           AZURE_RESOURCE_GROUP: wx1116-prod-rg
 
       - name: Set required azd parameter values
-        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: azd env set SQL_ADMINISTRATOR_LOGIN "$SQL_ADMINISTRATOR_LOGIN"
         env:
           SQL_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_SQL_ADMIN_LOGIN_NAME }}
 
       - name: azd provision
-        if: github.event_name == 'workflow_dispatch' || steps.infra.outputs.changed == 'true'
         shell: bash
         run: azd provision --no-prompt
 

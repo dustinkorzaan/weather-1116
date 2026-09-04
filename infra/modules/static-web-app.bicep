@@ -1,7 +1,7 @@
 // Static Web App, deliberately provisioned without repositoryUrl/branch/
 // buildProperties -- setting those would make Azure try to manage its own
 // GitHub-integrated workflow, fighting the existing hand-written
-// prod-deploy-ui-react-static-web-app.yml pattern. After provisioning,
+// prod-deploy-react.yml pattern. After provisioning,
 // retrieve the deployment token manually (az staticwebapp secrets list)
 // and add it as a GitHub secret for a future deploy workflow.
 

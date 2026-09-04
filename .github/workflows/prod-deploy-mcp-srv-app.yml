@@ -1,0 +1,61 @@
+name: cicd-wx1116-prod-mcp-srv-app-service
+run-name: CICD wx1116-prod-mcp-srv-app-service (ACA)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: prod-deploy-mcp-srv-app-service
+  cancel-in-progress: true
+
+env:
+  RESOURCE_GROUP: wx1116-prod-rg
+  ACR_NAME: wx1116prodacr
+  CONTAINER_APP_NAME: wx1116-prod-mcp-srv-app-service
+  IMAGE_NAME: wx1116-mcp-app
+  BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_BRANCH_NAME: ${{ github.ref_name }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Record build start time
+        id: build_start
+        shell: bash
+        run: echo "build_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Build, push, and update Container App image
+        uses: ./.github/actions/deploy-aca-container
+        with:
+          acr_name: ${{ env.ACR_NAME }}
+          image_name: ${{ env.IMAGE_NAME }}
+          image_tag: ${{ github.run_number }}
+          dockerfile: mcp-srv-app-service/mcp/Dockerfile
+          container_app_name: ${{ env.CONTAINER_APP_NAME }}
+          resource_group: ${{ env.RESOURCE_GROUP }}
+          secrets_multiline: |
+            mcp-app-key=${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
+          env_overlay_multiline: |
+            MCP_SRV_APP_SERVICE_KEY=secretref:mcp-app-key
+            ASPNETCORE_DETAILEDERRORS=false
+            BUILD_NUMBER=${{ env.BUILD_NUMBER }}
+            BUILD_START=${{ steps.build_start.outputs.build_start }}
+            BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}

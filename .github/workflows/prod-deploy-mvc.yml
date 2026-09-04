@@ -1,0 +1,79 @@
+name: cicd-wx1116-prod-mvc
+run-name: CICD wx1116-prod-mvc (ACA)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: prod-deploy-mvc
+  cancel-in-progress: true
+
+env:
+  RESOURCE_GROUP: wx1116-prod-rg
+  ACR_NAME: wx1116prodacr
+  CONTAINER_APP_NAME: wx1116-prod-mvc
+  IMAGE_NAME: wx1116-mvc
+  BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_BRANCH_NAME: ${{ github.ref_name }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Record build start time
+        id: build_start
+        shell: bash
+        run: echo "build_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Build, push, and update Container App image
+        uses: ./.github/actions/deploy-aca-container
+        with:
+          acr_name: ${{ env.ACR_NAME }}
+          image_name: ${{ env.IMAGE_NAME }}
+          image_tag: ${{ github.run_number }}
+          dockerfile: mvc-dotnet/mvc/Dockerfile
+          container_app_name: ${{ env.CONTAINER_APP_NAME }}
+          resource_group: ${{ env.RESOURCE_GROUP }}
+          secrets_multiline: |
+            db-connection-string=${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}
+            foundry-key=${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}
+            google-maps-key=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            mcp-func-key=${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
+            mcp-app-key=${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
+          env_overlay_multiline: |
+            DB_CONNECTION_STRING=secretref:db-connection-string
+            UI_REACT_URL=${{ vars.PROD_UI_REACT_URL }}
+            UI_BLAZOR_URL=${{ vars.PROD_UI_BLAZOR_URL }}
+            MVC_URL=${{ vars.PROD_MVC_DOTNET_URL }}
+            API_DOTNET_URL=${{ vars.PROD_API_DOTNET_URL }}
+            WORKER_DOTNET_URL=${{ vars.PROD_WORKER_DOTNET_URL }}
+            MCP_SRV_APP_SERVICE_URL=${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
+            MCP_SRV_FUNC_APP_URL=${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+            GOOGLE_MAPS_API_KEY=secretref:google-maps-key
+            AZURE_FOUNDRY_PROD_EUS2_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
+            AZURE_FOUNDRY_PROD_EUS2_KEY=secretref:foundry-key
+            AZURE_FOUNDRY_PROD_EUS2_MODEL=${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
+            AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME=${{ vars.AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME }}
+            MCP_SRV_FUNC_APP_KEY=secretref:mcp-func-key
+            MCP_SRV_APP_SERVICE_KEY=secretref:mcp-app-key
+            ASPNETCORE_DETAILEDERRORS=false
+            BUILD_NUMBER=${{ env.BUILD_NUMBER }}
+            BUILD_START=${{ steps.build_start.outputs.build_start }}
+            BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}
