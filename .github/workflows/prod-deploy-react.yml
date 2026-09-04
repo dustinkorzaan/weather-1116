@@ -2,13 +2,9 @@ name: cicd-weather1116-prod-react
 run-name: CICD weather1116-prod-react
 
 on:
-  workflow_run:
-    workflows:
-      - provision-wx1116-prod-infra
+  push:
     branches:
       - main
-    types:
-      - completed
   workflow_dispatch:
 
 concurrency:
@@ -17,7 +13,7 @@ concurrency:
 
 env:
   BUILD_NUMBER: ${{ github.run_number }}
-  BUILD_BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
+  BUILD_BRANCH_NAME: ${{ github.ref_name }}
 
 jobs:
   build_and_deploy_job:
@@ -26,17 +22,6 @@ jobs:
     permissions:
       contents: read
     steps:
-      # Fail (do not skip) when provision failed. Provision already gates on
-      # build-and-test success, so provision success implies both are green.
-      - name: Require provision success
-        if: github.event_name == 'workflow_run'
-        shell: bash
-        run: |
-          if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
-            echo "provision-wx1116-prod-infra conclusion was ${{ github.event.workflow_run.conclusion }}; refusing to deploy." >&2
-            exit 1
-          fi
-
       - name: Record build start time
         id: build_start
         shell: bash
@@ -44,7 +29,6 @@ jobs:
 
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
           submodules: true
           lfs: false
 
