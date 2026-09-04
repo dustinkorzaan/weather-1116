@@ -53,13 +53,23 @@ concurrency:
 jobs:
   provision:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     environment: prod
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
 
     steps:
+      # Fail (do not skip) when build-and-test failed: an all-skipped workflow
+      # run reports conclusion success, which would unblock prod deploys.
+      - name: Require build-and-test success
+        if: github.event_name == 'workflow_run'
+        shell: bash
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "build-and-test conclusion was ${{ github.event.workflow_run.conclusion }}; refusing to provision." >&2
+            exit 1
+          fi
+
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
