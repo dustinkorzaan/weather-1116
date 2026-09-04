@@ -1,0 +1,102 @@
+name: cicd-wx1116-prod-worker
+run-name: CICD wx1116-prod-worker (ACA)
+
+on:
+  workflow_run:
+    workflows:
+      - provision-wx1116-prod-infra
+    branches:
+      - main
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: prod-deploy-worker
+  cancel-in-progress: true
+
+env:
+  RESOURCE_GROUP: wx1116-prod-rg
+  ACR_NAME: wx1116prodacr
+  CONTAINER_APP_NAME: wx1116-prod-worker
+  IMAGE_NAME: wx1116-worker
+  BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Require provision success
+        if: github.event_name == 'workflow_run'
+        shell: bash
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "provision-wx1116-prod-infra conclusion was ${{ github.event.workflow_run.conclusion }}; refusing to deploy." >&2
+            exit 1
+          fi
+
+      - name: Record build start time
+        id: build_start
+        shell: bash
+        run: echo "build_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Build, push, and update Container App image
+        uses: ./.github/actions/deploy-aca-container
+        with:
+          acr_name: ${{ env.ACR_NAME }}
+          image_name: ${{ env.IMAGE_NAME }}
+          image_tag: ${{ github.run_number }}
+          dockerfile: worker-dotnet/worker/Dockerfile
+          container_app_name: ${{ env.CONTAINER_APP_NAME }}
+          resource_group: ${{ env.RESOURCE_GROUP }}
+
+      - name: Set Container App secrets and environment
+        uses: azure/cli@v3
+        env:
+          MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
+          MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+        with:
+          inlineScript: |
+            az containerapp secret set \
+              --name "$CONTAINER_APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --secrets \
+                db-connection-string="${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}" \
+                foundry-key="${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}" \
+                mcp-func-key="${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}" \
+                mcp-app-key="${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}"
+
+            az containerapp update \
+              --name "$CONTAINER_APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --set-env-vars \
+                "DB_CONNECTION_STRING=secretref:db-connection-string" \
+                "AZURE_FOUNDRY_PROD_EUS2_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}" \
+                "AZURE_FOUNDRY_PROD_EUS2_KEY=secretref:foundry-key" \
+                "AZURE_FOUNDRY_PROD_EUS2_MODEL=${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}" \
+                "MCP_SRV_APP_SERVICE_URL=$MCP_SRV_APP_SERVICE_URL" \
+                "MCP_SRV_FUNC_APP_URL=$MCP_SRV_FUNC_APP_URL" \
+                "MCP_SRV_FUNC_APP_KEY=secretref:mcp-func-key" \
+                "MCP_SRV_APP_SERVICE_KEY=secretref:mcp-app-key" \
+                "ASPNETCORE_ENVIRONMENT=Production" \
+                "ASPNETCORE_DETAILEDERRORS=false" \
+                "BUILD_NUMBER=${{ env.BUILD_NUMBER }}" \
+                "BUILD_START=${{ steps.build_start.outputs.build_start }}" \
+                "BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}"

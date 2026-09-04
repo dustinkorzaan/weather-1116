@@ -6,8 +6,8 @@ This repo is one Weather sample implemented across seven runnable stacks plus
 one shared `Core` class library (see `README.md` and `docs/architecture.md`).
 Six of those projects are primary: five runnable applications (React UI,
 Blazor UI, MVC UI, API, and Worker) plus the shared `Core` class library;
-the other two runnable stacks are the MCP hosts (App Service and Function
-App).
+the other two runnable stacks are the MCP hosts (Container App and Functions
+on ACA).
 
 ## Git / PR policy
 
@@ -88,6 +88,9 @@ for ordinary implementation work.
   `mvc-dotnet/mvc.tests`, `worker-dotnet/worker.tests`, `ui-blazor/blazor.tests`,
   `mcp-srv-app-service/mcp.tests`, and `mcp-srv-func-app/mcp.tests` (see CI
   `build-and-test.yml`).
-- The `prod-deploy-*.yml` workflows auto-deploy when `build-and-test` completes
-  successfully on `main` (e.g. after a merged PR). Each workflow can also be run
+- The `prod-deploy-*-aca.yml` workflows auto-deploy when `build-and-test` completes
+  successfully on `main` (after `provision-wx1116-prod-infra`). Each workflow can also be run
   manually via `workflow_dispatch` on any branch (e.g. hotfixes).
+- Production hosting is **Azure Container Apps + ACR** (five ASP.NET images) plus
+  **Functions on ACA** for `mcp-srv-func-app` and **Static Web Apps** for React.
+  First-deploy bootstrap: `docs/aca-bootstrap.md`.

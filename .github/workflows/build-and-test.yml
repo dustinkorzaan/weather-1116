@@ -206,6 +206,27 @@ jobs:
       - name: Validate main.parameters.json is well-formed
         run: jq empty infra/main.parameters.json
 
+  docker-build:
+    name: Build container images
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: api-dotnet/api/Dockerfile
+          - dockerfile: mvc-dotnet/mvc/Dockerfile
+          - dockerfile: ui-blazor/blazor/Dockerfile
+          - dockerfile: worker-dotnet/worker/Dockerfile
+          - dockerfile: mcp-srv-app-service/mcp/Dockerfile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build Docker image
+        run: docker build -f "${{ matrix.dockerfile }}" .
+
   build-and-test-react:
     name: Build and Test React Project
     runs-on: ubuntu-latest
@@ -255,6 +276,7 @@ jobs:
       - test-mvc
       - test-mcp-srv-app-service
       - test-mcp-srv-func-app
+      - docker-build
       - build-and-test-react
       - bicep-validate
     steps:

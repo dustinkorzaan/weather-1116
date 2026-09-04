@@ -1,0 +1,43 @@
+name: Build and push container image to ACR
+description: Remote-build a Dockerfile with az acr build and update the target Container App image.
+
+inputs:
+  acr_name:
+    description: Azure Container Registry name (not login server).
+    required: true
+  image_name:
+    description: Repository name inside ACR, e.g. wx1116-api.
+    required: true
+  image_tag:
+    description: Image tag, typically the GitHub run number.
+    required: true
+  dockerfile:
+    description: Path to the Dockerfile relative to the repository root.
+    required: true
+  container_app_name:
+    description: Target Container App resource name.
+    required: true
+  resource_group:
+    description: Azure resource group containing the Container App.
+    required: true
+    default: wx1116-prod-rg
+
+runs:
+  using: composite
+  steps:
+    - name: Build image in ACR
+      shell: bash
+      run: |
+        az acr build \
+          --registry "${{ inputs.acr_name }}" \
+          --image "${{ inputs.image_name }}:${{ inputs.image_tag }}" \
+          --file "${{ inputs.dockerfile }}" \
+          .
+
+    - name: Update Container App image
+      shell: bash
+      run: |
+        az containerapp update \
+          --name "${{ inputs.container_app_name }}" \
+          --resource-group "${{ inputs.resource_group }}" \
+          --image "${{ inputs.acr_name }}.azurecr.io/${{ inputs.image_name }}:${{ inputs.image_tag }}"

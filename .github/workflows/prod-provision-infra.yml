@@ -1,4 +1,5 @@
 # Provisions the wx1116-prod-* Azure resources (infra/main.bicep) via azd.
+# Creates ACA + ACR + SQL + SWA + Foundry in wx1116-prod-rg (greenfield).
 # Runs after build-and-test succeeds on main. The provision job always runs;
 # when infra/** or azure.yaml did not change it exits early without azd.
 # Deploy workflows trigger on provision completion (linear chain:

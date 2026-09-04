@@ -1,0 +1,100 @@
+name: cicd-wx1116-prod-blazor
+run-name: CICD wx1116-prod-blazor (ACA)
+
+on:
+  workflow_run:
+    workflows:
+      - provision-wx1116-prod-infra
+    branches:
+      - main
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: prod-deploy-blazor
+  cancel-in-progress: true
+
+env:
+  RESOURCE_GROUP: wx1116-prod-rg
+  ACR_NAME: wx1116prodacr
+  CONTAINER_APP_NAME: wx1116-prod-blazor
+  IMAGE_NAME: wx1116-blazor
+  BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Require provision success
+        if: github.event_name == 'workflow_run'
+        shell: bash
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "provision-wx1116-prod-infra conclusion was ${{ github.event.workflow_run.conclusion }}; refusing to deploy." >&2
+            exit 1
+          fi
+
+      - name: Record build start time
+        id: build_start
+        shell: bash
+        run: echo "build_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Build, push, and update Container App image
+        uses: ./.github/actions/deploy-aca-container
+        with:
+          acr_name: ${{ env.ACR_NAME }}
+          image_name: ${{ env.IMAGE_NAME }}
+          image_tag: ${{ github.run_number }}
+          dockerfile: ui-blazor/blazor/Dockerfile
+          container_app_name: ${{ env.CONTAINER_APP_NAME }}
+          resource_group: ${{ env.RESOURCE_GROUP }}
+
+      - name: Set Container App secrets and environment
+        uses: azure/cli@v3
+        env:
+          API_DOTNET_URL: ${{ vars.PROD_API_DOTNET_URL }}
+          UI_REACT_URL: ${{ vars.PROD_UI_REACT_URL }}
+          UI_BLAZOR_URL: ${{ vars.PROD_UI_BLAZOR_URL }}
+          MVC_DOTNET_URL: ${{ vars.PROD_MVC_DOTNET_URL }}
+          WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
+        with:
+          inlineScript: |
+            az containerapp secret set \
+              --name "$CONTAINER_APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --secrets \
+                google-maps-key="${{ secrets.GOOGLE_MAPS_API_KEY }}"
+
+            az containerapp update \
+              --name "$CONTAINER_APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --set-env-vars \
+                "API_DOTNET_URL=$API_DOTNET_URL" \
+                "UI_REACT_URL=$UI_REACT_URL" \
+                "UI_BLAZOR_URL=$UI_BLAZOR_URL" \
+                "MVC_URL=$MVC_DOTNET_URL" \
+                "WORKER_DOTNET_URL=$WORKER_DOTNET_URL" \
+                "GOOGLE_MAPS_API_KEY=secretref:google-maps-key" \
+                "ASPNETCORE_ENVIRONMENT=Production" \
+                "ASPNETCORE_DETAILEDERRORS=false" \
+                "BUILD_NUMBER=${{ env.BUILD_NUMBER }}" \
+                "BUILD_START=${{ steps.build_start.outputs.build_start }}" \
+                "BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}"
