@@ -88,7 +88,7 @@ for ordinary implementation work.
   `mvc-dotnet/mvc.tests`, `worker-dotnet/worker.tests`, `ui-blazor/blazor.tests`,
   `mcp-srv-app-service/mcp.tests`, and `mcp-srv-func-app/mcp.tests` (see CI
   `build-and-test.yml`).
-- The `prod-deploy-*-aca.yml` workflows auto-deploy when `build-and-test` completes
+- The `prod-deploy-*.yml` workflows auto-deploy when `build-and-test` completes
   successfully on `main` (after `provision-wx1116-prod-infra`). Each workflow can also be run
   manually via `workflow_dispatch` on any branch (e.g. hotfixes).
 - Production hosting is **Azure Container Apps + ACR** (five ASP.NET images) plus

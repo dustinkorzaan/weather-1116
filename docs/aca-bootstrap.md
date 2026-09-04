@@ -89,15 +89,15 @@ Run `infra/scripts/create-contained-users.sql` as the SQL Entra admin
 
 Run deploy workflows (or wait for the provision → deploy chain):
 
-| Workflow | Target |
+| Workflow file | Target |
 | --- | --- |
-| `cicd-wx1116-prod-api` | Container App + ACR image |
-| `cicd-wx1116-prod-mvc` | Container App + ACR image |
-| `cicd-wx1116-prod-blazor` | Container App + ACR image |
-| `cicd-wx1116-prod-worker` | Container App + ACR image |
-| `cicd-wx1116-prod-mcp-srv-app-service` | Container App + ACR image |
-| `cicd-wx1116-prod-mcp-srv-func-app` | Functions-on-ACA package deploy |
-| `cicd-weather1116-prod-react` | Static Web App |
+| `prod-deploy-api.yml` | Container App + ACR image |
+| `prod-deploy-mvc.yml` | Container App + ACR image |
+| `prod-deploy-blazor.yml` | Container App + ACR image |
+| `prod-deploy-worker.yml` | Container App + ACR image |
+| `prod-deploy-mcp-srv-app.yml` | Container App + ACR image |
+| `prod-deploy-mcp-srv-func.yml` | Functions-on-ACA package deploy |
+| `prod-deploy-react.yml` | Static Web App |
 
 After the MCP func deploy, retrieve the `mcp_extension` key if needed:
 
