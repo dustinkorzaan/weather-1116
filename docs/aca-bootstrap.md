@@ -44,6 +44,9 @@ First-time deployment into an empty `wx1116-prod-rg` (only
 ## Step 1 — Provision infrastructure
 
 Merge to `main` or run `provision-wx1116-prod-infra` via `workflow_dispatch`.
+Provisioning and app deploys each trigger independently on push to `main` (no
+`workflow_run` chain between them) and both run unconditionally on every
+push — `azd provision` is idempotent, so this is intentional, not wasteful.
 
 Capture outputs from the provision job or:
 
@@ -87,7 +90,8 @@ Run `infra/scripts/create-contained-users.sql` as the SQL Entra admin
 
 ## Step 5 — Deploy apps
 
-Run deploy workflows (or wait for the provision → deploy chain):
+Deploy workflows trigger automatically on push to `main` (independently of
+provision), or run them directly via `workflow_dispatch`:
 
 | Workflow file | Target |
 | --- | --- |
