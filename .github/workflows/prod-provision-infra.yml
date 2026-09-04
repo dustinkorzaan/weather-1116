@@ -1,9 +1,7 @@
 # Provisions the wx1116-prod-* Azure resources (infra/main.bicep) via azd.
-# Separate from the prod-deploy-*.yml workflows, which handle app code
-# deploys (now retargeted to these same wx1116-prod-* resources, except
-# prod-deploy-ui-react-static-web-app.yml, still on the old
-# weather1116-prod-react Static Web App pending a new deployment token)
-# and don't touch infra at all.
+# Runs after build-and-test succeeds on main (workflow_run), same as the
+# prod-deploy-*.yml chain -- deploy workflows then wait for this provision
+# workflow to complete successfully before deploying app code.
 #
 # Reuses the existing AZURE_GITHUB_CLIENTID / AZURE_TENANTID /
 # AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_CLIENTID has been updated to
@@ -39,12 +37,13 @@ name: provision-wx1116-prod-infra
 run-name: Provision wx1116-prod infra
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - build-and-test
     branches:
       - main
-    paths:
-      - 'infra/**'
-      - 'azure.yaml'
+    types:
+      - completed
   workflow_dispatch:
 
 concurrency:
@@ -54,6 +53,7 @@ concurrency:
 jobs:
   provision:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     environment: prod
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -61,6 +61,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
 
       - name: Debug Azure OIDC secret lengths
         shell: bash

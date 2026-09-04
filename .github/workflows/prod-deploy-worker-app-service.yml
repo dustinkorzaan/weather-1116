@@ -4,7 +4,7 @@ run-name: CICD wx1116-prod-worker
 on:
   workflow_run:
     workflows:
-      - build-and-test
+      - provision-wx1116-prod-infra
     branches:
       - main
     types:
