@@ -3,7 +3,7 @@
 // by default -- worker and the Function App both need alwaysOn, which
 // Free/Shared tiers don't support.
 
-@description('Name of the App Service Plan, e.g. wx1116-prd-asp.')
+@description('Name of the App Service Plan, e.g. wx1116-prod-asp.')
 param name string
 
 param location string

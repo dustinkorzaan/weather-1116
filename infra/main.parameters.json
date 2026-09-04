@@ -3,19 +3,16 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "environmentName": {
-      "value": "${AZURE_ENV_NAME=prd}"
+      "value": "${AZURE_ENV_NAME=prod}"
     },
     "location": {
-      "value": "${AZURE_LOCATION=westus2}"
-    },
-    "foundryLocation": {
-      "value": "${AZURE_FOUNDRY_LOCATION=eastus2}"
+      "value": "${AZURE_LOCATION=eastus2}"
     },
     "resourceGroupName": {
-      "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prd-rg}"
+      "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prod-rg}"
     },
     "githubActionsIdentityName": {
-      "value": "${GITHUB_ACTIONS_IDENTITY_NAME=wx1116-prd-mi-github-actions}"
+      "value": "${GITHUB_ACTIONS_IDENTITY_NAME=wx1116-prod-mi-github-actions}"
     },
     "githubRepository": {
       "value": "${GITHUB_REPOSITORY=dustinkorzaan/weather-1116}"

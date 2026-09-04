@@ -4,7 +4,7 @@
 // WEBSITES_PORT, since none of these apps set a fixed port in code and
 // Linux App Service (unlike Windows/IIS) won't negotiate it for you.
 
-@description('Name of the Web App, e.g. wx1116-prd-api.')
+@description('Name of the Web App, e.g. wx1116-prod-api.')
 param name string
 
 param location string

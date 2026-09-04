@@ -1,4 +1,4 @@
-// Subscription-scoped: targets the pre-existing wx1116-prd-rg resource
+// Subscription-scoped: targets the pre-existing wx1116-prod-rg resource
 // group by name (never creates it) and wires every module into it. The
 // resource group and the GitHub Actions managed identity are both created
 // manually, along with a one-time Owner grant on the resource group -- see
@@ -9,22 +9,19 @@
 targetScope = 'subscription'
 
 @description('azd environment name.')
-param environmentName string = 'prd'
+param environmentName string = 'prod'
 
-@description('Primary Azure region for compute/data resources.')
-param location string = 'westus2'
-
-@description('Azure region for the AI Foundry resource/project and its paired monitoring.')
-param foundryLocation string = 'eastus2'
+@description('Azure region for every resource in this environment.')
+param location string = 'eastus2'
 
 @description('Short name prefix used to build resource names.')
 param namePrefix string = 'wx1116'
 
 @description('Name of the pre-existing resource group. Created manually, not by this template.')
-param resourceGroupName string = 'wx1116-prd-rg'
+param resourceGroupName string = 'wx1116-prod-rg'
 
 @description('Name of the pre-existing GitHub Actions managed identity. Created manually, not by this template.')
-param githubActionsIdentityName string = 'wx1116-prd-mi-github-actions'
+param githubActionsIdentityName string = 'wx1116-prod-mi-github-actions'
 
 @description('GitHub repository in owner/repo form, used for the federated credential subject.')
 param githubRepository string = 'dustinkorzaan/weather-1116'
@@ -90,23 +87,13 @@ module appIdentities 'modules/app-identity.bicep' = [for cfg in appIdentityConfi
   }
 }]
 
-module monitoringPrimary 'modules/monitoring.bicep' = {
-  name: 'monitoring-primary'
-  scope: resourceGroup(resourceGroupName)
-  params: {
-    logAnalyticsName: '${namePrefix}-${environmentName}-log'
-    appInsightsName: '${namePrefix}-${environmentName}-appi'
-    location: location
-  }
-}
-
-module monitoringEastus2 'modules/monitoring.bicep' = {
-  name: 'monitoring-eastus2'
+module monitoring 'modules/monitoring.bicep' = {
+  name: 'monitoring'
   scope: resourceGroup(resourceGroupName)
   params: {
     logAnalyticsName: '${namePrefix}-${environmentName}-eastus2-log'
     appInsightsName: '${namePrefix}-${environmentName}-eastus2-appinsights'
-    location: foundryLocation
+    location: location
   }
 }
 
@@ -131,7 +118,7 @@ module webApps 'modules/web-app.bicep' = [for (cfg, i) in webAppsConfig: {
     userAssignedIdentityId: appIdentities[i].outputs.id
     userAssignedIdentityClientId: appIdentities[i].outputs.clientId
     setAzureClientId: cfg.setAzureClientId
-    appInsightsConnectionString: monitoringPrimary.outputs.appInsightsConnectionString
+    appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
   }
 }]
 
@@ -146,7 +133,7 @@ module functionApp 'modules/function-app.bicep' = {
     userAssignedIdentityId: appIdentities[5].outputs.id
     userAssignedIdentityPrincipalId: appIdentities[5].outputs.principalId
     userAssignedIdentityClientId: appIdentities[5].outputs.clientId
-    appInsightsConnectionString: monitoringPrimary.outputs.appInsightsConnectionString
+    appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
   }
 }
 
@@ -179,10 +166,10 @@ module aiFoundry 'modules/ai-foundry.bicep' = {
   params: {
     accountName: '${namePrefix}-${environmentName}-eastus2-res'
     projectName: '${namePrefix}-${environmentName}-eastus2-prj'
-    location: foundryLocation
+    location: location
     customSubDomainName: toLower('${namePrefix}${environmentName}eastus2${uniqueString(subscription().id, resourceGroupName)}')
-    appInsightsId: monitoringEastus2.outputs.appInsightsId
-    appInsightsConnectionString: monitoringEastus2.outputs.appInsightsConnectionString
+    appInsightsId: monitoring.outputs.appInsightsId
+    appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
     grantedPrincipalIds: [
       appIdentities[0].outputs.principalId // api
       appIdentities[1].outputs.principalId // mvc
@@ -203,7 +190,7 @@ output MCP_SRV_FUNC_APP_HOSTNAME string = functionApp.outputs.defaultHostname
 output SQL_SERVER_FQDN string = sql.outputs.serverFullyQualifiedDomainName
 output SQL_DATABASE_NAME string = sql.outputs.databaseName
 output STORAGE_ACCOUNT_NAME string = functionApp.outputs.storageAccountName
-output APP_INSIGHTS_CONNECTION_STRING string = monitoringPrimary.outputs.appInsightsConnectionString
+output APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 
 output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
 output STATIC_WEB_APP_HOSTNAME string = staticWebApp.outputs.defaultHostname

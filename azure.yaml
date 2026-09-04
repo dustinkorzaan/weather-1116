@@ -2,13 +2,13 @@
 
 name: weather1116
 
-# Infra-only: azd provisions the wx1116-prd-* resources below via Bicep.
+# Infra-only: azd provisions the wx1116-prod-* resources below via Bicep.
 # There is deliberately no `services:` block, so `azd deploy` has nothing
-# to do. Application code deploys continue through the existing
-# .github/workflows/prod-deploy-*.yml workflows (OIDC + az cli /
-# azure/webapps-deploy / Azure/functions-action / Azure/static-web-apps-deploy)
-# against the *current* weather1116-prod-* resources, unchanged. A future
-# workflow can point at the wx1116-prd-* names once app code is ready.
+# to do. Application code deploys stay on the existing hand-written
+# GitHub Actions workflows (OIDC + az cli / azure/webapps-deploy /
+# Azure/functions-action / Azure/static-web-apps-deploy) for now -- a
+# future workflow can point at these wx1116-prod-* resources once app
+# code is ready.
 infra:
   provider: bicep
   path: infra

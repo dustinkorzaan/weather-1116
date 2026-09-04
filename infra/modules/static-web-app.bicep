@@ -5,7 +5,7 @@
 // retrieve the deployment token manually (az staticwebapp secrets list)
 // and add it as a GitHub secret for a future deploy workflow.
 
-@description('Name of the Static Web App, e.g. wx1116-prd-react.')
+@description('Name of the Static Web App, e.g. wx1116-prod-react.')
 param name string
 
 param location string

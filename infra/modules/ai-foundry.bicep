@@ -1,20 +1,18 @@
 // AI Foundry resource + project (new unified Foundry model, not the older
 // ML-workspace-based Hub), provisioned empty -- no model deployment; that's
 // a manual follow-up once this exists. Connects to the East US 2 App
-// Insights pair for tracing, and grants api/mvc/worker's managed identities
-// passwordless Cognitive Services User access. This does not touch the
-// existing prod Foundry resource or its AZURE_FOUNDRY_PROD_EUS2_KEY-based
-// access in any way.
+// Insights instance for tracing, and grants api/mvc/worker's managed
+// identities passwordless Cognitive Services User access.
 //
 // NOTE: the Microsoft.CognitiveServices API surface for the unified
 // Foundry resource/project/connections model has moved around across
 // preview versions. Verify the api-version and the connections resource
 // shape below against current docs before relying on this module.
 
-@description('Name of the AI Foundry resource, e.g. wx1116-prd-eastus2-res.')
+@description('Name of the AI Foundry resource, e.g. wx1116-prod-eastus2-res.')
 param accountName string
 
-@description('Name of the AI Foundry project, e.g. wx1116-prd-eastus2-prj.')
+@description('Name of the AI Foundry project, e.g. wx1116-prod-eastus2-prj.')
 param projectName string
 
 param location string

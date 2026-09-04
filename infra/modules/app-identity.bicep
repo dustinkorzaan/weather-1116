@@ -3,7 +3,7 @@
 // resource -- no bootstrap problem, since the GitHub Actions identity that
 // runs this template already has Contributor on the resource group.
 
-@description('Name of the managed identity to create, e.g. wx1116-prd-mi-api.')
+@description('Name of the managed identity to create, e.g. wx1116-prod-mi-api.')
 param name string
 
 param location string

@@ -1,7 +1,6 @@
-// Log Analytics workspace + workspace-based Application Insights. Invoked
-// twice from main.bicep: once for the primary (West US 2) region, once for
-// East US 2 (paired with the AI Foundry resources, so tracing doesn't have
-// to reach cross-region into the West US 2 workspace).
+// Log Analytics workspace + workspace-based Application Insights, invoked
+// once from main.bicep -- shared by the web apps, the Function App, and
+// the AI Foundry project, all in the same East US 2 region.
 
 @description('Name of the Log Analytics workspace to create.')
 param logAnalyticsName string

@@ -4,7 +4,7 @@
 // plan. Uses its own dedicated User-Assigned Managed Identity for
 // identity-based storage access -- no storage key anywhere.
 
-@description('Name of the Function App, e.g. wx1116-prd-mcp-srv-func-app.')
+@description('Name of the Function App, e.g. wx1116-prod-mcp-srv-func-app.')
 param name string
 
 @description('Name of the storage account backing AzureWebJobsStorage, e.g. wx1116prodblob. Storage account names must be globally unique, <=24 chars, lowercase alphanumeric only.')

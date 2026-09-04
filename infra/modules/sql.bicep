@@ -4,10 +4,10 @@
 // Deliberately no azureADOnlyAuthentications resource -- that's the one
 // resource that would flip this from hybrid to Entra-only.
 
-@description('Name of the SQL logical server, e.g. wx1116-prd-sql-server.')
+@description('Name of the SQL logical server, e.g. wx1116-prod-sql-server.')
 param serverName string
 
-@description('Name of the SQL database, e.g. wx1116-prd-sql-database.')
+@description('Name of the SQL database, e.g. wx1116-prod-sql-database.')
 param databaseName string
 
 param location string
