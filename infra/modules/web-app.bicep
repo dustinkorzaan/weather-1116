@@ -1,8 +1,12 @@
 // Reusable Linux Web App module, invoked once per app (5 times) from
 // main.bicep. Each app gets its own dedicated User-Assigned Managed
-// Identity (never SystemAssigned) and its own listening port via
-// WEBSITES_PORT, since none of these apps set a fixed port in code and
-// Linux App Service (unlike Windows/IIS) won't negotiate it for you.
+// Identity (never SystemAssigned). No WEBSITES_PORT setting -- these apps
+// are deployed via `dotnet publish` + zip-deploy onto the built-in Linux
+// .NET runtime stack (not a custom container), which defaults to port
+// 8080 and configures the container to match automatically. The per-app
+// ports in launchSettings.json (8080/8090/8100/8110/8130) are a local
+// `dotnet run`/debugging artifact only and have no bearing on the
+// deployed container's port.
 
 @description('Name of the Web App, e.g. wx1116-prod-api.')
 param name string
@@ -11,9 +15,6 @@ param location string
 
 @description('Resource ID of the shared Linux App Service Plan.')
 param appServicePlanId string
-
-@description('Port the app listens on (WEBSITES_PORT).')
-param port int
 
 @description('Resource ID of this app\'s dedicated User-Assigned Managed Identity.')
 param userAssignedIdentityId string
@@ -27,10 +28,6 @@ param setAzureClientId bool = false
 param appInsightsConnectionString string
 
 var baseAppSettings = [
-  {
-    name: 'WEBSITES_PORT'
-    value: string(port)
-  }
   {
     name: 'ASPNETCORE_ENVIRONMENT'
     value: 'Production'

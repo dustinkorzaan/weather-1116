@@ -48,11 +48,11 @@ var appIdentityConfig = [
 ]
 
 var webAppsConfig = [
-  { key: 'api', port: 8080, setAzureClientId: true }
-  { key: 'mvc', port: 8100, setAzureClientId: true }
-  { key: 'blazor', port: 8090, setAzureClientId: false }
-  { key: 'worker', port: 8130, setAzureClientId: true }
-  { key: 'mcp-srv-app-service', port: 8110, setAzureClientId: false }
+  { key: 'api', setAzureClientId: true }
+  { key: 'mvc', setAzureClientId: true }
+  { key: 'blazor', setAzureClientId: false }
+  { key: 'worker', setAzureClientId: true }
+  { key: 'mcp-srv-app-service', setAzureClientId: false }
 ]
 
 module githubActionsIdentity 'modules/managed-identity.bicep' = {
@@ -101,7 +101,6 @@ module webApps 'modules/web-app.bicep' = [for (cfg, i) in webAppsConfig: {
     name: '${namePrefix}-${environmentName}-${cfg.key}'
     location: location
     appServicePlanId: appServicePlan.outputs.id
-    port: cfg.port
     userAssignedIdentityId: appIdentities[i].outputs.id
     userAssignedIdentityClientId: appIdentities[i].outputs.clientId
     setAzureClientId: cfg.setAzureClientId
