@@ -104,12 +104,21 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
       - name: Login to Azure (retry after transient OIDC timeout)
+        id: azure_login_attempt_2
         if: steps.azure_login_attempt_1.outcome == 'failure'
+        continue-on-error: true
         uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Fail fast when Azure login retry also fails
+        if: steps.azure_login_attempt_1.outcome == 'failure' && steps.azure_login_attempt_2.outcome == 'failure'
+        shell: bash
+        run: |
+          echo "Azure OIDC login failed twice; stopping before azd steps."
+          exit 1
 
       - name: Log in with azd (federated credentials)
         shell: bash
