@@ -86,9 +86,10 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANTID }}
 
-      - name: Create azd environment
+      - name: Create or select azd environment
         shell: bash
         run: |
+          azd env select "$AZURE_ENV_NAME" 2>/dev/null || \
           azd env new "$AZURE_ENV_NAME" \
             --subscription "$AZURE_SUBSCRIPTION_ID" \
             --location "$AZURE_LOCATION" \
