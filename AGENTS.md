@@ -81,16 +81,18 @@ for ordinary implementation work.
 ### Lint / test / build
 
 - Build everything: `dotnet build Weather.sln` (CI in
-  `.github/workflows/build-and-test.yml` builds each `.csproj` in Release +
+  `.github/workflows/build-test.yml` builds each `.csproj` in Release +
   `npm ci && npm run build && npm test -- --run` in `ui-react`).
 - React: `npm run build`, and `npm test -- --run` (Vitest).
 - .NET test projects: `core-dotnet/core.tests`, `api-dotnet/api.tests`,
   `mvc-dotnet/mvc.tests`, `worker-dotnet/worker.tests`, `ui-blazor/blazor.tests`,
   `mcp-srv-app-service/mcp.tests`, and `mcp-srv-func-app/mcp.tests` (see CI
-  `build-and-test.yml`).
-- The `prod-deploy-*.yml` workflows auto-deploy when `build-and-test` completes
-  successfully on `main` (after `provision-wx1116-prod-infra`). Each workflow can also be run
-  manually via `workflow_dispatch` on any branch (e.g. hotfixes).
+  `build-test.yml`).
+- On push to `main`, `build-test-provision-deploy.yml` calls `build-test.yml`,
+  then `prod-provision-infra.yml` (`needs: [build_test]`), then every
+  `prod-deploy-*.yml` in parallel (`needs: [provision]`). Each stage's
+  workflow file can also be run standalone via `workflow_dispatch` on any
+  branch (e.g. hotfixes).
 - Production hosting is **Azure Container Apps + ACR** (five ASP.NET images) plus
   **Functions on ACA** for `mcp-srv-func-app` and **Static Web Apps** for React.
   First-deploy bootstrap: `docs/aca-bootstrap.md`.

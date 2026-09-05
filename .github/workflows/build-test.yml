@@ -2,8 +2,15 @@ name: build-and-test
 run-name: Build and Test
 
 on:
+  # main is excluded here -- build-test-provision-deploy.yml calls this
+  # workflow via workflow_call on every push to main instead, and a
+  # standalone push-triggered run here would share this workflow's own
+  # concurrency group with that nested call and could cancel it, silently
+  # skipping provision/deploy for the release.
   push:
+    branches-ignore: [main]
   workflow_dispatch:
+  workflow_call:
 
 # Newer pushes cancel older in-progress builds for the same ref.
 concurrency:
