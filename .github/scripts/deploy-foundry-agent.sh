@@ -33,8 +33,8 @@
 #   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL   Foundry project endpoint
 #   AZURE_FOUNDRY_ACCESS_TOKEN         Entra ID bearer token (scope https://ai.azure.com/.default)
 #   AZURE_FOUNDRY_PROD_EUS2_MODEL      Model deployment name, e.g. gpt-5.4-mini
-#   MCP_SRV_APP_SERVICE_URL / MCP_SRV_APP_SERVICE_KEY
-#   MCP_SRV_FUNC_APP_URL / MCP_SRV_FUNC_APP_KEY
+#   MCP_SRV_APP_SERVICE_URL
+#   MCP_SRV_FUNC_APP_URL
 
 set -euo pipefail
 
@@ -51,35 +51,29 @@ fi
 : "${AZURE_FOUNDRY_ACCESS_TOKEN:?}"
 : "${AZURE_FOUNDRY_PROD_EUS2_MODEL:?}"
 : "${MCP_SRV_APP_SERVICE_URL:?}"
-: "${MCP_SRV_APP_SERVICE_KEY:?}"
 : "${MCP_SRV_FUNC_APP_URL:?}"
-: "${MCP_SRV_FUNC_APP_KEY:?}"
 
 API_VERSION="2025-05-01"
 ENDPOINT="${AZURE_FOUNDRY_PROD_EUS2_PROJ_URL%/}/assistants?api-version=${API_VERSION}"
 
-# Same MCP tool shape (type/server_label/server_url/headers/require_approval)
+# Same MCP tool shape (type/server_label/server_url/require_approval)
 # ChatMcpToolFactory/ChatHostedMcpToolFactory already build in-process for
 # Chat1b/Chat2b, and the same server_label naming (McpSrvAppService /
 # McpSrvFuncApp), so the agent-hosted tools match the rest of the app.
 TOOLS_JSON=$(jq -n \
   --arg appUrl "${MCP_SRV_APP_SERVICE_URL%/}/mcp" \
-  --arg appKey "Bearer ${MCP_SRV_APP_SERVICE_KEY}" \
   --arg funcUrl "${MCP_SRV_FUNC_APP_URL%/}/runtime/webhooks/mcp" \
-  --arg funcKey "${MCP_SRV_FUNC_APP_KEY}" \
   '[
     {
       type: "mcp",
       server_label: "McpSrvAppService",
       server_url: $appUrl,
-      headers: { Authorization: $appKey },
       require_approval: "never"
     },
     {
       type: "mcp",
       server_label: "McpSrvFuncApp",
       server_url: $funcUrl,
-      headers: { "x-functions-key": $funcKey },
       require_approval: "never"
     }
   ]')
