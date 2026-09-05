@@ -56,23 +56,23 @@ fi
 API_VERSION="2025-05-01"
 ENDPOINT="${AZURE_FOUNDRY_PROD_EUS2_PROJ_URL%/}/assistants?api-version=${API_VERSION}"
 
-# Same MCP tool shape (type/server_label/server_url/require_approval)
-# ChatMcpToolFactory/ChatHostedMcpToolFactory already build in-process for
-# Chat1b/Chat2b, and the same server_label naming (McpSrvAppService /
-# McpSrvFuncApp), so the agent-hosted tools match the rest of the app.
+# Same MCP tool shape (type/server_label/server_url/require_approval),
+# but auth is no longer embedded in the payload: Foundry applies credentials
+# from the project's provisioned Custom Keys connections
+# (MyMcpSrvAppService / MyMcpSrvFuncApp).
 TOOLS_JSON=$(jq -n \
   --arg appUrl "${MCP_SRV_APP_SERVICE_URL%/}/mcp" \
   --arg funcUrl "${MCP_SRV_FUNC_APP_URL%/}/runtime/webhooks/mcp" \
   '[
     {
       type: "mcp",
-      server_label: "McpSrvAppService",
+      server_label: "MyMcpSrvAppService",
       server_url: $appUrl,
       require_approval: "never"
     },
     {
       type: "mcp",
-      server_label: "McpSrvFuncApp",
+      server_label: "MyMcpSrvFuncApp",
       server_url: $funcUrl,
       require_approval: "never"
     }
