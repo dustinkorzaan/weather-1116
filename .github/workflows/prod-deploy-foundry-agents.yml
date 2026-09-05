@@ -1,19 +1,22 @@
 # Publishes the two hosted Foundry agents (wx1116-agent-current-weather for V5,
 # wx1116-agent-chat for Chat3) via .github/scripts/deploy-foundry-agent.sh.
 #
-# Manual (workflow_dispatch) only - unlike the other prod-deploy-*.yml
-# workflows, this does NOT run on every push to main. infra/main.bicep
-# already provisions the gpt-5.4-mini model deployment and the two MCP tool
+# Runs automatically once provision-wx1116-prod-infra finishes successfully
+# on main, same as the other prod-deploy-*.yml workflows - infra/main.bicep
+# provisions the gpt-5.4-mini model deployment and the two MCP tool
 # connections (MyMcpSrvAppService, MyMcpSrvFuncApp) idempotently on every
-# push, but Foundry has no ARM resource for agents, and the create/update
-# contract this script uses is a best-effort match to the
+# push, but Foundry has no ARM resource for agents, so this workflow
+# publishes/updates them separately against the same provisioned project.
+# workflow_dispatch still works for manual runs on any branch.
+#
+# The create/update contract this script uses is a best-effort match to the
 # Assistants-compatible API - it was written without being able to verify it
-# against current Microsoft docs from the authoring session. Run this by
-# hand, then confirm in the Foundry portal (Agents -> <name> -> Versions)
-# that a new version actually published, before wiring it into push-to-main.
+# against current Microsoft docs from the authoring session. Watch this
+# workflow's runs, and confirm in the Foundry portal (Agents -> <name> ->
+# Versions) that a new version actually published.
 #
 # System prompts live in .github/foundry-agents/*.instructions.md - edit
-# those files and re-run this workflow to publish an update.
+# those files and push (or re-run this workflow) to publish an update.
 #
 # Reuses existing repo secrets/vars (no new ones needed):
 #   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL / AZURE_FOUNDRY_PROD_EUS2_KEY / AZURE_FOUNDRY_PROD_EUS2_MODEL
@@ -24,6 +27,9 @@ name: prod-deploy-foundry-agents
 run-name: Deploy wx1116-prod Foundry agents
 
 on:
+  workflow_run:
+    workflows: ["provision-wx1116-prod-infra"]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -32,6 +38,14 @@ concurrency:
 
 jobs:
   deploy:
+    # Only publish once provision-wx1116-prod-infra has finished successfully
+    # on main -- agents reference the model deployment and MCP connections
+    # infra provisions, so they must run after it, not concurrently with it.
+    # workflow_dispatch still runs unconditionally for manual publishes.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     environment: prod
     permissions:
@@ -39,6 +53,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Publish wx1116-agent-current-weather (V5 current-ai-weather)
         shell: bash
