@@ -10,8 +10,8 @@ param environmentName string = 'prod'
 @description('Azure region for every resource in this environment.')
 param location string = 'eastus2'
 
-@description('Azure region for the SQL server/database only. Separate from `location` because East US 2 has (at least intermittently) rejected new Azure SQL server creation with RegionDoesNotAllowProvisioning; East US does not have that restriction.')
-param sqlLocation string = 'eastus'
+@description('Azure region for the SQL server/database only. Separate from `location` because East US 2 and East US have both (at least intermittently) rejected new Azure SQL server creation with RegionDoesNotAllowProvisioning; Central US does not have that restriction.')
+param sqlLocation string = 'centralus'
 
 @description('Short name prefix used to build resource names.')
 param namePrefix string = 'wx1116'
