@@ -33,7 +33,7 @@ param postgresAdministratorLogin string
 param existingContainerAppKeys string = ''
 
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
-var acrPushRoleId = '8311e382-0749-4cb8-61a8-304f252e45ec'
+var acrPushRoleId = '8311e382-0749-4cb8-b61a-304f252e45ec'
 
 // First create only. dotnet/samples:aspnetapp is a runnable ASP.NET app that
 // serves on 8080, the same port the real images use, so the first revision goes
