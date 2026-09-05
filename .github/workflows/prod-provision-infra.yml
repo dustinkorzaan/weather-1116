@@ -68,9 +68,16 @@ on:
       - main
   workflow_dispatch:
 
+# No cancel-in-progress: it only kills the runner, not the ARM deployment
+# `azd provision` already submitted, so a cancelled-then-retriggered run
+# collides with its own still-active deployment ("cannot be saved, because
+# this would overwrite an existing deployment which is still active") on
+# the fixed nested deployment names (e.g. "static-web-app") in
+# infra/main.bicep. Queuing instead is free: azd provision already blocks
+# until its deployment reaches a terminal state, so a queued run never
+# starts while the previous one's ARM deployment is still live.
 concurrency:
   group: prod-provision-infra
-  cancel-in-progress: true
 
 permissions:
   contents: read
