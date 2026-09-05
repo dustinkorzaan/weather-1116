@@ -26,8 +26,8 @@ param acrName string = 'wx1116prodacr'
 param storageAccountName string = 'wx1116prodblob'
 
 @secure()
-@description('PostgreSQL admin login username. Supply via azd env set / --parameters at deploy time.')
-param postgresAdministratorLogin string
+@description('SQL admin login username. Supply via azd env set / --parameters at deploy time.')
+param sqlAdministratorLogin string
 
 @description('Comma-separated keys of the container apps that already exist, e.g. api,mvc,worker. Set by infra/scripts/capture-existing-container-apps.sh before azd provision; empty means first provision.')
 param existingContainerAppKeys string = ''
@@ -201,13 +201,15 @@ module functionsContainerApp 'modules/functions-container-app.bicep' = {
   }
 }
 
-module postgresql 'modules/postgresql.bicep' = {
-  name: 'postgresql'
+module sql 'modules/sql.bicep' = {
+  name: 'sql'
   params: {
-    serverName: '${namePrefix}-${environmentName}-postgres'
-    databaseName: '${namePrefix}-${environmentName}-hangfire'
+    serverName: '${namePrefix}-${environmentName}-sql-server'
+    databaseName: '${namePrefix}-${environmentName}-sql-database'
     location: location
-    administratorLogin: postgresAdministratorLogin
+    administratorLogin: sqlAdministratorLogin
+    entraAdminPrincipalId: githubActionsIdentity.outputs.principalId
+    entraAdminLoginName: githubActionsIdentityName
   }
 }
 
@@ -254,8 +256,8 @@ output WORKER_HOSTNAME string = containerApps[3].outputs.fqdn
 output MCP_SRV_APP_SERVICE_HOSTNAME string = containerApps[4].outputs.fqdn
 output MCP_SRV_FUNC_APP_HOSTNAME string = functionsContainerApp.outputs.fqdn
 
-output POSTGRES_SERVER_FQDN string = postgresql.outputs.serverFullyQualifiedDomainName
-output POSTGRES_DATABASE_NAME string = postgresql.outputs.databaseName
+output SQL_SERVER_FQDN string = sql.outputs.serverFullyQualifiedDomainName
+output SQL_DATABASE_NAME string = sql.outputs.databaseName
 output STORAGE_ACCOUNT_NAME string = functionsContainerApp.outputs.storageAccountName
 output APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 
