@@ -34,12 +34,21 @@ param entraAdminPrincipalId string
 @description('Login/display name of that same Entra admin.')
 param entraAdminLoginName string
 
-@description('Database SKU tier/name. Default Standard S0 -- Hangfire\'s schema/indexes likely exceed Basic\'s 5 DTU.')
-param databaseSkuName string = 'S0'
-param databaseSkuTier string = 'Standard'
+@description('Database SKU tier/name. Default Basic (5 DTU).')
+param databaseSkuName string = 'Basic'
+param databaseSkuTier string = 'Basic'
 
 @description('Max database size in bytes. Default 2 GiB.')
 param maxSizeBytes int = 2147483648
+
+@description('Backup storage redundancy. Default Local (locally-redundant backup storage).')
+@allowed([
+  'Local'
+  'Zone'
+  'Geo'
+  'GeoZone'
+])
+param backupStorageRedundancy string = 'Local'
 
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01' = {
   name: serverName
@@ -97,6 +106,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-08-01' = {
   }
   properties: {
     maxSizeBytes: maxSizeBytes
+    requestedBackupStorageRedundancy: backupStorageRedundancy
   }
 }
 
