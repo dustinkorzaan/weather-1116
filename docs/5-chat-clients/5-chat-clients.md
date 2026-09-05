@@ -162,7 +162,7 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 Chat1a and Chat2a do **not** require MCP URLs. Chat3 does **not** require MCP URLs in the app
 either — those belong on the hosted agent.
 
-`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` remains the V5 console agent (`wx1116-agent-default`,
+`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` remains the V5 console agent (`wx1116-agent-current-weather`,
 JSON weather). Do not point Chat3 at that agent.
 
 ## Create the Chat3 Foundry agent (`wx1116-agent-chat`)
@@ -170,12 +170,12 @@ JSON weather). Do not point Chat3 at that agent.
 This is a **hosted Foundry Agent** (prompt agent), not a new model deployment and not a
 new SDK “client” type. The code already has a `ProjectResponsesClient` that *targets* the
 agent by name. You create the agent in the Foundry project; Chat3 then calls it the same
-way V5 calls `wx1116-agent-default`.
+way V5 calls `wx1116-agent-current-weather`.
 
-`wx1116-agent-chat` is a good name: it sits next to `wx1116-agent-default` and says this
+`wx1116-agent-chat` is a good name: it sits next to `wx1116-agent-current-weather` and says this
 one is the conversational chat agent.
 
-Do **not** clone `wx1116-agent-default` as-is. That agent owns a strict `AIWeatherResponse`
+Do **not** clone `wx1116-agent-current-weather` as-is. That agent owns a strict `AIWeatherResponse`
 JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form Markdown.
 
 ### Portal steps

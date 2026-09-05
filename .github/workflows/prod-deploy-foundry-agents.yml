@@ -1,4 +1,4 @@
-# Publishes the two hosted Foundry agents (wx1116-agent-default for V5,
+# Publishes the two hosted Foundry agents (wx1116-agent-current-weather for V5,
 # wx1116-agent-chat for Chat3) via .github/scripts/deploy-foundry-agent.sh.
 #
 # Manual (workflow_dispatch) only - unlike the other prod-deploy-*.yml
@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Publish wx1116-agent-default (V5 current-ai-weather)
+      - name: Publish wx1116-agent-current-weather (V5 current-ai-weather)
         shell: bash
         env:
           AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
@@ -53,9 +53,9 @@ jobs:
           MCP_SRV_FUNC_APP_KEY: ${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
         run: |
           bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
-            wx1116-agent-default \
-            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-default.instructions.txt" \
-            --response-schema "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-default.response-schema.json"
+            wx1116-agent-current-weather \
+            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-current-weather.instructions.txt" \
+            --response-schema "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-current-weather.response-schema.json"
 
       - name: Publish wx1116-agent-chat (Chat3)
         shell: bash

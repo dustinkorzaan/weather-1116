@@ -4,7 +4,7 @@
 // Cognitive Services User access, deploys the gpt-5.4-mini model on the
 // account, and registers the two MCP tool hosts as Custom Keys connections
 // on the project (MyMcpSrvAppService, MyMcpSrvFuncApp) so hosted agents can
-// reference them as tools. Agent creation itself (wx1116-agent-default,
+// reference them as tools. Agent creation itself (wx1116-agent-current-weather,
 // wx1116-agent-chat) remains a manual follow-up -- there is no ARM resource
 // for agents on this preview API surface yet.
 //
@@ -115,7 +115,7 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
 }
 
 // Custom Keys connections register the two MCP tool hosts on the project so
-// hosted agents (wx1116-agent-default, wx1116-agent-chat) can reference them
+// hosted agents (wx1116-agent-current-weather, wx1116-agent-chat) can reference them
 // as MCP tools by connection name instead of embedding raw secrets in each
 // agent definition. Each connection stores the tool's base URL as `target`
 // and its single auth header as one entry under `credentials.keys`.
