@@ -5,11 +5,19 @@
 # workflow_run) and runs unconditionally on every such push -- main only
 # ever receives merged PRs, and merges are gated on the
 # wx-1116-build-and-test-success required check via branch protection, so
-# that's the test gate. The deploy workflows are likewise triggered
-# directly on push to main, independently of this workflow rather than
-# chained off its completion -- provision is safe to re-run on every push to
-# main (rather than only when infra/** changed), and that is intentional
-# rather than a placeholder.
+# that's the test gate. Provision is safe to re-run on every push to main
+# (rather than only when infra/** changed), and that is intentional rather
+# than a placeholder.
+#
+# The deploy workflows (prod-deploy-*.yml) are chained off THIS workflow's
+# completion via workflow_run, rather than triggering directly on push --
+# running them concurrently with this one caused "there is an active
+# provisioning operation in progress" errors, since `azd provision`'s
+# resource-group-scoped Bicep deployment and the deploy jobs' per-app
+# `az containerapp update` calls both take ARM deployment locks in
+# wx1116-prod-rg. Deploys only proceed when this workflow's conclusion is
+# success and it ran on main; workflow_dispatch still deploys unconditionally
+# for manual runs on any branch.
 #
 # "Safe to re-run" is not free, though: a Bicep deployment is a PUT, so
 # provision would reassert the placeholder image and a bare app-settings list

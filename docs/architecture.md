@@ -399,9 +399,12 @@ builds on every push:
 - `WeatherBlazor.Tests` component tests.
 - `WeatherMcpSrvAppService.Tests` and `WeatherMcpSrvFuncApp.Tests` About/tool-registration tests.
 
-Production deploy workflows (`prod-deploy-*.yml`) auto-deploy when **build-and-test** completes successfully on `main` (after
-`provision-wx1116-prod-infra`). Each deploy workflow can also be triggered manually
-via `workflow_dispatch` on any branch. Deployables include API, MVC, React, Blazor,
+Production deploy workflows (`prod-deploy-*.yml`) auto-deploy via `workflow_run`
+once **`provision-wx1116-prod-infra`** completes successfully on `main` -- they no
+longer trigger directly on push, so they can't race infra provisioning for the
+same Azure resources (see `prod-provision-infra.yml` and the "active provisioning
+operation in progress" note there). Each deploy workflow can also be triggered
+manually via `workflow_dispatch` on any branch. Deployables include API, MVC, React, Blazor,
 worker-dotnet, and both MCP hosts on **Azure Container Apps + ACR** (Functions-on-ACA
 for `mcp-srv-func-app`). Bootstrap: [`docs/aca-bootstrap.md`](aca-bootstrap.md).
 
