@@ -36,7 +36,7 @@ Point it at:
 ## Postman
 
 Add a request to a Postman collection pointed at the `/mcp` endpoint (
-`https://weather1116-prod-mcp-srv-app-service-<slot>.westus2-01.azurewebsites.net/mcp`):
+`https://wx1116-prod-mcp-srv-app-service.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/mcp`):
 
 * Method **POST**, header `Authorization: Bearer <MCP_SRV_APP_SERVICE_KEY>`
 * Body → raw JSON, a JSON-RPC request, e.g. `tools/call` for
