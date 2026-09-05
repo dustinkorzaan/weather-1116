@@ -30,7 +30,7 @@ weather progression:
 
 Visit the [React UI](https://wx.korzaan.com/current-ai-weather) to view Current Weather Wired to V3, V4, and V5.
 
-Visit the Map in [React UI](https://wx.korzaan.com/), [Blazor UI](https://weather1116-prod-blazor.azurewebsites.net/), and [MVC UI](https://weather1116-prod-mvc.azurewebsites.net/) wired specifically to V3.
+Visit the Map in [React UI](https://wx.korzaan.com/), [Blazor UI](https://wx1116-prod-blazor.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/), and [MVC UI](https://wx1116-prod-mvc.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/) wired specifically to V3.
 
 ## Chat clients
 
@@ -61,8 +61,8 @@ Foundry console.
 |  | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
 | [Visit](https://wx.korzaan.com) | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
-| [Visit](https://weather1116-prod-blazor.azurewebsites.net) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
-| [Visit](https://weather1116-prod-mvc.azurewebsites.net) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
+| [Visit](https://wx1116-prod-blazor.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
+| [Visit](https://wx1116-prod-mvc.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
 |  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
 |  | Core | [`core-dotnet/core`](core-dotnet/core) | In API, MVC, Worker, and MCP |  |
 |  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |

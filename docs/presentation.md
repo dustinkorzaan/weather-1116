@@ -41,8 +41,8 @@ and the Foundry console learning path (V1 → V5).
 4. **V4**: model-direct with remote MCP tools
 5. **V5**: hosted Foundry agent; agent owns the instructions, response schema, and MCP tools
 6. **Live Demos**
-   - Live links: [React UI](https://wx.korzaan.com), [Blazor UI](https://weather1116-prod-blazor.azurewebsites.net), [MVC UI](https://weather1116-prod-mvc.azurewebsites.net)
-   - Current AI Weather links: [React UI](https://wx.korzaan.com/current-ai-weather), [Blazor UI](https://weather1116-prod-blazor.azurewebsites.net/current-ai-weather), [MVC UI](https://weather1116-prod-mvc.azurewebsites.net/current-ai-weather)
-   - Chat links: [React UI](https://wx.korzaan.com/chat-clients), [Blazor UI](https://weather1116-prod-blazor.azurewebsites.net/chat-clients), [MVC UI](https://weather1116-prod-mvc.azurewebsites.net/chat-clients)
+   - Live links: [React UI](https://wx.korzaan.com), [Blazor UI](https://wx1116-prod-blazor.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io), [MVC UI](https://wx1116-prod-mvc.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io)
+   - Current AI Weather links: [React UI](https://wx.korzaan.com/current-ai-weather), [Blazor UI](https://wx1116-prod-blazor.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/current-ai-weather), [MVC UI](https://wx1116-prod-mvc.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/current-ai-weather)
+   - Chat links: [React UI](https://wx.korzaan.com/chat-clients), [Blazor UI](https://wx1116-prod-blazor.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/chat-clients), [MVC UI](https://wx1116-prod-mvc.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/chat-clients)
 
 Adjust the first 2 to taste, keep the main palette focused on the next 3, and finish with the last live UI demos for dessert.
