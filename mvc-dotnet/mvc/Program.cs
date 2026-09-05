@@ -1,6 +1,7 @@
 using Core;
 using Core.About;
 using Core.Chat;
+using Core.Data;
 using Core.Hangfire;
 using DotNetEnv;
 using Hangfire;
@@ -15,7 +16,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Hangfire client only: this app enqueues jobs onto the shared storage
 // (DB_CONNECTION_STRING); the worker is the only app that runs the servers.
 // Falls back to in-memory storage locally when no connection string is set.
-var dbConnectionString = builder.Configuration["DB_CONNECTION_STRING"];
+// Authenticates via this app's user-assigned managed identity (AZURE_CLIENT_ID,
+// set by infra/modules/container-app.bicep) instead of a SQL login/password --
+// see ManagedIdentitySqlConnectionStringFactory.
+var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
+    builder.Configuration["DB_CONNECTION_STRING"],
+    builder.Configuration["AZURE_CLIENT_ID"]);
 builder.Services.AddHangfire(config =>
 {
     config.UseDefaultAutomaticRetry();

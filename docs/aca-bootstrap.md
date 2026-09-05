@@ -41,7 +41,7 @@ and assigns Contributor + User Access Administrator on this resource group.
 
 | Secret | Purpose |
 | --- | --- |
-| `AZURE_SQL_DB_CONNECTION_STRING` | Hangfire + SQL for api/mvc/worker |
+| `AZURE_SQL_DB_CONNECTION_STRING` | Hangfire + SQL for api/mvc/worker -- server/database only, no `Authentication` clause and no username/password (see below) |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Foundry API key |
 | `PROD_MCP_SRV_APP_SERVICE_KEY` | Bearer token for MCP app-service host |
 | `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key — you choose the value; deploy applies it |
@@ -97,6 +97,25 @@ az staticwebapp secrets list \
 ```
 
 Store as GitHub secret `AZURE_UI_REACT_TOKEN`.
+
+### `AZURE_SQL_DB_CONNECTION_STRING` format (Entra managed identity, no password)
+
+api/mvc/worker authenticate to Azure SQL via their own user-assigned managed
+identity, not a SQL login. The secret should hold only the server/database
+portion -- **no** `Authentication`, `User ID`, or `Password` keyword:
+
+```text
+Server=tcp:wx1116-prod-sql-srv.database.windows.net,1433;Initial Catalog=wx1116-prod-sql-database;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30
+```
+
+Each app appends `Authentication=Active Directory Default` plus its own
+`AZURE_CLIENT_ID` as `User ID` at startup
+(`Core.Data.ManagedIdentitySqlConnectionStringFactory`), so
+`DefaultAzureCredential` resolves that app's specific identity rather than
+one of the other five provisioned in this environment. If the secret already
+contains an `Authentication` clause, the factory leaves it untouched --
+useful for a one-off SQL-login override during local testing, but not the
+production shape.
 
 ## Step 4 — SQL contained users (once)
 
