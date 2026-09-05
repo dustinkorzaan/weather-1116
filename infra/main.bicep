@@ -36,11 +36,11 @@ param sqlAdministratorLogin string
 param existingContainerAppKeys string = ''
 
 @secure()
-@description('Bearer token for the MCP Server on App Service tool host, registered as the MyMcpSrvAppService Foundry connection. Supply via azd env set / --parameters at deploy time.')
+@description('Bearer token for the MCP Server on App Service tool host, registered as the MyMcpSrvAppService Foundry RemoteTool connection. Supply via azd env set / --parameters at deploy time.')
 param mcpSrvAppServiceKey string
 
 @secure()
-@description('Function key for the MCP Server on Function App tool host, registered as the MyMcpSrvFuncApp Foundry connection. Supply via azd env set / --parameters at deploy time.')
+@description('Function key for the MCP Server on Function App tool host, registered as the MyMcpSrvFuncApp Foundry RemoteTool connection. Supply via azd env set / --parameters at deploy time.')
 param mcpSrvFuncAppKey string
 
 @description('Custom domain hostname to bind to the Static Web App, e.g. wx.korzaan.com. Its CNAME must already point at the Static Web App default hostname before this deploys, or validation fails. Empty skips custom domain binding.')

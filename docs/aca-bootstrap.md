@@ -225,16 +225,21 @@ before setting the `mcp_extension` system key; if the CLI command group is
 missing, the job fails with manual-setup guidance instead of silently skipping
 MCP auth.
 
-## Step 6 — Foundry MCP servers
+## Step 6 — Foundry MCP tools and agents
 
-In the Foundry portal, configure MCP servers for agents:
+Do not configure MCP servers or agents in the Foundry portal.
 
-| Server | URL | Auth |
+- **Tools (connections):** `infra/modules/ai-foundry.bicep` registers
+  `MyMcpSrvAppService` and `MyMcpSrvFuncApp` as `RemoteTool` + `CustomKeys`
+  connections (URL + auth header) on every `azd provision`.
+- **Agents:** `prod-deploy-foundry-agents.yml` publishes
+  `wx1116-agent-current-weather` and `wx1116-agent-chat` against those
+  connections with `require_approval: never`.
+
+| Connection | URL | Auth |
 | --- | --- | --- |
-| McpSrvFuncApp | `https://<func-host>/runtime/webhooks/mcp` | Header `x-functions-key` |
-| McpSrvAppService | `https://<mcp-app-host>/mcp` | Bearer token |
-
-Set `require_approval: never` on each tool.
+| MyMcpSrvFuncApp | `https://<func-host>/runtime/webhooks/mcp` | Header `x-functions-key` |
+| MyMcpSrvAppService | `https://<mcp-app-host>/mcp` | Bearer token |
 
 ## Step 7 — Validate
 

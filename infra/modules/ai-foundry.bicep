@@ -2,11 +2,12 @@
 // ML-workspace-based Hub). Connects to the East US 2 App Insights instance
 // for tracing, grants api/mvc/worker's managed identities passwordless
 // Cognitive Services User access, deploys the gpt-5.4-mini model on the
-// account, and registers the two MCP tool hosts as Custom Keys connections
+// account, and registers the two MCP tool hosts as RemoteTool connections
 // on the project (MyMcpSrvAppService, MyMcpSrvFuncApp) so hosted agents can
-// reference them as tools. Also grants the GitHub Actions identity Foundry
-// User at project scope so it can publish agents via the Agents API (which
-// requires Entra ID auth, not the account api-key used for model inference).
+// attach them as MCP tools by project_connection_id. Also grants the GitHub
+// Actions identity Foundry User at project scope so it can publish agents
+// via the Agents API (which requires Entra ID auth, not the account api-key
+// used for model inference).
 //
 // NOTE: the Microsoft.CognitiveServices API surface for the unified
 // Foundry resource/project/connections/deployments model has moved around
@@ -60,9 +61,9 @@ var cognitiveServicesUserRoleId = 'a97b65f3-24c7-4388-baec-2e87135dc908'
 
 // "Foundry User" (formerly "Azure AI User"): the least-privileged built-in
 // role that grants agents/*/action, required to create/publish agents via
-// the Agents (Assistants-compatible) API. Must be assigned at project scope
-// -- the account-scoped Cognitive Services User role above only covers
-// model inference (chat/responses), not agent management.
+// the Foundry Agents REST API (`/agents?api-version=v1`). Must be assigned
+// at project scope -- the account-scoped Cognitive Services User role above
+// only covers model inference (chat/responses), not agent management.
 var foundryUserRoleId = '53ca6127-db72-4b80-b1b0-d745d6d5456d'
 
 resource foundryAccount 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
@@ -124,16 +125,17 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
   }
 }
 
-// Custom Keys connections register the two MCP tool hosts on the project so
-// hosted agents (wx1116-agent-current-weather, wx1116-agent-chat) can reference them
-// as MCP tools by connection name instead of embedding raw secrets in each
-// agent definition. Each connection stores the tool's base URL as `target`
-// and its single auth header as one entry under `credentials.keys`.
+// RemoteTool connections are the IaC home for MCP tool hosts. Foundry has
+// no ARM resource for agents themselves, so prod-deploy-foundry-agents.yml
+// attaches these connections onto each hosted agent as MCP tools
+// (project_connection_id + require_approval: never). category must be
+// RemoteTool (not CustomKeys) or the Agents API / portal picker will not
+// treat them as MCP servers. Auth stays CustomKeys: one header per host.
 resource mcpSrvAppServiceConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: foundryProject
   name: 'MyMcpSrvAppService'
   properties: {
-    category: 'CustomKeys'
+    category: 'RemoteTool'
     target: mcpSrvAppServiceUrl
     authType: 'CustomKeys'
     isSharedToAll: true
@@ -142,6 +144,9 @@ resource mcpSrvAppServiceConnection 'Microsoft.CognitiveServices/accounts/projec
         Authorization: 'Bearer ${mcpSrvAppServiceKey}'
       }
     }
+    metadata: {
+      type: 'generic_mcp'
+    }
   }
 }
 
@@ -149,7 +154,7 @@ resource mcpSrvFuncAppConnection 'Microsoft.CognitiveServices/accounts/projects/
   parent: foundryProject
   name: 'MyMcpSrvFuncApp'
   properties: {
-    category: 'CustomKeys'
+    category: 'RemoteTool'
     target: mcpSrvFuncAppUrl
     authType: 'CustomKeys'
     isSharedToAll: true
@@ -157,6 +162,9 @@ resource mcpSrvFuncAppConnection 'Microsoft.CognitiveServices/accounts/projects/
       keys: {
         'x-functions-key': mcpSrvFuncAppKey
       }
+    }
+    metadata: {
+      type: 'generic_mcp'
     }
   }
 }

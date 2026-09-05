@@ -206,6 +206,9 @@ jobs:
       - name: Validate main.parameters.json is well-formed
         run: jq empty infra/main.parameters.json
 
+      - name: Validate Foundry agent deploy payload
+        run: bash .github/scripts/deploy-foundry-agent.test.sh
+
   docker-build:
     name: Build container images
     runs-on: ubuntu-latest
