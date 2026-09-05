@@ -13,7 +13,7 @@ a one-shot structured JSON response.
 | **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-srv-func-app`, `mcp-srv-app-service`) | Foundry Console **V4** |
 | **Chat2a** | Microsoft Agent Framework (model-direct) | In-process tools via `AIFunctionFactory` | V3 orchestration style |
 | **Chat2b** | Microsoft Agent Framework (model-direct) | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
-| **Chat3** | Hosted Microsoft Foundry agent | MCP tools configured **on the agent** in Foundry (`wx1116-agent-chat`) | Foundry Console **V5** |
+| **Chat3** | Hosted Microsoft Foundry agent | MCP tools configured **on the agent** in Foundry (`wx1116-agent-for-chat`) | Foundry Console **V5** |
 
 Each tab has its **own controller**, **own Core service**, and **own session namespace**
 (`Chat1a:…`, `Chat1b:…`, `Chat3:…`, etc.) so implementations do not collide.
@@ -48,7 +48,7 @@ flowchart TB
         S3[Chat3Service]
         Store[IChatSessionStore]
         Tools[WeatherToolExecutor / MCP factories]
-        Agent[wx1116-agent-chat]
+        Agent[wx1116-agent-for-chat]
     end
 
     React --> api
@@ -121,7 +121,7 @@ builder.Services.AddWeatherChatClients();
 ## Tools (no web search)
 
 Chat1 and Chat2 expose the same public geo and weather tools from this repo (no web search).
-Chat3 uses the **same tool names**, but they are attached to `wx1116-agent-chat` in Foundry,
+Chat3 uses the **same tool names**, but they are attached to `wx1116-agent-for-chat` in Foundry,
 not declared on the request.
 
 | Tool | Purpose |
@@ -162,20 +162,20 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 Chat1a and Chat2a do **not** require MCP URLs. Chat3 does **not** require MCP URLs in the app
 either — those belong on the hosted agent.
 
-`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` remains the V5 console agent (`wx1116-agent-current-weather`,
+`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` remains the V5 console agent (`wx1116-agent-for-current-weather`,
 JSON weather). Do not point Chat3 at that agent.
 
-## Create the Chat3 Foundry agent (`wx1116-agent-chat`)
+## Create the Chat3 Foundry agent (`wx1116-agent-for-chat`)
 
 This is a **hosted Foundry Agent** (prompt agent), not a new model deployment and not a
 new SDK “client” type. The code already has a `ProjectResponsesClient` that *targets* the
 agent by name. You create the agent in the Foundry project; Chat3 then calls it the same
-way V5 calls `wx1116-agent-current-weather`.
+way V5 calls `wx1116-agent-for-current-weather`.
 
-`wx1116-agent-chat` is a good name: it sits next to `wx1116-agent-current-weather` and says this
+`wx1116-agent-for-chat` is a good name: it sits next to `wx1116-agent-for-current-weather` and says this
 one is the conversational chat agent.
 
-Do **not** clone `wx1116-agent-current-weather` as-is. That agent owns a strict `AIWeatherResponse`
+Do **not** clone `wx1116-agent-for-current-weather` as-is. That agent owns a strict `AIWeatherResponse`
 JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form Markdown.
 
 ### Automated publish
@@ -183,7 +183,7 @@ JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form
 Do not create Chat3 (or V5) by hand. `prod-provision-infra.yml` registers the
 two MCP hosts as Foundry **RemoteTool** connections (`MyMcpSrvAppService`,
 `MyMcpSrvFuncApp`). `prod-deploy-foundry-agents.yml` then publishes
-`wx1116-agent-chat` (and `wx1116-agent-current-weather`) against those
+`wx1116-agent-for-chat` (and `wx1116-agent-for-current-weather`) against those
 connections with `require_approval: never`. Instructions live in
 `.github/foundry-agents/`.
 
@@ -193,12 +193,12 @@ Only if you need to inspect or repair a published version:
 
 1. Open the Microsoft Foundry portal for the same project as
    `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
-2. **Agents** → `wx1116-agent-chat` (must match `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME`).
+2. **Agents** → `wx1116-agent-for-chat` (must match `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME`).
 3. Confirm the model is the same deployment as `AZURE_FOUNDRY_PROD_EUS2_MODEL`
    (for example `gpt-5.4-mini`).
 4. **Instructions:** the Chat3 text below (same as
    `ChatSystemInstructions.WeatherAssistant` /
-   `.github/foundry-agents/wx1116-agent-chat.instructions.md`).
+   `.github/foundry-agents/wx1116-agent-for-chat.instructions.md`).
 5. **Response format:** text / none. Do **not** attach a JSON schema.
 6. **Tools:** the two MCP connections above, **Approval** = **Never**.
    Chat3 does not round-trip approvals in app code (same as V5).

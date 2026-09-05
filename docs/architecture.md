@@ -114,7 +114,7 @@ Separate from **Current AI Weather**. All three UIs expose a chat panel on `/cha
 | Chat1b | Responses API | Remote MCP (V4) |
 | Chat2a | Agent Framework | In-process |
 | Chat2b | Agent Framework | Remote MCP |
-| Chat3 | Hosted Foundry agent | MCP on `wx1116-agent-chat` (V5) |
+| Chat3 | Hosted Foundry agent | MCP on `wx1116-agent-for-chat` (V5) |
 
 - **React / Blazor** → `POST /Chat1a/messages` … `/Chat3/messages` on Weather API (SSE stream)
 - **MVC** → same routes locally via `Chat1aController` … `Chat3Controller` + Core services
@@ -485,7 +485,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes (V3/V4) | Hosted model deployment name (e.g. `gpt-5.4-mini`); not used by V5, which sends only the user prompt |
 | `MCP_SRV_FUNC_APP_URL` / `MCP_SRV_FUNC_APP_KEY` | V4 only | `McpSrvFuncApp` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_APP_SERVICE_URL` / `MCP_SRV_APP_SERVICE_KEY` | V4 only | `McpSrvAppService` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
-| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-current-weather`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
+| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-for-current-weather`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
 
 `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on
 `/current-ai-weather`) runs tools in-process and does not need
@@ -498,7 +498,7 @@ The confirm-nashville-ai-weather-v4 worker recurring job needs them too.
 instead - the agent owns tool resolution, so no `MCP_SRV_*` variables apply.
 
 **V5 agent: MCP approval must be Never.** V5 is a one-shot handoff: the app
-sends only the user prompt. The hosted agent (`wx1116-agent-current-weather`) must run
+sends only the user prompt. The hosted agent (`wx1116-agent-for-current-weather`) must run
 MCP tools without asking this app to approve.
 
 The Foundry account/project itself (`infra/modules/ai-foundry.bicep`) now
@@ -508,7 +508,7 @@ hosts as **RemoteTool** connections on the project (`MyMcpSrvAppService`,
 kept in sync with the live `PROD_MCP_SRV_APP_SERVICE_KEY` /
 `PROD_MCP_SRV_FUNC_APP_KEY` secrets on every push to `main`). That is the
 IaC home for the tools: Foundry has no ARM resource for agents themselves,
-so publishing `wx1116-agent-current-weather` and `wx1116-agent-chat` is handled
+so publishing `wx1116-agent-for-current-weather` and `wx1116-agent-for-chat` is handled
 by the `prod-deploy-foundry-agents` workflow
 (`.github/workflows/prod-deploy-foundry-agents.yml`,
 `.github/scripts/deploy-foundry-agent.sh`). The script POSTs each prompt
@@ -525,17 +525,17 @@ GitHub Actions identity (granted the **Foundry User** role at project scope
 by `ai-foundry.bicep`) and mints a token scoped to
 `https://ai.azure.com/.default` for the script to send as
 `Authorization: Bearer`. System prompts live in
-`.github/foundry-agents/wx1116-agent-current-weather.instructions.md` and
-`wx1116-agent-chat.instructions.md` — edit those files and push (or re-run
+`.github/foundry-agents/wx1116-agent-for-current-weather.instructions.md` and
+`wx1116-agent-for-chat.instructions.md` — edit those files and push (or re-run
 the workflow) to publish an update. The default agent's response schema
-(`wx1116-agent-current-weather.response-schema.json`) matches `AIWeatherResponse`
+(`wx1116-agent-for-current-weather.response-schema.json`) matches `AIWeatherResponse`
 exactly (no `runLogDetails`).
 
 Portal fallback (only if you need to inspect or repair by hand):
 
 1. Open the Microsoft Foundry portal for the same project as
    `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
-2. **Agents** → `wx1116-agent-current-weather` (or `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
+2. **Agents** → `wx1116-agent-for-current-weather` (or `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
 3. Confirm the model is the `gpt-5.4-mini` deployment provisioned above.
 4. Confirm each MCP tool uses the `MyMcpSrvAppService` /
    `MyMcpSrvFuncApp` connections and **Approval** is **Never**
@@ -552,7 +552,7 @@ Suggested reading order: V1 → V2 → V3 → `GetCurrentAIWeatherV3Handler` in
 `GetCurrentAIWeatherV4Handler` (the production V4-pattern handler, the V4 tab
 on `/current-ai-weather`) → V5 →
 `GetCurrentAIWeatherV5Handler` (the production V5-pattern handler, the third
-`/current-ai-weather` tab) → Chat3 (`wx1116-agent-chat`).
+`/current-ai-weather` tab) → Chat3 (`wx1116-agent-for-chat`).
 
 **Chat3 settings** (hosted chat agent; independent of V5):
 

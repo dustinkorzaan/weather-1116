@@ -4,8 +4,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SCRIPT="${ROOT}/.github/scripts/deploy-foundry-agent.sh"
-INSTRUCTIONS="${ROOT}/.github/foundry-agents/wx1116-agent-current-weather.instructions.md"
-SCHEMA="${ROOT}/.github/foundry-agents/wx1116-agent-current-weather.response-schema.json"
+INSTRUCTIONS="${ROOT}/.github/foundry-agents/wx1116-agent-for-current-weather.instructions.md"
+SCHEMA="${ROOT}/.github/foundry-agents/wx1116-agent-for-current-weather.response-schema.json"
 
 fail() {
   echo "FAIL: $*" >&2
@@ -21,7 +21,7 @@ PAYLOAD="$(
   AZURE_FOUNDRY_PROD_EUS2_MODEL='gpt-5.4-mini' \
   FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
   FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
-  bash "$SCRIPT" wx1116-agent-current-weather "$INSTRUCTIONS" \
+  bash "$SCRIPT" wx1116-agent-for-current-weather "$INSTRUCTIONS" \
     --response-schema "$SCHEMA" --print-body
 )"
 
@@ -31,7 +31,7 @@ CREATE_URL="$(echo "$PAYLOAD" | jq -r '.create_url')"
 VERSION_URL="$(echo "$PAYLOAD" | jq -r '.version_url')"
 [[ "$CREATE_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents?api-version=v1' ]] \
   || fail "create_url should strip /openai/v1 and use /agents, got: $CREATE_URL"
-[[ "$VERSION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents/wx1116-agent-current-weather/versions?api-version=v1' ]] \
+[[ "$VERSION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents/wx1116-agent-for-current-weather/versions?api-version=v1' ]] \
   || fail "version_url mismatch: $VERSION_URL"
 [[ "$CREATE_URL" != *'/assistants'* ]] || fail "must not call the Assistants API"
 
@@ -39,7 +39,7 @@ KIND="$(echo "$PAYLOAD" | jq -r '.create_body.definition.kind')"
 [[ "$KIND" == 'prompt' ]] || fail "definition.kind should be prompt, got: $KIND"
 
 NAME="$(echo "$PAYLOAD" | jq -r '.create_body.name')"
-[[ "$NAME" == 'wx1116-agent-current-weather' ]] || fail "create_body.name mismatch"
+[[ "$NAME" == 'wx1116-agent-for-current-weather' ]] || fail "create_body.name mismatch"
 
 echo "$PAYLOAD" | jq -e '.create_body.definition.tools | length == 2' >/dev/null \
   || fail "expected two MCP tools"
@@ -69,14 +69,14 @@ echo "$PAYLOAD" | jq -e '.version_body.definition.tools[0].project_connection_id
   || fail "version body must include the same MCP tools"
 
 # Chat agent (no response schema) still attaches both connections.
-CHAT_INSTRUCTIONS="${ROOT}/.github/foundry-agents/wx1116-agent-chat.instructions.md"
+CHAT_INSTRUCTIONS="${ROOT}/.github/foundry-agents/wx1116-agent-for-chat.instructions.md"
 CHAT_PAYLOAD="$(
   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj' \
   AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
   AZURE_FOUNDRY_PROD_EUS2_MODEL='gpt-5.4-mini' \
   FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
   FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
-  bash "$SCRIPT" wx1116-agent-chat "$CHAT_INSTRUCTIONS" --print-body
+  bash "$SCRIPT" wx1116-agent-for-chat "$CHAT_INSTRUCTIONS" --print-body
 )"
 echo "$CHAT_PAYLOAD" | jq -e '.create_body.definition | has("text") | not' >/dev/null \
   || fail "chat agent must not set a JSON response schema"
@@ -89,7 +89,7 @@ if AZURE_FOUNDRY_PROD_EUS2_PROJ_URL='https://acct.services.ai.azure.com/openai/v
   AZURE_FOUNDRY_PROD_EUS2_MODEL='gpt-5.4-mini' \
   FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
   FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
-  bash "$SCRIPT" wx1116-agent-chat "$CHAT_INSTRUCTIONS" --print-body >/dev/null 2>&1
+  bash "$SCRIPT" wx1116-agent-for-chat "$CHAT_INSTRUCTIONS" --print-body >/dev/null 2>&1
 then
   fail "openai/v1-only project URL should be rejected"
 fi
