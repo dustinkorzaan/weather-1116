@@ -1,0 +1,81 @@
+# Orchestrates the prod release chain: build-test -> provision -> deploy.
+#
+# Chains its stages with needs: across workflow_call jobs, rather than
+# separate workflows linked by workflow_run events. That means a failure
+# anywhere structurally skips everything downstream and the whole run
+# reports failure -- there's no event-payload conclusion string to
+# misread as "skipped == fine to proceed".
+#
+# build_test re-runs build-test.yml against the actual merge commit on main
+# (build-test.yml also runs standalone on every push, which is what produces
+# the wx-1116-build-and-test-success required check on PRs) -- provisioning
+# only proceeds once this job confirms the commit landing on main builds,
+# rather than trusting branch protection on the PR as an indirect proxy.
+#
+# provision and each deploy job need secrets: inherit -- reusable workflows
+# don't receive the caller's secrets automatically otherwise, and both
+# reference repo/prod-environment secrets directly. The top-level
+# permissions block below is a ceiling reusable workflows can't exceed, so
+# id-token: write has to be granted here for the OIDC login steps inside
+# provision/deploy to work.
+name: build-test-provision-deploy
+run-name: Build, Test, Provision, Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build_test:
+    uses: ./.github/workflows/build-test.yml
+    secrets: inherit
+
+  provision:
+    needs: [build_test]
+    uses: ./.github/workflows/prod-provision-infra.yml
+    secrets: inherit
+
+  deploy-api:
+    needs: [provision]
+    uses: ./.github/workflows/prod-deploy-api.yml
+    secrets: inherit
+
+  deploy-mvc:
+    needs: [provision]
+    uses: ./.github/workflows/prod-deploy-mvc.yml
+    secrets: inherit
+
+  deploy-blazor:
+    needs: [provision]
+    uses: ./.github/workflows/prod-deploy-blazor.yml
+    secrets: inherit
+
+  deploy-worker:
+    needs: [provision]
+    uses: ./.github/workflows/prod-deploy-worker.yml
+    secrets: inherit
+
+  deploy-mcp-srv-app:
+    needs: [provision]
+    uses: ./.github/workflows/prod-deploy-mcp-srv-app.yml
+    secrets: inherit
+
+  deploy-mcp-srv-func:
+    needs: [provision]
+    uses: ./.github/workflows/prod-deploy-mcp-srv-func.yml
+    secrets: inherit
+
+  deploy-react:
+    needs: [provision]
+    uses: ./.github/workflows/prod-deploy-react.yml
+    secrets: inherit
+
+  deploy-foundry-agents:
+    needs: [provision]
+    uses: ./.github/workflows/prod-deploy-foundry-agents.yml
+    secrets: inherit

@@ -1,14 +1,14 @@
 # Publishes the two hosted Foundry agents (wx1116-agent-current-weather for V5,
 # wx1116-agent-chat for Chat3) via .github/scripts/deploy-foundry-agent.sh.
 #
-# Runs automatically once provision-wx1116-prod-infra finishes successfully
-# on main, same as the other prod-deploy-*.yml workflows. infra/main.bicep
-# provisions the gpt-5.4-mini model deployment and the two MCP RemoteTool
-# connections (MyMcpSrvAppService, MyMcpSrvFuncApp) idempotently on every
-# push. Foundry has no ARM resource for agents, so this workflow publishes
-# them against the same project and attaches those IaC connections as MCP
-# tools (require_approval: never). workflow_dispatch still works for manual
-# runs on any branch.
+# Called via workflow_call from build-test-provision-deploy.yml with
+# needs: [provision], same as the other prod-deploy-*.yml workflows.
+# infra/main.bicep provisions the gpt-5.4-mini model deployment and the two
+# MCP RemoteTool connections (MyMcpSrvAppService, MyMcpSrvFuncApp)
+# idempotently on every push. Foundry has no ARM resource for agents, so
+# this workflow publishes them against the same project and attaches those
+# IaC connections as MCP tools (require_approval: never). workflow_dispatch
+# still works for manual runs on any branch.
 #
 # System prompts live in .github/foundry-agents/*.instructions.md - edit
 # those files and push (or re-run this workflow) to publish an update.
@@ -29,10 +29,8 @@ name: prod-deploy-foundry-agents
 run-name: Deploy wx1116-prod Foundry agents
 
 on:
-  workflow_run:
-    workflows: ["provision-wx1116-prod-infra"]
-    types: [completed]
   workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: prod-deploy-foundry-agents
@@ -40,15 +38,12 @@ concurrency:
 
 jobs:
   deploy:
-    # Only publish once provision-wx1116-prod-infra has finished successfully
-    # on main -- agents reference the model deployment, MCP connections, and
-    # the GitHub Actions identity's Foundry User role assignment infra
-    # provisions, so they must run after it, not concurrently with it.
-    # workflow_dispatch still runs unconditionally for manual publishes.
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main')
+    # Called via workflow_call from build-test-provision-deploy.yml with
+    # needs: [provision] -- agents reference the model deployment, MCP
+    # connections, and the GitHub Actions identity's Foundry User role
+    # assignment infra provisions, so they must run after it, not
+    # concurrently with it. workflow_dispatch still runs unconditionally for
+    # manual publishes.
     runs-on: ubuntu-latest
     environment: prod
     permissions:
@@ -57,8 +52,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Login to Azure
         uses: azure/login@v3

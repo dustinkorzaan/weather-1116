@@ -50,10 +50,12 @@ and assigns Contributor + User Access Administrator on this resource group.
 
 ## Step 1 — Provision infrastructure
 
-Merge to `main` or run `provision-wx1116-prod-infra` via `workflow_dispatch`.
-Provisioning and app deploys each trigger independently on push to `main` (no
-`workflow_run` chain between them) and both run unconditionally on every
-push. That is intentional, not wasteful — see
+Merge to `main`, or run `provision-wx1116-prod-infra` directly via
+`workflow_dispatch`. On push to `main`, the orchestrator
+`build-test-provision-deploy.yml` runs `build-test.yml` first and only calls
+provision (`needs: [build_test]`) once that succeeds — provisioning runs
+unconditionally on every such push (not just when `infra/**` changed), which
+is intentional, not wasteful — see
 [Provision vs. deploy ownership](#provision-vs-deploy-ownership) for what makes
 re-provisioning safe.
 
@@ -128,8 +130,9 @@ Run `infra/scripts/create-contained-users.sql` as the SQL Entra admin
 
 ## Step 5 — Deploy apps
 
-Deploy workflows trigger automatically on push to `main` (independently of
-provision), or run them directly via `workflow_dispatch`:
+On push to `main`, `build-test-provision-deploy.yml` calls each deploy
+workflow (`needs: [provision]`) once provisioning succeeds, running them all
+in parallel. Each can also be run directly via `workflow_dispatch`:
 
 | Workflow file | Target |
 | --- | --- |

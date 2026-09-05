@@ -384,7 +384,7 @@ React or Blazor when testing API-dependent features.
 
 ## Build and CI
 
-The workflow [`build-and-test.yml`](../.github/workflows/build-and-test.yml)
+The workflow [`build-test.yml`](../.github/workflows/build-test.yml)
 builds on every push:
 
 - `Core.csproj`, `WeatherAPI.csproj`, `WeatherBlazor.csproj`, `WeatherMVC.csproj`,
@@ -399,14 +399,22 @@ builds on every push:
 - `WeatherBlazor.Tests` component tests.
 - `WeatherMcpSrvAppService.Tests` and `WeatherMcpSrvFuncApp.Tests` About/tool-registration tests.
 
-Production deploy workflows (`prod-deploy-*.yml`) auto-deploy via `workflow_run`
-once **`provision-wx1116-prod-infra`** completes successfully on `main` -- they no
-longer trigger directly on push, so they can't race infra provisioning for the
-same Azure resources (see `prod-provision-infra.yml` and the "active provisioning
-operation in progress" note there). Each deploy workflow can also be triggered
-manually via `workflow_dispatch` on any branch. Deployables include API, MVC, React, Blazor,
-worker-dotnet, and both MCP hosts on **Azure Container Apps + ACR** (Functions-on-ACA
-for `mcp-srv-func-app`). Bootstrap: [`docs/aca-bootstrap.md`](aca-bootstrap.md).
+On push to `main`, the orchestrator
+[`build-test-provision-deploy.yml`](../.github/workflows/build-test-provision-deploy.yml)
+calls `build-test.yml`, then **`prod-provision-infra.yml`**
+(`needs: [build_test]`), then every `prod-deploy-*.yml` in parallel
+(`needs: [provision]`), as reusable workflows chained with `needs:` rather
+than separate workflows linked by `workflow_run` events -- a failure anywhere
+in the chain structurally skips everything downstream instead of relying on
+an event's conclusion string. Provisioning and deploys still can't run
+concurrently with each other for the same reason as before (see
+`prod-provision-infra.yml` and the "active provisioning operation in
+progress" note there), just enforced by `needs:` now instead of
+`workflow_run`. Each stage's workflow file can also be triggered directly via
+`workflow_dispatch` on any branch (e.g. hotfixes). Deployables include API,
+MVC, React, Blazor, worker-dotnet, and both MCP hosts on **Azure Container
+Apps + ACR** (Functions-on-ACA for `mcp-srv-func-app`). Bootstrap:
+[`docs/aca-bootstrap.md`](aca-bootstrap.md).
 
 ## Repository Layout
 
@@ -503,9 +511,9 @@ agent to `{project}/agents?api-version=v1` (or `{project}/agents/{name}/versions
 when the agent already exists) with model, instructions, and both MCP tools
 wired to those connections (`project_connection_id` + `require_approval: never`).
 It does not embed MCP secrets in the agent payload. Like the other
-`prod-deploy-*.yml` workflows, it runs automatically once
-`provision-wx1116-prod-infra` finishes successfully on `main` (chained via
-`workflow_run`, `workflow_dispatch` still works for manual runs on any
+`prod-deploy-*.yml` workflows, it's called from
+`build-test-provision-deploy.yml` with `needs: [provision]` once provisioning
+succeeds on `main` (`workflow_dispatch` still works for manual runs on any
 branch). The Agents API takes a Microsoft Entra ID bearer token, not the
 Foundry account's `api-key` used elsewhere — the workflow logs in as the
 GitHub Actions identity (granted the **Foundry User** role at project scope
