@@ -4,7 +4,7 @@ using Core.Hangfire;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Hangfire.SqlServer;
+using Hangfire.PostgreSql;
 using CQMediator;
 using WeatherWorkerDotNet;
 
@@ -17,7 +17,7 @@ builder.Services.Configure<HangfireAboutHealthOptions>(options =>
 	HangfireAboutHealthOptions.Configure(options, builder.Configuration));
 builder.Services.AddControllers();
 
-// Durable SQL Server storage wherever a connection string is provided
+// Durable PostgreSQL storage wherever a connection string is provided
 // (DB_CONNECTION_STRING). Falls back to in-memory storage locally so the
 // worker still runs without a database.
 var dbConnectionString = builder.Configuration["DB_CONNECTION_STRING"];
@@ -36,10 +36,12 @@ builder.Services.AddHangfire(config =>
 	}
 	else
 	{
-		config.UseSqlServerStorage(dbConnectionString, new SqlServerStorageOptions
-		{
-			QueuePollInterval = queuePollInterval,
-		});
+		config.UsePostgreSqlStorage(
+			options => options.UseNpgsqlConnection(dbConnectionString),
+			new PostgreSqlStorageOptions
+			{
+				QueuePollInterval = queuePollInterval,
+			});
 	}
 });
 
@@ -75,7 +77,7 @@ builder.Services.AddHangfireServer(options =>
 });
 
 // Recurring jobs use Hangfire's explicit queue overload, which MemoryStorage
-// does not support. Only register the scheduler when durable SQL storage is
+// does not support. Only register the scheduler when durable PostgreSQL storage is
 // configured via DB_CONNECTION_STRING.
 if (!string.IsNullOrWhiteSpace(dbConnectionString))
 {

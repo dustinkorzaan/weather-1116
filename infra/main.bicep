@@ -10,9 +10,6 @@ param environmentName string = 'prod'
 @description('Azure region for every resource in this environment.')
 param location string = 'eastus2'
 
-@description('Azure region for the SQL logical server. Defaults to eastus because East US 2 periodically blocks new SQL server creation (RegionDoesNotAllowProvisioning) while other resources stay in eastus2.')
-param sqlLocation string = 'eastus'
-
 @description('Short name prefix used to build resource names.')
 param namePrefix string = 'wx1116'
 
@@ -29,8 +26,8 @@ param acrName string = 'wx1116prodacr'
 param storageAccountName string = 'wx1116prodblob'
 
 @secure()
-@description('SQL admin login username. Supply via azd env set / --parameters at deploy time.')
-param sqlAdministratorLogin string
+@description('PostgreSQL admin login username. Supply via azd env set / --parameters at deploy time.')
+param postgresAdministratorLogin string
 
 @description('Comma-separated keys of the container apps that already exist, e.g. api,mvc,worker. Set by infra/scripts/capture-existing-container-apps.sh before azd provision; empty means first provision.')
 param existingContainerAppKeys string = ''
@@ -196,15 +193,13 @@ module functionsContainerApp 'modules/functions-container-app.bicep' = {
   }
 }
 
-module sql 'modules/sql.bicep' = {
-  name: 'sql'
+module postgresql 'modules/postgresql.bicep' = {
+  name: 'postgresql'
   params: {
-    serverName: '${namePrefix}-${environmentName}-sql-server'
-    databaseName: '${namePrefix}-${environmentName}-sql-database'
-    location: sqlLocation
-    administratorLogin: sqlAdministratorLogin
-    entraAdminPrincipalId: githubActionsIdentity.outputs.principalId
-    entraAdminLoginName: githubActionsIdentityName
+    serverName: '${namePrefix}-${environmentName}-postgres'
+    databaseName: '${namePrefix}-${environmentName}-hangfire'
+    location: location
+    administratorLogin: postgresAdministratorLogin
   }
 }
 
@@ -247,8 +242,8 @@ output WORKER_HOSTNAME string = containerApps[3].outputs.fqdn
 output MCP_SRV_APP_SERVICE_HOSTNAME string = containerApps[4].outputs.fqdn
 output MCP_SRV_FUNC_APP_HOSTNAME string = functionsContainerApp.outputs.fqdn
 
-output SQL_SERVER_FQDN string = sql.outputs.serverFullyQualifiedDomainName
-output SQL_DATABASE_NAME string = sql.outputs.databaseName
+output POSTGRES_SERVER_FQDN string = postgresql.outputs.serverFullyQualifiedDomainName
+output POSTGRES_DATABASE_NAME string = postgresql.outputs.databaseName
 output STORAGE_ACCOUNT_NAME string = functionsContainerApp.outputs.storageAccountName
 output APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 

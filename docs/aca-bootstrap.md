@@ -21,7 +21,7 @@ and assigns Contributor + User Access Administrator on this resource group.
 | Container Apps (ASP.NET) | `wx1116-prod-api`, `-mvc`, `-blazor`, `-worker`, `-mcp-srv-app-service` |
 | Functions on ACA | `wx1116-prod-mcp-srv-func-app` |
 | Static Web App | `wx1116-prod-react` |
-| SQL Server + database | `wx1116-prod-sql-server` / `wx1116-prod-sql-database` (in **East US**, not East US 2 — that region periodically blocks new SQL servers) |
+| PostgreSQL flexible server + database | `wx1116-prod-postgres` / `wx1116-prod-hangfire` |
 | App Insights + Log Analytics | `wx1116-prod-eastus2-appinsights` |
 | AI Foundry | `wx1116-prod-eastus2-res` / `-prj` |
 | Six runtime managed identities | `wx1116-prod-*-mi` |
@@ -35,13 +35,13 @@ and assigns Contributor + User Access Administrator on this resource group.
 | `AZURE_GITHUB_CLIENTID` | GitHub Actions MI client ID |
 | `AZURE_TENANTID` | Azure AD tenant |
 | `AZURE_SUBSCRIPTIONID` | Target subscription |
-| `WX1116_SQL_ADMIN_LOGIN_NAME` | SQL native admin username for Bicep |
+| `WX1116_POSTGRES_ADMIN_LOGIN_NAME` | PostgreSQL admin username for Bicep |
 
 **Secrets** (before app deploys):
 
 | Secret | Purpose |
 | --- | --- |
-| `AZURE_SQL_DB_CONNECTION_STRING` | Hangfire + SQL for api/mvc/worker |
+| `AZURE_POSTGRES_DB_CONNECTION_STRING` | Hangfire Npgsql connection string for api/mvc/worker |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | Foundry API key |
 | `PROD_MCP_SRV_APP_SERVICE_KEY` | Bearer token for MCP app-service host |
 | `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key — you choose the value; deploy applies it |
@@ -98,11 +98,18 @@ az staticwebapp secrets list \
 
 Store as GitHub secret `AZURE_UI_REACT_TOKEN`.
 
-## Step 4 — SQL contained users (once)
+## Step 4 — PostgreSQL connection string (once)
 
-Run `infra/scripts/create-contained-users.sql` as the SQL Entra admin
-(`wx1116-prod-github-actions-mi`). See comments in
-`prod-provision-infra.yml`.
+After provision, reset the PostgreSQL admin password in the Azure portal (Bicep
+generates one on each deploy but never outputs it). Then set GitHub secret
+`AZURE_POSTGRES_DB_CONNECTION_STRING` to an Npgsql connection string, e.g.:
+
+```text
+Host=<POSTGRES_SERVER_FQDN>;Port=5432;Database=<POSTGRES_DATABASE_NAME>;Username=<admin>;Password=<portal-password>;SSL Mode=Require;Trust Server Certificate=true
+```
+
+Optionally run `infra/scripts/create-hangfire-db-user.sql` to create a dedicated
+`hangfire_app` role and point the connection string at that user instead.
 
 ## Step 5 — Deploy apps
 

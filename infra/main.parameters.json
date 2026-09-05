@@ -8,9 +8,6 @@
     "location": {
       "value": "${AZURE_LOCATION=eastus2}"
     },
-    "sqlLocation": {
-      "value": "${AZURE_SQL_LOCATION=eastus}"
-    },
     "resourceGroupName": {
       "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prod-rg}"
     },
@@ -20,8 +17,8 @@
     "storageAccountName": {
       "value": "${STORAGE_ACCOUNT_NAME=wx1116prodblob}"
     },
-    "sqlAdministratorLogin": {
-      "value": "${SQL_ADMINISTRATOR_LOGIN}"
+    "postgresAdministratorLogin": {
+      "value": "${POSTGRES_ADMINISTRATOR_LOGIN}"
     },
     "existingContainerAppKeys": {
       "value": "${EXISTING_CONTAINER_APP_KEYS}"
