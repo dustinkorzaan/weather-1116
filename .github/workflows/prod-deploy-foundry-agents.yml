@@ -12,9 +12,8 @@
 # hand, then confirm in the Foundry portal (Agents -> <name> -> Versions)
 # that a new version actually published, before wiring it into push-to-main.
 #
-# System prompts are placeholders (.github/foundry-agents/*.instructions.txt)
-# - edit those files with the real instructions before relying on either
-# agent, then re-run this workflow to publish the update.
+# System prompts live in .github/foundry-agents/*.instructions.md - edit
+# those files and re-run this workflow to publish an update.
 #
 # Reuses existing repo secrets/vars (no new ones needed):
 #   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL / AZURE_FOUNDRY_PROD_EUS2_KEY / AZURE_FOUNDRY_PROD_EUS2_MODEL
@@ -54,7 +53,7 @@ jobs:
         run: |
           bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
             wx1116-agent-current-weather \
-            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-current-weather.instructions.txt" \
+            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-current-weather.instructions.md" \
             --response-schema "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-current-weather.response-schema.json"
 
       - name: Publish wx1116-agent-chat (Chat3)
@@ -70,4 +69,4 @@ jobs:
         run: |
           bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
             wx1116-agent-chat \
-            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-chat.instructions.txt"
+            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-chat.instructions.md"

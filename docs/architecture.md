@@ -488,8 +488,8 @@ best-effort match to that API, written without being able to verify it
 against current Microsoft docs, so each run should be checked in the
 Foundry portal (**Agents** → `<name>` → **Versions**) before being trusted.
 System prompts live in
-`.github/foundry-agents/wx1116-agent-current-weather.instructions.txt` and
-`wx1116-agent-chat.instructions.txt` — edit those files and re-run the
+`.github/foundry-agents/wx1116-agent-current-weather.instructions.md` and
+`wx1116-agent-chat.instructions.md` — edit those files and re-run the
 workflow to publish an update. The default agent's response schema
 (`wx1116-agent-current-weather.response-schema.json`) matches `AIWeatherResponse`
 exactly (no `runLogDetails`).
