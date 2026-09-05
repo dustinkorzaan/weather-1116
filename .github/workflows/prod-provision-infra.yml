@@ -161,9 +161,9 @@ jobs:
           SQL_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_SQL_ADMIN_LOGIN_NAME }}
           # Reuses the same MCP tool-host secrets the deploy workflows already
           # set on the container apps -- so the MyMcpSrvAppService /
-          # MyMcpSrvFuncApp Foundry connections (infra/modules/ai-foundry.bicep)
-          # stay in sync with the actual host credentials on every push to
-          # main, with no new secret to manage.
+          # MyMcpSrvFuncApp Foundry RemoteTool connections
+          # (infra/modules/ai-foundry.bicep) stay in sync with the actual host
+          # credentials on every push to main, with no new secret to manage.
           MCP_SRV_APP_SERVICE_KEY: ${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
           MCP_SRV_FUNC_APP_KEY: ${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
 

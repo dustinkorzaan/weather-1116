@@ -490,17 +490,20 @@ MCP tools without asking this app to approve.
 
 The Foundry account/project itself (`infra/modules/ai-foundry.bicep`) now
 provisions the `gpt-5.4-mini` model deployment and registers both MCP tool
-hosts as Custom Keys connections on the project (`MyMcpSrvAppService`,
-`MyMcpSrvFuncApp` — target URL + auth header, kept in sync with the live
-`PROD_MCP_SRV_APP_SERVICE_KEY`/`PROD_MCP_SRV_FUNC_APP_KEY` secrets on every
-push to `main`). Foundry has no ARM resource for agents themselves, so
-publishing `wx1116-agent-current-weather` and `wx1116-agent-chat` is instead handled
+hosts as **RemoteTool** connections on the project (`MyMcpSrvAppService`,
+`MyMcpSrvFuncApp` — target URL + auth header, `metadata.type=generic_mcp`,
+kept in sync with the live `PROD_MCP_SRV_APP_SERVICE_KEY` /
+`PROD_MCP_SRV_FUNC_APP_KEY` secrets on every push to `main`). That is the
+IaC home for the tools: Foundry has no ARM resource for agents themselves,
+so publishing `wx1116-agent-current-weather` and `wx1116-agent-chat` is handled
 by the `prod-deploy-foundry-agents` workflow
 (`.github/workflows/prod-deploy-foundry-agents.yml`,
-`.github/scripts/deploy-foundry-agent.sh`), which POSTs each agent's
-definition — model, instructions, and both MCP tools with
-`require_approval: never` — to the Assistants-compatible REST API. Like the
-other `prod-deploy-*.yml` workflows, it runs automatically once
+`.github/scripts/deploy-foundry-agent.sh`). The script POSTs each prompt
+agent to `{project}/agents?api-version=v1` (or `{project}/agents/{name}/versions`
+when the agent already exists) with model, instructions, and both MCP tools
+wired to those connections (`project_connection_id` + `require_approval: never`).
+It does not embed MCP secrets in the agent payload. Like the other
+`prod-deploy-*.yml` workflows, it runs automatically once
 `provision-wx1116-prod-infra` finishes successfully on `main` (chained via
 `workflow_run`, `workflow_dispatch` still works for manual runs on any
 branch). The Agents API takes a Microsoft Entra ID bearer token, not the
@@ -508,28 +511,23 @@ Foundry account's `api-key` used elsewhere — the workflow logs in as the
 GitHub Actions identity (granted the **Foundry User** role at project scope
 by `ai-foundry.bicep`) and mints a token scoped to
 `https://ai.azure.com/.default` for the script to send as
-`Authorization: Bearer`. The create/update contract the script uses is
-still a best-effort match to that API, so each run should be checked in the
-Foundry portal (**Agents** → `<name>` → **Versions**) before being trusted.
-System prompts live in
+`Authorization: Bearer`. System prompts live in
 `.github/foundry-agents/wx1116-agent-current-weather.instructions.md` and
 `wx1116-agent-chat.instructions.md` — edit those files and push (or re-run
 the workflow) to publish an update. The default agent's response schema
 (`wx1116-agent-current-weather.response-schema.json`) matches `AIWeatherResponse`
 exactly (no `runLogDetails`).
 
-If the workflow's contract turns out to be wrong, or you'd rather do this by
-hand:
+Portal fallback (only if you need to inspect or repair by hand):
 
 1. Open the Microsoft Foundry portal for the same project as
    `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
 2. **Agents** → `wx1116-agent-current-weather` (or `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
-3. Set the model to the `gpt-5.4-mini` deployment provisioned above.
-4. For each MCP server, add it as a tool using the `MyMcpSrvAppService` /
-   `MyMcpSrvFuncApp` connections (instead of re-entering the URL/key by hand)
-   and set **Approval** to **Never** (`require_approval: never`).
-5. Create / publish a version. V5 calls the agent **by name** (project default
-   version).
+3. Confirm the model is the `gpt-5.4-mini` deployment provisioned above.
+4. Confirm each MCP tool uses the `MyMcpSrvAppService` /
+   `MyMcpSrvFuncApp` connections and **Approval** is **Never**
+   (`require_approval: never`).
+5. V5 calls the agent **by name** (project default version).
 
 Same MCP JSON shape as Chat3 (`require_approval: never` on each server). Chat3
 and V5 both leave approval on the hosted agent; neither round-trips approvals

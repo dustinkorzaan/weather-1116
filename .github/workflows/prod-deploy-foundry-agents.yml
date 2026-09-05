@@ -2,18 +2,13 @@
 # wx1116-agent-chat for Chat3) via .github/scripts/deploy-foundry-agent.sh.
 #
 # Runs automatically once provision-wx1116-prod-infra finishes successfully
-# on main, same as the other prod-deploy-*.yml workflows - infra/main.bicep
-# provisions the gpt-5.4-mini model deployment and the two MCP tool
+# on main, same as the other prod-deploy-*.yml workflows. infra/main.bicep
+# provisions the gpt-5.4-mini model deployment and the two MCP RemoteTool
 # connections (MyMcpSrvAppService, MyMcpSrvFuncApp) idempotently on every
-# push, but Foundry has no ARM resource for agents, so this workflow
-# publishes/updates them separately against the same provisioned project.
-# workflow_dispatch still works for manual runs on any branch.
-#
-# The create/update contract this script uses is a best-effort match to the
-# Assistants-compatible API - it was written without being able to verify it
-# against current Microsoft docs from the authoring session. Watch this
-# workflow's runs, and confirm in the Foundry portal (Agents -> <name> ->
-# Versions) that a new version actually published.
+# push. Foundry has no ARM resource for agents, so this workflow publishes
+# them against the same project and attaches those IaC connections as MCP
+# tools (require_approval: never). workflow_dispatch still works for manual
+# runs on any branch.
 #
 # System prompts live in .github/foundry-agents/*.instructions.md - edit
 # those files and push (or re-run this workflow) to publish an update.
@@ -27,8 +22,8 @@
 # Reuses existing repo secrets/vars (no new ones needed):
 #   AZURE_GITHUB_CLIENTID / AZURE_TENANTID / AZURE_SUBSCRIPTIONID
 #   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL / AZURE_FOUNDRY_PROD_EUS2_MODEL
-#   PROD_MCP_SRV_APP_SERVICE_URL / PROD_MCP_SRV_APP_SERVICE_KEY
-#   PROD_MCP_SRV_FUNC_APP_URL / PROD_MCP_SRV_FUNC_APP_KEY
+#   PROD_MCP_SRV_APP_SERVICE_URL / PROD_MCP_SRV_FUNC_APP_URL
+#     (URL fallback only; MCP keys stay on the Foundry connections)
 
 name: prod-deploy-foundry-agents
 run-name: Deploy wx1116-prod Foundry agents
@@ -87,9 +82,7 @@ jobs:
           AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
           AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
           MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
-          MCP_SRV_APP_SERVICE_KEY: ${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
           MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
-          MCP_SRV_FUNC_APP_KEY: ${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
         run: |
           bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
             wx1116-agent-current-weather \
@@ -103,9 +96,7 @@ jobs:
           AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
           AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
           MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
-          MCP_SRV_APP_SERVICE_KEY: ${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
           MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
-          MCP_SRV_FUNC_APP_KEY: ${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
         run: |
           bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
             wx1116-agent-chat \

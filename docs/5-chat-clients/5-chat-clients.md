@@ -178,22 +178,31 @@ one is the conversational chat agent.
 Do **not** clone `wx1116-agent-current-weather` as-is. That agent owns a strict `AIWeatherResponse`
 JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form Markdown.
 
-### Portal steps
+### Automated publish
+
+Do not create Chat3 (or V5) by hand. `prod-provision-infra.yml` registers the
+two MCP hosts as Foundry **RemoteTool** connections (`MyMcpSrvAppService`,
+`MyMcpSrvFuncApp`). `prod-deploy-foundry-agents.yml` then publishes
+`wx1116-agent-chat` (and `wx1116-agent-current-weather`) against those
+connections with `require_approval: never`. Instructions live in
+`.github/foundry-agents/`.
+
+### Portal fallback
+
+Only if you need to inspect or repair a published version:
 
 1. Open the Microsoft Foundry portal for the same project as
    `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
-2. **Agents → Create** (Prompt agent / Foundry agent).
-3. **Name:** must match `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` (this repo uses `wx1116-agent-chat`).
-4. **Model:** the same deployment as `AZURE_FOUNDRY_PROD_EUS2_MODEL` (for example `gpt-5.4-mini`).
-5. **Instructions:** paste the Chat3 instructions below (same text as
-   `ChatSystemInstructions.WeatherAssistant`).
-6. **Response format:** text / none. Do **not** attach a JSON schema.
-7. **Tools:** add two **MCP** servers (same hosts Chat1b/Chat2b/V4 use). Foundry runs in
-   Azure, so these URLs must be the **public** MCP apps, not `localhost`.
-8. Set MCP **approval to never** (`require_approval: never`) so Chat3 does not stall.
-   Chat3 does not round-trip approvals in app code (same as V5). If a request still
-   appears, the tab errors with this config instruction.
-9. Create / publish a version. Chat3 calls the agent **by name** (project default version).
+2. **Agents** → `wx1116-agent-chat` (must match `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME`).
+3. Confirm the model is the same deployment as `AZURE_FOUNDRY_PROD_EUS2_MODEL`
+   (for example `gpt-5.4-mini`).
+4. **Instructions:** the Chat3 text below (same as
+   `ChatSystemInstructions.WeatherAssistant` /
+   `.github/foundry-agents/wx1116-agent-chat.instructions.md`).
+5. **Response format:** text / none. Do **not** attach a JSON schema.
+6. **Tools:** the two MCP connections above, **Approval** = **Never**.
+   Chat3 does not round-trip approvals in app code (same as V5).
+7. Chat3 calls the agent **by name** (project default version).
 
 ### MCP tools on the agent
 
@@ -205,10 +214,10 @@ Match the labels Chat1b already uses so traces stay comparable:
 | `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
 
 Production host names are in [`docs/architecture.md`](../architecture.md) (MCP Tool Hosts).
-Prefer Foundry **project connections** for the secrets if the portal offers them, instead of
-pasting keys into the agent UI.
+Auth headers live on the Foundry **RemoteTool** connections, not on the agent.
 
-Equivalent MCP tool JSON (approval never):
+Equivalent MCP tool JSON (approval never; secrets come from the IaC
+connections, not from headers on the agent):
 
 ```json
 [
@@ -216,19 +225,15 @@ Equivalent MCP tool JSON (approval never):
     "type": "mcp",
     "server_label": "McpSrvFuncApp",
     "server_url": "https://<prod-mcp-srv-func-app>/runtime/webhooks/mcp",
-    "require_approval": "never",
-    "headers": {
-      "x-functions-key": "<MCP_SRV_FUNC_APP_KEY>"
-    }
+    "project_connection_id": "MyMcpSrvFuncApp",
+    "require_approval": "never"
   },
   {
     "type": "mcp",
     "server_label": "McpSrvAppService",
     "server_url": "https://<prod-mcp-srv-app-service>/mcp",
-    "require_approval": "never",
-    "headers": {
-      "Authorization": "Bearer <MCP_SRV_APP_SERVICE_KEY>"
-    }
+    "project_connection_id": "MyMcpSrvAppService",
+    "require_approval": "never"
   }
 ]
 ```
