@@ -207,7 +207,7 @@ module functionsContainerApp 'modules/functions-container-app.bicep' = {
 module sql 'modules/sql.bicep' = {
   name: 'sql'
   params: {
-    serverName: '${namePrefix}-${environmentName}-sql-server'
+    serverName: '${namePrefix}-${environmentName}-sql-srv'
     databaseName: '${namePrefix}-${environmentName}-sql-database'
     location: sqlLocation
     administratorLogin: sqlAdministratorLogin

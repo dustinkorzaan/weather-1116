@@ -12,7 +12,7 @@
 // creating "FROM EXTERNAL PROVIDER" users over an Entra-authenticated
 // connection.
 
-@description('Name of the SQL logical server, e.g. wx1116-prod-sql-server.')
+@description('Name of the SQL logical server, e.g. wx1116-prod-sql-srv.')
 param serverName string
 
 @description('Name of the SQL database, e.g. wx1116-prod-sql-database.')
