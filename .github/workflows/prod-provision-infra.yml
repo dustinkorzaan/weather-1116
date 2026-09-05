@@ -130,9 +130,19 @@ jobs:
 
       - name: Set required azd parameter values
         shell: bash
-        run: azd env set POSTGRES_ADMINISTRATOR_LOGIN "$POSTGRES_ADMINISTRATOR_LOGIN"
+        run: |
+          azd env set POSTGRES_ADMINISTRATOR_LOGIN "$POSTGRES_ADMINISTRATOR_LOGIN"
+          azd env set MCP_SRV_APP_SERVICE_KEY "$MCP_SRV_APP_SERVICE_KEY"
+          azd env set MCP_SRV_FUNC_APP_KEY "$MCP_SRV_FUNC_APP_KEY"
         env:
           POSTGRES_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_POSTGRES_ADMIN_LOGIN_NAME }}
+          # Reuses the same MCP tool-host secrets the deploy workflows already
+          # set on the container apps -- so the MyMcpSrvAppService /
+          # MyMcpSrvFuncApp Foundry connections (infra/modules/ai-foundry.bicep)
+          # stay in sync with the actual host credentials on every push to
+          # main, with no new secret to manage.
+          MCP_SRV_APP_SERVICE_KEY: ${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
+          MCP_SRV_FUNC_APP_KEY: ${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
 
       - name: azd provision
         shell: bash

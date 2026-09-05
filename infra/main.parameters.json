@@ -22,6 +22,12 @@
     },
     "existingContainerAppKeys": {
       "value": "${EXISTING_CONTAINER_APP_KEYS}"
+    },
+    "mcpSrvAppServiceKey": {
+      "value": "${MCP_SRV_APP_SERVICE_KEY}"
+    },
+    "mcpSrvFuncAppKey": {
+      "value": "${MCP_SRV_FUNC_APP_KEY}"
     }
   }
 }

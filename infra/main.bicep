@@ -32,6 +32,14 @@ param postgresAdministratorLogin string
 @description('Comma-separated keys of the container apps that already exist, e.g. api,mvc,worker. Set by infra/scripts/capture-existing-container-apps.sh before azd provision; empty means first provision.')
 param existingContainerAppKeys string = ''
 
+@secure()
+@description('Bearer token for the MCP Server on App Service tool host, registered as the MyMcpSrvAppService Foundry connection. Supply via azd env set / --parameters at deploy time.')
+param mcpSrvAppServiceKey string
+
+@secure()
+@description('Function key for the MCP Server on Function App tool host, registered as the MyMcpSrvFuncApp Foundry connection. Supply via azd env set / --parameters at deploy time.')
+param mcpSrvFuncAppKey string
+
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var acrPushRoleId = '8311e382-0749-4cb8-b61a-304f252e45ec'
 
@@ -225,6 +233,10 @@ module aiFoundry 'modules/ai-foundry.bicep' = {
       appIdentities[1].outputs.principalId // mvc
       appIdentities[3].outputs.principalId // worker
     ]
+    mcpSrvAppServiceUrl: 'https://${containerApps[4].outputs.fqdn}/mcp'
+    mcpSrvFuncAppUrl: 'https://${functionsContainerApp.outputs.fqdn}/runtime/webhooks/mcp'
+    mcpSrvAppServiceKey: mcpSrvAppServiceKey
+    mcpSrvFuncAppKey: mcpSrvFuncAppKey
   }
 }
 
@@ -252,6 +264,9 @@ output STATIC_WEB_APP_HOSTNAME string = staticWebApp.outputs.defaultHostname
 
 output AI_FOUNDRY_ACCOUNT_NAME string = aiFoundry.outputs.accountName
 output AI_FOUNDRY_PROJECT_NAME string = aiFoundry.outputs.projectName
+output AI_FOUNDRY_MODEL_DEPLOYMENT_NAME string = aiFoundry.outputs.modelDeploymentName
+output AI_FOUNDRY_MCP_SRV_APP_SERVICE_CONNECTION_NAME string = aiFoundry.outputs.mcpSrvAppServiceConnectionName
+output AI_FOUNDRY_MCP_SRV_FUNC_APP_CONNECTION_NAME string = aiFoundry.outputs.mcpSrvFuncAppConnectionName
 
 output GITHUB_ACTIONS_IDENTITY_CLIENT_ID string = githubActionsIdentity.outputs.clientId
 output GITHUB_ACTIONS_IDENTITY_PRINCIPAL_ID string = githubActionsIdentity.outputs.principalId

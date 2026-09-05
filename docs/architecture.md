@@ -470,12 +470,22 @@ instead - the agent owns tool resolution, so no `MCP_SRV_*` variables apply.
 sends only the user prompt. The hosted agent (`wx1116-agent-default`) must run
 MCP tools without asking this app to approve.
 
+The Foundry account/project itself (`infra/modules/ai-foundry.bicep`) now
+provisions the `gpt-5.4-mini` model deployment and registers both MCP tool
+hosts as Custom Keys connections on the project (`MyMcpSrvAppService`,
+`MyMcpSrvFuncApp` — target URL + auth header, kept in sync with the live
+`PROD_MCP_SRV_APP_SERVICE_KEY`/`PROD_MCP_SRV_FUNC_APP_KEY` secrets on every
+push to `main`). Creating the agents themselves is still a manual step — the
+preview API surface has no ARM resource for agents yet:
+
 1. Open the Microsoft Foundry portal for the same project as
    `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
 2. **Agents** → `wx1116-agent-default` (or `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
-3. For each MCP server (`McpSrvFuncApp`, `McpSrvAppService`): set **Approval**
-   to **Never** (`require_approval: never`).
-4. Create / publish a version. V5 calls the agent **by name** (project default
+3. Set the model to the `gpt-5.4-mini` deployment provisioned above.
+4. For each MCP server, add it as a tool using the `MyMcpSrvAppService` /
+   `MyMcpSrvFuncApp` connections (instead of re-entering the URL/key by hand)
+   and set **Approval** to **Never** (`require_approval: never`).
+5. Create / publish a version. V5 calls the agent **by name** (project default
    version).
 
 Same MCP JSON shape as Chat3 (`require_approval: never` on each server). Chat3
