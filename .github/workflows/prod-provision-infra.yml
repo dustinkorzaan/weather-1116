@@ -162,4 +162,4 @@ jobs:
       # server), e.g.:
       #   az login
       #   $accessToken = az account get-access-token --resource https://database.windows.net/ --query accessToken -o tsv
-      #   Invoke-Sqlcmd -ServerInstance wx1116-prod-sql-server.database.windows.net -Database wx1116-prod-sql-database -AccessToken $accessToken -InputFile infra/scripts/create-contained-users.sql
+      #   Invoke-Sqlcmd -ServerInstance wx1116-prod-sql-srv.database.windows.net -Database wx1116-prod-sql-database -AccessToken $accessToken -InputFile infra/scripts/create-contained-users.sql
