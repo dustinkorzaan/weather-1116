@@ -51,7 +51,7 @@ internal class Program
 		 - This is expected to fail because it doesn't have supporting data.
 		""");
 
-		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.services.ai.azure.com/openai/v1";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
@@ -113,7 +113,7 @@ internal class Program
 		 - Ask it to make something up because it doesn't have supporting data.
 		""");
 
-		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.services.ai.azure.com/openai/v1";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
@@ -180,7 +180,7 @@ internal class Program
 		 - String output from AI
 		""");
 
-		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.services.ai.azure.com/openai/v1";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
@@ -261,7 +261,7 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = "https://wx1116-prd-res-eu2.services.ai.azure.com/openai/v1";
+		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.services.ai.azure.com/openai/v1";
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
