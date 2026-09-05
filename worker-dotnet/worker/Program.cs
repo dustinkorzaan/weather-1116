@@ -1,5 +1,6 @@
 using Core;
 using Core.About;
+using Core.Data;
 using Core.Hangfire;
 using DotNetEnv;
 using Hangfire;
@@ -19,8 +20,13 @@ builder.Services.AddControllers();
 
 // Durable SQL Server storage wherever a connection string is provided
 // (DB_CONNECTION_STRING). Falls back to in-memory storage locally so the
-// worker still runs without a database.
-var dbConnectionString = builder.Configuration["DB_CONNECTION_STRING"];
+// worker still runs without a database. Authenticates via this app's
+// user-assigned managed identity (AZURE_CLIENT_ID, set by
+// infra/modules/container-app.bicep) instead of a SQL login/password -- see
+// ManagedIdentitySqlConnectionStringFactory.
+var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
+	builder.Configuration["DB_CONNECTION_STRING"],
+	builder.Configuration["AZURE_CLIENT_ID"]);
 
 // Explicit, non-zero poll interval: a value > TimeSpan.Zero keeps Hangfire on
 // interval polling (every 60s) rather than the aggressive/continuous mode.

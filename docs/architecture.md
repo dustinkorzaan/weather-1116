@@ -229,6 +229,21 @@ so they can enqueue jobs without running servers; the worker processes them.
 - **Production:** set `DB_CONNECTION_STRING` to the same Azure SQL connection
   string on the worker, API, and MVC. Prod app: `wx1116-prod-worker` on ACA
   (see `prod-deploy-worker.yml`).
+- **Auth (Entra managed identity, no passwords):** `DB_CONNECTION_STRING`
+  holds only `Server`/`Initial Catalog`/`Encrypt`/etc. -- no `Authentication`
+  clause and no username/password. Each app appends that itself via
+  `Core.Data.ManagedIdentitySqlConnectionStringFactory`, using
+  `Authentication=Active Directory Default` plus its own `AZURE_CLIENT_ID`
+  (the app's dedicated user-assigned managed identity, set by
+  `infra/modules/container-app.bicep`) as the `User ID`, so
+  `DefaultAzureCredential` resolves the right identity instead of guessing
+  among the six provisioned for this environment. This is what
+  `Microsoft.Data.SqlClient` actually opens the connection with, so it covers
+  Hangfire's `SqlServerStorage` and would cover an Entity Framework Core
+  `DbContext` (`UseSqlServer`) the same way with no extra code -- both just
+  hand the string to the same driver. The matching SQL-side contained users
+  (`FROM EXTERNAL PROVIDER`, `db_owner`) are created by
+  `infra/scripts/create-contained-users.sql`.
 
 ## About and Health
 
