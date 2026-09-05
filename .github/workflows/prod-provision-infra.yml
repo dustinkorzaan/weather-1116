@@ -28,23 +28,15 @@
 # wx1116-prod-* deploys below.
 #
 # Requires one additional GitHub secret:
-#   WX1116_SQL_ADMIN_LOGIN_NAME -- the SQL-native admin username. Treated as
-#     sensitive and never committed anywhere -- a non-default, non-obvious
-#     username is itself part of the security posture here, not just the
-#     password. Its password needs no secret at all: infra/main.bicep
-#     generates it internally (newGuid()) and never surfaces it.
+#   WX1116_POSTGRES_ADMIN_LOGIN_NAME -- the PostgreSQL admin username. Treated as
+#     sensitive and never committed anywhere. Its password needs no secret at
+#     all: infra/main.bicep generates it internally (newGuid()) and never
+#     surfaces it — reset in the Portal if direct admin access is needed.
 #
-# No other SQL admin secrets are needed: infra/main.bicep registers
-# wx1116-prod-github-actions-mi itself as the SQL server's Entra admin (its
-# principal ID is already known from modules/managed-identity.bicep, no new
-# secret required for that part) -- but this workflow does NOT run
-# infra/scripts/create-contained-users.sql itself. That's a deliberate
-# manual step, run once by hand (as the Entra admin, e.g. via
-# `az account get-access-token` + `Invoke-Sqlcmd -AccessToken`) rather than
-# automated here -- a SQL-native login cannot run it (Azure SQL only allows
-# CREATE USER ... FROM EXTERNAL PROVIDER over an Entra-authenticated
-# connection), which is exactly why the Entra admin registration exists,
-# but that doesn't require this workflow to be the one invoking it.
+# This workflow does NOT run infra/scripts/create-hangfire-db-user.sql itself.
+# That optional script creates a dedicated hangfire_app role; otherwise build
+# AZURE_POSTGRES_DB_CONNECTION_STRING from the admin login after resetting the
+# admin password in the Portal (see docs/aca-bootstrap.md).
 #
 # The "prod" GitHub Environment gate below is required, not stylistic: the
 # federated credential on wx1116-prod-github-actions-mi is scoped to the
@@ -138,18 +130,13 @@ jobs:
 
       - name: Set required azd parameter values
         shell: bash
-        run: azd env set SQL_ADMINISTRATOR_LOGIN "$SQL_ADMINISTRATOR_LOGIN"
+        run: azd env set POSTGRES_ADMINISTRATOR_LOGIN "$POSTGRES_ADMINISTRATOR_LOGIN"
         env:
-          SQL_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_SQL_ADMIN_LOGIN_NAME }}
+          POSTGRES_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_POSTGRES_ADMIN_LOGIN_NAME }}
 
       - name: azd provision
         shell: bash
         run: azd provision --no-prompt
 
-      # infra/scripts/create-contained-users.sql is deliberately NOT run
-      # here -- run it manually, once, as the Entra admin
-      # (wx1116-prod-github-actions-mi or another Entra admin on the
-      # server), e.g.:
-      #   az login
-      #   $accessToken = az account get-access-token --resource https://database.windows.net/ --query accessToken -o tsv
-      #   Invoke-Sqlcmd -ServerInstance wx1116-prod-sql-server.database.windows.net -Database wx1116-prod-sql-database -AccessToken $accessToken -InputFile infra/scripts/create-contained-users.sql
+      # infra/scripts/create-hangfire-db-user.sql is deliberately NOT run here.
+      # See docs/aca-bootstrap.md for building AZURE_POSTGRES_DB_CONNECTION_STRING.

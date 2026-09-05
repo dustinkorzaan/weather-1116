@@ -5,7 +5,7 @@ using Core.Hangfire;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Hangfire.SqlServer;
+using Hangfire.PostgreSql;
 using CQMediator;
 
 Env.TraversePath().Load();
@@ -26,12 +26,12 @@ builder.Services.AddHangfire(config =>
 	}
 	else
 	{
-		// Explicit non-zero poll interval keeps Hangfire on interval polling
-		// (every 60s) rather than the aggressive/continuous mode.
-		config.UseSqlServerStorage(dbConnectionString, new SqlServerStorageOptions
-		{
-			QueuePollInterval = TimeSpan.FromSeconds(60),
-		});
+		config.UsePostgreSqlStorage(
+			options => options.UseNpgsqlConnection(dbConnectionString),
+			new PostgreSqlStorageOptions
+			{
+				QueuePollInterval = TimeSpan.FromSeconds(60),
+			});
 	}
 });
 

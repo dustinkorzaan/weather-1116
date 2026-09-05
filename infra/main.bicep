@@ -26,14 +26,14 @@ param acrName string = 'wx1116prodacr'
 param storageAccountName string = 'wx1116prodblob'
 
 @secure()
-@description('SQL admin login username. Supply via azd env set / --parameters at deploy time.')
-param sqlAdministratorLogin string
+@description('PostgreSQL admin login username. Supply via azd env set / --parameters at deploy time.')
+param postgresAdministratorLogin string
 
 @description('Comma-separated keys of the container apps that already exist, e.g. api,mvc,worker. Set by infra/scripts/capture-existing-container-apps.sh before azd provision; empty means first provision.')
 param existingContainerAppKeys string = ''
 
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
-var acrPushRoleId = '8311e349-0899-44f8-b5e2-9be9d40fb000'
+var acrPushRoleId = '8311e382-0749-4cb8-b61a-304f252e45ec'
 
 // First create only. dotnet/samples:aspnetapp is a runnable ASP.NET app that
 // serves on 8080, the same port the real images use, so the first revision goes
@@ -153,6 +153,7 @@ module existingFunctionsContainerApp 'modules/existing-container-app.bicep' = {
   }
 }
 
+@batchSize(1)
 module containerApps 'modules/container-app.bicep' = [for (cfg, i) in containerAppsConfig: {
   name: 'container-app-${cfg.key}'
   params: {
@@ -192,15 +193,13 @@ module functionsContainerApp 'modules/functions-container-app.bicep' = {
   }
 }
 
-module sql 'modules/sql.bicep' = {
-  name: 'sql'
+module postgresql 'modules/postgresql.bicep' = {
+  name: 'postgresql'
   params: {
-    serverName: '${namePrefix}-${environmentName}-sql-server'
-    databaseName: '${namePrefix}-${environmentName}-sql-database'
+    serverName: '${namePrefix}-${environmentName}-postgres'
+    databaseName: '${namePrefix}-${environmentName}-hangfire'
     location: location
-    administratorLogin: sqlAdministratorLogin
-    entraAdminPrincipalId: githubActionsIdentity.outputs.principalId
-    entraAdminLoginName: githubActionsIdentityName
+    administratorLogin: postgresAdministratorLogin
   }
 }
 
@@ -243,8 +242,8 @@ output WORKER_HOSTNAME string = containerApps[3].outputs.fqdn
 output MCP_SRV_APP_SERVICE_HOSTNAME string = containerApps[4].outputs.fqdn
 output MCP_SRV_FUNC_APP_HOSTNAME string = functionsContainerApp.outputs.fqdn
 
-output SQL_SERVER_FQDN string = sql.outputs.serverFullyQualifiedDomainName
-output SQL_DATABASE_NAME string = sql.outputs.databaseName
+output POSTGRES_SERVER_FQDN string = postgresql.outputs.serverFullyQualifiedDomainName
+output POSTGRES_DATABASE_NAME string = postgresql.outputs.databaseName
 output STORAGE_ACCOUNT_NAME string = functionsContainerApp.outputs.storageAccountName
 output APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 

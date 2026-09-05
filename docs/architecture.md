@@ -206,7 +206,7 @@ URLs are configured via `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_FUNC_APP_URL`, and
 ## Background Worker (Hangfire)
 
 [`worker-dotnet/worker`](../worker-dotnet/worker) is the only host that runs
-Hangfire job servers against shared storage (`DB_CONNECTION_STRING`, SQL Server
+Hangfire job servers against shared storage (`DB_CONNECTION_STRING`, PostgreSQL
 in production). API and MVC register the same storage as Hangfire **clients**
 so they can enqueue jobs without running servers; the worker processes them.
 
@@ -226,7 +226,7 @@ so they can enqueue jobs without running servers; the worker processes them.
   appended in code).
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
-- **Production:** set `DB_CONNECTION_STRING` to the same Azure SQL connection
+- **Production:** set `DB_CONNECTION_STRING` to the same PostgreSQL connection
   string on the worker, API, and MVC. Prod app: `wx1116-prod-worker` on ACA
   (see `prod-deploy-worker.yml`).
 
