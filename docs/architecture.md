@@ -487,12 +487,12 @@ definition — model, instructions, and both MCP tools with
 best-effort match to that API, written without being able to verify it
 against current Microsoft docs, so each run should be checked in the
 Foundry portal (**Agents** → `<name>` → **Versions**) before being trusted.
-System prompts are placeholders for now
-(`.github/foundry-agents/wx1116-agent-default.instructions.txt` and
-`wx1116-agent-chat.instructions.txt`) — edit those files with real
-instructions, then re-run the workflow to publish the update. The default
-agent's response schema (`wx1116-agent-default.response-schema.json`)
-already matches `AIWeatherResponse` exactly (no `runLogDetails`).
+System prompts live in
+`.github/foundry-agents/wx1116-agent-default.instructions.txt` and
+`wx1116-agent-chat.instructions.txt` — edit those files and re-run the
+workflow to publish an update. The default agent's response schema
+(`wx1116-agent-default.response-schema.json`) matches `AIWeatherResponse`
+exactly (no `runLogDetails`).
 
 If the workflow's contract turns out to be wrong, or you'd rather do this by
 hand:
