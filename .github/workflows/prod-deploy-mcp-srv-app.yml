@@ -2,9 +2,9 @@ name: cicd-wx1116-prod-mcp-srv-app-service
 run-name: CICD wx1116-prod-mcp-srv-app-service (ACA)
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["provision-wx1116-prod-infra"]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -17,10 +17,18 @@ env:
   CONTAINER_APP_NAME: wx1116-prod-mcp-srv-app-service
   IMAGE_NAME: wx1116-mcp-app
   BUILD_NUMBER: ${{ github.run_number }}
-  BUILD_BRANCH_NAME: ${{ github.ref_name }}
+  BUILD_BRANCH_NAME: ${{ github.event.workflow_run.head_branch || github.ref_name }}
 
 jobs:
   deploy:
+    # Only deploy once provision-wx1116-prod-infra has finished successfully
+    # on main -- deploys target Container Apps that infra provisions, so
+    # they must run after it, not concurrently with it. workflow_dispatch
+    # still runs unconditionally for manual deploys on any branch.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     environment: prod
     permissions:
@@ -34,6 +42,8 @@ jobs:
         run: echo "build_start=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Login to Azure
         uses: azure/login@v3

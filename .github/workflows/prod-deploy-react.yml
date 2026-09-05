@@ -2,9 +2,9 @@ name: cicd-weather1116-prod-react
 run-name: CICD weather1116-prod-react
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["provision-wx1116-prod-infra"]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -13,10 +13,18 @@ concurrency:
 
 env:
   BUILD_NUMBER: ${{ github.run_number }}
-  BUILD_BRANCH_NAME: ${{ github.ref_name }}
+  BUILD_BRANCH_NAME: ${{ github.event.workflow_run.head_branch || github.ref_name }}
 
 jobs:
   build_and_deploy_job:
+    # Only deploy once provision-wx1116-prod-infra has finished successfully
+    # on main -- deploys target resources that infra provisions, so they
+    # must run after it, not concurrently with it. workflow_dispatch still
+    # runs unconditionally for manual deploys on any branch.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
@@ -29,6 +37,7 @@ jobs:
 
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
           submodules: true
           lfs: false
 
