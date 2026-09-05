@@ -52,7 +52,7 @@ jobs:
           container_app_name: ${{ env.CONTAINER_APP_NAME }}
           resource_group: ${{ env.RESOURCE_GROUP }}
           secrets_multiline: |
-            db-connection-string=${{ secrets.AZURE_POSTGRES_DB_CONNECTION_STRING }}
+            db-connection-string=${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}
             foundry-key=${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}
             google-maps-key=${{ secrets.GOOGLE_MAPS_API_KEY }}
             mcp-func-key=${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}

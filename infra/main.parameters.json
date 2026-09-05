@@ -17,8 +17,11 @@
     "storageAccountName": {
       "value": "${STORAGE_ACCOUNT_NAME=wx1116prodblob}"
     },
-    "postgresAdministratorLogin": {
-      "value": "${POSTGRES_ADMINISTRATOR_LOGIN}"
+    "sqlLocation": {
+      "value": "${SQL_LOCATION=eastus}"
+    },
+    "sqlAdministratorLogin": {
+      "value": "${SQL_ADMINISTRATOR_LOGIN}"
     },
     "existingContainerAppKeys": {
       "value": "${EXISTING_CONTAINER_APP_KEYS}"
