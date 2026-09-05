@@ -58,7 +58,7 @@ tool's JSON content.
 ## curl example
 
 ```bash
-curl -sS -N -X POST "https://weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3du.westus2-01.azurewebsites.net/mcp" \
+curl -sS -N -X POST "https://wx1116-prod-mcp-srv-app-service.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/mcp" \
   -H "accept: application/json, text/event-stream" \
   -H "authorization: Bearer ..." \
   -H "content-type: application/json" \
@@ -81,7 +81,7 @@ curl -sS -N -X POST "https://weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3
 ```
 
 ```bash
-curl -sS -X POST "https://weather1116-prod-mcp-srv-app-service-gdaef6e5cndqb3du.westus2-01.azurewebsites.net/mcp" \
+curl -sS -X POST "https://wx1116-prod-mcp-srv-app-service.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/mcp" \
   -H "accept: application/json, text/event-stream" \
   -H "authorization: Bearer ..." \
   -H "content-type: application/json" \
