@@ -102,7 +102,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   }
 }
 
-resource functionContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
+// 2024-03-01 silently ignores `kind`, deploying a plain container app that
+// `az containerapp function keys` then rejects with "is not an Azure
+// Functions on Container App" -- kind: 'functionapp' only takes effect from
+// 2024-10-02-preview onward (matches the Azure/azure-functions-on-container-apps
+// sample templates).
+resource functionContainerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
   name: name
   location: location
   kind: 'functionapp'
