@@ -18,8 +18,15 @@
 # System prompts live in .github/foundry-agents/*.instructions.md - edit
 # those files and push (or re-run this workflow) to publish an update.
 #
+# The Agents API requires Entra ID auth, not the account api-key used
+# elsewhere -- see deploy-foundry-agent.sh for why. This workflow logs in
+# as the GitHub Actions identity (granted "Foundry User" at project scope
+# by infra/modules/ai-foundry.bicep) and mints a token scoped to
+# https://ai.azure.com/.default for the script to send as a bearer token.
+#
 # Reuses existing repo secrets/vars (no new ones needed):
-#   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL / AZURE_FOUNDRY_PROD_EUS2_KEY / AZURE_FOUNDRY_PROD_EUS2_MODEL
+#   AZURE_GITHUB_CLIENTID / AZURE_TENANTID / AZURE_SUBSCRIPTIONID
+#   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL / AZURE_FOUNDRY_PROD_EUS2_MODEL
 #   PROD_MCP_SRV_APP_SERVICE_URL / PROD_MCP_SRV_APP_SERVICE_KEY
 #   PROD_MCP_SRV_FUNC_APP_URL / PROD_MCP_SRV_FUNC_APP_KEY
 
@@ -39,8 +46,9 @@ concurrency:
 jobs:
   deploy:
     # Only publish once provision-wx1116-prod-infra has finished successfully
-    # on main -- agents reference the model deployment and MCP connections
-    # infra provisions, so they must run after it, not concurrently with it.
+    # on main -- agents reference the model deployment, MCP connections, and
+    # the GitHub Actions identity's Foundry User role assignment infra
+    # provisions, so they must run after it, not concurrently with it.
     # workflow_dispatch still runs unconditionally for manual publishes.
     if: >-
       github.event_name == 'workflow_dispatch' ||
@@ -49,6 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     permissions:
+      id-token: write
       contents: read
 
     steps:
@@ -56,11 +65,26 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          tenant-id: ${{ secrets.AZURE_TENANTID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Get Foundry access token
+        id: foundry_token
+        shell: bash
+        run: |
+          token=$(az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv)
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
       - name: Publish wx1116-agent-current-weather (V5 current-ai-weather)
         shell: bash
         env:
           AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
-          AZURE_FOUNDRY_PROD_EUS2_KEY: ${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}
+          AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
           AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
           MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
           MCP_SRV_APP_SERVICE_KEY: ${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
@@ -76,7 +100,7 @@ jobs:
         shell: bash
         env:
           AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
-          AZURE_FOUNDRY_PROD_EUS2_KEY: ${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}
+          AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
           AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
           MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
           MCP_SRV_APP_SERVICE_KEY: ${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}

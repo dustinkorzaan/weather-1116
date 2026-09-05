@@ -4,7 +4,9 @@
 // Cognitive Services User access, deploys the gpt-5.4-mini model on the
 // account, and registers the two MCP tool hosts as Custom Keys connections
 // on the project (MyMcpSrvAppService, MyMcpSrvFuncApp) so hosted agents can
-// reference them as tools.
+// reference them as tools. Also grants the GitHub Actions identity Foundry
+// User at project scope so it can publish agents via the Agents API (which
+// requires Entra ID auth, not the account api-key used for model inference).
 //
 // NOTE: the Microsoft.CognitiveServices API surface for the unified
 // Foundry resource/project/connections/deployments model has moved around
@@ -31,6 +33,9 @@ param appInsightsConnectionString string
 @description('Principal IDs of the api/mvc/worker managed identities to grant Cognitive Services User on this Foundry resource.')
 param grantedPrincipalIds array
 
+@description('Principal ID of the GitHub Actions managed identity, granted Foundry User (data-plane agents/*/action) on the project so prod-deploy-foundry-agents.yml can publish agents via Entra ID auth.')
+param githubActionsPrincipalId string
+
 @description('Base URL of the MCP Server on App Service tool host, e.g. https://wx1116-prod-mcp-srv-app-service.<domain>/mcp.')
 param mcpSrvAppServiceUrl string
 
@@ -52,6 +57,13 @@ param modelDeploymentName string = 'gpt-5.4-mini'
 param modelName string = 'gpt-5.4-mini'
 
 var cognitiveServicesUserRoleId = 'a97b65f3-24c7-4388-baec-2e87135dc908'
+
+// "Foundry User" (formerly "Azure AI User"): the least-privileged built-in
+// role that grants agents/*/action, required to create/publish agents via
+// the Agents (Assistants-compatible) API. Must be assigned at project scope
+// -- the account-scoped Cognitive Services User role above only covers
+// model inference (chat/responses), not agent management.
+var foundryUserRoleId = '53ca6127-db72-4b80-b1b0-d745d6d5456d'
 
 resource foundryAccount 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
@@ -158,6 +170,16 @@ resource cognitiveServicesUserAssignments 'Microsoft.Authorization/roleAssignmen
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesUserRoleId)
   }
 }]
+
+resource githubActionsFoundryUserAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(foundryProject.id, githubActionsPrincipalId, foundryUserRoleId)
+  scope: foundryProject
+  properties: {
+    principalId: githubActionsPrincipalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
+  }
+}
 
 output accountId string = foundryAccount.id
 output accountName string = foundryAccount.name

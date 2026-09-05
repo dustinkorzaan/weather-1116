@@ -242,6 +242,7 @@ module aiFoundry 'modules/ai-foundry.bicep' = {
       appIdentities[1].outputs.principalId // mvc
       appIdentities[3].outputs.principalId // worker
     ]
+    githubActionsPrincipalId: githubActionsIdentity.outputs.principalId
     mcpSrvAppServiceUrl: 'https://${containerApps[4].outputs.fqdn}/mcp'
     mcpSrvFuncAppUrl: 'https://${functionsContainerApp.outputs.fqdn}/runtime/webhooks/mcp'
     mcpSrvAppServiceKey: mcpSrvAppServiceKey
