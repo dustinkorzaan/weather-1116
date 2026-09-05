@@ -4,9 +4,7 @@
 // Cognitive Services User access, deploys the gpt-5.4-mini model on the
 // account, and registers the two MCP tool hosts as Custom Keys connections
 // on the project (MyMcpSrvAppService, MyMcpSrvFuncApp) so hosted agents can
-// reference them as tools. Agent creation itself (wx1116-agent-current-weather,
-// wx1116-agent-chat) remains a manual follow-up -- there is no ARM resource
-// for agents on this preview API surface yet.
+// reference them as tools.
 //
 // NOTE: the Microsoft.CognitiveServices API surface for the unified
 // Foundry resource/project/connections/deployments model has moved around
