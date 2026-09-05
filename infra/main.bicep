@@ -43,6 +43,9 @@ param mcpSrvAppServiceKey string
 @description('Function key for the MCP Server on Function App tool host, registered as the MyMcpSrvFuncApp Foundry connection. Supply via azd env set / --parameters at deploy time.')
 param mcpSrvFuncAppKey string
 
+@description('Custom domain hostname to bind to the Static Web App, e.g. wx.korzaan.com. Its CNAME must already point at the Static Web App default hostname before this deploys, or validation fails. Empty skips custom domain binding.')
+param staticWebAppCustomDomain string = 'wx.korzaan.com'
+
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var acrPushRoleId = '8311e382-0749-4cb8-b61a-304f252e45ec'
 
@@ -221,6 +224,7 @@ module staticWebApp 'modules/static-web-app.bicep' = {
   params: {
     name: '${namePrefix}-${environmentName}-react'
     location: location
+    customDomainName: staticWebAppCustomDomain
   }
 }
 
@@ -266,6 +270,7 @@ output APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsCon
 
 output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
 output STATIC_WEB_APP_HOSTNAME string = staticWebApp.outputs.defaultHostname
+output STATIC_WEB_APP_CUSTOM_DOMAIN string = staticWebAppCustomDomain
 
 output AI_FOUNDRY_ACCOUNT_NAME string = aiFoundry.outputs.accountName
 output AI_FOUNDRY_PROJECT_NAME string = aiFoundry.outputs.projectName

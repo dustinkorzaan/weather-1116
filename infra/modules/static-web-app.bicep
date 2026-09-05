@@ -10,6 +10,9 @@ param name string
 
 param location string
 
+@description('Custom domain hostname to bind to the Static Web App, e.g. wx.korzaan.com. Its CNAME must already point at the Static Web App default hostname before this deploys, or validation fails. Empty skips custom domain binding.')
+param customDomainName string = ''
+
 resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
   name: name
   location: location
@@ -18,6 +21,14 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
     tier: 'Free'
   }
   properties: {}
+}
+
+resource customDomain 'Microsoft.Web/staticSites/customDomains@2023-12-01' = if (!empty(customDomainName)) {
+  parent: staticWebApp
+  name: customDomainName
+  properties: {
+    validationMethod: 'cname-delegation'
+  }
 }
 
 output id string = staticWebApp.id
