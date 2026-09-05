@@ -1,0 +1,28 @@
+{
+  "name": "AIWeatherResponse",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "fullSummary": { "type": "string" },
+      "temperatureF": { "type": "number" },
+      "windSpeedMPH": { "type": "number" },
+      "windDirectionSource": { "type": "string" },
+      "windDirectionSourceDegrees": { "type": "integer" },
+      "conditions": { "type": "string" },
+      "latitude": { "type": "number" },
+      "longitude": { "type": "number" }
+    },
+    "required": [
+      "fullSummary",
+      "temperatureF",
+      "windSpeedMPH",
+      "windDirectionSource",
+      "windDirectionSourceDegrees",
+      "conditions",
+      "latitude",
+      "longitude"
+    ],
+    "additionalProperties": false
+  }
+}

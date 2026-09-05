@@ -454,7 +454,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes (V3/V4) | Hosted model deployment name (e.g. `gpt-5.4-mini`); not used by V5, which sends only the user prompt |
 | `MCP_SRV_FUNC_APP_URL` / `MCP_SRV_FUNC_APP_KEY` | V4 only | `McpSrvFuncApp` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_APP_SERVICE_URL` / `MCP_SRV_APP_SERVICE_KEY` | V4 only | `McpSrvAppService` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
-| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-default`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
+| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-current-weather`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
 
 `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on
 `/current-ai-weather`) runs tools in-process and does not need
@@ -467,15 +467,44 @@ The confirm-nashville-ai-weather-v4 worker recurring job needs them too.
 instead - the agent owns tool resolution, so no `MCP_SRV_*` variables apply.
 
 **V5 agent: MCP approval must be Never.** V5 is a one-shot handoff: the app
-sends only the user prompt. The hosted agent (`wx1116-agent-default`) must run
+sends only the user prompt. The hosted agent (`wx1116-agent-current-weather`) must run
 MCP tools without asking this app to approve.
+
+The Foundry account/project itself (`infra/modules/ai-foundry.bicep`) now
+provisions the `gpt-5.4-mini` model deployment and registers both MCP tool
+hosts as Custom Keys connections on the project (`MyMcpSrvAppService`,
+`MyMcpSrvFuncApp` — target URL + auth header, kept in sync with the live
+`PROD_MCP_SRV_APP_SERVICE_KEY`/`PROD_MCP_SRV_FUNC_APP_KEY` secrets on every
+push to `main`). Foundry has no ARM resource for agents themselves, so
+publishing `wx1116-agent-current-weather` and `wx1116-agent-chat` is instead handled
+by the `prod-deploy-foundry-agents` workflow
+(`.github/workflows/prod-deploy-foundry-agents.yml`,
+`.github/scripts/deploy-foundry-agent.sh`), which POSTs each agent's
+definition — model, instructions, and both MCP tools with
+`require_approval: never` — to the Assistants-compatible REST API. It's
+**`workflow_dispatch`-only** (not run on every push like the other
+`prod-deploy-*.yml` workflows): the create/update contract it uses is a
+best-effort match to that API, written without being able to verify it
+against current Microsoft docs, so each run should be checked in the
+Foundry portal (**Agents** → `<name>` → **Versions**) before being trusted.
+System prompts live in
+`.github/foundry-agents/wx1116-agent-current-weather.instructions.md` and
+`wx1116-agent-chat.instructions.md` — edit those files and re-run the
+workflow to publish an update. The default agent's response schema
+(`wx1116-agent-current-weather.response-schema.json`) matches `AIWeatherResponse`
+exactly (no `runLogDetails`).
+
+If the workflow's contract turns out to be wrong, or you'd rather do this by
+hand:
 
 1. Open the Microsoft Foundry portal for the same project as
    `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
-2. **Agents** → `wx1116-agent-default` (or `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
-3. For each MCP server (`McpSrvFuncApp`, `McpSrvAppService`): set **Approval**
-   to **Never** (`require_approval: never`).
-4. Create / publish a version. V5 calls the agent **by name** (project default
+2. **Agents** → `wx1116-agent-current-weather` (or `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
+3. Set the model to the `gpt-5.4-mini` deployment provisioned above.
+4. For each MCP server, add it as a tool using the `MyMcpSrvAppService` /
+   `MyMcpSrvFuncApp` connections (instead of re-entering the URL/key by hand)
+   and set **Approval** to **Never** (`require_approval: never`).
+5. Create / publish a version. V5 calls the agent **by name** (project default
    version).
 
 Same MCP JSON shape as Chat3 (`require_approval: never` on each server). Chat3
