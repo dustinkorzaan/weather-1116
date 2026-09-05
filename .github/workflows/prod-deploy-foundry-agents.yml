@@ -1,5 +1,5 @@
-# Publishes the two hosted Foundry agents (wx1116-agent-current-weather for V5,
-# wx1116-agent-chat for Chat3) via .github/scripts/deploy-foundry-agent.sh.
+# Publishes the two hosted Foundry agents (wx1116-agent-for-current-weather for V5,
+# wx1116-agent-for-chat for Chat3) via .github/scripts/deploy-foundry-agent.sh.
 #
 # Called via workflow_call from build-test-provision-deploy.yml with
 # needs: [provision], same as the other prod-deploy-*.yml workflows.
@@ -76,7 +76,7 @@ jobs:
       # Re-enable by uncommenting these two steps once the portal renders
       # API-attached MCP tools, or once a scripted workaround is confirmed.
       #
-      # - name: Publish wx1116-agent-current-weather (V5 current-ai-weather)
+      # - name: Publish wx1116-agent-for-current-weather (V5 current-ai-weather)
       #   shell: bash
       #   env:
       #     AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
@@ -86,11 +86,11 @@ jobs:
       #     MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
       #   run: |
       #     bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
-      #       wx1116-agent-current-weather \
-      #       "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-current-weather.instructions.md" \
-      #       --response-schema "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-current-weather.response-schema.json"
+      #       wx1116-agent-for-current-weather \
+      #       "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-for-current-weather.instructions.md" \
+      #       --response-schema "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-for-current-weather.response-schema.json"
       #
-      # - name: Publish wx1116-agent-chat (Chat3)
+      # - name: Publish wx1116-agent-for-chat (Chat3)
       #   shell: bash
       #   env:
       #     AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
@@ -100,5 +100,5 @@ jobs:
       #     MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
       #   run: |
       #     bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
-      #       wx1116-agent-chat \
-      #       "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-chat.instructions.md"
+      #       wx1116-agent-for-chat \
+      #       "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-for-chat.instructions.md"

@@ -143,7 +143,7 @@ in parallel. Each can also be run directly via `workflow_dispatch`:
 | `prod-deploy-mcp-srv-app.yml` | Container App + ACR image |
 | `prod-deploy-mcp-srv-func.yml` | Functions-on-ACA container image (ACR) |
 | `prod-deploy-react.yml` | Static Web App |
-| `prod-deploy-foundry-agents.yml` | Foundry agents (`wx1116-agent-current-weather`, `wx1116-agent-chat`) |
+| `prod-deploy-foundry-agents.yml` | Foundry agents (`wx1116-agent-for-current-weather`, `wx1116-agent-for-chat`) |
 
 ### MCP `mcp_extension` key
 
@@ -237,7 +237,7 @@ Do not configure MCP servers or agents in the Foundry portal.
   `MyMcpSrvAppService` and `MyMcpSrvFuncApp` as `RemoteTool` + `CustomKeys`
   connections (URL + auth header) on every `azd provision`.
 - **Agents:** `prod-deploy-foundry-agents.yml` publishes
-  `wx1116-agent-current-weather` and `wx1116-agent-chat` against those
+  `wx1116-agent-for-current-weather` and `wx1116-agent-for-chat` against those
   connections with `require_approval: never`.
 
 | Connection | URL | Auth |

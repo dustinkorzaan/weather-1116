@@ -18,11 +18,11 @@ public class ChatFoundrySettingsTests
     [Fact]
     public void ChatAgentName_UsesEnvironmentValue()
     {
-        RunWithFoundryEnvironment(chatAgentName: "wx1116-agent-chat", () =>
+        RunWithFoundryEnvironment(chatAgentName: "wx1116-agent-for-chat", () =>
         {
             var settings = new ChatFoundrySettings();
 
-            Assert.Equal("wx1116-agent-chat", settings.ChatAgentName);
+            Assert.Equal("wx1116-agent-for-chat", settings.ChatAgentName);
         });
     }
 
