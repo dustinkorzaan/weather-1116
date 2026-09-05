@@ -409,9 +409,14 @@ in the chain structurally skips everything downstream instead of relying on
 an event's conclusion string. Provisioning and deploys still can't run
 concurrently with each other for the same reason as before (see
 `prod-provision-infra.yml` and the "active provisioning operation in
-progress" note there), just enforced by `needs:` now instead of
-`workflow_run`. Each stage's workflow file can also be triggered directly via
-`workflow_dispatch` on any branch (e.g. hotfixes). Deployables include API,
+progress" note there); within one orchestrator run that's `needs:`, and
+across separate runs (e.g. two pushes to main close together) it's the
+orchestrator's own workflow-level `concurrency:` group, which queues whole
+runs rather than letting one run's deploys overlap another run's provision.
+Each stage's workflow file can also be triggered directly via
+`workflow_dispatch` on any branch (e.g. hotfixes) -- including the
+orchestrator itself, which runs the full chain against that branch's code.
+Deployables include API,
 MVC, React, Blazor, worker-dotnet, and both MCP hosts on **Azure Container
 Apps + ACR** (Functions-on-ACA for `mcp-srv-func-app`). Bootstrap:
 [`docs/aca-bootstrap.md`](aca-bootstrap.md).

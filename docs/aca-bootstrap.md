@@ -143,6 +143,7 @@ in parallel. Each can also be run directly via `workflow_dispatch`:
 | `prod-deploy-mcp-srv-app.yml` | Container App + ACR image |
 | `prod-deploy-mcp-srv-func.yml` | Functions-on-ACA container image (ACR) |
 | `prod-deploy-react.yml` | Static Web App |
+| `prod-deploy-foundry-agents.yml` | Foundry agents (`wx1116-agent-current-weather`, `wx1116-agent-chat`) |
 
 ### MCP `mcp_extension` key
 
