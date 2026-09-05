@@ -8,6 +8,9 @@
     "location": {
       "value": "${AZURE_LOCATION=eastus2}"
     },
+    "sqlLocation": {
+      "value": "${SQL_LOCATION=eastus}"
+    },
     "resourceGroupName": {
       "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prod-rg}"
     },
