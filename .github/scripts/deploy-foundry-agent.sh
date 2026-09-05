@@ -4,23 +4,34 @@
 # deployment and both MCP tool connections (McpSrvAppService,
 # McpSrvFuncApp) with require_approval: never.
 #
-# BEST EFFORT / UNVERIFIED: this was written without being able to reach
-# Microsoft's docs from the authoring session to confirm the exact
-# create/update contract for named, versioned Foundry agents (the endpoint
-# below - POST {project}/assistants?api-version=... - is the closest
-# documented match: the Assistants-compatible API, which Microsoft's own
-# docs describe as creating "a new agent or a new version of an existing
-# agent" when given a `name`). After running this, check the Foundry portal
-# (Agents -> <name> -> Versions) to confirm a new version actually
-# published before relying on it, and adjust API_VERSION below if Azure
+# Auth: the Agents (Assistants-compatible) API is a data-plane operation
+# that does not accept the Foundry account's api-key -- it requires a
+# Microsoft Entra ID bearer token, unlike the /openai/v1 inference
+# endpoints the rest of this app calls with AZURE_FOUNDRY_PROD_EUS2_KEY.
+# (Confirmed by the HTTP 401 "invalid subscription key or wrong API
+# endpoint" this script previously got when sending api-key here -- see
+# Microsoft Q&A "Azure AI Agent Key Based Authentication".) The caller
+# (prod-deploy-foundry-agents.yml) logs in via azure/login and passes a
+# token scoped to https://ai.azure.com/.default as
+# AZURE_FOUNDRY_ACCESS_TOKEN. The identity used must hold the "Foundry
+# User" role (agents/*/action) at project scope -- infra/modules/ai-foundry.bicep
+# grants this to the GitHub Actions identity.
+#
+# BEST EFFORT: the create/update contract for named, versioned Foundry
+# agents (POST {project}/assistants?api-version=... creating "a new agent
+# or a new version of an existing agent" when given a `name`) is the
+# closest documented match found from this authoring session's available
+# docs, not hand-verified against a live resource. After running this,
+# check the Foundry portal (Agents -> <name> -> Versions) to confirm a new
+# version actually published, and adjust API_VERSION below if Azure
 # responds with an error naming a different contract.
 #
 # Usage:
 #   deploy-foundry-agent.sh <agent-name> <instructions-file> [--response-schema <schema-file>]
 #
 # Required env:
-#   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL   Foundry project OpenAI-compatible endpoint
-#   AZURE_FOUNDRY_PROD_EUS2_KEY        Foundry API key (sent as the api-key header)
+#   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL   Foundry project endpoint
+#   AZURE_FOUNDRY_ACCESS_TOKEN         Entra ID bearer token (scope https://ai.azure.com/.default)
 #   AZURE_FOUNDRY_PROD_EUS2_MODEL      Model deployment name, e.g. gpt-5.4-mini
 #   MCP_SRV_APP_SERVICE_URL / MCP_SRV_APP_SERVICE_KEY
 #   MCP_SRV_FUNC_APP_URL / MCP_SRV_FUNC_APP_KEY
@@ -37,14 +48,14 @@ if [ "${1:-}" = "--response-schema" ]; then
 fi
 
 : "${AZURE_FOUNDRY_PROD_EUS2_PROJ_URL:?}"
-: "${AZURE_FOUNDRY_PROD_EUS2_KEY:?}"
+: "${AZURE_FOUNDRY_ACCESS_TOKEN:?}"
 : "${AZURE_FOUNDRY_PROD_EUS2_MODEL:?}"
 : "${MCP_SRV_APP_SERVICE_URL:?}"
 : "${MCP_SRV_APP_SERVICE_KEY:?}"
 : "${MCP_SRV_FUNC_APP_URL:?}"
 : "${MCP_SRV_FUNC_APP_KEY:?}"
 
-API_VERSION="2025-05-15-preview"
+API_VERSION="2025-05-01"
 ENDPOINT="${AZURE_FOUNDRY_PROD_EUS2_PROJ_URL%/}/assistants?api-version=${API_VERSION}"
 
 # Same MCP tool shape (type/server_label/server_url/headers/require_approval)
@@ -92,7 +103,7 @@ trap 'rm -f "$RESPONSE_FILE"' EXIT
 
 HTTP_STATUS=$(curl -sS -o "$RESPONSE_FILE" -w '%{http_code}' \
   -X POST "$ENDPOINT" \
-  -H "api-key: ${AZURE_FOUNDRY_PROD_EUS2_KEY}" \
+  -H "Authorization: Bearer ${AZURE_FOUNDRY_ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d "$BODY")
 

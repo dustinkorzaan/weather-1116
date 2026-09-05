@@ -499,16 +499,22 @@ by the `prod-deploy-foundry-agents` workflow
 (`.github/workflows/prod-deploy-foundry-agents.yml`,
 `.github/scripts/deploy-foundry-agent.sh`), which POSTs each agent's
 definition — model, instructions, and both MCP tools with
-`require_approval: never` — to the Assistants-compatible REST API. It's
-**`workflow_dispatch`-only** (not run on every push like the other
-`prod-deploy-*.yml` workflows): the create/update contract it uses is a
-best-effort match to that API, written without being able to verify it
-against current Microsoft docs, so each run should be checked in the
+`require_approval: never` — to the Assistants-compatible REST API. Like the
+other `prod-deploy-*.yml` workflows, it runs automatically once
+`provision-wx1116-prod-infra` finishes successfully on `main` (chained via
+`workflow_run`, `workflow_dispatch` still works for manual runs on any
+branch). The Agents API takes a Microsoft Entra ID bearer token, not the
+Foundry account's `api-key` used elsewhere — the workflow logs in as the
+GitHub Actions identity (granted the **Foundry User** role at project scope
+by `ai-foundry.bicep`) and mints a token scoped to
+`https://ai.azure.com/.default` for the script to send as
+`Authorization: Bearer`. The create/update contract the script uses is
+still a best-effort match to that API, so each run should be checked in the
 Foundry portal (**Agents** → `<name>` → **Versions**) before being trusted.
 System prompts live in
 `.github/foundry-agents/wx1116-agent-current-weather.instructions.md` and
-`wx1116-agent-chat.instructions.md` — edit those files and re-run the
-workflow to publish an update. The default agent's response schema
+`wx1116-agent-chat.instructions.md` — edit those files and push (or re-run
+the workflow) to publish an update. The default agent's response schema
 (`wx1116-agent-current-weather.response-schema.json`) matches `AIWeatherResponse`
 exactly (no `runLogDetails`).
 
