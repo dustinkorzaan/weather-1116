@@ -1,0 +1,73 @@
+# Publishes the two hosted Foundry agents (wx1116-agent-default for V5,
+# wx1116-agent-chat for Chat3) via .github/scripts/deploy-foundry-agent.sh.
+#
+# Manual (workflow_dispatch) only - unlike the other prod-deploy-*.yml
+# workflows, this does NOT run on every push to main. infra/main.bicep
+# already provisions the gpt-5.4-mini model deployment and the two MCP tool
+# connections (MyMcpSrvAppService, MyMcpSrvFuncApp) idempotently on every
+# push, but Foundry has no ARM resource for agents, and the create/update
+# contract this script uses is a best-effort match to the
+# Assistants-compatible API - it was written without being able to verify it
+# against current Microsoft docs from the authoring session. Run this by
+# hand, then confirm in the Foundry portal (Agents -> <name> -> Versions)
+# that a new version actually published, before wiring it into push-to-main.
+#
+# System prompts are placeholders (.github/foundry-agents/*.instructions.txt)
+# - edit those files with the real instructions before relying on either
+# agent, then re-run this workflow to publish the update.
+#
+# Reuses existing repo secrets/vars (no new ones needed):
+#   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL / AZURE_FOUNDRY_PROD_EUS2_KEY / AZURE_FOUNDRY_PROD_EUS2_MODEL
+#   PROD_MCP_SRV_APP_SERVICE_URL / PROD_MCP_SRV_APP_SERVICE_KEY
+#   PROD_MCP_SRV_FUNC_APP_URL / PROD_MCP_SRV_FUNC_APP_KEY
+
+name: prod-deploy-foundry-agents
+run-name: Deploy wx1116-prod Foundry agents
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: prod-deploy-foundry-agents
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Publish wx1116-agent-default (V5 current-ai-weather)
+        shell: bash
+        env:
+          AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
+          AZURE_FOUNDRY_PROD_EUS2_KEY: ${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}
+          AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
+          MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
+          MCP_SRV_APP_SERVICE_KEY: ${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
+          MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+          MCP_SRV_FUNC_APP_KEY: ${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
+        run: |
+          bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
+            wx1116-agent-default \
+            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-default.instructions.txt" \
+            --response-schema "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-default.response-schema.json"
+
+      - name: Publish wx1116-agent-chat (Chat3)
+        shell: bash
+        env:
+          AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
+          AZURE_FOUNDRY_PROD_EUS2_KEY: ${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}
+          AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
+          MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
+          MCP_SRV_APP_SERVICE_KEY: ${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
+          MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+          MCP_SRV_FUNC_APP_KEY: ${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
+        run: |
+          bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
+            wx1116-agent-chat \
+            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-chat.instructions.txt"

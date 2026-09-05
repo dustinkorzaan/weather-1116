@@ -1,0 +1,12 @@
+PLACEHOLDER - replace with the real system prompt for wx1116-agent-default
+(the hosted agent behind GetCurrentAIWeatherV5Handler / the V5 tab on
+/current-ai-weather) before relying on this agent.
+
+Intent this prompt needs to cover once written for real:
+- Resolve the requested location's latitude/longitude and current weather
+  using the McpSrvAppService and McpSrvFuncApp MCP tools.
+- Respond with ONLY JSON matching the AIWeatherResponse schema (see
+  wx1116-agent-default.response-schema.json in this directory) - no prose,
+  no markdown fencing, no extra fields, and no "runLogDetails" field (V5 has
+  no local schema to strip it from; the agent's own schema must already
+  omit it).

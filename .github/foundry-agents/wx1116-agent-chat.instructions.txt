@@ -1,0 +1,10 @@
+PLACEHOLDER - replace with the real system prompt for wx1116-agent-chat
+(the hosted agent behind the Chat3 tab on /chat-clients) before relying on
+this agent.
+
+Intent this prompt needs to cover once written for real:
+- Hold a natural-language conversation about weather.
+- Use the McpSrvAppService and McpSrvFuncApp MCP tools to resolve locations
+  and look up current conditions as needed.
+- Unlike wx1116-agent-default, Chat3 is conversational - free-form text
+  responses, not a fixed JSON schema.

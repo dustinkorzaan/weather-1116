@@ -475,8 +475,27 @@ provisions the `gpt-5.4-mini` model deployment and registers both MCP tool
 hosts as Custom Keys connections on the project (`MyMcpSrvAppService`,
 `MyMcpSrvFuncApp` — target URL + auth header, kept in sync with the live
 `PROD_MCP_SRV_APP_SERVICE_KEY`/`PROD_MCP_SRV_FUNC_APP_KEY` secrets on every
-push to `main`). Creating the agents themselves is still a manual step — the
-preview API surface has no ARM resource for agents yet:
+push to `main`). Foundry has no ARM resource for agents themselves, so
+publishing `wx1116-agent-default` and `wx1116-agent-chat` is instead handled
+by the `prod-deploy-foundry-agents` workflow
+(`.github/workflows/prod-deploy-foundry-agents.yml`,
+`.github/scripts/deploy-foundry-agent.sh`), which POSTs each agent's
+definition — model, instructions, and both MCP tools with
+`require_approval: never` — to the Assistants-compatible REST API. It's
+**`workflow_dispatch`-only** (not run on every push like the other
+`prod-deploy-*.yml` workflows): the create/update contract it uses is a
+best-effort match to that API, written without being able to verify it
+against current Microsoft docs, so each run should be checked in the
+Foundry portal (**Agents** → `<name>` → **Versions**) before being trusted.
+System prompts are placeholders for now
+(`.github/foundry-agents/wx1116-agent-default.instructions.txt` and
+`wx1116-agent-chat.instructions.txt`) — edit those files with real
+instructions, then re-run the workflow to publish the update. The default
+agent's response schema (`wx1116-agent-default.response-schema.json`)
+already matches `AIWeatherResponse` exactly (no `runLogDetails`).
+
+If the workflow's contract turns out to be wrong, or you'd rather do this by
+hand:
 
 1. Open the Microsoft Foundry portal for the same project as
    `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
