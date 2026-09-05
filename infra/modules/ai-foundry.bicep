@@ -107,15 +107,17 @@ resource appInsightsConnection 'Microsoft.CognitiveServices/accounts/projects/co
   }
 }
 
-// Default settings: GlobalStandard SKU, capacity 1, no explicit model
-// version pin (Azure OpenAI resolves to the current default version for the
-// model when version is omitted).
+// Default settings: GlobalStandard SKU, capacity 249. For gpt-5.4-mini this
+// subscription's quota scales at 1,000 TPM and 1 RPM per capacity unit, so
+// 249 units yields the full available 249,000 TPM / 249 RPM. No explicit
+// model version pin (Azure OpenAI resolves to the current default version
+// for the model when version is omitted).
 resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-04-01-preview' = {
   parent: foundryAccount
   name: modelDeploymentName
   sku: {
     name: 'GlobalStandard'
-    capacity: 1
+    capacity: 249
   }
   properties: {
     model: {
