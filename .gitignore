@@ -24,6 +24,3 @@ obj/
 # Environment
 .env
 .env.local
-
-# Bicep compile output (source of truth is *.bicep; azd compiles at deploy time)
-infra/main.json
