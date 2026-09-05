@@ -73,7 +73,10 @@ azd env get-values
 
 ## Step 2 — Populate GitHub vars from provision outputs
 
-Set `https://` URLs from the `*_HOSTNAME` outputs:
+Set `https://` URLs from the `*_HOSTNAME` outputs. For React, use the custom
+domain when provision binds one (default `wx.korzaan.com` via
+`STATIC_WEB_APP_CUSTOM_DOMAIN`); fall back to `STATIC_WEB_APP_HOSTNAME` only
+when custom-domain binding is skipped.
 
 ```text
 PROD_API_DOTNET_URL          = https://<API_HOSTNAME>
@@ -82,7 +85,7 @@ PROD_UI_BLAZOR_URL           = https://<BLAZOR_HOSTNAME>
 PROD_WORKER_DOTNET_URL       = https://<WORKER_HOSTNAME>
 PROD_MCP_SRV_APP_SERVICE_URL = https://<MCP_SRV_APP_SERVICE_HOSTNAME>
 PROD_MCP_SRV_FUNC_APP_URL    = https://<MCP_SRV_FUNC_APP_HOSTNAME>
-PROD_UI_REACT_URL            = https://<STATIC_WEB_APP_HOSTNAME>
+PROD_UI_REACT_URL            = https://<STATIC_WEB_APP_CUSTOM_DOMAIN>
 ```
 
 Also set Foundry vars (`AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`, model, agent names).
@@ -238,9 +241,40 @@ Set `require_approval: never` on each tool.
 - Each app: `GET https://<host>/About`
 - API `/About` aggregates worker + both MCP hosts
 - React SWA: hello, map, `/current-ai-weather`, `/chat-clients`
+- React custom domain (when bound): `https://<STATIC_WEB_APP_CUSTOM_DOMAIN>`
+  returns `200` with a valid TLS certificate
 - MCP Inspector: see `docs/6-mcp-inspection/6-mcp-inspection.md`
 
-## Custom domains
+## Static Web App custom domain
 
-Out of scope for the initial ACA deploy. Map domains to ACA ingress and SWA
-in a follow-up story.
+`infra/main.bicep` binds a custom domain to `wx1116-prod-react` via
+`infra/modules/static-web-app.bicep`. The default hostname is
+`wx.korzaan.com` (`staticWebAppCustomDomain` / `STATIC_WEB_APP_CUSTOM_DOMAIN`).
+
+**Before the first provision that binds a custom domain**, create a CNAME at your
+DNS provider pointing the hostname at the SWA default hostname
+(`STATIC_WEB_APP_HOSTNAME`, e.g.
+`wonderful-ground-0511f4e0f.5.azurestaticapps.net`). Bicep uses
+`cname-delegation` validation — Azure checks that CNAME during deploy; if it is
+missing or wrong, provision fails.
+
+```text
+wx.korzaan.com  CNAME  <STATIC_WEB_APP_HOSTNAME>
+```
+
+No manual `az staticwebapp hostname` step is required once DNS is in place.
+Provision creates the `Microsoft.Web/staticSites/customDomains` resource and
+Azure issues the managed certificate after validation succeeds.
+
+Override or skip via azd env:
+
+```bash
+# different hostname
+azd env set STATIC_WEB_APP_CUSTOM_DOMAIN other.example.com
+
+# skip custom-domain binding (e.g. a throwaway SWA in another environment)
+azd env set STATIC_WEB_APP_CUSTOM_DOMAIN ""
+```
+
+ACA container-app custom domains remain out of scope for this template; only the
+React Static Web App is wired here.
