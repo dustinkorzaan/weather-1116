@@ -10,6 +10,15 @@ Without both, `azure/login` and `azd auth login` in the workflows cannot
 authenticate. Bicep never creates either one — it only references the identity
 and assigns Contributor + User Access Administrator on this resource group.
 
+**Subscription prerequisite (one-time):** register the PostgreSQL resource
+provider before the first provision. The `provision-wx1116-prod-infra` workflow
+attempts this automatically; if it fails with `AuthorizationFailed`, a
+subscription admin must run once:
+
+```bash
+az provider register --namespace Microsoft.DBforPostgreSQL --wait
+```
+
 ## What gets provisioned
 
 `azd provision` (via `prod-provision-infra.yml`) creates:

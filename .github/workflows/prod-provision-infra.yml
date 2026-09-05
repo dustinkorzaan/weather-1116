@@ -1,5 +1,5 @@
 # Provisions the wx1116-prod-* Azure resources (infra/main.bicep) via azd.
-# Creates ACA + ACR + SQL + SWA + Foundry in wx1116-prod-rg (greenfield).
+# Creates ACA + ACR + PostgreSQL + SWA + Foundry in wx1116-prod-rg (greenfield).
 #
 # Triggers directly on push to main (not chained off build-and-test via
 # workflow_run) and runs unconditionally on every such push -- main only
@@ -32,6 +32,14 @@
 #     sensitive and never committed anywhere. Its password needs no secret at
 #     all: infra/main.bicep generates it internally (newGuid()) and never
 #     surfaces it — reset in the Portal if direct admin access is needed.
+#
+# Subscription prerequisite (one-time): the target subscription must register
+# the Microsoft.DBforPostgreSQL resource provider before the flexible server can
+# be created. The "Register PostgreSQL resource provider" step below does this
+# automatically when wx1116-prod-github-actions-mi has permission to register
+# providers at subscription scope (e.g. Subscription Contributor). If that step
+# fails with AuthorizationFailed, a subscription admin must run once:
+#   az provider register --namespace Microsoft.DBforPostgreSQL --wait
 #
 # This workflow does NOT run infra/scripts/create-hangfire-db-user.sql itself.
 # That optional script creates a dedicated hangfire_app role; otherwise build
@@ -92,6 +100,29 @@ jobs:
           client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Register PostgreSQL resource provider
+        shell: bash
+        run: |
+          set -euo pipefail
+          NAMESPACE="Microsoft.DBforPostgreSQL"
+          STATE="$(az provider show --namespace "$NAMESPACE" --query registrationState -o tsv)"
+          echo "$NAMESPACE registration state: $STATE"
+          if [ "$STATE" = "Registered" ]; then
+            echo "Already registered."
+            exit 0
+          fi
+          echo "Registering $NAMESPACE (can take a few minutes)..."
+          if ! az provider register --namespace "$NAMESPACE" --wait; then
+            echo "::error::Failed to register $NAMESPACE. wx1116-prod-github-actions-mi needs subscription-level permission to register resource providers, or a subscription admin must run once: az provider register --namespace $NAMESPACE --wait"
+            exit 1
+          fi
+          STATE="$(az provider show --namespace "$NAMESPACE" --query registrationState -o tsv)"
+          echo "$NAMESPACE registration state after register: $STATE"
+          if [ "$STATE" != "Registered" ]; then
+            echo "::error::$NAMESPACE is not Registered (state=$STATE). Retry after a subscription admin runs: az provider register --namespace $NAMESPACE --wait"
+            exit 1
+          fi
 
       - name: Log in with azd (federated credentials)
         shell: bash
