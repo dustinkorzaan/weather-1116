@@ -45,7 +45,7 @@ builder.Services.AddHangfire(config =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(15);
+    client.Timeout = TimeSpan.FromSeconds(60);
 });
 builder.Services.AddStandardCoreServices();
 builder.Services.AddWeatherChatClients();
