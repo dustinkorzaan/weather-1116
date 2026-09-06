@@ -18,7 +18,7 @@ param name string
 @description('False before the app exists (first provision), true afterwards.')
 param exists bool
 
-resource containerApp 'Microsoft.App/containerApps@2024-03-01' existing = if (exists) {
+resource containerApp 'Microsoft.App/containerApps@2025-01-01' existing = if (exists) {
   name: name
 }
 
