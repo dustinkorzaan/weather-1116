@@ -24,11 +24,14 @@ param existingSecrets object = {}
 @description('Container port. ASP.NET apps listen on 8080.')
 param targetPort int = 8080
 
-@description('Minimum replicas. Use 1 for always-on workloads (worker, blazor).')
+@description('Minimum replicas.')
 param minReplicas int = 0
 
 @description('Maximum replicas.')
 param maxReplicas int = 3
+
+@description('KEDA cooldown period in seconds before scaling in to minReplicas.')
+param cooldownPeriod int = 600
 
 @description('Enable sticky sessions for Blazor Server SignalR.')
 param stickySessions bool = false
@@ -75,7 +78,7 @@ var envVars = concat(provisionEnvVars, filter(existingEnv, envVar => !contains(p
 
 var image = empty(existingImage) ? containerImage : existingImage
 
-resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
+resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
   name: name
   location: location
   identity: {
@@ -120,6 +123,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       scale: {
         minReplicas: minReplicas
         maxReplicas: maxReplicas
+        cooldownPeriod: cooldownPeriod
       }
     }
   }
