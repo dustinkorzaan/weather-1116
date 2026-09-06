@@ -24,7 +24,7 @@ param existingSecrets object = {}
 @description('Container port. ASP.NET apps listen on 8080.')
 param targetPort int = 8080
 
-@description('Minimum replicas. Use 1 for always-on workloads (worker, blazor).')
+@description('Minimum replicas. All apps currently scale to zero; the React frontend pre-warms api/blazor/mvc on load to mask cold starts.')
 param minReplicas int = 0
 
 @description('Maximum replicas.')
