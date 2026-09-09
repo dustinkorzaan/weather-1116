@@ -55,3 +55,7 @@ dotnet restore
 dotnet build
 func start
 ```
+
+# Postman
+
+![Postman against the local DemoFuncApp MCP endpoint, showing the MyDemo tool call with demoProperty "test" and response "4"](postman-mcp-demo-func.png)
