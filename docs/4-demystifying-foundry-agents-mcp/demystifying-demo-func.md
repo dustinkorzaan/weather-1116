@@ -59,3 +59,11 @@ func start
 # Postman
 
 ![Postman against the local DemoFuncApp MCP endpoint, showing the MyDemo tool call with demoProperty "test" and response "4"](postman-mcp-demo-func.png)
+
+# MCP Inspector Web
+
+```
+npx @modelcontextprotocol/inspector
+Streamable HTTP
+http://localhost:7071/runtime/webhooks/mcp
+```
