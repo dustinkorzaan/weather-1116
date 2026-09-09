@@ -248,13 +248,19 @@ on `/current-ai-weather`) **→ V5 →**
       participant Agent as Foundry Agent
       participant Model as Foundry Model
       box MCP Server on Function App
+          participant FuncMcp
           participant GetLatLongTool
       end
       box MCP Server on App Service
+          participant AppSvcMcp
           participant GetPublicWeatherTool
       end
 
       Console->>Agent: user prompt only
+      Agent->>FuncMcp: Discover MCP Tools
+      FuncMcp-->>Agent: MCP Tools
+      Agent->>AppSvcMcp: Discover MCP Tools
+      AppSvcMcp-->>Agent: MCP Tools
       Agent->>Model: user prompt only
       Model->>Agent: GetLatLong(location)
       Agent->>GetLatLongTool: GetLatLong(location)
