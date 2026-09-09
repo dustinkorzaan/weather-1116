@@ -211,7 +211,7 @@ on `/current-ai-weather`) **→ V5 →**
     MCP approval must be Never).
   - This is the production pattern in `GetCurrentAIWeatherV5Handler` (API/MVC, the third tab on `/current-ai-weather`).
 
-  **Simple Diagram without Agent/Loop**
+  **Simple Diagram without Agent/Loop (wrong)**
 
   ```mermaid
   sequenceDiagram
