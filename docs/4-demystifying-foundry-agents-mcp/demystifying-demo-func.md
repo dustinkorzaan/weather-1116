@@ -13,7 +13,7 @@ using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
 namespace WeatherMcpSrvFuncApp;
 
 /// <summary>
-/// MCP tool that resolves a location name to ranked latitude/longitude matches via Core/CQMediator.
+/// MCP tool that returns a string length.
 /// </summary>
 public class MyDemoTool()
 {
