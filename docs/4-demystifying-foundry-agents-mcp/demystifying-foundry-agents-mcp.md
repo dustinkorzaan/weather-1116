@@ -86,7 +86,7 @@ on `/current-ai-weather`) **→ V5 →**
   - Model chooses tools that are actually handled locally; no remote MCP servers yet.
   - This is the production pattern in `GetCurrentAIWeatherV3Handler` (API/MVC, a tab on `/current-ai-weather`).
 
-  **Simple Diagram without Agent/Loop**
+  **Simple Diagram without Agent/Loop (wrong)**
 
   ```mermaid
   sequenceDiagram
@@ -147,7 +147,7 @@ on `/current-ai-weather`) **→ V5 →**
   - Shows that MCP tooling does not require a Foundry agent.
   - Chat1b/Chat2b remote-MCP chat tabs still use this pattern; Current AI Weather does not.
 
-  **Simple Diagram without Agent/Loop**
+  **Simple Diagram without Agent/Loop (wrong)**
 
   ```mermaid
   sequenceDiagram
