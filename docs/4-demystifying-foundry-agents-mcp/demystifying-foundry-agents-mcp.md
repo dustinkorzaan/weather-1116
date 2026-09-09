@@ -143,6 +143,7 @@ on `/current-ai-weather`) **→ V5 →**
   (`FoundryConsoleV4MCP.csproj`)
   - Same model-direct call as V3, but the tools are hosted in remote MCP servers
     declared on the request instead of local in-process looping.
+  - [Create Demo Function App MCP Server](demystifying-demo-func.md)
   - Shows that MCP tooling does not require a Foundry agent.
   - Chat1b/Chat2b remote-MCP chat tabs still use this pattern; Current AI Weather does not.
 
