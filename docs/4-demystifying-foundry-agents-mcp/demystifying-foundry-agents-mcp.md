@@ -86,7 +86,7 @@ on `/current-ai-weather`) **→ V5 →**
   - Model chooses tools that are actually handled locally; no remote MCP servers yet.
   - This is the production pattern in `GetCurrentAIWeatherV3Handler` (API/MVC, a tab on `/current-ai-weather`).
 
-  **Simple Diagram without Agent/Loop**
+  **Simple Diagram without Agent/Loop (wrong)**
 
   ```mermaid
   sequenceDiagram
@@ -143,10 +143,11 @@ on `/current-ai-weather`) **→ V5 →**
   (`FoundryConsoleV4MCP.csproj`)
   - Same model-direct call as V3, but the tools are hosted in remote MCP servers
     declared on the request instead of local in-process looping.
+  - [Create Demo Function App MCP Server](demystifying-demo-func.md)
   - Shows that MCP tooling does not require a Foundry agent.
   - Chat1b/Chat2b remote-MCP chat tabs still use this pattern; Current AI Weather does not.
 
-  **Simple Diagram without Agent/Loop**
+  **Simple Diagram without Agent/Loop (wrong)**
 
   ```mermaid
   sequenceDiagram
@@ -177,13 +178,19 @@ on `/current-ai-weather`) **→ V5 →**
       participant AppLoop as Agent/Loop
       participant Model as Foundry Model
       box MCP Server on Function App
+          participant FuncMcp
           participant GetLatLongTool
       end
       box MCP Server on App Service
+          participant AppSvcMcp
           participant GetPublicWeatherTool
       end
 
       Console->>AppLoop: system prompt + MCP tools, user prompt last
+      AppLoop->>FuncMcp: Discover MCP Tools
+      FuncMcp-->>AppLoop: MCP Tools
+      AppLoop->>AppSvcMcp: Discover MCP Tools
+      AppSvcMcp-->>AppLoop: MCP Tools
       AppLoop->>Model: system prompt + MCP tools, user prompt last
       Model->>AppLoop: GetLatLong(location)
       AppLoop->>GetLatLongTool: GetLatLong(location)
@@ -210,7 +217,7 @@ on `/current-ai-weather`) **→ V5 →**
     MCP approval must be Never).
   - This is the production pattern in `GetCurrentAIWeatherV5Handler` (API/MVC, the third tab on `/current-ai-weather`).
 
-  **Simple Diagram without Agent/Loop**
+  **Simple Diagram without Agent/Loop (wrong)**
 
   ```mermaid
   sequenceDiagram
@@ -241,13 +248,19 @@ on `/current-ai-weather`) **→ V5 →**
       participant Agent as Foundry Agent
       participant Model as Foundry Model
       box MCP Server on Function App
+          participant FuncMcp
           participant GetLatLongTool
       end
       box MCP Server on App Service
+          participant AppSvcMcp
           participant GetPublicWeatherTool
       end
 
       Console->>Agent: user prompt only
+      Agent->>FuncMcp: Discover MCP Tools
+      FuncMcp-->>Agent: MCP Tools
+      Agent->>AppSvcMcp: Discover MCP Tools
+      AppSvcMcp-->>Agent: MCP Tools
       Agent->>Model: user prompt only
       Model->>Agent: GetLatLong(location)
       Agent->>GetLatLongTool: GetLatLong(location)
