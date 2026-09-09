@@ -178,11 +178,11 @@ on `/current-ai-weather`) **→ V5 →**
       participant AppLoop as Agent/Loop
       participant Model as Foundry Model
       box MCP Server on Function App
-          participant FuncMcp as MCP Server on Function App
+          participant FuncMcp
           participant GetLatLongTool
       end
       box MCP Server on App Service
-          participant AppSvcMcp as MCP Server on App Service
+          participant AppSvcMcp
           participant GetPublicWeatherTool
       end
 
