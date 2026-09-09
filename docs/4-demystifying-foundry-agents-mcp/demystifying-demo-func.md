@@ -1,3 +1,4 @@
+```
 cd \r
 func init DemoFuncApp --worker-runtime dotnet-isolated --target-framework net10.0
 cd DemoFuncApp
@@ -38,3 +39,4 @@ public class MyDemoTool()
 
 dotnet restore
 dotnet build
+```
