@@ -191,7 +191,7 @@ public sealed class Chat4aService : IChatClientService
                 nonAiWeatherAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "NonAIWeather",
-                    Description = "Weather assistant. Reports current conditions, forecast, or recent history for a latitude/longitude. Accepts numeric coordinates only — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the coordinates on every call, including follow-up turns. Send it a natural-language weather question that names the coordinates; it returns the answer as text.",
+                    Description = "Weather assistant. Reports current conditions, an upcoming forecast (daily, hourly, or every 15 minutes), or recent history (daily or hourly) for a latitude/longitude. Accepts numeric coordinates only — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the coordinates on every call, including follow-up turns. Send it a natural-language weather question that names the coordinates and the level of detail you want (daily, hourly, or every 15 minutes); it returns the answer as text.",
                 }),
             ]);
     }

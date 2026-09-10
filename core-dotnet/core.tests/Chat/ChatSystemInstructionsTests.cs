@@ -48,6 +48,15 @@ public class ChatSystemInstructionsTests
     }
 
     [Fact]
+    public void MultiAgentAiWeatherOrchestrationAssistant_KnowsNonAiWeatherResolutionTiers()
+    {
+        var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
+
+        Assert.Contains("hourly", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("every 15 minutes", prompt, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void MultiAgentGeoAssistant_IsGeoOnly()
     {
         var prompt = ChatSystemInstructions.MultiAgentGeoAssistant;
