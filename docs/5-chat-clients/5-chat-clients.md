@@ -1,4 +1,4 @@
-# Chat Clients (Chat1a–Chat2b, Chat3, and Chat4a)
+# Chat Clients (Chat1a–Chat2b, Chat3, and Chat4a–Chat4b)
 
 Standalone multi-turn chat in all three UIs (React, MVC, Blazor). This feature is **separate**
 from the existing **Current AI Weather** widget (`/AIWeather/CurrentV3`, `/CurrentV4`, or
@@ -15,9 +15,10 @@ a one-shot structured JSON response.
 | **Chat2b** | Microsoft Agent Framework (model-direct) | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
 | **Chat3** | Hosted Microsoft Foundry agent | MCP tools configured **on the agent** in Foundry (`wx1116-agent-for-chat`) | Foundry Console **V5** |
 | **Chat4a** | Microsoft Agent Framework (model-direct), multi-agent | In-process tools, split across two sub-agents delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V3 orchestration style |
+| **Chat4b** | Microsoft Agent Framework (model-direct), multi-agent | Remote MCP tools, split across two sub-agents delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V4 orchestration style |
 
 Each tab has its **own controller**, **own Core service**, and **own session namespace**
-(`Chat1a:…`, `Chat1b:…`, `Chat3:…`, `Chat4a:…`, etc.) so implementations do not collide.
+(`Chat1a:…`, `Chat1b:…`, `Chat3:…`, `Chat4a:…`, `Chat4b:…`, etc.) so implementations do not collide.
 
 Chat1/Chat2 still send the model name, instructions, and tools from this repo.
 **Chat3 does not** — it calls `GetProjectResponsesClientForAgent` and sends only the
@@ -40,6 +41,7 @@ flowchart TB
         C2b[Chat2bController]
         C3[Chat3Controller]
         C4a[Chat4aController]
+        C4b[Chat4bController]
     end
 
     subgraph core [Core.Chat]
@@ -49,6 +51,7 @@ flowchart TB
         S2b[Chat2bService]
         S3[Chat3Service]
         S4a[Chat4aService]
+        S4b[Chat4bService]
         Store[IChatSessionStore]
         Tools[WeatherToolExecutor / MCP factories]
         Agent[wx1116-agent-for-chat]
@@ -64,6 +67,7 @@ flowchart TB
     C2b --> S2b
     C3 --> S3
     C4a --> S4a
+    C4b --> S4b
 
     S1a --> Store
     S1b --> Store
@@ -71,6 +75,7 @@ flowchart TB
     S2b --> Store
     S3 --> Store
     S4a --> Store
+    S4b --> Store
 
     S1a --> Tools
     S1b --> Tools
@@ -78,11 +83,12 @@ flowchart TB
     S2b --> Tools
     S3 --> Agent
     S4a --> Tools
+    S4b --> Tools
 ```
 
 ### Request flow
 
-1. UI posts `POST /Chat1a/messages` (or `Chat1b`, `Chat2a`, `Chat2b`, `Chat3`, `Chat4a`) with JSON:
+1. UI posts `POST /Chat1a/messages` (or `Chat1b`, `Chat2a`, `Chat2b`, `Chat3`, `Chat4a`, `Chat4b`) with JSON:
    `{ "sessionId": "optional", "message": "user text" }`
 2. Server returns **Server-Sent Events** (`text/event-stream`) with JSON payloads:
    - `session` — assigns or confirms session id
@@ -116,6 +122,7 @@ core-dotnet/core/Chat/
   Chat2b/Chat2bService.cs
   Chat3/Chat3Service.cs
   Chat4a/Chat4aService.cs
+  Chat4b/Chat4bService.cs
   ChatServiceCollectionExtensions.cs
 ```
 
@@ -142,8 +149,10 @@ not declared on the request.
 - **In-process (Chat1a, Chat2a, Chat4a):** Core `WeatherToolExecutor` runs CQMediator handlers when the
   model emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a and, inside
   Chat4a's Geo and NonAI Weather sub-agents, for Chat4a).
-- **MCP (Chat1b, Chat2b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`) — platform invokes
-  tools; no local function-call loop in Chat1b.
+- **MCP (Chat1b, Chat2b, Chat4b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`) —
+  platform invokes tools; no local function-call loop in Chat1b. Chat4b's Geo and NonAI Weather
+  sub-agents each get only one host's tool from `ChatHostedMcpToolFactory.CreateGeoTools()` /
+  `CreateNonAiWeatherTools()`, not the combined list Chat1b/Chat2b use.
 - **Hosted agent (Chat3):** Foundry invokes those MCP hosts. This app does not send tools, instructions,
   or a model name.
 
@@ -160,6 +169,10 @@ rebuilt on every request and invoked with `session` omitted from `AsAIFunction` 
 fresh, throwaway `AgentSession` per call rather than leaving it null — so they are stateless,
 single-purpose "query in, text out" tools with no memory of their own; AI Weather Orchestration is
 the only agent that remembers prior turns.
+
+**Chat4b memory:** identical shape to Chat4a's — only the orchestrator persists an `AgentSession`;
+Geo and NonAI Weather are stateless per call. The only difference is where Geo's and NonAI
+Weather's tools come from (remote MCP vs in-process), not how memory works.
 
 ## Chat4a: multi-agent orchestration (Geo / NonAI Weather / AI Weather Orchestration)
 
@@ -193,6 +206,32 @@ Geo before asking NonAI Weather anything, and must pass NonAI Weather numeric la
 every call — NonAI Weather has no session of its own, so it does not remember coordinates from an
 earlier turn even within the same chat session; the orchestrator has to resend them each time.
 
+## Chat4b: multi-agent orchestration (remote MCP)
+
+Chat4b is Chat4a with one change: Geo and NonAI Weather get their tools from the existing remote
+MCP hosts instead of in-process CQMediator calls — mirroring how Chat2b differs from Chat2a. This
+works cleanly because the two MCP hosts are already split along exactly the Geo/NonAI Weather
+boundary: `mcp-srv-func-app` exposes `GetLatLong`/`GetLocation` (Geo's tools) and
+`mcp-srv-app-service` exposes `GetPublicWeatherCurrent`/`Forecast`/`History` (NonAI Weather's
+tools). `ChatHostedMcpToolFactory` (already used by Chat1b/Chat2b) gained two new methods,
+`CreateGeoTools()` and `CreateNonAiWeatherTools()`, each returning only one host's tool — its
+existing `CreateTools()` (both hosts combined) is unchanged and still used by Chat1b/Chat2b.
+
+The three `// Agent <name> 👤` construction sites, the instruction constants
+(`MultiAgentGeoAssistant`, `MultiAgentNonAiWeatherAssistant`,
+`MultiAgentAiWeatherOrchestrationAssistant`), and the coordinates-only contract between the
+orchestrator and NonAI Weather are all identical to Chat4a's — they never mention transport, so
+Chat4b reuses them verbatim.
+
+**This is not the same as Chat2b's MCP handling.** Chat2b's own agent holds MCP tools directly, so
+its stream switches on `McpServerToolCallContent`/`McpServerToolResultContent`. Chat4b's
+orchestrator never touches MCP content types at all — from its point of view, Geo and NonAI
+Weather are still ordinary `AsAIFunction`-wrapped functions, so `Chat4bService`'s streaming loop
+is a straight copy of `Chat4aService`'s (`FunctionCallContent`/`FunctionResultContent`). MCP call
+content only ever appears inside each sub-agent's own non-streamed `AsAIFunction`-generated call —
+invisible to the orchestrator's SSE stream, the same nested-call blind spot (and the same
+usage-chip undercount) Chat4a already has.
+
 ## Configuration
 
 Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent name:
@@ -201,10 +240,10 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 | --- | --- |
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | All chat tabs |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | All chat tabs |
-| `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Chat1a–Chat2b and Chat4a (not Chat3) |
+| `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Chat1a–Chat2b and Chat4a–Chat4b (not Chat3) |
 | `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | Chat3 only (required). GitHub var / App Service. Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. |
-| `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b |
-| `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b |
+| `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b, Chat4b (Geo sub-agent) |
+| `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent) |
 
 Chat1a and Chat2a do **not** require MCP URLs. Chat3 does **not** require MCP URLs in the app
 either — those belong on the hosted agent.
@@ -312,7 +351,7 @@ Keep this in sync with `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs
 | Endpoint | `GET /AIWeather/CurrentV3`, `/CurrentV4`, or `/CurrentV5` | `POST /Chat1a/messages`, etc. |
 | Output | Strict `AIWeatherResponse` JSON | Conversational text (streamed) |
 | Memory | None (single shot) | Per-tab session history |
-| UI | `/current-ai-weather` page | `/chat-clients` chat panel (six tabs, per-tab session) |
+| UI | `/current-ai-weather` page | `/chat-clients` chat panel (seven tabs, per-tab session) |
 
 ## Learning goals
 
@@ -326,6 +365,10 @@ Keep this in sync with `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs
   owns all five tools directly on one agent, Chat4a splits them across two narrowly-scoped
   sub-agents (Geo, NonAI Weather) delegated to by an orchestrator (AI Weather Orchestration) via
   `AsAIFunction` — same capability, now visibly decomposed into a multi-agent shape.
+- **Chat4a vs Chat4b:** Same three-agent shape, same instructions, same orchestrator-sees-
+  ordinary-functions streaming behavior; Chat4a's Geo/NonAI Weather sub-agents call in-process
+  tools, Chat4b's call the same two remote MCP hosts Chat1b/Chat2b use — split one-host-per-agent
+  instead of combined.
 
 ## Related docs
 

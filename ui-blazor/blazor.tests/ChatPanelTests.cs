@@ -14,6 +14,7 @@ public sealed class ChatPanelTests
     [InlineData("Chat2b", "2b")]
     [InlineData("Chat3", "3")]
     [InlineData("Chat4a", "4a")]
+    [InlineData("Chat4b", "4b")]
     public void TabShowsShortVisibleLabelUnderFullAccessibleName(string fullLabel, string shortLabel)
     {
         using var context = new BunitContext();

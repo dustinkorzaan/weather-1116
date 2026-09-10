@@ -20,7 +20,8 @@ public static class ChatSystemInstructions
     // Keep in sync with the hosted Foundry chat agent
     // (AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME; see docs/5-chat-clients/5-chat-clients.md).
 
-    // Chat4a only — no hosted Foundry agent counterpart for these three.
+    // Chat4a and Chat4b only — no hosted Foundry agent counterpart for these three. They never
+    // mention transport, so Chat4b's remote-MCP sub-agents reuse them verbatim.
     public const string MultiAgentAiWeatherOrchestrationAssistant = """
         You are the AI Weather Orchestration agent in a multi-turn weather chat. You do not fetch geo or weather data yourself.
         You have exactly two tools, each a delegate agent:

@@ -11,6 +11,7 @@ internal static class ChatResponsesSessionHelper
     public const string Chat2bKind = "Chat2b";
     public const string Chat3Kind = "Chat3";
     public const string Chat4aKind = "Chat4a";
+    public const string Chat4bKind = "Chat4b";
 
     public static string ResolveSessionId(IChatSessionStore sessionStore, string chatKind, string? requestedSessionId)
     {

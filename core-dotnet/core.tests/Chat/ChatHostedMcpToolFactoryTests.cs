@@ -38,6 +38,46 @@ public class ChatHostedMcpToolFactoryTests
     }
 
     [Fact]
+    public void CreateGeoTools_ReturnsOnlyMcpSrvFuncAppTool()
+    {
+        RunWithMcpEnvironment(
+            funcAppUrl: "https://func.example.com/",
+            funcAppKey: "func-key",
+            appServiceUrl: null,
+            appServiceKey: null,
+            () =>
+            {
+                var tools = new ChatHostedMcpToolFactory().CreateGeoTools()
+                    .Cast<HostedMcpServerTool>()
+                    .ToList();
+
+                var tool = Assert.Single(tools);
+                Assert.Equal("McpSrvFuncApp", tool.ServerName);
+                Assert.Equal("https://func.example.com/runtime/webhooks/mcp", tool.ServerAddress);
+            });
+    }
+
+    [Fact]
+    public void CreateNonAiWeatherTools_ReturnsOnlyMcpSrvAppServiceTool()
+    {
+        RunWithMcpEnvironment(
+            funcAppUrl: null,
+            funcAppKey: null,
+            appServiceUrl: "https://app.example.com/",
+            appServiceKey: "app-key",
+            () =>
+            {
+                var tools = new ChatHostedMcpToolFactory().CreateNonAiWeatherTools()
+                    .Cast<HostedMcpServerTool>()
+                    .ToList();
+
+                var tool = Assert.Single(tools);
+                Assert.Equal("McpSrvAppService", tool.ServerName);
+                Assert.Equal("https://app.example.com/mcp", tool.ServerAddress);
+            });
+    }
+
+    [Fact]
     public void CreateTools_ThrowsWhenMcpEnvironmentIsMissing()
     {
         RunWithMcpEnvironment(null, null, null, null, () =>
