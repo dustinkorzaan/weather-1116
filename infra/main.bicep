@@ -68,11 +68,11 @@ var appIdentityConfig = [
 ]
 
 var containerAppsConfig = [
-  { key: 'api', setAzureClientId: true, minReplicas: 0, maxReplicas: 3, stickySessions: false }
-  { key: 'mvc', setAzureClientId: true, minReplicas: 0, maxReplicas: 3, stickySessions: false }
-  { key: 'blazor', setAzureClientId: false, minReplicas: 0, maxReplicas: 3, stickySessions: true }
-  { key: 'worker', setAzureClientId: true, minReplicas: 0, maxReplicas: 1, stickySessions: false }
-  { key: 'mcp-srv-app-service', setAzureClientId: false, minReplicas: 0, maxReplicas: 2, stickySessions: false }
+  { key: 'api', setAzureClientId: true, minReplicas: 1, maxReplicas: 5, stickySessions: false }
+  { key: 'mvc', setAzureClientId: true, minReplicas: 1, maxReplicas: 5, stickySessions: false }
+  { key: 'blazor', setAzureClientId: false, minReplicas: 1, maxReplicas: 5, stickySessions: true }
+  { key: 'worker', setAzureClientId: true, minReplicas: 1, maxReplicas: 1, stickySessions: false }
+  { key: 'mcp-srv-app-service', setAzureClientId: false, minReplicas: 1, maxReplicas: 5, stickySessions: false }
 ]
 
 module githubActionsIdentity 'modules/managed-identity.bicep' = {

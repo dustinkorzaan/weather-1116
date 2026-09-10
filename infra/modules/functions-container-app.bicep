@@ -149,7 +149,7 @@ resource functionContainerApp 'Microsoft.App/containerApps@2024-10-02-preview' =
       ]
       scale: {
         minReplicas: 1
-        maxReplicas: 3
+        maxReplicas: 5
       }
     }
   }
