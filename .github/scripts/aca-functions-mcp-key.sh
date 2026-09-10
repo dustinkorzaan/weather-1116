@@ -36,7 +36,7 @@ fi
 # `az containerapp function keys` connects live to the running Functions host
 # inside the newest revision rather than just PATCHing via ARM. Right after a
 # deploy, that revision can still be provisioning -- az containerapp update
-# returns as soon as the update is accepted, not once the revision is
+# returns once the ARM update succeeds, not once the new revision is actually
 # healthy -- so wait for it here or the key list/set below fails with a
 # generic "Error setting function key" and no further detail.
 LATEST_REVISION="$(az containerapp show \
@@ -45,23 +45,40 @@ LATEST_REVISION="$(az containerapp show \
   --query properties.latestRevisionName \
   --output tsv)"
 
+if [ -z "$LATEST_REVISION" ]; then
+  echo "Could not resolve latestRevisionName for $APP_NAME; is it deployed yet?" >&2
+  exit 1
+fi
+
 WAIT_TIMEOUT_S=300
 WAIT_INTERVAL_S=10
 ELAPSED_S=0
 while true; do
+  # A single ARM blip here shouldn't abort the whole wait -- treat a failed
+  # or empty read as "not ready yet" and keep polling until the timeout.
   READ_STATE="$(az containerapp revision show \
     --name "$APP_NAME" \
     --resource-group "$RESOURCE_GROUP" \
     --revision "$LATEST_REVISION" \
-    --query "[properties.runningState, properties.healthState]" \
-    --output tsv)"
+    --query "[properties.runningState, properties.healthState, properties.provisioningError]" \
+    --output tsv 2>/dev/null || true)"
   RUNNING_STATE="$(cut -f1 <<< "$READ_STATE")"
   HEALTH_STATE="$(cut -f2 <<< "$READ_STATE")"
+  PROVISIONING_ERROR="$(cut -f3 <<< "$READ_STATE")"
+
+  echo "Waiting on revision $LATEST_REVISION (runningState=$RUNNING_STATE, healthState=$HEALTH_STATE)..."
 
   if [ "$RUNNING_STATE" = "Running" ] && [ "$HEALTH_STATE" = "Healthy" ]; then
     echo "::notice::Revision $LATEST_REVISION is Running/Healthy."
     break
   fi
+
+  case "$RUNNING_STATE" in
+    Failed|Degraded|Stopped)
+      echo "Revision $LATEST_REVISION reached terminal state '$RUNNING_STATE'; not waiting out the timeout.${PROVISIONING_ERROR:+ provisioningError: $PROVISIONING_ERROR}" >&2
+      exit 1
+      ;;
+  esac
 
   if [ "$ELAPSED_S" -ge "$WAIT_TIMEOUT_S" ]; then
     echo "Revision $LATEST_REVISION did not become Running/Healthy within ${WAIT_TIMEOUT_S}s (runningState=$RUNNING_STATE, healthState=$HEALTH_STATE)." >&2
