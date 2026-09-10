@@ -26,20 +26,20 @@ public class ChatSystemInstructionsTests
     }
 
     [Fact]
-    public void MultiAgentHelmAssistant_DelegatesToFixAndBaro()
+    public void MultiAgentAiWeatherOrchestrationAssistant_DelegatesToGeoAndNonAiWeather()
     {
-        var prompt = ChatSystemInstructions.MultiAgentHelmAssistant;
+        var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
 
-        Assert.Contains("Fix", prompt);
-        Assert.Contains("Baro", prompt);
+        Assert.Contains("Geo", prompt);
+        Assert.Contains("NonAI Weather", prompt);
         Assert.Contains("Never guess a location or weather fact yourself", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("GitHub-flavored Markdown", prompt);
     }
 
     [Fact]
-    public void MultiAgentFixAssistant_IsGeoOnly()
+    public void MultiAgentGeoAssistant_IsGeoOnly()
     {
-        var prompt = ChatSystemInstructions.MultiAgentFixAssistant;
+        var prompt = ChatSystemInstructions.MultiAgentGeoAssistant;
 
         Assert.Contains("latitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("GetLatLong", prompt);
@@ -49,9 +49,9 @@ public class ChatSystemInstructionsTests
     }
 
     [Fact]
-    public void MultiAgentBaroAssistant_IsWeatherOnlyWithUnitRules()
+    public void MultiAgentNonAiWeatherAssistant_IsWeatherOnlyWithUnitRules()
     {
-        var prompt = ChatSystemInstructions.MultiAgentBaroAssistant;
+        var prompt = ChatSystemInstructions.MultiAgentNonAiWeatherAssistant;
 
         Assert.Contains("°F", prompt);
         Assert.Contains("mph", prompt);

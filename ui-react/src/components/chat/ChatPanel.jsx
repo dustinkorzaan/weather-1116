@@ -77,7 +77,7 @@ const TAB_CONFIG = [
     id: 'Chat4a',
     label: 'Chat4a',
     shortLabel: '4a',
-    description: 'Agent Framework · Multi-agent · Helm delegates to Fix (geo) and Baro (weather)',
+    description: 'Agent Framework · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather',
     endpoint: '/Chat4a/messages',
   },
 ];
@@ -384,7 +384,7 @@ function ChatPanel() {
     <div>
       <h2 className="text-xl font-semibold">Chat Clients</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Six standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a's in-process multi-agent orchestration (Helm delegating to Fix and Baro).
+        Six standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a's in-process multi-agent orchestration (AI Weather Orchestration delegating to Geo and NonAI Weather).
       </p>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3 gap-0">

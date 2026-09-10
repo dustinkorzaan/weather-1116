@@ -5,7 +5,7 @@
 <div class="chat-section">
     <h2 class="section-title">Chat Clients</h2>
     <p class="muted">
-        Six standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a's in-process multi-agent orchestration (Helm delegating to Fix and Baro).
+        Six standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a's in-process multi-agent orchestration (AI Weather Orchestration delegating to Geo and NonAI Weather).
     </p>
 
     <FluentTabs @bind-ActiveTabId="ActiveTab">
@@ -94,7 +94,7 @@
         new("Chat2a", "Chat2a", "2a", "Agent Framework · In-process · Like Foundry Console V3"),
         new("Chat2b", "Chat2b", "2b", "Agent Framework · Remote MCP · Like Foundry Console V4"),
         new("Chat3", "Chat3", "3", "Hosted Foundry agent · Like Foundry Console V5"),
-        new("Chat4a", "Chat4a", "4a", "Agent Framework · Multi-agent · Helm delegates to Fix (geo) and Baro (weather)"),
+        new("Chat4a", "Chat4a", "4a", "Agent Framework · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather"),
     ];
 
     private readonly Dictionary<string, string?> _sessions = new()

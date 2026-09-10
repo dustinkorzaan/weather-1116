@@ -153,33 +153,36 @@ not declared on the request.
 **Chat3 memory:** later turns send `previous_response_id` (`ChatHostedAgentResponseStore`). Chat3
 does **not** replay a system prompt — Foundry rejects `instructions` when an agent is specified.
 
-**Chat4a memory:** only the orchestrator (Helm) has a persistent `AgentSession` via
-`ChatAgentSessionStore`, exactly like Chat2a. The two sub-agents (Fix, Baro) are rebuilt on every
-request and invoked with `session: null` — they are stateless, single-purpose "query in, text out"
-tools with no memory of their own; Helm is the only agent that remembers prior turns.
+**Chat4a memory:** only the orchestrator (AI Weather Orchestration) has a persistent `AgentSession`
+via `ChatAgentSessionStore`, exactly like Chat2a. The two sub-agents (Geo, NonAI Weather) are
+rebuilt on every request and invoked with `session: null` — they are stateless, single-purpose
+"query in, text out" tools with no memory of their own; AI Weather Orchestration is the only agent
+that remembers prior turns.
 
-## Chat4a: multi-agent orchestration (Fix / Baro / Helm)
+## Chat4a: multi-agent orchestration (Geo / NonAI Weather / AI Weather Orchestration)
 
 Chat4a restructures Chat2a's single flat-tool agent into a small multi-agent system. Three
 `AIAgent` instances are built per request in `Chat4aService`, each with a fixed nickname kept in
 a `// Agent <name> 👤` comment directly above its construction so the three names stay
 unambiguous in code:
 
-- **Agent Fix 👤** — geo sub-agent. Owns exactly `GetLatLong` and `GetLocation`.
-- **Agent Baro 👤** — weather sub-agent. Owns exactly `GetPublicWeatherCurrent`,
+- **Agent Geo 👤** — geo sub-agent. Owns exactly `GetLatLong` and `GetLocation`.
+- **Agent NonAI Weather 👤** — weather sub-agent. Owns exactly `GetPublicWeatherCurrent`,
   `GetPublicWeatherForecast`, and `GetPublicWeatherHistory`.
-- **Agent Helm 👤** — orchestrator. Has no geo/weather tools of its own; its only two tools
-  *are* Fix and Baro, wrapped via `AIAgentExtensions.AsAIFunction` (`Microsoft.Agents.AI` 1.20.0,
-  already referenced by this repo — no `Microsoft.Agents.AI.Workflows` package is used or needed
-  for this two-agent delegation). Helm decides when to call Fix, when to call Baro, and passes
-  Fix's resolved coordinates into Baro's request.
+- **Agent AI Weather Orchestration 👤** — orchestrator. Has no geo/weather tools of its own; its
+  only two tools *are* Geo and NonAI Weather, wrapped via `AIAgentExtensions.AsAIFunction`
+  (`Microsoft.Agents.AI` 1.20.0, already referenced by this repo — no `Microsoft.Agents.AI.Workflows`
+  package is used or needed for this two-agent delegation). AI Weather Orchestration decides when
+  to call Geo, when to call NonAI Weather, and passes Geo's resolved coordinates into NonAI
+  Weather's request.
 
-**Nested tool calls are not individually traced.** Helm's SSE stream shows `tool_start`/`tool_end`
-for the two delegation calls ("Fix", "Baro") the same way Chat2a shows its five direct tool calls.
-Fix's and Baro's own inner tool calls (e.g. Fix calling `GetLatLong`) happen inside the synchronous
-function body `AsAIFunction` generates and do not produce separate stream events — the UI shows
-"Helm called Fix" → "Fix returned an answer", not the geocoding call nested inside Fix. This is an
-intentional scope boundary for this tab, not a bug.
+**Nested tool calls are not individually traced.** AI Weather Orchestration's SSE stream shows
+`tool_start`/`tool_end` for the two delegation calls ("Geo", "NonAIWeather") the same way Chat2a
+shows its five direct tool calls. Geo's and NonAI Weather's own inner tool calls (e.g. Geo calling
+`GetLatLong`) happen inside the synchronous function body `AsAIFunction` generates and do not
+produce separate stream events — the UI shows "AI Weather Orchestration called Geo" → "Geo returned
+an answer", not the geocoding call nested inside Geo. This is an intentional scope boundary for
+this tab, not a bug.
 
 ## Configuration
 
@@ -312,8 +315,8 @@ Keep this in sync with `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs
   Chat3 uses the Foundry-defined agent.
 - **Chat2a vs Chat4a:** Same in-process tools and same model-direct Agent Framework stack; Chat2a
   owns all five tools directly on one agent, Chat4a splits them across two narrowly-scoped
-  sub-agents (Fix, Baro) delegated to by an orchestrator (Helm) via `AsAIFunction` — same
-  capability, now visibly decomposed into a multi-agent shape.
+  sub-agents (Geo, NonAI Weather) delegated to by an orchestrator (AI Weather Orchestration) via
+  `AsAIFunction` — same capability, now visibly decomposed into a multi-agent shape.
 
 ## Related docs
 

@@ -80,24 +80,24 @@ public class ChatAgentFrameworkPackageTests
     }
 
     [Fact]
-    public void AsAIFunction_WrapsSubAgent_ForHelmDelegation()
+    public void AsAIFunction_WrapsSubAgent_ForOrchestrationDelegation()
     {
         var client = CreateResponsesClient();
-        var fixAgent = client.AsAIAgent(
-            name: "Fix",
+        var geoAgent = client.AsAIAgent(
+            name: "Geo",
             instructions: "You are a test geo assistant.",
             model: "gpt-test",
             tools: [AIFunctionFactory.Create(GetLatLong)]);
 
-        var fixTool = fixAgent.AsAIFunction(new AIFunctionFactoryOptions
+        var geoTool = geoAgent.AsAIFunction(new AIFunctionFactoryOptions
         {
-            Name = "Fix",
+            Name = "Geo",
             Description = "Geo assistant.",
         });
 
-        Assert.Equal("Fix", fixTool.Name);
-        Assert.Equal("Geo assistant.", fixTool.Description);
-        Assert.IsAssignableFrom<AITool>(fixTool);
+        Assert.Equal("Geo", geoTool.Name);
+        Assert.Equal("Geo assistant.", geoTool.Description);
+        Assert.IsAssignableFrom<AITool>(geoTool);
     }
 
     [Fact]

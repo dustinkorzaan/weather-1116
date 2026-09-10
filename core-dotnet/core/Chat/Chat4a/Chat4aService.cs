@@ -16,14 +16,14 @@ namespace Core.Chat.Chat4a;
 
 /// <summary>
 /// Microsoft Agent Framework, in-process tools, multi-agent (V3 orchestration style).
-/// Three agents: Agent Helm 👤 is the orchestrator the user talks to and delegates to
-/// Agent Fix 👤 (geo) and Agent Baro 👤 (weather), each wrapped as a callable tool via
-/// <see cref="AIAgentExtensions.AsAIFunction"/>. Only Helm carries a persistent
-/// <see cref="AgentSession"/> (multi-turn memory); Fix and Baro are rebuilt per request
-/// and invoked statelessly, one query in / one text answer out.
-/// Fix's and Baro's own inner tool calls (e.g. Fix calling GetLatLong) happen inside the
-/// synchronous body AsAIFunction generates and do not surface as separate SSE events —
-/// only the Helm-to-Fix and Helm-to-Baro delegation calls do.
+/// Three agents: Agent AI Weather Orchestration 👤 is the orchestrator the user talks to and
+/// delegates to Agent Geo 👤 (geo) and Agent NonAI Weather 👤 (weather), each wrapped as a
+/// callable tool via <see cref="AIAgentExtensions.AsAIFunction"/>. Only the orchestrator carries
+/// a persistent <see cref="AgentSession"/> (multi-turn memory); Geo and NonAI Weather are
+/// rebuilt per request and invoked statelessly, one query in / one text answer out.
+/// Geo's and NonAI Weather's own inner tool calls (e.g. Geo calling GetLatLong) happen inside
+/// the synchronous body AsAIFunction generates and do not surface as separate SSE events —
+/// only the orchestrator's delegation calls to Geo and NonAI Weather do.
 /// </summary>
 public sealed class Chat4aService : IChatClientService
 {
@@ -69,13 +69,13 @@ public sealed class Chat4aService : IChatClientService
 
         var usage = new ChatUsageAccumulator();
         var responsesClient = _settings.CreateResponsesClient();
-        AIAgent helmAgent = BuildHelmAgent(responsesClient);
+        AIAgent orchestrationAgent = BuildOrchestrationAgent(responsesClient);
 
         AgentSession? agentSession = null;
         string? sessionError = null;
         try
         {
-            agentSession = await _agentSessionStore.GetOrCreateAsync(helmAgent, sessionId, cancellationToken);
+            agentSession = await _agentSessionStore.GetOrCreateAsync(orchestrationAgent, sessionId, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -96,7 +96,7 @@ public sealed class Chat4aService : IChatClientService
         string? streamError = null;
         try
         {
-            updates = helmAgent.RunStreamingAsync(userMessage, agentSession, cancellationToken: cancellationToken);
+            updates = orchestrationAgent.RunStreamingAsync(userMessage, agentSession, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
@@ -151,53 +151,53 @@ public sealed class Chat4aService : IChatClientService
 
     private sealed record PendingToolCall(string Name, string? Arguments);
 
-    private AIAgent BuildHelmAgent(ResponsesClient responsesClient)
+    private AIAgent BuildOrchestrationAgent(ResponsesClient responsesClient)
     {
-        // Agent Fix 👤: geo sub-agent — resolves location name ↔ latitude/longitude only.
-        AIAgent fixAgent = responsesClient.AsAIAgent(
-            name: "Fix",
-            instructions: ChatSystemInstructions.MultiAgentFixAssistant,
+        // Agent Geo 👤: geo sub-agent — resolves location name ↔ latitude/longitude only.
+        AIAgent geoAgent = responsesClient.AsAIAgent(
+            name: "Geo",
+            instructions: ChatSystemInstructions.MultiAgentGeoAssistant,
             model: _settings.DeploymentName,
-            tools: CreateFixTools());
+            tools: CreateGeoTools());
 
-        // Agent Baro 👤: weather sub-agent — current/forecast/history for a given lat/long only.
-        AIAgent baroAgent = responsesClient.AsAIAgent(
-            name: "Baro",
-            instructions: ChatSystemInstructions.MultiAgentBaroAssistant,
+        // Agent NonAI Weather 👤: weather sub-agent — current/forecast/history for a given lat/long only.
+        AIAgent nonAiWeatherAgent = responsesClient.AsAIAgent(
+            name: "NonAIWeather",
+            instructions: ChatSystemInstructions.MultiAgentNonAiWeatherAssistant,
             model: _settings.DeploymentName,
-            tools: CreateBaroTools());
+            tools: CreateNonAiWeatherTools());
 
-        // Agent Helm 👤: orchestrator — delegates to Fix and Baro, holds the multi-turn session.
+        // Agent AI Weather Orchestration 👤: orchestrator — delegates to Geo and NonAI Weather, holds the multi-turn session.
         return responsesClient.AsAIAgent(
-            name: "Helm",
-            instructions: ChatSystemInstructions.MultiAgentHelmAssistant,
+            name: "AIWeatherOrchestration",
+            instructions: ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant,
             model: _settings.DeploymentName,
             tools:
             [
-                // session: null (default) — Fix is stateless per delegated call; Helm alone owns memory.
-                fixAgent.AsAIFunction(new AIFunctionFactoryOptions
+                // session: null (default) — Geo is stateless per delegated call; the orchestrator alone owns memory.
+                geoAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
-                    Name = "Fix",
+                    Name = "Geo",
                     Description = "Geo assistant. Resolves a location name to latitude/longitude, or reverse-geocodes latitude/longitude to a place label. Send it a natural-language geo question; it returns the answer as text.",
                 }),
-                // session: null (default) — Baro is stateless per delegated call; Helm alone owns memory.
-                baroAgent.AsAIFunction(new AIFunctionFactoryOptions
+                // session: null (default) — NonAI Weather is stateless per delegated call; the orchestrator alone owns memory.
+                nonAiWeatherAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
-                    Name = "Baro",
+                    Name = "NonAIWeather",
                     Description = "Weather assistant. Given a location or coordinates, reports current conditions, forecast, or recent history. Send it a natural-language weather question (mention the place or coordinates); it returns the answer as text.",
                 }),
             ]);
     }
 
-    // Agent Fix 👤's tools: geo resolution only.
-    private IList<AITool> CreateFixTools() =>
+    // Agent Geo 👤's tools: geo resolution only.
+    private IList<AITool> CreateGeoTools() =>
     [
         AIFunctionFactory.Create(GetLatLong),
         AIFunctionFactory.Create(GetLocation),
     ];
 
-    // Agent Baro 👤's tools: weather facts only.
-    private IList<AITool> CreateBaroTools() =>
+    // Agent NonAI Weather 👤's tools: weather facts only.
+    private IList<AITool> CreateNonAiWeatherTools() =>
     [
         AIFunctionFactory.Create(GetPublicWeatherCurrent),
         AIFunctionFactory.Create(GetPublicWeatherForecast),
