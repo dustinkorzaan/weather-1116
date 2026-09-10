@@ -56,15 +56,18 @@ ELAPSED_S=0
 while true; do
   # A single ARM blip here shouldn't abort the whole wait -- treat a failed
   # or empty read as "not ready yet" and keep polling until the timeout.
+  # --output json + jq (not tsv): tsv flattens a 3-element array query onto
+  # 3 separate lines instead of 3 tab-separated columns, which silently broke
+  # the state comparisons below.
   READ_STATE="$(az containerapp revision show \
     --name "$APP_NAME" \
     --resource-group "$RESOURCE_GROUP" \
     --revision "$LATEST_REVISION" \
-    --query "[properties.runningState, properties.healthState, properties.provisioningError]" \
-    --output tsv 2>/dev/null || true)"
-  RUNNING_STATE="$(cut -f1 <<< "$READ_STATE")"
-  HEALTH_STATE="$(cut -f2 <<< "$READ_STATE")"
-  PROVISIONING_ERROR="$(cut -f3 <<< "$READ_STATE")"
+    --query "{runningState: properties.runningState, healthState: properties.healthState, provisioningError: properties.provisioningError}" \
+    --output json 2>/dev/null || true)"
+  RUNNING_STATE="$(jq -r '.runningState // empty' <<< "$READ_STATE" 2>/dev/null || true)"
+  HEALTH_STATE="$(jq -r '.healthState // empty' <<< "$READ_STATE" 2>/dev/null || true)"
+  PROVISIONING_ERROR="$(jq -r '.provisioningError // empty' <<< "$READ_STATE" 2>/dev/null || true)"
 
   echo "Waiting on revision $LATEST_REVISION (runningState=$RUNNING_STATE, healthState=$HEALTH_STATE)..."
 
