@@ -139,8 +139,9 @@ not declared on the request.
 | `GetPublicWeatherForecast` | Upcoming forecast: Daily (7 days), Hourly (48 hours), or FifteenMinutes (48 hours) |
 | `GetPublicWeatherHistory` | Recent past: Daily (previous 7 days) or Hourly (previous 48 hours) |
 
-- **In-process (Chat1a, Chat2a):** Core `WeatherToolExecutor` runs CQMediator handlers when the model
-  emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a).
+- **In-process (Chat1a, Chat2a, Chat4a):** Core `WeatherToolExecutor` runs CQMediator handlers when the
+  model emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a and, inside
+  Chat4a's Geo and NonAI Weather sub-agents, for Chat4a).
 - **MCP (Chat1b, Chat2b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`) — platform invokes
   tools; no local function-call loop in Chat1b.
 - **Hosted agent (Chat3):** Foundry invokes those MCP hosts. This app does not send tools, instructions,
@@ -179,10 +180,17 @@ unambiguous in code:
 **Nested tool calls are not individually traced.** AI Weather Orchestration's SSE stream shows
 `tool_start`/`tool_end` for the two delegation calls ("Geo", "NonAIWeather") the same way Chat2a
 shows its five direct tool calls. Geo's and NonAI Weather's own inner tool calls (e.g. Geo calling
-`GetLatLong`) happen inside the synchronous function body `AsAIFunction` generates and do not
-produce separate stream events — the UI shows "AI Weather Orchestration called Geo" → "Geo returned
-an answer", not the geocoding call nested inside Geo. This is an intentional scope boundary for
-this tab, not a bug.
+`GetLatLong`) run inside the non-streamed async call `AsAIFunction` generates and do not produce
+separate stream events — the UI shows "AI Weather Orchestration called Geo" → "Geo returned an
+answer", not the geocoding call nested inside Geo. This is an intentional scope boundary for this
+tab, not a bug. The same boundary means Geo's and NonAI Weather's own model token usage never
+reaches the `usage` chip on `done` — only tokens from the orchestrator's own stream are counted, so
+the usage shown for a Chat4a turn undercounts the true 3-agent total.
+
+**Geo and NonAI Weather only speak coordinates.** The orchestrator must resolve a place name via
+Geo before asking NonAI Weather anything, and must pass NonAI Weather numeric latitude/longitude on
+every call — NonAI Weather has no session of its own, so it does not remember coordinates from an
+earlier turn even within the same chat session; the orchestrator has to resend them each time.
 
 ## Configuration
 
@@ -192,7 +200,7 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 | --- | --- |
 | `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | All chat tabs |
 | `AZURE_FOUNDRY_PROD_EUS2_KEY` | All chat tabs |
-| `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Chat1a–Chat2b (not Chat3) |
+| `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Chat1a–Chat2b and Chat4a (not Chat3) |
 | `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | Chat3 only (required). GitHub var / App Service. Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. |
 | `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b |
 | `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b |

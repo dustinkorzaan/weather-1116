@@ -20,10 +20,15 @@ namespace Core.Chat.Chat4a;
 /// delegates to Agent Geo 👤 (geo) and Agent NonAI Weather 👤 (weather), each wrapped as a
 /// callable tool via <see cref="AIAgentExtensions.AsAIFunction"/>. Only the orchestrator carries
 /// a persistent <see cref="AgentSession"/> (multi-turn memory); Geo and NonAI Weather are
-/// rebuilt per request and invoked statelessly, one query in / one text answer out.
-/// Geo's and NonAI Weather's own inner tool calls (e.g. Geo calling GetLatLong) happen inside
-/// the synchronous body AsAIFunction generates and do not surface as separate SSE events —
-/// only the orchestrator's delegation calls to Geo and NonAI Weather do.
+/// rebuilt per request. Omitting <c>session</c> from AsAIFunction does not leave it null — a
+/// fresh, throwaway <see cref="AgentSession"/> is created for each delegated call, which is what
+/// makes Geo and NonAI Weather stateless: nothing carries over between calls.
+/// Geo's and NonAI Weather's own inner tool calls (e.g. Geo calling GetLatLong) run inside the
+/// non-streamed async call AsAIFunction generates (<c>InvokeAgentAsync</c>) and do not surface as
+/// separate SSE events — only the orchestrator's delegation calls to Geo and NonAI Weather do.
+/// For the same reason, Geo's and NonAI Weather's own model token usage never reaches
+/// <see cref="ChatUsageAccumulator"/> (only the orchestrator's own <see cref="AgentResponseUpdate"/>
+/// contents do) — the usage chip a user sees undercounts a multi-agent turn.
 /// </summary>
 public sealed class Chat4aService : IChatClientService
 {
@@ -174,17 +179,19 @@ public sealed class Chat4aService : IChatClientService
             model: _settings.DeploymentName,
             tools:
             [
-                // session: null (default) — Geo is stateless per delegated call; the orchestrator alone owns memory.
+                // session omitted — AsAIFunction creates a fresh, throwaway session per call, so Geo is
+                // stateless per delegated call; the orchestrator alone owns memory.
                 geoAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "Geo",
                     Description = "Geo assistant. Resolves a location name to latitude/longitude, or reverse-geocodes latitude/longitude to a place label. Send it a natural-language geo question; it returns the answer as text.",
                 }),
-                // session: null (default) — NonAI Weather is stateless per delegated call; the orchestrator alone owns memory.
+                // session omitted — AsAIFunction creates a fresh, throwaway session per call, so NonAI
+                // Weather is stateless per delegated call; the orchestrator alone owns memory.
                 nonAiWeatherAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "NonAIWeather",
-                    Description = "Weather assistant. Given a location or coordinates, reports current conditions, forecast, or recent history. Send it a natural-language weather question (mention the place or coordinates); it returns the answer as text.",
+                    Description = "Weather assistant. Reports current conditions, forecast, or recent history for a latitude/longitude. Accepts numeric coordinates only — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the coordinates on every call, including follow-up turns. Send it a natural-language weather question that names the coordinates; it returns the answer as text.",
                 }),
             ]);
     }
