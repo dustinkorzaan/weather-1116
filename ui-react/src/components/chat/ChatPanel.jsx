@@ -42,7 +42,7 @@ const TAB_CONFIG = [
     id: 'Chat1a',
     label: 'Chat1a',
     shortLabel: '1a',
-    description: 'Responses API · In-process · Like Foundry Console V3',
+    description: 'Responses API · Local Loops · Like Foundry Console V3',
     endpoint: '/Chat1a/messages',
   },
   {
@@ -56,7 +56,7 @@ const TAB_CONFIG = [
     id: 'Chat2a',
     label: 'Chat2a',
     shortLabel: '2a',
-    description: 'Agent Framework · In-process · Like Foundry Console V3',
+    description: 'Agent Framework · Local Loops · Like Foundry Console V3',
     endpoint: '/Chat2a/messages',
   },
   {
@@ -77,14 +77,14 @@ const TAB_CONFIG = [
     id: 'Chat4a',
     label: 'Chat4a',
     shortLabel: '4a',
-    description: 'Agent Framework · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather',
+    description: 'Agent Framework · Local Loops · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather',
     endpoint: '/Chat4a/messages',
   },
   {
     id: 'Chat4b',
     label: 'Chat4b',
     shortLabel: '4b',
-    description: 'Agent Framework · Multi-agent · Remote MCP · AI Weather Orchestration delegates to Geo and NonAI Weather',
+    description: 'Agent Framework · Remote MCP · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather (invalid Token Counts)',
     endpoint: '/Chat4b/messages',
   },
 ];
