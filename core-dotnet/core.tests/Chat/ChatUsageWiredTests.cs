@@ -10,6 +10,8 @@ public class ChatUsageWiredTests
     [InlineData("core-dotnet/core/Chat/Chat2a/Chat2aService.cs")]
     [InlineData("core-dotnet/core/Chat/Chat2b/Chat2bService.cs")]
     [InlineData("core-dotnet/core/Chat/Chat3/Chat3Service.cs")]
+    [InlineData("core-dotnet/core/Chat/Chat4a/Chat4aService.cs")]
+    [InlineData("core-dotnet/core/Chat/Chat4b/Chat4bService.cs")]
     public void Service_AccumulatesUsageOnDone(string relativePath)
     {
         var source = File.ReadAllText(RepoFiles.FindRepoFile(relativePath));

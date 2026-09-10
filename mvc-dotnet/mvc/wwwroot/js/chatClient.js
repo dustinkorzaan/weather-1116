@@ -16,6 +16,7 @@
     Chat2b: null,
     Chat3: null,
     Chat4a: null,
+    Chat4b: null,
   };
 
   window.chatHistory = window.chatHistory || {
@@ -25,6 +26,7 @@
     Chat2b: [],
     Chat3: [],
     Chat4a: [],
+    Chat4b: [],
   };
 
   const sendingTabs = {
@@ -34,6 +36,7 @@
     Chat2b: false,
     Chat3: false,
     Chat4a: false,
+    Chat4b: false,
   };
 
   function updateSendingControls() {

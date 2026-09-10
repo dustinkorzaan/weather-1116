@@ -104,9 +104,9 @@ The request path differs by stack:
   or `/AIWeather/CurrentV5`)
 - **MVC** → local `HomeController` + `Core` (same handlers, no API hop)
 
-## Chat Clients (Chat1a–Chat2b, Chat3, and Chat4a)
+## Chat Clients (Chat1a–Chat2b, Chat3, and Chat4a–Chat4b)
 
-Separate from **Current AI Weather**. All three UIs expose a chat panel on `/chat-clients` with six tabs:
+Separate from **Current AI Weather**. All three UIs expose a chat panel on `/chat-clients` with seven tabs:
 
 | Tab | Stack | Tools |
 | --- | --- | --- |
@@ -116,9 +116,10 @@ Separate from **Current AI Weather**. All three UIs expose a chat panel on `/cha
 | Chat2b | Agent Framework | Remote MCP |
 | Chat3 | Hosted Foundry agent | MCP on `wx1116-agent-for-chat` (V5) |
 | Chat4a | Agent Framework, multi-agent | In-process, split across Geo/NonAI Weather sub-agents |
+| Chat4b | Agent Framework, multi-agent | Remote MCP, split across Geo/NonAI Weather sub-agents |
 
-- **React / Blazor** → `POST /Chat1a/messages` … `/Chat4a/messages` on Weather API (SSE stream)
-- **MVC** → same routes locally via `Chat1aController` … `Chat4aController` + Core services
+- **React / Blazor** → `POST /Chat1a/messages` … `/Chat4b/messages` on Weather API (SSE stream)
+- **MVC** → same routes locally via `Chat1aController` … `Chat4bController` + Core services
 
 Full detail: [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)
 
@@ -126,7 +127,7 @@ Full detail: [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-cli
 flowchart LR
   UI[React / Blazor / MVC /chat-clients chat panel]
   API[MVC or WeatherAPI Chat controllers]
-  Core[Core.Chat1a…3, Chat4a services]
+  Core[Core.Chat1a…3, Chat4a, Chat4b services]
   Model[Azure OpenAI Responses or hosted Foundry agent]
   Tools[In-process, MCP, or agent-owned MCP]
 

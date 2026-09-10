@@ -4,6 +4,7 @@ using Core.Chat.Chat2a;
 using Core.Chat.Chat2b;
 using Core.Chat.Chat3;
 using Core.Chat.Chat4a;
+using Core.Chat.Chat4b;
 using Core.Chat.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,6 +28,7 @@ public static class ChatServiceCollectionExtensions
         services.AddKeyedScoped<IChatClientService, Chat2bService>("Chat2b");
         services.AddKeyedScoped<IChatClientService, Chat3Service>("Chat3");
         services.AddKeyedScoped<IChatClientService, Chat4aService>("Chat4a");
+        services.AddKeyedScoped<IChatClientService, Chat4bService>("Chat4b");
 
         return services;
     }

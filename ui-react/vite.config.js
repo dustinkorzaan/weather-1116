@@ -61,6 +61,10 @@ export default defineConfig({
         target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
+      '/Chat4b': {
+        target: process.env.VITE_API_DOTNET_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
   test: {

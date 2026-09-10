@@ -343,6 +343,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("data-chat-tab=\"Chat1a\" role=\"tab\" aria-selected=\"true\" aria-label=\"Chat1a\" title=\"Chat1a\">1a</button>", html);
         Assert.Contains("data-chat-tab=\"Chat3\" role=\"tab\" aria-selected=\"false\" aria-label=\"Chat3\" title=\"Chat3\">3</button>", html);
         Assert.Contains("data-chat-tab=\"Chat4a\" role=\"tab\" aria-selected=\"false\" aria-label=\"Chat4a\" title=\"Chat4a\">4a</button>", html);
+        Assert.Contains("data-chat-tab=\"Chat4b\" role=\"tab\" aria-selected=\"false\" aria-label=\"Chat4b\" title=\"Chat4b\">4b</button>", html);
         Assert.Contains("aria-label=\"Enter fullscreen\"", html);
         Assert.Contains("chatFullscreen.js", html);
         Assert.Contains("safeGfmMarkdown.js", html);
