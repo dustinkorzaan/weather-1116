@@ -37,6 +37,17 @@ public class ChatSystemInstructionsTests
     }
 
     [Fact]
+    public void MultiAgentAiWeatherOrchestrationAssistant_RequiresNumericCoordinatesResentEveryCall()
+    {
+        var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
+
+        Assert.Contains("numeric coordinates", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no memory of its own", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("every call", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("a location or coordinates", prompt, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void MultiAgentGeoAssistant_IsGeoOnly()
     {
         var prompt = ChatSystemInstructions.MultiAgentGeoAssistant;

@@ -156,9 +156,10 @@ does **not** replay a system prompt — Foundry rejects `instructions` when an a
 
 **Chat4a memory:** only the orchestrator (AI Weather Orchestration) has a persistent `AgentSession`
 via `ChatAgentSessionStore`, exactly like Chat2a. The two sub-agents (Geo, NonAI Weather) are
-rebuilt on every request and invoked with `session: null` — they are stateless, single-purpose
-"query in, text out" tools with no memory of their own; AI Weather Orchestration is the only agent
-that remembers prior turns.
+rebuilt on every request and invoked with `session` omitted from `AsAIFunction` — which creates a
+fresh, throwaway `AgentSession` per call rather than leaving it null — so they are stateless,
+single-purpose "query in, text out" tools with no memory of their own; AI Weather Orchestration is
+the only agent that remembers prior turns.
 
 ## Chat4a: multi-agent orchestration (Geo / NonAI Weather / AI Weather Orchestration)
 
