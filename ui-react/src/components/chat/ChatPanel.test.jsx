@@ -95,12 +95,12 @@ test('scrolls the visible chat to the bottom when a turn completes', async () =>
   });
 });
 
-test('scrolls to the bottom when switching among the five chats', async () => {
+test('scrolls to the bottom when switching among the six chats', async () => {
   stubChatMessagesScrollHeight(640);
   const user = userEvent.setup();
   const { container } = render(<ChatPanel />);
 
-  for (const name of ['Chat1b', 'Chat2a', 'Chat2b', 'Chat3', 'Chat1a']) {
+  for (const name of ['Chat1b', 'Chat2a', 'Chat2b', 'Chat3', 'Chat4a', 'Chat1a']) {
     await user.click(screen.getByRole('tab', { name }));
     expect(container.querySelector('[data-chat-messages]').scrollTop).toBe(640);
   }
@@ -115,6 +115,7 @@ test('chat tab buttons show a short visible label under the full accessible name
     Chat2a: '2a',
     Chat2b: '2b',
     Chat3: '3',
+    Chat4a: '4a',
   };
 
   for (const [name, shortLabel] of Object.entries(shortLabelByAccessibleName)) {

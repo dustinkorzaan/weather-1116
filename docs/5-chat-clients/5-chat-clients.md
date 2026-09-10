@@ -1,4 +1,4 @@
-# Chat Clients (Chat1a–Chat2b and Chat3)
+# Chat Clients (Chat1a–Chat2b, Chat3, and Chat4a)
 
 Standalone multi-turn chat in all three UIs (React, MVC, Blazor). This feature is **separate**
 from the existing **Current AI Weather** widget (`/AIWeather/CurrentV3`, `/CurrentV4`, or
@@ -14,9 +14,10 @@ a one-shot structured JSON response.
 | **Chat2a** | Microsoft Agent Framework (model-direct) | In-process tools via `AIFunctionFactory` | V3 orchestration style |
 | **Chat2b** | Microsoft Agent Framework (model-direct) | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
 | **Chat3** | Hosted Microsoft Foundry agent | MCP tools configured **on the agent** in Foundry (`wx1116-agent-for-chat`) | Foundry Console **V5** |
+| **Chat4a** | Microsoft Agent Framework (model-direct), multi-agent | In-process tools, split across two sub-agents delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V3 orchestration style |
 
 Each tab has its **own controller**, **own Core service**, and **own session namespace**
-(`Chat1a:…`, `Chat1b:…`, `Chat3:…`, etc.) so implementations do not collide.
+(`Chat1a:…`, `Chat1b:…`, `Chat3:…`, `Chat4a:…`, etc.) so implementations do not collide.
 
 Chat1/Chat2 still send the model name, instructions, and tools from this repo.
 **Chat3 does not** — it calls `GetProjectResponsesClientForAgent` and sends only the
@@ -38,6 +39,7 @@ flowchart TB
         C2a[Chat2aController]
         C2b[Chat2bController]
         C3[Chat3Controller]
+        C4a[Chat4aController]
     end
 
     subgraph core [Core.Chat]
@@ -46,6 +48,7 @@ flowchart TB
         S2a[Chat2aService]
         S2b[Chat2bService]
         S3[Chat3Service]
+        S4a[Chat4aService]
         Store[IChatSessionStore]
         Tools[WeatherToolExecutor / MCP factories]
         Agent[wx1116-agent-for-chat]
@@ -60,23 +63,26 @@ flowchart TB
     C2a --> S2a
     C2b --> S2b
     C3 --> S3
+    C4a --> S4a
 
     S1a --> Store
     S1b --> Store
     S2a --> Store
     S2b --> Store
     S3 --> Store
+    S4a --> Store
 
     S1a --> Tools
     S1b --> Tools
     S2a --> Tools
     S2b --> Tools
     S3 --> Agent
+    S4a --> Tools
 ```
 
 ### Request flow
 
-1. UI posts `POST /Chat1a/messages` (or `Chat1b`, `Chat2a`, `Chat2b`, `Chat3`) with JSON:
+1. UI posts `POST /Chat1a/messages` (or `Chat1b`, `Chat2a`, `Chat2b`, `Chat3`, `Chat4a`) with JSON:
    `{ "sessionId": "optional", "message": "user text" }`
 2. Server returns **Server-Sent Events** (`text/event-stream`) with JSON payloads:
    - `session` — assigns or confirms session id
@@ -109,6 +115,7 @@ core-dotnet/core/Chat/
   Chat2a/Chat2aService.cs
   Chat2b/Chat2bService.cs
   Chat3/Chat3Service.cs
+  Chat4a/Chat4aService.cs
   ChatServiceCollectionExtensions.cs
 ```
 
@@ -145,6 +152,34 @@ not declared on the request.
 
 **Chat3 memory:** later turns send `previous_response_id` (`ChatHostedAgentResponseStore`). Chat3
 does **not** replay a system prompt — Foundry rejects `instructions` when an agent is specified.
+
+**Chat4a memory:** only the orchestrator (Helm) has a persistent `AgentSession` via
+`ChatAgentSessionStore`, exactly like Chat2a. The two sub-agents (Fix, Baro) are rebuilt on every
+request and invoked with `session: null` — they are stateless, single-purpose "query in, text out"
+tools with no memory of their own; Helm is the only agent that remembers prior turns.
+
+## Chat4a: multi-agent orchestration (Fix / Baro / Helm)
+
+Chat4a restructures Chat2a's single flat-tool agent into a small multi-agent system. Three
+`AIAgent` instances are built per request in `Chat4aService`, each with a fixed nickname kept in
+a `// Agent <name> 👤` comment directly above its construction so the three names stay
+unambiguous in code:
+
+- **Agent Fix 👤** — geo sub-agent. Owns exactly `GetLatLong` and `GetLocation`.
+- **Agent Baro 👤** — weather sub-agent. Owns exactly `GetPublicWeatherCurrent`,
+  `GetPublicWeatherForecast`, and `GetPublicWeatherHistory`.
+- **Agent Helm 👤** — orchestrator. Has no geo/weather tools of its own; its only two tools
+  *are* Fix and Baro, wrapped via `AIAgentExtensions.AsAIFunction` (`Microsoft.Agents.AI` 1.20.0,
+  already referenced by this repo — no `Microsoft.Agents.AI.Workflows` package is used or needed
+  for this two-agent delegation). Helm decides when to call Fix, when to call Baro, and passes
+  Fix's resolved coordinates into Baro's request.
+
+**Nested tool calls are not individually traced.** Helm's SSE stream shows `tool_start`/`tool_end`
+for the two delegation calls ("Fix", "Baro") the same way Chat2a shows its five direct tool calls.
+Fix's and Baro's own inner tool calls (e.g. Fix calling `GetLatLong`) happen inside the synchronous
+function body `AsAIFunction` generates and do not produce separate stream events — the UI shows
+"Helm called Fix" → "Fix returned an answer", not the geocoding call nested inside Fix. This is an
+intentional scope boundary for this tab, not a bug.
 
 ## Configuration
 
@@ -265,7 +300,7 @@ Keep this in sync with `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs
 | Endpoint | `GET /AIWeather/CurrentV3`, `/CurrentV4`, or `/CurrentV5` | `POST /Chat1a/messages`, etc. |
 | Output | Strict `AIWeatherResponse` JSON | Conversational text (streamed) |
 | Memory | None (single shot) | Per-tab session history |
-| UI | `/current-ai-weather` page | `/chat-clients` chat panel (five tabs, per-tab session) |
+| UI | `/current-ai-weather` page | `/chat-clients` chat panel (six tabs, per-tab session) |
 
 ## Learning goals
 
@@ -275,6 +310,10 @@ Keep this in sync with `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs
   sessions and `RunStreamingAsync`.
 - **Chat2b vs Chat3:** Same remote MCP weather tools; Chat2b still defines the agent in-process,
   Chat3 uses the Foundry-defined agent.
+- **Chat2a vs Chat4a:** Same in-process tools and same model-direct Agent Framework stack; Chat2a
+  owns all five tools directly on one agent, Chat4a splits them across two narrowly-scoped
+  sub-agents (Fix, Baro) delegated to by an orchestrator (Helm) via `AsAIFunction` — same
+  capability, now visibly decomposed into a multi-agent shape.
 
 ## Related docs
 
