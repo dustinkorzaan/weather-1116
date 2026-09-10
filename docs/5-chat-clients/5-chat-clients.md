@@ -245,7 +245,7 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 | `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b, Chat4b (Geo sub-agent) |
 | `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent) |
 
-Chat1a and Chat2a do **not** require MCP URLs. Chat3 does **not** require MCP URLs in the app
+Chat1a, Chat2a, and Chat4a do **not** require MCP URLs. Chat3 does **not** require MCP URLs in the app
 either — those belong on the hosted agent.
 
 `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` remains the V5 console agent (`wx1116-agent-for-current-weather`,

@@ -14,7 +14,9 @@ namespace Core.Chat.Chat4b;
 /// user talks to and delegates to Agent Geo 👤 (geo) and Agent NonAI Weather 👤 (weather), each
 /// wrapped as a callable tool via <see cref="AIAgentExtensions.AsAIFunction"/>. Only the
 /// orchestrator carries a persistent <see cref="AgentSession"/> (multi-turn memory); Geo and
-/// NonAI Weather are rebuilt per request and invoked statelessly, same as Chat4a.
+/// NonAI Weather are rebuilt per request. Omitting <c>session</c> from AsAIFunction does not
+/// leave it null — a fresh, throwaway <see cref="AgentSession"/> is created for each delegated
+/// call, which is what makes Geo and NonAI Weather stateless, same as Chat4a.
 /// The difference from Chat4a: Geo and NonAI Weather get their tools from the existing remote MCP
 /// hosts (<see cref="ChatHostedMcpToolFactory"/>) instead of in-process CQMediator calls — Geo
 /// gets only the <c>mcp-srv-func-app</c> tool, NonAI Weather gets only the
@@ -69,12 +71,17 @@ public sealed class Chat4bService : IChatClientService
 
         var usage = new ChatUsageAccumulator();
         var responsesClient = _settings.CreateResponsesClient();
-        AIAgent orchestrationAgent = BuildOrchestrationAgent(responsesClient);
 
+        AIAgent? orchestrationAgent = null;
         AgentSession? agentSession = null;
         string? sessionError = null;
         try
         {
+            // BuildOrchestrationAgent calls ChatHostedMcpToolFactory, which throws when
+            // MCP_SRV_* env vars are missing — build it inside this try (like Chat2b does with
+            // CreateTools()) so missing MCP config surfaces as a ChatStreamEvent.Error, not an
+            // unhandled exception.
+            orchestrationAgent = BuildOrchestrationAgent(responsesClient);
             agentSession = await _agentSessionStore.GetOrCreateAsync(orchestrationAgent, sessionId, cancellationToken);
         }
         catch (Exception ex)
@@ -96,7 +103,7 @@ public sealed class Chat4bService : IChatClientService
         string? streamError = null;
         try
         {
-            updates = orchestrationAgent.RunStreamingAsync(userMessage, agentSession, cancellationToken: cancellationToken);
+            updates = orchestrationAgent!.RunStreamingAsync(userMessage, agentSession, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
