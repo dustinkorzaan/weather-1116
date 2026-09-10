@@ -10,6 +10,7 @@ planning, execution, and review without a traditional "you type every line" loop
 - Sprint board as the coordination surface for agent work
 - Handoffs between human intent and autonomous execution
 - What worked, what did not (Mid June → late July)
+- [YML start_story_with_v1_ai](../../.github/workflows/v1-ai-10-init.yml)
 
 ## Reflection / Out of Scope / V2 Notes
 
