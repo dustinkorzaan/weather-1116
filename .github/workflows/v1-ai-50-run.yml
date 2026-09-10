@@ -53,6 +53,7 @@ jobs:
 
           if [ "${AI_TARGET}" = "copilot" ]; then
             echo "Running Copilot for branch ${BRANCH_NAME}"
+            # Wrong package; should use the GitHub Copilot agent and let it run async.
             npx -y @github/copilot -p "${PROMPT}" --allow-all --silent
           elif [ "${AI_TARGET}" = "cursor" ]; then
             echo "Running Cursor Agent for branch ${BRANCH_NAME}"
