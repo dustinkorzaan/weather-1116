@@ -80,6 +80,27 @@ public class ChatAgentFrameworkPackageTests
     }
 
     [Fact]
+    public void AsAIFunction_WrapsSubAgent_ForOrchestrationDelegation()
+    {
+        var client = CreateResponsesClient();
+        var geoAgent = client.AsAIAgent(
+            name: "Geo",
+            instructions: "You are a test geo assistant.",
+            model: "gpt-test",
+            tools: [AIFunctionFactory.Create(GetLatLong)]);
+
+        var geoTool = geoAgent.AsAIFunction(new AIFunctionFactoryOptions
+        {
+            Name = "Geo",
+            Description = "Geo assistant.",
+        });
+
+        Assert.Equal("Geo", geoTool.Name);
+        Assert.Equal("Geo assistant.", geoTool.Description);
+        Assert.IsAssignableFrom<AITool>(geoTool);
+    }
+
+    [Fact]
     public void AIFunctionFactory_OmitsCancellationTokenFromToolSchema()
     {
         var function = AIFunctionFactory.Create(GetLatLong);

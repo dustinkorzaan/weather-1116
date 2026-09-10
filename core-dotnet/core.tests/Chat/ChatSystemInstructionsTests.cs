@@ -24,4 +24,60 @@ public class ChatSystemInstructionsTests
         Assert.Contains("meteorological source", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Do not add 180", prompt);
     }
+
+    [Fact]
+    public void MultiAgentAiWeatherOrchestrationAssistant_DelegatesToGeoAndNonAiWeather()
+    {
+        var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
+
+        Assert.Contains("Geo", prompt);
+        Assert.Contains("NonAI Weather", prompt);
+        Assert.Contains("Never guess a location or weather fact yourself", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("GitHub-flavored Markdown", prompt);
+    }
+
+    [Fact]
+    public void MultiAgentAiWeatherOrchestrationAssistant_RequiresNumericCoordinatesResentEveryCall()
+    {
+        var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
+
+        Assert.Contains("numeric coordinates", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no memory of its own", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("every call", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("a location or coordinates", prompt, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void MultiAgentAiWeatherOrchestrationAssistant_KnowsNonAiWeatherResolutionTiers()
+    {
+        var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
+
+        Assert.Contains("hourly", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("every 15 minutes", prompt, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void MultiAgentGeoAssistant_IsGeoOnly()
+    {
+        var prompt = ChatSystemInstructions.MultiAgentGeoAssistant;
+
+        Assert.Contains("latitude", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("GetLatLong", prompt);
+        Assert.Contains("GetLocation", prompt);
+        Assert.DoesNotContain("°F", prompt);
+        Assert.DoesNotContain("GetPublicWeather", prompt);
+    }
+
+    [Fact]
+    public void MultiAgentNonAiWeatherAssistant_IsWeatherOnlyWithUnitRules()
+    {
+        var prompt = ChatSystemInstructions.MultiAgentNonAiWeatherAssistant;
+
+        Assert.Contains("°F", prompt);
+        Assert.Contains("mph", prompt);
+        Assert.Contains("GetPublicWeatherCurrent", prompt);
+        Assert.Contains("GetPublicWeatherForecast", prompt);
+        Assert.Contains("GetPublicWeatherHistory", prompt);
+        Assert.DoesNotContain("GetLatLong", prompt);
+    }
 }
