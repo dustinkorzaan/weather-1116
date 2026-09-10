@@ -45,7 +45,7 @@ Standalone multi-turn chat page with six tabs:
 | Chat2a | In-process | Agent Framework | Like Foundry Console V3 |
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-for-chat`) |
-| Chat4a | In-process, multi-agent | Agent Framework | AI Weather Orchestration delegates to Geo and NonAI Weather via `AsAIFunction` |
+| Chat4a | In-process, multi-agent | Agent Framework | Like Foundry Console V3 - AI Weather Orchestration delegates to Geo and NonAI Weather |
 
 Visit the [React UI](https://wx.korzaan.com/chat-clients) Chat wired to variations of V3, V4, and V5
 
