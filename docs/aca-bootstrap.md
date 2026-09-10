@@ -227,7 +227,14 @@ App Service (`Microsoft.Web/sites`), not `Microsoft.App/containerApps`.
 `aca-functions-mcp-key.sh` checks that `az containerapp function keys` exists
 before setting the `mcp_extension` system key; if the CLI command group is
 missing, the job fails with manual-setup guidance instead of silently skipping
-MCP auth.
+MCP auth. That command group connects live to the running Functions host
+inside the newest revision rather than going through ARM, so the script polls
+`az containerapp revision show` (up to 5 minutes) until the just-deployed
+revision is `Running`/`Healthy` before touching keys -- `az containerapp
+update` in the previous step returns as soon as the update is accepted, not
+once the new revision is actually healthy, and without this wait the key
+list/set call intermittently fails with a generic `Error setting function key`
+and no further detail.
 
 ## Step 6 — Foundry MCP tools and agents
 

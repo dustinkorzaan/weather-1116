@@ -33,6 +33,45 @@ EOF
   exit 1
 fi
 
+# `az containerapp function keys` connects live to the running Functions host
+# inside the newest revision rather than just PATCHing via ARM. Right after a
+# deploy, that revision can still be provisioning -- az containerapp update
+# returns as soon as the update is accepted, not once the revision is
+# healthy -- so wait for it here or the key list/set below fails with a
+# generic "Error setting function key" and no further detail.
+LATEST_REVISION="$(az containerapp show \
+  --name "$APP_NAME" \
+  --resource-group "$RESOURCE_GROUP" \
+  --query properties.latestRevisionName \
+  --output tsv)"
+
+WAIT_TIMEOUT_S=300
+WAIT_INTERVAL_S=10
+ELAPSED_S=0
+while true; do
+  READ_STATE="$(az containerapp revision show \
+    --name "$APP_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --revision "$LATEST_REVISION" \
+    --query "[properties.runningState, properties.healthState]" \
+    --output tsv)"
+  RUNNING_STATE="$(cut -f1 <<< "$READ_STATE")"
+  HEALTH_STATE="$(cut -f2 <<< "$READ_STATE")"
+
+  if [ "$RUNNING_STATE" = "Running" ] && [ "$HEALTH_STATE" = "Healthy" ]; then
+    echo "::notice::Revision $LATEST_REVISION is Running/Healthy."
+    break
+  fi
+
+  if [ "$ELAPSED_S" -ge "$WAIT_TIMEOUT_S" ]; then
+    echo "Revision $LATEST_REVISION did not become Running/Healthy within ${WAIT_TIMEOUT_S}s (runningState=$RUNNING_STATE, healthState=$HEALTH_STATE)." >&2
+    exit 1
+  fi
+
+  sleep "$WAIT_INTERVAL_S"
+  ELAPSED_S=$((ELAPSED_S + WAIT_INTERVAL_S))
+done
+
 CURRENT_KEY="$(az containerapp function keys list \
   --name "$APP_NAME" \
   --resource-group "$RESOURCE_GROUP" \
