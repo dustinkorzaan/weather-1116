@@ -70,7 +70,7 @@ resource site 'Microsoft.Web/sites@2023-12-01' = {
     httpsOnly: true
     clientAffinityEnabled: clientAffinityEnabled
     siteConfig: {
-      linuxFxVersion: 'DOTNETCORE|10.0'
+      linuxFxVersion: 'DOTNETCORE|10'
       alwaysOn: true
       minTlsVersion: '1.2'
       ftpsState: 'Disabled'
