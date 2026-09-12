@@ -104,6 +104,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   properties: {
     serverFarmId: appServicePlanId
     httpsOnly: true
+    clientAffinityEnabled: false
     siteConfig: {
       linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       alwaysOn: true

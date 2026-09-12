@@ -95,8 +95,11 @@ PROD_UI_REACT_URL            = https://<STATIC_WEB_APP_CUSTOM_DOMAIN>
 
 Also set Foundry vars (`AZURE_FOUNDRY_PROD_PROJ_URL`,
 `AZURE_FOUNDRY_PROD_MODEL`, `AZURE_FOUNDRY_PROD_AGENT_NAME`,
-`AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME`) against
-`wx1116-prod-proj`.
+`AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME`, plus the `AZURE_FOUNDRY_PROD_KEY` secret
+on the app deploys) against `wx1116-prod-proj`. These are the only Foundry
+var/secret names this repo reads -- create them fresh under these names if
+this is your first bootstrap; if you're migrating an older checkout, the
+`_EUS2_` and `_CUS_` variants are retired and nothing falls back to them.
 
 ## Step 3 — Static Web App deploy token
 
