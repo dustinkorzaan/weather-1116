@@ -1,5 +1,5 @@
 // Resource-group-scoped App Service deployment into the pre-existing
-// wx1116-prod-rg resource group. wx1116-prod-github-actions-mi is created
+// wx1116-prod-rg resource group. wx1116-prod-github-mi is created
 // manually, not by this template; every other resource here is created (or
 // updated in place) by `azd provision` and may already exist from a prior
 // run.
@@ -19,7 +19,7 @@ param namePrefix string = 'wx1116'
 param resourceGroupName string = 'wx1116-prod-rg'
 
 @description('Name of the pre-existing GitHub Actions managed identity. Created manually, not by this template.')
-param githubActionsIdentityName string = 'wx1116-prod-github-actions-mi'
+param githubActionsIdentityName string = 'wx1116-prod-github-mi'
 
 @description('Name of the storage account backing the Function App\'s AzureWebJobsStorage.')
 param storageAccountName string = 'wx1116prodblob'

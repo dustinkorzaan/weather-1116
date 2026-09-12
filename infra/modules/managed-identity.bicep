@@ -5,7 +5,7 @@
 // group. This module never creates the identity or its federated credential —
 // without both of those, GitHub Actions cannot authenticate to run provision.
 
-@description('Name of the pre-existing GitHub Actions managed identity (e.g. wx1116-prod-github-actions-mi). Created manually, not by this template.')
+@description('Name of the pre-existing GitHub Actions managed identity (e.g. wx1116-prod-github-mi). Created manually, not by this template.')
 param githubActionsIdentityName string
 
 var contributorRoleId = 'b24988ac-6180-42a0-ab88-20f7382dd24c'

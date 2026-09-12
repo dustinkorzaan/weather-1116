@@ -3,7 +3,7 @@
 First-time deployment into an empty `wx1116-prod-rg`. Two resources must exist
 **before** the first provision or deploy can run at all:
 
-- `wx1116-prod-github-actions-mi` (user-assigned managed identity)
+- `wx1116-prod-github-mi` (user-assigned managed identity)
 - Its GitHub OIDC federated credential for `repo:<owner>/<repo>:environment:prod`
 
 Without both, `azure/login` and `azd auth login` in the workflows cannot
@@ -130,7 +130,7 @@ production shape.
 ## Step 4 — SQL contained users (once)
 
 Run `infra/scripts/create-contained-users.sql` as the SQL Entra admin
-(`wx1116-prod-github-actions-mi`). See comments in
+(`wx1116-prod-github-mi`). See comments in
 `prod-provision-infra.yml`. Re-run this if the runtime managed identities are
 deleted and recreated (new principal IDs).
 

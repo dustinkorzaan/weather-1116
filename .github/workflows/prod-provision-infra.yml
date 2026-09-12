@@ -31,7 +31,7 @@
 #
 # Reuses the existing AZURE_GITHUB_MI_CLIENTID / AZURE_TENANTID /
 # AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_MI_CLIENTID holds
-# wx1116-prod-github-actions-mi's client ID, on the assumption
+# wx1116-prod-github-mi's client ID, on the assumption
 # wx1116-prod-rg lives in the same tenant/subscription as the
 # wx1116-prod-* deploys below.
 #
@@ -40,7 +40,7 @@
 # SQL-native login ever exists to have a secret for -- the
 # administratorLogin/administratorLoginPassword ARM still requires are
 # generated internally and never surfaced. infra/main.bicep registers
-# wx1116-prod-github-actions-mi itself as the SQL server's Entra admin (its
+# wx1116-prod-github-mi itself as the SQL server's Entra admin (its
 # principal ID is already known from modules/managed-identity.bicep) -- but
 # this workflow does NOT run
 # infra/scripts/create-contained-users.sql itself. That's a deliberate
@@ -52,7 +52,7 @@
 # but that doesn't require this workflow to be the one invoking it.
 #
 # The "prod" GitHub Environment gate below is required, not stylistic: the
-# federated credential on wx1116-prod-github-actions-mi is scoped to the
+# federated credential on wx1116-prod-github-mi is scoped to the
 # subject repo:dustinkorzaan/weather-1116:environment:prod, so azd auth
 # login fails without it.
 
@@ -123,7 +123,7 @@ jobs:
           AZURE_LOCATION: centralus
 
       # infra/main.bicep is resource-group-scoped, not subscription-scoped
-      # (deliberately -- wx1116-prod-github-actions-mi only holds Contributor
+      # (deliberately -- wx1116-prod-github-mi only holds Contributor
       # + User Access Administrator on wx1116-prod-rg, not the subscription).
       # azd needs to be told which pre-existing resource group to target;
       # without this it defaults to (and tries to create) rg-prod.
@@ -153,7 +153,7 @@ jobs:
 
       # infra/scripts/create-contained-users.sql is deliberately NOT run
       # here -- run it manually, once, as the Entra admin
-      # (wx1116-prod-github-actions-mi or another Entra admin on the
+      # (wx1116-prod-github-mi or another Entra admin on the
       # server), e.g.:
       #   az login
       #   $accessToken = az account get-access-token --resource https://database.windows.net/ --query accessToken -o tsv

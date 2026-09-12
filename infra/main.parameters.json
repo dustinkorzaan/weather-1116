@@ -12,7 +12,7 @@
       "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prod-rg}"
     },
     "githubActionsIdentityName": {
-      "value": "${GITHUB_ACTIONS_IDENTITY_NAME=wx1116-prod-github-actions-mi}"
+      "value": "${GITHUB_ACTIONS_IDENTITY_NAME=wx1116-prod-github-mi}"
     },
     "storageAccountName": {
       "value": "${STORAGE_ACCOUNT_NAME=wx1116prodblob}"
