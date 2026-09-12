@@ -51,7 +51,7 @@ function ErrorFallback() {
       <div>
         <p className="text-lg font-semibold">Something went wrong.</p>
         <p className="text-sm text-muted-foreground">
-          The error has been reported. Try reloading the page.
+          {appInsights ? 'The error has been reported. ' : ''}Try reloading the page.
         </p>
       </div>
     </div>
