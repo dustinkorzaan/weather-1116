@@ -40,12 +40,12 @@ Standalone multi-turn chat page with seven tabs:
 
 | Tab | Pattern | Stack | Notes |
 | --- | --- | --- | --- |
-| Chat1a | In-process | Responses API | Like Foundry Console V3 |
+| Chat1a | Local Loops | Responses API | Like Foundry Console V3 |
 | Chat1b | Remote MCP | Responses API | Like Foundry Console V4 |
-| Chat2a | In-process | Agent Framework | Like Foundry Console V3 |
+| Chat2a | Local Loops | Agent Framework | Like Foundry Console V3 |
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-for-chat`) |
-| Chat4a | In-process, multi-agent | Agent Framework | Like Foundry Console V3 - AI Weather Orchestration delegates to Geo and NonAI Weather |
+| Chat4a | Local Loops, multi-agent | Agent Framework | Like Foundry Console V3 - AI Weather Orchestration delegates to Geo and NonAI Weather |
 | Chat4b | Remote MCP, multi-agent | Agent Framework | Like Foundry Console V4 - AI Weather Orchestration delegates to Geo and NonAI Weather |
 
 Visit the [React UI](https://wx.korzaan.com/chat-clients) Chat wired to variations of V3, V4, and V5
