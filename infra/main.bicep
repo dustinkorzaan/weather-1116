@@ -1,14 +1,15 @@
-// Resource-group-scoped greenfield App Service deployment into the
-// pre-existing wx1116-prod-rg resource group. Only
-// wx1116-prod-github-actions-mi exists before first provision; everything
-// else is created here.
+// Resource-group-scoped App Service deployment into the pre-existing
+// wx1116-prod-rg resource group. wx1116-prod-github-actions-mi is created
+// manually, not by this template; every other resource here is created (or
+// updated in place) by `azd provision` and may already exist from a prior
+// run.
 
 targetScope = 'resourceGroup'
 
 @description('azd environment name.')
 param environmentName string = 'prod'
 
-@description('Azure region for every resource in this environment except SQL.')
+@description('Azure region for every resource in this environment except SQL, which uses the separate `sqlLocation` param below -- both currently default to the same region.')
 param location string = 'centralus'
 
 @description('Azure region for the SQL server/database only. Separate from `location` because East US 2 and East US have both (at least intermittently) rejected new Azure SQL server creation with RegionDoesNotAllowProvisioning; Central US does not have that restriction.')
@@ -52,11 +53,11 @@ var appIdentityConfig = [
 ]
 
 var appServiceConfig = [
-  { key: 'api', setAzureClientId: true }
-  { key: 'mvc', setAzureClientId: true }
-  { key: 'blazor', setAzureClientId: false }
-  { key: 'worker', setAzureClientId: true }
-  { key: 'mcp-srv-app-service', setAzureClientId: false }
+  { key: 'api', setAzureClientId: true, clientAffinityEnabled: false }
+  { key: 'mvc', setAzureClientId: true, clientAffinityEnabled: false }
+  { key: 'blazor', setAzureClientId: false, clientAffinityEnabled: true }
+  { key: 'worker', setAzureClientId: true, clientAffinityEnabled: false }
+  { key: 'mcp-srv-app-service', setAzureClientId: false, clientAffinityEnabled: false }
 ]
 
 module githubActionsIdentity 'modules/managed-identity.bicep' = {
@@ -100,6 +101,7 @@ module appServices 'modules/app-service.bicep' = [for (cfg, i) in appServiceConf
     userAssignedIdentityId: appIdentities[i].outputs.id
     userAssignedIdentityClientId: appIdentities[i].outputs.clientId
     setAzureClientId: cfg.setAzureClientId
+    clientAffinityEnabled: cfg.clientAffinityEnabled
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
   }
 }]

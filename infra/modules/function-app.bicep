@@ -1,11 +1,13 @@
 // MCP host for mcp-srv-func-app: a Linux Function App on the shared App
 // Service Plan (Dedicated hosting, not Consumption). App code deploys
 // separately via `az functionapp deploy` (prod-deploy-mcp-srv-func.yml);
-// this module only owns the site resource, its identity, and the
-// Functions-host application settings that provision owns. Anything else
-// the deploy workflow sets via `az functionapp config appsettings set`
-// survives future redeploys of this template untouched, since that command
-// only upserts the keys it's given.
+// this module owns the site resource, its identity, and the Functions-host
+// application settings listed here. `siteConfig.appSettings` is a full PUT
+// of the whole settings collection: every `azd provision` resets it to
+// exactly this list, dropping whatever `az functionapp config appsettings
+// set` added afterward until the next deploy upserts it again -- see the
+// ordering note in prod-provision-infra.yml. A provision-only run with no
+// following deploy leaves settings at this reduced list.
 
 @description('Function App name, e.g. wx1116-prod-mcp-srv-func-app.')
 param name string
@@ -105,6 +107,8 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
     siteConfig: {
       linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       alwaysOn: true
+      minTlsVersion: '1.2'
+      ftpsState: 'Disabled'
       appSettings: baseAppSettings
     }
   }

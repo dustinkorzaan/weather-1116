@@ -47,23 +47,12 @@ runs:
       working-directory: ${{ runner.temp }}/publish-${{ inputs.app_name }}
       run: zip -r "${RUNNER_TEMP}/publish-${{ inputs.app_name }}.zip" .
 
-    - name: Deploy code
-      shell: bash
-      run: |
-        if [ "${{ inputs.app_kind }}" = "functionapp" ]; then
-          az functionapp deploy \
-            --resource-group "${{ inputs.resource_group }}" \
-            --name "${{ inputs.app_name }}" \
-            --src-path "${RUNNER_TEMP}/publish-${{ inputs.app_name }}.zip" \
-            --type zip
-        else
-          az webapp deploy \
-            --resource-group "${{ inputs.resource_group }}" \
-            --name "${{ inputs.app_name }}" \
-            --src-path "${RUNNER_TEMP}/publish-${{ inputs.app_name }}.zip" \
-            --type zip
-        fi
-
+    # Runs before the code deploy: applying settings first means the process
+    # that starts when the new code lands already has DB_CONNECTION_STRING /
+    # MCP keys / Foundry config in place, instead of booting once on
+    # whatever Bicep last put there and restarting again when settings catch
+    # up. Same one overlay from the workflow inputs either way -- just
+    # reordered, not a second settings path.
     - name: Apply application settings
       shell: bash
       env:
@@ -86,3 +75,20 @@ runs:
           --app-kind "${{ inputs.app_kind }}" \
           ${SECRETS_FILE:+--secrets-file "${SECRETS_FILE}"} \
           ${ENV_OVERLAY_FILE:+--env-overlay-file "${ENV_OVERLAY_FILE}"}
+
+    - name: Deploy code
+      shell: bash
+      run: |
+        if [ "${{ inputs.app_kind }}" = "functionapp" ]; then
+          az functionapp deploy \
+            --resource-group "${{ inputs.resource_group }}" \
+            --name "${{ inputs.app_name }}" \
+            --src-path "${RUNNER_TEMP}/publish-${{ inputs.app_name }}.zip" \
+            --type zip
+        else
+          az webapp deploy \
+            --resource-group "${{ inputs.resource_group }}" \
+            --name "${{ inputs.app_name }}" \
+            --src-path "${RUNNER_TEMP}/publish-${{ inputs.app_name }}.zip" \
+            --type zip
+        fi
