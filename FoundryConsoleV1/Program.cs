@@ -55,7 +55,7 @@ internal class Program
 
 		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// AI prep
 		var systemPrompt = "You are a helpful weather assistant.";
@@ -111,7 +111,7 @@ internal class Program
 
 		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// AI prep
 		var systemPrompt = """
@@ -172,7 +172,7 @@ internal class Program
 
 		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });
@@ -248,7 +248,7 @@ internal class Program
 
 		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.cognitiveservices.azure.com/";
 		var deploymentName = "gpt-5.4-mini";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });

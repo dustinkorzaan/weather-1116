@@ -34,7 +34,7 @@ internal class Program
 
 		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.services.ai.azure.com/api/projects/wx1116-prod-eastus2-prj/openai/v1"; // pragma: allowlist secret
 		var agentName = "wx1116-agent-for-current-weather";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		var userPrompt = $"""
 		What is today's weather in: {location}?

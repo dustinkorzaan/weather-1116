@@ -42,7 +42,7 @@ and assigns Contributor + User Access Administrator on this resource group.
 | Secret | Purpose |
 | --- | --- |
 | `AZURE_SQL_DB_CONNECTION_STRING` | Hangfire + SQL for api/mvc/worker -- server/database only, no `Authentication` clause and no username/password (see below) |
-| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Foundry API key |
+| `AZURE_FOUNDRY_PROD_CUS_KEY` | Foundry API key |
 | `PROD_MCP_SRV_APP_SERVICE_KEY` | Bearer token for MCP app-service host |
 | `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key — you choose the value; deploy applies it |
 | `GOOGLE_MAPS_API_KEY` | Maps on React/MVC/Blazor |
@@ -90,7 +90,7 @@ PROD_MCP_SRV_FUNC_APP_URL    = https://<MCP_SRV_FUNC_APP_HOSTNAME>
 PROD_UI_REACT_URL            = https://<STATIC_WEB_APP_CUSTOM_DOMAIN>
 ```
 
-Also set Foundry vars (`AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`, model, agent names).
+Also set Foundry vars (`AZURE_FOUNDRY_PROD_CUS_PROJ_URL`, model, agent names).
 
 ## Step 3 — Static Web App deploy token
 

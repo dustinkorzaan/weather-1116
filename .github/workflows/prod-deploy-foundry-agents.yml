@@ -21,7 +21,7 @@
 #
 # Reuses existing repo secrets/vars (no new ones needed):
 #   AZURE_GITHUB_CLIENTID / AZURE_TENANTID / AZURE_SUBSCRIPTIONID
-#   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL / AZURE_FOUNDRY_PROD_EUS2_MODEL
+#   AZURE_FOUNDRY_PROD_CUS_PROJ_URL / AZURE_FOUNDRY_PROD_CUS_MODEL
 #   PROD_MCP_SRV_APP_SERVICE_URL / PROD_MCP_SRV_FUNC_APP_URL
 #     (URL fallback only; MCP keys stay on the Foundry connections)
 
@@ -75,9 +75,9 @@ jobs:
       - name: Publish wx1116-agent-for-current-weather (V5 current-ai-weather)
         shell: bash
         env:
-          AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
+          AZURE_FOUNDRY_PROD_CUS_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_CUS_PROJ_URL }}
           AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
-          AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
+          AZURE_FOUNDRY_PROD_CUS_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_CUS_MODEL }}
           MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
           MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
         run: |
@@ -89,9 +89,9 @@ jobs:
       - name: Publish wx1116-agent-for-chat (Chat3)
         shell: bash
         env:
-          AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
+          AZURE_FOUNDRY_PROD_CUS_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_CUS_PROJ_URL }}
           AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
-          AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
+          AZURE_FOUNDRY_PROD_CUS_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_CUS_MODEL }}
           MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
           MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
         run: |

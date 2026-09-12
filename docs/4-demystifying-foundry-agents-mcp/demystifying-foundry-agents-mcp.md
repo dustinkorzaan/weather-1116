@@ -23,7 +23,7 @@ Five standalone console apps in `Weather.sln` show how the production AI weather
 path was built up. They are **training building blocks**, not deployables. V1
 and V2 stay console-only; V3, V4, and V5 also back a production handler.
 Run from VS Code (**Foundry Console V1** … **V5**) or `dotnet run` in each
-folder. All use the `AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `.env.example`).
+folder. All use the `AZURE_FOUNDRY_PROD_CUS_*` prefix (see each `.env.example`).
 
 Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherV3Handler` in
 `core-dotnet/core/AIWeather` (the production V3-pattern handler, used by
@@ -32,7 +32,7 @@ Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherV3Handler` in
 on `/current-ai-weather`) **→ V5 →**
 `GetCurrentAIWeatherV5Handler` (the production V5-pattern handler, the third
 `/current-ai-weather` tab; sends only the user prompt to
-`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
+`AZURE_FOUNDRY_PROD_CUS_AGENT_NAME`).
 
 - **V1 — Model-direct (legacy endpoint)** — [`FoundryConsoleV1`](../../FoundryConsoleV1)
   (`FoundryConsoleV1ModelDirectLegacy.csproj`)
