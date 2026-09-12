@@ -56,8 +56,8 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
 
-        var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME")
-            ?? "wx1116-agent-for-current-weather";
+        var agentNameEnv = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME");
+        var agentName = string.IsNullOrWhiteSpace(agentNameEnv) ? "wx1116-agent-for-current-weather" : agentNameEnv;
 
         _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, agent {Agent}", endpoint, agentName);
 
