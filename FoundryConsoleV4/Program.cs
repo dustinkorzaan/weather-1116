@@ -38,7 +38,7 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.services.ai.azure.com/openai/v1";
+		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_CUS_PROJ_URL not found in environment variables.");
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
@@ -108,13 +108,13 @@ internal class Program
 
 		var myMcpSrvFuncApp = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvFuncApp",
-			serverUri: new Uri("https://wx1116-prod-mcp-srv-func-app.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/runtime/webhooks/mcp"),
+			serverUri: new Uri("https://wx1116-prod-mcp-srv-func-app.azurewebsites.net/runtime/webhooks/mcp"),
 			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		var myMcpSrvAppService = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvAppService",
-			serverUri: new Uri("https://wx1116-prod-mcp-srv-app-service.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/mcp"),
+			serverUri: new Uri("https://wx1116-prod-mcp-srv-app-service.azurewebsites.net/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 

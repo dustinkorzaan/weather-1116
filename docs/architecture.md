@@ -186,9 +186,10 @@ CQMediator handlers the sample uses in-process elsewhere.
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
 
-Prod apps (ACA): `wx1116-prod-mcp-srv-app-service`, `wx1116-prod-mcp-srv-func-app`
+Prod apps (App Service / Function App): `wx1116-prod-mcp-srv-app-service`,
+`wx1116-prod-mcp-srv-func-app`
 (`https://<MCP_SRV_APP_SERVICE_HOSTNAME>`, `https://<MCP_SRV_FUNC_APP_HOSTNAME>` from
-`azd provision` outputs; see `docs/aca-bootstrap.md` and `prod-deploy-mcp-srv-*.yml`).
+`azd provision` outputs; see `docs/app-service-bootstrap.md` and `prod-deploy-mcp-srv-*.yml`).
 
 Auth examples:
 
@@ -229,7 +230,7 @@ so they can enqueue jobs without running servers; the worker processes them.
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
 - **Production:** set `DB_CONNECTION_STRING` to the same Azure SQL connection
-  string on the worker, API, and MVC. Prod app: `wx1116-prod-worker` on ACA
+  string on the worker, API, and MVC. Prod app: `wx1116-prod-worker` on App Service
   (see `prod-deploy-worker.yml`).
 - **Auth (Entra managed identity, no passwords):** `DB_CONNECTION_STRING`
   holds only `Server`/`Initial Catalog`/`Encrypt`/etc. -- no `Authentication`
@@ -237,7 +238,7 @@ so they can enqueue jobs without running servers; the worker processes them.
   `Core.Data.ManagedIdentitySqlConnectionStringFactory`, using
   `Authentication=Active Directory Default` plus its own `AZURE_CLIENT_ID`
   (the app's dedicated user-assigned managed identity, set by
-  `infra/modules/container-app.bicep`) as the `User ID`, so
+  `infra/modules/app-service.bicep`) as the `User ID`, so
   `DefaultAzureCredential` resolves the right identity instead of guessing
   among the six provisioned for this environment. This is what
   `Microsoft.Data.SqlClient` actually opens the connection with, so it covers
@@ -419,9 +420,9 @@ Each stage's workflow file can also be triggered directly via
 `workflow_dispatch` on any branch (e.g. hotfixes) -- including the
 orchestrator itself, which runs the full chain against that branch's code.
 Deployables include API,
-MVC, React, Blazor, worker-dotnet, and both MCP hosts on **Azure Container
-Apps + ACR** (Functions-on-ACA for `mcp-srv-func-app`). Bootstrap:
-[`docs/aca-bootstrap.md`](aca-bootstrap.md).
+MVC, React, Blazor, worker-dotnet, and both MCP hosts on **Azure App Service**
+(shared Linux plan; Function App for `mcp-srv-func-app`). Bootstrap:
+[`docs/app-service-bootstrap.md`](app-service-bootstrap.md).
 
 ## Repository Layout
 

@@ -49,7 +49,7 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.services.ai.azure.com/openai/v1";
+		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_CUS_PROJ_URL not found in environment variables.");
 		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 

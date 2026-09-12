@@ -62,7 +62,7 @@ var cognitiveServicesUserRoleId = 'a97b65f3-24c7-4388-baec-2e87135dc908'
 
 // "Foundry User" (formerly "Azure AI User"): the least-privileged built-in
 // role that grants agents/*/action, required to create/publish agents via
-// the Foundry Agents REST API (`/agents?api-version=v1`). Must be assigned
+// the Foundry Agents REST API (`/agents?api-version=2025-11-15-preview`). Must be assigned
 // at project scope -- the account-scoped Cognitive Services User role above
 // only covers model inference (chat/responses), not agent management.
 var foundryUserRoleId = '53ca6127-db72-4b80-b1b0-d745d6d5456d'
