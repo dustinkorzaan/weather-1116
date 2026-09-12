@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Core;
 using DotNetEnv;
 using ModelContextProtocol.Server;
@@ -5,6 +6,15 @@ using ModelContextProtocol.Server;
 Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Exports traces/metrics/logs to Application Insights via APPLICATIONINSIGHTS_CONNECTION_STRING
+// (set by infra/modules/app-service.bicep). UseAzureMonitor() throws at startup if the
+// connection string is missing, so it's opt-in -- local dev and WebApplicationFactory-based
+// tests run with no App Insights resource at all.
+if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+	builder.Services.AddOpenTelemetry().UseAzureMonitor();
+}
 
 builder.Services.AddControllers();
 

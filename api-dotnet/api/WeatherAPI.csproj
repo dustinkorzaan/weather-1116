@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
     <PackageReference Include="DotNetEnv" Version="3.2.0" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
     <PackageReference Include="Hangfire.NetCore" Version="1.8.25" />

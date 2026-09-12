@@ -44,6 +44,7 @@ jobs:
           VITE_MVC_DOTNET_URL: ${{ vars.PROD_MVC_DOTNET_URL }}
           VITE_WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          VITE_APPINSIGHTS_CONNECTION_STRING: ${{ secrets.PROD_APPINSIGHTS_CONNECTION_STRING }}
           VITE_BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
           VITE_BUILD_START: ${{ steps.build_start.outputs.build_start }}
           VITE_BUILD_BRANCH_NAME: ${{ env.BUILD_BRANCH_NAME }}
