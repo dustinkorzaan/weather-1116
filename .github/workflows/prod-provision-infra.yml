@@ -36,7 +36,7 @@
 # wx1116-prod-* deploys below.
 #
 # Requires one additional GitHub secret:
-#   WX1116_SQL_ADMIN_LOGIN_NAME -- the SQL-native admin username. Treated as
+#   AZURE_SQL_ADMIN_LOGIN_NAME -- the SQL-native admin username. Treated as
 #     sensitive and never committed anywhere -- a non-default, non-obvious
 #     username is itself part of the security posture here, not just the
 #     password. Its password needs no secret at all: infra/main.bicep
@@ -143,7 +143,7 @@ jobs:
           azd env set MCP_SRV_APP_SERVICE_KEY "$MCP_SRV_APP_SERVICE_KEY"
           azd env set MCP_SRV_FUNC_APP_KEY "$MCP_SRV_FUNC_APP_KEY"
         env:
-          SQL_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_SQL_ADMIN_LOGIN_NAME }}
+          SQL_ADMINISTRATOR_LOGIN: ${{ secrets.AZURE_SQL_ADMIN_LOGIN_NAME }}
           # Reuses the same MCP tool-host secrets the deploy workflows already
           # set as App Service/Function App settings -- so the MyMcpSrvAppService /
           # MyMcpSrvFuncApp Foundry RemoteTool connections

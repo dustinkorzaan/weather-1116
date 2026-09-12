@@ -37,7 +37,7 @@ Everything uses `location: centralus`.
 | `AZURE_GITHUB_CLIENTID` | GitHub Actions MI client ID |
 | `AZURE_TENANTID` | Azure AD tenant |
 | `AZURE_SUBSCRIPTIONID` | Target subscription |
-| `WX1116_SQL_ADMIN_LOGIN_NAME` | SQL native admin username for Bicep |
+| `AZURE_SQL_ADMIN_LOGIN_NAME` | SQL native admin username for Bicep |
 
 **Secrets** (before app deploys):
 
