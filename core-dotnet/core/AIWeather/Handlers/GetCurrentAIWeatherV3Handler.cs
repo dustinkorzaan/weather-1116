@@ -1,4 +1,5 @@
 using System.ClientModel;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -6,6 +7,8 @@ using System.Text.Json.Schema;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.AIWeather.Services;
+using Core.Data;
+using Core.Data.Domain;
 using Core.Json;
 using Core.Tools;
 using Core.Weather;
@@ -24,15 +27,21 @@ namespace Core.AIWeather.Handlers;
 /// </summary>
 public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV3Event, AIWeatherResponse>
 {
+    private const string Feature = "AIWeatherV3";
     private static readonly string DefaultLocation = "Nashville, TN";
     private const int MaxToolLoopIterations = 32;
 
     private readonly WeatherToolExecutor _toolExecutor;
+    private readonly IWeatherActivityLogger _activityLogger;
     private readonly ILogger<GetCurrentAIWeatherV3Handler> _logger;
 
-    public GetCurrentAIWeatherV3Handler(WeatherToolExecutor toolExecutor, ILogger<GetCurrentAIWeatherV3Handler> logger)
+    public GetCurrentAIWeatherV3Handler(
+        WeatherToolExecutor toolExecutor,
+        IWeatherActivityLogger activityLogger,
+        ILogger<GetCurrentAIWeatherV3Handler> logger)
     {
         _toolExecutor = toolExecutor;
+        _activityLogger = activityLogger;
         _logger = logger;
     }
 
@@ -49,6 +58,36 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         var location = string.IsNullOrWhiteSpace(request.Location)
             ? DefaultLocation
             : request.Location.Trim();
+
+        // No real multi-turn session exists for this one-shot endpoint; a fresh GUID per
+        // request still gives every dbo.WeatherActivity row a SessionId, and ties this
+        // Request row to its Response row the same way CorrelationId does.
+        var activitySessionId = Guid.NewGuid().ToString();
+        var userPrompt = $"What is the current weather in: `{location}`?";
+        var correlationId = await _activityLogger.LogRequestAsync(
+            Feature,
+            WeatherActivityFeatureCategory.ModelDirect,
+            activitySessionId,
+            userPrompt,
+            location,
+            cancellationToken);
+        var stopwatch = Stopwatch.StartNew();
+
+        Task LogActivityErrorAsync(string errorMessage, ResponseResult? failureResponse) => _activityLogger.LogResponseAsync(
+            correlationId,
+            Feature,
+            WeatherActivityFeatureCategory.ModelDirect,
+            activitySessionId,
+            content: null,
+            location: location,
+            inputTokenCount: failureResponse?.Usage?.InputTokenCount,
+            cachedTokenCount: failureResponse?.Usage?.InputTokenDetails?.CachedTokenCount,
+            outputTokenCount: failureResponse?.Usage?.OutputTokenCount,
+            reasoningTokenCount: failureResponse?.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+            totalTokenCount: failureResponse?.Usage?.TotalTokenCount,
+            runtimeMs: (int)stopwatch.ElapsedMilliseconds,
+            errorMessage: errorMessage,
+            cancellationToken: cancellationToken);
 
         var endpoint = Resolve(
             Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
@@ -91,8 +130,6 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             - longitude: Decimal degrees from the best geo result (positive east, negative west).
             """;
 
-        var userPrompt = $"What is the current weather in: `{location}`?";
-
         var aiOutputSchema = BuildAIOutputSchema();
 
         _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, deploymentName);
@@ -118,6 +155,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
 
         bool requiresAnotherLoop;
         string? content = null;
+        ResponseResult? lastResponse = null;
         var toolLoopIteration = 0;
 
         do
@@ -125,8 +163,9 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             if (++toolLoopIteration > MaxToolLoopIterations)
             {
                 LogRunLogOnFailure("tool loop exceeded max iterations");
-                throw new InvalidOperationException(
-                    $"AI Weather tool loop exceeded {MaxToolLoopIterations} iterations.");
+                var message = $"AI Weather tool loop exceeded {MaxToolLoopIterations} iterations.";
+                await LogActivityErrorAsync(message, lastResponse);
+                throw new InvalidOperationException(message);
             }
 
             runLog.AddLog($"Start loop {toolLoopIteration}", null, toolLoopIteration);
@@ -148,15 +187,18 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             runLog.AddLog("Start CreateResponse", null, toolLoopIteration);
             ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
             runLog.AddLog("Finish CreateResponse", response, toolLoopIteration);
+            lastResponse = response;
 
             var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
             if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
             {
                 LogRunLogOnFailure("model response did not complete");
-                throw new InvalidOperationException(
+                var message =
                     $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
                     $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
-                    $"error: {response.Error?.Message ?? "(none)"}");
+                    $"error: {response.Error?.Message ?? "(none)"}";
+                await LogActivityErrorAsync(message, response);
+                throw new InvalidOperationException(message);
             }
 
             inputItems.AddRange(response.OutputItems);
@@ -177,7 +219,9 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         if (content is null)
         {
             LogRunLogOnFailure("model finished without producing content");
-            throw new InvalidOperationException("Model finished without producing content.");
+            const string message = "Model finished without producing content.";
+            await LogActivityErrorAsync(message, lastResponse);
+            throw new InvalidOperationException(message);
         }
 
         var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(content);
@@ -185,8 +229,10 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         if (modelOutput is null)
         {
             LogRunLogOnFailure("model returned empty or invalid JSON");
-            throw new InvalidOperationException(
-                $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
+            var message =
+                $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}";
+            await LogActivityErrorAsync(message, lastResponse);
+            throw new InvalidOperationException(message);
         }
 
         modelOutput.WindDirectionSourceDegrees =
@@ -196,6 +242,21 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
 
         runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV3Handler)}", null, toolLoopIteration);
         modelOutput.RunLogDetails = runLog.Hydrate();
+
+        await _activityLogger.LogResponseAsync(
+            correlationId,
+            Feature,
+            WeatherActivityFeatureCategory.ModelDirect,
+            activitySessionId,
+            content: content,
+            location: location,
+            inputTokenCount: lastResponse?.Usage?.InputTokenCount,
+            cachedTokenCount: lastResponse?.Usage?.InputTokenDetails?.CachedTokenCount,
+            outputTokenCount: lastResponse?.Usage?.OutputTokenCount,
+            reasoningTokenCount: lastResponse?.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+            totalTokenCount: lastResponse?.Usage?.TotalTokenCount,
+            runtimeMs: (int)stopwatch.ElapsedMilliseconds,
+            cancellationToken: cancellationToken);
 
         return modelOutput;
     }

@@ -1,0 +1,66 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Core.Data.Migrations
+{
+    /// <inheritdoc />
+    public partial class InitialCreateWeatherActivity : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.EnsureSchema(
+                name: "dbo");
+
+            migrationBuilder.CreateTable(
+                name: "WeatherActivity",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CorrelationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SessionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Feature = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    FeatureCategory = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Host = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Direction = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Location = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    InputTokenCount = table.Column<int>(type: "int", nullable: true),
+                    CachedTokenCount = table.Column<int>(type: "int", nullable: true),
+                    OutputTokenCount = table.Column<int>(type: "int", nullable: true),
+                    ReasoningTokenCount = table.Column<int>(type: "int", nullable: true),
+                    TotalTokenCount = table.Column<int>(type: "int", nullable: true),
+                    RuntimeMs = table.Column<int>(type: "int", nullable: true),
+                    ErrorMessage = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WeatherActivity", x => x.Id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WeatherActivity_CorrelationId",
+                schema: "dbo",
+                table: "WeatherActivity",
+                column: "CorrelationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WeatherActivity_SessionId",
+                schema: "dbo",
+                table: "WeatherActivity",
+                column: "SessionId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "WeatherActivity",
+                schema: "dbo");
+        }
+    }
+}
