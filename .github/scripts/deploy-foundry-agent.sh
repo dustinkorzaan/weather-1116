@@ -71,7 +71,7 @@ done
 FOUNDRY_MCP_APP_CONNECTION_NAME="${FOUNDRY_MCP_APP_CONNECTION_NAME:-MyMcpSrvAppService}"
 FOUNDRY_MCP_FUNC_CONNECTION_NAME="${FOUNDRY_MCP_FUNC_CONNECTION_NAME:-MyMcpSrvFuncApp}"
 
-API_VERSION="v1"
+API_VERSION="2025-11-15-preview"
 
 normalize_project_endpoint() {
   local url="${1%/}"

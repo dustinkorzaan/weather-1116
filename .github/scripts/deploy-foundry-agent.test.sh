@@ -29,9 +29,9 @@ echo "$PAYLOAD" | jq empty >/dev/null || fail "print-body did not emit JSON"
 
 CREATE_URL="$(echo "$PAYLOAD" | jq -r '.create_url')"
 VERSION_URL="$(echo "$PAYLOAD" | jq -r '.version_url')"
-[[ "$CREATE_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents?api-version=v1' ]] \
+[[ "$CREATE_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents?api-version=2025-11-15-preview' ]] \
   || fail "create_url should strip /openai/v1 and use /agents, got: $CREATE_URL"
-[[ "$VERSION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents/wx1116-agent-for-current-weather/versions?api-version=v1' ]] \
+[[ "$VERSION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents/wx1116-agent-for-current-weather/versions?api-version=2025-11-15-preview' ]] \
   || fail "version_url mismatch: $VERSION_URL"
 [[ "$CREATE_URL" != *'/assistants'* ]] || fail "must not call the Assistants API"
 
