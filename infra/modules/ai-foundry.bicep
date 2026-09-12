@@ -1,6 +1,7 @@
 // AI Foundry resource + project (new unified Foundry model, not the older
-// ML-workspace-based Hub). Connects to the East US 2 App Insights instance
-// for tracing, grants api/mvc/worker's managed identities passwordless
+// ML-workspace-based Hub). Stays in East US 2 while the rest of the stack
+// moves to Central US; connects to the (now Central US) App Insights
+// instance for tracing, grants api/mvc/worker's managed identities passwordless
 // Cognitive Services User access, deploys the gpt-5.4-mini model on the
 // account, and registers the two MCP tool hosts as RemoteTool connections
 // on the project (MyMcpSrvAppService, MyMcpSrvFuncApp) so hosted agents can
@@ -25,10 +26,10 @@ param location string
 @description('Globally-unique custom subdomain for the Foundry resource\'s public endpoint.')
 param customSubDomainName string
 
-@description('Resource ID of the East US 2 Application Insights instance to connect for tracing.')
+@description('Resource ID of the Application Insights instance to connect for tracing.')
 param appInsightsId string
 
-@description('Connection string of the East US 2 Application Insights instance.')
+@description('Connection string of the Application Insights instance.')
 param appInsightsConnectionString string
 
 @description('Principal IDs of the api/mvc/worker managed identities to grant Cognitive Services User on this Foundry resource.')
@@ -37,10 +38,10 @@ param grantedPrincipalIds array
 @description('Principal ID of the GitHub Actions managed identity, granted Foundry User (data-plane agents/*/action) on the project so prod-deploy-foundry-agents.yml can publish agents via Entra ID auth.')
 param githubActionsPrincipalId string
 
-@description('Base URL of the MCP Server on App Service tool host, e.g. https://wx1116-prod-mcp-srv-app-service.<domain>/mcp.')
+@description('Base URL of the MCP Server on App Service tool host, e.g. https://wx1116-prod-mcp-srv-app-service.azurewebsites.net/mcp.')
 param mcpSrvAppServiceUrl string
 
-@description('Base URL of the MCP Server on Function App tool host, e.g. https://wx1116-prod-mcp-srv-func-app.<domain>/runtime/webhooks/mcp.')
+@description('Base URL of the MCP Server on Function App tool host, e.g. https://wx1116-prod-mcp-srv-func-app.azurewebsites.net/runtime/webhooks/mcp.')
 param mcpSrvFuncAppUrl string
 
 @secure()
@@ -95,7 +96,7 @@ resource foundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-0
 
 resource appInsightsConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: foundryProject
-  name: 'appinsights-eastus2'
+  name: 'appinsights'
   properties: {
     category: 'AppInsights'
     target: appInsightsId

@@ -2,28 +2,12 @@
 
 name: weather1116
 
-# Infra-only: azd provisions wx1116-prod-* resources (ACA + ACR + SQL + SWA +
-# Foundry) via Bicep. Application deploys use GitHub Actions workflows
-# (OIDC + az acr build + az containerapp update / Azure/static-web-apps-deploy).
-# See docs/aca-bootstrap.md for first-deploy steps.
+# Infra-only: azd provisions wx1116-prod-* resources (App Service + Function
+# App + SQL + SWA + Foundry) via Bicep. Application deploys use GitHub
+# Actions workflows (OIDC + dotnet publish + az webapp/functionapp deploy /
+# Azure/static-web-apps-deploy).
 
 infra:
   provider: bicep
   path: infra
   module: main
-
-# A Bicep deployment is a PUT, so provision would otherwise reset the container
-# app image, environment variables, and secrets that prod-deploy-*.yml owns back
-# to the placeholder. This hook records which apps already exist so
-# infra/main.bicep can read the live values back and hand them through.
-#
-# It needs an authenticated `az` (the provision workflow adds azure/login;
-# locally, `az login` first) and bash, so provisioning from Windows needs Git
-# Bash or WSL. The hook failing blocks provision on purpose: a skipped capture
-# would silently revert every app.
-hooks:
-  preprovision:
-    shell: sh
-    run: bash ./infra/scripts/capture-existing-container-apps.sh
-    continueOnError: false
-    interactive: false
