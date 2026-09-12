@@ -26,8 +26,7 @@ and assigns Contributor + User Access Administrator on this resource group.
 | AI Foundry | `wx1116-prod-res` / `wx1116-prod-proj` |
 | Six runtime managed identities | `wx1116-prod-*-mi` |
 
-Everything uses `location: centralus` except SQL, which already defaults to
-Central US (`sqlLocation`).
+Everything uses `location: centralus`.
 
 ## Prerequisites (GitHub)
 

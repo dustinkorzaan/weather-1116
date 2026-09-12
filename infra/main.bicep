@@ -9,11 +9,8 @@ targetScope = 'resourceGroup'
 @description('azd environment name.')
 param environmentName string = 'prod'
 
-@description('Azure region for every resource in this environment except SQL, which uses the separate `sqlLocation` param below -- both currently default to the same region.')
+@description('Azure region for every resource in this environment.')
 param location string = 'centralus'
-
-@description('Azure region for the SQL server/database only. Separate from `location` because East US 2 and East US have both (at least intermittently) rejected new Azure SQL server creation with RegionDoesNotAllowProvisioning; Central US does not have that restriction.')
-param sqlLocation string = 'centralus'
 
 @description('Short name prefix used to build resource names.')
 param namePrefix string = 'wx1116'
@@ -125,7 +122,7 @@ module sql 'modules/sql.bicep' = {
   params: {
     serverName: '${namePrefix}-${environmentName}-sql-srv'
     databaseName: '${namePrefix}-${environmentName}-sql-database'
-    location: sqlLocation
+    location: location
     administratorLogin: sqlAdministratorLogin
     entraAdminPrincipalId: githubActionsIdentity.outputs.principalId
     entraAdminLoginName: githubActionsIdentityName

@@ -8,9 +8,6 @@
     "location": {
       "value": "${AZURE_LOCATION=centralus}"
     },
-    "sqlLocation": {
-      "value": "${SQL_LOCATION=centralus}"
-    },
     "resourceGroupName": {
       "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prod-rg}"
     },
