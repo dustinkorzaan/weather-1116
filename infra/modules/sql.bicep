@@ -6,12 +6,13 @@
 // administratorLogin/administratorLoginPassword pair to create the server;
 // both are generated internally below and never surfaced, since
 // Entra-only auth makes them permanently unusable regardless of value --
-// there is nothing to manage or protect. The Entra admin identity uses its
-// own Entra-authenticated connection to bootstrap the contained users for
-// api/mvc/worker's managed identities
-// (infra/scripts/create-contained-users.sql, run from the provisioning
-// workflow) -- Azure SQL only allows creating "FROM EXTERNAL PROVIDER"
-// users over an Entra-authenticated connection.
+// there is nothing to manage or protect. The Entra admin identity's own
+// Entra-authenticated connection is what bootstraps the contained users for
+// api/mvc/worker's managed identities (infra/scripts/create-contained-users.sql)
+// -- Azure SQL only allows creating "FROM EXTERNAL PROVIDER" users over an
+// Entra-authenticated connection. That script is run manually, once, as the
+// Entra admin, not by prod-provision-infra.yml -- see that workflow's own
+// comment for why.
 
 @description('Name of the SQL logical server, e.g. wx1116-prod-sql-srv.')
 param serverName string
