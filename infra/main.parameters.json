@@ -11,9 +11,6 @@
     "sqlLocation": {
       "value": "${SQL_LOCATION=centralus}"
     },
-    "aiFoundryLocation": {
-      "value": "${AI_FOUNDRY_LOCATION=eastus2}"
-    },
     "resourceGroupName": {
       "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prod-rg}"
     },

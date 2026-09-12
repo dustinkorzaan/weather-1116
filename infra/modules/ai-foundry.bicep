@@ -1,7 +1,7 @@
 // AI Foundry resource + project (new unified Foundry model, not the older
-// ML-workspace-based Hub). Stays in East US 2 while the rest of the stack
-// moves to Central US; connects to the (now Central US) App Insights
-// instance for tracing, grants api/mvc/worker's managed identities passwordless
+// ML-workspace-based Hub). Lives in Central US alongside the rest of the
+// stack; connects to the Central US App Insights instance for tracing,
+// grants api/mvc/worker's managed identities passwordless
 // Cognitive Services User access, deploys the gpt-5.4-mini model on the
 // account, and registers the two MCP tool hosts as RemoteTool connections
 // on the project (MyMcpSrvAppService, MyMcpSrvFuncApp) so hosted agents can
@@ -15,10 +15,10 @@
 // across preview versions. Verify the api-version and resource shapes below
 // against current docs before relying on this module.
 
-@description('Name of the AI Foundry resource, e.g. wx1116-prod-eastus2-res.')
+@description('Name of the AI Foundry resource, e.g. wx1116-prod-centralus-res.')
 param accountName string
 
-@description('Name of the AI Foundry project, e.g. wx1116-prod-eastus2-prj.')
+@description('Name of the AI Foundry project, e.g. wx1116-prod-centralus-proj.')
 param projectName string
 
 param location string

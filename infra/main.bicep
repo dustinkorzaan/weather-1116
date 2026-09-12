@@ -8,14 +8,11 @@ targetScope = 'resourceGroup'
 @description('azd environment name.')
 param environmentName string = 'prod'
 
-@description('Azure region for every resource in this environment except AI Foundry and SQL.')
+@description('Azure region for every resource in this environment except SQL.')
 param location string = 'centralus'
 
 @description('Azure region for the SQL server/database only. Separate from `location` because East US 2 and East US have both (at least intermittently) rejected new Azure SQL server creation with RegionDoesNotAllowProvisioning; Central US does not have that restriction.')
 param sqlLocation string = 'centralus'
-
-@description('Azure region for AI Foundry only. Kept in East US 2 while the rest of the stack moves to Central US.')
-param aiFoundryLocation string = 'eastus2'
 
 @description('Short name prefix used to build resource names.')
 param namePrefix string = 'wx1116'
@@ -145,10 +142,10 @@ module staticWebApp 'modules/static-web-app.bicep' = {
 module aiFoundry 'modules/ai-foundry.bicep' = {
   name: 'ai-foundry'
   params: {
-    accountName: '${namePrefix}-${environmentName}-eastus2-res'
-    projectName: '${namePrefix}-${environmentName}-eastus2-prj'
-    location: aiFoundryLocation
-    customSubDomainName: toLower('${namePrefix}${environmentName}eastus2${uniqueString(subscription().id, resourceGroupName)}')
+    accountName: '${namePrefix}-${environmentName}-centralus-res'
+    projectName: '${namePrefix}-${environmentName}-centralus-proj'
+    location: location
+    customSubDomainName: toLower('${namePrefix}${environmentName}centralus${uniqueString(subscription().id, resourceGroupName)}')
     appInsightsId: monitoring.outputs.appInsightsId
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
     grantedPrincipalIds: [
