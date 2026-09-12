@@ -81,3 +81,5 @@ relationships, and parity guidance live in
 - **Authentication**: Login/identity provider (e.g. Auth0)
 - **Per-user custom map pins**: Map pins scoped to individual user accounts
 - **Per-pin photo uploads**: Image upload/download per pin via blob storage SAS URIs
+- **Securing multi-agent orchestration**
+- **Shifting more to Microsoft Agent Framework using declarative YAML or code-first**
