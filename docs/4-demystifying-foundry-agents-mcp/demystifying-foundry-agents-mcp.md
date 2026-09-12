@@ -32,7 +32,7 @@ Suggested order: **V1 → V2 → V3 →** `GetCurrentAIWeatherV3Handler` in
 on `/current-ai-weather`) **→ V5 →**
 `GetCurrentAIWeatherV5Handler` (the production V5-pattern handler, the third
 `/current-ai-weather` tab; sends only the user prompt to
-`AZURE_FOUNDRY_PROD_AGENT_NAME`).
+`AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`).
 
 - **V1 — Model-direct (legacy endpoint)** — [`FoundryConsoleV1`](../../FoundryConsoleV1)
   (`FoundryConsoleV1ModelDirectLegacy.csproj`)
