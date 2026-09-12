@@ -5,11 +5,8 @@
 # Has no trigger of its own beyond workflow_dispatch -- it's called via
 # workflow_call from build-test-provision-deploy.yml, which runs build-test.yml
 # first and only calls this job (needs: [build_test]) once that succeeds on
-# main. Provision used to trigger directly on push to main, running in
-# parallel with build-and-test and relying on branch protection as an
-# indirect test gate; it's now an explicit needs: dependency instead, and
-# runs unconditionally on every such push (rather than only when infra/**
-# changed), which is intentional rather than a placeholder.
+# main, and runs unconditionally on every such push (rather than only when
+# infra/** changed), which is intentional rather than a placeholder.
 #
 # The deploy workflows (prod-deploy-*.yml) are likewise called via
 # workflow_call from build-test-provision-deploy.yml with needs: [provision],
@@ -93,17 +90,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-
-      - name: Debug Azure OIDC secret lengths
-        shell: bash
-        env:
-          AZURE_GITHUB_CLIENTID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
-          AZURE_TENANTID: ${{ secrets.AZURE_TENANTID }}
-          AZURE_SUBSCRIPTIONID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
-        run: |
-          echo "AZURE_GITHUB_CLIENTID length=${#AZURE_GITHUB_CLIENTID}"
-          echo "AZURE_TENANTID length=${#AZURE_TENANTID}"
-          echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
 
       - name: Install azd
         uses: Azure/setup-azd@v2

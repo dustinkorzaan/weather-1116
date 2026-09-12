@@ -97,9 +97,7 @@ Also set Foundry vars (`AZURE_FOUNDRY_PROD_PROJ_URL`,
 `AZURE_FOUNDRY_PROD_MODEL`, `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`,
 `AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME`, plus the `AZURE_FOUNDRY_PROD_KEY` secret
 on the app deploys) against `wx1116-prod-proj`. These are the only Foundry
-var/secret names this repo reads -- create them fresh under these names if
-this is your first bootstrap; if you're migrating an older checkout, the
-`_EUS2_` and `_CUS_` variants are retired and nothing falls back to them.
+var/secret names this repo reads.
 
 ## Step 3 — Static Web App deploy token
 
