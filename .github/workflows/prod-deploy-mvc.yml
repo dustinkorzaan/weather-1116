@@ -67,6 +67,7 @@ jobs:
             AZURE_FOUNDRY_PROD_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_PROJ_URL }}
             AZURE_FOUNDRY_PROD_KEY=secretref:foundry-key
             AZURE_FOUNDRY_PROD_MODEL=${{ vars.AZURE_FOUNDRY_PROD_MODEL }}
+            AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME=${{ vars.AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME }}
             AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME=${{ vars.AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME }}
             MCP_SRV_FUNC_APP_KEY=secretref:mcp-func-key
             MCP_SRV_APP_SERVICE_KEY=secretref:mcp-app-key
