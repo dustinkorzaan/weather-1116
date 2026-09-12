@@ -1,13 +1,21 @@
-// Functions-on-ACA host for mcp-srv-func-app (MCP extension + x-functions-key auth).
-// App code deploys as a custom container image built from mcp-srv-func-app/mcp/Dockerfile.
+// MCP host for mcp-srv-func-app: a Linux Function App on the shared App
+// Service Plan (Dedicated hosting, not Consumption). App code deploys
+// separately via `az functionapp deploy` (prod-deploy-mcp-srv-func.yml);
+// this module owns the site resource, its identity, and the Functions-host
+// application settings listed here. `siteConfig.appSettings` is a full PUT
+// of the whole settings collection: every `azd provision` resets it to
+// exactly this list, dropping whatever `az functionapp config appsettings
+// set` added afterward until the next deploy upserts it again -- see the
+// ordering note in prod-provision-infra.yml. A provision-only run with no
+// following deploy leaves settings at this reduced list.
 
-@description('Container app name, e.g. wx1116-prod-mcp-srv-func-app.')
+@description('Function App name, e.g. wx1116-prod-mcp-srv-func-app.')
 param name string
 
 param location string
 
-@description('Resource ID of the Container Apps Environment.')
-param managedEnvironmentId string
+@description('Resource ID of the shared App Service Plan.')
+param appServicePlanId string
 
 @description('Storage account name backing AzureWebJobsStorage.')
 param storageAccountName string
@@ -23,29 +31,11 @@ param userAssignedIdentityClientId string
 
 param appInsightsConnectionString string
 
-@description('ACR login server for registry identity, e.g. wx1116prodacr.azurecr.io.')
-param acrLoginServer string
-
-@description('Image the deploy workflow last pushed, read back by modules/existing-container-app.bicep. Empty on first provision, which falls back to the placeholder.')
-param existingImage string = ''
-
-@description('Env vars currently on the live app. Names this module does not own are carried forward.')
-param existingEnv array = []
-
-@secure()
-@description('Secrets currently on the live app as { list: [{ name, value }] }. Carried forward verbatim; this module never authors secrets itself.')
-param existingSecrets object = {}
-
 var storageBlobDataOwnerRoleId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
 var storageQueueDataContributorRoleId = '974c5e8b-45b9-4653-ba55-5f855dd0fb88'
 var storageTableDataContributorRoleId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
 
-// First create only, until the first ACR image deploy lands. The bare Functions
-// host image starts and serves on port 80 with no functions loaded, so the app
-// comes up healthy instead of crash-looping. Must match the net10.0 worker.
-var placeholderImage = 'mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0'
-
-var provisionEnvVars = [
+var baseAppSettings = [
   {
     name: 'FUNCTIONS_EXTENSION_VERSION'
     value: '~4'
@@ -78,16 +68,15 @@ var provisionEnvVars = [
     name: 'AzureWebJobsStorage__clientId'
     value: userAssignedIdentityClientId
   }
+  {
+    name: 'AZURE_CLIENT_ID'
+    value: userAssignedIdentityClientId
+  }
+  {
+    name: 'WEBSITE_RUN_FROM_PACKAGE'
+    value: '1'
+  }
 ]
-
-var provisionEnvNames = map(provisionEnvVars, envVar => envVar.name)
-
-// The Functions host settings above stay owned by provision; the build metadata
-// prod-deploy-mcp-srv-func.yml adds (BUILD_NUMBER and friends) has to survive
-// this PUT.
-var envVars = concat(provisionEnvVars, filter(existingEnv, envVar => !contains(provisionEnvNames, envVar.name)))
-
-var image = empty(existingImage) ? placeholderImage : existingImage
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName
@@ -102,15 +91,10 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   }
 }
 
-// 2024-03-01 silently ignores `kind`, deploying a plain container app that
-// `az containerapp function keys` then rejects with "is not an Azure
-// Functions on Container App" -- kind: 'functionapp' only takes effect from
-// 2024-10-02-preview onward (matches the Azure/azure-functions-on-container-apps
-// sample templates).
-resource functionContainerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
+resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: name
   location: location
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
@@ -118,39 +102,15 @@ resource functionContainerApp 'Microsoft.App/containerApps@2024-10-02-preview' =
     }
   }
   properties: {
-    managedEnvironmentId: managedEnvironmentId
-    configuration: {
-      activeRevisionsMode: 'Single'
-      ingress: {
-        external: true
-        targetPort: 80
-        transport: 'auto'
-        allowInsecure: false
-      }
-      secrets: existingSecrets.?list ?? []
-      registries: [
-        {
-          server: acrLoginServer
-          identity: userAssignedIdentityId
-        }
-      ]
-    }
-    template: {
-      containers: [
-        {
-          name: name
-          image: image
-          env: envVars
-          resources: {
-            cpu: json('0.5')
-            memory: '1Gi'
-          }
-        }
-      ]
-      scale: {
-        minReplicas: 1
-        maxReplicas: 5
-      }
+    serverFarmId: appServicePlanId
+    httpsOnly: true
+    clientAffinityEnabled: false
+    siteConfig: {
+      linuxFxVersion: 'DOTNET-ISOLATED|10.0'
+      alwaysOn: true
+      minTlsVersion: '1.2'
+      ftpsState: 'Disabled'
+      appSettings: baseAppSettings
     }
   }
 }
@@ -185,7 +145,7 @@ resource storageTableDataContributorAssignment 'Microsoft.Authorization/roleAssi
   }
 }
 
-output id string = functionContainerApp.id
-output name string = functionContainerApp.name
-output fqdn string = functionContainerApp.properties.configuration.ingress.fqdn
+output id string = functionApp.id
+output name string = functionApp.name
+output defaultHostname string = functionApp.properties.defaultHostName
 output storageAccountName string = storageAccount.name

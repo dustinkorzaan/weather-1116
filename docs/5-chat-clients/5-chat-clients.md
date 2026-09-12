@@ -238,17 +238,17 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 
 | Variable | Used by |
 | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | All chat tabs |
-| `AZURE_FOUNDRY_PROD_EUS2_KEY` | All chat tabs |
-| `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Chat1a–Chat2b and Chat4a–Chat4b (not Chat3) |
-| `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | Chat3 only (required). GitHub var / App Service. Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. |
+| `AZURE_FOUNDRY_PROD_PROJ_URL` | All chat tabs |
+| `AZURE_FOUNDRY_PROD_KEY` | All chat tabs |
+| `AZURE_FOUNDRY_PROD_MODEL` | Chat1a–Chat2b and Chat4a–Chat4b (not Chat3) |
+| `AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME` | Chat3 only (required). GitHub var / App Service. Independent of V5's `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`. |
 | `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b, Chat4b (Geo sub-agent) |
 | `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent) |
 
 Chat1a, Chat2a, and Chat4a do **not** require MCP URLs. Chat3 does **not** require MCP URLs in the app
 either — those belong on the hosted agent.
 
-`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` remains the V5 console agent (`wx1116-agent-for-current-weather`,
+`AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME` remains the V5 console agent (`wx1116-agent-for-current-weather`,
 JSON weather). Do not point Chat3 at that agent.
 
 ## Create the Chat3 Foundry agent (`wx1116-agent-for-chat`)
@@ -278,9 +278,9 @@ connections with `require_approval: never`. Instructions live in
 Only if you need to inspect or repair a published version:
 
 1. Open the Microsoft Foundry portal for the same project as
-   `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
-2. **Agents** → `wx1116-agent-for-chat` (must match `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME`).
-3. Confirm the model is the same deployment as `AZURE_FOUNDRY_PROD_EUS2_MODEL`
+   `AZURE_FOUNDRY_PROD_PROJ_URL`.
+2. **Agents** → `wx1116-agent-for-chat` (must match `AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME`).
+3. Confirm the model is the same deployment as `AZURE_FOUNDRY_PROD_MODEL`
    (for example `gpt-5.4-mini`).
 4. **Instructions:** the Chat3 text below (same as
    `ChatSystemInstructions.WeatherAssistant` /

@@ -51,14 +51,14 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             : request.Location.Trim();
 
         var endpoint = Resolve(
-            Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL."));
+            Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
+            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL."));
 
-        var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
+        var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
+            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
 
-        var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_MODEL")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_MODEL.");
+        var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL")
+            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_MODEL.");
 
         var systemPrompt =
             """

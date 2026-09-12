@@ -1,5 +1,5 @@
 name: cicd-wx1116-prod-blazor
-run-name: CICD wx1116-prod-blazor (ACA)
+run-name: CICD wx1116-prod-blazor (App Service)
 
 on:
   workflow_dispatch:
@@ -11,19 +11,16 @@ concurrency:
 
 env:
   RESOURCE_GROUP: wx1116-prod-rg
-  ACR_NAME: wx1116prodacr
-  CONTAINER_APP_NAME: wx1116-prod-blazor
-  IMAGE_NAME: wx1116-blazor
+  APP_NAME: wx1116-prod-blazor
   BUILD_NUMBER: ${{ github.run_number }}
   BUILD_BRANCH_NAME: ${{ github.ref_name }}
 
 jobs:
   deploy:
     # Called via workflow_call from build-test-provision-deploy.yml with
-    # needs: [provision] -- deploys target Container Apps that infra
-    # provisions, so they must run after it, not concurrently with it.
-    # workflow_dispatch still runs unconditionally for manual deploys on any
-    # branch.
+    # needs: [provision] -- deploys App Services that infra provisions, so
+    # they must run after it, not concurrently with it. workflow_dispatch
+    # still runs unconditionally for manual deploys on any branch.
     runs-on: ubuntu-latest
     environment: prod
     permissions:
@@ -41,18 +38,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v3
         with:
-          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          client-id: ${{ secrets.AZURE_GITHUB_MI_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
-      - name: Build, push, and update Container App image
-        uses: ./.github/actions/deploy-aca-container
+      - name: Publish and deploy to App Service
+        uses: ./.github/actions/deploy-app-service
         with:
-          acr_name: ${{ env.ACR_NAME }}
-          image_name: ${{ env.IMAGE_NAME }}
-          image_tag: ${{ github.run_number }}
-          dockerfile: ui-blazor/blazor/Dockerfile
-          container_app_name: ${{ env.CONTAINER_APP_NAME }}
+          csproj: ui-blazor/blazor/WeatherBlazor.csproj
+          app_name: ${{ env.APP_NAME }}
           resource_group: ${{ env.RESOURCE_GROUP }}
           secrets_multiline: |
             google-maps-key=${{ secrets.GOOGLE_MAPS_API_KEY }}

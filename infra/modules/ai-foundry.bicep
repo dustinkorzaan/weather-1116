@@ -1,6 +1,7 @@
 // AI Foundry resource + project (new unified Foundry model, not the older
-// ML-workspace-based Hub). Connects to the East US 2 App Insights instance
-// for tracing, grants api/mvc/worker's managed identities passwordless
+// ML-workspace-based Hub). Lives in Central US alongside the rest of the
+// stack; connects to the Central US App Insights instance for tracing,
+// grants api/mvc/worker's managed identities passwordless
 // Cognitive Services User access, deploys the gpt-5.4-mini model on the
 // account, and registers the two MCP tool hosts as RemoteTool connections
 // on the project (MyMcpSrvAppService, MyMcpSrvFuncApp) so hosted agents can
@@ -14,10 +15,10 @@
 // across preview versions. Verify the api-version and resource shapes below
 // against current docs before relying on this module.
 
-@description('Name of the AI Foundry resource, e.g. wx1116-prod-eastus2-res.')
+@description('Name of the AI Foundry resource, e.g. wx1116-prod-res.')
 param accountName string
 
-@description('Name of the AI Foundry project, e.g. wx1116-prod-eastus2-prj.')
+@description('Name of the AI Foundry project, e.g. wx1116-prod-proj.')
 param projectName string
 
 param location string
@@ -25,10 +26,10 @@ param location string
 @description('Globally-unique custom subdomain for the Foundry resource\'s public endpoint.')
 param customSubDomainName string
 
-@description('Resource ID of the East US 2 Application Insights instance to connect for tracing.')
+@description('Resource ID of the Application Insights instance to connect for tracing.')
 param appInsightsId string
 
-@description('Connection string of the East US 2 Application Insights instance.')
+@description('Connection string of the Application Insights instance.')
 param appInsightsConnectionString string
 
 @description('Principal IDs of the api/mvc/worker managed identities to grant Cognitive Services User on this Foundry resource.')
@@ -37,10 +38,10 @@ param grantedPrincipalIds array
 @description('Principal ID of the GitHub Actions managed identity, granted Foundry User (data-plane agents/*/action) on the project so prod-deploy-foundry-agents.yml can publish agents via Entra ID auth.')
 param githubActionsPrincipalId string
 
-@description('Base URL of the MCP Server on App Service tool host, e.g. https://wx1116-prod-mcp-srv-app-service.<domain>/mcp.')
+@description('Base URL of the MCP Server on App Service tool host, e.g. https://wx1116-prod-mcp-srv-app-service.azurewebsites.net/mcp.')
 param mcpSrvAppServiceUrl string
 
-@description('Base URL of the MCP Server on Function App tool host, e.g. https://wx1116-prod-mcp-srv-func-app.<domain>/runtime/webhooks/mcp.')
+@description('Base URL of the MCP Server on Function App tool host, e.g. https://wx1116-prod-mcp-srv-func-app.azurewebsites.net/runtime/webhooks/mcp.')
 param mcpSrvFuncAppUrl string
 
 @secure()
@@ -61,7 +62,7 @@ var cognitiveServicesUserRoleId = 'a97b65f3-24c7-4388-baec-2e87135dc908'
 
 // "Foundry User" (formerly "Azure AI User"): the least-privileged built-in
 // role that grants agents/*/action, required to create/publish agents via
-// the Foundry Agents REST API (`/agents?api-version=v1`). Must be assigned
+// the Foundry Agents REST API (`/agents?api-version=2025-11-15-preview`). Must be assigned
 // at project scope -- the account-scoped Cognitive Services User role above
 // only covers model inference (chat/responses), not agent management.
 var foundryUserRoleId = '53ca6127-db72-4b80-b1b0-d745d6d5456d'
@@ -95,7 +96,7 @@ resource foundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-0
 
 resource appInsightsConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
   parent: foundryProject
-  name: 'appinsights-eastus2'
+  name: 'appinsights'
   properties: {
     category: 'AppInsights'
     target: appInsightsId

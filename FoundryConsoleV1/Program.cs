@@ -53,9 +53,9 @@ internal class Program
 		 - This is expected to fail because it doesn't have supporting data.
 		""");
 
-		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.cognitiveservices.azure.com/";
+		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
 		var deploymentName = "gpt-5.4-mini";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// AI prep
 		var systemPrompt = "You are a helpful weather assistant.";
@@ -109,9 +109,9 @@ internal class Program
 		 - Ask it to make something up because it doesn't have supporting data.
 		""");
 
-		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.cognitiveservices.azure.com/";
+		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
 		var deploymentName = "gpt-5.4-mini";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// AI prep
 		var systemPrompt = """
@@ -170,9 +170,9 @@ internal class Program
 		 - String output from AI
 		""");
 
-		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.cognitiveservices.azure.com/";
+		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
 		var deploymentName = "gpt-5.4-mini";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });
@@ -246,9 +246,9 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = "https://wx1116prodeastus22th7yydhws5h6.cognitiveservices.azure.com/";
+		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
 		var deploymentName = "gpt-5.4-mini";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		// Non-AI prep
 		var latLongMatches = await mediator.Send(new GetLatLongEvent { Location = location, Count = 1 });

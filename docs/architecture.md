@@ -91,7 +91,7 @@ All three UIs expose **Current AI Weather**, in three versions:
   remote MCP tool calls (`ChatMcpToolFactory`), matching the Chat1b remote-MCP
   pattern.
 - **V5** (`GetCurrentAIWeatherV5Handler`), which calls a hosted Foundry agent
-  (`AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`) that owns its own instructions,
+  (`AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`) that owns its own instructions,
   response schema, and MCP tools - this handler sends only the user prompt,
   matching the Foundry Console V5 pattern.
 
@@ -186,9 +186,10 @@ CQMediator handlers the sample uses in-process elsewhere.
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json).
 
-Prod apps (ACA): `wx1116-prod-mcp-srv-app-service`, `wx1116-prod-mcp-srv-func-app`
+Prod apps (App Service / Function App): `wx1116-prod-mcp-srv-app-service`,
+`wx1116-prod-mcp-srv-func-app`
 (`https://<MCP_SRV_APP_SERVICE_HOSTNAME>`, `https://<MCP_SRV_FUNC_APP_HOSTNAME>` from
-`azd provision` outputs; see `docs/aca-bootstrap.md` and `prod-deploy-mcp-srv-*.yml`).
+`azd provision` outputs; see `docs/app-service-bootstrap.md` and `prod-deploy-mcp-srv-*.yml`).
 
 Auth examples:
 
@@ -229,7 +230,7 @@ so they can enqueue jobs without running servers; the worker processes them.
 - **Local dev:** without `DB_CONNECTION_STRING`, each process uses in-memory
   storage; jobs do not cross apps until a shared database is configured.
 - **Production:** set `DB_CONNECTION_STRING` to the same Azure SQL connection
-  string on the worker, API, and MVC. Prod app: `wx1116-prod-worker` on ACA
+  string on the worker, API, and MVC. Prod app: `wx1116-prod-worker` on App Service
   (see `prod-deploy-worker.yml`).
 - **Auth (Entra managed identity, no passwords):** `DB_CONNECTION_STRING`
   holds only `Server`/`Initial Catalog`/`Encrypt`/etc. -- no `Authentication`
@@ -237,7 +238,7 @@ so they can enqueue jobs without running servers; the worker processes them.
   `Core.Data.ManagedIdentitySqlConnectionStringFactory`, using
   `Authentication=Active Directory Default` plus its own `AZURE_CLIENT_ID`
   (the app's dedicated user-assigned managed identity, set by
-  `infra/modules/container-app.bicep`) as the `User ID`, so
+  `infra/modules/app-service.bicep`) as the `User ID`, so
   `DefaultAzureCredential` resolves the right identity instead of guessing
   among the six provisioned for this environment. This is what
   `Microsoft.Data.SqlClient` actually opens the connection with, so it covers
@@ -419,9 +420,9 @@ Each stage's workflow file can also be triggered directly via
 `workflow_dispatch` on any branch (e.g. hotfixes) -- including the
 orchestrator itself, which runs the full chain against that branch's code.
 Deployables include API,
-MVC, React, Blazor, worker-dotnet, and both MCP hosts on **Azure Container
-Apps + ACR** (Functions-on-ACA for `mcp-srv-func-app`). Bootstrap:
-[`docs/aca-bootstrap.md`](aca-bootstrap.md).
+MVC, React, Blazor, worker-dotnet, and both MCP hosts on **Azure App Service**
+(shared Linux plan; Function App for `mcp-srv-func-app`). Bootstrap:
+[`docs/app-service-bootstrap.md`](app-service-bootstrap.md).
 
 ## Repository Layout
 
@@ -469,9 +470,9 @@ V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 | **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`) sends only the user prompt |
 
 Run from VS Code or `dotnet run` in each folder. Settings use the
-`AZURE_FOUNDRY_PROD_EUS2_*` prefix (see each `Program.cs` and `.env.example`).
+`AZURE_FOUNDRY_PROD_*` prefix (see each `Program.cs` and `.env.example`).
 
-**V4 settings** (in addition to `AZURE_FOUNDRY_PROD_EUS2_KEY`):
+**V4 settings** (in addition to `AZURE_FOUNDRY_PROD_KEY`):
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
@@ -482,12 +483,12 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
-| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Yes | Microsoft Foundry API key |
-| `AZURE_FOUNDRY_PROD_EUS2_MODEL` | Yes (V3/V4) | Hosted model deployment name (e.g. `gpt-5.4-mini`); not used by V5, which sends only the user prompt |
+| `AZURE_FOUNDRY_PROD_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
+| `AZURE_FOUNDRY_PROD_KEY` | Yes | Microsoft Foundry API key |
+| `AZURE_FOUNDRY_PROD_MODEL` | Yes (V3/V4) | Hosted model deployment name (e.g. `gpt-5.4-mini`); not used by V5, which sends only the user prompt |
 | `MCP_SRV_FUNC_APP_URL` / `MCP_SRV_FUNC_APP_KEY` | V4 only | `McpSrvFuncApp` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_APP_SERVICE_URL` / `MCP_SRV_APP_SERVICE_KEY` | V4 only | `McpSrvAppService` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
-| `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-for-current-weather`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
+| `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-for-current-weather`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
 
 `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on
 `/current-ai-weather`) runs tools in-process and does not need
@@ -496,7 +497,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 `MCP_SRV_APP_SERVICE_*` variables as the Chat1b/Chat2b remote-MCP chat tabs
 (see [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)).
 The confirm-nashville-ai-weather-v4 worker recurring job needs them too.
-`GetCurrentAIWeatherV5Handler` needs `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`
+`GetCurrentAIWeatherV5Handler` needs `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`
 instead - the agent owns tool resolution, so no `MCP_SRV_*` variables apply.
 
 **V5 agent: MCP approval must be Never.** V5 is a one-shot handoff: the app
@@ -514,7 +515,7 @@ so publishing `wx1116-agent-for-current-weather` and `wx1116-agent-for-chat` is 
 by the `prod-deploy-foundry-agents` workflow
 (`.github/workflows/prod-deploy-foundry-agents.yml`,
 `.github/scripts/deploy-foundry-agent.sh`). The script POSTs each prompt
-agent to `{project}/agents?api-version=v1` (or `{project}/agents/{name}/versions`
+agent to `{project}/agents?api-version=2025-11-15-preview` (or `{project}/agents/{name}/versions`
 when the agent already exists) with model, instructions, and both MCP tools
 wired to those connections (`project_connection_id` + `require_approval: never`).
 It does not embed MCP secrets in the agent payload. Like the other
@@ -536,8 +537,8 @@ exactly (no `runLogDetails`).
 Portal fallback (only if you need to inspect or repair by hand):
 
 1. Open the Microsoft Foundry portal for the same project as
-   `AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`.
-2. **Agents** → `wx1116-agent-for-current-weather` (or `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`).
+   `AZURE_FOUNDRY_PROD_PROJ_URL`.
+2. **Agents** → `wx1116-agent-for-current-weather` (or `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`).
 3. Confirm the model is the `gpt-5.4-mini` deployment provisioned above.
 4. Confirm each MCP tool uses the `MyMcpSrvAppService` /
    `MyMcpSrvFuncApp` connections and **Approval** is **Never**
@@ -560,4 +561,4 @@ on `/current-ai-weather`) → V5 →
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` | Yes (Chat3) | Chat3 only. GitHub variable `AZURE_FOUNDRY_PROD_EUS2_CHAT_AGENT_NAME` (API/MVC App Service). Independent of V5's `AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME`. MCP tools on this agent must use `require_approval: never`; Chat3 does not round-trip approvals. |
+| `AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME` | Yes (Chat3) | Chat3 only. GitHub variable `AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME` (API/MVC App Service). Independent of V5's `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`. MCP tools on this agent must use `require_approval: never`; Chat3 does not round-trip approvals. |

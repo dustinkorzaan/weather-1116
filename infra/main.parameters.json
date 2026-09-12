@@ -6,25 +6,16 @@
       "value": "${AZURE_ENV_NAME=prod}"
     },
     "location": {
-      "value": "${AZURE_LOCATION=eastus2}"
-    },
-    "sqlLocation": {
-      "value": "${SQL_LOCATION=centralus}"
+      "value": "${AZURE_LOCATION=centralus}"
     },
     "resourceGroupName": {
       "value": "${AZURE_RESOURCE_GROUP_NAME=wx1116-prod-rg}"
     },
     "githubActionsIdentityName": {
-      "value": "${GITHUB_ACTIONS_IDENTITY_NAME=wx1116-prod-github-actions-mi}"
+      "value": "${GITHUB_ACTIONS_IDENTITY_NAME=wx1116-prod-github-mi}"
     },
     "storageAccountName": {
       "value": "${STORAGE_ACCOUNT_NAME=wx1116prodblob}"
-    },
-    "sqlAdministratorLogin": {
-      "value": "${SQL_ADMINISTRATOR_LOGIN}"
-    },
-    "existingContainerAppKeys": {
-      "value": "${EXISTING_CONTAINER_APP_KEYS}"
     },
     "mcpSrvAppServiceKey": {
       "value": "${MCP_SRV_APP_SERVICE_KEY}"

@@ -22,7 +22,7 @@ builder.Services.AddControllers();
 // (DB_CONNECTION_STRING). Falls back to in-memory storage locally so the
 // worker still runs without a database. Authenticates via this app's
 // user-assigned managed identity (AZURE_CLIENT_ID, set by
-// infra/modules/container-app.bicep) instead of a SQL login/password -- see
+// infra/modules/app-service.bicep) instead of a SQL login/password -- see
 // ManagedIdentitySqlConnectionStringFactory.
 var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
 	builder.Configuration["DB_CONNECTION_STRING"],

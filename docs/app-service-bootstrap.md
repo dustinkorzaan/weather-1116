@@ -1,9 +1,9 @@
-# ACA + ACR greenfield bootstrap
+# App Service greenfield bootstrap
 
 First-time deployment into an empty `wx1116-prod-rg`. Two resources must exist
 **before** the first provision or deploy can run at all:
 
-- `wx1116-prod-github-actions-mi` (user-assigned managed identity)
+- `wx1116-prod-github-mi` (user-assigned managed identity)
 - Its GitHub OIDC federated credential for `repo:<owner>/<repo>:environment:prod`
 
 Without both, `azure/login` and `azd auth login` in the workflows cannot
@@ -16,15 +16,17 @@ and assigns Contributor + User Access Administrator on this resource group.
 
 | Resource | Name |
 | --- | --- |
-| Azure Container Registry | `wx1116prodacr` |
-| Container Apps Environment | `wx1116-prod-aca-env` |
-| Container Apps (ASP.NET) | `wx1116-prod-api`, `-mvc`, `-blazor`, `-worker`, `-mcp-srv-app-service` |
-| Functions on ACA | `wx1116-prod-mcp-srv-func-app` |
+| Linux App Service Plan (B1) | `wx1116-prod-asp` |
+| App Services (ASP.NET) | `wx1116-prod-api`, `-mvc`, `-blazor`, `-worker`, `-mcp-srv-app-service` |
+| Function App (Linux, dedicated plan) | `wx1116-prod-mcp-srv-func-app` |
+| Storage (Functions host) | `wx1116prodblob` |
 | Static Web App | `wx1116-prod-react` |
-| SQL Server + database | `wx1116-prod-sql-srv` / `wx1116-prod-sql-database` |
-| App Insights + Log Analytics | `wx1116-prod-eastus2-appinsights` |
-| AI Foundry | `wx1116-prod-eastus2-res` / `-prj` |
+| SQL Server (Entra-only auth) + database | `wx1116-prod-sql-srv` / `wx1116-prod-sql-database` |
+| App Insights + Log Analytics | `wx1116-prod-appinsights` / `wx1116-prod-log` |
+| AI Foundry | `wx1116-prod-res` / `wx1116-prod-proj` |
 | Six runtime managed identities | `wx1116-prod-*-mi` |
+
+Everything uses `location: centralus`.
 
 ## Prerequisites (GitHub)
 
@@ -32,17 +34,16 @@ and assigns Contributor + User Access Administrator on this resource group.
 
 | Secret | Purpose |
 | --- | --- |
-| `AZURE_GITHUB_CLIENTID` | GitHub Actions MI client ID |
+| `AZURE_GITHUB_MI_CLIENTID` | GitHub Actions MI client ID |
 | `AZURE_TENANTID` | Azure AD tenant |
 | `AZURE_SUBSCRIPTIONID` | Target subscription |
-| `WX1116_SQL_ADMIN_LOGIN_NAME` | SQL native admin username for Bicep |
 
 **Secrets** (before app deploys):
 
 | Secret | Purpose |
 | --- | --- |
 | `AZURE_SQL_DB_CONNECTION_STRING` | Hangfire + SQL for api/mvc/worker -- server/database only, no `Authentication` clause and no username/password (see below) |
-| `AZURE_FOUNDRY_PROD_EUS2_KEY` | Foundry API key |
+| `AZURE_FOUNDRY_PROD_KEY` | Foundry API key |
 | `PROD_MCP_SRV_APP_SERVICE_KEY` | Bearer token for MCP app-service host |
 | `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key — you choose the value; deploy applies it |
 | `GOOGLE_MAPS_API_KEY` | Maps on React/MVC/Blazor |
@@ -56,13 +57,12 @@ Merge to `main`, or run `provision-wx1116-prod-infra` directly via
 provision (`needs: [build_test]`) once that succeeds — provisioning runs
 unconditionally on every such push (not just when `infra/**` changed), which
 is intentional, not wasteful — see
-[Provision vs. deploy ownership](#provision-vs-deploy-ownership) for what makes
-re-provisioning safe.
+[Provision vs. deploy ownership](#provision-vs-deploy-ownership).
 
-Provisioning locally needs the same pre-pass the workflow runs:
+Provisioning locally:
 
 ```bash
-az login   # the preprovision hook queries the resource group with `az`
+az login
 azd env select prod
 azd provision
 ```
@@ -78,7 +78,8 @@ azd env get-values
 Set `https://` URLs from the `*_HOSTNAME` outputs. For React, use the custom
 domain when provision binds one (default `wx.korzaan.com` via
 `STATIC_WEB_APP_CUSTOM_DOMAIN`); fall back to `STATIC_WEB_APP_HOSTNAME` only
-when custom-domain binding is skipped.
+when custom-domain binding is skipped. App Service hostnames are
+`<app>.azurewebsites.net`.
 
 ```text
 PROD_API_DOTNET_URL          = https://<API_HOSTNAME>
@@ -90,7 +91,11 @@ PROD_MCP_SRV_FUNC_APP_URL    = https://<MCP_SRV_FUNC_APP_HOSTNAME>
 PROD_UI_REACT_URL            = https://<STATIC_WEB_APP_CUSTOM_DOMAIN>
 ```
 
-Also set Foundry vars (`AZURE_FOUNDRY_PROD_EUS2_PROJ_URL`, model, agent names).
+Also set Foundry vars (`AZURE_FOUNDRY_PROD_PROJ_URL`,
+`AZURE_FOUNDRY_PROD_MODEL`, `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`,
+`AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME`, plus the `AZURE_FOUNDRY_PROD_KEY` secret
+on the app deploys) against `wx1116-prod-proj`. These are the only Foundry
+var/secret names this repo reads.
 
 ## Step 3 — Static Web App deploy token
 
@@ -125,8 +130,9 @@ production shape.
 ## Step 4 — SQL contained users (once)
 
 Run `infra/scripts/create-contained-users.sql` as the SQL Entra admin
-(`wx1116-prod-github-actions-mi`). See comments in
-`prod-provision-infra.yml`.
+(`wx1116-prod-github-mi`). See comments in
+`prod-provision-infra.yml`. Re-run this if the runtime managed identities are
+deleted and recreated (new principal IDs).
 
 ## Step 5 — Deploy apps
 
@@ -136,14 +142,18 @@ in parallel. Each can also be run directly via `workflow_dispatch`:
 
 | Workflow file | Target |
 | --- | --- |
-| `prod-deploy-api.yml` | Container App + ACR image |
-| `prod-deploy-mvc.yml` | Container App + ACR image |
-| `prod-deploy-blazor.yml` | Container App + ACR image |
-| `prod-deploy-worker.yml` | Container App + ACR image |
-| `prod-deploy-mcp-srv-app.yml` | Container App + ACR image |
-| `prod-deploy-mcp-srv-func.yml` | Functions-on-ACA container image (ACR) |
+| `prod-deploy-api.yml` | App Service zip deploy |
+| `prod-deploy-mvc.yml` | App Service zip deploy |
+| `prod-deploy-blazor.yml` | App Service zip deploy |
+| `prod-deploy-worker.yml` | App Service zip deploy |
+| `prod-deploy-mcp-srv-app.yml` | App Service zip deploy |
+| `prod-deploy-mcp-srv-func.yml` | Function App zip deploy |
 | `prod-deploy-react.yml` | Static Web App |
 | `prod-deploy-foundry-agents.yml` | Foundry agents (`wx1116-agent-for-current-weather`, `wx1116-agent-for-chat`) |
+
+Deploys use `dotnet publish` + `az webapp/functionapp deploy` (composite
+action `.github/actions/deploy-app-service`), then upsert application
+settings with `az webapp/functionapp config appsettings set`.
 
 ### MCP `mcp_extension` key
 
@@ -157,8 +167,13 @@ openssl rand -base64 32
 
 `prod-deploy-mcp-srv-func.yml` then applies it to the Functions host's
 `mcp_extension` system key on every deploy, and api/mvc/worker read the same
-secret into their own container app secrets. Because both sides come from one
-GitHub secret, there is no copy-back step and no redeploy ordering requirement.
+secret into their own app settings. Because both sides come from one GitHub
+secret, there is no copy-back step and no redeploy ordering requirement.
+
+`.github/scripts/function-app-mcp-key.sh` retries `az functionapp keys
+list/set` until the Functions host answers. Zip-deploy returns when ARM
+succeeds, not when the host is serving, so ARM `state=Running` is not a
+readiness signal.
 
 To rotate: update the GitHub secret, then re-run the func deploy plus the
 api/mvc/worker deploys.
@@ -166,75 +181,21 @@ api/mvc/worker deploys.
 If the secret is unset, the func deploy fails with that instruction rather than
 generating a key nothing else knows about.
 
-### Container App environment variables
-
-Unlike App Service `az webapp config appsettings set`, `az containerapp update
---set-env-vars` **replaces** the entire env-var list. Deploy workflows merge
-deploy-time values onto Bicep-provisioned vars (App Insights, UAMI storage
-settings, etc.) via `.github/scripts/aca-container-configure.sh`. Do not call
-`--set-env-vars` directly in workflows without merging first.
-
 ### Provision vs. deploy ownership
-
-Two pipelines write to the same container apps, so each field has exactly one
-owner:
 
 | Field | Owner |
 | --- | --- |
-| App existence, ingress, scale, identity, ACR registry | `infra/main.bicep` (provision) |
+| App Service Plan, sites, Function App, identity, SQL, SWA, Foundry | `infra/main.bicep` (provision) |
 | Functions host settings, `ASPNETCORE_ENVIRONMENT`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, `AZURE_CLIENT_ID` | `infra/main.bicep` (provision) |
-| Container image | `prod-deploy-*.yml` (deploy) |
-| All other env vars, and every secret | `prod-deploy-*.yml` (deploy) |
+| App code (zip) | `prod-deploy-*.yml` (deploy) |
+| All other application settings | `prod-deploy-*.yml` (deploy) via `az webapp/functionapp config appsettings set` (upsert) |
 
-The catch is that an ARM/Bicep deployment is a **PUT**, not a PATCH: any
-property the template sets wins over whatever was configured out of band. Left
-alone, every provision would reset all six apps to the placeholder image with
-only the provision-owned env vars and no secrets — an outage on every push to
-`main`, with the deploy workflows racing to repair it.
-
-So provision reads the deploy-owned fields back and hands them through:
-
-1. The `preprovision` hook in `azure.yaml` runs
-   `infra/scripts/capture-existing-container-apps.sh`, which lists the resource
-   group and sets `EXISTING_CONTAINER_APP_KEYS` (e.g. `api,mvc,worker`) in the
-   azd environment. It needs an authenticated `az`, and fails the provision
-   rather than reporting apps as absent if it cannot list them.
-2. `infra/modules/existing-container-app.bicep` resolves each listed app as an
-   `existing` reference and returns its live image, env vars, and secrets.
-3. `container-app.bicep` / `functions-container-app.bicep` reuse the live image,
-   pass the live secrets straight through, and union the env lists —
-   provision-owned names are reasserted (so a rotated App Insights connection
-   string still lands) while every other name is carried forward.
-
-Consequences worth knowing:
-
-- The placeholder image applies on **first create only**. It is
-  `mcr.microsoft.com/dotnet/samples:aspnetapp`, a runnable ASP.NET app that
-  serves on port 8080 like the real images, so the first revision goes healthy;
-  a bare runtime image such as `dotnet/aspnet:10.0` has no app to run and
-  crash-loops instead.
-- Adding a provision-owned env var means adding it to the module's
-  `provisionEnvVars`. Adding a deploy-time var means adding it to the workflow's
-  `env_overlay_multiline`. Putting the same name in both makes provision win.
-- Deleting a container app by hand is fine: the next capture pass simply omits
-  it and provision recreates it from the placeholder.
-
-The Functions deploy workflow builds a .NET 10 isolated-worker container image
-(`mcp-srv-func-app/mcp/Dockerfile`) and pushes it to ACR. Functions-on-ACA
-requires container images; zip/package deploy via `Azure/functions-action` targets
-App Service (`Microsoft.Web/sites`), not `Microsoft.App/containerApps`.
-
-`aca-functions-mcp-key.sh` checks that `az containerapp function keys` exists
-before setting the `mcp_extension` system key; if the CLI command group is
-missing, the job fails with manual-setup guidance instead of silently skipping
-MCP auth. That command group connects live to the running Functions host
-inside the newest revision rather than going through ARM, so the script polls
-`az containerapp revision show` (up to 5 minutes) until the just-deployed
-revision is `Running`/`Healthy` before touching keys -- `az containerapp
-update` in the previous step returns as soon as the update is accepted, not
-once the new revision is actually healthy, and without this wait the key
-list/set call intermittently fails with a generic `Error setting function key`
-and no further detail.
+A Bicep deployment is a **PUT**. The site modules declare a short
+`siteConfig.appSettings` list, so re-provision resets application settings to
+that list until the following deploy upserts the rest. On push to `main` the
+orchestrator always deploys after provision (`needs: [provision]`). Running
+`prod-provision-infra` alone leaves settings at the reduced set until the next
+deploy.
 
 ## Step 6 — Foundry MCP tools and agents
 
@@ -292,5 +253,5 @@ azd env set STATIC_WEB_APP_CUSTOM_DOMAIN other.example.com
 azd env set STATIC_WEB_APP_CUSTOM_DOMAIN ""
 ```
 
-ACA container-app custom domains remain out of scope for this template; only the
-React Static Web App is wired here.
+App Service custom domains are out of scope for this template; only the React
+Static Web App is wired here.

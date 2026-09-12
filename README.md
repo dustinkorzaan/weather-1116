@@ -30,7 +30,7 @@ weather progression:
 
 Visit the [React UI](https://wx.korzaan.com/current-ai-weather) to view Current Weather Wired to V3, V4, and V5.
 
-Visit the Map in [React UI](https://wx.korzaan.com/), [Blazor UI](https://wx1116-prod-blazor.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/), and [MVC UI](https://wx1116-prod-mvc.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io/) wired specifically to V3.
+Visit the Map in [React UI](https://wx.korzaan.com/), [Blazor UI](https://wx1116-prod-blazor.azurewebsites.net/), and [MVC UI](https://wx1116-prod-mvc.azurewebsites.net/) wired specifically to V3.
 
 ## Chat clients
 
@@ -40,12 +40,12 @@ Standalone multi-turn chat page with seven tabs:
 
 | Tab | Pattern | Stack | Notes |
 | --- | --- | --- | --- |
-| Chat1a | In-process | Responses API | Like Foundry Console V3 |
+| Chat1a | Local Loops | Responses API | Like Foundry Console V3 |
 | Chat1b | Remote MCP | Responses API | Like Foundry Console V4 |
-| Chat2a | In-process | Agent Framework | Like Foundry Console V3 |
+| Chat2a | Local Loops | Agent Framework | Like Foundry Console V3 |
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-for-chat`) |
-| Chat4a | In-process, multi-agent | Agent Framework | Like Foundry Console V3 - AI Weather Orchestration delegates to Geo and NonAI Weather |
+| Chat4a | Local Loops, multi-agent | Agent Framework | Like Foundry Console V3 - AI Weather Orchestration delegates to Geo and NonAI Weather |
 | Chat4b | Remote MCP, multi-agent | Agent Framework | Like Foundry Console V4 - AI Weather Orchestration delegates to Geo and NonAI Weather |
 
 Visit the [React UI](https://wx.korzaan.com/chat-clients) Chat wired to variations of V3, V4, and V5
@@ -63,8 +63,8 @@ Foundry console.
 |  | Project | Path | Stack | Port |
 | --- | --- | --- | --- | --- |
 | [Visit](https://wx.korzaan.com) | React UI | [`ui-react`](ui-react) | React + Vite | 3000 |
-| [Visit](https://wx1116-prod-blazor.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
-| [Visit](https://wx1116-prod-mvc.ashycoast-8bd37bb4.eastus2.azurecontainerapps.io) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
+| [Visit](https://wx1116-prod-blazor.azurewebsites.net) | Blazor UI | [`ui-blazor/blazor`](ui-blazor/blazor) | Blazor | 8090 |
+| [Visit](https://wx1116-prod-mvc.azurewebsites.net) | MVC UI | [`mvc-dotnet/mvc`](mvc-dotnet/mvc) | ASP.NET Core MVC | 8100 |
 |  | API | [`api-dotnet/api`](api-dotnet/api) | ASP.NET Core Minimal API | 8080 |
 |  | Core | [`core-dotnet/core`](core-dotnet/core) | In API, MVC, Worker, and MCP |  |
 |  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |
@@ -81,5 +81,5 @@ relationships, and parity guidance live in
 - **Authentication**: Login/identity provider (e.g. Auth0)
 - **Per-user custom map pins**: Map pins scoped to individual user accounts
 - **Per-pin photo uploads**: Image upload/download per pin via blob storage SAS URIs
-- **Infrastructure as Code**: Provisioning Azure resources via Bicep
-- **Foundry config as code**: Managing Foundry models, tools, and agents via Azure Developer CLI (azd) templates
+- **Securing multi-agent orchestration**
+- **Shifting more to Microsoft Agent Framework using declarative YAML or code-first**

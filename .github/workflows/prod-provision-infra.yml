@@ -1,51 +1,48 @@
 # Provisions the wx1116-prod-* Azure resources (infra/main.bicep) via azd.
-# Creates ACA + ACR + SQL + SWA + Foundry in wx1116-prod-rg (greenfield).
+# Creates an App Service Plan + App Services + Function App + SQL + SWA +
+# Foundry in wx1116-prod-rg (greenfield).
 #
 # Has no trigger of its own beyond workflow_dispatch -- it's called via
 # workflow_call from build-test-provision-deploy.yml, which runs build-test.yml
 # first and only calls this job (needs: [build_test]) once that succeeds on
-# main. Provision used to trigger directly on push to main, running in
-# parallel with build-and-test and relying on branch protection as an
-# indirect test gate; it's now an explicit needs: dependency instead, and
-# runs unconditionally on every such push (rather than only when infra/**
-# changed), which is intentional rather than a placeholder.
+# main, and runs unconditionally on every such push (rather than only when
+# infra/** changed), which is intentional rather than a placeholder.
 #
 # The deploy workflows (prod-deploy-*.yml) are likewise called via
 # workflow_call from build-test-provision-deploy.yml with needs: [provision],
 # rather than triggering directly on push -- running them concurrently with
 # this one caused "there is an active provisioning operation in progress"
 # errors, since `azd provision`'s resource-group-scoped Bicep deployment and
-# the deploy jobs' per-app `az containerapp update` calls both take ARM
-# deployment locks in wx1116-prod-rg. workflow_dispatch still runs this (and
-# each deploy workflow) unconditionally for manual runs on any branch.
+# the deploy jobs' `az webapp/functionapp deploy` + `config appsettings set`
+# calls both take ARM deployment locks in wx1116-prod-rg. workflow_dispatch
+# still runs this (and each deploy workflow) unconditionally for manual runs
+# on any branch.
 #
 # "Safe to re-run" is not free, though: a Bicep deployment is a PUT, so
-# provision would reassert the placeholder image and a bare app-settings list
-# over whatever the deploy workflows had set. The preprovision hook in
-# azure.yaml runs infra/scripts/capture-existing-container-apps.sh to record
-# which container apps already exist, and infra/main.bicep then reads their
-# live image, env vars, and secrets back through
-# modules/existing-container-app.bicep and hands them straight through. That
-# hook needs an authenticated `az`, which is why this workflow logs in with
-# azure/login as well as azd.
+# provision resets each App Service's application settings back to just the
+# small set infra/modules/app-service.bicep and modules/function-app.bicep
+# declare (App Insights connection string, AZURE_CLIENT_ID, and similar). The
+# deploy workflows always re-run immediately afterward in the same pipeline
+# (needs: [provision]) and re-add the rest via `az webapp/functionapp config
+# appsettings set`, which only upserts the keys it's given, so the end state
+# of every push to main is correct either way. Running prod-provision-infra
+# on its own without a following deploy leaves settings at that reduced set
+# until the next deploy runs.
 #
-# Reuses the existing AZURE_GITHUB_CLIENTID / AZURE_TENANTID /
-# AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_CLIENTID has been updated to
-# hold wx1116-prod-github-actions-mi's client ID, on the assumption
+# Reuses the existing AZURE_GITHUB_MI_CLIENTID / AZURE_TENANTID /
+# AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_MI_CLIENTID holds
+# wx1116-prod-github-mi's client ID, on the assumption
 # wx1116-prod-rg lives in the same tenant/subscription as the
 # wx1116-prod-* deploys below.
 #
-# Requires one additional GitHub secret:
-#   WX1116_SQL_ADMIN_LOGIN_NAME -- the SQL-native admin username. Treated as
-#     sensitive and never committed anywhere -- a non-default, non-obvious
-#     username is itself part of the security posture here, not just the
-#     password. Its password needs no secret at all: infra/main.bicep
-#     generates it internally (newGuid()) and never surfaces it.
-#
-# No other SQL admin secrets are needed: infra/main.bicep registers
-# wx1116-prod-github-actions-mi itself as the SQL server's Entra admin (its
-# principal ID is already known from modules/managed-identity.bicep, no new
-# secret required for that part) -- but this workflow does NOT run
+# No SQL admin secret is needed at all: infra/modules/sql.bicep creates the
+# server with Microsoft Entra-only authentication from the start, so no
+# SQL-native login ever exists to have a secret for -- the
+# administratorLogin/administratorLoginPassword ARM still requires are
+# generated internally and never surfaced. infra/main.bicep registers
+# wx1116-prod-github-mi itself as the SQL server's Entra admin (its
+# principal ID is already known from modules/managed-identity.bicep) -- but
+# this workflow does NOT run
 # infra/scripts/create-contained-users.sql itself. That's a deliberate
 # manual step, run once by hand (as the Entra admin, e.g. via
 # `az account get-access-token` + `Invoke-Sqlcmd -AccessToken`) rather than
@@ -55,7 +52,7 @@
 # but that doesn't require this workflow to be the one invoking it.
 #
 # The "prod" GitHub Environment gate below is required, not stylistic: the
-# federated credential on wx1116-prod-github-actions-mi is scoped to the
+# federated credential on wx1116-prod-github-mi is scoped to the
 # subject repo:dustinkorzaan/weather-1116:environment:prod, so azd auth
 # login fails without it.
 
@@ -91,26 +88,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Debug Azure OIDC secret lengths
-        shell: bash
-        env:
-          AZURE_GITHUB_CLIENTID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
-          AZURE_TENANTID: ${{ secrets.AZURE_TENANTID }}
-          AZURE_SUBSCRIPTIONID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
-        run: |
-          echo "AZURE_GITHUB_CLIENTID length=${#AZURE_GITHUB_CLIENTID}"
-          echo "AZURE_TENANTID length=${#AZURE_TENANTID}"
-          echo "AZURE_SUBSCRIPTIONID length=${#AZURE_SUBSCRIPTIONID}"
-
       - name: Install azd
         uses: Azure/setup-azd@v2
 
-      # The azure.yaml preprovision hook queries the resource group with `az`,
-      # so it needs its own login alongside azd's.
       - name: Login to Azure
         uses: azure/login@v3
         with:
-          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          client-id: ${{ secrets.AZURE_GITHUB_MI_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
@@ -122,7 +106,7 @@ jobs:
             --federated-credential-provider "github" \
             --tenant-id "$AZURE_TENANT_ID"
         env:
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_GITHUB_MI_CLIENTID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANTID }}
 
       - name: Create or select azd environment
@@ -136,10 +120,10 @@ jobs:
         env:
           AZURE_ENV_NAME: prod
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
-          AZURE_LOCATION: eastus2
+          AZURE_LOCATION: centralus
 
       # infra/main.bicep is resource-group-scoped, not subscription-scoped
-      # (deliberately -- wx1116-prod-github-actions-mi only holds Contributor
+      # (deliberately -- wx1116-prod-github-mi only holds Contributor
       # + User Access Administrator on wx1116-prod-rg, not the subscription).
       # azd needs to be told which pre-existing resource group to target;
       # without this it defaults to (and tries to create) rg-prod.
@@ -152,13 +136,11 @@ jobs:
       - name: Set required azd parameter values
         shell: bash
         run: |
-          azd env set SQL_ADMINISTRATOR_LOGIN "$SQL_ADMINISTRATOR_LOGIN"
           azd env set MCP_SRV_APP_SERVICE_KEY "$MCP_SRV_APP_SERVICE_KEY"
           azd env set MCP_SRV_FUNC_APP_KEY "$MCP_SRV_FUNC_APP_KEY"
         env:
-          SQL_ADMINISTRATOR_LOGIN: ${{ secrets.WX1116_SQL_ADMIN_LOGIN_NAME }}
           # Reuses the same MCP tool-host secrets the deploy workflows already
-          # set on the container apps -- so the MyMcpSrvAppService /
+          # set as App Service/Function App settings -- so the MyMcpSrvAppService /
           # MyMcpSrvFuncApp Foundry RemoteTool connections
           # (infra/modules/ai-foundry.bicep) stay in sync with the actual host
           # credentials on every push to main, with no new secret to manage.
@@ -171,7 +153,7 @@ jobs:
 
       # infra/scripts/create-contained-users.sql is deliberately NOT run
       # here -- run it manually, once, as the Entra admin
-      # (wx1116-prod-github-actions-mi or another Entra admin on the
+      # (wx1116-prod-github-mi or another Entra admin on the
       # server), e.g.:
       #   az login
       #   $accessToken = az account get-access-token --resource https://database.windows.net/ --query accessToken -o tsv

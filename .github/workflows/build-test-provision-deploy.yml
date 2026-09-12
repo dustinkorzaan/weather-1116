@@ -36,8 +36,8 @@ on:
 # does not stop two runs (e.g. two pushes to main close together) from
 # overlapping. Without a workflow-level concurrency group here, run B's
 # provision job could start azd provision while run A's deploy jobs are
-# still doing az containerapp update, recreating the ARM-lock collision this
-# whole restructure exists to avoid. No cancel-in-progress, same rationale
+# still doing az webapp/functionapp deploy, recreating the ARM-lock collision
+# this whole restructure exists to avoid. No cancel-in-progress, same rationale
 # as prod-provision-infra.yml's own concurrency block: queue full runs
 # rather than cancel a release partway through.
 concurrency:

@@ -16,7 +16,7 @@ namespace Core.AIWeather.Handlers;
 /// <summary>
 /// Calls a hosted Microsoft Foundry Agent for current weather (same pattern as Foundry
 /// Console V5). Instructions, response schema, and MCP tools are configured on the agent
-/// itself (named by <c>AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME</c>) - this handler sends only the
+/// itself (named by <c>AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME</c>) - this handler sends only the
 /// user prompt, so there is no local schema, tool wiring, approval loop, or tool-call loop.
 /// Each MCP tool on the agent must use <c>require_approval: never</c>; V5 will not round-trip
 /// approvals (same as Chat3). Unlike V3/V4, this handler cannot strip <c>runLogDetails</c> from
@@ -50,14 +50,14 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
             : request.Location.Trim();
 
         var endpoint = Resolve(
-            Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_PROJ_URL."));
+            Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
+            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL."));
 
-        var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_KEY")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_EUS2_KEY.");
+        var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
+            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
 
-        var agentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME")
-            ?? "wx1116-agent-for-current-weather";
+        var agentNameEnv = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME");
+        var agentName = string.IsNullOrWhiteSpace(agentNameEnv) ? "wx1116-agent-for-current-weather" : agentNameEnv;
 
         _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, agent {Agent}", endpoint, agentName);
 

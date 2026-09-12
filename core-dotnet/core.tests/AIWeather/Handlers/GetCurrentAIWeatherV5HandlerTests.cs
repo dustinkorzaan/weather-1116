@@ -9,7 +9,10 @@ public class GetCurrentAIWeatherV5HandlerTests
 
         Assert.Contains("ProjectOpenAIClient", source, StringComparison.Ordinal);
         Assert.Contains("GetProjectResponsesClientForAgent", source, StringComparison.Ordinal);
-        Assert.Contains("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME", source, StringComparison.Ordinal);
+        Assert.Contains("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME", source, StringComparison.Ordinal);
+        // An empty (but set) GitHub var must still fall back to the default agent name --
+        // ?? only catches null, not "", so this has to be an explicit blank check.
+        Assert.Contains("IsNullOrWhiteSpace(agentNameEnv)", source, StringComparison.Ordinal);
         Assert.Contains("AIWeatherResponse", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ChatMcpToolFactory", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolExecutor", source, StringComparison.Ordinal);

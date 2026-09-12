@@ -19,9 +19,10 @@
 # by infra/modules/ai-foundry.bicep) and mints a token scoped to
 # https://ai.azure.com/.default for the script to send as a bearer token.
 #
-# Reuses existing repo secrets/vars (no new ones needed):
-#   AZURE_GITHUB_CLIENTID / AZURE_TENANTID / AZURE_SUBSCRIPTIONID
-#   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL / AZURE_FOUNDRY_PROD_EUS2_MODEL
+# Reuses existing OIDC secrets, plus these Foundry/URL vars (see
+# docs/app-service-bootstrap.md Step 2):
+#   AZURE_GITHUB_MI_CLIENTID / AZURE_TENANTID / AZURE_SUBSCRIPTIONID
+#   AZURE_FOUNDRY_PROD_PROJ_URL / AZURE_FOUNDRY_PROD_MODEL
 #   PROD_MCP_SRV_APP_SERVICE_URL / PROD_MCP_SRV_FUNC_APP_URL
 #     (URL fallback only; MCP keys stay on the Foundry connections)
 
@@ -56,7 +57,7 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v3
         with:
-          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          client-id: ${{ secrets.AZURE_GITHUB_MI_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
@@ -68,37 +69,33 @@ jobs:
           echo "::add-mask::$token"
           echo "token=$token" >> "$GITHUB_OUTPUT"
 
-      # Publish steps disabled: the Foundry portal Playground's Tools panel
-      # doesn't render MCP tools attached this way (project_connection_id on
-      # a PromptAgentDefinition tool), even though the API accepts them and
-      # they work at runtime (confirmed via Traces). Agents are being
-      # created/configured manually in the portal for the demo instead.
-      # Re-enable by uncommenting these two steps once the portal renders
-      # API-attached MCP tools, or once a scripted workaround is confirmed.
-      #
-      # - name: Publish wx1116-agent-for-current-weather (V5 current-ai-weather)
-      #   shell: bash
-      #   env:
-      #     AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
-      #     AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
-      #     AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
-      #     MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
-      #     MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
-      #   run: |
-      #     bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
-      #       wx1116-agent-for-current-weather \
-      #       "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-for-current-weather.instructions.md" \
-      #       --response-schema "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-for-current-weather.response-schema.json"
-      #
-      # - name: Publish wx1116-agent-for-chat (Chat3)
-      #   shell: bash
-      #   env:
-      #     AZURE_FOUNDRY_PROD_EUS2_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
-      #     AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
-      #     AZURE_FOUNDRY_PROD_EUS2_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
-      #     MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
-      #     MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
-      #   run: |
-      #     bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
-      #       wx1116-agent-for-chat \
-      #       "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-for-chat.instructions.md"
+      # Uses the Agents API's 2025-11-15-preview surface
+      # (deploy-foundry-agent.sh's API_VERSION), which matches the surface
+      # the Foundry portal's Playground Tools panel reads from, so MCP tools
+      # attached via project_connection_id render there correctly.
+      - name: Publish wx1116-agent-for-current-weather (V5 current-ai-weather)
+        shell: bash
+        env:
+          AZURE_FOUNDRY_PROD_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_PROJ_URL }}
+          AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
+          AZURE_FOUNDRY_PROD_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_MODEL }}
+          MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
+          MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+        run: |
+          bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
+            wx1116-agent-for-current-weather \
+            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-for-current-weather.instructions.md" \
+            --response-schema "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-for-current-weather.response-schema.json"
+
+      - name: Publish wx1116-agent-for-chat (Chat3)
+        shell: bash
+        env:
+          AZURE_FOUNDRY_PROD_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_PROJ_URL }}
+          AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
+          AZURE_FOUNDRY_PROD_MODEL: ${{ vars.AZURE_FOUNDRY_PROD_MODEL }}
+          MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
+          MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+        run: |
+          bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-agent.sh" \
+            wx1116-agent-for-chat \
+            "${GITHUB_WORKSPACE}/.github/foundry-agents/wx1116-agent-for-chat.instructions.md"
