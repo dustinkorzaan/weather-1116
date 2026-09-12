@@ -29,9 +29,9 @@
 # on its own without a following deploy leaves settings at that reduced set
 # until the next deploy runs.
 #
-# Reuses the existing AZURE_GITHUB_CLIENTID / AZURE_TENANTID /
-# AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_CLIENTID has been updated to
-# hold wx1116-prod-github-actions-mi's client ID, on the assumption
+# Reuses the existing AZURE_GITHUB_MI_CLIENTID / AZURE_TENANTID /
+# AZURE_SUBSCRIPTIONID secrets -- AZURE_GITHUB_MI_CLIENTID holds
+# wx1116-prod-github-actions-mi's client ID, on the assumption
 # wx1116-prod-rg lives in the same tenant/subscription as the
 # wx1116-prod-* deploys below.
 #
@@ -94,7 +94,7 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v3
         with:
-          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          client-id: ${{ secrets.AZURE_GITHUB_MI_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 
@@ -106,7 +106,7 @@ jobs:
             --federated-credential-provider "github" \
             --tenant-id "$AZURE_TENANT_ID"
         env:
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_GITHUB_MI_CLIENTID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANTID }}
 
       - name: Create or select azd environment

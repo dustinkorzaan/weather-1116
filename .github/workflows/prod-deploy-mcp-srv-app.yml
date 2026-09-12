@@ -38,7 +38,7 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v3
         with:
-          client-id: ${{ secrets.AZURE_GITHUB_CLIENTID }}
+          client-id: ${{ secrets.AZURE_GITHUB_MI_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
 

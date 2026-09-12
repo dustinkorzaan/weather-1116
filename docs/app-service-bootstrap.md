@@ -34,7 +34,7 @@ Everything uses `location: centralus`.
 
 | Secret | Purpose |
 | --- | --- |
-| `AZURE_GITHUB_CLIENTID` | GitHub Actions MI client ID |
+| `AZURE_GITHUB_MI_CLIENTID` | GitHub Actions MI client ID |
 | `AZURE_TENANTID` | Azure AD tenant |
 | `AZURE_SUBSCRIPTIONID` | Target subscription |
 
