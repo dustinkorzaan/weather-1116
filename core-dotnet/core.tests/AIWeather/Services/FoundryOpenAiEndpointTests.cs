@@ -6,11 +6,11 @@ public class FoundryOpenAiEndpointTests
 {
     [Theory]
     [InlineData(
-        "https://example.services.ai.azure.com/api/projects/wx1116-prod-centralus-proj",
-        "https://example.services.ai.azure.com/api/projects/wx1116-prod-centralus-proj/openai/v1")]
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj",
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj/openai/v1")]
     [InlineData(
-        "https://example.services.ai.azure.com/api/projects/wx1116-prod-centralus-proj/",
-        "https://example.services.ai.azure.com/api/projects/wx1116-prod-centralus-proj/openai/v1")]
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj/",
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj/openai/v1")]
     [InlineData(
         "https://example.services.ai.azure.com/openai/v1",
         "https://example.services.ai.azure.com/openai/v1")]

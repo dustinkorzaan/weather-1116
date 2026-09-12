@@ -18,22 +18,22 @@ public sealed class ChatFoundrySettings
     public ChatFoundrySettings()
     {
         Endpoint = FoundryOpenAiEndpoint.Resolve(
-            Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_PROJ_URL")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_CUS_PROJ_URL.")).ToString();
+            Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
+            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL.")).ToString();
 
-        ApiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_KEY")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_CUS_KEY.");
+        ApiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
+            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
 
-        DeploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_MODEL")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_CUS_MODEL.");
+        DeploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL")
+            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_MODEL.");
 
-        var chatAgentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_CHAT_AGENT_NAME");
+        var chatAgentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME");
         _chatAgentName = string.IsNullOrWhiteSpace(chatAgentName) ? null : chatAgentName.Trim();
     }
 
     public string ChatAgentName =>
         _chatAgentName
-        ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_CUS_CHAT_AGENT_NAME.");
+        ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME.");
 
     public ResponsesClient CreateResponsesClient() => new(
         credential: new ApiKeyCredential(ApiKey),

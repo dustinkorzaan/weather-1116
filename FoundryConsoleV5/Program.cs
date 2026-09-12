@@ -32,9 +32,9 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_CUS_PROJ_URL not found in environment variables.");
+		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
 		var agentName = "wx1116-agent-for-current-weather";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CUS_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		var userPrompt = $"""
 		What is today's weather in: {location}?

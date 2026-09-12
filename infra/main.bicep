@@ -144,10 +144,10 @@ module staticWebApp 'modules/static-web-app.bicep' = {
 module aiFoundry 'modules/ai-foundry.bicep' = {
   name: 'ai-foundry'
   params: {
-    accountName: '${namePrefix}-${environmentName}-centralus-res'
-    projectName: '${namePrefix}-${environmentName}-centralus-proj'
+    accountName: '${namePrefix}-${environmentName}-res'
+    projectName: '${namePrefix}-${environmentName}-proj'
     location: location
-    customSubDomainName: toLower('${namePrefix}${environmentName}centralus${uniqueString(subscription().id, resourceGroupName)}')
+    customSubDomainName: toLower('${namePrefix}${environmentName}${uniqueString(subscription().id, resourceGroupName)}')
     appInsightsId: monitoring.outputs.appInsightsId
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
     grantedPrincipalIds: [

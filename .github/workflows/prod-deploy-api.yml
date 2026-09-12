@@ -50,7 +50,7 @@ jobs:
           resource_group: ${{ env.RESOURCE_GROUP }}
           secrets_multiline: |
             db-connection-string=${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}
-            foundry-key=${{ secrets.AZURE_FOUNDRY_PROD_CUS_KEY }}
+            foundry-key=${{ secrets.AZURE_FOUNDRY_PROD_KEY }}
             mcp-func-key=${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
             mcp-app-key=${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
           env_overlay_multiline: |
@@ -59,10 +59,10 @@ jobs:
             WORKER_DOTNET_URL=${{ vars.PROD_WORKER_DOTNET_URL }}
             MCP_SRV_APP_SERVICE_URL=${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
             MCP_SRV_FUNC_APP_URL=${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
-            AZURE_FOUNDRY_PROD_CUS_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_CUS_PROJ_URL }}
-            AZURE_FOUNDRY_PROD_CUS_KEY=secretref:foundry-key
-            AZURE_FOUNDRY_PROD_CUS_MODEL=${{ vars.AZURE_FOUNDRY_PROD_CUS_MODEL }}
-            AZURE_FOUNDRY_PROD_CUS_CHAT_AGENT_NAME=${{ vars.AZURE_FOUNDRY_PROD_CUS_CHAT_AGENT_NAME }}
+            AZURE_FOUNDRY_PROD_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_PROJ_URL }}
+            AZURE_FOUNDRY_PROD_KEY=secretref:foundry-key
+            AZURE_FOUNDRY_PROD_MODEL=${{ vars.AZURE_FOUNDRY_PROD_MODEL }}
+            AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME=${{ vars.AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME }}
             MCP_SRV_FUNC_APP_KEY=secretref:mcp-func-key
             MCP_SRV_APP_SERVICE_KEY=secretref:mcp-app-key
             ASPNETCORE_DETAILEDERRORS=false

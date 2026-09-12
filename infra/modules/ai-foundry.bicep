@@ -15,10 +15,10 @@
 // across preview versions. Verify the api-version and resource shapes below
 // against current docs before relying on this module.
 
-@description('Name of the AI Foundry resource, e.g. wx1116-prod-centralus-res.')
+@description('Name of the AI Foundry resource, e.g. wx1116-prod-res.')
 param accountName string
 
-@description('Name of the AI Foundry project, e.g. wx1116-prod-centralus-proj.')
+@description('Name of the AI Foundry project, e.g. wx1116-prod-proj.')
 param projectName string
 
 param location string

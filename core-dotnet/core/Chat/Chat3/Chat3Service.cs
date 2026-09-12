@@ -10,7 +10,7 @@ namespace Core.Chat.Chat3;
 /// Hosted Microsoft Foundry agent (Foundry Console V5 pattern). The app sends
 /// only the user prompt; instructions, model, MCP tools, and MCP approval
 /// (<c>require_approval: never</c>) are defined on the agent named by
-/// <c>AZURE_FOUNDRY_PROD_CUS_CHAT_AGENT_NAME</c>. Chat3 does not round-trip
+/// <c>AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME</c>. Chat3 does not round-trip
 /// tool-call approvals.
 /// </summary>
 public sealed class Chat3Service : IChatClientService

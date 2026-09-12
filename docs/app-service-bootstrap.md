@@ -23,7 +23,7 @@ and assigns Contributor + User Access Administrator on this resource group.
 | Static Web App | `wx1116-prod-react` |
 | SQL Server + database | `wx1116-prod-sql-srv` / `wx1116-prod-sql-database` |
 | App Insights + Log Analytics | `wx1116-prod-appinsights` / `wx1116-prod-log` |
-| AI Foundry | `wx1116-prod-centralus-res` / `wx1116-prod-centralus-proj` |
+| AI Foundry | `wx1116-prod-res` / `wx1116-prod-proj` |
 | Six runtime managed identities | `wx1116-prod-*-mi` |
 
 Everything uses `location: centralus` except SQL, which already defaults to
@@ -45,7 +45,7 @@ Central US (`sqlLocation`).
 | Secret | Purpose |
 | --- | --- |
 | `AZURE_SQL_DB_CONNECTION_STRING` | Hangfire + SQL for api/mvc/worker -- server/database only, no `Authentication` clause and no username/password (see below) |
-| `AZURE_FOUNDRY_PROD_CUS_KEY` | Foundry API key |
+| `AZURE_FOUNDRY_PROD_KEY` | Foundry API key |
 | `PROD_MCP_SRV_APP_SERVICE_KEY` | Bearer token for MCP app-service host |
 | `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key — you choose the value; deploy applies it |
 | `GOOGLE_MAPS_API_KEY` | Maps on React/MVC/Blazor |
@@ -93,10 +93,10 @@ PROD_MCP_SRV_FUNC_APP_URL    = https://<MCP_SRV_FUNC_APP_HOSTNAME>
 PROD_UI_REACT_URL            = https://<STATIC_WEB_APP_CUSTOM_DOMAIN>
 ```
 
-Also set Foundry vars (`AZURE_FOUNDRY_PROD_CUS_PROJ_URL`,
-`AZURE_FOUNDRY_PROD_CUS_MODEL`, `AZURE_FOUNDRY_PROD_CUS_AGENT_NAME`,
-`AZURE_FOUNDRY_PROD_CUS_CHAT_AGENT_NAME`) against
-`wx1116-prod-centralus-proj`.
+Also set Foundry vars (`AZURE_FOUNDRY_PROD_PROJ_URL`,
+`AZURE_FOUNDRY_PROD_MODEL`, `AZURE_FOUNDRY_PROD_AGENT_NAME`,
+`AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME`) against
+`wx1116-prod-proj`.
 
 ## Step 3 — Static Web App deploy token
 
