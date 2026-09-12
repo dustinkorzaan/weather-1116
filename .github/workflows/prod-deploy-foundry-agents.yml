@@ -68,15 +68,10 @@ jobs:
           echo "::add-mask::$token"
           echo "token=$token" >> "$GITHUB_OUTPUT"
 
-      # Re-enabled on the Agents API's 2025-11-15-preview surface
-      # (deploy-foundry-agent.sh's API_VERSION) instead of the v1/1.0 GA
-      # surface these steps were previously published against -- the
-      # portal Playground's Tools panel not rendering MCP tools attached via
-      # project_connection_id was suspected to be a version-surface mismatch
-      # between what this script wrote and what the portal reads back, even
-      # though the API accepted the old calls and the tools worked at
-      # runtime (confirmed via Traces). Re-disable (re-comment) these two
-      # steps if 2025-11-15-preview turns out not to fix the rendering issue.
+      # Uses the Agents API's 2025-11-15-preview surface
+      # (deploy-foundry-agent.sh's API_VERSION), which matches the surface
+      # the Foundry portal's Playground Tools panel reads from, so MCP tools
+      # attached via project_connection_id render there correctly.
       - name: Publish wx1116-agent-for-current-weather (V5 current-ai-weather)
         shell: bash
         env:

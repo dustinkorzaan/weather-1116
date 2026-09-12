@@ -1,13 +1,11 @@
-// MCP host for mcp-srv-func-app, now a Linux Function App on the shared App
-// Service Plan (Dedicated hosting, not Consumption) instead of Functions on
-// ACA. Keeps the AzureWebJobsStorage account and its role assignments as-is;
-// only the compute resource itself changes. App code deploys separately via
-// `az functionapp deploy` (prod-deploy-mcp-srv-func.yml); this module only
-// owns the site resource, its identity, and the Functions-host application
-// settings that provision has always owned. Anything else the deploy
-// workflow sets via `az functionapp config appsettings set` survives future
-// redeploys of this template untouched, since that command only upserts the
-// keys it's given.
+// MCP host for mcp-srv-func-app: a Linux Function App on the shared App
+// Service Plan (Dedicated hosting, not Consumption). App code deploys
+// separately via `az functionapp deploy` (prod-deploy-mcp-srv-func.yml);
+// this module only owns the site resource, its identity, and the
+// Functions-host application settings that provision owns. Anything else
+// the deploy workflow sets via `az functionapp config appsettings set`
+// survives future redeploys of this template untouched, since that command
+// only upserts the keys it's given.
 
 @description('Function App name, e.g. wx1116-prod-mcp-srv-func-app.')
 param name string

@@ -2,9 +2,9 @@
 # Resolve secretref values against a secrets file and upsert the merged
 # NAME=VALUE pairs as Azure App Service / Function App application settings.
 #
-# Unlike Container Apps, `az webapp/functionapp config appsettings set` only
-# touches the keys it's given -- it doesn't replace the whole settings list --
-# so no read-back-and-merge step is needed here.
+# `az webapp/functionapp config appsettings set` only touches the keys it's
+# given -- it doesn't replace the whole settings list -- so this script
+# never needs to read back and merge existing settings.
 #
 # Usage:
 #   app-service-configure.sh --app-name NAME --resource-group RG [--app-kind webapp|functionapp] \
