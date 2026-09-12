@@ -2,7 +2,6 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Core;
 using DotNetEnv;
 using ModelContextProtocol.Server;
-using OpenTelemetry;
 
 Env.TraversePath().Load();
 

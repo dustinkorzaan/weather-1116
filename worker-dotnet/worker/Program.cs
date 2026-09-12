@@ -8,7 +8,6 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
 using CQMediator;
-using OpenTelemetry;
 using WeatherWorkerDotNet;
 
 Env.TraversePath().Load();

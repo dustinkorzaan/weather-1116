@@ -9,7 +9,6 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
 using CQMediator;
-using OpenTelemetry;
 
 Env.TraversePath().Load();
 

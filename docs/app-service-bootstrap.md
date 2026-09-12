@@ -48,6 +48,7 @@ Everything uses `location: centralus`.
 | `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key — you choose the value; deploy applies it |
 | `GOOGLE_MAPS_API_KEY` | Maps on React/MVC/Blazor |
 | `AZURE_UI_REACT_TOKEN` | SWA deploy token (after provision) |
+| `PROD_APPINSIGHTS_CONNECTION_STRING` | Browser telemetry for React -- same value as the `APP_INSIGHTS_CONNECTION_STRING` infra output. Missing/empty is safe (React just runs with no browser telemetry), but leaving it unset makes browser telemetry silently absent once the backends start reporting. |
 
 ## Step 1 — Provision infrastructure
 

@@ -1,7 +1,6 @@
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using DotNetEnv;
 using Microsoft.FluentUI.AspNetCore.Components;
-using OpenTelemetry;
 using WeatherBlazor.Data;
 
 Env.TraversePath().Load();
