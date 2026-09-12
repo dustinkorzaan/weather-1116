@@ -515,7 +515,7 @@ so publishing `wx1116-agent-for-current-weather` and `wx1116-agent-for-chat` is 
 by the `prod-deploy-foundry-agents` workflow
 (`.github/workflows/prod-deploy-foundry-agents.yml`,
 `.github/scripts/deploy-foundry-agent.sh`). The script POSTs each prompt
-agent to `{project}/agents?api-version=v1` (or `{project}/agents/{name}/versions`
+agent to `{project}/agents?api-version=2025-11-15-preview` (or `{project}/agents/{name}/versions`
 when the agent already exists) with model, instructions, and both MCP tools
 wired to those connections (`project_connection_id` + `require_approval: never`).
 It does not embed MCP secrets in the agent payload. Like the other
