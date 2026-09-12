@@ -9,7 +9,7 @@ public class GetCurrentAIWeatherV5HandlerTests
 
         Assert.Contains("ProjectOpenAIClient", source, StringComparison.Ordinal);
         Assert.Contains("GetProjectResponsesClientForAgent", source, StringComparison.Ordinal);
-        Assert.Contains("AZURE_FOUNDRY_PROD_EUS2_AGENT_NAME", source, StringComparison.Ordinal);
+        Assert.Contains("AZURE_FOUNDRY_PROD_CUS_AGENT_NAME", source, StringComparison.Ordinal);
         Assert.Contains("AIWeatherResponse", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ChatMcpToolFactory", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolExecutor", source, StringComparison.Ordinal);

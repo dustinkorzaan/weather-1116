@@ -16,9 +16,9 @@ APP_JSON='{"id":"conn-app-id","name":"MyMcpSrvAppService","target":"https://app.
 FUNC_JSON='{"id":"conn-func-id","name":"MyMcpSrvFuncApp","target":"https://func.example/runtime/webhooks/mcp"}'
 
 PAYLOAD="$(
-  AZURE_FOUNDRY_PROD_EUS2_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj/openai/v1' \
+  AZURE_FOUNDRY_PROD_CUS_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj/openai/v1' \
   AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
-  AZURE_FOUNDRY_PROD_EUS2_MODEL='gpt-5.4-mini' \
+  AZURE_FOUNDRY_PROD_CUS_MODEL='gpt-5.4-mini' \
   FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
   FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
   bash "$SCRIPT" wx1116-agent-for-current-weather "$INSTRUCTIONS" \
@@ -71,9 +71,9 @@ echo "$PAYLOAD" | jq -e '.version_body.definition.tools[0].project_connection_id
 # Chat agent (no response schema) still attaches both connections.
 CHAT_INSTRUCTIONS="${ROOT}/.github/foundry-agents/wx1116-agent-for-chat.instructions.md"
 CHAT_PAYLOAD="$(
-  AZURE_FOUNDRY_PROD_EUS2_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj' \
+  AZURE_FOUNDRY_PROD_CUS_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj' \
   AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
-  AZURE_FOUNDRY_PROD_EUS2_MODEL='gpt-5.4-mini' \
+  AZURE_FOUNDRY_PROD_CUS_MODEL='gpt-5.4-mini' \
   FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
   FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
   bash "$SCRIPT" wx1116-agent-for-chat "$CHAT_INSTRUCTIONS" --print-body
@@ -84,9 +84,9 @@ echo "$CHAT_PAYLOAD" | jq -e '.create_body.definition.tools | length == 2' >/dev
   || fail "chat agent should still attach both MCP connections"
 
 # Inference-only URL (no /api/projects/) must fail loudly.
-if AZURE_FOUNDRY_PROD_EUS2_PROJ_URL='https://acct.services.ai.azure.com/openai/v1' \
+if AZURE_FOUNDRY_PROD_CUS_PROJ_URL='https://acct.services.ai.azure.com/openai/v1' \
   AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
-  AZURE_FOUNDRY_PROD_EUS2_MODEL='gpt-5.4-mini' \
+  AZURE_FOUNDRY_PROD_CUS_MODEL='gpt-5.4-mini' \
   FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
   FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
   bash "$SCRIPT" wx1116-agent-for-chat "$CHAT_INSTRUCTIONS" --print-body >/dev/null 2>&1

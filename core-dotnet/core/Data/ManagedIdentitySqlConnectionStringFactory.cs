@@ -23,7 +23,7 @@ public static class ManagedIdentitySqlConnectionStringFactory
     /// </param>
     /// <param name="managedIdentityClientId">
     /// Client ID of this app's user-assigned managed identity (AZURE_CLIENT_ID,
-    /// set per app by infra/modules/container-app.bicep). Passed through as
+    /// set per app by infra/modules/app-service.bicep). Passed through as
     /// the connection string's User ID so DefaultAzureCredential knows which
     /// identity to use instead of guessing among several.
     /// </param>

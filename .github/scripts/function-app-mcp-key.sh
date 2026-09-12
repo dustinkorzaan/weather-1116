@@ -22,53 +22,70 @@ EOF
   exit 1
 fi
 
-# `az functionapp deploy` returns once the zip-deploy operation succeeds, not
-# once the app has actually restarted with it -- wait for the app to report
-# Running or the key list/set below can hit a still-restarting host.
+# `az functionapp deploy` and `config appsettings set` return once ARM
+# succeeds, not once the Functions host is serving. `az functionapp keys
+# list/set` talks to that host, so retry those calls until they succeed.
+# ARM `state=Running` is not a readiness signal: a live app stays Running
+# through zip-deploy and restarts.
+STATE="$(az functionapp show \
+  --name "$APP_NAME" \
+  --resource-group "$RESOURCE_GROUP" \
+  --query state \
+  --output tsv 2>/dev/null || true)"
+
+if [ "$STATE" = "Stopped" ]; then
+  echo "$APP_NAME state is Stopped; start it before setting keys." >&2
+  exit 1
+fi
+
 WAIT_TIMEOUT_S=180
 WAIT_INTERVAL_S=10
 ELAPSED_S=0
+CURRENT_KEY=""
+
 while true; do
-  STATE="$(az functionapp show \
-    --name "$APP_NAME" \
-    --resource-group "$RESOURCE_GROUP" \
-    --query state \
-    --output tsv 2>/dev/null || true)"
-
-  echo "Waiting on $APP_NAME (state=$STATE)..."
-
-  if [ "$STATE" = "Running" ]; then
-    echo "::notice::$APP_NAME is Running."
+  LIST_JSON=""
+  if LIST_JSON="$(az functionapp keys list \
+      --name "$APP_NAME" \
+      --resource-group "$RESOURCE_GROUP" \
+      --output json 2>/dev/null)"; then
+    CURRENT_KEY="$(jq -r '.systemKeys.mcp_extension // empty' <<< "$LIST_JSON")"
+    echo "Functions host on $APP_NAME accepted keys list (elapsed ${ELAPSED_S}s)."
     break
   fi
 
+  echo "Waiting on $APP_NAME Functions host keys API (elapsed ${ELAPSED_S}s, armState=${STATE:-unknown})..."
   if [ "$ELAPSED_S" -ge "$WAIT_TIMEOUT_S" ]; then
-    echo "$APP_NAME did not report state=Running within ${WAIT_TIMEOUT_S}s (state=$STATE)." >&2
+    echo "$APP_NAME keys list did not succeed within ${WAIT_TIMEOUT_S}s; the host is likely still restarting after deploy." >&2
     exit 1
   fi
-
   sleep "$WAIT_INTERVAL_S"
   ELAPSED_S=$((ELAPSED_S + WAIT_INTERVAL_S))
 done
-
-CURRENT_KEY="$(az functionapp keys list \
-  --name "$APP_NAME" \
-  --resource-group "$RESOURCE_GROUP" \
-  --query "systemKeys.mcp_extension" \
-  --output tsv 2>/dev/null || true)"
 
 if [ "$CURRENT_KEY" = "$KEY_VALUE" ]; then
   echo "::notice::mcp_extension system key already matches PROD_MCP_SRV_FUNC_APP_KEY."
   exit 0
 fi
 
-# --output none keeps the key value out of the job log.
-az functionapp keys set \
-  --name "$APP_NAME" \
-  --resource-group "$RESOURCE_GROUP" \
-  --key-name mcp_extension \
-  --key-type systemKeys \
-  --key-value "$KEY_VALUE" \
-  --output none
+ELAPSED_S=0
+while true; do
+  if az functionapp keys set \
+      --name "$APP_NAME" \
+      --resource-group "$RESOURCE_GROUP" \
+      --key-name mcp_extension \
+      --key-type systemKeys \
+      --key-value "$KEY_VALUE" \
+      --output none; then
+    echo "::notice::Set mcp_extension system key from PROD_MCP_SRV_FUNC_APP_KEY."
+    exit 0
+  fi
 
-echo "::notice::Set mcp_extension system key from PROD_MCP_SRV_FUNC_APP_KEY."
+  echo "Waiting to set mcp_extension on $APP_NAME (elapsed ${ELAPSED_S}s)..."
+  if [ "$ELAPSED_S" -ge "$WAIT_TIMEOUT_S" ]; then
+    echo "Failed to set mcp_extension on $APP_NAME within ${WAIT_TIMEOUT_S}s." >&2
+    exit 1
+  fi
+  sleep "$WAIT_INTERVAL_S"
+  ELAPSED_S=$((ELAPSED_S + WAIT_INTERVAL_S))
+done

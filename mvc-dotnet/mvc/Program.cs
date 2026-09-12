@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // (DB_CONNECTION_STRING); the worker is the only app that runs the servers.
 // Falls back to in-memory storage locally when no connection string is set.
 // Authenticates via this app's user-assigned managed identity (AZURE_CLIENT_ID,
-// set by infra/modules/container-app.bicep) instead of a SQL login/password --
+// set by infra/modules/app-service.bicep) instead of a SQL login/password --
 // see ManagedIdentitySqlConnectionStringFactory.
 var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
     builder.Configuration["DB_CONNECTION_STRING"],

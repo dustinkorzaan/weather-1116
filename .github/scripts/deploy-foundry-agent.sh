@@ -13,7 +13,7 @@
 #
 # Auth: the Agents API is a data-plane operation that requires a Microsoft
 # Entra ID bearer token, unlike the /openai/v1 inference endpoints the rest
-# of this app calls with AZURE_FOUNDRY_PROD_EUS2_KEY. The caller
+# of this app calls with AZURE_FOUNDRY_PROD_CUS_KEY. The caller
 # (prod-deploy-foundry-agents.yml) logs in via azure/login and passes a
 # token scoped to https://ai.azure.com/.default as
 # AZURE_FOUNDRY_ACCESS_TOKEN. The identity used must hold the "Foundry
@@ -25,11 +25,11 @@
 #     [--response-schema <schema-file>] [--print-body]
 #
 # Required env:
-#   AZURE_FOUNDRY_PROD_EUS2_PROJ_URL   Foundry project endpoint
+#   AZURE_FOUNDRY_PROD_CUS_PROJ_URL   Foundry project endpoint
 #                                      (.../api/projects/<name>)
 #   AZURE_FOUNDRY_ACCESS_TOKEN         Entra ID bearer token
 #                                      (scope https://ai.azure.com/.default)
-#   AZURE_FOUNDRY_PROD_EUS2_MODEL      Model deployment name, e.g. gpt-5.4-mini
+#   AZURE_FOUNDRY_PROD_CUS_MODEL      Model deployment name, e.g. gpt-5.4-mini
 #
 # Optional env:
 #   FOUNDRY_MCP_APP_CONNECTION_NAME    default MyMcpSrvAppService
@@ -64,9 +64,9 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-: "${AZURE_FOUNDRY_PROD_EUS2_PROJ_URL:?}"
+: "${AZURE_FOUNDRY_PROD_CUS_PROJ_URL:?}"
 : "${AZURE_FOUNDRY_ACCESS_TOKEN:?}"
-: "${AZURE_FOUNDRY_PROD_EUS2_MODEL:?}"
+: "${AZURE_FOUNDRY_PROD_CUS_MODEL:?}"
 
 FOUNDRY_MCP_APP_CONNECTION_NAME="${FOUNDRY_MCP_APP_CONNECTION_NAME:-MyMcpSrvAppService}"
 FOUNDRY_MCP_FUNC_CONNECTION_NAME="${FOUNDRY_MCP_FUNC_CONNECTION_NAME:-MyMcpSrvFuncApp}"
@@ -77,13 +77,13 @@ normalize_project_endpoint() {
   local url="${1%/}"
   url="${url%/openai/v1}"
   if [[ "$url" != *"/api/projects/"* ]]; then
-    echo "AZURE_FOUNDRY_PROD_EUS2_PROJ_URL must be a Foundry project endpoint (https://<account>.services.ai.azure.com/api/projects/<name>), not an OpenAI inference URL." >&2
+    echo "AZURE_FOUNDRY_PROD_CUS_PROJ_URL must be a Foundry project endpoint (https://<account>.services.ai.azure.com/api/projects/<name>), not an OpenAI inference URL." >&2
     exit 1
   fi
   printf '%s' "$url"
 }
 
-PROJECT_ENDPOINT="$(normalize_project_endpoint "$AZURE_FOUNDRY_PROD_EUS2_PROJ_URL")"
+PROJECT_ENDPOINT="$(normalize_project_endpoint "$AZURE_FOUNDRY_PROD_CUS_PROJ_URL")"
 CREATE_URL="${PROJECT_ENDPOINT}/agents?api-version=${API_VERSION}"
 VERSION_URL="${PROJECT_ENDPOINT}/agents/${AGENT_NAME}/versions?api-version=${API_VERSION}"
 GET_AGENT_URL="${PROJECT_ENDPOINT}/agents/${AGENT_NAME}?api-version=${API_VERSION}"
@@ -182,7 +182,7 @@ TOOLS_JSON=$(jq -n \
   ]')
 
 DEFINITION=$(jq -n \
-  --arg model "$AZURE_FOUNDRY_PROD_EUS2_MODEL" \
+  --arg model "$AZURE_FOUNDRY_PROD_CUS_MODEL" \
   --rawfile instructions "$INSTRUCTIONS_FILE" \
   --argjson tools "$TOOLS_JSON" \
   '{kind: "prompt", model: $model, instructions: $instructions, tools: $tools}')
@@ -211,7 +211,7 @@ if [ "$PRINT_BODY" -eq 1 ]; then
   exit 0
 fi
 
-echo "::notice::Publishing agent '${AGENT_NAME}' (model: ${AZURE_FOUNDRY_PROD_EUS2_MODEL}) to ${PROJECT_ENDPOINT}"
+echo "::notice::Publishing agent '${AGENT_NAME}' (model: ${AZURE_FOUNDRY_PROD_CUS_MODEL}) to ${PROJECT_ENDPOINT}"
 
 RESPONSE_FILE="$(mktemp)"
 trap 'rm -f "$RESPONSE_FILE"' EXIT

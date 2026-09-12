@@ -50,14 +50,14 @@ jobs:
           resource_group: ${{ env.RESOURCE_GROUP }}
           secrets_multiline: |
             db-connection-string=${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}
-            foundry-key=${{ secrets.AZURE_FOUNDRY_PROD_EUS2_KEY }}
+            foundry-key=${{ secrets.AZURE_FOUNDRY_PROD_CUS_KEY }}
             mcp-func-key=${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
             mcp-app-key=${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
           env_overlay_multiline: |
             DB_CONNECTION_STRING=secretref:db-connection-string
-            AZURE_FOUNDRY_PROD_EUS2_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_EUS2_PROJ_URL }}
-            AZURE_FOUNDRY_PROD_EUS2_KEY=secretref:foundry-key
-            AZURE_FOUNDRY_PROD_EUS2_MODEL=${{ vars.AZURE_FOUNDRY_PROD_EUS2_MODEL }}
+            AZURE_FOUNDRY_PROD_CUS_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_CUS_PROJ_URL }}
+            AZURE_FOUNDRY_PROD_CUS_KEY=secretref:foundry-key
+            AZURE_FOUNDRY_PROD_CUS_MODEL=${{ vars.AZURE_FOUNDRY_PROD_CUS_MODEL }}
             MCP_SRV_APP_SERVICE_URL=${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
             MCP_SRV_FUNC_APP_URL=${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
             MCP_SRV_FUNC_APP_KEY=secretref:mcp-func-key
