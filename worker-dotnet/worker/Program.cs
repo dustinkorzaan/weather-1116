@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Core;
 using Core.About;
 using Core.Data;
@@ -7,11 +8,20 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
 using CQMediator;
+using OpenTelemetry;
 using WeatherWorkerDotNet;
 
 Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Exports traces/metrics/logs to Application Insights via APPLICATIONINSIGHTS_CONNECTION_STRING
+// (set by infra/modules/app-service.bicep). UseAzureMonitor() throws at startup if the
+// connection string is missing, so it's opt-in -- local dev runs with no App Insights resource.
+if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+	builder.Services.AddOpenTelemetry().UseAzureMonitor();
+}
 
 builder.Services.AddStandardCoreServices();
 builder.Services.Configure<HangfireAboutHealthOptions>(options =>

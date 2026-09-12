@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Core;
 using Core.About;
 using Core.Chat;
@@ -8,10 +9,20 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
 using CQMediator;
+using OpenTelemetry;
 
 Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Exports traces/metrics/logs to Application Insights via APPLICATIONINSIGHTS_CONNECTION_STRING
+// (set by infra/modules/app-service.bicep). UseAzureMonitor() throws at startup if the
+// connection string is missing, so it's opt-in -- local dev and WebApplicationFactory-based
+// tests run with no App Insights resource at all.
+if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+    builder.Services.AddOpenTelemetry().UseAzureMonitor();
+}
 
 // Hangfire client only: this app enqueues jobs onto the shared storage
 // (DB_CONNECTION_STRING); the worker is the only app that runs the servers.
