@@ -21,7 +21,7 @@ and assigns Contributor + User Access Administrator on this resource group.
 | Function App (Linux, dedicated plan) | `wx1116-prod-mcp-srv-func-app` |
 | Storage (Functions host) | `wx1116prodblob` |
 | Static Web App | `wx1116-prod-react` |
-| SQL Server + database | `wx1116-prod-sql-srv` / `wx1116-prod-sql-database` |
+| SQL Server (Entra-only auth) + database | `wx1116-prod-sql-srv` / `wx1116-prod-sql-database` |
 | App Insights + Log Analytics | `wx1116-prod-appinsights` / `wx1116-prod-log` |
 | AI Foundry | `wx1116-prod-res` / `wx1116-prod-proj` |
 | Six runtime managed identities | `wx1116-prod-*-mi` |
@@ -37,7 +37,6 @@ Everything uses `location: centralus`.
 | `AZURE_GITHUB_CLIENTID` | GitHub Actions MI client ID |
 | `AZURE_TENANTID` | Azure AD tenant |
 | `AZURE_SUBSCRIPTIONID` | Target subscription |
-| `AZURE_SQL_ADMIN_LOGIN_NAME` | SQL native admin username for Bicep |
 
 **Secrets** (before app deploys):
 

@@ -25,10 +25,6 @@ param githubActionsIdentityName string = 'wx1116-prod-github-actions-mi'
 param storageAccountName string = 'wx1116prodblob'
 
 @secure()
-@description('SQL admin login username. Supply via azd env set / --parameters at deploy time.')
-param sqlAdministratorLogin string
-
-@secure()
 @description('Bearer token for the MCP Server on App Service tool host, registered as the MyMcpSrvAppService Foundry RemoteTool connection. Supply via azd env set / --parameters at deploy time.')
 param mcpSrvAppServiceKey string
 
@@ -123,7 +119,6 @@ module sql 'modules/sql.bicep' = {
     serverName: '${namePrefix}-${environmentName}-sql-srv'
     databaseName: '${namePrefix}-${environmentName}-sql-database'
     location: location
-    administratorLogin: sqlAdministratorLogin
     entraAdminPrincipalId: githubActionsIdentity.outputs.principalId
     entraAdminLoginName: githubActionsIdentityName
   }
