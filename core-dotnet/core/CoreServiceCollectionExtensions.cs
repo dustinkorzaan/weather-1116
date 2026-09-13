@@ -1,6 +1,5 @@
 using Core.Caching;
 using Core.Chat.Services;
-using Core.Data;
 using Core.HelloWorld.Handlers;
 using Core.Http;
 using Core.Tools;
@@ -13,6 +12,9 @@ public static class CoreServiceCollectionExtensions
 {
     public static IServiceCollection AddStandardCoreServices(this IServiceCollection services)
     {
+        // Also registers LogAgentActivityHandler (Core.Data.Handlers) via assembly scanning --
+        // AgentActivityDbContext and IAgentActivityHostProvider it depends on are registered
+        // per-host in Program.cs, since each needs that host's DB_CONNECTION_STRING and Api/Mvc tag.
         services.AddCQMediator(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
         services.AddMemoryCache();
         services.AddHttpClient();
@@ -23,9 +25,6 @@ public static class CoreServiceCollectionExtensions
         // this remote-MCP tool factory in every host that includes Core, not just the ones
         // that also call AddWeatherChatClients().
         services.AddSingleton<ChatMcpToolFactory>();
-        // AgentActivityDbContext and IAgentActivityHostProvider are registered per-host
-        // (Program.cs) since each needs that host's DB_CONNECTION_STRING and Api/Mvc tag.
-        services.AddScoped<IAgentActivityLogger, AgentActivityLogger>();
         return services;
     }
 }

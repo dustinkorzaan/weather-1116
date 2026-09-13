@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Data.Migrations
 {
     [DbContext(typeof(AgentActivityDbContext))]
-    [Migration("20260913004639_InitialCreateAgentActivity")]
+    [Migration("20260913005619_InitialCreateAgentActivity")]
     partial class InitialCreateAgentActivity
     {
         /// <inheritdoc />
@@ -29,6 +29,10 @@ namespace Core.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AgentName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int?>("CachedTokenCount")
                         .HasColumnType("int");
@@ -72,6 +76,9 @@ namespace Core.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int?>("LoopNumber")
+                        .HasColumnType("int");
+
                     b.Property<int?>("OutputTokenCount")
                         .HasColumnType("int");
 
@@ -85,14 +92,23 @@ namespace Core.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("ToolName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<int?>("TotalTokenCount")
                         .HasColumnType("int");
+
+                    b.Property<Guid>("TraceId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CorrelationId");
 
                     b.HasIndex("SessionId");
+
+                    b.HasIndex("TraceId");
 
                     b.ToTable("AgentActivity", "dbo");
                 });

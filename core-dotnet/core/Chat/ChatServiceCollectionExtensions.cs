@@ -6,8 +6,8 @@ using Core.Chat.Chat3;
 using Core.Chat.Chat4a;
 using Core.Chat.Chat4b;
 using Core.Chat.Services;
-using Core.Data;
 using Core.Data.Domain;
+using CQMediator;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.Chat;
@@ -44,7 +44,7 @@ public static class ChatServiceCollectionExtensions
     {
         services.AddKeyedScoped<IChatClientService>(feature, (sp, _) => new AgentActivityLoggingChatClientService(
             ActivatorUtilities.CreateInstance<TService>(sp),
-            sp.GetRequiredService<IAgentActivityLogger>(),
+            sp.GetRequiredService<IMediator>(),
             feature,
             featureCategory));
     }
