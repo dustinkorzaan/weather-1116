@@ -3,12 +3,15 @@ using Core;
 using Core.About;
 using Core.Chat;
 using Core.Data;
+using Core.Data.Domain;
 using Core.Hangfire;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
+using Microsoft.EntityFrameworkCore;
 using CQMediator;
+using WeatherMVC;
 
 Env.TraversePath().Load();
 
@@ -59,6 +62,17 @@ builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 });
 builder.Services.AddStandardCoreServices();
 builder.Services.AddWeatherChatClients();
+
+// dbo.AgentActivity logging (Chat1a-Chat4b and Current AI Weather V3/V4/V5). Unlike Hangfire
+// above, DB_CONNECTION_STRING is a hard requirement here -- there is no in-memory fallback, so
+// this throws at startup if it's missing. API's Program.cs owns applying migrations
+// (Database.Migrate()); this app only reads/writes the already-migrated schema.
+// HttpAgentActivityContextProvider lets LogAgentActivityHandler capture the inbound request
+// into each row's Context column.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAgentActivityContextProvider, HttpAgentActivityContextProvider>();
+builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Mvc));
+builder.Services.AddDbContext<AgentActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
 
 var app = builder.Build();
 

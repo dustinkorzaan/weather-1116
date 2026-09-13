@@ -1,10 +1,13 @@
 using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.Diagnostics;
 using System.Text.Json;
 using Azure.AI.Extensions.OpenAI;
+using Core.Agent.Events;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.AIWeather.Services;
+using Core.Data.Domain;
 using Core.Weather;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using CQMediator;
@@ -26,12 +29,15 @@ namespace Core.AIWeather.Handlers;
 /// </summary>
 public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV5Event, AIWeatherResponse>
 {
+    private const string Feature = "AIWeatherV5";
     private static readonly string DefaultLocation = "Nashville, TN";
 
+    private readonly IMediator _mediator;
     private readonly ILogger<GetCurrentAIWeatherV5Handler> _logger;
 
-    public GetCurrentAIWeatherV5Handler(ILogger<GetCurrentAIWeatherV5Handler> logger)
+    public GetCurrentAIWeatherV5Handler(IMediator mediator, ILogger<GetCurrentAIWeatherV5Handler> logger)
     {
+        _mediator = mediator;
         _logger = logger;
     }
 
@@ -48,6 +54,39 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         var location = string.IsNullOrWhiteSpace(request.Location)
             ? DefaultLocation
             : request.Location.Trim();
+
+        var activitySessionId = Guid.NewGuid().ToString();
+        var traceId = Guid.NewGuid();
+        var userPrompt = $"What is the current weather in: `{location}`?";
+        var correlationId = await _mediator.Send(new LogAgentActivityEvent
+        {
+            Direction = AgentActivityDirection.Request,
+            TraceId = traceId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.Agent,
+            SessionId = activitySessionId,
+            Content = userPrompt,
+            Location = location,
+        }, cancellationToken);
+        var stopwatch = Stopwatch.StartNew();
+
+        Task LogActivityErrorAsync(string errorMessage, ResponseResult? failureResponse) => _mediator.Send(new LogAgentActivityEvent
+        {
+            Direction = AgentActivityDirection.Response,
+            TraceId = traceId,
+            CorrelationId = correlationId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.Agent,
+            SessionId = activitySessionId,
+            Location = location,
+            InputTokenCount = failureResponse?.Usage?.InputTokenCount,
+            CachedTokenCount = failureResponse?.Usage?.InputTokenDetails?.CachedTokenCount,
+            OutputTokenCount = failureResponse?.Usage?.OutputTokenCount,
+            ReasoningTokenCount = failureResponse?.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+            TotalTokenCount = failureResponse?.Usage?.TotalTokenCount,
+            RuntimeMs = (int)stopwatch.ElapsedMilliseconds,
+            ErrorMessage = errorMessage,
+        }, cancellationToken);
 
         var endpoint = Resolve(
             Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
@@ -70,8 +109,6 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
 
         ProjectResponsesClient client = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
 
-        var userPrompt = $"What is the current weather in: `{location}`?";
-
         CreateResponseOptions options = new()
         {
             InputItems =
@@ -91,20 +128,24 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         {
             LogRunLogOnFailure("hosted agent requested MCP tool approval");
             var tools = string.Join(", ", approvalRequests.Select(item => $"{item.ServerLabel}/{item.ToolName}"));
-            throw new InvalidOperationException(
+            var message =
                 $"Hosted agent '{agentName}' requested MCP tool approval ({tools}). " +
                 "V5 sends only the user prompt and does not round-trip approvals. " +
                 "On the agent, set each MCP tool to require_approval: never " +
-                "(Foundry portal: Agents → this agent → Tools → MCP → Approval = Never), then publish a new version.");
+                "(Foundry portal: Agents → this agent → Tools → MCP → Approval = Never), then publish a new version.";
+            await LogActivityErrorAsync(message, response);
+            throw new InvalidOperationException(message);
         }
 
         if (response.Status != ResponseStatus.Completed)
         {
             LogRunLogOnFailure("model response did not complete");
-            throw new InvalidOperationException(
+            var message =
                 $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
                 $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
-                $"error: {response.Error?.Message ?? "(none)"}");
+                $"error: {response.Error?.Message ?? "(none)"}";
+            await LogActivityErrorAsync(message, response);
+            throw new InvalidOperationException(message);
         }
 
         var content = response.GetOutputText();
@@ -113,8 +154,10 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         if (modelOutput is null)
         {
             LogRunLogOnFailure("model returned empty or invalid JSON");
-            throw new InvalidOperationException(
-                $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
+            var message =
+                $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}";
+            await LogActivityErrorAsync(message, response);
+            throw new InvalidOperationException(message);
         }
 
         modelOutput.WindDirectionSourceDegrees =
@@ -124,6 +167,24 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
 
         runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV5Handler)}", null);
         modelOutput.RunLogDetails = runLog.Hydrate();
+
+        await _mediator.Send(new LogAgentActivityEvent
+        {
+            Direction = AgentActivityDirection.Response,
+            TraceId = traceId,
+            CorrelationId = correlationId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.Agent,
+            SessionId = activitySessionId,
+            Content = content,
+            Location = location,
+            InputTokenCount = response.Usage?.InputTokenCount,
+            CachedTokenCount = response.Usage?.InputTokenDetails?.CachedTokenCount,
+            OutputTokenCount = response.Usage?.OutputTokenCount,
+            ReasoningTokenCount = response.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+            TotalTokenCount = response.Usage?.TotalTokenCount,
+            RuntimeMs = (int)stopwatch.ElapsedMilliseconds,
+        }, cancellationToken);
 
         return modelOutput;
     }

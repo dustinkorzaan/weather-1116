@@ -1,12 +1,15 @@
 using System.ClientModel;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
+using Core.Agent.Events;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.AIWeather.Services;
 using Core.Chat.Services;
+using Core.Data.Domain;
 using Core.Json;
 using Core.Weather;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
@@ -24,14 +27,20 @@ namespace Core.AIWeather.Handlers;
 /// </summary>
 public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV4Event, AIWeatherResponse>
 {
+    private const string Feature = "AIWeatherV4";
     private static readonly string DefaultLocation = "Nashville, TN";
 
     private readonly ChatMcpToolFactory _mcpToolFactory;
+    private readonly IMediator _mediator;
     private readonly ILogger<GetCurrentAIWeatherV4Handler> _logger;
 
-    public GetCurrentAIWeatherV4Handler(ChatMcpToolFactory mcpToolFactory, ILogger<GetCurrentAIWeatherV4Handler> logger)
+    public GetCurrentAIWeatherV4Handler(
+        ChatMcpToolFactory mcpToolFactory,
+        IMediator mediator,
+        ILogger<GetCurrentAIWeatherV4Handler> logger)
     {
         _mcpToolFactory = mcpToolFactory;
+        _mediator = mediator;
         _logger = logger;
     }
 
@@ -48,6 +57,39 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         var location = string.IsNullOrWhiteSpace(request.Location)
             ? DefaultLocation
             : request.Location.Trim();
+
+        var activitySessionId = Guid.NewGuid().ToString();
+        var traceId = Guid.NewGuid();
+        var userPrompt = $"What is the current weather in: `{location}`?";
+        var correlationId = await _mediator.Send(new LogAgentActivityEvent
+        {
+            Direction = AgentActivityDirection.Request,
+            TraceId = traceId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+            SessionId = activitySessionId,
+            Content = userPrompt,
+            Location = location,
+        }, cancellationToken);
+        var stopwatch = Stopwatch.StartNew();
+
+        Task LogActivityErrorAsync(string errorMessage, ResponseResult? failureResponse) => _mediator.Send(new LogAgentActivityEvent
+        {
+            Direction = AgentActivityDirection.Response,
+            TraceId = traceId,
+            CorrelationId = correlationId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+            SessionId = activitySessionId,
+            Location = location,
+            InputTokenCount = failureResponse?.Usage?.InputTokenCount,
+            CachedTokenCount = failureResponse?.Usage?.InputTokenDetails?.CachedTokenCount,
+            OutputTokenCount = failureResponse?.Usage?.OutputTokenCount,
+            ReasoningTokenCount = failureResponse?.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+            TotalTokenCount = failureResponse?.Usage?.TotalTokenCount,
+            RuntimeMs = (int)stopwatch.ElapsedMilliseconds,
+            ErrorMessage = errorMessage,
+        }, cancellationToken);
 
         var endpoint = Resolve(
             Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
@@ -89,8 +131,6 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
             - latitude: Decimal degrees from the best geo result (positive north, negative south).
             - longitude: Decimal degrees from the best geo result (positive east, negative west).
             """;
-
-        var userPrompt = $"What is the current weather in: `{location}`?";
 
         var aiOutputSchema = BuildAIOutputSchema();
 
@@ -135,10 +175,12 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         if (response.Status != ResponseStatus.Completed)
         {
             LogRunLogOnFailure("model response did not complete");
-            throw new InvalidOperationException(
+            var message =
                 $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
                 $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
-                $"error: {response.Error?.Message ?? "(none)"}");
+                $"error: {response.Error?.Message ?? "(none)"}";
+            await LogActivityErrorAsync(message, response);
+            throw new InvalidOperationException(message);
         }
 
         var content = response.GetOutputText();
@@ -147,8 +189,10 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         if (modelOutput is null)
         {
             LogRunLogOnFailure("model returned empty or invalid JSON");
-            throw new InvalidOperationException(
-                $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
+            var message =
+                $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}";
+            await LogActivityErrorAsync(message, response);
+            throw new InvalidOperationException(message);
         }
 
         modelOutput.WindDirectionSourceDegrees =
@@ -158,6 +202,24 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
         runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV4Handler)}", null);
         modelOutput.RunLogDetails = runLog.Hydrate();
+
+        await _mediator.Send(new LogAgentActivityEvent
+        {
+            Direction = AgentActivityDirection.Response,
+            TraceId = traceId,
+            CorrelationId = correlationId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+            SessionId = activitySessionId,
+            Content = content,
+            Location = location,
+            InputTokenCount = response.Usage?.InputTokenCount,
+            CachedTokenCount = response.Usage?.InputTokenDetails?.CachedTokenCount,
+            OutputTokenCount = response.Usage?.OutputTokenCount,
+            ReasoningTokenCount = response.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+            TotalTokenCount = response.Usage?.TotalTokenCount,
+            RuntimeMs = (int)stopwatch.ElapsedMilliseconds,
+        }, cancellationToken);
 
         return modelOutput;
     }

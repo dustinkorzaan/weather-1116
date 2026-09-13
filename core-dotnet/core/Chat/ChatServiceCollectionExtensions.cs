@@ -6,6 +6,8 @@ using Core.Chat.Chat3;
 using Core.Chat.Chat4a;
 using Core.Chat.Chat4b;
 using Core.Chat.Services;
+using Core.Data.Domain;
+using CQMediator;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.Chat;
@@ -22,14 +24,28 @@ public static class ChatServiceCollectionExtensions
         services.AddSingleton<ChatAgentSessionStore>();
         services.AddSingleton<ChatHostedAgentResponseStore>();
 
-        services.AddKeyedScoped<IChatClientService, Chat1aService>("Chat1a");
-        services.AddKeyedScoped<IChatClientService, Chat1bService>("Chat1b");
-        services.AddKeyedScoped<IChatClientService, Chat2aService>("Chat2a");
-        services.AddKeyedScoped<IChatClientService, Chat2bService>("Chat2b");
-        services.AddKeyedScoped<IChatClientService, Chat3Service>("Chat3");
-        services.AddKeyedScoped<IChatClientService, Chat4aService>("Chat4a");
-        services.AddKeyedScoped<IChatClientService, Chat4bService>("Chat4b");
+        // Each registration wraps the real service in AgentActivityLoggingChatClientService so
+        // every prompt/response for every tab lands in dbo.AgentActivity with no per-controller
+        // or per-service changes. FeatureCategory mirrors docs/5-chat-clients/5-chat-clients.md's
+        // "Stack" column.
+        AddLoggedChatClient<Chat1aService>(services, "Chat1a", AgentActivityFeatureCategory.ModelDirect);
+        AddLoggedChatClient<Chat1bService>(services, "Chat1b", AgentActivityFeatureCategory.ModelDirect);
+        AddLoggedChatClient<Chat2aService>(services, "Chat2a", AgentActivityFeatureCategory.ModelDirect);
+        AddLoggedChatClient<Chat2bService>(services, "Chat2b", AgentActivityFeatureCategory.ModelDirect);
+        AddLoggedChatClient<Chat3Service>(services, "Chat3", AgentActivityFeatureCategory.Agent);
+        AddLoggedChatClient<Chat4aService>(services, "Chat4a", AgentActivityFeatureCategory.MultiAgent);
+        AddLoggedChatClient<Chat4bService>(services, "Chat4b", AgentActivityFeatureCategory.MultiAgent);
 
         return services;
+    }
+
+    private static void AddLoggedChatClient<TService>(IServiceCollection services, string feature, string featureCategory)
+        where TService : class, IChatClientService
+    {
+        services.AddKeyedScoped<IChatClientService>(feature, (sp, _) => new AgentActivityLoggingChatClientService(
+            ActivatorUtilities.CreateInstance<TService>(sp),
+            sp.GetRequiredService<IMediator>(),
+            feature,
+            featureCategory));
     }
 }

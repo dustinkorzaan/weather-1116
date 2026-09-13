@@ -2,11 +2,13 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Core;
 using Core.About;
 using Core.Data;
+using Core.Data.Domain;
 using Core.Hangfire;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
+using Microsoft.EntityFrameworkCore;
 using CQMediator;
 using WeatherWorkerDotNet;
 
@@ -27,6 +29,16 @@ builder.Services.Configure<HangfireAboutHealthOptions>(options =>
 	HangfireAboutHealthOptions.Configure(options, builder.Configuration));
 builder.Services.AddControllers();
 
+// dbo.AgentActivity logging: the confirm-nashville-ai-weather-v3/v4 recurring jobs below call
+// straight into GetCurrentAIWeatherV3Handler/V4Handler, the same handlers API's AIWeatherController
+// and MVC's HomeController call -- this is the third host (alongside Api and Mvc) that can produce
+// AgentActivity rows. DB_CONNECTION_STRING is a hard requirement here, same as API and MVC.
+// HttpAgentActivityContextProvider is registered too, but a Hangfire recurring job has no
+// ambient HttpContext, so it always returns null and rows logged from this host leave Context null.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAgentActivityContextProvider, HttpAgentActivityContextProvider>();
+builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Worker));
+
 // Durable SQL Server storage wherever a connection string is provided
 // (DB_CONNECTION_STRING). Falls back to in-memory storage locally so the
 // worker still runs without a database. Authenticates via this app's
@@ -36,6 +48,11 @@ builder.Services.AddControllers();
 var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
 	builder.Configuration["DB_CONNECTION_STRING"],
 	builder.Configuration["AZURE_CLIENT_ID"]);
+
+// Unlike Hangfire's own storage above, there is no in-memory fallback here -- this throws at
+// startup if DB_CONNECTION_STRING is missing. API's Program.cs owns applying migrations
+// (Database.Migrate()); this app only reads/writes the already-migrated schema.
+builder.Services.AddDbContext<AgentActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
 
 // Explicit, non-zero poll interval: a value > TimeSpan.Zero keeps Hangfire on
 // interval polling (every 60s) rather than the aggressive/continuous mode.
