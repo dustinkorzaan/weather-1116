@@ -1,8 +1,8 @@
 using System.Runtime.CompilerServices;
 using System.Text;
+using Core.Agent.Events;
 using Core.Chat.Models;
 using Core.Data.Domain;
-using Core.Data.Events;
 using CQMediator;
 
 namespace Core.Chat.Services;
