@@ -27,7 +27,7 @@ namespace Core.AIWeather.Handlers;
 /// </summary>
 public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV4Event, AIWeatherResponse>
 {
-    private const string Feature = "AIWeatherV4";
+    private const string Feature = nameof(GetCurrentAIWeatherV4Handler);
     private static readonly string DefaultLocation = "Nashville, TN";
 
     private readonly ChatMcpToolFactory _mcpToolFactory;
