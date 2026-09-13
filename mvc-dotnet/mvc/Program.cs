@@ -11,6 +11,7 @@ using Hangfire.MemoryStorage;
 using Hangfire.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using CQMediator;
+using WeatherMVC;
 
 Env.TraversePath().Load();
 
@@ -66,6 +67,10 @@ builder.Services.AddWeatherChatClients();
 // above, DB_CONNECTION_STRING is a hard requirement here -- there is no in-memory fallback, so
 // this throws at startup if it's missing. API's Program.cs owns applying migrations
 // (Database.Migrate()); this app only reads/writes the already-migrated schema.
+// HttpAgentActivityContextProvider lets LogAgentActivityHandler capture the inbound request
+// into each row's Context column.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAgentActivityContextProvider, HttpAgentActivityContextProvider>();
 builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Mvc));
 builder.Services.AddDbContext<AgentActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
 
