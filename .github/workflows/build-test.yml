@@ -78,6 +78,24 @@ jobs:
     name: Test Weather API
     runs-on: ubuntu-latest
 
+    # api.tests boots the real Program.cs via WebApplicationFactory<Program>, which requires
+    # DB_CONNECTION_STRING unconditionally (dbo.AgentActivity logging -- see docs/5-chat-clients)
+    # and applies migrations itself on startup, so no separate migrate step is needed here.
+    services:
+      sql-server:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "P@ssw0rd2026!"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P P@ssw0rd2026! -C -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 10s
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -89,6 +107,11 @@ jobs:
 
       - name: Run Weather API tests
         run: dotnet test api-dotnet/api.tests/WeatherAPI.Tests.csproj --configuration Release --verbosity normal
+        env:
+          # Explicit Authentication=SqlPassword keeps ManagedIdentitySqlConnectionStringFactory
+          # from overriding this with Entra auth (it only does that when Authentication is
+          # unset) -- see core-dotnet/core/Data/ManagedIdentitySqlConnectionStringFactory.cs.
+          DB_CONNECTION_STRING: "Server=localhost,1433;Database=AgentActivityCiTests;User ID=sa;Password=P@ssw0rd2026!;TrustServerCertificate=True;Authentication=SqlPassword"
 
   test-core:
     name: Test Core Library
