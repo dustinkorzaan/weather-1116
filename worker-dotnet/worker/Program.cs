@@ -33,6 +33,10 @@ builder.Services.AddControllers();
 // straight into GetCurrentAIWeatherV3Handler/V4Handler, the same handlers API's AIWeatherController
 // and MVC's HomeController call -- this is the third host (alongside Api and Mvc) that can produce
 // AgentActivity rows. DB_CONNECTION_STRING is a hard requirement here, same as API and MVC.
+// HttpAgentActivityContextProvider is registered too, but a Hangfire recurring job has no
+// ambient HttpContext, so it always returns null and rows logged from this host leave Context null.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAgentActivityContextProvider, HttpAgentActivityContextProvider>();
 builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Worker));
 
 // Durable SQL Server storage wherever a connection string is provided

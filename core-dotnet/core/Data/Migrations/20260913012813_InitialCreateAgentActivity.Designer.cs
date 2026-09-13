@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Data.Migrations
 {
     [DbContext(typeof(AgentActivityDbContext))]
-    [Migration("20260913011816_InitialCreateAgentActivity")]
+    [Migration("20260913012813_InitialCreateAgentActivity")]
     partial class InitialCreateAgentActivity
     {
         /// <inheritdoc />
@@ -38,6 +38,9 @@ namespace Core.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Context")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("CorrelationId")
