@@ -13,7 +13,7 @@ public class AgentActivityConfig : IEntityTypeConfiguration<AgentActivity>
         builder.Property(activity => activity.Id).ValueGeneratedNever();
 
         builder.Property(activity => activity.SessionId).HasMaxLength(100);
-        builder.Property(activity => activity.Feature).HasMaxLength(20).IsRequired();
+        builder.Property(activity => activity.Feature).HasMaxLength(AgentActivityColumnLengths.Feature).IsRequired();
         builder.Property(activity => activity.FeatureCategory).HasMaxLength(20).IsRequired();
         builder.Property(activity => activity.Host).HasMaxLength(10).IsRequired();
         builder.Property(activity => activity.Direction).HasMaxLength(10).IsRequired();
