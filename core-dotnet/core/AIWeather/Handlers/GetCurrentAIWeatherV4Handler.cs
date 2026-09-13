@@ -8,8 +8,8 @@ using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.AIWeather.Services;
 using Core.Chat.Services;
-using Core.Data;
 using Core.Data.Domain;
+using Core.Data.Events;
 using Core.Json;
 using Core.Weather;
 using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
@@ -31,16 +31,16 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
     private static readonly string DefaultLocation = "Nashville, TN";
 
     private readonly ChatMcpToolFactory _mcpToolFactory;
-    private readonly IAgentActivityLogger _activityLogger;
+    private readonly IMediator _mediator;
     private readonly ILogger<GetCurrentAIWeatherV4Handler> _logger;
 
     public GetCurrentAIWeatherV4Handler(
         ChatMcpToolFactory mcpToolFactory,
-        IAgentActivityLogger activityLogger,
+        IMediator mediator,
         ILogger<GetCurrentAIWeatherV4Handler> logger)
     {
         _mcpToolFactory = mcpToolFactory;
-        _activityLogger = activityLogger;
+        _mediator = mediator;
         _logger = logger;
     }
 
@@ -59,31 +59,37 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
             : request.Location.Trim();
 
         var activitySessionId = Guid.NewGuid().ToString();
+        var traceId = Guid.NewGuid();
         var userPrompt = $"What is the current weather in: `{location}`?";
-        var correlationId = await _activityLogger.LogRequestAsync(
-            Feature,
-            AgentActivityFeatureCategory.ModelDirect,
-            activitySessionId,
-            userPrompt,
-            location,
-            cancellationToken);
+        var correlationId = await _mediator.Send(new LogAgentActivityEvent
+        {
+            Direction = AgentActivityDirection.Request,
+            TraceId = traceId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+            SessionId = activitySessionId,
+            Content = userPrompt,
+            Location = location,
+        }, cancellationToken);
         var stopwatch = Stopwatch.StartNew();
 
-        Task LogActivityErrorAsync(string errorMessage, ResponseResult? failureResponse) => _activityLogger.LogResponseAsync(
-            correlationId,
-            Feature,
-            AgentActivityFeatureCategory.ModelDirect,
-            activitySessionId,
-            content: null,
-            location: location,
-            inputTokenCount: failureResponse?.Usage?.InputTokenCount,
-            cachedTokenCount: failureResponse?.Usage?.InputTokenDetails?.CachedTokenCount,
-            outputTokenCount: failureResponse?.Usage?.OutputTokenCount,
-            reasoningTokenCount: failureResponse?.Usage?.OutputTokenDetails?.ReasoningTokenCount,
-            totalTokenCount: failureResponse?.Usage?.TotalTokenCount,
-            runtimeMs: (int)stopwatch.ElapsedMilliseconds,
-            errorMessage: errorMessage,
-            cancellationToken: cancellationToken);
+        Task LogActivityErrorAsync(string errorMessage, ResponseResult? failureResponse) => _mediator.Send(new LogAgentActivityEvent
+        {
+            Direction = AgentActivityDirection.Response,
+            TraceId = traceId,
+            CorrelationId = correlationId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+            SessionId = activitySessionId,
+            Location = location,
+            InputTokenCount = failureResponse?.Usage?.InputTokenCount,
+            CachedTokenCount = failureResponse?.Usage?.InputTokenDetails?.CachedTokenCount,
+            OutputTokenCount = failureResponse?.Usage?.OutputTokenCount,
+            ReasoningTokenCount = failureResponse?.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+            TotalTokenCount = failureResponse?.Usage?.TotalTokenCount,
+            RuntimeMs = (int)stopwatch.ElapsedMilliseconds,
+            ErrorMessage = errorMessage,
+        }, cancellationToken);
 
         var endpoint = Resolve(
             Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
@@ -197,20 +203,23 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV4Handler)}", null);
         modelOutput.RunLogDetails = runLog.Hydrate();
 
-        await _activityLogger.LogResponseAsync(
-            correlationId,
-            Feature,
-            AgentActivityFeatureCategory.ModelDirect,
-            activitySessionId,
-            content: content,
-            location: location,
-            inputTokenCount: response.Usage?.InputTokenCount,
-            cachedTokenCount: response.Usage?.InputTokenDetails?.CachedTokenCount,
-            outputTokenCount: response.Usage?.OutputTokenCount,
-            reasoningTokenCount: response.Usage?.OutputTokenDetails?.ReasoningTokenCount,
-            totalTokenCount: response.Usage?.TotalTokenCount,
-            runtimeMs: (int)stopwatch.ElapsedMilliseconds,
-            cancellationToken: cancellationToken);
+        await _mediator.Send(new LogAgentActivityEvent
+        {
+            Direction = AgentActivityDirection.Response,
+            TraceId = traceId,
+            CorrelationId = correlationId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+            SessionId = activitySessionId,
+            Content = content,
+            Location = location,
+            InputTokenCount = response.Usage?.InputTokenCount,
+            CachedTokenCount = response.Usage?.InputTokenDetails?.CachedTokenCount,
+            OutputTokenCount = response.Usage?.OutputTokenCount,
+            ReasoningTokenCount = response.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+            TotalTokenCount = response.Usage?.TotalTokenCount,
+            RuntimeMs = (int)stopwatch.ElapsedMilliseconds,
+        }, cancellationToken);
 
         return modelOutput;
     }
