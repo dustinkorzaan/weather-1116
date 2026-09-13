@@ -31,12 +31,12 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
     private static readonly string DefaultLocation = "Nashville, TN";
 
     private readonly ChatMcpToolFactory _mcpToolFactory;
-    private readonly IWeatherActivityLogger _activityLogger;
+    private readonly IAgentActivityLogger _activityLogger;
     private readonly ILogger<GetCurrentAIWeatherV4Handler> _logger;
 
     public GetCurrentAIWeatherV4Handler(
         ChatMcpToolFactory mcpToolFactory,
-        IWeatherActivityLogger activityLogger,
+        IAgentActivityLogger activityLogger,
         ILogger<GetCurrentAIWeatherV4Handler> logger)
     {
         _mcpToolFactory = mcpToolFactory;
@@ -62,7 +62,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         var userPrompt = $"What is the current weather in: `{location}`?";
         var correlationId = await _activityLogger.LogRequestAsync(
             Feature,
-            WeatherActivityFeatureCategory.ModelDirect,
+            AgentActivityFeatureCategory.ModelDirect,
             activitySessionId,
             userPrompt,
             location,
@@ -72,7 +72,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         Task LogActivityErrorAsync(string errorMessage, ResponseResult? failureResponse) => _activityLogger.LogResponseAsync(
             correlationId,
             Feature,
-            WeatherActivityFeatureCategory.ModelDirect,
+            AgentActivityFeatureCategory.ModelDirect,
             activitySessionId,
             content: null,
             location: location,
@@ -200,7 +200,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
         await _activityLogger.LogResponseAsync(
             correlationId,
             Feature,
-            WeatherActivityFeatureCategory.ModelDirect,
+            AgentActivityFeatureCategory.ModelDirect,
             activitySessionId,
             content: content,
             location: location,

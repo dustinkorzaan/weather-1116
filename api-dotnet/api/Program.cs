@@ -61,11 +61,11 @@ builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 builder.Services.AddStandardCoreServices();
 builder.Services.AddWeatherChatClients();
 
-// dbo.WeatherActivity logging (Chat1a-Chat4b and Current AI Weather V3/V4/V5). Unlike Hangfire
+// dbo.AgentActivity logging (Chat1a-Chat4b and Current AI Weather V3/V4/V5). Unlike Hangfire
 // above, DB_CONNECTION_STRING is a hard requirement here -- there is no in-memory fallback, so
 // this throws at startup if it's missing.
-builder.Services.AddSingleton<IWeatherActivityHostProvider>(new WeatherActivityHostProvider(WeatherActivityHost.Api));
-builder.Services.AddDbContext<WeatherActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
+builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Api));
+builder.Services.AddDbContext<AgentActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("ReactClient", policy =>
@@ -93,11 +93,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Applies any pending EF Core migrations (dbo.WeatherActivity and future tables) on every
+// Applies any pending EF Core migrations (dbo.AgentActivity and future tables) on every
 // startup, so a deploy never needs a separate manual migration step.
 using (var migrationScope = app.Services.CreateScope())
 {
-	migrationScope.ServiceProvider.GetRequiredService<WeatherActivityDbContext>().Database.Migrate();
+	migrationScope.ServiceProvider.GetRequiredService<AgentActivityDbContext>().Database.Migrate();
 }
 
 app.UseHttpsRedirection();

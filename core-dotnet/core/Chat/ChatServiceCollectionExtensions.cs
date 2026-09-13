@@ -24,17 +24,17 @@ public static class ChatServiceCollectionExtensions
         services.AddSingleton<ChatAgentSessionStore>();
         services.AddSingleton<ChatHostedAgentResponseStore>();
 
-        // Each registration wraps the real service in WeatherActivityLoggingChatClientService so
-        // every prompt/response for every tab lands in dbo.WeatherActivity with no per-controller
+        // Each registration wraps the real service in AgentActivityLoggingChatClientService so
+        // every prompt/response for every tab lands in dbo.AgentActivity with no per-controller
         // or per-service changes. FeatureCategory mirrors docs/5-chat-clients/5-chat-clients.md's
         // "Stack" column.
-        AddLoggedChatClient<Chat1aService>(services, "Chat1a", WeatherActivityFeatureCategory.ModelDirect);
-        AddLoggedChatClient<Chat1bService>(services, "Chat1b", WeatherActivityFeatureCategory.ModelDirect);
-        AddLoggedChatClient<Chat2aService>(services, "Chat2a", WeatherActivityFeatureCategory.ModelDirect);
-        AddLoggedChatClient<Chat2bService>(services, "Chat2b", WeatherActivityFeatureCategory.ModelDirect);
-        AddLoggedChatClient<Chat3Service>(services, "Chat3", WeatherActivityFeatureCategory.Agent);
-        AddLoggedChatClient<Chat4aService>(services, "Chat4a", WeatherActivityFeatureCategory.MultiAgent);
-        AddLoggedChatClient<Chat4bService>(services, "Chat4b", WeatherActivityFeatureCategory.MultiAgent);
+        AddLoggedChatClient<Chat1aService>(services, "Chat1a", AgentActivityFeatureCategory.ModelDirect);
+        AddLoggedChatClient<Chat1bService>(services, "Chat1b", AgentActivityFeatureCategory.ModelDirect);
+        AddLoggedChatClient<Chat2aService>(services, "Chat2a", AgentActivityFeatureCategory.ModelDirect);
+        AddLoggedChatClient<Chat2bService>(services, "Chat2b", AgentActivityFeatureCategory.ModelDirect);
+        AddLoggedChatClient<Chat3Service>(services, "Chat3", AgentActivityFeatureCategory.Agent);
+        AddLoggedChatClient<Chat4aService>(services, "Chat4a", AgentActivityFeatureCategory.MultiAgent);
+        AddLoggedChatClient<Chat4bService>(services, "Chat4b", AgentActivityFeatureCategory.MultiAgent);
 
         return services;
     }
@@ -42,9 +42,9 @@ public static class ChatServiceCollectionExtensions
     private static void AddLoggedChatClient<TService>(IServiceCollection services, string feature, string featureCategory)
         where TService : class, IChatClientService
     {
-        services.AddKeyedScoped<IChatClientService>(feature, (sp, _) => new WeatherActivityLoggingChatClientService(
+        services.AddKeyedScoped<IChatClientService>(feature, (sp, _) => new AgentActivityLoggingChatClientService(
             ActivatorUtilities.CreateInstance<TService>(sp),
-            sp.GetRequiredService<IWeatherActivityLogger>(),
+            sp.GetRequiredService<IAgentActivityLogger>(),
             feature,
             featureCategory));
     }

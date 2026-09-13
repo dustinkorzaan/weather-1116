@@ -23,9 +23,9 @@ public static class CoreServiceCollectionExtensions
         // this remote-MCP tool factory in every host that includes Core, not just the ones
         // that also call AddWeatherChatClients().
         services.AddSingleton<ChatMcpToolFactory>();
-        // WeatherActivityDbContext and IWeatherActivityHostProvider are registered per-host
+        // AgentActivityDbContext and IAgentActivityHostProvider are registered per-host
         // (Program.cs) since each needs that host's DB_CONNECTION_STRING and Api/Mvc tag.
-        services.AddScoped<IWeatherActivityLogger, WeatherActivityLogger>();
+        services.AddScoped<IAgentActivityLogger, AgentActivityLogger>();
         return services;
     }
 }

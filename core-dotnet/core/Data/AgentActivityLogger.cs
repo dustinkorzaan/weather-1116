@@ -2,10 +2,10 @@ using Core.Data.Domain;
 
 namespace Core.Data;
 
-public class WeatherActivityLogger(
-    WeatherActivityDbContext dbContext,
-    IWeatherActivityHostProvider hostProvider,
-    TimeProvider? timeProvider = null) : IWeatherActivityLogger
+public class AgentActivityLogger(
+    AgentActivityDbContext dbContext,
+    IAgentActivityHostProvider hostProvider,
+    TimeProvider? timeProvider = null) : IAgentActivityLogger
 {
     private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
 
@@ -19,7 +19,7 @@ public class WeatherActivityLogger(
     {
         var id = Guid.NewGuid();
 
-        dbContext.WeatherActivity.Add(new WeatherActivity
+        dbContext.AgentActivity.Add(new AgentActivity
         {
             Id = id,
             CorrelationId = id,
@@ -27,7 +27,7 @@ public class WeatherActivityLogger(
             Feature = feature,
             FeatureCategory = featureCategory,
             Host = hostProvider.Host,
-            Direction = WeatherActivityDirection.Request,
+            Direction = AgentActivityDirection.Request,
             CreatedUtc = _timeProvider.GetUtcNow().UtcDateTime,
             Content = content,
             Location = location,
@@ -54,7 +54,7 @@ public class WeatherActivityLogger(
         string? errorMessage = null,
         CancellationToken cancellationToken = default)
     {
-        dbContext.WeatherActivity.Add(new WeatherActivity
+        dbContext.AgentActivity.Add(new AgentActivity
         {
             Id = Guid.NewGuid(),
             CorrelationId = correlationId,
@@ -62,7 +62,7 @@ public class WeatherActivityLogger(
             Feature = feature,
             FeatureCategory = featureCategory,
             Host = hostProvider.Host,
-            Direction = WeatherActivityDirection.Response,
+            Direction = AgentActivityDirection.Response,
             CreatedUtc = _timeProvider.GetUtcNow().UtcDateTime,
             Content = content,
             Location = location,
