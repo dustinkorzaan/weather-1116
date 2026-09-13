@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Data.Migrations
 {
     [DbContext(typeof(AgentActivityDbContext))]
-    [Migration("20260913140113_InitialCreateAgentActivity")]
+    [Migration("20260913144944_InitialCreateAgentActivity")]
     partial class InitialCreateAgentActivity
     {
         /// <inheritdoc />
@@ -59,8 +59,7 @@ namespace Core.Data.Migrations
 
                     b.Property<string>("Feature")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FeatureCategory")
                         .IsRequired()

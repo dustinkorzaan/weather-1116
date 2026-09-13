@@ -23,7 +23,7 @@ namespace Core.Data.Migrations
                     CorrelationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RunId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SessionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Feature = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    Feature = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FeatureCategory = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     Host = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Context = table.Column<string>(type: "nvarchar(max)", nullable: true),
