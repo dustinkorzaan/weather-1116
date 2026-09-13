@@ -4,19 +4,22 @@ namespace Core.Agent.Events;
 
 /// <summary>
 /// Logs one dbo.AgentActivity row (a Request or a Response -- see
-/// <see cref="Core.Data.Domain.AgentActivityDirection"/>) and returns its Id. Send it once per Request with
-/// <see cref="CorrelationId"/> left null; the returned Id is that turn's CorrelationId, to pass
-/// back in on the paired Response send (and on any nested tool-call or child-agent rows that
-/// belong to the same Request/Response pair). <see cref="TraceId"/> is the wider id shared by
-/// every row in one orchestration run, parent and child agents alike.
+/// <see cref="Core.Data.Domain.AgentActivityDirection"/>) and returns its Id.
+///
+/// Two ids, two different jobs: send once per Request with <see cref="CorrelationId"/> left
+/// null -- the returned Id is *that Request's own* CorrelationId, to pass back in on its own
+/// paired Response send only. A nested tool-call or child-agent row is a separate Request/
+/// Response pair with its own freshly-minted CorrelationId (from its own Request send), not the
+/// parent turn's. <see cref="RunId"/> is what ties the whole thing together: it is the same
+/// value on the parent turn's rows and on every nested row underneath it.
 /// </summary>
 public class LogAgentActivityEvent : IRequest<Guid>
 {
     public required string Direction { get; init; }
 
-    public required Guid TraceId { get; init; }
+    public required Guid RunId { get; init; }
 
-    /// <summary>Null on a Request row (the new row's own Id becomes the CorrelationId); the Request row's Id on its paired Response row.</summary>
+    /// <summary>Null on a Request row (the new row's own Id becomes this Request's own CorrelationId); that Request row's Id on its paired Response row.</summary>
     public Guid? CorrelationId { get; init; }
 
     public required string Feature { get; init; }

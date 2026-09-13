@@ -39,4 +39,18 @@ public class GetCurrentAIWeatherV5HandlerTests
         Assert.DoesNotContain("AddLog(1,", source, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Handler_WrapsRequestInCatchAll_SoAnyExceptionStillLogsAPairedResponseRow()
+    {
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));
+
+        // A stray "await LogActivityErrorAsync(...)" sprinkled before an explicit throw would mean
+        // an exception thrown by CreateResponseAsync itself (network/auth failure, not one of the
+        // handler's own validation checks) skips logging entirely, leaving the Request row logged
+        // above unpaired. The single catch-all is what guarantees every exit path is covered.
+        Assert.Contains("catch (Exception ex)", source, StringComparison.Ordinal);
+        Assert.Contains("ErrorMessage = ex.Message,", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("LogActivityErrorAsync", source, StringComparison.Ordinal);
+    }
+
 }

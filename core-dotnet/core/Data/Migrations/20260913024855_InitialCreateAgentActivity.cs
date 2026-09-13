@@ -21,7 +21,7 @@ namespace Core.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CorrelationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TraceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RunId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SessionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Feature = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     FeatureCategory = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
