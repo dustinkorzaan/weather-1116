@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Data.Migrations
 {
     [DbContext(typeof(AgentActivityDbContext))]
-    [Migration("20260913005619_InitialCreateAgentActivity")]
+    [Migration("20260913011816_InitialCreateAgentActivity")]
     partial class InitialCreateAgentActivity
     {
         /// <inheritdoc />
@@ -103,12 +103,6 @@ namespace Core.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CorrelationId");
-
-                    b.HasIndex("SessionId");
-
-                    b.HasIndex("TraceId");
 
                     b.ToTable("AgentActivity", "dbo");
                 });

@@ -101,12 +101,6 @@ namespace Core.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CorrelationId");
-
-                    b.HasIndex("SessionId");
-
-                    b.HasIndex("TraceId");
-
                     b.ToTable("AgentActivity", "dbo");
                 });
 #pragma warning restore 612, 618

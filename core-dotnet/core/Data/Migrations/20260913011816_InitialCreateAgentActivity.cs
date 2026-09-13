@@ -45,24 +45,6 @@ namespace Core.Data.Migrations
                 {
                     table.PrimaryKey("PK_AgentActivity", x => x.Id);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AgentActivity_CorrelationId",
-                schema: "dbo",
-                table: "AgentActivity",
-                column: "CorrelationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AgentActivity_SessionId",
-                schema: "dbo",
-                table: "AgentActivity",
-                column: "SessionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AgentActivity_TraceId",
-                schema: "dbo",
-                table: "AgentActivity",
-                column: "TraceId");
         }
 
         /// <inheritdoc />
