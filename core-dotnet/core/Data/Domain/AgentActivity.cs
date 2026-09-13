@@ -7,7 +7,7 @@ namespace Core.Data.Domain;
 /// equals its paired Request row's <see cref="Id"/>, so a turn's two rows join without needing
 /// an update to the Request row once the response is known.
 /// </summary>
-public class WeatherActivity
+public class AgentActivity
 {
     public Guid Id { get; set; }
 
@@ -22,13 +22,13 @@ public class WeatherActivity
     /// <summary>Chat1a, Chat1b, Chat2a, Chat2b, Chat3, Chat4a, Chat4b, AIWeatherV3, AIWeatherV4, AIWeatherV5.</summary>
     public required string Feature { get; set; }
 
-    /// <summary>One of <see cref="WeatherActivityFeatureCategory"/>.</summary>
+    /// <summary>One of <see cref="AgentActivityFeatureCategory"/>.</summary>
     public required string FeatureCategory { get; set; }
 
-    /// <summary>One of <see cref="WeatherActivityHost"/>.</summary>
+    /// <summary>One of <see cref="AgentActivityHost"/>.</summary>
     public required string Host { get; set; }
 
-    /// <summary>One of <see cref="WeatherActivityDirection"/>.</summary>
+    /// <summary>One of <see cref="AgentActivityDirection"/>.</summary>
     public required string Direction { get; set; }
 
     public DateTime CreatedUtc { get; set; }

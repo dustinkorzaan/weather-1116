@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Core.Data.Config;
 
-public class WeatherActivityConfig : IEntityTypeConfiguration<WeatherActivity>
+public class AgentActivityConfig : IEntityTypeConfiguration<AgentActivity>
 {
-    public void Configure(EntityTypeBuilder<WeatherActivity> builder)
+    public void Configure(EntityTypeBuilder<AgentActivity> builder)
     {
-        builder.ToTable("WeatherActivity", "dbo");
+        builder.ToTable("AgentActivity", "dbo");
         builder.HasKey(activity => activity.Id);
         builder.Property(activity => activity.Id).ValueGeneratedNever();
 
