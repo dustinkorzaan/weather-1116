@@ -94,7 +94,9 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Applies any pending EF Core migrations (dbo.AgentActivity and future tables) on every
-// startup, so a deploy never needs a separate manual migration step.
+// startup, so a deploy never needs a separate manual migration step. API is the only host that
+// does this -- MVC and the worker also register AgentActivityDbContext, but only read/write the
+// schema API has already migrated.
 using (var migrationScope = app.Services.CreateScope())
 {
 	migrationScope.ServiceProvider.GetRequiredService<AgentActivityDbContext>().Database.Migrate();
