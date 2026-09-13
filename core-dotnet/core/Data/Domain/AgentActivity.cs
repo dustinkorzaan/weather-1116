@@ -6,6 +6,9 @@ namespace Core.Data.Domain;
 /// Current AI Weather versions (V3/V4/V5) alike. A Response row's <see cref="CorrelationId"/>
 /// equals its paired Request row's <see cref="Id"/>, so a turn's two rows join without needing
 /// an update to the Request row once the response is known.
+///
+/// <see cref="Content"/> stores the full prompt/response text, and <see cref="Context"/> stores
+/// the caller's remote IP and user agent when available -- treat this table as sensitive.
 /// </summary>
 public class AgentActivity
 {
@@ -14,12 +17,15 @@ public class AgentActivity
     public Guid CorrelationId { get; set; }
 
     /// <summary>
-    /// Shared by every row belonging to one orchestration run -- an orchestrator's own Request/
-    /// Response rows and each child agent's (e.g. Chat4a/Chat4b's Geo and NonAI Weather) carry
-    /// the same TraceId, so a query can pull the whole multi-agent turn together. CorrelationId
-    /// still only ties one row's own Request to its own Response; TraceId is the wider net.
+    /// App-generated grouping key shared by every row belonging to one orchestration run -- an
+    /// orchestrator's own Request/Response rows and each child agent's (e.g. Chat4a/Chat4b's Geo
+    /// and NonAI Weather) carry the same RunId, so a query can pull the whole multi-agent turn
+    /// together. CorrelationId still only ties one row's own Request to its own Response; RunId
+    /// is the wider net. Deliberately not the distributed trace id (<c>Activity.Current?.TraceId</c>
+    /// / ASP.NET's <c>HttpContext.TraceIdentifier</c>, which lives in <see cref="Context"/>
+    /// instead) -- naming it RunId rather than TraceId keeps that distinct.
     /// </summary>
-    public Guid TraceId { get; set; }
+    public Guid RunId { get; set; }
 
     /// <summary>
     /// Chat session id for Chat1a-Chat4b. Current AI Weather has no real multi-turn session, so

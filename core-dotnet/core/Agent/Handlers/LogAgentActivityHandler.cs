@@ -32,7 +32,7 @@ public class LogAgentActivityHandler(
         {
             Id = id,
             CorrelationId = request.CorrelationId ?? id,
-            TraceId = request.TraceId,
+            RunId = request.RunId,
             SessionId = request.SessionId,
             Feature = request.Feature,
             FeatureCategory = request.FeatureCategory,

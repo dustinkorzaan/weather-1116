@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Data.Migrations
 {
     [DbContext(typeof(AgentActivityDbContext))]
-    [Migration("20260913012813_InitialCreateAgentActivity")]
+    [Migration("20260913024855_InitialCreateAgentActivity")]
     partial class InitialCreateAgentActivity
     {
         /// <inheritdoc />
@@ -88,6 +88,9 @@ namespace Core.Data.Migrations
                     b.Property<int?>("ReasoningTokenCount")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int?>("RuntimeMs")
                         .HasColumnType("int");
 
@@ -101,9 +104,6 @@ namespace Core.Data.Migrations
 
                     b.Property<int?>("TotalTokenCount")
                         .HasColumnType("int");
-
-                    b.Property<Guid>("TraceId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

@@ -49,9 +49,17 @@ var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
 	builder.Configuration["DB_CONNECTION_STRING"],
 	builder.Configuration["AZURE_CLIENT_ID"]);
 
-// Unlike Hangfire's own storage above, there is no in-memory fallback here -- this throws at
-// startup if DB_CONNECTION_STRING is missing. API's Program.cs owns applying migrations
-// (Database.Migrate()); this app only reads/writes the already-migrated schema.
+// Unlike Hangfire's own storage above, there is no in-memory fallback here. AddDbContext's
+// UseSqlServer(null) does NOT throw eagerly (EF Core only fails the first time something
+// actually opens a connection), so check explicitly instead of waiting for the first recurring
+// job to fail deep inside LogAgentActivityHandler.SaveChangesAsync. API's Program.cs owns
+// applying migrations (Database.Migrate()); this app only reads/writes the already-migrated
+// schema.
+if (string.IsNullOrWhiteSpace(dbConnectionString))
+{
+	throw new InvalidOperationException("Missing DB_CONNECTION_STRING (required for dbo.AgentActivity logging).");
+}
+
 builder.Services.AddDbContext<AgentActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
 
 // Explicit, non-zero poll interval: a value > TimeSpan.Zero keeps Hangfire on

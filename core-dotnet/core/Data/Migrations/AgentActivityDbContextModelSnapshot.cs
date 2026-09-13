@@ -85,6 +85,9 @@ namespace Core.Data.Migrations
                     b.Property<int?>("ReasoningTokenCount")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int?>("RuntimeMs")
                         .HasColumnType("int");
 
@@ -98,9 +101,6 @@ namespace Core.Data.Migrations
 
                     b.Property<int?>("TotalTokenCount")
                         .HasColumnType("int");
-
-                    b.Property<Guid>("TraceId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
