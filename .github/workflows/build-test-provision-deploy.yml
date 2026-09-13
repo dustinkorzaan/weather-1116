@@ -57,33 +57,40 @@ jobs:
     uses: ./.github/workflows/prod-provision-infra.yml
     secrets: inherit
 
+  # api/mvc/blazor/worker/mcp-srv-app/mcp-srv-func all share one
+  # single-instance App Service Plan (infra/modules/app-service-plan.bicep),
+  # so their zip-deploys chain one at a time instead of firing at once --
+  # 6 concurrent `az webapp/functionapp deploy` calls contend for that one
+  # instance's Kudu process and fail with Kudu 502s. react (Static Web App)
+  # and foundry-agents (no App Service Plan involved) don't share that
+  # resource, so they stay parallel off provision.
   deploy-api:
     needs: [provision]
     uses: ./.github/workflows/prod-deploy-api.yml
     secrets: inherit
 
   deploy-mvc:
-    needs: [provision]
+    needs: [deploy-api]
     uses: ./.github/workflows/prod-deploy-mvc.yml
     secrets: inherit
 
   deploy-blazor:
-    needs: [provision]
+    needs: [deploy-mvc]
     uses: ./.github/workflows/prod-deploy-blazor.yml
     secrets: inherit
 
   deploy-worker:
-    needs: [provision]
+    needs: [deploy-blazor]
     uses: ./.github/workflows/prod-deploy-worker.yml
     secrets: inherit
 
   deploy-mcp-srv-app:
-    needs: [provision]
+    needs: [deploy-worker]
     uses: ./.github/workflows/prod-deploy-mcp-srv-app.yml
     secrets: inherit
 
   deploy-mcp-srv-func:
-    needs: [provision]
+    needs: [deploy-mcp-srv-app]
     uses: ./.github/workflows/prod-deploy-mcp-srv-func.yml
     secrets: inherit
 
