@@ -56,8 +56,7 @@ namespace Core.Data.Migrations
 
                     b.Property<string>("Feature")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FeatureCategory")
                         .IsRequired()

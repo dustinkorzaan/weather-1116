@@ -37,8 +37,7 @@ public class AgentActivity
     /// The class actually doing the work -- <c>nameof(GetCurrentAIWeatherV3Handler)</c>/
     /// <c>V4Handler</c>/<c>V5Handler</c> for Current AI Weather, or <c>typeof(TService).Name</c>
     /// for chat (<c>Chat1aService</c>...<c>Chat4bService</c>) -- so it can't drift from a
-    /// separately hand-typed label. See <see cref="AgentActivityColumnLengths.Feature"/> for the
-    /// column width this must fit.
+    /// separately hand-typed label. <c>nvarchar(max)</c> so a future rename can't overflow it.
     /// </summary>
     public required string Feature { get; set; }
 
