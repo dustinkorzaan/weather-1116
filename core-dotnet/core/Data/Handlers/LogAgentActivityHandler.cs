@@ -5,8 +5,8 @@ using CQMediator;
 namespace Core.Data.Handlers;
 
 public class LogAgentActivityHandler(
-    AgentActivityDbContext dbContext,
-    IAgentActivityHostProvider hostProvider,
+    AgentActivityDbContext? dbContext = null,
+    IAgentActivityHostProvider? hostProvider = null,
     IAgentActivityContextProvider? contextProvider = null,
     TimeProvider? timeProvider = null) : IRequestHandler<LogAgentActivityEvent, Guid>
 {
@@ -15,6 +15,17 @@ public class LogAgentActivityHandler(
     public async Task<Guid> Handle(LogAgentActivityEvent request, CancellationToken cancellationToken)
     {
         var id = Guid.NewGuid();
+
+        // Core's AddStandardCoreServices() registers this handler in every host that calls it
+        // via CQMediator's blanket assembly scan -- including mcp-srv-app-service and
+        // mcp-srv-func-app, which have nothing to do with chat/AIWeather and never register
+        // AgentActivityDbContext/IAgentActivityHostProvider. Treat that as "logging isn't wired
+        // here" rather than throwing, so those hosts' DI container validation (ValidateOnBuild,
+        // on by default in Development) doesn't fail just because this handler exists.
+        if (dbContext is null || hostProvider is null)
+        {
+            return id;
+        }
 
         dbContext.AgentActivity.Add(new AgentActivity
         {
