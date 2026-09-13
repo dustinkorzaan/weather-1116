@@ -29,7 +29,7 @@ namespace Core.AIWeather.Handlers;
 /// </summary>
 public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV5Event, AIWeatherResponse>
 {
-    private const string Feature = "AIWeatherV5";
+    private const string Feature = nameof(GetCurrentAIWeatherV5Handler);
     private static readonly string DefaultLocation = "Nashville, TN";
 
     private readonly IMediator _mediator;

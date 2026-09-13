@@ -28,7 +28,7 @@ namespace Core.AIWeather.Handlers;
 /// </summary>
 public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV3Event, AIWeatherResponse>
 {
-    private const string Feature = "AIWeatherV3";
+    private const string Feature = nameof(GetCurrentAIWeatherV3Handler);
     private static readonly string DefaultLocation = "Nashville, TN";
     private const int MaxToolLoopIterations = 32;
 

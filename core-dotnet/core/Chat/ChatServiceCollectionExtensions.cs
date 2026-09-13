@@ -27,7 +27,9 @@ public static class ChatServiceCollectionExtensions
         // Each registration wraps the real service in AgentActivityLoggingChatClientService so
         // every prompt/response for every tab lands in dbo.AgentActivity with no per-controller
         // or per-service changes. FeatureCategory mirrors docs/5-chat-clients/5-chat-clients.md's
-        // "Stack" column.
+        // "Stack" column. "feature" below is only the keyed-DI lookup key controllers/views use
+        // (unchanged); the Feature value actually logged is TService's own type name, so it can't
+        // drift from the class doing the work.
         AddLoggedChatClient<Chat1aService>(services, "Chat1a", AgentActivityFeatureCategory.ModelDirect);
         AddLoggedChatClient<Chat1bService>(services, "Chat1b", AgentActivityFeatureCategory.ModelDirect);
         AddLoggedChatClient<Chat2aService>(services, "Chat2a", AgentActivityFeatureCategory.ModelDirect);
@@ -45,7 +47,7 @@ public static class ChatServiceCollectionExtensions
         services.AddKeyedScoped<IChatClientService>(feature, (sp, _) => new AgentActivityLoggingChatClientService(
             ActivatorUtilities.CreateInstance<TService>(sp),
             sp.GetRequiredService<IMediator>(),
-            feature,
+            typeof(TService).Name,
             featureCategory));
     }
 }
