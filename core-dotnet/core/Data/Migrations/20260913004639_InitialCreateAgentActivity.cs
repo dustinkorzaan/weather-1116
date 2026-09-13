@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Core.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateWeatherActivity : Migration
+    public partial class InitialCreateAgentActivity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,7 +15,7 @@ namespace Core.Data.Migrations
                 name: "dbo");
 
             migrationBuilder.CreateTable(
-                name: "WeatherActivity",
+                name: "AgentActivity",
                 schema: "dbo",
                 columns: table => new
                 {
@@ -39,19 +39,19 @@ namespace Core.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WeatherActivity", x => x.Id);
+                    table.PrimaryKey("PK_AgentActivity", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_WeatherActivity_CorrelationId",
+                name: "IX_AgentActivity_CorrelationId",
                 schema: "dbo",
-                table: "WeatherActivity",
+                table: "AgentActivity",
                 column: "CorrelationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WeatherActivity_SessionId",
+                name: "IX_AgentActivity_SessionId",
                 schema: "dbo",
-                table: "WeatherActivity",
+                table: "AgentActivity",
                 column: "SessionId");
         }
 
@@ -59,7 +59,7 @@ namespace Core.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "WeatherActivity",
+                name: "AgentActivity",
                 schema: "dbo");
         }
     }

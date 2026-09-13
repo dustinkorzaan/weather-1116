@@ -4,19 +4,16 @@ using Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace Core.Data.Migrations
 {
-    [DbContext(typeof(WeatherActivityDbContext))]
-    [Migration("20260912222906_InitialCreateWeatherActivity")]
-    partial class InitialCreateWeatherActivity
+    [DbContext(typeof(AgentActivityDbContext))]
+    partial class AgentActivityDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,7 +22,7 @@ namespace Core.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Core.Data.Domain.WeatherActivity", b =>
+            modelBuilder.Entity("Core.Data.Domain.AgentActivity", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -94,7 +91,7 @@ namespace Core.Data.Migrations
 
                     b.HasIndex("SessionId");
 
-                    b.ToTable("WeatherActivity", "dbo");
+                    b.ToTable("AgentActivity", "dbo");
                 });
 #pragma warning restore 612, 618
         }

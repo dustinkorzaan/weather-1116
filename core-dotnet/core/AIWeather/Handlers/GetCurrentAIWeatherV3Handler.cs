@@ -32,12 +32,12 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
     private const int MaxToolLoopIterations = 32;
 
     private readonly WeatherToolExecutor _toolExecutor;
-    private readonly IWeatherActivityLogger _activityLogger;
+    private readonly IAgentActivityLogger _activityLogger;
     private readonly ILogger<GetCurrentAIWeatherV3Handler> _logger;
 
     public GetCurrentAIWeatherV3Handler(
         WeatherToolExecutor toolExecutor,
-        IWeatherActivityLogger activityLogger,
+        IAgentActivityLogger activityLogger,
         ILogger<GetCurrentAIWeatherV3Handler> logger)
     {
         _toolExecutor = toolExecutor;
@@ -60,13 +60,13 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             : request.Location.Trim();
 
         // No real multi-turn session exists for this one-shot endpoint; a fresh GUID per
-        // request still gives every dbo.WeatherActivity row a SessionId, and ties this
+        // request still gives every dbo.AgentActivity row a SessionId, and ties this
         // Request row to its Response row the same way CorrelationId does.
         var activitySessionId = Guid.NewGuid().ToString();
         var userPrompt = $"What is the current weather in: `{location}`?";
         var correlationId = await _activityLogger.LogRequestAsync(
             Feature,
-            WeatherActivityFeatureCategory.ModelDirect,
+            AgentActivityFeatureCategory.ModelDirect,
             activitySessionId,
             userPrompt,
             location,
@@ -76,7 +76,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         Task LogActivityErrorAsync(string errorMessage, ResponseResult? failureResponse) => _activityLogger.LogResponseAsync(
             correlationId,
             Feature,
-            WeatherActivityFeatureCategory.ModelDirect,
+            AgentActivityFeatureCategory.ModelDirect,
             activitySessionId,
             content: null,
             location: location,
@@ -246,7 +246,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         await _activityLogger.LogResponseAsync(
             correlationId,
             Feature,
-            WeatherActivityFeatureCategory.ModelDirect,
+            AgentActivityFeatureCategory.ModelDirect,
             activitySessionId,
             content: content,
             location: location,

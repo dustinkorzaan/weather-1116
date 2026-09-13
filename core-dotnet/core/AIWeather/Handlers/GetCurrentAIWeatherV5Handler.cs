@@ -32,10 +32,10 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
     private const string Feature = "AIWeatherV5";
     private static readonly string DefaultLocation = "Nashville, TN";
 
-    private readonly IWeatherActivityLogger _activityLogger;
+    private readonly IAgentActivityLogger _activityLogger;
     private readonly ILogger<GetCurrentAIWeatherV5Handler> _logger;
 
-    public GetCurrentAIWeatherV5Handler(IWeatherActivityLogger activityLogger, ILogger<GetCurrentAIWeatherV5Handler> logger)
+    public GetCurrentAIWeatherV5Handler(IAgentActivityLogger activityLogger, ILogger<GetCurrentAIWeatherV5Handler> logger)
     {
         _activityLogger = activityLogger;
         _logger = logger;
@@ -59,7 +59,7 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         var userPrompt = $"What is the current weather in: `{location}`?";
         var correlationId = await _activityLogger.LogRequestAsync(
             Feature,
-            WeatherActivityFeatureCategory.Agent,
+            AgentActivityFeatureCategory.Agent,
             activitySessionId,
             userPrompt,
             location,
@@ -69,7 +69,7 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         Task LogActivityErrorAsync(string errorMessage, ResponseResult? failureResponse) => _activityLogger.LogResponseAsync(
             correlationId,
             Feature,
-            WeatherActivityFeatureCategory.Agent,
+            AgentActivityFeatureCategory.Agent,
             activitySessionId,
             content: null,
             location: location,
@@ -165,7 +165,7 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         await _activityLogger.LogResponseAsync(
             correlationId,
             Feature,
-            WeatherActivityFeatureCategory.Agent,
+            AgentActivityFeatureCategory.Agent,
             activitySessionId,
             content: content,
             location: location,
