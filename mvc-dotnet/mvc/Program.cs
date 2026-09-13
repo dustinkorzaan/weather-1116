@@ -64,18 +64,12 @@ builder.Services.AddWeatherChatClients();
 
 // dbo.AgentActivity logging (Chat1a-Chat4b and Current AI Weather V3/V4/V5). Unlike Hangfire
 // above, DB_CONNECTION_STRING is a hard requirement here -- there is no in-memory fallback, so
-// this throws at startup if it's missing.
+// this throws at startup if it's missing. API's Program.cs owns applying migrations
+// (Database.Migrate()); this app only reads/writes the already-migrated schema.
 builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Mvc));
 builder.Services.AddDbContext<AgentActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
 
 var app = builder.Build();
-
-// Applies any pending EF Core migrations (dbo.AgentActivity and future tables) on every
-// startup, so a deploy never needs a separate manual migration step.
-using (var migrationScope = app.Services.CreateScope())
-{
-    migrationScope.ServiceProvider.GetRequiredService<AgentActivityDbContext>().Database.Migrate();
-}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

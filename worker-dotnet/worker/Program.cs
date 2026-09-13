@@ -46,7 +46,8 @@ var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
 	builder.Configuration["AZURE_CLIENT_ID"]);
 
 // Unlike Hangfire's own storage above, there is no in-memory fallback here -- this throws at
-// startup if DB_CONNECTION_STRING is missing.
+// startup if DB_CONNECTION_STRING is missing. API's Program.cs owns applying migrations
+// (Database.Migrate()); this app only reads/writes the already-migrated schema.
 builder.Services.AddDbContext<AgentActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
 
 // Explicit, non-zero poll interval: a value > TimeSpan.Zero keeps Hangfire on
@@ -110,13 +111,6 @@ if (!string.IsNullOrWhiteSpace(dbConnectionString))
 }
 
 var app = builder.Build();
-
-// Applies any pending EF Core migrations (dbo.AgentActivity and future tables) on every
-// startup, so a deploy never needs a separate manual migration step.
-using (var migrationScope = app.Services.CreateScope())
-{
-	migrationScope.ServiceProvider.GetRequiredService<AgentActivityDbContext>().Database.Migrate();
-}
 
 // Hangfire dashboard, open to all (POC — no auth). It reads the shared storage,
 // so it also shows jobs enqueued by the api/mvc clients.
