@@ -1,10 +1,10 @@
 using CQMediator;
 
-namespace Core.Data.Events;
+namespace Core.Agent.Events;
 
 /// <summary>
 /// Logs one dbo.AgentActivity row (a Request or a Response -- see
-/// <see cref="Domain.AgentActivityDirection"/>) and returns its Id. Send it once per Request with
+/// <see cref="Core.Data.Domain.AgentActivityDirection"/>) and returns its Id. Send it once per Request with
 /// <see cref="CorrelationId"/> left null; the returned Id is that turn's CorrelationId, to pass
 /// back in on the paired Response send (and on any nested tool-call or child-agent rows that
 /// belong to the same Request/Response pair). <see cref="TraceId"/> is the wider id shared by

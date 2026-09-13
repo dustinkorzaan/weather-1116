@@ -1,8 +1,9 @@
+using Core.Agent.Events;
+using Core.Data;
 using Core.Data.Domain;
-using Core.Data.Events;
 using CQMediator;
 
-namespace Core.Data.Handlers;
+namespace Core.Agent.Handlers;
 
 public class LogAgentActivityHandler(
     AgentActivityDbContext? dbContext = null,
