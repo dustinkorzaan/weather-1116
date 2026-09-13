@@ -7,6 +7,7 @@ namespace Core.Data.Handlers;
 public class LogAgentActivityHandler(
     AgentActivityDbContext dbContext,
     IAgentActivityHostProvider hostProvider,
+    IAgentActivityContextProvider? contextProvider = null,
     TimeProvider? timeProvider = null) : IRequestHandler<LogAgentActivityEvent, Guid>
 {
     private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
@@ -24,6 +25,7 @@ public class LogAgentActivityHandler(
             Feature = request.Feature,
             FeatureCategory = request.FeatureCategory,
             Host = hostProvider.Host,
+            Context = contextProvider?.GetContext(),
             Direction = request.Direction,
             AgentName = request.AgentName,
             LoopNumber = request.LoopNumber,

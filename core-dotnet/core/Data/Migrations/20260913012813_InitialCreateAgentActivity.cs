@@ -26,6 +26,7 @@ namespace Core.Data.Migrations
                     Feature = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     FeatureCategory = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     Host = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Context = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Direction = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AgentName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),

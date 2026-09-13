@@ -22,5 +22,6 @@ public class AgentActivityConfig : IEntityTypeConfiguration<AgentActivity>
         builder.Property(activity => activity.Location).HasMaxLength(200);
         builder.Property(activity => activity.Content).HasColumnType("nvarchar(max)");
         builder.Property(activity => activity.ErrorMessage).HasColumnType("nvarchar(max)");
+        builder.Property(activity => activity.Context).HasColumnType("nvarchar(max)");
     }
 }

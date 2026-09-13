@@ -36,6 +36,13 @@ public class AgentActivity
     /// <summary>One of <see cref="AgentActivityHost"/>.</summary>
     public required string Host { get; set; }
 
+    /// <summary>
+    /// JSON snapshot of the inbound HTTP request (method, path, query string, trace identifier,
+    /// user agent) for a row logged from Api or Mvc. Null for Worker rows -- a Hangfire recurring
+    /// job has no HTTP request to capture.
+    /// </summary>
+    public string? Context { get; set; }
+
     /// <summary>One of <see cref="AgentActivityDirection"/>.</summary>
     public required string Direction { get; set; }
 
