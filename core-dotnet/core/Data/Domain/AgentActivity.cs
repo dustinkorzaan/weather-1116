@@ -33,7 +33,13 @@ public class AgentActivity
     /// </summary>
     public string? SessionId { get; set; }
 
-    /// <summary>Chat1a, Chat1b, Chat2a, Chat2b, Chat3, Chat4a, Chat4b, AIWeatherV3, AIWeatherV4, AIWeatherV5.</summary>
+    /// <summary>
+    /// The class actually doing the work -- <c>nameof(GetCurrentAIWeatherV3Handler)</c>/
+    /// <c>V4Handler</c>/<c>V5Handler</c> for Current AI Weather, or <c>typeof(TService).Name</c>
+    /// for chat (<c>Chat1aService</c>...<c>Chat4bService</c>) -- so it can't drift from a
+    /// separately hand-typed label. See <see cref="AgentActivityColumnLengths.Feature"/> for the
+    /// column width this must fit.
+    /// </summary>
     public required string Feature { get; set; }
 
     /// <summary>One of <see cref="AgentActivityFeatureCategory"/>.</summary>
