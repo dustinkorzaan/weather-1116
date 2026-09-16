@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
@@ -19,13 +19,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from './theme/useTheme';
-import { siteLinks, blazorBaseUrl, mvcBaseUrl } from './config/siteLinks';
+import { siteLinks } from './config/siteLinks';
+import BackendWakeScreen from './components/BackendWakeScreen';
 import ChatClientsPage from './pages/ChatClientsPage';
 import CurrentAIWeatherPage from './pages/CurrentAIWeatherPage';
 import HelloWorldPage from './pages/HelloWorldPage';
 import MapPage from './pages/MapPage';
 import WeatherModalPage from './pages/WeatherModalPage';
 import { MapPinsProvider } from './map/mapPinsContext';
+import { useBackendWake } from './app/useBackendWake';
 import {
   useLazyGetAboutQuery,
 } from './services/weatherApi';
@@ -137,18 +139,21 @@ function AppShell() {
   const { pathname } = useLocation();
   const isMapVisible = pathname === '/';
 
+  // ACA scales api/mvc/blazor to zero when idle; wait for all three to
+  // answer (retrying as long as it takes) before showing the app so cold
+  // start happens up front instead of mid-navigation. This already hits
+  // API's /About, so there's no separate mount-time loadAbout() call here --
+  // the dialog fetches its own data lazily when opened (handleAboutClick).
+  const { isWarm: isBackendWarm, ...backendWakeStatus } = useBackendWake();
+
   const handleAboutClick = () => {
     setIsAboutOpen(true);
     loadAbout();
   };
 
-  // All backends scale to zero when idle; pre-warm them on load so the
-  // cold start happens before the user navigates there instead of during.
-  useEffect(() => {
-    loadAbout();
-    fetch(blazorBaseUrl, { mode: 'no-cors' }).catch(() => {});
-    fetch(mvcBaseUrl, { mode: 'no-cors' }).catch(() => {});
-  }, [loadAbout]);
+  if (!isBackendWarm) {
+    return <BackendWakeScreen statuses={backendWakeStatus} />;
+  }
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">

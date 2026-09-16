@@ -44,9 +44,14 @@ rely on this in production, not just during the demo:
   run if a replica happens to be up when Hangfire's scheduler ticks. There is
   no queue-depth/KEDA scale rule bringing `worker` up on a schedule -- the
   only thing that wakes it from zero is an inbound HTTP request, which today
-  means the React UI's `loadAbout()` call on page load (see `App.jsx`) hitting
-  API's `/About`, which itself fans out to `WORKER_DOTNET_URL` -- one hop, not
-  React calling the worker directly. If nobody loads the React UI around 2am,
+  means the React UI's `useBackendWake` hook (`ui-react/src/app/useBackendWake.js`,
+  used from `App.jsx`) hitting API's `/About` on page load, which itself fans
+  out to `WORKER_DOTNET_URL` -- one hop, not React calling the worker
+  directly. `useBackendWake` fires a fresh `/About` (plus MVC and Blazor)
+  request roughly every 30s -- without cancelling ones still in flight --
+  until one succeeds, rather than giving up after a single attempt; see the
+  `BackendWakeScreen` full-page loader it drives while that's pending. If
+  nobody loads the React UI around 2am,
   that day's recurring jobs are silently skipped, not just delayed. Keep `worker` at
   `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
   `/About`) if the recurring jobs need to actually run unattended.
@@ -58,6 +63,11 @@ rely on this in production, not just during the demo:
   `/About` fan-out or Foundry tool calls into `mcp-srv-func-app` start timing
   out, raising this host back to `minReplicas: 1` (and/or its old 0.5 vCPU /
   1Gi size) is the first thing to try before touching the 60s timeout itself.
+  `useBackendWake` never cancels an in-flight `/About` request when it fires
+  the next retry, so a fan-out that takes close to the full 60s still counts
+  as a success once it finally responds -- the retries just add redundant
+  requests (and repeated pressure to wake worker/MCP hosts) rather than
+  racing the slow one to a premature abort.
 
 ## Prerequisites (GitHub)
 

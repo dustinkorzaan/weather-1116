@@ -20,16 +20,22 @@ function createTestStore() {
   });
 }
 
-function renderApp(path) {
+async function renderApp(path) {
   const store = createTestStore();
 
-  return render(
+  const view = render(
     <Provider store={store}>
       <MemoryRouter initialEntries={[path]}>
         <App />
       </MemoryRouter>
     </Provider>
   );
+
+  await waitFor(() => {
+    expect(screen.queryByTestId('backend-wake-screen')).toBeNull();
+  });
+
+  return view;
 }
 
 function requestUrl(input) {
@@ -108,7 +114,7 @@ function mockHelloFetch(weather = {}) {
   });
 }
 
-function renderAppWithRouter(path) {
+async function renderAppWithRouter(path) {
   const store = createTestStore();
   const router = createMemoryRouter([{ path: '*', element: <App /> }], {
     initialEntries: [path],
@@ -119,6 +125,10 @@ function renderAppWithRouter(path) {
       <RouterProvider router={router} />
     </Provider>
   );
+
+  await waitFor(() => {
+    expect(screen.queryByTestId('backend-wake-screen')).toBeNull();
+  });
 
   return { ...view, router };
 }
@@ -132,18 +142,18 @@ afterEach(() => {
   window.sessionStorage.removeItem(MAP_CITIES_STORAGE_KEY);
 });
 
-test('user menu is a gray outline control instead of a solid blue button', () => {
+test('user menu is a gray outline control instead of a solid blue button', async () => {
   mockHelloFetch();
-  renderApp('/');
+  await renderApp('/');
 
   const button = screen.getByRole('button', { name: /open user menu/i });
   expect(button.className).not.toMatch(/bg-blue/);
   expect(button.className).toMatch(/border-2/);
 });
 
-test('header person icon uses the shared filled avatar svg', () => {
+test('header person icon uses the shared filled avatar svg', async () => {
   mockHelloFetch();
-  renderApp('/');
+  await renderApp('/');
 
   const title = screen.getByRole('heading', { name: /weather react/i });
   const avatar = title.closest('header')?.querySelector('img.avatar-icon');
@@ -160,9 +170,9 @@ test('header person icon uses the shared filled avatar svg', () => {
   expect(avatarSvg).not.toContain('<circle ');
 });
 
-test('renders the map on the home route without split page content', () => {
+test('renders the map on the home route without split page content', async () => {
   mockHelloFetch();
-  renderApp('/');
+  await renderApp('/');
 
   expect(screen.getByRole('region', { name: /map/i })).toBeDefined();
   expect(screen.getByRole('button', { name: /add location/i })).toBeDefined();
@@ -182,7 +192,7 @@ test('renders the map on the home route without split page content', () => {
 
 test('renders hello world on its own page', async () => {
   mockHelloFetch();
-  renderApp('/hello-world');
+  await renderApp('/hello-world');
 
   expect(await screen.findByRole('heading', { name: /weather react/i })).toBeDefined();
   expect(await screen.findByRole('heading', { name: /^hello world$/i })).toBeDefined();
@@ -193,9 +203,9 @@ test('renders hello world on its own page', async () => {
   expect(screen.queryByRole('button', { name: /add location/i })).toBeNull();
 });
 
-test('renders current AI weather on its own page', () => {
+test('renders current AI weather on its own page', async () => {
   mockHelloFetch();
-  renderApp('/current-ai-weather');
+  await renderApp('/current-ai-weather');
 
   expect(screen.getByRole('heading', { name: /current ai weather/i })).toBeDefined();
   expect(screen.getByLabelText(/location:/i)).toBeDefined();
@@ -206,9 +216,9 @@ test('renders current AI weather on its own page', () => {
   expect(screen.queryByRole('button', { name: /add location/i })).toBeNull();
 });
 
-test('current AI weather submit is a charcoal button instead of blue or a flat outline', () => {
+test('current AI weather submit is a charcoal button instead of blue or a flat outline', async () => {
   mockHelloFetch();
-  renderApp('/current-ai-weather');
+  await renderApp('/current-ai-weather');
 
   const button = screen.getByRole('button', { name: /get current ai weather/i });
   expect(button.className).toMatch(/bg-primary/);
@@ -218,9 +228,9 @@ test('current AI weather submit is a charcoal button instead of blue or a flat o
   expect(button.className).not.toMatch(/bg-white/);
 });
 
-test('chat tabs and send use clickable gray controls instead of blue', () => {
+test('chat tabs and send use clickable gray controls instead of blue', async () => {
   mockHelloFetch();
-  renderApp('/chat-clients');
+  await renderApp('/chat-clients');
 
   expect(screen.getByRole('textbox', { name: /message/i }).closest('form')?.className).toMatch(
     /items-start/
@@ -241,7 +251,7 @@ test('chat tabs and send use clickable gray controls instead of blue', () => {
 
 test('current AI weather reads location query, clears it, and fetches', async () => {
   const fetchMock = mockHelloFetch();
-  const { router } = renderAppWithRouter('/current-ai-weather?location=nashville%20tn');
+  const { router } = await renderAppWithRouter('/current-ai-weather?location=nashville%20tn');
 
   expect(screen.getByLabelText(/location:/i).value).toBe('nashville tn');
 
@@ -285,7 +295,7 @@ test('current AI weather reads location query, clears it, and fetches', async ()
 test('current AI weather page shows the Foundry connecting message while fetching', async () => {
   const user = userEvent.setup();
   mockHelloFetch();
-  renderApp('/current-ai-weather');
+  await renderApp('/current-ai-weather');
 
   expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
 
@@ -302,7 +312,7 @@ test('current AI weather page shows the Foundry connecting message while fetchin
 
 test('weather modal current tab shows the Foundry connecting message while fetching', async () => {
   const fetchMock = mockHelloFetch();
-  renderApp('/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=current');
+  await renderApp('/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=current');
 
   expect(screen.getByText('Connecting to Microsoft Foundry...')).toBeDefined();
 
@@ -320,7 +330,7 @@ test('weather modal current tab shows the Foundry connecting message while fetch
 
 test('weather modal forecast tab has no Foundry connecting message', async () => {
   mockHelloFetch();
-  renderApp('/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=daily-forecast');
+  await renderApp('/weather?name=Nashville%2C%20TN&lat=36.1627&lng=-86.7816&tab=daily-forecast');
 
   expect(screen.queryByText('Connecting to Microsoft Foundry...')).toBeNull();
 });
@@ -328,7 +338,7 @@ test('weather modal forecast tab has no Foundry connecting message', async () =>
 test('current AI weather page has V3/V4/V5 tabs that call their own endpoint', async () => {
   const user = userEvent.setup();
   const fetchMock = mockHelloFetch();
-  renderApp('/current-ai-weather');
+  await renderApp('/current-ai-weather');
 
   expect(screen.getByRole('tab', { name: 'V3' })).toBeDefined();
   expect(screen.getByRole('tab', { name: 'V4' })).toBeDefined();
@@ -353,7 +363,7 @@ test('current AI weather page has V3/V4/V5 tabs that call their own endpoint', a
 test('current AI weather keeps a tab result after switching away and back', async () => {
   const user = userEvent.setup();
   mockHelloFetch();
-  renderApp('/current-ai-weather');
+  await renderApp('/current-ai-weather');
 
   await user.click(screen.getByRole('tab', { name: 'V4' }));
   await user.click(screen.getByRole('button', { name: /get current ai weather/i }));
@@ -379,7 +389,7 @@ test('current AI weather renders the full summary as GitHub-flavored Markdown', 
 `,
   });
   const user = userEvent.setup();
-  renderApp('/current-ai-weather');
+  await renderApp('/current-ai-weather');
 
   await user.click(screen.getByRole('button', { name: /get current ai weather/i }));
 
@@ -391,9 +401,9 @@ test('current AI weather renders the full summary as GitHub-flavored Markdown', 
   });
 });
 
-test('renders chat clients on its own page', () => {
+test('renders chat clients on its own page', async () => {
   mockHelloFetch();
-  renderApp('/chat-clients');
+  await renderApp('/chat-clients');
 
   expect(screen.getByRole('heading', { name: /chat clients/i })).toBeDefined();
   expect(screen.getByRole('tab', { name: 'Chat1a' })).toBeDefined();
@@ -407,7 +417,7 @@ test('renders chat clients on its own page', () => {
 test('user menu lists home, login, and the three content pages', async () => {
   mockHelloFetch();
   const user = userEvent.setup();
-  renderApp('/');
+  await renderApp('/');
 
   await user.click(screen.getByRole('button', { name: /open user menu/i }));
 
@@ -427,7 +437,7 @@ test('user menu lists home, login, and the three content pages', async () => {
 test('user menu can switch the document to the dark theme', async () => {
   mockHelloFetch();
   const user = userEvent.setup();
-  renderApp('/');
+  await renderApp('/');
 
   await user.click(screen.getByRole('button', { name: /open user menu/i }));
   await user.click(await screen.findByRole('menuitemradio', { name: 'Dark' }));
@@ -440,7 +450,7 @@ test('user menu can switch the document to the dark theme', async () => {
 test('user menu can switch the document back to the light theme', async () => {
   mockHelloFetch();
   const user = userEvent.setup();
-  renderApp('/');
+  await renderApp('/');
 
   await user.click(screen.getByRole('button', { name: /open user menu/i }));
   await user.click(await screen.findByRole('menuitemradio', { name: 'Dark' }));
@@ -471,7 +481,7 @@ test('renders a public message in the About tree', () => {
 test('header plus control opens a location popdown and stays open while geo search runs', async () => {
   const fetchMock = mockHelloFetch();
   const user = userEvent.setup();
-  renderApp('/');
+  await renderApp('/');
 
   const addButton = screen.getByRole('button', { name: /add location/i });
   const avatar = screen.getByRole('button', { name: /open user menu/i });
