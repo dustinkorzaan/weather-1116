@@ -8,4 +8,7 @@
 **/publish
 **/artifacts
 **/*.md
+**/.env
+**/.env.*
+!**/.env.example
 FoundryConsole*/

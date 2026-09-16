@@ -37,6 +37,27 @@ short gap in traffic. `worker` alone is capped at `maxReplicas: 1`: Hangfire
 recurring jobs assume a single active server, so a second cold-started
 replica racing the first would double-run jobs instead of adding throughput.
 
+Two consequences of scaling everything to zero are worth knowing before you
+rely on this in production, not just during the demo:
+
+- **`worker`'s `Cron.Daily(2)` recurring jobs** (`RecurringJobScheduler`) only
+  run if a replica happens to be up when Hangfire's scheduler ticks. There is
+  no queue-depth/KEDA scale rule bringing `worker` up on a schedule -- the
+  only thing that wakes it from zero is an inbound HTTP request, which today
+  means the React UI's `loadAbout()` call on page load (see `App.jsx`) hitting
+  `WORKER_DOTNET_URL`. If nobody loads the React UI around 2am, that day's
+  recurring jobs are silently skipped, not just delayed. Keep `worker` at
+  `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
+  `/About`) if the recurring jobs need to actually run unattended.
+- **`mcp-srv-func-app` cold starts compound with `AboutClient`'s 60s HTTP
+  timeout** (`api-dotnet/api/Program.cs`). API's `/About` fans out to worker
+  and both MCP hosts; if `mcp-srv-func-app` is also scaled to zero, that
+  fan-out call pays a nested cold start on top of whatever else is cold. This
+  has not caused a timeout in practice at current traffic levels, but if
+  `/About` fan-out or Foundry tool calls into `mcp-srv-func-app` start timing
+  out, raising this host back to `minReplicas: 1` (and/or its old 0.5 vCPU /
+  1Gi size) is the first thing to try before touching the 60s timeout itself.
+
 ## Prerequisites (GitHub)
 
 **Secrets** (must exist before provision/deploy):
