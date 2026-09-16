@@ -45,8 +45,9 @@ rely on this in production, not just during the demo:
   no queue-depth/KEDA scale rule bringing `worker` up on a schedule -- the
   only thing that wakes it from zero is an inbound HTTP request, which today
   means the React UI's `loadAbout()` call on page load (see `App.jsx`) hitting
-  `WORKER_DOTNET_URL`. If nobody loads the React UI around 2am, that day's
-  recurring jobs are silently skipped, not just delayed. Keep `worker` at
+  API's `/About`, which itself fans out to `WORKER_DOTNET_URL` -- one hop, not
+  React calling the worker directly. If nobody loads the React UI around 2am,
+  that day's recurring jobs are silently skipped, not just delayed. Keep `worker` at
   `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
   `/About`) if the recurring jobs need to actually run unattended.
 - **`mcp-srv-func-app` cold starts compound with `AboutClient`'s 60s HTTP
