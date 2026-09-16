@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
@@ -141,14 +141,10 @@ function AppShell() {
 
   // ACA scales api/mvc/blazor to zero when idle; wait for all three to
   // answer (retrying as long as it takes) before showing the app so cold
-  // start happens up front instead of mid-navigation.
+  // start happens up front instead of mid-navigation. This already hits
+  // API's /About, so there's no separate mount-time loadAbout() call here --
+  // the dialog fetches its own data lazily when opened (handleAboutClick).
   const { isWarm: isBackendWarm, ...backendWakeStatus } = useBackendWake();
-
-  // Also warm the About RTK Query cache so the About dialog has data ready
-  // the first time it's opened, independent of the wake-up gate above.
-  useEffect(() => {
-    loadAbout();
-  }, [loadAbout]);
 
   const handleAboutClick = () => {
     setIsAboutOpen(true);
