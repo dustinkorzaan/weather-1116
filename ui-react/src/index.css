@@ -253,6 +253,57 @@
   }
 }
 
+/* Same spinning/pulsing logo as the map pins, standalone for the backend
+   wake-up screen (no OverlayView pixel positioning involved here). */
+.weather-wake-logo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  color: #111827;
+}
+
+.dark .weather-wake-logo {
+  color: #ffffff;
+}
+
+.weather-wake-logo-spin,
+.weather-wake-logo-pulse,
+.weather-wake-logo-image {
+  grid-area: 1 / 1;
+}
+
+.weather-wake-logo-spin {
+  display: block;
+  width: 56px;
+  height: 56px;
+  animation: weather-map-logo-spin 16s linear infinite;
+}
+
+.weather-wake-logo-image {
+  display: block;
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.45));
+}
+
+.weather-wake-logo-pulse {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  opacity: 0.35;
+  animation: weather-map-logo-pulse 2.8s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-wake-logo-spin,
+  .weather-wake-logo-pulse {
+    animation: none;
+  }
+}
+
 .chat-markdown > :first-child {
   margin-top: 0;
 }
