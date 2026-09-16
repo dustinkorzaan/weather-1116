@@ -41,6 +41,7 @@ function BackendWakeScreen({ statuses = {} }) {
         })}
       </div>
       <p className="text-sm text-muted-foreground">Waking up the weather services…</p>
+      <p className="text-xs text-muted-foreground">Please wait, this can take 30 - 60 seconds...</p>
     </div>
   );
 }
