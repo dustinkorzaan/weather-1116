@@ -1,24 +1,38 @@
 import { useEffect, useState } from 'react';
-import { blazorBaseUrl, mvcBaseUrl } from '../config/siteLinks';
+import {
+  blazorBaseUrl,
+  mcpSrvAppServiceBaseUrl,
+  mcpSrvFuncAppBaseUrl,
+  mvcBaseUrl,
+  workerBaseUrl,
+} from '../config/siteLinks';
 import { resolveApiBaseUrl } from '../services/apiBaseUrl';
 
-// ACA scales api/mvc/blazor to zero when idle (see docs/aca-bootstrap.md), and
-// a cold start can take up to ~90s per layer -- stacked across 2-3 layers
-// that can run well past a single fixed timeout. So instead of giving up,
-// fire a fresh ping at this cadence until one lands; earlier pings are left
-// running rather than cancelled, since a slow-but-eventually-successful
-// fan-out (e.g. API's /About calling into worker + MCP hosts) should still
-// count as a win whenever it finishes. This only paces *new* backup
-// attempts -- success is detected the instant any one request resolves, not
-// on the next tick -- so it's tuned for keeping concurrent in-flight
-// requests low against a still-booting (0.25 vCPU/0.5Gi) container rather
-// than for how fast we notice a win.
+// ACA scales every layer to zero when idle (see docs/aca-bootstrap.md), and a
+// cold start can take up to ~90s per layer. API's own /About handler fans
+// out server-side to worker + both MCP hosts (Task.WhenAll), but that fan-out
+// only *starts* once the API container has finished its own cold start --
+// so waiting on /About alone serializes API's boot in front of theirs. Ping
+// worker and both MCP hosts directly, in parallel with API/MVC/Blazor, so
+// their cold start begins immediately instead of only after API wakes up
+// and gets around to calling them.
+// So instead of giving up, fire a fresh ping at this cadence until one
+// lands; earlier pings are left running rather than cancelled, since a
+// slow-but-eventually-successful request should still count as a win
+// whenever it finishes. This only paces *new* backup attempts -- success is
+// detected the instant any one request resolves, not on the next tick --
+// so it's tuned for keeping concurrent in-flight requests low against a
+// still-booting (0.25 vCPU/0.5Gi) container rather than for how fast we
+// notice a win.
 const WAKE_RETRY_INTERVAL_MS = 30000;
 
 const WAKE_URLS = {
   api: `${resolveApiBaseUrl()}/About`,
   mvc: mvcBaseUrl,
   blazor: blazorBaseUrl,
+  worker: `${workerBaseUrl}/about`,
+  mcpSrvAppService: `${mcpSrvAppServiceBaseUrl}/about`,
+  mcpSrvFuncApp: `${mcpSrvFuncAppBaseUrl}/about`,
 };
 
 function pingForWakeUp(url) {
@@ -66,13 +80,21 @@ function retryUntilAwake(url, isCancelled, onWarm) {
   return () => clearInterval(intervalId);
 }
 
-const INITIAL_WARM_STATE = { api: false, mvc: false, blazor: false };
+const INITIAL_WARM_STATE = {
+  api: false,
+  mvc: false,
+  blazor: false,
+  worker: false,
+  mcpSrvAppService: false,
+  mcpSrvFuncApp: false,
+};
 
 /**
- * Waits for the API (via the About endpoint), MVC, and Blazor apps to answer,
- * retrying each independently every ~30s until it does. Returns a warm flag
- * per target plus an overall `isWarm` once all three have answered, so the
- * caller can show per-layer progress instead of one opaque loading state.
+ * Waits for the API (via the About endpoint), MVC, Blazor, worker, and both
+ * MCP hosts to answer, retrying each independently every ~30s until it does.
+ * Returns a warm flag per target plus an overall `isWarm` once every target
+ * has answered, so the caller can show per-layer progress instead of one
+ * opaque loading state.
  */
 export function useBackendWake() {
   const [warmState, setWarmState] = useState(INITIAL_WARM_STATE);
@@ -94,6 +116,6 @@ export function useBackendWake() {
 
   return {
     ...warmState,
-    isWarm: warmState.api && warmState.mvc && warmState.blazor,
+    isWarm: Object.values(warmState).every(Boolean),
   };
 }

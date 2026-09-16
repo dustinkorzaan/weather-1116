@@ -7,10 +7,12 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test('is not warm until the api, mvc, and blazor pings all resolve', async () => {
+test('is not warm until the api, mvc, blazor, worker, and mcp host pings all resolve', async () => {
   let resolveAbout;
   vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
     const url = String(input);
+    // Only the api target hits the capital-case /About path (the other
+    // targets ping lowercase /about directly), so this only stalls api.
     if (url.includes('/About')) {
       return new Promise((resolve) => {
         resolveAbout = resolve;
@@ -24,6 +26,9 @@ test('is not warm until the api, mvc, and blazor pings all resolve', async () =>
   await waitFor(() => {
     expect(result.current.mvc).toBe(true);
     expect(result.current.blazor).toBe(true);
+    expect(result.current.worker).toBe(true);
+    expect(result.current.mcpSrvAppService).toBe(true);
+    expect(result.current.mcpSrvFuncApp).toBe(true);
   });
   expect(result.current.api).toBe(false);
   expect(result.current.isWarm).toBe(false);

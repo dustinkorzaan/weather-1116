@@ -45,28 +45,35 @@ rely on this in production, not just during the demo:
   no queue-depth/KEDA scale rule bringing `worker` up on a schedule -- the
   only thing that wakes it from zero is an inbound HTTP request, which today
   means the React UI's `useBackendWake` hook (`ui-react/src/app/useBackendWake.js`,
-  used from `App.jsx`) hitting API's `/About` on page load, which itself fans
-  out to `WORKER_DOTNET_URL` -- one hop, not React calling the worker
-  directly. `useBackendWake` fires a fresh `/About` (plus MVC and Blazor)
-  request roughly every 30s -- without cancelling ones still in flight --
-  until one succeeds, rather than giving up after a single attempt; see the
-  `BackendWakeScreen` full-page loader it drives while that's pending. If
-  nobody loads the React UI around 2am,
+  used from `App.jsx`) pinging `worker`'s own `/about` directly on page load,
+  in parallel with API, MVC, Blazor, and both MCP hosts, rather than relying
+  on API's `/About` fan-out to reach it (see below for why that changed).
+  `useBackendWake` fires a fresh ping per target roughly every 30s -- without
+  cancelling ones still in flight -- until each succeeds, rather than giving
+  up after a single attempt; see the `BackendWakeScreen` full-page loader,
+  now showing six spinning icons (one per target), it drives while that's
+  pending. If nobody loads the React UI around 2am,
   that day's recurring jobs are silently skipped, not just delayed. Keep `worker` at
   `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
-  `/About`) if the recurring jobs need to actually run unattended.
-- **`mcp-srv-func-app` cold starts compound with `AboutClient`'s 60s HTTP
-  timeout** (`api-dotnet/api/Program.cs`). API's `/About` fans out to worker
-  and both MCP hosts; if `mcp-srv-func-app` is also scaled to zero, that
-  fan-out call pays a nested cold start on top of whatever else is cold. This
-  has not caused a timeout in practice at current traffic levels, but if
-  `/About` fan-out or Foundry tool calls into `mcp-srv-func-app` start timing
-  out, raising this host back to `minReplicas: 1` (and/or its old 0.5 vCPU /
-  1Gi size) is the first thing to try before touching the 60s timeout itself.
-  `useBackendWake` never cancels an in-flight `/About` request when it fires
-  the next retry, so a fan-out that takes close to the full 60s still counts
-  as a success once it finally responds -- the retries just add redundant
-  requests (and repeated pressure to wake worker/MCP hosts) rather than
+  `/about`) if the recurring jobs need to actually run unattended.
+- **`mcp-srv-func-app` cold starts used to compound with `AboutClient`'s 60s
+  HTTP timeout** (`api-dotnet/api/Program.cs`). API's own `/About` still fans
+  out server-side to worker and both MCP hosts via `Task.WhenAll`, but that
+  fan-out only starts once the API container itself has finished cold
+  starting -- so a page load that waited on `/About` alone paid API's cold
+  start, then worker/MCP's cold start, back to back. `useBackendWake` now
+  pings `worker`, `mcp-srv-app-service`, and `mcp-srv-func-app` directly (each
+  its own `/about`) at the same time it pings API, so their cold start begins
+  immediately instead of only after API wakes up and gets around to calling
+  them -- turning that serial chain into one round of parallel cold starts.
+  API's `/About` fan-out and its 60s timeout are unchanged and still matter
+  for the About dialog's own request and for Foundry tool calls into
+  `mcp-srv-func-app`; if those start timing out, raising this host back to
+  `minReplicas: 1` (and/or its old 0.5 vCPU / 1Gi size) is still the first
+  thing to try before touching the 60s timeout itself. `useBackendWake` never
+  cancels an in-flight request when it fires the next retry, so a ping that
+  takes close to the full cold-start window still counts as a success once it
+  finally responds -- the retries just add redundant requests rather than
   racing the slow one to a premature abort.
 
 ## Prerequisites (GitHub)
