@@ -1,18 +1,16 @@
 // SQL logical server + database. Microsoft Entra-only authentication is
-// enabled from creation, so no SQL-native login can ever authenticate --
-// only Entra ID can, whether that's the Entra admin (the GitHub Actions
-// identity itself rather than a human, see infra/main.bicep for why) or an
-// app's own managed identity via a contained user. ARM still requires an
-// administratorLogin/administratorLoginPassword pair to create the server;
-// both are generated internally below and never surfaced, since
-// Entra-only auth makes them permanently unusable regardless of value --
-// there is nothing to manage or protect. The Entra admin identity's own
-// Entra-authenticated connection is what bootstraps the contained users for
-// api/mvc/worker's managed identities (infra/scripts/create-contained-users.sql)
-// -- Azure SQL only allows creating "FROM EXTERNAL PROVIDER" users over an
-// Entra-authenticated connection. That script is run manually, once, as the
-// Entra admin, not by prod-provision-infra.yml -- see that workflow's own
-// comment for why.
+// enabled from creation via the inline `administrators` property on the
+// server resource itself -- no SQL-native login/password is ever created,
+// so there is nothing to generate, protect, or manage on that side. Only
+// Entra ID can authenticate, whether that's the Entra admin (the GitHub
+// Actions identity itself rather than a human, see infra/main.bicep for
+// why) or an app's own managed identity via a contained user. The Entra
+// admin identity's own Entra-authenticated connection is what bootstraps
+// the contained users for api/mvc/worker's managed identities
+// (infra/scripts/create-contained-users.sql) -- Azure SQL only allows
+// creating "FROM EXTERNAL PROVIDER" users over an Entra-authenticated
+// connection. That script is run manually, once, as the Entra admin, not
+// by prod-provision-infra.yml -- see that workflow's own comment for why.
 
 @description('Name of the SQL logical server, e.g. wx1116-prod-sql-srv.')
 param serverName string
@@ -22,14 +20,7 @@ param databaseName string
 
 param location string
 
-@description('SQL admin login username. Auto-generated from non-secret inputs -- Entra-only authentication below makes it permanently unusable regardless of value, so there is nothing here worth marking @secure().')
-param administratorLogin string = 'sqladmin${uniqueString(resourceGroup().id, serverName)}'
-
-@secure()
-@description('SQL admin login password. Auto-generated fresh on every deployment and never surfaced, for the same reason.')
-param administratorLoginPassword string = newGuid()
-
-@description('Principal ID of the Entra admin (the GitHub Actions managed identity) -- used only to bootstrap the contained users for the SQL-touching apps.')
+@description('Principal ID of the Entra admin (the GitHub Actions managed identity) -- both the server\'s sole administrator and the identity that bootstraps the contained users for the SQL-touching apps.')
 param entraAdminPrincipalId string
 
 @description('Login/display name of that same Entra admin.')
@@ -55,37 +46,17 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01' = {
   name: serverName
   location: location
   properties: {
-    administratorLogin: administratorLogin
-    administratorLoginPassword: administratorLoginPassword
     minimalTlsVersion: '1.2'
     publicNetworkAccess: 'Enabled'
+    administrators: {
+      administratorType: 'ActiveDirectory'
+      principalType: 'Application'
+      login: entraAdminLoginName
+      sid: entraAdminPrincipalId
+      tenantId: subscription().tenantId
+      azureADOnlyAuthentication: true
+    }
   }
-}
-
-resource sqlEntraAdmin 'Microsoft.Sql/servers/administrators@2023-08-01' = {
-  parent: sqlServer
-  name: 'ActiveDirectory'
-  properties: {
-    administratorType: 'ActiveDirectory'
-    login: entraAdminLoginName
-    sid: entraAdminPrincipalId
-    tenantId: subscription().tenantId
-  }
-}
-
-// Disables SQL-native authentication entirely -- the administratorLogin
-// above becomes permanently unusable from here on, regardless of its
-// value. Must come after the Entra admin exists: Azure rejects enabling
-// Entra-only auth on a server with no Entra admin configured.
-resource sqlAzureADOnlyAuth 'Microsoft.Sql/servers/azureADOnlyAuthentications@2023-08-01' = {
-  parent: sqlServer
-  name: 'Default'
-  properties: {
-    azureADOnlyAuthentication: true
-  }
-  dependsOn: [
-    sqlEntraAdmin
-  ]
 }
 
 // Special-cased firewall rule: 0.0.0.0-0.0.0.0 is not a literal IP, it's
