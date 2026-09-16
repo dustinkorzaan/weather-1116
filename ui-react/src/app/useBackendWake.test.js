@@ -35,7 +35,7 @@ test('is not warm until the api, mvc, and blazor pings all resolve', async () =>
   });
 });
 
-test('retries a failed ping every ~15s until it succeeds', async () => {
+test('retries a failed ping every ~30s until it succeeds', async () => {
   vi.useFakeTimers();
   let mvcCallCount = 0;
   vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
@@ -58,7 +58,7 @@ test('retries a failed ping every ~15s until it succeeds', async () => {
   expect(result.current.mvc).toBe(false);
 
   await act(async () => {
-    await vi.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(30000);
   });
 
   expect(mvcCallCount).toBeGreaterThan(1);
@@ -83,7 +83,7 @@ test('a slow first attempt still wins instead of being cancelled by later retrie
   // Let a couple of retry intervals pass -- more requests fire, but none
   // has resolved yet, so none can have won.
   await act(async () => {
-    await vi.advanceTimersByTimeAsync(30000);
+    await vi.advanceTimersByTimeAsync(60000);
   });
   expect(apiResolvers.length).toBeGreaterThan(1);
   expect(result.current.api).toBe(false);

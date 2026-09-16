@@ -13,7 +13,7 @@ import { resolveApiBaseUrl } from '../services/apiBaseUrl';
 // on the next tick -- so it's tuned for keeping concurrent in-flight
 // requests low against a still-booting (0.25 vCPU/0.5Gi) container rather
 // than for how fast we notice a win.
-const WAKE_RETRY_INTERVAL_MS = 15000;
+const WAKE_RETRY_INTERVAL_MS = 30000;
 
 const WAKE_URLS = {
   api: `${resolveApiBaseUrl()}/About`,
@@ -70,7 +70,7 @@ const INITIAL_WARM_STATE = { api: false, mvc: false, blazor: false };
 
 /**
  * Waits for the API (via the About endpoint), MVC, and Blazor apps to answer,
- * retrying each independently every ~15s until it does. Returns a warm flag
+ * retrying each independently every ~30s until it does. Returns a warm flag
  * per target plus an overall `isWarm` once all three have answered, so the
  * caller can show per-layer progress instead of one opaque loading state.
  */

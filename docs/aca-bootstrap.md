@@ -48,7 +48,7 @@ rely on this in production, not just during the demo:
   used from `App.jsx`) hitting API's `/About` on page load, which itself fans
   out to `WORKER_DOTNET_URL` -- one hop, not React calling the worker
   directly. `useBackendWake` fires a fresh `/About` (plus MVC and Blazor)
-  request roughly every 15s -- without cancelling ones still in flight --
+  request roughly every 30s -- without cancelling ones still in flight --
   until one succeeds, rather than giving up after a single attempt; see the
   `BackendWakeScreen` full-page loader it drives while that's pending. If
   nobody loads the React UI around 2am,
