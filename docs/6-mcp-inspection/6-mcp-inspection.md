@@ -36,7 +36,7 @@ Point it at:
 ## Postman
 
 Add a request to a Postman collection pointed at the `/mcp` endpoint (
-`https://wx1116-prod-mcp-srv-app-service.azurewebsites.net/mcp`):
+`https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp`):
 
 * Method **POST**, header `Authorization: Bearer <MCP_SRV_APP_SERVICE_KEY>`
 * Body → raw JSON, a JSON-RPC request, e.g. `tools/call` for
@@ -58,7 +58,7 @@ tool's JSON content.
 ## curl example
 
 ```bash
-curl -sS -N -X POST "https://wx1116-prod-mcp-srv-app-service.azurewebsites.net/mcp" \
+curl -sS -N -X POST "https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp" \
   -H "accept: application/json, text/event-stream" \
   -H "authorization: Bearer ..." \
   -H "content-type: application/json" \
@@ -81,7 +81,7 @@ curl -sS -N -X POST "https://wx1116-prod-mcp-srv-app-service.azurewebsites.net/m
 ```
 
 ```bash
-curl -sS -X POST "https://wx1116-prod-mcp-srv-app-service.azurewebsites.net/mcp" \
+curl -sS -X POST "https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp" \
   -H "accept: application/json, text/event-stream" \
   -H "authorization: Bearer ..." \
   -H "content-type: application/json" \

@@ -15,7 +15,7 @@ Env.TraversePath().Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // Exports traces/metrics/logs to Application Insights via APPLICATIONINSIGHTS_CONNECTION_STRING
-// (set by infra/modules/app-service.bicep). UseAzureMonitor() throws at startup if the
+// (set by infra/modules/container-app.bicep). UseAzureMonitor() throws at startup if the
 // connection string is missing, so it's opt-in -- local dev and WebApplicationFactory-based
 // tests run with no App Insights resource at all.
 if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
@@ -27,7 +27,7 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNEC
 // (DB_CONNECTION_STRING); the worker is the only app that runs the servers.
 // Falls back to in-memory storage locally when no connection string is set.
 // Authenticates via this app's user-assigned managed identity (AZURE_CLIENT_ID,
-// set by infra/modules/app-service.bicep) instead of a SQL login/password --
+// set by infra/modules/container-app.bicep) instead of a SQL login/password --
 // see ManagedIdentitySqlConnectionStringFactory.
 var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
     builder.Configuration["DB_CONNECTION_STRING"],
