@@ -139,11 +139,12 @@ function AppShell() {
   const { pathname } = useLocation();
   const isMapVisible = pathname === '/';
 
-  // ACA scales api/mvc/blazor to zero when idle; wait for all three to
-  // answer (retrying as long as it takes) before showing the app so cold
-  // start happens up front instead of mid-navigation. This already hits
-  // API's /About, so there's no separate mount-time loadAbout() call here --
-  // the dialog fetches its own data lazily when opened (handleAboutClick).
+  // ACA scales every layer to zero when idle; wait for all six (api, mvc,
+  // blazor, worker, and both MCP hosts) to answer directly (retrying as long
+  // as it takes) before showing the app so cold start happens up front
+  // instead of mid-navigation. This already hits API's /About, so there's no
+  // separate mount-time loadAbout() call here -- the dialog fetches its own
+  // data lazily when opened (handleAboutClick).
   const { isWarm: isBackendWarm, ...backendWakeStatus } = useBackendWake();
 
   const handleAboutClick = () => {

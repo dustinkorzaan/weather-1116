@@ -30,8 +30,11 @@ const WAKE_URLS = {
   api: `${resolveApiBaseUrl()}/About`,
   mvc: mvcBaseUrl,
   blazor: blazorBaseUrl,
-  worker: `${workerBaseUrl}/about`,
-  mcpSrvAppService: `${mcpSrvAppServiceBaseUrl}/about`,
+  // Worker and MCP App Service are ASP.NET [Route("[controller]")] hosts, so
+  // /About matches the rest of the repo (AboutController, siteLinks, docs).
+  // MCP Func App's HTTP trigger route is literally lowercase "about".
+  worker: `${workerBaseUrl}/About`,
+  mcpSrvAppService: `${mcpSrvAppServiceBaseUrl}/About`,
   mcpSrvFuncApp: `${mcpSrvFuncAppBaseUrl}/about`,
 };
 

@@ -45,7 +45,7 @@ rely on this in production, not just during the demo:
   no queue-depth/KEDA scale rule bringing `worker` up on a schedule -- the
   only thing that wakes it from zero is an inbound HTTP request, which today
   means the React UI's `useBackendWake` hook (`ui-react/src/app/useBackendWake.js`,
-  used from `App.jsx`) pinging `worker`'s own `/about` directly on page load,
+  used from `App.jsx`) pinging `worker`'s own `/About` directly on page load,
   in parallel with API, MVC, Blazor, and both MCP hosts, rather than relying
   on API's `/About` fan-out to reach it (see below for why that changed).
   `useBackendWake` fires a fresh ping per target roughly every 30s -- without
@@ -55,17 +55,24 @@ rely on this in production, not just during the demo:
   pending. If nobody loads the React UI around 2am,
   that day's recurring jobs are silently skipped, not just delayed. Keep `worker` at
   `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
-  `/about`) if the recurring jobs need to actually run unattended.
+  `/About`) if the recurring jobs need to actually run unattended.
 - **`mcp-srv-func-app` cold starts used to compound with `AboutClient`'s 60s
   HTTP timeout** (`api-dotnet/api/Program.cs`). API's own `/About` still fans
   out server-side to worker and both MCP hosts via `Task.WhenAll`, but that
   fan-out only starts once the API container itself has finished cold
   starting -- so a page load that waited on `/About` alone paid API's cold
   start, then worker/MCP's cold start, back to back. `useBackendWake` now
-  pings `worker`, `mcp-srv-app-service`, and `mcp-srv-func-app` directly (each
-  its own `/about`) at the same time it pings API, so their cold start begins
-  immediately instead of only after API wakes up and gets around to calling
-  them -- turning that serial chain into one round of parallel cold starts.
+  pings `worker` and `mcp-srv-app-service` directly at their own `/About`
+  (matching `AboutController`'s casing) and `mcp-srv-func-app` at its own
+  lowercase `/about` route, at the same time it pings API, so their cold
+  start begins immediately instead of only after API wakes up and gets
+  around to calling them -- turning that serial chain into one round of
+  parallel cold starts. The three new targets' base URLs come from
+  `VITE_MCP_SRV_APP_SERVICE_URL` / `VITE_MCP_SRV_FUNC_APP_URL` (new) and the
+  existing `VITE_WORKER_DOTNET_URL`; the React deploy and CI build workflows
+  set these from the same `PROD_MCP_SRV_APP_SERVICE_URL` /
+  `PROD_MCP_SRV_FUNC_APP_URL` GitHub variables the API, MVC, and worker
+  deploys already use, since Vite inlines `VITE_*` at build time.
   API's `/About` fan-out and its 60s timeout are unchanged and still matter
   for the About dialog's own request and for Foundry tool calls into
   `mcp-srv-func-app`; if those start timing out, raising this host back to
