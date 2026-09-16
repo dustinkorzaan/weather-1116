@@ -36,8 +36,8 @@ on:
 # does not stop two runs (e.g. two pushes to main close together) from
 # overlapping. Without a workflow-level concurrency group here, run B's
 # provision job could start azd provision while run A's deploy jobs are
-# still doing az webapp/functionapp deploy, recreating the ARM-lock collision
-# this whole restructure exists to avoid. No cancel-in-progress, same rationale
+# still doing az containerapp update, recreating the ARM-lock collision this
+# whole restructure exists to avoid. No cancel-in-progress, same rationale
 # as prod-provision-infra.yml's own concurrency block: queue full runs
 # rather than cancel a release partway through.
 concurrency:
@@ -57,40 +57,33 @@ jobs:
     uses: ./.github/workflows/prod-provision-infra.yml
     secrets: inherit
 
-  # api/mvc/blazor/worker/mcp-srv-app/mcp-srv-func all share one
-  # single-instance App Service Plan (infra/modules/app-service-plan.bicep),
-  # so their zip-deploys chain one at a time instead of firing at once --
-  # 6 concurrent `az webapp/functionapp deploy` calls contend for that one
-  # instance's Kudu process and fail with Kudu 502s. react (Static Web App)
-  # and foundry-agents (no App Service Plan involved) don't share that
-  # resource, so they stay parallel off provision.
   deploy-api:
     needs: [provision]
     uses: ./.github/workflows/prod-deploy-api.yml
     secrets: inherit
 
   deploy-mvc:
-    needs: [deploy-api]
+    needs: [provision]
     uses: ./.github/workflows/prod-deploy-mvc.yml
     secrets: inherit
 
   deploy-blazor:
-    needs: [deploy-mvc]
+    needs: [provision]
     uses: ./.github/workflows/prod-deploy-blazor.yml
     secrets: inherit
 
   deploy-worker:
-    needs: [deploy-blazor]
+    needs: [provision]
     uses: ./.github/workflows/prod-deploy-worker.yml
     secrets: inherit
 
   deploy-mcp-srv-app:
-    needs: [deploy-worker]
+    needs: [provision]
     uses: ./.github/workflows/prod-deploy-mcp-srv-app.yml
     secrets: inherit
 
   deploy-mcp-srv-func:
-    needs: [deploy-mcp-srv-app]
+    needs: [provision]
     uses: ./.github/workflows/prod-deploy-mcp-srv-func.yml
     secrets: inherit
 

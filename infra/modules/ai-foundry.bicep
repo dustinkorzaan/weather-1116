@@ -38,10 +38,10 @@ param grantedPrincipalIds array
 @description('Principal ID of the GitHub Actions managed identity, granted Foundry User (data-plane agents/*/action) on the project so prod-deploy-foundry-agents.yml can publish agents via Entra ID auth.')
 param githubActionsPrincipalId string
 
-@description('Base URL of the MCP Server on App Service tool host, e.g. https://wx1116-prod-mcp-srv-app-service.azurewebsites.net/mcp.')
+@description('Base URL of the MCP Server on App Service tool host, e.g. https://wx1116-prod-mcp-srv-app-service.<domain>/mcp.')
 param mcpSrvAppServiceUrl string
 
-@description('Base URL of the MCP Server on Function App tool host, e.g. https://wx1116-prod-mcp-srv-func-app.azurewebsites.net/runtime/webhooks/mcp.')
+@description('Base URL of the MCP Server on Function App tool host, e.g. https://wx1116-prod-mcp-srv-func-app.<domain>/runtime/webhooks/mcp.')
 param mcpSrvFuncAppUrl string
 
 @secure()

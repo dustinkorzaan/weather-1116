@@ -108,13 +108,13 @@ internal class Program
 
 		var myMcpSrvFuncApp = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvFuncApp",
-			serverUri: new Uri("https://wx1116-prod-mcp-srv-func-app.azurewebsites.net/runtime/webhooks/mcp"),
+			serverUri: new Uri("https://wx1116-prod-mcp-srv-func-app.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/runtime/webhooks/mcp"),
 			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		var myMcpSrvAppService = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvAppService",
-			serverUri: new Uri("https://wx1116-prod-mcp-srv-app-service.azurewebsites.net/mcp"),
+			serverUri: new Uri("https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 

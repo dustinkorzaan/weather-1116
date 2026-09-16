@@ -1,0 +1,11 @@
+**/.git
+**/.github
+**/bin
+**/obj
+**/node_modules
+**/.vs
+**/.vscode
+**/publish
+**/artifacts
+**/*.md
+FoundryConsole*/
