@@ -47,10 +47,12 @@ rely on this in production, not just during the demo:
   means the React UI's `useBackendWake` hook (`ui-react/src/app/useBackendWake.js`,
   used from `App.jsx`) hitting API's `/About` on page load, which itself fans
   out to `WORKER_DOTNET_URL` -- one hop, not React calling the worker
-  directly. `useBackendWake` fires a fresh `/About` (plus MVC and Blazor)
-  request roughly every 30s -- without cancelling ones still in flight --
-  until one succeeds, rather than giving up after a single attempt; see the
-  `BackendWakeScreen` full-page loader it drives while that's pending. If
+  directly. `useBackendWake` fires `/About` (plus MVC and Blazor) on load
+  and retries roughly every 30s only if the previous attempt already failed
+  -- an in-flight request is left running, never aborted and never overlapped,
+  so a slow first `/About` does not start a second mesh fan-out at the 30s
+  tick; see the `BackendWakeScreen` full-page loader it drives while that's
+  pending. If
   nobody loads the React UI around 2am,
   that day's recurring jobs are silently skipped, not just delayed. Keep `worker` at
   `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
@@ -63,11 +65,10 @@ rely on this in production, not just during the demo:
   `/About` fan-out or Foundry tool calls into `mcp-srv-func-app` start timing
   out, raising this host back to `minReplicas: 1` (and/or its old 0.5 vCPU /
   1Gi size) is the first thing to try before touching the 60s timeout itself.
-  `useBackendWake` never cancels an in-flight `/About` request when it fires
-  the next retry, so a fan-out that takes close to the full 60s still counts
-  as a success once it finally responds -- the retries just add redundant
-  requests (and repeated pressure to wake worker/MCP hosts) rather than
-  racing the slow one to a premature abort.
+  `useBackendWake` never cancels an in-flight `/About` request, so a fan-out
+  that takes close to the full 60s still counts as a success once it
+  responds. It also will not start another `/About` while that one is still
+  running -- retries are for a failed attempt, not a slow one.
 
 ## Prerequisites (GitHub)
 

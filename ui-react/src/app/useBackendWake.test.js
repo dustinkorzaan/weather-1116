@@ -65,7 +65,7 @@ test('retries a failed ping every ~30s until it succeeds', async () => {
   expect(result.current.mvc).toBe(true);
 });
 
-test('a slow first attempt still wins instead of being cancelled by later retries', async () => {
+test('a slow first attempt is not overlapped at 30s/60s and still wins when it resolves', async () => {
   vi.useFakeTimers();
   const apiResolvers = [];
   vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
@@ -80,20 +80,46 @@ test('a slow first attempt still wins instead of being cancelled by later retrie
 
   const { result } = renderHook(() => useBackendWake());
 
-  // Let a couple of retry intervals pass -- more requests fire, but none
-  // has resolved yet, so none can have won.
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+  });
+  expect(apiResolvers).toHaveLength(1);
+
+  // Interval ticks must not start a second /About while the first is still
+  // in flight -- that would fan the mesh out again for a merely slow wake.
   await act(async () => {
     await vi.advanceTimersByTimeAsync(60000);
   });
-  expect(apiResolvers.length).toBeGreaterThan(1);
+  expect(apiResolvers).toHaveLength(1);
   expect(result.current.api).toBe(false);
 
-  // The very first (still-pending) attempt finally comes back -- it should
-  // still count as the win, even though later retries were also in flight.
   await act(async () => {
     apiResolvers[0](new Response(null, { status: 200 }));
     await vi.advanceTimersByTimeAsync(0);
   });
 
   expect(result.current.api).toBe(true);
+});
+
+test('clears the retry interval as soon as a ping succeeds', async () => {
+  vi.useFakeTimers();
+  const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+    Promise.resolve(new Response(null, { status: 200 }))
+  );
+
+  const { result } = renderHook(() => useBackendWake());
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+  });
+
+  expect(result.current.isWarm).toBe(true);
+  expect(clearIntervalSpy).toHaveBeenCalled();
+  const callsAfterWarm = fetchMock.mock.calls.length;
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(60000);
+  });
+  expect(fetchMock.mock.calls.length).toBe(callsAfterWarm);
 });

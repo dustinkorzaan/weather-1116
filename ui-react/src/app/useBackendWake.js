@@ -5,14 +5,11 @@ import { resolveApiBaseUrl } from '../services/apiBaseUrl';
 // ACA scales api/mvc/blazor to zero when idle (see docs/aca-bootstrap.md), and
 // a cold start can take up to ~90s per layer -- stacked across 2-3 layers
 // that can run well past a single fixed timeout. So instead of giving up,
-// fire a fresh ping at this cadence until one lands; earlier pings are left
-// running rather than cancelled, since a slow-but-eventually-successful
-// fan-out (e.g. API's /About calling into worker + MCP hosts) should still
-// count as a win whenever it finishes. This only paces *new* backup
-// attempts -- success is detected the instant any one request resolves, not
-// on the next tick -- so it's tuned for keeping concurrent in-flight
-// requests low against a still-booting (0.25 vCPU/0.5Gi) container rather
-// than for how fast we notice a win.
+// retry at this cadence until one ping lands. An in-flight ping is never
+// cancelled (a slow /About fan-out to worker + MCP hosts still counts as a
+// win when it finishes) and is never overlapped -- a merely slow first
+// attempt does not start a second mesh fan-out at the 30s tick. Success is
+// detected the instant that request resolves, not on the next interval tick.
 const WAKE_RETRY_INTERVAL_MS = 30000;
 
 const WAKE_URLS = {
@@ -29,8 +26,10 @@ function pingForWakeUp(url) {
 }
 
 /**
- * Pings `url` immediately, then again every `WAKE_RETRY_INTERVAL_MS` (without
- * waiting for or cancelling earlier attempts) until the first one succeeds.
+ * Pings `url` immediately, then again every `WAKE_RETRY_INTERVAL_MS` until
+ * the first one succeeds. Does not start a new ping while one is already in
+ * flight, and does not abort the in-flight one. Stops the interval as soon
+ * as a ping succeeds (not on the following tick).
  * @param {string} url
  * @param {() => boolean} isCancelled
  * @param {() => void} onWarm
@@ -38,39 +37,55 @@ function pingForWakeUp(url) {
  */
 function retryUntilAwake(url, isCancelled, onWarm) {
   let isWarm = false;
+  let inFlight = false;
+  let intervalId;
+
+  const stop = () => {
+    if (intervalId !== undefined) {
+      clearInterval(intervalId);
+      intervalId = undefined;
+    }
+  };
 
   const attempt = () => {
-    if (isWarm || isCancelled()) {
+    if (isWarm || isCancelled() || inFlight) {
       return;
     }
-    pingForWakeUp(url).then(() => {
-      if (!isWarm && !isCancelled()) {
-        isWarm = true;
-        onWarm();
+    inFlight = true;
+    pingForWakeUp(url).then(
+      () => {
+        inFlight = false;
+        if (!isWarm && !isCancelled()) {
+          isWarm = true;
+          stop();
+          onWarm();
+        }
+      },
+      () => {
+        inFlight = false;
+        // This attempt failed; the next interval tick may retry.
       }
-    }, () => {
-      // This attempt failed; a still-pending earlier attempt or the next
-      // scheduled retry may yet succeed.
-    });
+    );
   };
 
   attempt();
-  const intervalId = setInterval(() => {
+  intervalId = setInterval(() => {
     if (isWarm || isCancelled()) {
-      clearInterval(intervalId);
+      stop();
       return;
     }
     attempt();
   }, WAKE_RETRY_INTERVAL_MS);
 
-  return () => clearInterval(intervalId);
+  return stop;
 }
 
 const INITIAL_WARM_STATE = { api: false, mvc: false, blazor: false };
 
 /**
  * Waits for the API (via the About endpoint), MVC, and Blazor apps to answer,
- * retrying each independently every ~30s until it does. Returns a warm flag
+ * retrying each independently every ~30s on failure (not while a ping is
+ * still in flight) until it does. Returns a warm flag
  * per target plus an overall `isWarm` once all three have answered, so the
  * caller can show per-layer progress instead of one opaque loading state.
  */

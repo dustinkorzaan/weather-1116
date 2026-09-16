@@ -142,6 +142,31 @@ afterEach(() => {
   window.sessionStorage.removeItem(MAP_CITIES_STORAGE_KEY);
 });
 
+test('keeps the wake splash while /About hangs even when MVC and Blazor are ready', async () => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
+    const url = requestUrl(input);
+    if (url.includes('/About')) {
+      return new Promise(() => {});
+    }
+    return Promise.resolve(new Response(null, { status: 200 }));
+  });
+
+  const store = createTestStore();
+  render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>
+    </Provider>
+  );
+
+  expect(await screen.findByTestId('backend-wake-screen')).toBeDefined();
+  expect(await screen.findByText(/MVC ready/)).toBeDefined();
+  expect(await screen.findByText(/Blazor ready/)).toBeDefined();
+  expect(screen.getByText(/API waking/)).toBeDefined();
+  expect(screen.queryByRole('heading', { name: /weather react/i })).toBeNull();
+});
+
 test('user menu is a gray outline control instead of a solid blue button', async () => {
   mockHelloFetch();
   await renderApp('/');
