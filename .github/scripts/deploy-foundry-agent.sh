@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 # Publishes (creates, or publishes a new version of) one named Foundry prompt
-# agent via the Foundry Agents REST API, attaching the two IaC-provisioned
-# MCP RemoteTool connections (MyMcpSrvAppService, MyMcpSrvFuncApp) with
-# require_approval: never.
+# agent via the Foundry Agents REST API, attaching the shared weather MCP
+# toolbox (wx1116-weather-mcp-toolbox) with require_approval: never.
 #
-# Tools live in Foundry IaC as project connections
-# (infra/modules/ai-foundry.bicep). This script does not embed MCP secrets;
-# Agent Service reads credentials from those connections at runtime.
-# Foundry has no ARM resource for agents themselves, so this data-plane
-# publish is the automated substitute for creating agents / attaching tools
-# in the portal.
+# MCP hosts remain in Foundry IaC as RemoteTool connections; the toolbox
+# (deploy-foundry-toolbox.sh) wraps them and exposes a single consumer MCP
+# endpoint that agents reference. This matches the portal's toolbox-first tool
+# model so Tools / Used in agents render correctly.
 #
 # Auth: the Agents API is a data-plane operation that requires a Microsoft
 # Entra ID bearer token, unlike the /openai/v1 inference endpoints the rest
@@ -31,15 +28,13 @@
 #                                      (scope https://ai.azure.com/.default)
 #   AZURE_FOUNDRY_PROD_MODEL      Model deployment name, e.g. gpt-5.4-mini
 #
-# Optional env:
-#   FOUNDRY_MCP_APP_CONNECTION_NAME    default MyMcpSrvAppService
-#   FOUNDRY_MCP_FUNC_CONNECTION_NAME   default MyMcpSrvFuncApp
-#   MCP_SRV_APP_SERVICE_URL / MCP_SRV_FUNC_APP_URL
-#     Base URLs used only when a connection GET does not return target.
-#   FOUNDRY_MCP_APP_CONNECTION_JSON / FOUNDRY_MCP_FUNC_CONNECTION_JSON
-#     Injected connection payloads for tests (skip live GET).
+# Optional env: see foundry-common.sh (toolbox name/connection, injected JSON).
 
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=foundry-common.sh
+source "${SCRIPT_DIR}/foundry-common.sh"
 
 AGENT_NAME="${1:?agent name required}"
 INSTRUCTIONS_FILE="${2:?instructions file required}"
@@ -68,118 +63,21 @@ done
 : "${AZURE_FOUNDRY_ACCESS_TOKEN:?}"
 : "${AZURE_FOUNDRY_PROD_MODEL:?}"
 
-FOUNDRY_MCP_APP_CONNECTION_NAME="${FOUNDRY_MCP_APP_CONNECTION_NAME:-MyMcpSrvAppService}"
-FOUNDRY_MCP_FUNC_CONNECTION_NAME="${FOUNDRY_MCP_FUNC_CONNECTION_NAME:-MyMcpSrvFuncApp}"
+PROJECT_ENDPOINT="$(foundry_normalize_project_endpoint "$AZURE_FOUNDRY_PROD_PROJ_URL")"
+foundry_auth_headers
 
-API_VERSION="2025-11-15-preview"
+CREATE_URL="${PROJECT_ENDPOINT}/agents?api-version=${FOUNDRY_API_VERSION}"
+VERSION_URL="${PROJECT_ENDPOINT}/agents/${AGENT_NAME}/versions?api-version=${FOUNDRY_API_VERSION}"
+GET_AGENT_URL="${PROJECT_ENDPOINT}/agents/${AGENT_NAME}?api-version=${FOUNDRY_API_VERSION}"
 
-normalize_project_endpoint() {
-  local url="${1%/}"
-  url="${url%/openai/v1}"
-  if [[ "$url" != *"/api/projects/"* ]]; then
-    echo "AZURE_FOUNDRY_PROD_PROJ_URL must be a Foundry project endpoint (https://<account>.services.ai.azure.com/api/projects/<name>), not an OpenAI inference URL." >&2
-    exit 1
-  fi
-  printf '%s' "$url"
-}
-
-PROJECT_ENDPOINT="$(normalize_project_endpoint "$AZURE_FOUNDRY_PROD_PROJ_URL")"
-CREATE_URL="${PROJECT_ENDPOINT}/agents?api-version=${API_VERSION}"
-VERSION_URL="${PROJECT_ENDPOINT}/agents/${AGENT_NAME}/versions?api-version=${API_VERSION}"
-GET_AGENT_URL="${PROJECT_ENDPOINT}/agents/${AGENT_NAME}?api-version=${API_VERSION}"
-
-auth_headers=(
-  -H "Authorization: Bearer ${AZURE_FOUNDRY_ACCESS_TOKEN}"
-  -H "Content-Type: application/json"
-)
-
-fetch_connection() {
-  local name="$1"
-  local injected_json="${2:-}"
-  local url="${PROJECT_ENDPOINT}/connections/${name}?api-version=${API_VERSION}"
-  local response_file http_status
-
-  if [ -n "$injected_json" ]; then
-    printf '%s' "$injected_json"
-    return
-  fi
-
-  response_file="$(mktemp)"
-  http_status=$(curl -sS -o "$response_file" -w '%{http_code}' \
-    -X GET "$url" \
-    -H "Authorization: Bearer ${AZURE_FOUNDRY_ACCESS_TOKEN}" \
-    -H "Content-Type: application/json") || true
-
-  if [ "$http_status" -ge 200 ] && [ "$http_status" -lt 300 ]; then
-    cat "$response_file"
-    rm -f "$response_file"
-    return
-  fi
-
-  echo "::warning::GET ${url} failed (HTTP ${http_status}). Using connection name '${name}' as project_connection_id. Response:" >&2
-  cat "$response_file" >&2 || true
-  rm -f "$response_file"
-  jq -n --arg name "$name" '{name: $name}'
-}
-
-connection_id() {
-  jq -r '.id // .name // empty'
-}
-
-connection_target() {
-  jq -r '.target // empty'
-}
-
-APP_CONNECTION_JSON="$(fetch_connection "$FOUNDRY_MCP_APP_CONNECTION_NAME" "${FOUNDRY_MCP_APP_CONNECTION_JSON:-}")"
-FUNC_CONNECTION_JSON="$(fetch_connection "$FOUNDRY_MCP_FUNC_CONNECTION_NAME" "${FOUNDRY_MCP_FUNC_CONNECTION_JSON:-}")"
-
-APP_CONNECTION_ID="$(connection_id <<<"$APP_CONNECTION_JSON")"
-FUNC_CONNECTION_ID="$(connection_id <<<"$FUNC_CONNECTION_JSON")"
-APP_TARGET="$(connection_target <<<"$APP_CONNECTION_JSON")"
-FUNC_TARGET="$(connection_target <<<"$FUNC_CONNECTION_JSON")"
-
-if [ -z "$APP_CONNECTION_ID" ]; then
-  APP_CONNECTION_ID="$FOUNDRY_MCP_APP_CONNECTION_NAME"
-fi
-if [ -z "$FUNC_CONNECTION_ID" ]; then
-  FUNC_CONNECTION_ID="$FOUNDRY_MCP_FUNC_CONNECTION_NAME"
+TOOLBOX_CONSUMER_URL="$(foundry_toolbox_consumer_url "$PROJECT_ENDPOINT")"
+TOOLBOX_CONNECTION_JSON="$(foundry_fetch_connection "$PROJECT_ENDPOINT" "$FOUNDRY_TOOLBOX_CONNECTION_NAME" "${FOUNDRY_TOOLBOX_CONNECTION_JSON:-}")"
+TOOLBOX_CONNECTION_ID="$(foundry_connection_id <<<"$TOOLBOX_CONNECTION_JSON")"
+if [ -z "$TOOLBOX_CONNECTION_ID" ]; then
+  TOOLBOX_CONNECTION_ID="$FOUNDRY_TOOLBOX_CONNECTION_NAME"
 fi
 
-if [ -z "$APP_TARGET" ]; then
-  : "${MCP_SRV_APP_SERVICE_URL:?MCP app-service URL required when the Foundry connection has no target}"
-  APP_TARGET="${MCP_SRV_APP_SERVICE_URL%/}/mcp"
-fi
-if [ -z "$FUNC_TARGET" ]; then
-  : "${MCP_SRV_FUNC_APP_URL:?MCP func-app URL required when the Foundry connection has no target}"
-  FUNC_TARGET="${MCP_SRV_FUNC_APP_URL%/}/runtime/webhooks/mcp"
-fi
-
-# MCP tool shape for the Foundry Agents API (PromptAgentDefinition), not the
-# Assistants-compatible /assistants contract. require_approval is valid here.
-# Secrets stay on the RemoteTool connections; do not send headers.
-TOOLS_JSON=$(jq -n \
-  --arg appLabel "McpSrvAppService" \
-  --arg appUrl "$APP_TARGET" \
-  --arg appConn "$APP_CONNECTION_ID" \
-  --arg funcLabel "McpSrvFuncApp" \
-  --arg funcUrl "$FUNC_TARGET" \
-  --arg funcConn "$FUNC_CONNECTION_ID" \
-  '[
-    {
-      type: "mcp",
-      server_label: $appLabel,
-      server_url: $appUrl,
-      project_connection_id: $appConn,
-      require_approval: "never"
-    },
-    {
-      type: "mcp",
-      server_label: $funcLabel,
-      server_url: $funcUrl,
-      project_connection_id: $funcConn,
-      require_approval: "never"
-    }
-  ]')
+TOOLS_JSON="$(foundry_build_agent_toolbox_tools_json "$TOOLBOX_CONSUMER_URL" "$TOOLBOX_CONNECTION_ID")"
 
 DEFINITION=$(jq -n \
   --arg model "$AZURE_FOUNDRY_PROD_MODEL" \
@@ -228,13 +126,13 @@ if [ "$agent_exists" -eq 1 ]; then
   echo "::notice::Agent '${AGENT_NAME}' exists; publishing a new version."
   HTTP_STATUS=$(curl -sS -o "$RESPONSE_FILE" -w '%{http_code}' \
     -X POST "$VERSION_URL" \
-    "${auth_headers[@]}" \
+    "${FOUNDRY_AUTH_HEADERS[@]}" \
     -d "$VERSION_BODY")
 else
   echo "::notice::Agent '${AGENT_NAME}' not found (GET HTTP ${GET_STATUS}); creating it."
   HTTP_STATUS=$(curl -sS -o "$RESPONSE_FILE" -w '%{http_code}' \
     -X POST "$CREATE_URL" \
-    "${auth_headers[@]}" \
+    "${FOUNDRY_AUTH_HEADERS[@]}" \
     -d "$CREATE_BODY")
 fi
 

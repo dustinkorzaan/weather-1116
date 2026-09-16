@@ -1,14 +1,13 @@
-# Publishes the two hosted Foundry agents (wx1116-agent-for-current-weather for V5,
-# wx1116-agent-for-chat for Chat3) via .github/scripts/deploy-foundry-agent.sh.
+# Publishes the shared weather MCP toolbox and the two hosted Foundry agents
+# (wx1116-agent-for-current-weather for V5, wx1116-agent-for-chat for Chat3).
 #
 # Called via workflow_call from build-test-provision-deploy.yml with
 # needs: [provision], same as the other prod-deploy-*.yml workflows.
 # infra/main.bicep provisions the gpt-5.4-mini model deployment and the two
 # MCP RemoteTool connections (MyMcpSrvAppService, MyMcpSrvFuncApp)
-# idempotently on every push. Foundry has no ARM resource for agents, so
-# this workflow publishes them against the same project and attaches those
-# IaC connections as MCP tools (require_approval: never). workflow_dispatch
-# still works for manual runs on any branch.
+# idempotently on every push. deploy-foundry-toolbox.sh wraps those connections
+# in a toolbox; deploy-foundry-agent.sh attaches the toolbox to each agent
+# (require_approval: never). workflow_dispatch still works for manual runs.
 #
 # System prompts live in .github/foundry-agents/*.instructions.md - edit
 # those files and push (or re-run this workflow) to publish an update.
@@ -69,10 +68,15 @@ jobs:
           echo "::add-mask::$token"
           echo "token=$token" >> "$GITHUB_OUTPUT"
 
-      # Uses the Agents API's 2025-11-15-preview surface
-      # (deploy-foundry-agent.sh's API_VERSION), which matches the surface
-      # the Foundry portal's Playground Tools panel reads from, so MCP tools
-      # attached via project_connection_id render there correctly.
+      - name: Publish wx1116-weather-mcp-toolbox
+        shell: bash
+        env:
+          AZURE_FOUNDRY_PROD_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_PROJ_URL }}
+          AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
+          MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
+          MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+        run: bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-toolbox.sh"
+
       - name: Publish wx1116-agent-for-current-weather (V5 current-ai-weather)
         shell: bash
         env:
