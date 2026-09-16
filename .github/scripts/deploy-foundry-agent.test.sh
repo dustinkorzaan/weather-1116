@@ -12,7 +12,7 @@ fail() {
   exit 1
 }
 
-TOOLBOX_JSON='{"id":"conn-toolbox-id","name":"Wx1116WeatherToolbox","target":"https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-weather-mcp-toolbox/mcp?api-version=v1"}'
+TOOLBOX_JSON='{"id":"conn-toolbox-id","name":"Wx1116GeoNonAIWeather","target":"https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-geo-nonaiweather-toolbox/mcp?api-version=v1"}'
 
 PAYLOAD="$(
   AZURE_FOUNDRY_PROD_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj/openai/v1' \
@@ -49,7 +49,7 @@ echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0] | has("headers") | not
   || fail "MCP secrets must stay on connections, not in agent headers"
 echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0].server_label == "toolbox"' >/dev/null \
   || fail "toolbox server_label mismatch"
-echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0].server_url | endswith("/toolboxes/wx1116-weather-mcp-toolbox/mcp?api-version=v1")' >/dev/null \
+echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0].server_url | endswith("/toolboxes/wx1116-geo-nonaiweather-toolbox/mcp?api-version=v1")' >/dev/null \
   || fail "agent should point at the toolbox consumer MCP endpoint"
 echo "$PAYLOAD" | jq -e '.create_body.definition.text.format.type == "json_schema"' >/dev/null \
   || fail "response schema should be definition.text.format"

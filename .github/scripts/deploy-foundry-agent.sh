@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Publishes (creates, or publishes a new version of) one named Foundry prompt
-# agent via the Foundry Agents REST API, attaching the shared weather MCP
-# toolbox (wx1116-weather-mcp-toolbox) with require_approval: never.
+# agent via the Foundry Agents REST API, attaching the shared geo +
+# NonAI Weather MCP toolbox (wx1116-geo-nonaiweather-toolbox) with
+# require_approval: never.
 #
 # MCP hosts remain in Foundry IaC as RemoteTool connections; the toolbox
 # (deploy-foundry-toolbox.sh) wraps them and exposes a single consumer MCP

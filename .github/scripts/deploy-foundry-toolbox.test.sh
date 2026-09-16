@@ -28,13 +28,13 @@ UPDATE_URL="$(echo "$PAYLOAD" | jq -r '.toolbox_update_url')"
 CONNECTION_URL="$(echo "$PAYLOAD" | jq -r '.toolbox_connection_url')"
 CONSUMER_URL="$(echo "$PAYLOAD" | jq -r '.toolbox_consumer_url')"
 
-[[ "$VERSION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-weather-mcp-toolbox/versions?api-version=v1' ]] \
+[[ "$VERSION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-geo-nonaiweather-toolbox/versions?api-version=v1' ]] \
   || fail "toolbox_version_url mismatch: $VERSION_URL"
-[[ "$UPDATE_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-weather-mcp-toolbox?api-version=v1' ]] \
+[[ "$UPDATE_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-geo-nonaiweather-toolbox?api-version=v1' ]] \
   || fail "toolbox_update_url mismatch: $UPDATE_URL"
-[[ "$CONNECTION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/connections/Wx1116WeatherToolbox?api-version=v1' ]] \
+[[ "$CONNECTION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/connections/Wx1116GeoNonAIWeather?api-version=v1' ]] \
   || fail "toolbox_connection_url mismatch: $CONNECTION_URL"
-[[ "$CONSUMER_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-weather-mcp-toolbox/mcp?api-version=v1' ]] \
+[[ "$CONSUMER_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-geo-nonaiweather-toolbox/mcp?api-version=v1' ]] \
   || fail "toolbox_consumer_url mismatch: $CONSUMER_URL"
 
 echo "$PAYLOAD" | jq -e '.version_body.tools | length == 2' >/dev/null \

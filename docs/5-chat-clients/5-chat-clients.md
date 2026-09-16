@@ -269,7 +269,7 @@ JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form
 Do not create Chat3 (or V5) by hand. `prod-provision-infra.yml` registers the
 two MCP hosts as Foundry **RemoteTool** connections (`MyMcpSrvAppService`,
 `MyMcpSrvFuncApp`). `prod-deploy-foundry-agents.yml` then publishes
-`wx1116-weather-mcp-toolbox` (wrapping those connections) and attaches the
+`wx1116-geo-nonaiweather-toolbox` (wrapping those connections) and attaches the
 toolbox to `wx1116-agent-for-chat` and `wx1116-agent-for-current-weather`
 with `require_approval: never`. Instructions live in `.github/foundry-agents/`.
 
@@ -286,14 +286,14 @@ Only if you need to inspect or repair a published version:
    `ChatSystemInstructions.WeatherAssistant` /
    `.github/foundry-agents/wx1116-agent-for-chat.instructions.md`).
 5. **Response format:** text / none. Do **not** attach a JSON schema.
-6. **Tools:** the `wx1116-weather-mcp-toolbox` toolbox (via the
-   `Wx1116WeatherToolbox` connection), **Approval** = **Never**. Chat3 does
+6. **Tools:** the `wx1116-geo-nonaiweather-toolbox` toolbox (via the
+   `Wx1116GeoNonAIWeather` connection), **Approval** = **Never**. Chat3 does
    not round-trip approvals in app code (same as V5).
 7. Chat3 calls the agent **by name** (project default version).
 
 ### MCP tools (toolbox)
 
-Agents attach the shared `wx1116-weather-mcp-toolbox` toolbox as a single MCP
+Agents attach the shared `wx1116-geo-nonaiweather-toolbox` toolbox as a single MCP
 tool. The toolbox wraps the two IaC **RemoteTool** connections below; auth
 headers stay on those connections, not on the agent.
 
@@ -311,8 +311,8 @@ Agent-side toolbox MCP tool (approval never):
   {
     "type": "mcp",
     "server_label": "toolbox",
-    "server_url": "https://<foundry-project>/toolboxes/wx1116-weather-mcp-toolbox/mcp?api-version=v1",
-    "project_connection_id": "Wx1116WeatherToolbox",
+    "server_url": "https://<foundry-project>/toolboxes/wx1116-geo-nonaiweather-toolbox/mcp?api-version=v1",
+    "project_connection_id": "Wx1116GeoNonAIWeather",
     "require_approval": "never"
   }
 ]

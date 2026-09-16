@@ -1,4 +1,4 @@
-# Publishes the shared weather MCP toolbox and the two hosted Foundry agents
+# Publishes the shared geo + NonAI Weather toolbox and the two hosted Foundry agents
 # (wx1116-agent-for-current-weather for V5, wx1116-agent-for-chat for Chat3).
 #
 # Called via workflow_call from build-test-provision-deploy.yml with
@@ -68,7 +68,7 @@ jobs:
           echo "::add-mask::$token"
           echo "token=$token" >> "$GITHUB_OUTPUT"
 
-      - name: Publish wx1116-weather-mcp-toolbox
+      - name: Publish wx1116-geo-nonaiweather-toolbox
         shell: bash
         env:
           AZURE_FOUNDRY_PROD_PROJ_URL: ${{ vars.AZURE_FOUNDRY_PROD_PROJ_URL }}

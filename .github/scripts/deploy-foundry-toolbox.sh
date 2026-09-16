@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Publishes (creates a new version of) the shared weather MCP Foundry toolbox and
+# Publishes (creates a new version of) the shared geo + NonAI Weather Foundry
+# toolbox and
 # upserts the RemoteTool connection agents use to reach its consumer MCP endpoint.
 #
 # The toolbox wraps the two IaC-provisioned MCP RemoteTool connections
@@ -50,7 +51,7 @@ TOOLBOX_CONSUMER_URL="$(foundry_toolbox_consumer_url "$PROJECT_ENDPOINT")"
 
 TOOLS_JSON="$(foundry_build_weather_toolbox_tools_json)"
 VERSION_BODY=$(jq -n \
-  --arg description "Weather MCP toolbox (func-app geocoding + app-service weather)" \
+  --arg description "Geo + NonAI Weather toolbox (func-app geocoding + app-service weather)" \
   --argjson tools "$TOOLS_JSON" \
   '{description: $description, tools: $tools}')
 

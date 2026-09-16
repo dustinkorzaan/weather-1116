@@ -515,8 +515,8 @@ by the `prod-deploy-foundry-agents` workflow
 (`.github/workflows/prod-deploy-foundry-agents.yml`,
 `.github/scripts/deploy-foundry-toolbox.sh`,
 `.github/scripts/deploy-foundry-agent.sh`). `deploy-foundry-toolbox.sh` wraps
-those connections in `wx1116-weather-mcp-toolbox` and upserts the
-`Wx1116WeatherToolbox` RemoteTool connection to the toolbox consumer MCP
+those connections in `wx1116-geo-nonaiweather-toolbox` and upserts the
+`Wx1116GeoNonAIWeather` RemoteTool connection to the toolbox consumer MCP
 endpoint. `deploy-foundry-agent.sh` then POSTs each prompt agent to
 `{project}/agents?api-version=v1` (or `{project}/agents/{name}/versions` when
 the agent already exists) with model, instructions, and a single toolbox MCP
@@ -543,7 +543,7 @@ Portal fallback (only if you need to inspect or repair by hand):
    `AZURE_FOUNDRY_PROD_PROJ_URL`.
 2. **Agents** → `wx1116-agent-for-current-weather` (or `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`).
 3. Confirm the model is the `gpt-5.4-mini` deployment provisioned above.
-4. Confirm the agent's toolbox MCP tool uses the `Wx1116WeatherToolbox`
+4. Confirm the agent's toolbox MCP tool uses the `Wx1116GeoNonAIWeather`
    connection and **Approval** is **Never** (`require_approval: never`).
    The toolbox itself should list `MyMcpSrvAppService` and `MyMcpSrvFuncApp`.
 5. V5 calls the agent **by name** (project default version).
