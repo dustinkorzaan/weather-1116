@@ -548,7 +548,7 @@ Portal fallback (only if you need to inspect or repair by hand):
    The toolbox itself should list `MyMcpSrvAppService` and `MyMcpSrvFuncApp`.
 5. V5 calls the agent **by name** (project default version).
 
-Same MCP JSON shape as Chat3 (`require_approval: never` on each server). Chat3
+Both agents attach the same toolbox MCP tool (`require_approval: never`). Chat3
 and V5 both leave approval on the hosted agent; neither round-trips approvals
 in app code.
 

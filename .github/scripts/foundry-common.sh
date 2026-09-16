@@ -3,6 +3,9 @@
 set -euo pipefail
 
 FOUNDRY_API_VERSION="${FOUNDRY_API_VERSION:-v1}"
+FOUNDRY_ARM_CONNECTION_API_VERSION="${FOUNDRY_ARM_CONNECTION_API_VERSION:-2025-04-01-preview}"
+FOUNDRY_TOOLBOX_PREVIEW_FEATURE="${FOUNDRY_TOOLBOX_PREVIEW_FEATURE:-Toolboxes=V1Preview}"
+AZURE_RESOURCE_GROUP="${AZURE_RESOURCE_GROUP:-wx1116-prod-rg}"
 
 FOUNDRY_MCP_APP_CONNECTION_NAME="${FOUNDRY_MCP_APP_CONNECTION_NAME:-MyMcpSrvAppService}"
 FOUNDRY_MCP_FUNC_CONNECTION_NAME="${FOUNDRY_MCP_FUNC_CONNECTION_NAME:-MyMcpSrvFuncApp}"
@@ -24,6 +27,58 @@ foundry_auth_headers() {
     -H "Authorization: Bearer ${AZURE_FOUNDRY_ACCESS_TOKEN}"
     -H "Content-Type: application/json"
   )
+}
+
+foundry_toolbox_auth_headers() {
+  foundry_auth_headers
+  FOUNDRY_TOOLBOX_AUTH_HEADERS=(
+    "${FOUNDRY_AUTH_HEADERS[@]}"
+    -H "Foundry-Features: ${FOUNDRY_TOOLBOX_PREVIEW_FEATURE}"
+  )
+}
+
+foundry_parse_account_and_project_from_endpoint() {
+  local endpoint="$1"
+  if [[ "$endpoint" =~ ^https://([^./]+)\.services\.ai\.azure\.com/api/projects/([^/]+) ]]; then
+    FOUNDRY_ACCOUNT_NAME="${BASH_REMATCH[1]}"
+    FOUNDRY_PROJECT_NAME="${BASH_REMATCH[2]}"
+    return 0
+  fi
+  echo "Could not parse account/project from Foundry project endpoint: ${endpoint}" >&2
+  exit 1
+}
+
+foundry_arm_connection_url() {
+  local subscription_id="$1"
+  local resource_group="$2"
+  local account_name="$3"
+  local project_name="$4"
+  local connection_name="$5"
+  printf 'https://management.azure.com/subscriptions/%s/resourceGroups/%s/providers/Microsoft.CognitiveServices/accounts/%s/projects/%s/connections/%s?api-version=%s' \
+    "$subscription_id" "$resource_group" "$account_name" "$project_name" "$connection_name" "$FOUNDRY_ARM_CONNECTION_API_VERSION"
+}
+
+foundry_upsert_arm_connection() {
+  local subscription_id="$1"
+  local resource_group="$2"
+  local account_name="$3"
+  local project_name="$4"
+  local connection_name="$5"
+  local properties_json="$6"
+  local response_file="$7"
+
+  local arm_token url request_body http_status
+  arm_token="$(az account get-access-token --resource https://management.azure.com --query accessToken -o tsv)"
+  url="$(foundry_arm_connection_url "$subscription_id" "$resource_group" "$account_name" "$project_name" "$connection_name")"
+  request_body="$(jq -n --argjson properties "$properties_json" '{properties: $properties}')"
+
+  http_status=$(curl -sS -o "$response_file" -w '%{http_code}' \
+    -X PUT "$url" \
+    -H "Authorization: Bearer ${arm_token}" \
+    -H "Content-Type: application/json" \
+    -d "$request_body")
+
+  printf '%s' "$http_status"
 }
 
 foundry_fetch_connection() {
