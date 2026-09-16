@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
@@ -139,10 +139,16 @@ function AppShell() {
   const { pathname } = useLocation();
   const isMapVisible = pathname === '/';
 
-  // All backends scale to zero when idle; wait for api/mvc/blazor to answer
-  // once before showing the app so cold start happens up front instead of
-  // mid-navigation.
-  const isBackendWarm = useBackendWake(loadAbout);
+  // ACA scales api/mvc/blazor to zero when idle; wait for all three to
+  // answer (retrying as long as it takes) before showing the app so cold
+  // start happens up front instead of mid-navigation.
+  const { isWarm: isBackendWarm, ...backendWakeStatus } = useBackendWake();
+
+  // Also warm the About RTK Query cache so the About dialog has data ready
+  // the first time it's opened, independent of the wake-up gate above.
+  useEffect(() => {
+    loadAbout();
+  }, [loadAbout]);
 
   const handleAboutClick = () => {
     setIsAboutOpen(true);
@@ -150,7 +156,7 @@ function AppShell() {
   };
 
   if (!isBackendWarm) {
-    return <BackendWakeScreen />;
+    return <BackendWakeScreen statuses={backendWakeStatus} />;
   }
 
   return (
