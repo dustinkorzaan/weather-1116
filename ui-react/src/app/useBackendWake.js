@@ -8,8 +8,12 @@ import { resolveApiBaseUrl } from '../services/apiBaseUrl';
 // fire a fresh ping at this cadence until one lands; earlier pings are left
 // running rather than cancelled, since a slow-but-eventually-successful
 // fan-out (e.g. API's /About calling into worker + MCP hosts) should still
-// count as a win whenever it finishes.
-const WAKE_RETRY_INTERVAL_MS = 7000;
+// count as a win whenever it finishes. This only paces *new* backup
+// attempts -- success is detected the instant any one request resolves, not
+// on the next tick -- so it's tuned for keeping concurrent in-flight
+// requests low against a still-booting (0.25 vCPU/0.5Gi) container rather
+// than for how fast we notice a win.
+const WAKE_RETRY_INTERVAL_MS = 15000;
 
 const WAKE_URLS = {
   api: `${resolveApiBaseUrl()}/About`,
@@ -66,7 +70,7 @@ const INITIAL_WARM_STATE = { api: false, mvc: false, blazor: false };
 
 /**
  * Waits for the API (via the About endpoint), MVC, and Blazor apps to answer,
- * retrying each independently every ~7s until it does. Returns a warm flag
+ * retrying each independently every ~15s until it does. Returns a warm flag
  * per target plus an overall `isWarm` once all three have answered, so the
  * caller can show per-layer progress instead of one opaque loading state.
  */
