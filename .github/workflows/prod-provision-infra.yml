@@ -33,10 +33,10 @@
 # wx1116-prod-* deploys below.
 #
 # No SQL admin secret is needed at all: infra/modules/sql.bicep creates the
-# server with Microsoft Entra-only authentication from the start, so no
-# SQL-native login ever exists to have a secret for -- the
-# administratorLogin/administratorLoginPassword ARM still requires are
-# generated internally and never surfaced. infra/main.bicep registers
+# server with Microsoft Entra-only authentication from the start (the
+# inline `administrators` property on the server resource itself), so no
+# SQL-native login/password is ever created to have a secret for.
+# infra/main.bicep registers
 # wx1116-prod-github-mi itself as the SQL server's Entra admin (its
 # principal ID is already known from modules/managed-identity.bicep) -- but
 # this workflow does NOT run
