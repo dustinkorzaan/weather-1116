@@ -18,6 +18,7 @@ PAYLOAD="$(
   AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
   AZURE_SUBSCRIPTION_ID='test-sub' \
   AZURE_RESOURCE_GROUP='test-rg' \
+  AZURE_FOUNDRY_ARM_ACCOUNT_NAME='wx1116-prod-res' \
   FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
   FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
   bash "$SCRIPT" --print-body
@@ -28,6 +29,7 @@ echo "$PAYLOAD" | jq empty >/dev/null || fail "print-body did not emit JSON"
 VERSION_URL="$(echo "$PAYLOAD" | jq -r '.toolbox_version_url')"
 UPDATE_URL="$(echo "$PAYLOAD" | jq -r '.toolbox_update_url')"
 ARM_CONNECTION_URL="$(echo "$PAYLOAD" | jq -r '.arm_connection_url')"
+ARM_ACCOUNT_NAME="$(echo "$PAYLOAD" | jq -r '.arm_account_name')"
 CONSUMER_URL="$(echo "$PAYLOAD" | jq -r '.toolbox_consumer_url')"
 FOUNDARY_FEATURES="$(echo "$PAYLOAD" | jq -r '.foundry_features')"
 
@@ -35,7 +37,9 @@ FOUNDARY_FEATURES="$(echo "$PAYLOAD" | jq -r '.foundry_features')"
   || fail "toolbox_version_url mismatch: $VERSION_URL"
 [[ "$UPDATE_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-geo-nonaiweather-toolbox?api-version=v1' ]] \
   || fail "toolbox_update_url mismatch: $UPDATE_URL"
-[[ "$ARM_CONNECTION_URL" == 'https://management.azure.com/subscriptions/test-sub/resourceGroups/test-rg/providers/Microsoft.CognitiveServices/accounts/acct/projects/proj/connections/Wx1116GeoNonAIWeather?api-version=2025-04-01-preview' ]] \
+[[ "$ARM_ACCOUNT_NAME" == 'wx1116-prod-res' ]] \
+  || fail "arm_account_name should use the ARM resource name, not the data-plane subdomain: $ARM_ACCOUNT_NAME"
+[[ "$ARM_CONNECTION_URL" == 'https://management.azure.com/subscriptions/test-sub/resourceGroups/test-rg/providers/Microsoft.CognitiveServices/accounts/wx1116-prod-res/projects/proj/connections/Wx1116GeoNonAIWeather?api-version=2025-04-01-preview' ]] \
   || fail "arm_connection_url mismatch: $ARM_CONNECTION_URL"
 [[ "$CONSUMER_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-geo-nonaiweather-toolbox/mcp?api-version=v1' ]] \
   || fail "toolbox_consumer_url mismatch: $CONSUMER_URL"

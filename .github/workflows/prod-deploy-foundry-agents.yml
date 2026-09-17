@@ -22,6 +22,7 @@
 # docs/aca-bootstrap.md Step 2):
 #   AZURE_GITHUB_MI_CLIENTID / AZURE_TENANTID / AZURE_SUBSCRIPTIONID
 #   AZURE_FOUNDRY_PROD_PROJ_URL / AZURE_FOUNDRY_PROD_MODEL
+#   AZURE_FOUNDRY_ARM_ACCOUNT_NAME (ARM resource name, e.g. wx1116-prod-res)
 #   PROD_MCP_SRV_APP_SERVICE_URL / PROD_MCP_SRV_FUNC_APP_URL
 #     (URL fallback only; MCP keys stay on the Foundry connections)
 
@@ -75,6 +76,7 @@ jobs:
           AZURE_FOUNDRY_ACCESS_TOKEN: ${{ steps.foundry_token.outputs.token }}
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
           AZURE_RESOURCE_GROUP: wx1116-prod-rg
+          AZURE_FOUNDRY_ARM_ACCOUNT_NAME: ${{ vars.AZURE_FOUNDRY_ARM_ACCOUNT_NAME }}
           MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
           MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
         run: bash "${GITHUB_WORKSPACE}/.github/scripts/deploy-foundry-toolbox.sh"
