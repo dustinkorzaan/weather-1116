@@ -107,25 +107,23 @@ internal class Program
 		var mcpSrvAppServiceKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY") ?? throw new InvalidOperationException("MCP_SRV_APP_SERVICE_KEY not found in environment variables.");
 		var mcpSrvPythonKey = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_KEY") ?? throw new InvalidOperationException("MCP_SRV_PYTHON_KEY not found in environment variables.");
 
-		// Hardcoded, not read from env: this console is a learning sample, and
-		// editing the URL directly here is the point -- fill in your own ACA
-		// default domain from the azd provision MCP_SRV_FUNC_APP_HOSTNAME /
-		// MCP_SRV_APP_SERVICE_HOSTNAME / MCP_SRV_PYTHON_HOSTNAME outputs before running.
+		// Hardcoded prod ACA FQDNs (wx1116-prod stack). Edit here when reprovisioning
+		// to a different environment's MCP_SRV_*_HOSTNAME azd outputs.
 		var myMcpSrvFuncApp = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvFuncApp",
-			serverUri: new Uri("https://wx1116-prod-mcp-srv-func-app.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/runtime/webhooks/mcp"),
+			serverUri: new Uri("https://wx1116-prod-mcp-srv-func-app.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/runtime/webhooks/mcp"),
 			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		var myMcpSrvAppService = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvAppService",
-			serverUri: new Uri("https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp"),
+			serverUri: new Uri("https://wx1116-prod-mcp-srv-app-service.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		var myMcpSrvPython = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvPython",
-			serverUri: new Uri("https://wx1116-prod-mcp-srv-python.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp"),
+			serverUri: new Uri("https://wx1116-prod-mcp-srv-python.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvPythonKey}" },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
