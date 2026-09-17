@@ -344,8 +344,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("data-chat-tab=\"Chat3\" role=\"tab\" aria-selected=\"false\" aria-label=\"Chat3\" title=\"Chat3\">3</button>", html);
         Assert.Contains("data-chat-tab=\"Chat4a\" role=\"tab\" aria-selected=\"false\" aria-label=\"Chat4a\" title=\"Chat4a\">4a</button>", html);
         Assert.Contains("data-chat-tab=\"Chat4b\" role=\"tab\" aria-selected=\"false\" aria-label=\"Chat4b\" title=\"Chat4b\">4b</button>", html);
-        Assert.Contains("aria-label=\"Enter fullscreen\"", html);
-        Assert.Contains("chatFullscreen.js", html);
         Assert.Contains("safeGfmMarkdown.js", html);
         Assert.Contains("marked.min.js", html);
         Assert.Contains("purify.min.js", html);
@@ -373,22 +371,10 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("safeGfmMarkdown.render", script);
         Assert.Contains("streaming", script);
 
-        // The hover card must follow the chat window into (and back out of)
-        // native fullscreen, including WebKit's prefixed API, or it renders
-        // invisible outside the fullscreen top layer.
-        Assert.Contains("document.webkitFullscreenElement", script);
-        Assert.Contains("document.addEventListener('fullscreenchange', onToolHoverFullscreenChange)", script);
-        Assert.Contains("document.addEventListener('webkitfullscreenchange', onToolHoverFullscreenChange)", script);
-
         var markdown = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/markdown/safeGfmMarkdown.js"));
         Assert.Contains("marked.parse", markdown);
         Assert.Contains("gfm: true", markdown);
         Assert.Contains("DOMPurify.sanitize", markdown);
-
-        var fullscreen = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatFullscreen.js"));
-        Assert.Contains("data-chat-fullscreen-button", fullscreen);
-        Assert.Contains("requestFullscreen", fullscreen);
-        Assert.Contains("is-css-fullscreen", fullscreen);
     }
 
     [Fact]
@@ -446,7 +432,6 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains(".chat-tool-hover-wrap", css);
         Assert.Contains(".chat-markdown", css);
         Assert.Contains(".chat-usage-chip", css);
-        Assert.Contains(".chat-fullscreen-button", css);
         Assert.Contains("flex: 0 0 auto", css);
         Assert.Contains("height: max-content", css);
         Assert.Contains("min-height: min-content", css);
