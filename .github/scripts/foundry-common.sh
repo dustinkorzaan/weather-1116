@@ -37,33 +37,19 @@ foundry_toolbox_auth_headers() {
   )
 }
 
-foundry_parse_account_and_project_from_endpoint() {
+foundry_parse_project_name_from_endpoint() {
   local endpoint="$1"
-  if [[ "$endpoint" =~ ^https://([^./]+)\.services\.ai\.azure\.com/api/projects/([^/]+) ]]; then
-    FOUNDRY_CUSTOM_SUBDOMAIN="${BASH_REMATCH[1]}"
-    FOUNDRY_PROJECT_NAME="${BASH_REMATCH[2]}"
+  if [[ "$endpoint" =~ ^https://[^./]+\.services\.ai\.azure\.com/api/projects/([^/]+) ]]; then
+    FOUNDRY_PROJECT_NAME="${BASH_REMATCH[1]}"
     return 0
   fi
-  echo "Could not parse account/project from Foundry project endpoint: ${endpoint}" >&2
+  echo "Could not parse project name from Foundry project endpoint: ${endpoint}" >&2
   exit 1
 }
 
-foundry_resolve_arm_account_name() {
-  local resource_group="$1"
-
-  if [ -n "${AZURE_FOUNDRY_ARM_ACCOUNT_NAME:-}" ]; then
-    FOUNDRY_ARM_ACCOUNT_NAME="$AZURE_FOUNDRY_ARM_ACCOUNT_NAME"
-    return 0
-  fi
-
-  FOUNDRY_ARM_ACCOUNT_NAME="$(az cognitiveservices account list \
-    --resource-group "$resource_group" \
-    --query "[?properties.customSubDomainName=='${FOUNDRY_CUSTOM_SUBDOMAIN}'].name | [0]" -o tsv)"
-
-  if [ -z "$FOUNDRY_ARM_ACCOUNT_NAME" ]; then
-    echo "Could not resolve ARM account name for custom subdomain '${FOUNDRY_CUSTOM_SUBDOMAIN}' in resource group '${resource_group}'. Set AZURE_FOUNDRY_ARM_ACCOUNT_NAME explicitly (e.g. wx1116-prod-res)." >&2
-    exit 1
-  fi
+foundry_require_arm_account_name() {
+  : "${AZURE_FOUNDRY_ARM_ACCOUNT_NAME:?AZURE_FOUNDRY_ARM_ACCOUNT_NAME is required (e.g. wx1116-prod-res)}"
+  FOUNDRY_ARM_ACCOUNT_NAME="$AZURE_FOUNDRY_ARM_ACCOUNT_NAME"
 }
 
 foundry_arm_connection_url() {

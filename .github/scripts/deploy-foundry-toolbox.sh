@@ -13,14 +13,12 @@
 # Required env:
 #   AZURE_FOUNDRY_PROD_PROJ_URL
 #   AZURE_FOUNDRY_ACCESS_TOKEN
+#   AZURE_FOUNDRY_ARM_ACCOUNT_NAME  ARM resource name (e.g. wx1116-prod-res), not
+#                                   the data-plane hostname in PROJ_URL
 #
 # Optional env:
-#   AZURE_SUBSCRIPTION_ID        defaults to the active az login subscription
-#   AZURE_RESOURCE_GROUP         defaults to wx1116-prod-rg
-#   AZURE_FOUNDRY_ARM_ACCOUNT_NAME  ARM resource name for the Foundry account
-#                                   (e.g. wx1116-prod-res). Defaults to a lookup
-#                                   by custom subdomain; do not use the data-plane
-#                                   hostname as the ARM account name.
+#   AZURE_SUBSCRIPTION_ID   defaults to the active az login subscription
+#   AZURE_RESOURCE_GROUP      defaults to wx1116-prod-rg
 #   see foundry-common.sh for toolbox/MCP connection names and test injections
 
 set -euo pipefail
@@ -47,7 +45,8 @@ done
 : "${AZURE_FOUNDRY_ACCESS_TOKEN:?}"
 
 PROJECT_ENDPOINT="$(foundry_normalize_project_endpoint "$AZURE_FOUNDRY_PROD_PROJ_URL")"
-foundry_parse_account_and_project_from_endpoint "$PROJECT_ENDPOINT"
+foundry_parse_project_name_from_endpoint "$PROJECT_ENDPOINT"
+foundry_require_arm_account_name
 foundry_resolve_mcp_targets "$PROJECT_ENDPOINT"
 foundry_toolbox_auth_headers
 
@@ -55,8 +54,6 @@ SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID:-}"
 if [ -z "$SUBSCRIPTION_ID" ]; then
   SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
 fi
-
-foundry_resolve_arm_account_name "$AZURE_RESOURCE_GROUP"
 
 TOOLBOX_VERSION_URL="${PROJECT_ENDPOINT}/toolboxes/${FOUNDRY_TOOLBOX_NAME}/versions?api-version=${FOUNDRY_API_VERSION}"
 TOOLBOX_UPDATE_URL="${PROJECT_ENDPOINT}/toolboxes/${FOUNDRY_TOOLBOX_NAME}?api-version=${FOUNDRY_API_VERSION}"
