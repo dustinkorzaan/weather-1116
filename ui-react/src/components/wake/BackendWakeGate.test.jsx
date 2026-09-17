@@ -48,3 +48,34 @@ test('shows a blank screen during the 250ms grace period, then the wake screen w
     'Blazor waking…',
   ]);
 });
+
+test('keeps a target that answered during the grace period marked ready once the wake screen becomes visible', async () => {
+  vi.useFakeTimers();
+  // Only the Worker target (whose /Wake ping hits port 8130) ever resolves; every
+  // other layer hangs forever, so the gate stays un-warm and the grace-period
+  // timer fires.
+  vi.spyOn(globalThis, 'fetch').mockImplementation((url) =>
+    String(url).includes('8130') ? Promise.resolve(new Response(null, { status: 200 })) : new Promise(() => {})
+  );
+
+  render(
+    <BackendWakeGate>
+      <div>App content</div>
+    </BackendWakeGate>
+  );
+
+  // Let the Worker ping resolve and mark its target ready before the grace period ends.
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+  });
+  expect(screen.getByText('Worker ready')).toBeDefined();
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(250);
+  });
+
+  expect(screen.getByTestId('backend-wake-screen')).toBeDefined();
+  // Must still read "ready", not have been remounted back to "waking…" when the
+  // WakeTarget instances transitioned from hidden to visible.
+  expect(screen.getByText('Worker ready')).toBeDefined();
+});

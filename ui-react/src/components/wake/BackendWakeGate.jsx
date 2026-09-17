@@ -49,19 +49,24 @@ export function BackendWakeGate({ children }) {
     return () => clearTimeout(timer);
   }, [isWarm]);
 
+  // Mounted unconditionally (even during the grace period) so the pings fire
+  // immediately on load -- if they only started once the visible wake screen
+  // mounted, the grace period could never be long enough to absorb a fast
+  // warm response, and the wake screen would always flash for at least one
+  // round trip.
+  const wakeTargets = WAKE_TARGETS.map(({ key, label, url }) => (
+    <WakeTarget key={key} wakeKey={key} label={label} url={url} onReady={markWarm} />
+  ));
+
   if (isWarm) {
     return children;
   }
 
-  if (!pastGracePeriod) {
-    return <div className="h-screen w-full bg-background" />;
-  }
-
-  return (
-    <BackendWakeScreen>
-      {WAKE_TARGETS.map(({ key, label, url }) => (
-        <WakeTarget key={key} wakeKey={key} label={label} url={url} onReady={markWarm} />
-      ))}
-    </BackendWakeScreen>
-  );
+  // Always the same element type (BackendWakeScreen) in the same tree position --
+  // only its `visible` prop changes across the grace period. Swapping between two
+  // different element types here (e.g. a plain div pre-grace-period vs
+  // BackendWakeScreen after) would make React tear down and remount every
+  // WakeTarget on that transition, resetting any that had already answered back
+  // to "waking…" and losing their progress.
+  return <BackendWakeScreen visible={pastGracePeriod}>{wakeTargets}</BackendWakeScreen>;
 }
