@@ -5,7 +5,7 @@
 This sample demystifies Foundry, agents, and models: from model-direct, to
 local in-process tool loops, to remote MCP, to a hosted agent, behind a pin map.
 
-This repository is a Weather sample app implemented across seven runnable
+This repository is a Weather sample app implemented across eight runnable
 stacks plus one shared .NET class library.
 
 Six of those projects are primary: five runnable applications (React UI,
@@ -13,7 +13,7 @@ Blazor UI, MVC UI, API, and Worker) plus the shared `Core` class library.
 The goal is feature parity across all UI implementations while keeping each
 project idiomatic for its framework.
 
-The remaining two runnable stacks are the **MCP tool hosts**. The UIs never
+The remaining three runnable stacks are the **MCP tool hosts**. The UIs never
 call them directly. Current AI Weather now ships three handler versions side
 by side: `GetCurrentAIWeatherV3Handler` resolves geo/weather tools in-process
 (V3 pattern, used by the `/weather` modal's "current" tab),
