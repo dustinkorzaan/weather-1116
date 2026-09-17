@@ -38,7 +38,7 @@ Point it at:
 ## Postman
 
 Add a request to a Postman collection pointed at the `/mcp` endpoint (
-`https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp`):
+`https://wx1116-prod-mcp-srv-app-service.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp`):
 
 * Method **POST**, header `Authorization: Bearer <MCP_SRV_APP_SERVICE_KEY>`
 * Body → raw JSON, a JSON-RPC request, e.g. `tools/call` for
@@ -63,7 +63,7 @@ Postman/curl steps apply against its `/mcp` endpoint with a
 ## curl example
 
 ```bash
-curl -sS -N -X POST "https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp" \
+curl -sS -N -X POST "https://wx1116-prod-mcp-srv-app-service.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp" \
   -H "accept: application/json, text/event-stream" \
   -H "authorization: Bearer ..." \
   -H "content-type: application/json" \
@@ -86,7 +86,7 @@ curl -sS -N -X POST "https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DO
 ```
 
 ```bash
-curl -sS -X POST "https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp" \
+curl -sS -X POST "https://wx1116-prod-mcp-srv-app-service.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp" \
   -H "accept: application/json, text/event-stream" \
   -H "authorization: Bearer ..." \
   -H "content-type: application/json" \
@@ -100,7 +100,7 @@ The same `tools/list`/`tools/call` requests work against `mcp-srv-python`,
 substituting its URL and bearer token:
 
 ```bash
-curl -sS -X POST "https://wx1116-prod-mcp-srv-python.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp" \
+curl -sS -X POST "https://wx1116-prod-mcp-srv-python.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp" \
   -H "accept: application/json, text/event-stream" \
   -H "authorization: Bearer ..." \
   -H "content-type: application/json" \
