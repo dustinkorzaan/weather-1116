@@ -74,9 +74,9 @@ CONNECTION_PROPERTIES=$(jq -n \
     target: $target,
     authType: "ProjectManagedIdentity",
     isSharedToAll: true,
+    audience: "https://ai.azure.com",
     metadata: {
-      type: "generic_mcp",
-      audience: "https://ai.azure.com"
+      type: "generic_mcp"
     }
   }')
 
