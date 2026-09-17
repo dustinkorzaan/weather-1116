@@ -1,6 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Maximize2, Minimize2 } from 'lucide-react';
 import SafeGfmMarkdown from '../markdown/SafeGfmMarkdown';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -8,34 +7,6 @@ import { findLastIndex } from '../../utils/array';
 import { formatToolHoverText, TOOL_HOVER_CLOSE_DELAY_MS } from '../../utils/chatToolHover';
 import { streamChatMessage } from '../../utils/chatStream';
 import { formatChatUsageChip, formatChatUsageDetails } from '../../utils/chatUsage';
-import { nativeFullscreenElement, useChatFullscreen } from './useChatFullscreen';
-
-// Tracks the element the tooltip portal should mount into: the current
-// native-fullscreen element (which only paints its own subtree) or
-// document.body otherwise. Recomputed on fullscreenchange so a tooltip
-// that is already open gets reparented immediately, not just on next hover.
-function usePortalContainer() {
-  const [container, setContainer] = useState(() => nativeFullscreenElement() || document.body);
-
-  // useLayoutEffect (not useEffect) so the reparent + reposition happen
-  // before paint, matching the synchronous reparent in the Blazor/MVC
-  // fullscreenchange listeners and avoiding a frame where the tooltip
-  // renders detached from the (now-hidden) fullscreen subtree.
-  useLayoutEffect(() => {
-    function onChange() {
-      setContainer(nativeFullscreenElement() || document.body);
-    }
-
-    document.addEventListener('fullscreenchange', onChange);
-    document.addEventListener('webkitfullscreenchange', onChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', onChange);
-      document.removeEventListener('webkitfullscreenchange', onChange);
-    };
-  }, []);
-
-  return container;
-}
 
 const TAB_CONFIG = [
   {
@@ -114,7 +85,7 @@ function scrollElementToBottom(element) {
   element.scrollTop = element.scrollHeight;
 }
 
-function ToolChip({ content, details, portalContainer, className }) {
+function ToolChip({ content, details, className }) {
   const chipRef = useRef(null);
   const tooltipRef = useRef(null);
   const hideTimerRef = useRef(null);
@@ -159,9 +130,6 @@ function ToolChip({ content, details, portalContainer, className }) {
       return undefined;
     }
 
-    // Entering/exiting fullscreen reflows the chat window (and moves the
-    // chip), and reparents this tooltip via portalContainer, so both must
-    // trigger a fresh measurement — not just scroll/resize.
     updatePosition();
     const onReposition = (event) => {
       if (tooltipRef.current && event.target && tooltipRef.current.contains(event.target)) {
@@ -175,7 +143,7 @@ function ToolChip({ content, details, portalContainer, className }) {
       window.removeEventListener('scroll', onReposition, true);
       window.removeEventListener('resize', onReposition);
     };
-  }, [open, details, portalContainer]);
+  }, [open, details]);
 
   return (
     <div
@@ -203,7 +171,7 @@ function ToolChip({ content, details, portalContainer, className }) {
                 {details}
               </pre>
             </div>,
-            portalContainer,
+            document.body,
           )
         : null}
     </div>
@@ -230,9 +198,6 @@ function ChatPanel() {
   const [scrollNonce, setScrollNonce] = useState(0);
   const sessionsRef = useRef(createEmptySessions());
   const messagesRef = useRef(null);
-  const windowRef = useRef(null);
-  const { isFullscreen, isCssFullscreen, toggle: toggleFullscreen } = useChatFullscreen(windowRef);
-  const portalContainer = usePortalContainer();
   const activeTabRef = useRef(activeTab);
   activeTabRef.current = activeTab;
 
@@ -417,32 +382,13 @@ function ChatPanel() {
 
         <TabsContent value={activeTab} className="mt-3">
           <section
-            ref={windowRef}
-            className={`chat-window relative flex flex-col rounded-lg border border-border bg-card p-3 ${
-              isCssFullscreen ? 'is-css-fullscreen' : ''
-            }`}
+            className="relative flex flex-col rounded-lg border border-border bg-card p-3"
             aria-label="Chat conversation"
           >
-            <div className="mb-1 flex justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                aria-pressed={isFullscreen}
-                onClick={() => {
-                  void toggleFullscreen();
-                }}
-              >
-                {isFullscreen ? <Minimize2 className="size-5" /> : <Maximize2 className="size-5" />}
-              </Button>
-            </div>
             <div
               ref={messagesRef}
               data-chat-messages
-              className={`flex min-h-40 flex-col gap-2 overflow-x-auto overflow-y-auto p-1 ${
-                isFullscreen ? 'min-h-0 flex-1 max-h-none' : 'max-h-96'
-              }`}
+              className="flex min-h-40 max-h-96 flex-col gap-2 overflow-x-auto overflow-y-auto p-1"
             >
               {histories[activeTab].map((entry, index) => (
                 entry.role === 'tool' ? (
@@ -450,7 +396,6 @@ function ChatPanel() {
                     key={`${activeTab}-${index}`}
                     content={entry.content}
                     details={formatToolHoverText(entry)}
-                    portalContainer={portalContainer}
                   />
                 ) : (
                   <div key={`${activeTab}-${index}`} className={messageClasses(entry)}>
@@ -463,7 +408,6 @@ function ChatPanel() {
                       <ToolChip
                         content={formatChatUsageChip(entry.usage)}
                         details={formatChatUsageDetails(entry.usage)}
-                        portalContainer={portalContainer}
                         className="mt-1.5 w-fit text-xs text-muted-foreground"
                       />
                     ) : null}
