@@ -13,16 +13,27 @@ fail() {
 APP_JSON='{"id":"conn-app-id","name":"MyMcpSrvAppService","target":"https://app.example/mcp"}'
 FUNC_JSON='{"id":"conn-func-id","name":"MyMcpSrvFuncApp","target":"https://func.example/runtime/webhooks/mcp"}'
 
-PAYLOAD="$(
-  AZURE_FOUNDRY_PROD_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj' \
-  AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
-  AZURE_SUBSCRIPTION_ID='test-sub' \
-  AZURE_RESOURCE_GROUP='test-rg' \
-  AZURE_FOUNDRY_ARM_ACCOUNT_NAME='wx1116-prod-res' \
-  FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
-  FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
-  bash "$SCRIPT" --print-body
-)"
+run_print_body() {
+  local arm_account_name="${1:-}"
+  local path_prefix="${2:-}"
+
+  (
+    if [ -n "$path_prefix" ]; then
+      export PATH="${path_prefix}:${PATH}"
+    fi
+    env \
+      AZURE_FOUNDRY_PROD_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj' \
+      AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
+      AZURE_SUBSCRIPTION_ID='test-sub' \
+      AZURE_RESOURCE_GROUP='test-rg' \
+      ${arm_account_name:+AZURE_FOUNDRY_ARM_ACCOUNT_NAME="$arm_account_name"} \
+      FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
+      FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
+      bash "$SCRIPT" --print-body
+  )
+}
+
+PAYLOAD="$(run_print_body 'wx1116-prod-res')"
 
 echo "$PAYLOAD" | jq empty >/dev/null || fail "print-body did not emit JSON"
 
@@ -60,5 +71,23 @@ echo "$PAYLOAD" | jq -e '.connection_properties.authType == "ProjectManagedIdent
   || fail "toolbox connection should use project managed identity"
 echo "$PAYLOAD" | jq -e '.connection_properties.target == $consumer' --arg consumer "$CONSUMER_URL" >/dev/null \
   || fail "toolbox connection target should be the consumer MCP endpoint"
+
+AZ_STUB_DIR="$(mktemp -d)"
+trap 'rm -rf "$AZ_STUB_DIR"' EXIT
+cat >"${AZ_STUB_DIR}/az" <<'EOF'
+#!/usr/bin/env bash
+if [[ "$1" == "cognitiveservices" && "$2" == "account" && "$3" == "list" ]]; then
+  printf '%s\n' 'wx1116-prod-res'
+  exit 0
+fi
+echo "unexpected az invocation: $*" >&2
+exit 1
+EOF
+chmod +x "${AZ_STUB_DIR}/az"
+
+LOOKUP_PAYLOAD="$(run_print_body '' "$AZ_STUB_DIR")"
+LOOKUP_ARM_ACCOUNT_NAME="$(echo "$LOOKUP_PAYLOAD" | jq -r '.arm_account_name')"
+[[ "$LOOKUP_ARM_ACCOUNT_NAME" == 'wx1116-prod-res' ]] \
+  || fail "az lookup should resolve the ARM account name from customSubDomainName: $LOOKUP_ARM_ACCOUNT_NAME"
 
 echo "OK: deploy-foundry-toolbox.sh payload wraps IaC MCP connections in a toolbox"
