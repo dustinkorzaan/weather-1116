@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
@@ -20,22 +20,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from './theme/useTheme';
 import { siteLinks } from './config/siteLinks';
-import BackendWakeScreen from './components/BackendWakeScreen';
 import ChatClientsPage from './pages/ChatClientsPage';
 import CurrentAIWeatherPage from './pages/CurrentAIWeatherPage';
 import HelloWorldPage from './pages/HelloWorldPage';
 import MapPage from './pages/MapPage';
 import WeatherModalPage from './pages/WeatherModalPage';
 import { MapPinsProvider } from './map/mapPinsContext';
-import { useBackendWake } from './app/useBackendWake';
 import {
   useLazyGetAboutQuery,
 } from './services/weatherApi';
-
-// Backends that are already warm still take a real round trip to answer the
-// wake pings, so gate the wake screen behind a short grace period -- a fast
-// warm response never flashes it, but a genuine cold start still shows it.
-const WAKE_SCREEN_GRACE_PERIOD_MS = 250;
 
 /** Formats a build timestamp like "7/12/2026 10:22:14 PM UTC" (matches MVC and Blazor). */
 function formatBuildStart(isoDate) {
@@ -144,34 +137,14 @@ function AppShell() {
   const { pathname } = useLocation();
   const isMapVisible = pathname === '/';
 
-  // ACA scales every layer to zero when idle; wait for all six (api, mvc,
-  // blazor, worker, and both MCP hosts) to answer directly (retrying as long
-  // as it takes) before showing the app so cold start happens up front
-  // instead of mid-navigation. This already hits API's /About, so there's no
-  // separate mount-time loadAbout() call here -- the dialog fetches its own
-  // data lazily when opened (handleAboutClick).
-  const { isWarm: isBackendWarm, ...backendWakeStatus } = useBackendWake();
-  const [pastGracePeriod, setPastGracePeriod] = useState(false);
-
-  useEffect(() => {
-    if (isBackendWarm) {
-      return undefined;
-    }
-    const timer = setTimeout(() => setPastGracePeriod(true), WAKE_SCREEN_GRACE_PERIOD_MS);
-    return () => clearTimeout(timer);
-  }, [isBackendWarm]);
-
+  // BackendWakeGate (see components/wake/BackendWakeGate.jsx) already hits
+  // the API's /Wake endpoint before App mounts, so there's no separate
+  // mount-time loadAbout() call here -- the dialog fetches its own data
+  // lazily when opened (handleAboutClick).
   const handleAboutClick = () => {
     setIsAboutOpen(true);
     loadAbout();
   };
-
-  if (!isBackendWarm) {
-    if (!pastGracePeriod) {
-      return <div className="h-screen w-full bg-background" />;
-    }
-    return <BackendWakeScreen statuses={backendWakeStatus} />;
-  }
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
