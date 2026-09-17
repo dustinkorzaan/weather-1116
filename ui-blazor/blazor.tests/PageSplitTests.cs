@@ -219,7 +219,6 @@ public sealed class PageSplitTests
         Assert.Contains("Chat Clients", rendered.Markup);
         Assert.Contains("Responses API · Local Loops · Like Foundry Console V3", rendered.Markup);
         Assert.Contains("chat-input", rendered.Markup);
-        Assert.Contains("Enter fullscreen", rendered.Markup);
         Assert.DoesNotContain("Hello World", rendered.Markup);
         Assert.DoesNotContain("Current AI Weather", rendered.Markup);
         Assert.DoesNotContain("Loading hello message", rendered.Markup);
@@ -246,8 +245,6 @@ public sealed class PageSplitTests
         Assert.Contains("SafeGfmMarkdown.ToHtml", panelSource);
         Assert.Contains("MarkupString", panelSource);
         Assert.Contains("Streaming", panelSource);
-        Assert.Contains("chat-fullscreen-button", panelSource);
-        Assert.Contains("Enter fullscreen", panelSource);
         Assert.Contains("chat-window", panelSource);
 
         var markdown = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Markdown/SafeGfmMarkdown.cs"));
@@ -271,18 +268,6 @@ public sealed class PageSplitTests
         Assert.Contains("chat-tool-hover-wrap", chatInput);
         Assert.Contains("scheduleHide", chatInput);
         Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", chatInput);
-
-        // The hover card must follow the chat window into (and back out of)
-        // native fullscreen, including WebKit's prefixed API, or it renders
-        // invisible outside the fullscreen top layer.
-        Assert.Contains("document.webkitFullscreenElement", chatInput);
-        Assert.Contains("document.addEventListener('fullscreenchange', onFullscreenChange)", chatInput);
-        Assert.Contains("document.addEventListener('webkitfullscreenchange', onFullscreenChange)", chatInput);
-
-        var fullscreen = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/wwwroot/js/chatFullscreen.js"));
-        Assert.Contains("data-chat-fullscreen-button", fullscreen);
-        Assert.Contains("requestFullscreen", fullscreen);
-        Assert.Contains("is-css-fullscreen", fullscreen);
     }
 
     private static BunitContext CreateContext(bool holdWeather = false)

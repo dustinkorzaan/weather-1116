@@ -141,7 +141,6 @@ window.chatToolHover = (function () {
   var wrap = null;
   var card = null;
   var hideTimer = null;
-  var lastAnchor = null;
 
   function cancelHide() {
     if (hideTimer !== null) {
@@ -162,23 +161,6 @@ window.chatToolHover = (function () {
     hideTimer = window.setTimeout(hide, TOOL_HOVER_CLOSE_DELAY_MS);
   }
 
-  function fullscreenTarget() {
-    return document.fullscreenElement || document.webkitFullscreenElement || document.body;
-  }
-
-  // A native-fullscreen chat window only paints its own subtree, so the
-  // hover card must live inside it (not document.body) while active.
-  function reparent() {
-    if (!wrap) {
-      return;
-    }
-
-    var container = fullscreenTarget();
-    if (wrap.parentNode !== container) {
-      container.appendChild(wrap);
-    }
-  }
-
   function ensureCard() {
     if (!card) {
       wrap = document.createElement('div');
@@ -191,9 +173,9 @@ window.chatToolHover = (function () {
       card.className = 'chat-tool-hover-card';
       card.setAttribute('role', 'tooltip');
       wrap.appendChild(card);
+      document.body.appendChild(wrap);
     }
 
-    reparent();
     return card;
   }
 
@@ -231,18 +213,7 @@ window.chatToolHover = (function () {
     var el = ensureCard();
     el.textContent = text;
     wrap.hidden = false;
-    lastAnchor = anchor;
     position(anchor);
-  }
-
-  // Fires while the card is open (nothing else would move it) and while
-  // it's hidden (so a stale reparented node doesn't linger in the former
-  // fullscreen element after exiting).
-  function onFullscreenChange() {
-    reparent();
-    if (wrap && !wrap.hidden && lastAnchor) {
-      position(lastAnchor);
-    }
   }
 
   function relatedIsHoverUi(related) {
@@ -292,8 +263,6 @@ window.chatToolHover = (function () {
       }
       hide();
     }, true);
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
   }
 
   if (document.readyState === 'loading') {

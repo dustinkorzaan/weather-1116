@@ -8,7 +8,7 @@ const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
 
 // Scope CORS correlation to the API host only -- enabling it with no allow-list makes the
 // SDK attempt to inject traceparent/Request-Id on every cross-origin fetch/XHR (Blazor/MVC
-// warmup pings in App.jsx, Google Maps), not just api-dotnet.
+// warmup pings in components/wake/WakeTarget.jsx, Google Maps), not just api-dotnet.
 function apiHost() {
   try {
     return new URL(import.meta.env.VITE_API_DOTNET_URL).hostname;
