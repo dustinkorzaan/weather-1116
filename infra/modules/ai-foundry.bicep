@@ -239,6 +239,19 @@ resource githubActionsFoundryUserAssignment 'Microsoft.Authorization/roleAssignm
   }
 }
 
+// Wx1116GeoNonAIWeather uses ProjectManagedIdentity + audience https://ai.azure.com to
+// call this project's toolbox consumer MCP endpoint. Without Foundry User on the
+// project's system-assigned MI, agent playground/tool enumeration returns HTTP 403.
+resource projectManagedIdentityFoundryUserAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(foundryProject.id, foundryProject.identity.principalId, foundryUserRoleId, 'project-mi')
+  scope: foundryProject
+  properties: {
+    principalId: foundryProject.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
+  }
+}
+
 output accountId string = foundryAccount.id
 output accountName string = foundryAccount.name
 output projectName string = foundryProject.name
@@ -246,4 +259,5 @@ output mcpSrvAppServiceConnectionName string = mcpSrvAppServiceConnection.name
 output mcpSrvFuncAppConnectionName string = mcpSrvFuncAppConnection.name
 output mcpSrvPythonConnectionName string = mcpSrvPythonConnection.name
 output toolboxConnectionName string = toolboxConnection.name
+output projectManagedIdentityPrincipalId string = foundryProject.identity.principalId
 output modelDeploymentName string = modelDeployment.name
