@@ -47,7 +47,7 @@ hot reload); React uses `npm start`. Ports come from each project's
 | Worker DotNet | `worker-dotnet/worker` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8130 |
 | MCP Server on App Service | `mcp-srv-app-service/mcp` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8110 |
 | MCP Server on Function App | `mcp-srv-func-app/mcp` | `func start` from `mcp-srv-func-app/mcp` (or VS Code **WeatherMcpSrvFuncApp**) | 8120 |
-| MCP Server on Python | `mcp-srv-python` | `pip install -e ".[dev]"` then `weather-mcp-srv-python` from `mcp-srv-python/`, with `MCP_SRV_PYTHON_KEY` set (see `mcp-srv-python/.env.example`) | 8140 |
+| MCP Server on Python | `mcp-srv-python/mcp` | `pip install -e "./mcp[dev]"` then `weather-mcp-srv-python` from `mcp-srv-python/mcp/`, with `MCP_SRV_PYTHON_KEY` set (see `mcp-srv-python/mcp/.env.example`) | 8140 |
 
 ### Non-obvious caveats
 
@@ -96,7 +96,7 @@ for ordinary implementation work.
   `mvc-dotnet/mvc.tests`, `worker-dotnet/worker.tests`, `ui-blazor/blazor.tests`,
   `mcp-srv-app-service/mcp.tests`, and `mcp-srv-func-app/mcp.tests` (see CI
   `build-test.yml`).
-- `mcp-srv-python` tests: `pip install -e ".[dev]"` then `python -m pytest`
+- `mcp-srv-python` tests: `pip install -e "./mcp[dev]"` then `python -m pytest mcp.tests`
   from `mcp-srv-python/` (pytest, not a .NET test project).
 - On push to `main`, `build-test-provision-deploy.yml` calls `build-test.yml`,
   then `prod-provision-infra.yml` (`needs: [build_test]`), then every

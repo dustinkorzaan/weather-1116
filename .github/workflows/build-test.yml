@@ -200,11 +200,11 @@ jobs:
           python-version: '3.12'
 
       - name: Install package with dev dependencies
-        run: pip install -e ".[dev]"
+        run: pip install -e "./mcp[dev]"
         working-directory: mcp-srv-python
 
       - name: Run mcp-srv-python tests
-        run: python -m pytest -q
+        run: python -m pytest -q mcp.tests
         working-directory: mcp-srv-python
 
   bicep-validate:
@@ -291,7 +291,7 @@ jobs:
           - dockerfile: worker-dotnet/worker/Dockerfile
           - dockerfile: mcp-srv-app-service/mcp/Dockerfile
           - dockerfile: mcp-srv-func-app/mcp/Dockerfile
-          - dockerfile: mcp-srv-python/Dockerfile
+          - dockerfile: mcp-srv-python/mcp/Dockerfile
 
     steps:
       - name: Checkout repository

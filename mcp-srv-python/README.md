@@ -17,7 +17,7 @@ own.
 ## Running locally
 
 ```bash
-cd mcp-srv-python
+cd mcp-srv-python/mcp
 pip install -e .
 cp .env.example .env  # set MCP_SRV_PYTHON_KEY
 weather-mcp-srv-python
@@ -52,6 +52,6 @@ what api-dotnet/mvc-dotnet's own `/About` fan out to.
 Built from the repo root so it can reach `mcp-srv-python/`:
 
 ```bash
-docker build -f mcp-srv-python/Dockerfile -t weather-mcp-srv-python .
+docker build -f mcp-srv-python/mcp/Dockerfile -t weather-mcp-srv-python .
 docker run -p 8080:8080 -e MCP_SRV_PYTHON_KEY=... weather-mcp-srv-python
 ```

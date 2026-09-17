@@ -233,7 +233,7 @@
             "type": "shell",
             "command": "weather-mcp-srv-python",
             "options": {
-                "cwd": "${workspaceFolder}/mcp-srv-python"
+                "cwd": "${workspaceFolder}/mcp-srv-python/mcp"
             },
             "isBackground": true,
             "problemMatcher": []
