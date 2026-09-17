@@ -212,9 +212,9 @@ resource toolboxConnection 'Microsoft.CognitiveServices/accounts/projects/connec
     target: toolboxConsumerUrl
     authType: 'ProjectManagedIdentity'
     isSharedToAll: true
+    audience: 'https://ai.azure.com'
     metadata: {
       type: 'generic_mcp'
-      audience: 'https://ai.azure.com'
     }
   }
 }

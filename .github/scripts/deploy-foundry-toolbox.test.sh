@@ -64,5 +64,9 @@ echo "$PAYLOAD" | jq -e '.connection_properties.authType == "ProjectManagedIdent
   || fail "toolbox connection should use project managed identity"
 echo "$PAYLOAD" | jq -e '.connection_properties.target == $consumer' --arg consumer "$CONSUMER_URL" >/dev/null \
   || fail "toolbox connection target should be the consumer MCP endpoint"
+echo "$PAYLOAD" | jq -e '.connection_properties.audience == "https://ai.azure.com"' >/dev/null \
+  || fail "toolbox connection audience must be a top-level property for ProjectManagedIdentity token fetch"
+echo "$PAYLOAD" | jq -e '.connection_properties.metadata.audience? | not' >/dev/null \
+  || fail "toolbox connection audience must not be nested under metadata"
 
 echo "OK: deploy-foundry-toolbox.sh payload wraps IaC MCP connections in a toolbox"
