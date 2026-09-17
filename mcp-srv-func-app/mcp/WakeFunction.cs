@@ -13,7 +13,7 @@ public class WakeFunction
 {
 	[Function(nameof(Wake))]
 	public IActionResult Wake(
-		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "wake")] HttpRequest _)
+		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Wake")] HttpRequest _)
 	{
 		return new OkResult();
 	}
