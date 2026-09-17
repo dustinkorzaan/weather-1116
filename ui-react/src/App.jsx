@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
@@ -31,6 +31,11 @@ import { useBackendWake } from './app/useBackendWake';
 import {
   useLazyGetAboutQuery,
 } from './services/weatherApi';
+
+// Backends that are already warm still take a real round trip to answer the
+// wake pings, so gate the wake screen behind a short grace period -- a fast
+// warm response never flashes it, but a genuine cold start still shows it.
+const WAKE_SCREEN_GRACE_PERIOD_MS = 250;
 
 /** Formats a build timestamp like "7/12/2026 10:22:14 PM UTC" (matches MVC and Blazor). */
 function formatBuildStart(isoDate) {
@@ -146,6 +151,15 @@ function AppShell() {
   // separate mount-time loadAbout() call here -- the dialog fetches its own
   // data lazily when opened (handleAboutClick).
   const { isWarm: isBackendWarm, ...backendWakeStatus } = useBackendWake();
+  const [pastGracePeriod, setPastGracePeriod] = useState(false);
+
+  useEffect(() => {
+    if (isBackendWarm) {
+      return undefined;
+    }
+    const timer = setTimeout(() => setPastGracePeriod(true), WAKE_SCREEN_GRACE_PERIOD_MS);
+    return () => clearTimeout(timer);
+  }, [isBackendWarm]);
 
   const handleAboutClick = () => {
     setIsAboutOpen(true);
@@ -153,6 +167,9 @@ function AppShell() {
   };
 
   if (!isBackendWarm) {
+    if (!pastGracePeriod) {
+      return <div className="h-screen w-full bg-background" />;
+    }
     return <BackendWakeScreen statuses={backendWakeStatus} />;
   }
 
