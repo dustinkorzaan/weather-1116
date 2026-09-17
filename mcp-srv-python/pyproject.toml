@@ -1,0 +1,22 @@
+[project]
+name = "weather-mcp-srv-python"
+version = "0.1.0"
+description = "Standalone Python MCP server exposing public weather forecast and history tools backed by Open-Meteo."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=2.0",
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+    "uvicorn>=0.30",
+]
+
+[project.scripts]
+weather-mcp-srv-python = "weather_mcp_srv_python.server:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
