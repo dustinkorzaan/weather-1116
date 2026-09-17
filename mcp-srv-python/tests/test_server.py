@@ -31,6 +31,24 @@ def test_mcp_rejects_wrong_token(monkeypatch):
     assert response.status_code == 401
 
 
+def test_mcp_accepts_non_localhost_host_header(monkeypatch):
+    """Regression: ACA FQDN Host headers must not return 421 after bearer auth."""
+    app = _build_test_app(monkeypatch)
+    client = TestClient(app, raise_server_exceptions=False)
+    response = client.post(
+        "/mcp",
+        headers={
+            "Authorization": "Bearer test-key",
+            "Host": "wx1116-prod-mcp-srv-python.example.azurecontainerapps.io",
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/event-stream",
+        },
+        json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
+    )
+    assert response.status_code != 421
+    assert response.status_code != 401
+
+
 def test_mcp_rejects_all_requests_when_key_unset(monkeypatch):
     monkeypatch.delenv("MCP_SRV_PYTHON_KEY", raising=False)
     from weather_mcp_srv_python.server import build_app

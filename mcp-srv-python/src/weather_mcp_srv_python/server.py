@@ -5,6 +5,7 @@ import os
 import uvicorn
 from dotenv import load_dotenv, find_dotenv
 from mcp.server.mcpserver import MCPServer
+from mcp.server.transport_security import TransportSecuritySettings
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse
 
@@ -87,7 +88,12 @@ def build_app():
     """Build the ASGI app: the MCP streamable-HTTP app wrapped with bearer-token auth."""
     token = os.environ.get("MCP_SRV_PYTHON_KEY", "")
     # Stateless mode is enough for simple tool calls (no sampling/elicitation).
-    app = mcp.streamable_http_app(stateless_http=True)
+    # The MCP SDK defaults to localhost-only Host validation (421 on ACA FQDNs).
+    # Ingress handles edge Host checks; /mcp is already protected by BearerTokenMiddleware.
+    app = mcp.streamable_http_app(
+        stateless_http=True,
+        transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
+    )
     app.add_middleware(BearerTokenMiddleware, token=token, protected_path_prefix="/mcp")
     return app
 
