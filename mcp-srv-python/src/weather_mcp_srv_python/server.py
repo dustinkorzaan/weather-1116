@@ -6,7 +6,7 @@ import uvicorn
 from dotenv import load_dotenv, find_dotenv
 from mcp.server.mcpserver import MCPServer
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse
+from starlette.responses import JSONResponse, PlainTextResponse
 
 from weather_mcp_srv_python.auth import BearerTokenMiddleware
 from weather_mcp_srv_python.tools.forecast import ForecastResolution, get_public_weather_forecast
@@ -16,11 +16,40 @@ load_dotenv(find_dotenv(usecwd=True))
 
 mcp = MCPServer("WeatherMcpSrvPython")
 
+# Tools this host must have registered to report healthy in /About, mirroring
+# mcp-srv-app-service's AboutController and mcp-srv-func-app's AboutFunction.
+EXPECTED_TOOLS = {"GetPublicWeatherForecast", "GetPublicWeatherHistory"}
+
 
 @mcp.custom_route("/Wake", methods=["GET"])
 async def wake(request: Request) -> PlainTextResponse:
     """Anonymous liveness probe for waking this container from zero (no tool resolution, no auth)."""
     return PlainTextResponse("OK")
+
+
+@mcp.custom_route("/About", methods=["GET"])
+async def about(request: Request) -> JSONResponse:
+    """Anonymous About probe -- leaf AboutNode (Core.About.AboutNode shape) named
+    mcp-srv-python, no children. Healthy only when MCP_SRV_PYTHON_KEY is set and both
+    weather tools are registered."""
+    key = os.environ.get("MCP_SRV_PYTHON_KEY", "")
+    tools = await mcp.list_tools()
+    tool_names = {tool.name for tool in tools}
+    is_healthy = bool(key) and EXPECTED_TOOLS.issubset(tool_names)
+
+    build_number = os.environ.get("BUILD_NUMBER", "")
+
+    return JSONResponse(
+        {
+            "name": "mcp-srv-python",
+            "publicMessage": None,
+            "isHealthy": is_healthy,
+            "buildStart": os.environ.get("BUILD_START") or None,
+            "buildNumber": int(build_number) if build_number.isdigit() else None,
+            "buildBranchName": os.environ.get("BUILD_BRANCH_NAME") or None,
+            "children": [],
+        }
+    )
 
 
 @mcp.tool(

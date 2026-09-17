@@ -33,6 +33,16 @@ with a missing, malformed, or incorrect token get a `401`. There is no default t
 `GET /Wake` is an unauthenticated liveness probe (used to prewarm this container from a
 scaled-to-zero state) — it does no tool resolution and doesn't check `MCP_SRV_PYTHON_KEY`.
 
+## About
+
+`GET /About` is an unauthenticated health probe returning the same `AboutNode` JSON shape
+(`Core.About.AboutNode`) as this repo's other backends — a leaf node named `mcp-srv-python`
+with no children. `isHealthy` is `true` only when `MCP_SRV_PYTHON_KEY` is set and both
+`GetPublicWeatherForecast`/`GetPublicWeatherHistory` are registered. `buildNumber`,
+`buildStart`, and `buildBranchName` are read from the `BUILD_NUMBER`/`BUILD_START`/
+`BUILD_BRANCH_NAME` env vars set by the deploy workflow, same as the other hosts. This is
+what api-dotnet/mvc-dotnet's own `/About` fan out to.
+
 ## Docker
 
 Built from the repo root so it can reach `mcp-srv-python/`:

@@ -207,12 +207,13 @@ Auth examples:
 - MCP Server on Function App (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 - MCP Server on Python: `Authorization: Bearer {your MCP_SRV_PYTHON_KEY value}`
 
-Each of the two .NET hosts also exposes an anonymous **`/About`** probe that
-returns a leaf `AboutNode` (`mcp-srv-app-service` or `mcp-srv-func-app`) with
-tool-registration health and optional `BUILD_NUMBER` / `BUILD_START` /
-`BUILD_BRANCH_NAME` metadata. mcp-srv-python does not implement `/About` yet
-(it has an anonymous `/Wake` liveness probe, like every other backend, but is
-not wired into the API/MVC `/About` aggregation tree below).
+Each host also exposes an anonymous **`/About`** probe that returns a leaf
+`AboutNode` (`mcp-srv-app-service`, `mcp-srv-func-app`, or `mcp-srv-python`)
+with tool-registration health and optional `BUILD_NUMBER` / `BUILD_START` /
+`BUILD_BRANCH_NAME` metadata. mcp-srv-python's is a plain Starlette route
+(`@mcp.custom_route("/About", ...)` in `server.py`) returning the same
+`AboutNode` JSON shape, healthy when `MCP_SRV_PYTHON_KEY` is set and both
+`GetPublicWeatherForecast`/`GetPublicWeatherHistory` are registered.
 
 API and MVC `/About` aggregate those remote nodes as children under their
 `API Root` subtree (see [About and health](#about-and-health)). Production base

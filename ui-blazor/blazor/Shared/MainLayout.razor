@@ -134,6 +134,9 @@
                 <FluentAnchor Href="@_mvcUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MVC</FluentAnchor>
                 <FluentAnchor Href="@_apiAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">API About</FluentAnchor>
                 <FluentAnchor Href="@_workerHangfireUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">Worker Hangfire</FluentAnchor>
+                <FluentAnchor Href="@_mcpSrvAppServiceAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP App Service About</FluentAnchor>
+                <FluentAnchor Href="@_mcpSrvFuncAppAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP Func App About</FluentAnchor>
+                <FluentAnchor Href="@_mcpSrvPythonAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP Python About</FluentAnchor>
                 <FluentAnchor Href="https://github.com/dustinkorzaan/weather-1116" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">GitHub</FluentAnchor>
             </div>
         </div>
@@ -148,6 +151,9 @@
     private string _mvcUrl = "http://localhost:8100";
     private string _apiAboutUrl = "http://localhost:8080/About";
     private string _workerHangfireUrl = "http://localhost:8130/hangfire";
+    private string _mcpSrvAppServiceAboutUrl = "http://localhost:8110/About";
+    private string _mcpSrvFuncAppAboutUrl = "http://localhost:8120/about";
+    private string _mcpSrvPythonAboutUrl = "http://localhost:8140/About";
 
     private bool _aboutDialogHidden = true;
     private bool _isAboutLoading;
@@ -175,6 +181,12 @@
         _apiAboutUrl = $"{apiUrl}/About";
         var workerUrl = (Configuration["WORKER_DOTNET_URL"] ?? "http://localhost:8130").TrimEnd('/');
         _workerHangfireUrl = $"{workerUrl}/hangfire";
+        var mcpSrvAppServiceUrl = (Configuration["MCP_SRV_APP_SERVICE_URL"] ?? "http://localhost:8110").TrimEnd('/');
+        _mcpSrvAppServiceAboutUrl = $"{mcpSrvAppServiceUrl}/About";
+        var mcpSrvFuncAppUrl = (Configuration["MCP_SRV_FUNC_APP_URL"] ?? "http://localhost:8120").TrimEnd('/');
+        _mcpSrvFuncAppAboutUrl = $"{mcpSrvFuncAppUrl}/about";
+        var mcpSrvPythonUrl = (Configuration["MCP_SRV_PYTHON_URL"] ?? "http://localhost:8140").TrimEnd('/');
+        _mcpSrvPythonAboutUrl = $"{mcpSrvPythonUrl}/About";
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
