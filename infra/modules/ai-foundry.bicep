@@ -243,7 +243,8 @@ resource githubActionsFoundryUserAssignment 'Microsoft.Authorization/roleAssignm
 // call this project's toolbox consumer MCP endpoint. Without Foundry User on the
 // project's system-assigned MI, agent playground/tool enumeration returns HTTP 403.
 resource projectManagedIdentityFoundryUserAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(foundryProject.id, foundryProject.identity.principalId, foundryUserRoleId, 'project-mi')
+  // name must not reference identity.principalId (BCP120 — not known until deploy time).
+  name: guid(foundryProject.id, foundryUserRoleId, 'project-managed-identity')
   scope: foundryProject
   properties: {
     principalId: foundryProject.identity.principalId
