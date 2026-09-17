@@ -7,7 +7,8 @@ import userEvent from '@testing-library/user-event';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-dom';
-import App, { AboutTreeNode } from './App';
+import App from './App';
+import { AboutTreeNode } from './components/about/AboutTreeNode';
 import { MAP_CITIES_STORAGE_KEY } from './data/mapCities';
 import { weatherApi } from './services/weatherApi';
 
@@ -45,6 +46,16 @@ function requestUrl(input) {
 function mockHelloFetch(weather = {}) {
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
     const url = requestUrl(input);
+
+    if (url.includes('/About')) {
+      return new Response(
+        JSON.stringify({ name: 'API Root', isHealthy: true, children: [] }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
 
     if (url.includes('/Home/Hello')) {
       return new Response(
@@ -432,6 +443,19 @@ test('user menu lists home, login, and the three content pages', async () => {
   expect(screen.queryByRole('menuitem', { name: 'MVC' })).toBeNull();
   expect(screen.queryByRole('menuitem', { name: 'API About' })).toBeNull();
   expect(screen.queryByRole('menuitem', { name: 'Worker Hangfire' })).toBeNull();
+});
+
+test('selecting About opens the dialog and fetches the About tree', async () => {
+  mockHelloFetch();
+  const user = userEvent.setup();
+  await renderApp('/');
+
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
+  await user.click(await screen.findByRole('menuitem', { name: 'About' }));
+
+  expect(await screen.findByRole('heading', { name: 'About' })).toBeDefined();
+  expect(await screen.findByText('API Root')).toBeDefined();
+  expect(screen.getByRole('link', { name: 'GitHub' })).toBeDefined();
 });
 
 test('user menu can switch the document to the dark theme', async () => {
