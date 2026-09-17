@@ -5,6 +5,8 @@ import os
 import uvicorn
 from dotenv import load_dotenv, find_dotenv
 from mcp.server.mcpserver import MCPServer
+from starlette.requests import Request
+from starlette.responses import PlainTextResponse
 
 from weather_mcp_srv_python.auth import BearerTokenMiddleware
 from weather_mcp_srv_python.tools.forecast import ForecastResolution, get_public_weather_forecast
@@ -13,6 +15,12 @@ from weather_mcp_srv_python.tools.history import HistoryResolution, get_public_w
 load_dotenv(find_dotenv(usecwd=True))
 
 mcp = MCPServer("WeatherMcpSrvPython")
+
+
+@mcp.custom_route("/Wake", methods=["GET"])
+async def wake(request: Request) -> PlainTextResponse:
+    """Anonymous liveness probe for waking this container from zero (no tool resolution, no auth)."""
+    return PlainTextResponse("OK")
 
 
 @mcp.tool(
@@ -57,7 +65,7 @@ def build_app():
 
 def main() -> None:
     host = os.environ.get("MCP_SRV_PYTHON_HOST", "0.0.0.0")
-    port = int(os.environ.get("MCP_SRV_PYTHON_PORT", "8120"))
+    port = int(os.environ.get("MCP_SRV_PYTHON_PORT", "8140"))
     uvicorn.run(build_app(), host=host, port=port)
 
 

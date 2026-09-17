@@ -3,9 +3,9 @@
 // stack; connects to the Central US App Insights instance for tracing,
 // grants api/mvc/worker's managed identities passwordless
 // Cognitive Services User access, deploys the gpt-5.4-mini model on the
-// account, and registers the two MCP tool hosts as RemoteTool connections
-// on the project (MyMcpSrvAppService, MyMcpSrvFuncApp) so hosted agents can
-// attach them as MCP tools by project_connection_id. Also grants the GitHub
+// account, and registers the three MCP tool hosts as RemoteTool connections
+// on the project (MyMcpSrvAppService, MyMcpSrvFuncApp, MyMcpSrvPython) so
+// hosted agents can attach them as MCP tools by project_connection_id. Also grants the GitHub
 // Actions identity Foundry User at project scope so it can publish agents
 // via the Agents API (which requires Entra ID auth, not the account api-key
 // used for model inference).
@@ -44,6 +44,9 @@ param mcpSrvAppServiceUrl string
 @description('Base URL of the MCP Server on Function App tool host, e.g. https://wx1116-prod-mcp-srv-func-app.<domain>/runtime/webhooks/mcp.')
 param mcpSrvFuncAppUrl string
 
+@description('Base URL of the standalone Python MCP server tool host, e.g. https://wx1116-prod-mcp-srv-python.<domain>/mcp.')
+param mcpSrvPythonUrl string
+
 @secure()
 @description('Bearer token for the MCP Server on App Service tool host (sent as the Authorization header value, including the "Bearer " prefix).')
 param mcpSrvAppServiceKey string
@@ -51,6 +54,10 @@ param mcpSrvAppServiceKey string
 @secure()
 @description('Function key for the MCP Server on Function App tool host (sent as the x-functions-key header value).')
 param mcpSrvFuncAppKey string
+
+@secure()
+@description('Bearer token for the standalone Python MCP server tool host (sent as the Authorization header value, including the "Bearer " prefix).')
+param mcpSrvPythonKey string
 
 @description('Model deployment name on the Foundry account, e.g. gpt-5.4-mini.')
 param modelDeploymentName string = 'gpt-5.4-mini'
@@ -175,6 +182,25 @@ resource mcpSrvFuncAppConnection 'Microsoft.CognitiveServices/accounts/projects/
   }
 }
 
+resource mcpSrvPythonConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-04-01-preview' = {
+  parent: foundryProject
+  name: 'MyMcpSrvPython'
+  properties: {
+    category: 'RemoteTool'
+    target: mcpSrvPythonUrl
+    authType: 'CustomKeys'
+    isSharedToAll: true
+    credentials: {
+      keys: {
+        Authorization: 'Bearer ${mcpSrvPythonKey}'
+      }
+    }
+    metadata: {
+      type: 'generic_mcp'
+    }
+  }
+}
+
 // RemoteTool connection for the geo + NonAI Weather toolbox consumer MCP
 // endpoint. deploy-foundry-toolbox.sh also ARM-upserts this on each agent
 // deploy so existing environments pick it up without a full reprovision.
@@ -218,5 +244,6 @@ output accountName string = foundryAccount.name
 output projectName string = foundryProject.name
 output mcpSrvAppServiceConnectionName string = mcpSrvAppServiceConnection.name
 output mcpSrvFuncAppConnectionName string = mcpSrvFuncAppConnection.name
+output mcpSrvPythonConnectionName string = mcpSrvPythonConnection.name
 output toolboxConnectionName string = toolboxConnection.name
 output modelDeploymentName string = modelDeployment.name

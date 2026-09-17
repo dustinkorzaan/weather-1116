@@ -59,12 +59,14 @@ jobs:
             foundry-key=${{ secrets.AZURE_FOUNDRY_PROD_KEY }}
             mcp-func-key=${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
             mcp-app-key=${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
+            mcp-python-key=${{ secrets.PROD_MCP_SRV_PYTHON_KEY }}
           env_overlay_multiline: |
             Cors__AllowedOrigins__0=${{ vars.PROD_UI_REACT_URL }}
             DB_CONNECTION_STRING=secretref:db-connection-string
             WORKER_DOTNET_URL=${{ vars.PROD_WORKER_DOTNET_URL }}
             MCP_SRV_APP_SERVICE_URL=${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
             MCP_SRV_FUNC_APP_URL=${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+            MCP_SRV_PYTHON_URL=${{ vars.PROD_MCP_SRV_PYTHON_URL }}
             AZURE_FOUNDRY_PROD_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_PROJ_URL }}
             AZURE_FOUNDRY_PROD_KEY=secretref:foundry-key
             AZURE_FOUNDRY_PROD_MODEL=${{ vars.AZURE_FOUNDRY_PROD_MODEL }}
@@ -72,6 +74,7 @@ jobs:
             AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME=${{ vars.AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME }}
             MCP_SRV_FUNC_APP_KEY=secretref:mcp-func-key
             MCP_SRV_APP_SERVICE_KEY=secretref:mcp-app-key
+            MCP_SRV_PYTHON_KEY=secretref:mcp-python-key
             ASPNETCORE_DETAILEDERRORS=false
             BUILD_NUMBER=${{ env.BUILD_NUMBER }}
             BUILD_START=${{ steps.build_start.outputs.build_start }}

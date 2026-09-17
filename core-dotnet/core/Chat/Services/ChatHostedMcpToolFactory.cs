@@ -4,13 +4,14 @@ namespace Core.Chat.Services;
 
 public sealed class ChatHostedMcpToolFactory
 {
-    public IList<AITool> CreateTools() => [CreateGeoTool(), CreateNonAiWeatherTool()];
+    public IList<AITool> CreateTools() => [CreateGeoTool(), CreateNonAiWeatherTool(), CreateNonAiWeatherPythonTool()];
 
     // Agent Geo 👤's remote MCP tool — mcp-srv-func-app only.
     public IList<AITool> CreateGeoTools() => [CreateGeoTool()];
 
-    // Agent NonAI Weather 👤's remote MCP tool — mcp-srv-app-service only.
-    public IList<AITool> CreateNonAiWeatherTools() => [CreateNonAiWeatherTool()];
+    // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-app-service (current) and
+    // mcp-srv-python (forecast/history).
+    public IList<AITool> CreateNonAiWeatherTools() => [CreateNonAiWeatherTool(), CreateNonAiWeatherPythonTool()];
 
     private static HostedMcpServerTool CreateGeoTool()
     {
@@ -46,6 +47,25 @@ public sealed class ChatHostedMcpToolFactory
             Headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}",
+            },
+        };
+    }
+
+    private static HostedMcpServerTool CreateNonAiWeatherPythonTool()
+    {
+        var mcpSrvPythonUrl = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_URL")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_PYTHON_URL.");
+        var mcpSrvPythonKey = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_KEY")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_PYTHON_KEY.");
+
+        return new HostedMcpServerTool(
+            "McpSrvPython",
+            new Uri($"{mcpSrvPythonUrl.TrimEnd('/')}/mcp"))
+        {
+            ApprovalMode = HostedMcpServerToolApprovalMode.NeverRequire,
+            Headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Authorization"] = $"Bearer {mcpSrvPythonKey}",
             },
         };
     }

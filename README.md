@@ -54,8 +54,8 @@ Visit the [React UI](https://wx.korzaan.com/chat-clients) Chat wired to variatio
 
 Presentation reference: [`docs/6-mcp-inspection/6-mcp-inspection.md`](docs/6-mcp-inspection/6-mcp-inspection.md)
 
-How to examine `mcp-srv-app-service` and `mcp-srv-func-app` directly with the
-MCP Inspector, Postman, or curl - outside a chat tab or
+How to examine `mcp-srv-app-service`, `mcp-srv-func-app`, and `mcp-srv-python`
+directly with the MCP Inspector, Postman, or curl - outside a chat tab or
 Foundry console.
 
 ## Projects, Architecture, and live demos in a Weather Pin App
@@ -70,6 +70,7 @@ Foundry console.
 |  | Worker DotNet | [`worker-dotnet/worker`](worker-dotnet/worker) | Hangfire dashboard and servers | 8130 |
 |  | MCP Server (App Service) | [`mcp-srv-app-service/mcp`](mcp-srv-app-service/mcp) | ASP.NET Core MCP server | 8110 |
 |  | MCP Server (Function App) | [`mcp-srv-func-app/mcp`](mcp-srv-func-app/mcp) | Azure Functions MCP server | 8120 |
+|  | MCP Server (Python) | [`mcp-srv-python`](mcp-srv-python) | Standalone Python MCP server | 8140 |
 
 This README is intentionally brief. Use it for the project grid and demo
 outline. UI pages, styling stacks, theme, architecture constraints, project

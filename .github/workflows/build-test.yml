@@ -186,6 +186,27 @@ jobs:
       - name: Run MCP Server on Function App tests
         run: dotnet test mcp-srv-func-app/mcp.tests/WeatherMcpSrvFuncApp.Tests.csproj --configuration Release --verbosity normal
 
+  test-mcp-srv-python:
+    name: Test MCP Server on Python
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install package with dev dependencies
+        run: pip install -e ".[dev]"
+        working-directory: mcp-srv-python
+
+      - name: Run mcp-srv-python tests
+        run: python -m pytest -q
+        working-directory: mcp-srv-python
+
   bicep-validate:
     name: Validate Bicep Templates
     runs-on: ubuntu-latest
@@ -249,6 +270,7 @@ jobs:
           VITE_WORKER_DOTNET_URL: ${{ vars.PROD_WORKER_DOTNET_URL }}
           VITE_MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
           VITE_MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+          VITE_MCP_SRV_PYTHON_URL: ${{ vars.PROD_MCP_SRV_PYTHON_URL }}
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Run React tests
@@ -269,6 +291,7 @@ jobs:
           - dockerfile: worker-dotnet/worker/Dockerfile
           - dockerfile: mcp-srv-app-service/mcp/Dockerfile
           - dockerfile: mcp-srv-func-app/mcp/Dockerfile
+          - dockerfile: mcp-srv-python/Dockerfile
 
     steps:
       - name: Checkout repository
@@ -293,6 +316,7 @@ jobs:
       - test-mvc
       - test-mcp-srv-app-service
       - test-mcp-srv-func-app
+      - test-mcp-srv-python
       - build-and-test-react
       - bicep-validate
       - docker-build

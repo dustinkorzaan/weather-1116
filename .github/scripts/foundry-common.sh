@@ -9,6 +9,7 @@ AZURE_RESOURCE_GROUP="${AZURE_RESOURCE_GROUP:-wx1116-prod-rg}"
 
 FOUNDRY_MCP_APP_CONNECTION_NAME="${FOUNDRY_MCP_APP_CONNECTION_NAME:-MyMcpSrvAppService}"
 FOUNDRY_MCP_FUNC_CONNECTION_NAME="${FOUNDRY_MCP_FUNC_CONNECTION_NAME:-MyMcpSrvFuncApp}"
+FOUNDRY_MCP_PYTHON_CONNECTION_NAME="${FOUNDRY_MCP_PYTHON_CONNECTION_NAME:-MyMcpSrvPython}"
 FOUNDRY_TOOLBOX_NAME="${FOUNDRY_TOOLBOX_NAME:-wx1116-geo-nonaiweather-toolbox}"
 FOUNDRY_TOOLBOX_CONNECTION_NAME="${FOUNDRY_TOOLBOX_CONNECTION_NAME:-Wx1116GeoNonAIWeather}"
 
@@ -126,20 +127,26 @@ foundry_connection_target() {
 foundry_resolve_mcp_targets() {
   local project_endpoint="$1"
 
-  local app_json func_json
+  local app_json func_json python_json
   app_json="$(foundry_fetch_connection "$project_endpoint" "$FOUNDRY_MCP_APP_CONNECTION_NAME" "${FOUNDRY_MCP_APP_CONNECTION_JSON:-}")"
   func_json="$(foundry_fetch_connection "$project_endpoint" "$FOUNDRY_MCP_FUNC_CONNECTION_NAME" "${FOUNDRY_MCP_FUNC_CONNECTION_JSON:-}")"
+  python_json="$(foundry_fetch_connection "$project_endpoint" "$FOUNDRY_MCP_PYTHON_CONNECTION_NAME" "${FOUNDRY_MCP_PYTHON_CONNECTION_JSON:-}")"
 
   FOUNDRY_MCP_APP_CONNECTION_ID="$(foundry_connection_id <<<"$app_json")"
   FOUNDRY_MCP_FUNC_CONNECTION_ID="$(foundry_connection_id <<<"$func_json")"
+  FOUNDRY_MCP_PYTHON_CONNECTION_ID="$(foundry_connection_id <<<"$python_json")"
   FOUNDRY_MCP_APP_TARGET="$(foundry_connection_target <<<"$app_json")"
   FOUNDRY_MCP_FUNC_TARGET="$(foundry_connection_target <<<"$func_json")"
+  FOUNDRY_MCP_PYTHON_TARGET="$(foundry_connection_target <<<"$python_json")"
 
   if [ -z "$FOUNDRY_MCP_APP_CONNECTION_ID" ]; then
     FOUNDRY_MCP_APP_CONNECTION_ID="$FOUNDRY_MCP_APP_CONNECTION_NAME"
   fi
   if [ -z "$FOUNDRY_MCP_FUNC_CONNECTION_ID" ]; then
     FOUNDRY_MCP_FUNC_CONNECTION_ID="$FOUNDRY_MCP_FUNC_CONNECTION_NAME"
+  fi
+  if [ -z "$FOUNDRY_MCP_PYTHON_CONNECTION_ID" ]; then
+    FOUNDRY_MCP_PYTHON_CONNECTION_ID="$FOUNDRY_MCP_PYTHON_CONNECTION_NAME"
   fi
 
   if [ -z "$FOUNDRY_MCP_APP_TARGET" ]; then
@@ -149,6 +156,10 @@ foundry_resolve_mcp_targets() {
   if [ -z "$FOUNDRY_MCP_FUNC_TARGET" ]; then
     : "${MCP_SRV_FUNC_APP_URL:?MCP func-app URL required when the Foundry connection has no target}"
     FOUNDRY_MCP_FUNC_TARGET="${MCP_SRV_FUNC_APP_URL%/}/runtime/webhooks/mcp"
+  fi
+  if [ -z "$FOUNDRY_MCP_PYTHON_TARGET" ]; then
+    : "${MCP_SRV_PYTHON_URL:?MCP python URL required when the Foundry connection has no target}"
+    FOUNDRY_MCP_PYTHON_TARGET="${MCP_SRV_PYTHON_URL%/}/mcp"
   fi
 }
 
@@ -166,6 +177,9 @@ foundry_build_weather_toolbox_tools_json() {
     --arg funcLabel "McpSrvFuncApp" \
     --arg funcUrl "$FOUNDRY_MCP_FUNC_TARGET" \
     --arg funcConn "$FOUNDRY_MCP_FUNC_CONNECTION_ID" \
+    --arg pythonLabel "McpSrvPython" \
+    --arg pythonUrl "$FOUNDRY_MCP_PYTHON_TARGET" \
+    --arg pythonConn "$FOUNDRY_MCP_PYTHON_CONNECTION_ID" \
     '[
       {
         type: "mcp",
@@ -179,6 +193,13 @@ foundry_build_weather_toolbox_tools_json() {
         server_label: $funcLabel,
         server_url: $funcUrl,
         project_connection_id: $funcConn,
+        require_approval: "never"
+      },
+      {
+        type: "mcp",
+        server_label: $pythonLabel,
+        server_url: $pythonUrl,
+        project_connection_id: $pythonConn,
         require_approval: "never"
       }
     ]'

@@ -3,9 +3,10 @@
 # toolbox and upserts the RemoteTool connection agents use to reach its consumer
 # MCP endpoint via the ARM connections API.
 #
-# The toolbox wraps the two IaC-provisioned MCP RemoteTool connections
-# (MyMcpSrvAppService, MyMcpSrvFuncApp). Agents attach the toolbox as a single
-# MCP tool so the Foundry portal can render tool associations correctly.
+# The toolbox wraps the three IaC-provisioned MCP RemoteTool connections
+# (MyMcpSrvAppService, MyMcpSrvFuncApp, MyMcpSrvPython). Agents attach the
+# toolbox as a single MCP tool so the Foundry portal can render tool
+# associations correctly.
 #
 # Usage:
 #   deploy-foundry-toolbox.sh [--print-body]
@@ -62,7 +63,7 @@ ARM_CONNECTION_URL="$(foundry_arm_connection_url "$SUBSCRIPTION_ID" "$AZURE_RESO
 
 TOOLS_JSON="$(foundry_build_weather_toolbox_tools_json)"
 VERSION_BODY=$(jq -n \
-  --arg description "Geo + NonAI Weather toolbox (func-app geocoding + app-service weather)" \
+  --arg description "Geo + NonAI Weather toolbox (func-app geocoding + app-service/python weather)" \
   --argjson tools "$TOOLS_JSON" \
   '{description: $description, tools: $tools}')
 

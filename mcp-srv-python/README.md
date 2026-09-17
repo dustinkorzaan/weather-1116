@@ -19,7 +19,7 @@ cp .env.example .env  # set MCP_SRV_PYTHON_KEY
 weather-mcp-srv-python
 ```
 
-The server listens on `http://0.0.0.0:8120/mcp` by default (override with
+The server listens on `http://0.0.0.0:8140/mcp` by default (override with
 `MCP_SRV_PYTHON_HOST` / `MCP_SRV_PYTHON_PORT`).
 
 ## Auth
@@ -27,6 +27,11 @@ The server listens on `http://0.0.0.0:8120/mcp` by default (override with
 Every request to `/mcp` must carry `Authorization: Bearer <MCP_SRV_PYTHON_KEY>`. Requests
 with a missing, malformed, or incorrect token get a `401`. There is no default token — if
 `MCP_SRV_PYTHON_KEY` isn't set, all `/mcp` requests are rejected.
+
+## Wake
+
+`GET /Wake` is an unauthenticated liveness probe (used to prewarm this container from a
+scaled-to-zero state) — it does no tool resolution and doesn't check `MCP_SRV_PYTHON_KEY`.
 
 ## Docker
 

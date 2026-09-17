@@ -4,7 +4,7 @@ namespace Core.Chat.Services;
 
 public sealed class ChatMcpToolFactory
 {
-    public (McpTool GeoMcpTools, McpTool WeatherMcpTools) CreateTools()
+    public (McpTool GeoMcpTools, McpTool WeatherMcpTools, McpTool WeatherPythonMcpTools) CreateTools()
     {
         var mcpSrvFuncAppUrl = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_URL")
             ?? throw new InvalidOperationException("Missing MCP_SRV_FUNC_APP_URL.");
@@ -15,6 +15,11 @@ public sealed class ChatMcpToolFactory
             ?? throw new InvalidOperationException("Missing MCP_SRV_APP_SERVICE_URL.");
         var mcpSrvAppServiceKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY")
             ?? throw new InvalidOperationException("Missing MCP_SRV_APP_SERVICE_KEY.");
+
+        var mcpSrvPythonUrl = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_URL")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_PYTHON_URL.");
+        var mcpSrvPythonKey = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_KEY")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_PYTHON_KEY.");
 
         McpTool geoMcpTools = ResponseTool.CreateMcpTool(
             serverLabel: "McpSrvFuncApp",
@@ -28,6 +33,12 @@ public sealed class ChatMcpToolFactory
             headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
             toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
-        return (geoMcpTools, weatherMcpTools);
+        McpTool weatherPythonMcpTools = ResponseTool.CreateMcpTool(
+            serverLabel: "McpSrvPython",
+            serverUri: new Uri($"{mcpSrvPythonUrl.TrimEnd('/')}/mcp"),
+            headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvPythonKey}" },
+            toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+
+        return (geoMcpTools, weatherMcpTools, weatherPythonMcpTools);
     }
 }

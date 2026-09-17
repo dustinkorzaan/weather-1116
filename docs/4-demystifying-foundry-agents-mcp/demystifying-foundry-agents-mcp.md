@@ -208,8 +208,8 @@ on `/current-ai-weather`) **→ V5 →**
   (`FoundryConsoleV5Agent.csproj`)
   - Agent-hosted alternative to V4: calls a **hosted Foundry agent**
     (`wx1116-agent-for-current-weather` by default).
-  - Instructions, response schema, and MCP tools (`mcp-srv-func-app`, `mcp-srv-app-service`)
-    are configured on the agent in Azure.
+  - Instructions, response schema, and MCP tools (`mcp-srv-func-app`, `mcp-srv-app-service`,
+    `mcp-srv-python`) are configured on the agent in Azure.
   - The console sends **only the user prompt** - Responses `instructions` and
     `text` fields are rejected when an agent is specified.
   - Each MCP tool on the agent must use `require_approval: never`. V5 and Chat3

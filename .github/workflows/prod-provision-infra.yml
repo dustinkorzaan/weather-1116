@@ -137,14 +137,16 @@ jobs:
         run: |
           azd env set MCP_SRV_APP_SERVICE_KEY "$MCP_SRV_APP_SERVICE_KEY"
           azd env set MCP_SRV_FUNC_APP_KEY "$MCP_SRV_FUNC_APP_KEY"
+          azd env set MCP_SRV_PYTHON_KEY "$MCP_SRV_PYTHON_KEY"
         env:
           # Reuses the same MCP tool-host secrets the deploy workflows already
           # set on the container apps -- so the MyMcpSrvAppService /
-          # MyMcpSrvFuncApp Foundry RemoteTool connections
+          # MyMcpSrvFuncApp / MyMcpSrvPython Foundry RemoteTool connections
           # (infra/modules/ai-foundry.bicep) stay in sync with the actual host
           # credentials on every push to main, with no new secret to manage.
           MCP_SRV_APP_SERVICE_KEY: ${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
           MCP_SRV_FUNC_APP_KEY: ${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
+          MCP_SRV_PYTHON_KEY: ${{ secrets.PROD_MCP_SRV_PYTHON_KEY }}
 
       - name: azd provision
         shell: bash
