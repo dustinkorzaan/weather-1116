@@ -55,15 +55,15 @@ async def about(request: Request) -> JSONResponse:
 @mcp.tool(
     name="GetPublicWeatherForecast",
     description=(
-        "Get an upcoming public weather forecast for a latitude and longitude. daily is the next 7 "
-        "days, hourly is the next 48 hours, and fifteen_minutes is the next 48 hours in 15-minute "
-        "steps. Use daily unless the user asks for hourly or 15-minute detail."
+        "Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 "
+        "days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute "
+        "steps. Use Daily unless the user asks for hourly or 15-minute detail."
     ),
 )
 async def get_public_weather_forecast_tool(
     latitude: float,
     longitude: float,
-    resolution: ForecastResolution = "daily",
+    resolution: ForecastResolution = "Daily",
 ) -> dict:
     return await get_public_weather_forecast(latitude, longitude, resolution)
 
@@ -71,14 +71,14 @@ async def get_public_weather_forecast_tool(
 @mcp.tool(
     name="GetPublicWeatherHistory",
     description=(
-        "Get recent past public weather for a latitude and longitude. daily is the previous 7 days, "
-        "hourly is the previous 48 hours. Use daily unless the user asks for hourly detail."
+        "Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, "
+        "Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail."
     ),
 )
 async def get_public_weather_history_tool(
     latitude: float,
     longitude: float,
-    resolution: HistoryResolution = "daily",
+    resolution: HistoryResolution = "Daily",
 ) -> dict:
     return await get_public_weather_history(latitude, longitude, resolution)
 

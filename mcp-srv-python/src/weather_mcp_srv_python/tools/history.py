@@ -14,16 +14,19 @@ OPEN_METEO_UNITS = {
     "precipitation_unit": "mm",
 }
 
-HistoryResolution = Literal["daily", "hourly"]
+# PascalCase to match the resolution values the MCP tool exposed when it lived on
+# mcp-srv-app-service (Core.Weather.Events.PublicWeatherHistoryResolution), so callers/prompts
+# tuned on the old tool keep working unchanged now that it's served by mcp-srv-python.
+HistoryResolution = Literal["Daily", "Hourly"]
 
 _RESOLUTION_QUERY: dict[str, dict[str, str]] = {
-    "daily": {
+    "Daily": {
         "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,"
         "wind_speed_10m_max,wind_direction_10m_dominant",
         "past_days": "7",
         "forecast_days": "0",
     },
-    "hourly": {
+    "Hourly": {
         "hourly": "temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m",
         "past_hours": "48",
         "forecast_hours": "0",
@@ -77,11 +80,11 @@ def _normalize_series_block(block: dict[str, Any] | None, keys: tuple[str, ...])
 async def get_public_weather_history(
     latitude: float,
     longitude: float,
-    resolution: HistoryResolution = "daily",
+    resolution: HistoryResolution = "Daily",
 ) -> dict[str, Any]:
     """Fetch recent past public weather for a latitude/longitude from Open-Meteo.
 
-    daily is the previous 7 days, hourly is the previous 48 hours.
+    Daily is the previous 7 days, Hourly is the previous 48 hours.
     """
     url = _build_history_url(latitude, longitude, resolution)
 

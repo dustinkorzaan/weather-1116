@@ -14,19 +14,22 @@ OPEN_METEO_UNITS = {
     "precipitation_unit": "mm",
 }
 
-ForecastResolution = Literal["daily", "hourly", "fifteen_minutes"]
+# PascalCase to match the resolution values the MCP tool exposed when it lived on
+# mcp-srv-app-service (Core.Weather.Events.PublicWeatherForecastResolution), so callers/prompts
+# tuned on the old tool keep working unchanged now that it's served by mcp-srv-python.
+ForecastResolution = Literal["Daily", "Hourly", "FifteenMinutes"]
 
 _RESOLUTION_QUERY: dict[str, dict[str, str]] = {
-    "daily": {
+    "Daily": {
         "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,"
         "wind_speed_10m_max,wind_direction_10m_dominant",
         "forecast_days": "7",
     },
-    "hourly": {
+    "Hourly": {
         "hourly": "temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m",
         "forecast_hours": "48",
     },
-    "fifteen_minutes": {
+    "FifteenMinutes": {
         "minutely_15": "temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m",
         "forecast_minutely_15": "192",
     },
@@ -79,11 +82,11 @@ def _normalize_series_block(block: dict[str, Any] | None, keys: tuple[str, ...])
 async def get_public_weather_forecast(
     latitude: float,
     longitude: float,
-    resolution: ForecastResolution = "daily",
+    resolution: ForecastResolution = "Daily",
 ) -> dict[str, Any]:
     """Fetch an upcoming public weather forecast for a latitude/longitude from Open-Meteo.
 
-    daily is the next 7 days, hourly is the next 48 hours, and fifteen_minutes is the
+    Daily is the next 7 days, Hourly is the next 48 hours, and FifteenMinutes is the
     next 48 hours in 15-minute steps.
     """
     url = _build_forecast_url(latitude, longitude, resolution)

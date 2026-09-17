@@ -4,14 +4,14 @@ from weather_mcp_srv_python.tools.history import _build_history_url, _normalize_
 
 
 def test_build_history_url_daily():
-    url = _build_history_url(47.6062, -122.3321, "daily")
+    url = _build_history_url(47.6062, -122.3321, "Daily")
     assert url.startswith("https://api.open-meteo.com/v1/forecast?")
     assert "past_days=7" in url
     assert "forecast_days=0" in url
 
 
 def test_build_history_url_hourly():
-    url = _build_history_url(0, 0, "hourly")
+    url = _build_history_url(0, 0, "Hourly")
     assert "past_hours=48" in url
     assert "forecast_hours=0" in url
 

@@ -3,8 +3,12 @@
 Standalone Python MCP server exposing two public weather tools, backed directly by the
 [Open-Meteo](https://open-meteo.com/) API:
 
-- `GetPublicWeatherForecast` — upcoming forecast (daily, hourly, or 15-minute resolution)
-- `GetPublicWeatherHistory` — recent past weather (daily or hourly resolution)
+- `GetPublicWeatherForecast` — upcoming forecast (`Daily`, `Hourly`, or `FifteenMinutes` resolution)
+- `GetPublicWeatherHistory` — recent past weather (`Daily` or `Hourly` resolution)
+
+The `resolution` values are PascalCase (`Daily`/`Hourly`/`FifteenMinutes`) to match what
+these tools returned when `GetPublicWeatherForecast`/`GetPublicWeatherHistory` still lived on
+`mcp-srv-app-service`, so existing callers/prompts don't need to change.
 
 This project has no dependency on the rest of this repo (no shared `core` project, no
 caching layer) — it's a self-contained MCP server you can build, run, and deploy on its
