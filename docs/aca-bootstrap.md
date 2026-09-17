@@ -310,9 +310,10 @@ Do not configure MCP servers or agents in the Foundry portal.
 - **Tools (connections):** `infra/modules/ai-foundry.bicep` registers
   `MyMcpSrvAppService` and `MyMcpSrvFuncApp` as `RemoteTool` + `CustomKeys`
   connections (URL + auth header) on every `azd provision`.
-- **Agents:** `prod-deploy-foundry-agents.yml` publishes
-  `wx1116-agent-for-current-weather` and `wx1116-agent-for-chat` against those
-  connections with `require_approval: never`.
+- **Toolbox + agents:** `prod-deploy-foundry-agents.yml` publishes
+  `wx1116-geo-nonaiweather-toolbox` (wrapping those connections), then publishes
+  `wx1116-agent-for-current-weather` and `wx1116-agent-for-chat` with the
+  toolbox attached (`require_approval: never`).
 
 | Connection | URL | Auth |
 | --- | --- | --- |

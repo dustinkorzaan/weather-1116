@@ -513,10 +513,14 @@ IaC home for the tools: Foundry has no ARM resource for agents themselves,
 so publishing `wx1116-agent-for-current-weather` and `wx1116-agent-for-chat` is handled
 by the `prod-deploy-foundry-agents` workflow
 (`.github/workflows/prod-deploy-foundry-agents.yml`,
-`.github/scripts/deploy-foundry-agent.sh`). The script POSTs each prompt
-agent to `{project}/agents?api-version=2025-11-15-preview` (or `{project}/agents/{name}/versions`
-when the agent already exists) with model, instructions, and both MCP tools
-wired to those connections (`project_connection_id` + `require_approval: never`).
+`.github/scripts/deploy-foundry-toolbox.sh`,
+`.github/scripts/deploy-foundry-agent.sh`). `deploy-foundry-toolbox.sh` wraps
+those connections in `wx1116-geo-nonaiweather-toolbox` and upserts the
+`Wx1116GeoNonAIWeather` RemoteTool connection to the toolbox consumer MCP
+endpoint. `deploy-foundry-agent.sh` then POSTs each prompt agent to
+`{project}/agents?api-version=v1` (or `{project}/agents/{name}/versions` when
+the agent already exists) with model, instructions, and a single toolbox MCP
+tool (`project_connection_id` + `require_approval: never`).
 It does not embed MCP secrets in the agent payload. Like the other
 `prod-deploy-*.yml` workflows, it's called from
 `build-test-provision-deploy.yml` with `needs: [provision]` once provisioning
@@ -539,12 +543,12 @@ Portal fallback (only if you need to inspect or repair by hand):
    `AZURE_FOUNDRY_PROD_PROJ_URL`.
 2. **Agents** → `wx1116-agent-for-current-weather` (or `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`).
 3. Confirm the model is the `gpt-5.4-mini` deployment provisioned above.
-4. Confirm each MCP tool uses the `MyMcpSrvAppService` /
-   `MyMcpSrvFuncApp` connections and **Approval** is **Never**
-   (`require_approval: never`).
+4. Confirm the agent's toolbox MCP tool uses the `Wx1116GeoNonAIWeather`
+   connection and **Approval** is **Never** (`require_approval: never`).
+   The toolbox itself should list `MyMcpSrvAppService` and `MyMcpSrvFuncApp`.
 5. V5 calls the agent **by name** (project default version).
 
-Same MCP JSON shape as Chat3 (`require_approval: never` on each server). Chat3
+Both agents attach the same toolbox MCP tool (`require_approval: never`). Chat3
 and V5 both leave approval on the hosted agent; neither round-trips approvals
 in app code.
 

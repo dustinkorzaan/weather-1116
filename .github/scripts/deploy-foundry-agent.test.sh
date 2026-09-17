@@ -12,15 +12,13 @@ fail() {
   exit 1
 }
 
-APP_JSON='{"id":"conn-app-id","name":"MyMcpSrvAppService","target":"https://app.example/mcp"}'
-FUNC_JSON='{"id":"conn-func-id","name":"MyMcpSrvFuncApp","target":"https://func.example/runtime/webhooks/mcp"}'
+TOOLBOX_JSON='{"id":"conn-toolbox-id","name":"Wx1116GeoNonAIWeather","target":"https://acct.services.ai.azure.com/api/projects/proj/toolboxes/wx1116-geo-nonaiweather-toolbox/mcp?api-version=v1"}'
 
 PAYLOAD="$(
   AZURE_FOUNDRY_PROD_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj/openai/v1' \
   AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
   AZURE_FOUNDRY_PROD_MODEL='gpt-5.4-mini' \
-  FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
-  FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
+  FOUNDRY_TOOLBOX_CONNECTION_JSON="$TOOLBOX_JSON" \
   bash "$SCRIPT" wx1116-agent-for-current-weather "$INSTRUCTIONS" \
     --response-schema "$SCHEMA" --print-body
 )"
@@ -29,9 +27,9 @@ echo "$PAYLOAD" | jq empty >/dev/null || fail "print-body did not emit JSON"
 
 CREATE_URL="$(echo "$PAYLOAD" | jq -r '.create_url')"
 VERSION_URL="$(echo "$PAYLOAD" | jq -r '.version_url')"
-[[ "$CREATE_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents?api-version=2025-11-15-preview' ]] \
+[[ "$CREATE_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents?api-version=v1' ]] \
   || fail "create_url should strip /openai/v1 and use /agents, got: $CREATE_URL"
-[[ "$VERSION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents/wx1116-agent-for-current-weather/versions?api-version=2025-11-15-preview' ]] \
+[[ "$VERSION_URL" == 'https://acct.services.ai.azure.com/api/projects/proj/agents/wx1116-agent-for-current-weather/versions?api-version=v1' ]] \
   || fail "version_url mismatch: $VERSION_URL"
 [[ "$CREATE_URL" != *'/assistants'* ]] || fail "must not call the Assistants API"
 
@@ -41,22 +39,18 @@ KIND="$(echo "$PAYLOAD" | jq -r '.create_body.definition.kind')"
 NAME="$(echo "$PAYLOAD" | jq -r '.create_body.name')"
 [[ "$NAME" == 'wx1116-agent-for-current-weather' ]] || fail "create_body.name mismatch"
 
-echo "$PAYLOAD" | jq -e '.create_body.definition.tools | length == 2' >/dev/null \
-  || fail "expected two MCP tools"
+echo "$PAYLOAD" | jq -e '.create_body.definition.tools | length == 1' >/dev/null \
+  || fail "expected one toolbox MCP tool on the agent"
 echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0].require_approval == "never"' >/dev/null \
-  || fail "tools[0].require_approval should be never"
-echo "$PAYLOAD" | jq -e '.create_body.definition.tools[1].require_approval == "never"' >/dev/null \
-  || fail "tools[1].require_approval should be never"
-echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0].project_connection_id == "conn-app-id"' >/dev/null \
-  || fail "app tool should use the IaC connection id"
-echo "$PAYLOAD" | jq -e '.create_body.definition.tools[1].project_connection_id == "conn-func-id"' >/dev/null \
-  || fail "func tool should use the IaC connection id"
+  || fail "toolbox tool require_approval should be never"
+echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0].project_connection_id == "conn-toolbox-id"' >/dev/null \
+  || fail "agent should reference the toolbox connection id"
 echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0] | has("headers") | not' >/dev/null \
-  || fail "MCP secrets must stay on the connection, not in headers"
-echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0].server_label == "McpSrvAppService"' >/dev/null \
-  || fail "app server_label mismatch"
-echo "$PAYLOAD" | jq -e '.create_body.definition.tools[1].server_label == "McpSrvFuncApp"' >/dev/null \
-  || fail "func server_label mismatch"
+  || fail "MCP secrets must stay on connections, not in agent headers"
+echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0].server_label == "toolbox"' >/dev/null \
+  || fail "toolbox server_label mismatch"
+echo "$PAYLOAD" | jq -e '.create_body.definition.tools[0].server_url | endswith("/toolboxes/wx1116-geo-nonaiweather-toolbox/mcp?api-version=v1")' >/dev/null \
+  || fail "agent should point at the toolbox consumer MCP endpoint"
 echo "$PAYLOAD" | jq -e '.create_body.definition.text.format.type == "json_schema"' >/dev/null \
   || fail "response schema should be definition.text.format"
 echo "$PAYLOAD" | jq -e '.create_body.definition.text.format.name == "AIWeatherResponse"' >/dev/null \
@@ -65,33 +59,31 @@ echo "$PAYLOAD" | jq -e 'has("create_body") and (.create_body | has("response_fo
   || fail "Assistants-style top-level response_format must not be present"
 echo "$PAYLOAD" | jq -e '.version_body | has("name") | not' >/dev/null \
   || fail "version body should not repeat the agent name"
-echo "$PAYLOAD" | jq -e '.version_body.definition.tools[0].project_connection_id == "conn-app-id"' >/dev/null \
-  || fail "version body must include the same MCP tools"
+echo "$PAYLOAD" | jq -e '.version_body.definition.tools[0].project_connection_id == "conn-toolbox-id"' >/dev/null \
+  || fail "version body must include the same toolbox tool"
 
-# Chat agent (no response schema) still attaches both connections.
+# Chat agent (no response schema) still attaches the toolbox.
 CHAT_INSTRUCTIONS="${ROOT}/.github/foundry-agents/wx1116-agent-for-chat.instructions.md"
 CHAT_PAYLOAD="$(
   AZURE_FOUNDRY_PROD_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj' \
   AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
   AZURE_FOUNDRY_PROD_MODEL='gpt-5.4-mini' \
-  FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
-  FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
+  FOUNDRY_TOOLBOX_CONNECTION_JSON="$TOOLBOX_JSON" \
   bash "$SCRIPT" wx1116-agent-for-chat "$CHAT_INSTRUCTIONS" --print-body
 )"
 echo "$CHAT_PAYLOAD" | jq -e '.create_body.definition | has("text") | not' >/dev/null \
   || fail "chat agent must not set a JSON response schema"
-echo "$CHAT_PAYLOAD" | jq -e '.create_body.definition.tools | length == 2' >/dev/null \
-  || fail "chat agent should still attach both MCP connections"
+echo "$CHAT_PAYLOAD" | jq -e '.create_body.definition.tools | length == 1' >/dev/null \
+  || fail "chat agent should attach the toolbox MCP tool"
 
 # Inference-only URL (no /api/projects/) must fail loudly.
 if AZURE_FOUNDRY_PROD_PROJ_URL='https://acct.services.ai.azure.com/openai/v1' \
   AZURE_FOUNDRY_ACCESS_TOKEN='test-token' \
   AZURE_FOUNDRY_PROD_MODEL='gpt-5.4-mini' \
-  FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
-  FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
+  FOUNDRY_TOOLBOX_CONNECTION_JSON="$TOOLBOX_JSON" \
   bash "$SCRIPT" wx1116-agent-for-chat "$CHAT_INSTRUCTIONS" --print-body >/dev/null 2>&1
 then
   fail "openai/v1-only project URL should be rejected"
 fi
 
-echo "OK: deploy-foundry-agent.sh payload uses Foundry Agents API + IaC MCP connections"
+echo "OK: deploy-foundry-agent.sh payload uses Foundry Agents API + toolbox MCP tool"
