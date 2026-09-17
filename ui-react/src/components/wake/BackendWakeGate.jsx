@@ -17,7 +17,7 @@ export function BackendWakeGate({ children }) {
   const [pastGracePeriod, setPastGracePeriod] = useState(false);
 
   const markWarm = useCallback((key) => {
-    setWarmState((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+    setWarmState((prev) => ({ ...prev, [key]: true }));
   }, []);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function BackendWakeGate({ children }) {
   return (
     <BackendWakeScreen>
       {WAKE_TARGETS.map(({ key, label, url }) => (
-        <WakeTarget key={key} label={label} url={url} onReady={() => markWarm(key)} />
+        <WakeTarget key={key} wakeKey={key} label={label} url={url} onReady={markWarm} />
       ))}
     </BackendWakeScreen>
   );

@@ -41,6 +41,7 @@ test('shows a blank screen during the 250ms grace period, then the wake screen w
   const labels = screen.getAllByText(/waking…$/).map((el) => el.textContent);
   expect(labels).toEqual([
     'API waking…',
+    'Worker waking…',
     'MCP App Service waking…',
     'MCP Func App waking…',
     'MVC waking…',
