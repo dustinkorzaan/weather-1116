@@ -103,7 +103,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
                 Endpoint = endpoint,
             });
 
-        var (geoMcpTools, weatherMcpTools) = _mcpToolFactory.CreateTools();
+        var (geoMcpTools, weatherMcpTools, weatherPythonMcpTools) = _mcpToolFactory.CreateTools();
 
         var inputItems = new List<ResponseItem>
         {
@@ -116,7 +116,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
         CreateResponseOptions options = new(deploymentName, inputItems)
         {
-            Tools = { geoMcpTools, weatherMcpTools },
+            Tools = { geoMcpTools, weatherMcpTools, weatherPythonMcpTools },
             TextOptions = new ResponseTextOptions
             {
                 TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(

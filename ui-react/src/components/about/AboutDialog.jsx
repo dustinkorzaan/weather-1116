@@ -1,6 +1,14 @@
 import { useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { apiBaseUrl, blazorBaseUrl, mvcBaseUrl, workerBaseUrl } from '../../config/siteLinks';
+import {
+  apiBaseUrl,
+  blazorBaseUrl,
+  mcpSrvAppServiceBaseUrl,
+  mcpSrvFuncAppBaseUrl,
+  mcpSrvPythonBaseUrl,
+  mvcBaseUrl,
+  workerBaseUrl,
+} from '../../config/siteLinks';
 import { useLazyGetAboutQuery } from '../../services/weatherApi';
 import { AboutTreeNode } from './AboutTreeNode';
 
@@ -9,6 +17,9 @@ const SITE_LINKS = [
   { label: 'MVC', href: mvcBaseUrl },
   { label: 'API About', href: `${apiBaseUrl}/About` },
   { label: 'Worker Hangfire', href: `${workerBaseUrl}/hangfire` },
+  { label: 'MCP App Service About', href: `${mcpSrvAppServiceBaseUrl}/About` },
+  { label: 'MCP Func App About', href: `${mcpSrvFuncAppBaseUrl}/about` },
+  { label: 'MCP Python About', href: `${mcpSrvPythonBaseUrl}/About` },
 ];
 
 function SiteLinksFooter() {

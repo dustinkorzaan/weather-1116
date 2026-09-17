@@ -1,8 +1,8 @@
 # MCP Inspection
 
-How to examine this repo's two remote MCP hosts (`mcp-srv-app-service`,
-`mcp-srv-func-app`) directly - outside a chat tab or Foundry console - with
-the MCP Inspector, Postman, and curl.
+How to examine this repo's three remote MCP hosts (`mcp-srv-app-service`,
+`mcp-srv-func-app`, `mcp-srv-python`) directly - outside a chat tab or
+Foundry console - with the MCP Inspector, Postman, and curl.
 
 ## MCP 2026-07-28 vs Legacy
 
@@ -30,6 +30,8 @@ Point it at:
   `Authorization: Bearer <MCP_SRV_APP_SERVICE_KEY>`
 * Local `mcp-srv-func-app` - `http://localhost:8120/runtime/webhooks/mcp`,
   header `x-functions-key: <mcp_extension system key>`
+* Local `mcp-srv-python` - `http://localhost:8140/mcp`, header
+  `Authorization: Bearer <MCP_SRV_PYTHON_KEY>`
 * Prod hosts - see [`docs/architecture.md`](../architecture.md#mcp-tool-hosts)
   for the production URLs and auth headers
 
@@ -53,7 +55,10 @@ session handshake, the `initialize` `POST` succeeding (`200`), a
 notification accepted (`202`), a `GET` rejected (`405` - no SSE stream in
 stateless mode), and the `tools/call` `POST`s for
 `GetPublicWeatherCurrent`/`GetPublicWeatherHistory` returning `200` with the
-tool's JSON content.
+tool's JSON content. (This screenshot predates the split below -
+`GetPublicWeatherHistory` has since moved to `mcp-srv-python`; the same
+Postman/curl steps apply against its `/mcp` endpoint with a
+`MCP_SRV_PYTHON_KEY` bearer token.)
 
 ## curl example
 
@@ -82,6 +87,20 @@ curl -sS -N -X POST "https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DO
 
 ```bash
 curl -sS -X POST "https://wx1116-prod-mcp-srv-app-service.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp" \
+  -H "accept: application/json, text/event-stream" \
+  -H "authorization: Bearer ..." \
+  -H "content-type: application/json" \
+  -H "mcp-protocol-version: 2025-11-25" \
+  --data '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+  | sed -n 's/^[[:space:]]*data:[[:space:]]*//p' \
+  | python -m json.tool
+```
+
+The same `tools/list`/`tools/call` requests work against `mcp-srv-python`,
+substituting its URL and bearer token:
+
+```bash
+curl -sS -X POST "https://wx1116-prod-mcp-srv-python.YOUR-ACA-DEFAULT-DOMAIN.centralus.azurecontainerapps.io/mcp" \
   -H "accept: application/json, text/event-stream" \
   -H "authorization: Bearer ..." \
   -H "content-type: application/json" \

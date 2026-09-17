@@ -1,0 +1,26 @@
+# mcp-srv-python .gitignore
+
+# Byte-compiled / build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local env
+.env

@@ -24,7 +24,7 @@ NAME_PREFIX="${2:-${AZURE_NAME_PREFIX:-wx1116}}"
 ENVIRONMENT_NAME="${3:-${AZURE_ENV_NAME:-prod}}"
 
 # Must match containerAppsConfig plus the Functions host in infra/main.bicep.
-APP_KEYS=(api mvc blazor worker mcp-srv-app-service mcp-srv-func-app)
+APP_KEYS=(api mvc blazor worker mcp-srv-app-service mcp-srv-python mcp-srv-func-app)
 
 # `az resource list` rather than `az containerapp list`: it needs no CLI
 # extension and returns an empty list (instead of an error) when the

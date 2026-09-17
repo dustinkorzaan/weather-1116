@@ -1,4 +1,4 @@
-// Azure Container Registry for all six container apps, including the
+// Azure Container Registry for all seven container apps, including the
 // Functions-on-ACA MCP host (Functions on ACA deploys custom images, not packages).
 
 @description('Globally unique ACR name, e.g. wx1116prodacr (alphanumeric only, 5-50 chars).')

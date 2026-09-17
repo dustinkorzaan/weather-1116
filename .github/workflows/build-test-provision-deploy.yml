@@ -87,6 +87,11 @@ jobs:
     uses: ./.github/workflows/prod-deploy-mcp-srv-func.yml
     secrets: inherit
 
+  deploy-mcp-srv-python:
+    needs: [provision]
+    uses: ./.github/workflows/prod-deploy-mcp-srv-python.yml
+    secrets: inherit
+
   deploy-react:
     needs: [provision]
     uses: ./.github/workflows/prod-deploy-react.yml

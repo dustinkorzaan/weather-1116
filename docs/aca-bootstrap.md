@@ -19,13 +19,14 @@ and assigns Contributor + User Access Administrator on this resource group.
 | Azure Container Registry | `wx1116prodacr` |
 | Container Apps Environment | `wx1116-prod-aca-env` |
 | Container Apps (ASP.NET) | `wx1116-prod-api`, `-mvc`, `-blazor`, `-worker`, `-mcp-srv-app-service` |
+| Container App (Python) | `wx1116-prod-mcp-srv-python` |
 | Functions on ACA | `wx1116-prod-mcp-srv-func-app` |
 | Storage (Functions host) | `wx1116prodblob` |
 | Static Web App | `wx1116-prod-react` |
 | SQL Server (Entra-only auth) + database | `wx1116-prod-sql-srv` / `wx1116-prod-sql-database` |
 | App Insights + Log Analytics | `wx1116-prod-appinsights` / `wx1116-prod-log` |
 | AI Foundry | `wx1116-prod-res` / `wx1116-prod-proj` |
-| Six runtime managed identities | `wx1116-prod-*-mi` |
+| Seven runtime managed identities | `wx1116-prod-*-mi` |
 
 Everything uses `location: centralus`.
 
@@ -46,12 +47,12 @@ rely on this in production, not just during the demo:
   only thing that wakes it from zero is an inbound HTTP request, which today
   means the React UI's `useBackendWake` hook (`ui-react/src/app/useBackendWake.js`,
   used from `App.jsx`) pinging `worker`'s own `/About` directly on page load,
-  in parallel with API, MVC, Blazor, and both MCP hosts, rather than relying
+  in parallel with API, MVC, Blazor, and all three MCP hosts, rather than relying
   on API's `/About` fan-out to reach it (see below for why that changed).
   `useBackendWake` fires a fresh ping per target roughly every 30s -- without
   cancelling ones still in flight -- until each succeeds, rather than giving
   up after a single attempt; see the `BackendWakeScreen` full-page loader,
-  now showing six spinning icons (one per target), it drives while that's
+  now showing seven spinning icons (one per target), it drives while that's
   pending. If nobody loads the React UI around 2am,
   that day's recurring jobs are silently skipped, not just delayed. Keep `worker` at
   `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
@@ -101,6 +102,7 @@ rely on this in production, not just during the demo:
 | `AZURE_FOUNDRY_PROD_KEY` | Foundry API key |
 | `PROD_MCP_SRV_APP_SERVICE_KEY` | Bearer token for MCP app-service host |
 | `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key — you choose the value; deploy applies it |
+| `PROD_MCP_SRV_PYTHON_KEY` | Bearer token for the standalone Python MCP host |
 | `GOOGLE_MAPS_API_KEY` | Maps on React/MVC/Blazor |
 | `AZURE_UI_REACT_TOKEN` | SWA deploy token (after provision) |
 | `PROD_APPINSIGHTS_CONNECTION_STRING` | Browser telemetry for React -- same value as the `APP_INSIGHTS_CONNECTION_STRING` infra output. Missing/empty is safe (React just runs with no browser telemetry), but leaving it unset makes browser telemetry silently absent once the backends start reporting. |
@@ -144,6 +146,7 @@ PROD_UI_BLAZOR_URL           = https://<BLAZOR_HOSTNAME>
 PROD_WORKER_DOTNET_URL       = https://<WORKER_HOSTNAME>
 PROD_MCP_SRV_APP_SERVICE_URL = https://<MCP_SRV_APP_SERVICE_HOSTNAME>
 PROD_MCP_SRV_FUNC_APP_URL    = https://<MCP_SRV_FUNC_APP_HOSTNAME>
+PROD_MCP_SRV_PYTHON_URL      = https://<MCP_SRV_PYTHON_HOSTNAME>
 PROD_UI_REACT_URL            = https://<STATIC_WEB_APP_CUSTOM_DOMAIN>
 ```
 
@@ -205,6 +208,7 @@ in parallel. Each can also be run directly via `workflow_dispatch`:
 | `prod-deploy-worker.yml` | Container App + ACR image |
 | `prod-deploy-mcp-srv-app.yml` | Container App + ACR image |
 | `prod-deploy-mcp-srv-func.yml` | Functions-on-ACA container image (ACR) |
+| `prod-deploy-mcp-srv-python.yml` | Container App + ACR image |
 | `prod-deploy-react.yml` | Static Web App |
 | `prod-deploy-foundry-agents.yml` | Foundry agents (`wx1116-agent-for-current-weather`, `wx1116-agent-for-chat`) |
 

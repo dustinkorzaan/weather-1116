@@ -229,6 +229,16 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "run mcp srv python",
+            "type": "shell",
+            "command": "weather-mcp-srv-python",
+            "options": {
+                "cwd": "${workspaceFolder}/mcp-srv-python"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
             "label": "build foundry console v1",
             "command": "dotnet",
             "type": "process",

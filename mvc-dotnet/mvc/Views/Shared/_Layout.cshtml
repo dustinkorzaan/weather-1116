@@ -6,6 +6,12 @@
     var apiAboutUrl = $"{apiUrl}/About";
     var workerUrl = (Configuration["WORKER_DOTNET_URL"] ?? "http://localhost:8130").TrimEnd('/');
     var workerHangfireUrl = $"{workerUrl}/hangfire";
+    var mcpSrvAppServiceUrl = (Configuration["MCP_SRV_APP_SERVICE_URL"] ?? "http://localhost:8110").TrimEnd('/');
+    var mcpSrvAppServiceAboutUrl = $"{mcpSrvAppServiceUrl}/About";
+    var mcpSrvFuncAppUrl = (Configuration["MCP_SRV_FUNC_APP_URL"] ?? "http://localhost:8120").TrimEnd('/');
+    var mcpSrvFuncAppAboutUrl = $"{mcpSrvFuncAppUrl}/about";
+    var mcpSrvPythonUrl = (Configuration["MCP_SRV_PYTHON_URL"] ?? "http://localhost:8140").TrimEnd('/');
+    var mcpSrvPythonAboutUrl = $"{mcpSrvPythonUrl}/About";
     var isMapPage = string.Equals(ViewContext.RouteData.Values["action"] as string, "Index", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
@@ -159,6 +165,9 @@
                     <a href="@uiBlazorUrl" target="_blank" rel="noopener noreferrer">UI Blazor</a>
                     <a href="@apiAboutUrl" target="_blank" rel="noopener noreferrer">API About</a>
                     <a href="@workerHangfireUrl" target="_blank" rel="noopener noreferrer">Worker Hangfire</a>
+                    <a href="@mcpSrvAppServiceAboutUrl" target="_blank" rel="noopener noreferrer">MCP App Service About</a>
+                    <a href="@mcpSrvFuncAppAboutUrl" target="_blank" rel="noopener noreferrer">MCP Func App About</a>
+                    <a href="@mcpSrvPythonAboutUrl" target="_blank" rel="noopener noreferrer">MCP Python About</a>
                     <a href="https://github.com/dustinkorzaan/weather-1116" target="_blank" rel="noopener noreferrer">GitHub</a>
                 </div>
             </div>

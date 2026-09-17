@@ -26,13 +26,18 @@ public class AboutController(
             $"{configuration["MCP_SRV_FUNC_APP_URL"]}/About",
             "mcp-srv-func-app",
             cancellationToken);
+        var mcpSrvPythonTask = aboutClient.GetAsync(
+            $"{configuration["MCP_SRV_PYTHON_URL"]}/About",
+            "mcp-srv-python",
+            cancellationToken);
 
-        await Task.WhenAll(workerDotNetTask, mcpSrvAppServiceTask, mcpSrvFuncAppTask);
+        await Task.WhenAll(workerDotNetTask, mcpSrvAppServiceTask, mcpSrvFuncAppTask, mcpSrvPythonTask);
 
         var root = AboutTreeBuilder.BuildApiRoot(
             await workerDotNetTask,
             await mcpSrvAppServiceTask,
-            await mcpSrvFuncAppTask);
+            await mcpSrvFuncAppTask,
+            await mcpSrvPythonTask);
         return Ok(root);
     }
 }
