@@ -51,7 +51,7 @@ jobs:
           acr_name: ${{ env.ACR_NAME }}
           image_name: ${{ env.IMAGE_NAME }}
           image_tag: ${{ github.run_number }}
-          dockerfile: mcp-srv-python/Dockerfile
+          dockerfile: mcp-srv-python/mcp/Dockerfile
           container_app_name: ${{ env.CONTAINER_APP_NAME }}
           resource_group: ${{ env.RESOURCE_GROUP }}
           secrets_multiline: |

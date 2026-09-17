@@ -466,9 +466,9 @@ mcp-srv-app-service/
 mcp-srv-func-app/
   mcp/                       MCP Server on Function App tool host (WeatherMcpSrvFuncApp.csproj)
   mcp.tests/                 MCP Server on Function App tests (WeatherMcpSrvFuncApp.Tests.csproj)
-mcp-srv-python/              Standalone Python MCP server (GetPublicWeatherForecast, GetPublicWeatherHistory)
-  src/                       Package source (weather_mcp_srv_python)
-  tests/                     pytest suite
+mcp-srv-python/
+  mcp/                       Standalone Python MCP server (weather_mcp_srv_python)
+  mcp.tests/                 pytest suite
 FoundryConsoleV1…V5/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```
