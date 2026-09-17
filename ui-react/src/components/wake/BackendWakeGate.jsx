@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   blazorBaseUrl,
   mcpSrvAppServiceBaseUrl,
@@ -9,6 +9,7 @@ import {
 import { resolveApiBaseUrl } from '../../services/apiBaseUrl';
 import BackendWakeScreen from './BackendWakeScreen';
 import WakeTarget from './WakeTarget';
+import { useWakeTargets } from './useWakeTargets';
 
 // Every layer here scales to zero when idle. API, worker, mcp-srv-app-service, and
 // mcp-srv-func-app each expose an anonymous /Wake probe instead of /About -- /About
@@ -24,8 +25,6 @@ const WAKE_TARGETS = [
   { key: 'blazor', label: 'Blazor', url: blazorBaseUrl },
 ];
 
-const INITIAL_WARM_STATE = Object.fromEntries(WAKE_TARGETS.map(({ key }) => [key, false]));
-
 // Backends that are already warm still take a real round trip to answer the wake
 // pings, so gate the wake screen behind a short grace period -- a fast warm
 // response never flashes it, but a genuine cold start still shows it.
@@ -33,13 +32,13 @@ const WAKE_SCREEN_GRACE_PERIOD_MS = 250;
 
 /** Renders a WakeTarget per backend layer until every one has answered, then mounts `children`. */
 export function BackendWakeGate({ children }) {
-  const [warmState, setWarmState] = useState(INITIAL_WARM_STATE);
-  const isWarm = Object.values(warmState).every(Boolean);
+  // Pinging is owned here, not by the individual WakeTarget rows -- it starts as
+  // soon as BackendWakeGate mounts (immediately, not gated behind the grace
+  // period) and survives for as long as the gate itself is mounted, regardless of
+  // how its descendants are rendered or re-rendered underneath it.
+  const awakeState = useWakeTargets(WAKE_TARGETS);
+  const isWarm = Object.values(awakeState).every(Boolean);
   const [pastGracePeriod, setPastGracePeriod] = useState(false);
-
-  const markWarm = useCallback((key) => {
-    setWarmState((prev) => ({ ...prev, [key]: true }));
-  }, []);
 
   useEffect(() => {
     if (isWarm) {
@@ -49,24 +48,13 @@ export function BackendWakeGate({ children }) {
     return () => clearTimeout(timer);
   }, [isWarm]);
 
-  // Mounted unconditionally (even during the grace period) so the pings fire
-  // immediately on load -- if they only started once the visible wake screen
-  // mounted, the grace period could never be long enough to absorb a fast
-  // warm response, and the wake screen would always flash for at least one
-  // round trip.
-  const wakeTargets = WAKE_TARGETS.map(({ key, label, url }) => (
-    <WakeTarget key={key} wakeKey={key} label={label} url={url} onReady={markWarm} />
-  ));
-
   if (isWarm) {
     return children;
   }
 
-  // Always the same element type (BackendWakeScreen) in the same tree position --
-  // only its `visible` prop changes across the grace period. Swapping between two
-  // different element types here (e.g. a plain div pre-grace-period vs
-  // BackendWakeScreen after) would make React tear down and remount every
-  // WakeTarget on that transition, resetting any that had already answered back
-  // to "waking…" and losing their progress.
+  const wakeTargets = WAKE_TARGETS.map(({ key, label }) => (
+    <WakeTarget key={key} label={label} isAwake={awakeState[key]} />
+  ));
+
   return <BackendWakeScreen visible={pastGracePeriod}>{wakeTargets}</BackendWakeScreen>;
 }
