@@ -62,9 +62,11 @@ export function BackendWakeGate({ children }) {
     return children;
   }
 
-  if (!pastGracePeriod) {
-    return <div className="h-screen w-full bg-background hidden">{wakeTargets}</div>;
-  }
-
-  return <BackendWakeScreen>{wakeTargets}</BackendWakeScreen>;
+  // Always the same element type (BackendWakeScreen) in the same tree position --
+  // only its `visible` prop changes across the grace period. Swapping between two
+  // different element types here (e.g. a plain div pre-grace-period vs
+  // BackendWakeScreen after) would make React tear down and remount every
+  // WakeTarget on that transition, resetting any that had already answered back
+  // to "waking…" and losing their progress.
+  return <BackendWakeScreen visible={pastGracePeriod}>{wakeTargets}</BackendWakeScreen>;
 }
