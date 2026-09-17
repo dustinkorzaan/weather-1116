@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from './theme/useTheme';
-import { siteLinks } from './config/siteLinks';
+import { apiBaseUrl, blazorBaseUrl, mvcBaseUrl, workerBaseUrl } from './config/siteLinks';
 import ChatClientsPage from './pages/ChatClientsPage';
 import CurrentAIWeatherPage from './pages/CurrentAIWeatherPage';
 import HelloWorldPage from './pages/HelloWorldPage';
@@ -104,10 +104,17 @@ export function AboutTreeNode({ node }) {
   );
 }
 
+const SITE_LINKS = [
+  { label: 'UI Blazor', href: blazorBaseUrl },
+  { label: 'MVC', href: mvcBaseUrl },
+  { label: 'API About', href: `${apiBaseUrl}/About` },
+  { label: 'Worker Hangfire', href: `${workerBaseUrl}/hangfire` },
+];
+
 function SiteLinksFooter() {
   return (
     <div className="mt-4 flex flex-wrap gap-x-4 gap-y-3 border-t border-border pt-3 text-sm">
-      {siteLinks.map((link) => (
+      {SITE_LINKS.map((link) => (
         <a
           key={link.label}
           className="text-foreground/80 hover:underline"
