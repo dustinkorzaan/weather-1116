@@ -1,17 +1,29 @@
 import { afterEach, expect, test, vi } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useBackendWake } from './useBackendWake';
+import { resolveApiBaseUrl } from '../services/apiBaseUrl';
+import {
+  blazorBaseUrl,
+  mcpSrvAppServiceBaseUrl,
+  mcpSrvFuncAppBaseUrl,
+  mvcBaseUrl,
+  workerBaseUrl,
+} from '../config/siteLinks';
+
+// Worker and MCP App Service also ping their own /About, so matching on the
+// path alone would stall them too -- match the full api URL instead.
+const API_ABOUT_URL = `${resolveApiBaseUrl()}/About`;
 
 afterEach(() => {
   vi.restoreAllMocks();
   vi.useRealTimers();
 });
 
-test('is not warm until the api, mvc, and blazor pings all resolve', async () => {
+test('is not warm until the api, mvc, blazor, worker, and mcp host pings all resolve', async () => {
   let resolveAbout;
   vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
     const url = String(input);
-    if (url.includes('/About')) {
+    if (url === API_ABOUT_URL) {
       return new Promise((resolve) => {
         resolveAbout = resolve;
       });
@@ -24,6 +36,9 @@ test('is not warm until the api, mvc, and blazor pings all resolve', async () =>
   await waitFor(() => {
     expect(result.current.mvc).toBe(true);
     expect(result.current.blazor).toBe(true);
+    expect(result.current.worker).toBe(true);
+    expect(result.current.mcpSrvAppService).toBe(true);
+    expect(result.current.mcpSrvFuncApp).toBe(true);
   });
   expect(result.current.api).toBe(false);
   expect(result.current.isWarm).toBe(false);
@@ -33,6 +48,26 @@ test('is not warm until the api, mvc, and blazor pings all resolve', async () =>
   await waitFor(() => {
     expect(result.current.isWarm).toBe(true);
   });
+});
+
+test('pings all six targets at their expected URLs', () => {
+  const fetchMock = vi
+    .spyOn(globalThis, 'fetch')
+    .mockResolvedValue(new Response(null, { status: 200 }));
+
+  renderHook(() => useBackendWake());
+
+  const calledUrls = fetchMock.mock.calls.map(([input]) => String(input));
+  expect(calledUrls).toEqual(
+    expect.arrayContaining([
+      API_ABOUT_URL,
+      mvcBaseUrl,
+      blazorBaseUrl,
+      `${workerBaseUrl}/About`,
+      `${mcpSrvAppServiceBaseUrl}/About`,
+      `${mcpSrvFuncAppBaseUrl}/about`,
+    ])
+  );
 });
 
 test('retries a failed ping every ~30s until it succeeds', async () => {
@@ -70,7 +105,7 @@ test('a slow first attempt still wins instead of being cancelled by later retrie
   const apiResolvers = [];
   vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
     const url = String(input);
-    if (url.includes('/About')) {
+    if (url === API_ABOUT_URL) {
       return new Promise((resolve) => {
         apiResolvers.push(resolve);
       });
