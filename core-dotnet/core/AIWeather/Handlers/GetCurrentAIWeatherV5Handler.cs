@@ -1,5 +1,3 @@
-using System.ClientModel;
-using System.ClientModel.Primitives;
 using System.Diagnostics;
 using System.Text.Json;
 using Azure.AI.Extensions.OpenAI;
@@ -78,26 +76,20 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
         // propagate too, the same fail-closed policy as a missing DB_CONNECTION_STRING.
         try
         {
-            var endpoint = Resolve(
-                Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
-                ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL."));
-
-            var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
-                ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
+            var projectUrl = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
+                ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL.");
 
             var agentNameEnv = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME");
             var agentName = string.IsNullOrWhiteSpace(agentNameEnv) ? "wx1116-agent-for-current-weather" : agentNameEnv;
 
-            _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, agent {Agent}", endpoint, agentName);
+            var projectEndpoint = ResolveProjectEndpoint(projectUrl);
 
-            ProjectOpenAIClient projectOpenAIClient = new(
-                ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-                new ProjectOpenAIClientOptions
-                {
-                    Endpoint = endpoint,
-                });
+            _logger.LogInformation(
+                "AI Weather: Foundry project {ProjectEndpoint}, agent {Agent}",
+                projectEndpoint,
+                agentName);
 
-            ProjectResponsesClient client = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+            ProjectResponsesClient client = FoundryAgentResponsesClientFactory.CreateForAgent(agentName, projectEndpoint);
 
             CreateResponseOptions options = new()
             {
@@ -112,6 +104,13 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
             runLog.AddLog("Start CreateResponse", null);
             response = await client.CreateResponseAsync(options, cancellationToken);
             runLog.AddLog("Finish CreateResponse", response);
+
+            if (response is null)
+            {
+                LogRunLogOnFailure("CreateResponseAsync returned null response");
+                throw new InvalidOperationException(
+                    "Foundry agent returned no response. Check AZURE_FOUNDRY_PROD_PROJ_URL, agent name, and agent publish status.");
+            }
 
             var approvalRequests = response.OutputItems.OfType<McpToolCallApprovalRequestItem>().ToList();
             if (approvalRequests.Count > 0)
@@ -135,13 +134,20 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
             }
 
             var content = response.GetOutputText();
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                LogRunLogOnFailure("model returned empty or invalid JSON");
+                throw new InvalidOperationException(
+                    "Model returned empty or invalid JSON. Raw output: (empty)");
+            }
+
             var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
             if (modelOutput is null)
             {
                 LogRunLogOnFailure("model returned empty or invalid JSON");
                 throw new InvalidOperationException(
-                    $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
+                    $"Model returned empty or invalid JSON. Raw output: {content}");
             }
 
             modelOutput.WindDirectionSourceDegrees =

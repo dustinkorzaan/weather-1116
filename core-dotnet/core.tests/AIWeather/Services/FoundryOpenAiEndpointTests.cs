@@ -37,4 +37,21 @@ public class FoundryOpenAiEndpointTests
     {
         Assert.Throws<ArgumentNullException>(() => FoundryOpenAiEndpoint.Resolve(null!));
     }
+
+    [Theory]
+    [InlineData(
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj",
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj")]
+    [InlineData(
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj/openai/v1",
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj")]
+    [InlineData(
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj/openai/v1/",
+        "https://example.services.ai.azure.com/api/projects/wx1116-prod-proj")]
+    public void ResolveProjectEndpoint_StripsOpenAiSuffixWhenPresent(string input, string expected)
+    {
+        var endpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(input);
+
+        Assert.Equal(expected, endpoint.ToString());
+    }
 }

@@ -17,4 +17,16 @@ public class Chat3ServiceTests
         Assert.DoesNotContain("WeatherToolExecutor", source, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Service_CatchesStreamingFailuresDuringEnumeration()
+    {
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Chat3/Chat3Service.cs"));
+
+        // CreateResponseStreamingAsync is lazy — Foundry/auth failures happen on first MoveNext,
+        // so the try/catch must wrap await foreach, not just the call that builds the enumerable.
+        Assert.Contains("await enumerator.MoveNextAsync()", source, StringComparison.Ordinal);
+        Assert.Contains("ExceptionDispatchInfo.Capture", source, StringComparison.Ordinal);
+        Assert.Contains("ChatStreamEvent.Error(failure.SourceException.Message)", source, StringComparison.Ordinal);
+    }
+
 }

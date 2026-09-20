@@ -26,6 +26,14 @@ public class ChatFoundrySettingsTests
         });
     }
 
+    [Fact]
+    public void CreateProjectResponsesClientForChatAgent_UsesSharedFoundryAgentFactory()
+    {
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Services/ChatFoundrySettings.cs"));
+
+        Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgent", source, StringComparison.Ordinal);
+    }
+
     private static void RunWithFoundryEnvironment(string? chatAgentName, Action action)
     {
         var previousUrl = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL");

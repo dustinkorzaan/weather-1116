@@ -1,5 +1,4 @@
 using System.ClientModel;
-using System.ClientModel.Primitives;
 using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Services;
 using OpenAI;
@@ -46,15 +45,6 @@ public sealed class ChatFoundrySettings
     /// Responses client bound to the hosted Foundry agent. Chat3 sends only the
     /// user prompt; instructions, tools, model, and MCP approval live on the agent.
     /// </summary>
-    public ProjectResponsesClient CreateProjectResponsesClientForChatAgent()
-    {
-        ProjectOpenAIClient projectOpenAIClient = new(
-            ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(ApiKey), "api-key"),
-            new ProjectOpenAIClientOptions
-            {
-                Endpoint = new Uri(Endpoint),
-            });
-
-        return projectOpenAIClient.GetProjectResponsesClientForAgent(ChatAgentName);
-    }
+    public ProjectResponsesClient CreateProjectResponsesClientForChatAgent() =>
+        FoundryAgentResponsesClientFactory.CreateForAgent(ChatAgentName);
 }
