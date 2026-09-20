@@ -89,7 +89,7 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
                 projectEndpoint,
                 agentName);
 
-            ProjectResponsesClient client = FoundryAgentResponsesClientFactory.CreateForAgent(agentName);
+            ProjectResponsesClient client = FoundryAgentResponsesClientFactory.CreateForAgent(agentName, projectEndpoint);
 
             CreateResponseOptions options = new()
             {
@@ -112,7 +112,7 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
                     "Foundry agent returned no response. Check AZURE_FOUNDRY_PROD_PROJ_URL, agent name, and agent publish status.");
             }
 
-            var approvalRequests = response.GetOutputItemsOrEmpty().OfType<McpToolCallApprovalRequestItem>().ToList();
+            var approvalRequests = response.OutputItems.OfType<McpToolCallApprovalRequestItem>().ToList();
             if (approvalRequests.Count > 0)
             {
                 LogRunLogOnFailure("hosted agent requested MCP tool approval");
@@ -133,7 +133,7 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
                     $"error: {response.Error?.Message ?? "(none)"}");
             }
 
-            var content = response.TryGetOutputText();
+            var content = response.GetOutputText();
             if (string.IsNullOrWhiteSpace(content))
             {
                 LogRunLogOnFailure("model returned empty or invalid JSON");

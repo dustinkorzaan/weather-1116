@@ -11,13 +11,17 @@ namespace Core.AIWeather.Services;
 /// </summary>
 public static class FoundryAgentResponsesClientFactory
 {
-    public static ProjectResponsesClient CreateForAgent(string agentName)
+    public static ProjectResponsesClient CreateForAgent(string agentName) =>
+        CreateForAgent(agentName, ResolveProjectEndpointFromEnvironment());
+
+    /// <param name="projectEndpoint">
+    /// Foundry project URI (not the <c>/openai/v1</c> inference suffix). When omitted, resolved
+    /// from <c>AZURE_FOUNDRY_PROD_PROJ_URL</c>.
+    /// </param>
+    public static ProjectResponsesClient CreateForAgent(string agentName, Uri projectEndpoint)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(agentName);
-
-        var projectEndpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(
-            Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL."));
+        ArgumentNullException.ThrowIfNull(projectEndpoint);
 
         var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
@@ -31,4 +35,9 @@ public static class FoundryAgentResponsesClientFactory
 
         return projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
     }
+
+    public static Uri ResolveProjectEndpointFromEnvironment() =>
+        FoundryOpenAiEndpoint.ResolveProjectEndpoint(
+            Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
+            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL."));
 }

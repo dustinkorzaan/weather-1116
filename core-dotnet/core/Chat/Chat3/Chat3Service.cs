@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using System.Text;
 using Core.Chat.Models;
 using Core.Chat.Services;
@@ -72,75 +73,91 @@ public sealed class Chat3Service : IChatClientService
             options.PreviousResponseId = previousResponseId;
         }
 
-        IAsyncEnumerable<StreamingResponseUpdate>? updates = null;
-        string? errorOnStart = null;
-        try
-        {
-            updates = client.CreateResponseStreamingAsync(options, cancellationToken);
-            if (updates is null)
-            {
-                errorOnStart =
-                    "Foundry agent streaming returned no updates. Check AZURE_FOUNDRY_PROD_PROJ_URL, agent name, and agent publish status.";
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Chat3 failed to start streaming for agent {AgentName}", _settings.ChatAgentName);
-            errorOnStart = ex.Message;
-        }
-
-        if (errorOnStart is not null)
-        {
-            yield return ChatStreamEvent.Error(errorOnStart);
-            yield break;
-        }
+        var updates = client.CreateResponseStreamingAsync(options, cancellationToken);
+        var enumerator = updates.GetAsyncEnumerator(cancellationToken);
 
         string? approvalError = null;
-        await foreach (StreamingResponseUpdate update in updates!)
+        try
         {
-            usage.Add(update);
-
-            if (update is StreamingResponseCreatedUpdate created
-                && !string.IsNullOrWhiteSpace(created.Response?.Id))
+            while (true)
             {
-                previousResponseId = created.Response.Id;
-            }
+                StreamingResponseUpdate? update = null;
+                ExceptionDispatchInfo? failure = null;
+                try
+                {
+                    if (await enumerator.MoveNextAsync())
+                    {
+                        update = enumerator.Current;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    failure = ExceptionDispatchInfo.Capture(ex);
+                }
 
-            if (update is StreamingResponseCompletedUpdate completed
-                && !string.IsNullOrWhiteSpace(completed.Response?.Id))
-            {
-                previousResponseId = completed.Response.Id;
-            }
+                if (failure is not null)
+                {
+                    _logger.LogError(
+                        failure.SourceException,
+                        "Chat3 streaming failed for agent {AgentName}",
+                        _settings.ChatAgentName);
+                    yield return ChatStreamEvent.Error(failure.SourceException.Message);
+                    yield break;
+                }
 
-            if (update is StreamingResponseOutputTextDeltaUpdate textDelta && !string.IsNullOrEmpty(textDelta.Delta))
-            {
-                assistantBuilder.Append(textDelta.Delta);
-                yield return ChatStreamEvent.Token(textDelta.Delta);
-            }
-
-            if (update is not StreamingResponseOutputItemDoneUpdate itemDone)
-            {
-                continue;
-            }
-
-            switch (itemDone.Item)
-            {
-                case McpToolCallItem mcpCall:
-                    var toolArguments = ChatToolPayload.Format(mcpCall.ToolArguments);
-                    var toolResult = ChatToolPayload.Format(mcpCall.ToolOutput)
-                        ?? ChatToolPayload.Format(mcpCall.Error);
-                    yield return ChatStreamEvent.ToolStart(mcpCall.ToolName, toolArguments);
-                    yield return ChatStreamEvent.ToolEnd(mcpCall.ToolName, toolArguments, toolResult);
+                if (update is null)
+                {
                     break;
-                case McpToolCallApprovalRequestItem approvalRequest:
-                    approvalError ??=
-                        $"Hosted agent '{_settings.ChatAgentName}' requested MCP tool approval " +
-                        $"({approvalRequest.ServerLabel}/{approvalRequest.ToolName}). " +
-                        "Chat3 sends only the user prompt and does not round-trip approvals. " +
-                        "On the agent, set each MCP tool to require_approval: never " +
-                        "(Foundry portal: Agents → this agent → Tools → MCP → Approval = Never), then publish a new version.";
-                    break;
+                }
+
+                usage.Add(update);
+
+                if (update is StreamingResponseCreatedUpdate created
+                    && !string.IsNullOrWhiteSpace(created.Response?.Id))
+                {
+                    previousResponseId = created.Response.Id;
+                }
+
+                if (update is StreamingResponseCompletedUpdate completed
+                    && !string.IsNullOrWhiteSpace(completed.Response?.Id))
+                {
+                    previousResponseId = completed.Response.Id;
+                }
+
+                if (update is StreamingResponseOutputTextDeltaUpdate textDelta && !string.IsNullOrEmpty(textDelta.Delta))
+                {
+                    assistantBuilder.Append(textDelta.Delta);
+                    yield return ChatStreamEvent.Token(textDelta.Delta);
+                }
+
+                if (update is not StreamingResponseOutputItemDoneUpdate itemDone)
+                {
+                    continue;
+                }
+
+                switch (itemDone.Item)
+                {
+                    case McpToolCallItem mcpCall:
+                        var toolArguments = ChatToolPayload.Format(mcpCall.ToolArguments);
+                        var toolResult = ChatToolPayload.Format(mcpCall.ToolOutput)
+                            ?? ChatToolPayload.Format(mcpCall.Error);
+                        yield return ChatStreamEvent.ToolStart(mcpCall.ToolName, toolArguments);
+                        yield return ChatStreamEvent.ToolEnd(mcpCall.ToolName, toolArguments, toolResult);
+                        break;
+                    case McpToolCallApprovalRequestItem approvalRequest:
+                        approvalError ??=
+                            $"Hosted agent '{_settings.ChatAgentName}' requested MCP tool approval " +
+                            $"({approvalRequest.ServerLabel}/{approvalRequest.ToolName}). " +
+                            "Chat3 sends only the user prompt and does not round-trip approvals. " +
+                            "On the agent, set each MCP tool to require_approval: never " +
+                            "(Foundry portal: Agents → this agent → Tools → MCP → Approval = Never), then publish a new version.";
+                        break;
+                }
             }
+        }
+        finally
+        {
+            await enumerator.DisposeAsync();
         }
 
         if (approvalError is not null)
