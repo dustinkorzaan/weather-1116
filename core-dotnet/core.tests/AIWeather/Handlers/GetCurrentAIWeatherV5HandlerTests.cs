@@ -31,6 +31,19 @@ public class GetCurrentAIWeatherV5HandlerTests
     }
 
     [Fact]
+    public void Handler_SetsConversationOptions_SoApplyClientDefaultsDoesNotThrow()
+    {
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));
+
+        // ProjectResponsesClient.CreateResponseAsync reads AgentConversationId (via
+        // ApplyClientDefaults) before every call, which walks into ConversationOptions.Patch and
+        // throws a NullReferenceException in CreateResponseOptions.PropagateGet when
+        // ConversationOptions is left at its default null. A non-null ConversationOptions on the
+        // options literal is required to avoid it.
+        Assert.Contains("ConversationOptions = new ResponseConversationOptions()", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Handler_RecordsRunLog()
     {
         var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));

@@ -93,6 +93,13 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
 
             CreateResponseOptions options = new()
             {
+                // ProjectResponsesClient.CreateResponseAsync reads AgentConversationId (via
+                // ApplyClientDefaults) before every call. That getter walks into
+                // ConversationOptions.Patch, and OpenAI.Responses.CreateResponseOptions leaves
+                // ConversationOptions null until set, so a bare CreateResponseOptions crashes
+                // with a NullReferenceException in CreateResponseOptions.PropagateGet before any
+                // request is sent. A default (non-null) ConversationOptions avoids that.
+                ConversationOptions = new ResponseConversationOptions(),
                 InputItems =
                 {
                     ResponseItem.CreateUserMessageItem(userPrompt),
