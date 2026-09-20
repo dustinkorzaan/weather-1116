@@ -1077,6 +1077,30 @@ html[data-theme="dark"] .weather-map-logo-pin {
     border-radius: 0.4rem;
 }
 
+.chat-message.blocked {
+    width: 100%;
+    max-width: none;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 0.4rem;
+}
+
+.chat-gate-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--wx-muted-fg, inherit);
+}
+
+.chat-gate-options label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: help;
+}
+
 .error-title {
     color: var(--wx-error-fg);
 }

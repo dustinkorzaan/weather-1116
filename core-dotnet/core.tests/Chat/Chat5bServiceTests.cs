@@ -1,0 +1,42 @@
+namespace Core.Tests.Chat;
+
+public class Chat5bServiceTests
+{
+    private static readonly string Source =
+        File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Chat5b/Chat5bService.cs"));
+
+    [Fact]
+    public void Service_RunsInputGatesBeforeBuildingTheOrchestrationAgent()
+    {
+        var gatesIndex = Source.IndexOf("RunInputGatesAsync(request", StringComparison.Ordinal);
+        var buildIndex = Source.IndexOf("BuildOrchestrationAgent(responsesClient", StringComparison.Ordinal);
+
+        Assert.True(gatesIndex >= 0);
+        Assert.True(buildIndex >= 0);
+        Assert.True(gatesIndex < buildIndex, "Input gates must run before the orchestration agent is built.");
+    }
+
+    [Fact]
+    public void Service_SkipsStreamingWhenOutputGateIsEnabled()
+    {
+        Assert.Contains("if (request.EnableLlmOutputGate)", Source, StringComparison.Ordinal);
+        Assert.Contains("RunAsync(userMessage, agentSession, cancellationToken: cancellationToken)", Source, StringComparison.Ordinal);
+        Assert.Contains("RunStreamingAsync(userMessage, agentSession, cancellationToken: cancellationToken)", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Service_UsesHardenedPromptOnlyWhenSystemPromptGuardIsEnabled()
+    {
+        Assert.Contains("useHardenedPrompt", Source, StringComparison.Ordinal);
+        Assert.Contains("Chat5HardenedAiWeatherOrchestrationAssistant", Source, StringComparison.Ordinal);
+        Assert.Contains("request.EnableSystemPromptGuard", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Service_UsesRemoteMcpToolsLikeChat4b()
+    {
+        Assert.Contains("ChatHostedMcpToolFactory", Source, StringComparison.Ordinal);
+        Assert.Contains("_hostedMcpToolFactory.CreateGeoTools()", Source, StringComparison.Ordinal);
+        Assert.Contains("_hostedMcpToolFactory.CreateNonAiWeatherTools()", Source, StringComparison.Ordinal);
+    }
+}
