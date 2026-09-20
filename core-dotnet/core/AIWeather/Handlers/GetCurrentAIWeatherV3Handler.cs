@@ -180,7 +180,9 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                 };
 
                 runLog.AddLog("Start CreateResponse", null, toolLoopIteration);
+                var loopCallStartMs = stopwatch.ElapsedMilliseconds;
                 ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
+                var loopRuntimeMs = (int)(stopwatch.ElapsedMilliseconds - loopCallStartMs);
                 runLog.AddLog("Finish CreateResponse", response, toolLoopIteration);
                 lastResponse = response;
 
@@ -192,6 +194,42 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                         $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
                         $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
                         $"error: {response.Error?.Message ?? "(none)"}");
+                }
+
+                // Only loops that call a tool and continue get their own row here -- the
+                // terminating loop's CreateResponse usage is already the run's final Response
+                // row below. Logging both would double-count that call's tokens if a query ever
+                // sums InputTokenCount/TotalTokenCount across a run's AgentActivity rows.
+                if (functionCalls.Count > 0)
+                {
+                    var modelCallCorrelationId = await _mediator.Send(new LogAgentActivityEvent
+                    {
+                        Direction = AgentActivityDirection.Request,
+                        RunId = runId,
+                        Feature = Feature,
+                        FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+                        SessionId = activitySessionId,
+                        LoopNumber = toolLoopIteration,
+                        Location = location,
+                    }, cancellationToken);
+
+                    await _mediator.Send(new LogAgentActivityEvent
+                    {
+                        Direction = AgentActivityDirection.Response,
+                        RunId = runId,
+                        CorrelationId = modelCallCorrelationId,
+                        Feature = Feature,
+                        FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+                        SessionId = activitySessionId,
+                        LoopNumber = toolLoopIteration,
+                        Location = location,
+                        InputTokenCount = response.Usage?.InputTokenCount,
+                        CachedTokenCount = response.Usage?.InputTokenDetails?.CachedTokenCount,
+                        OutputTokenCount = response.Usage?.OutputTokenCount,
+                        ReasoningTokenCount = response.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+                        TotalTokenCount = response.Usage?.TotalTokenCount,
+                        RuntimeMs = loopRuntimeMs,
+                    }, cancellationToken);
                 }
 
                 inputItems.AddRange(response.OutputItems);
