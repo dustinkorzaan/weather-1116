@@ -4,7 +4,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Microsoft.Data.SqlClient (pulled in transitively via Core.csproj's
+         Microsoft.EntityFrameworkCore.SqlServer, added for AgentActivityDbContext)
+         needs ICU for connection setup, so invariant mode throws
+         "Globalization Invariant Mode is not supported" from SqlConnection.Open,
+         which crashed Database.Migrate() on startup. MVC and Worker never set
+         this property, so they were unaffected. -->
   </PropertyGroup>
 
   <ItemGroup>
