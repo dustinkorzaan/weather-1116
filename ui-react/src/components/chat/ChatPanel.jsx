@@ -49,7 +49,7 @@ const TAB_CONFIG = [
     id: 'Chat4a',
     label: 'Chat4a',
     shortLabel: '4a',
-    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents',
+    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents (invalid Token Counts)',
     endpoint: '/Chat4a/messages',
   },
   {
@@ -63,7 +63,7 @@ const TAB_CONFIG = [
     id: 'Chat5a',
     label: 'Chat5a',
     shortLabel: '5a',
-    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed',
+    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed (invalid Token Counts)',
     endpoint: '/Chat5a/messages',
     hasGates: true,
   },
