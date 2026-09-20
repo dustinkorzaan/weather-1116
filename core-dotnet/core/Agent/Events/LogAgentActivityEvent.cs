@@ -19,13 +19,13 @@ public class LogAgentActivityEvent : IRequest<Guid>
 
     public Guid? CorrelationId { get; init; }
 
-    public string SessionId { get; init; }
+    public string? SessionId { get; init; }
 
-    public required string Direction { get; init; }
+    public string? Direction { get; init; }
 
-    public required string Feature { get; init; }
+    public string? Feature { get; init; }
 
-    public required string FeatureCategory { get; init; }
+    public string? FeatureCategory { get; init; }
 
     public string? AgentName { get; init; }
 

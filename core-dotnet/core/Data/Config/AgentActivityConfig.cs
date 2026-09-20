@@ -13,10 +13,10 @@ public class AgentActivityConfig : IEntityTypeConfiguration<AgentActivity>
         builder.Property(activity => activity.Id).ValueGeneratedNever();
 
         builder.Property(activity => activity.SessionId).HasMaxLength(100);
-        builder.Property(activity => activity.Feature).HasColumnType("nvarchar(max)").IsRequired();
-        builder.Property(activity => activity.FeatureCategory).HasMaxLength(20).IsRequired();
+        builder.Property(activity => activity.Feature).HasColumnType("nvarchar(max)");
+        builder.Property(activity => activity.FeatureCategory).HasMaxLength(20);
         builder.Property(activity => activity.Host).HasMaxLength(10).IsRequired();
-        builder.Property(activity => activity.Direction).HasMaxLength(10).IsRequired();
+        builder.Property(activity => activity.Direction).HasMaxLength(10);
         builder.Property(activity => activity.AgentName).HasMaxLength(100);
         builder.Property(activity => activity.ToolName).HasMaxLength(100);
         builder.Property(activity => activity.Location).HasMaxLength(200);

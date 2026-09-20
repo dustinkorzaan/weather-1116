@@ -40,14 +40,13 @@ namespace Core.Data.Migrations
                     b.Property<string>("Context")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("CorrelationId")
+                    b.Property<Guid?>("CorrelationId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Direction")
-                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
@@ -55,11 +54,9 @@ namespace Core.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Feature")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FeatureCategory")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -84,7 +81,7 @@ namespace Core.Data.Migrations
                     b.Property<int?>("ReasoningTokenCount")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("RunId")
+                    b.Property<Guid?>("RunId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("RuntimeMs")

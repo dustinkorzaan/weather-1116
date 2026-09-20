@@ -14,7 +14,7 @@ public class AgentActivity
 {
     public Guid Id { get; set; }
 
-    public Guid CorrelationId { get; set; }
+    public Guid? CorrelationId { get; set; }
 
     /// <summary>
     /// App-generated grouping key shared by every row belonging to one orchestration run -- an
@@ -25,7 +25,7 @@ public class AgentActivity
     /// / ASP.NET's <c>HttpContext.TraceIdentifier</c>, which lives in <see cref="Context"/>
     /// instead) -- naming it RunId rather than TraceId keeps that distinct.
     /// </summary>
-    public Guid RunId { get; set; }
+    public Guid? RunId { get; set; }
 
     /// <summary>
     /// Chat session id for Chat1a-Chat4b. Current AI Weather has no real multi-turn session, so
@@ -39,10 +39,10 @@ public class AgentActivity
     /// for chat (<c>Chat1aService</c>...<c>Chat4bService</c>) -- so it can't drift from a
     /// separately hand-typed label. <c>nvarchar(max)</c> so a future rename can't overflow it.
     /// </summary>
-    public required string Feature { get; set; }
+    public string? Feature { get; set; }
 
     /// <summary>One of <see cref="AgentActivityFeatureCategory"/>.</summary>
-    public required string FeatureCategory { get; set; }
+    public string? FeatureCategory { get; set; }
 
     /// <summary>One of <see cref="AgentActivityHost"/>.</summary>
     public required string Host { get; set; }
@@ -55,7 +55,7 @@ public class AgentActivity
     public string? Context { get; set; }
 
     /// <summary>One of <see cref="AgentActivityDirection"/>.</summary>
-    public required string Direction { get; set; }
+    public string? Direction { get; set; }
 
     public DateTime CreatedUtc { get; set; }
 
