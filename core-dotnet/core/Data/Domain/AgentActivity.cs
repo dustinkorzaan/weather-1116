@@ -14,8 +14,6 @@ public class AgentActivity
 {
     public Guid Id { get; set; }
 
-    public Guid? CorrelationId { get; set; }
-
     /// <summary>
     /// App-generated grouping key shared by every row belonging to one orchestration run -- an
     /// orchestrator's own Request/Response rows and each child agent's (e.g. Chat4a/Chat4b's Geo
@@ -27,11 +25,16 @@ public class AgentActivity
     /// </summary>
     public Guid? RunId { get; set; }
 
+    public Guid? CorrelationId { get; set; }
+
     /// <summary>
     /// Chat session id for Chat1a-Chat4b. Current AI Weather has no real multi-turn session, so
     /// callers generate a fresh GUID per request instead, purely so every row has one.
     /// </summary>
     public string? SessionId { get; set; }
+
+    /// <summary>One of <see cref="AgentActivityDirection"/>.</summary>
+    public string? Direction { get; set; }
 
     /// <summary>
     /// The class actually doing the work -- <c>nameof(GetCurrentAIWeatherV3Handler)</c>/
@@ -53,9 +56,6 @@ public class AgentActivity
     /// job has no HTTP request to capture.
     /// </summary>
     public string? Context { get; set; }
-
-    /// <summary>One of <see cref="AgentActivityDirection"/>.</summary>
-    public string? Direction { get; set; }
 
     public DateTime CreatedUtc { get; set; }
 
