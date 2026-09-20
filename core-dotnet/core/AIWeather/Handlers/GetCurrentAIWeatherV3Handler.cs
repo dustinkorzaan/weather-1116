@@ -180,7 +180,9 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                 };
 
                 runLog.AddLog("Start CreateResponse", null, toolLoopIteration);
+                var loopCallStartMs = stopwatch.ElapsedMilliseconds;
                 ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
+                var loopRuntimeMs = (int)(stopwatch.ElapsedMilliseconds - loopCallStartMs);
                 runLog.AddLog("Finish CreateResponse", response, toolLoopIteration);
                 lastResponse = response;
 
@@ -227,6 +229,12 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                         LoopNumber = toolLoopIteration,
                         Content = functionOutput,
                         Location = location,
+                        InputTokenCount = response.Usage?.InputTokenCount,
+                        CachedTokenCount = response.Usage?.InputTokenDetails?.CachedTokenCount,
+                        OutputTokenCount = response.Usage?.OutputTokenCount,
+                        ReasoningTokenCount = response.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+                        TotalTokenCount = response.Usage?.TotalTokenCount,
+                        RuntimeMs = loopRuntimeMs,
                     }, cancellationToken);
                 }
 
