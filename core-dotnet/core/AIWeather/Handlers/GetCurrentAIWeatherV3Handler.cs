@@ -1,11 +1,15 @@
 using System.ClientModel;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
+using Core.Agent.Events;
 using Core.AIWeather.Events;
 using Core.AIWeather.Models;
 using Core.AIWeather.Services;
+using Core.Chat.Services;
+using Core.Data.Domain;
 using Core.Json;
 using Core.Tools;
 using Core.Weather;
@@ -24,15 +28,21 @@ namespace Core.AIWeather.Handlers;
 /// </summary>
 public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV3Event, AIWeatherResponse>
 {
+    private const string Feature = nameof(GetCurrentAIWeatherV3Handler);
     private static readonly string DefaultLocation = "Nashville, TN";
     private const int MaxToolLoopIterations = 32;
 
     private readonly WeatherToolExecutor _toolExecutor;
+    private readonly IMediator _mediator;
     private readonly ILogger<GetCurrentAIWeatherV3Handler> _logger;
 
-    public GetCurrentAIWeatherV3Handler(WeatherToolExecutor toolExecutor, ILogger<GetCurrentAIWeatherV3Handler> logger)
+    public GetCurrentAIWeatherV3Handler(
+        WeatherToolExecutor toolExecutor,
+        IMediator mediator,
+        ILogger<GetCurrentAIWeatherV3Handler> logger)
     {
         _toolExecutor = toolExecutor;
+        _mediator = mediator;
         _logger = logger;
     }
 
@@ -50,154 +60,246 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             ? DefaultLocation
             : request.Location.Trim();
 
-        var endpoint = Resolve(
-            Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL."));
-
-        var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
-
-        var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_MODEL.");
-
-        var systemPrompt =
-            """
-            # Role & Operational Rules
-            You are a dedicated weather assistant.
-            Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
-            You have access to tools for location mapping and real-time public meteorology data.
-
-            # Tool Protocol
-            1. When given a location, immediately call your coordinates resolution tool. It returns ranked matches (rank 1 is best); select the single best-matching place using name, state, and country — normally rank 1, but you may skip rank 1 when a lower rank is clearly correct.
-            2. Use the latitude and longitude from the best result (normally rank 1) to invoke your weather fetching tool. Fetch weather for that location only — do not query multiple matches.
-            3. You must query these tools whenever real weather data is required to fulfill the request.
-
-            # Constraints
-            - Output raw JSON text only.
-            - Do not wrap the JSON document in markdown code fences (do not wrap in ```json).
-            - GitHub-flavored Markdown is allowed inside the fullSummary string when it makes the summary easier to read. Do not emit raw HTML.
-            - Do not include any conversational pleasantries, introductory text, explanations, or trailing remarks.
-            - Do not ask follow-up questions or offer further assistance.
-
-            # JSON Structure Properties
-            - fullSummary: One or two friendly sentences describing the current weather. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields. Do not include latitude or longitude in fullSummary. When stating wind direction, use the meteorological source compass label from windDirectionSource (where the wind comes from), optionally with source degrees in parentheses (e.g. SW (224°)). Do not add 180 to degrees.
-            - For the place name, prefer a clean, human-friendly city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
-            - temperatureF: Current temperature in Fahrenheit (convert from the weather tool).
-            - windSpeedMPH: Current wind speed in miles per hour (convert from the weather tool).
-            - windDirectionSourceDegrees: Copy current_weather.winddirection from the weather tool exactly (meteorological source direction — where the wind comes from). Normalize to 0–360 if needed. Do not add 180.
-            - windDirectionSource: 16-point compass label derived from windDirectionSourceDegrees. Round normalized degrees to the nearest 22.5° sector and map to one of: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (e.g. 180 → S, 224 → SW).
-            - conditions: Short current conditions phrase from the weather tool.
-            - latitude: Decimal degrees from the best geo result (positive north, negative south).
-            - longitude: Decimal degrees from the best geo result (positive east, negative west).
-            """;
-
+        // No real multi-turn session exists for this one-shot endpoint; a fresh GUID per
+        // request still gives every dbo.AgentActivity row a SessionId, and ties this
+        // Request row to its Response row the same way CorrelationId does.
+        var activitySessionId = Guid.NewGuid().ToString();
+        var runId = Guid.NewGuid();
         var userPrompt = $"What is the current weather in: `{location}`?";
-
-        var aiOutputSchema = BuildAIOutputSchema();
-
-        _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, deploymentName);
-
-        ResponsesClient client = new(
-            credential: new ApiKeyCredential(apiKey),
-            options: new ResponsesClientOptions
-            {
-                Endpoint = endpoint,
-            });
-
-        FunctionTool getLatLongTool = WeatherToolDefinitions.CreateGetLatLongTool();
-        FunctionTool getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();
-
-        var inputItems = new List<ResponseItem>
+        var correlationId = await _mediator.Send(new LogAgentActivityEvent
         {
-            ResponseItem.CreateSystemMessageItem(systemPrompt),
-            // Placing the dynamic query at the absolute end ensures the unchanging system instructions,
-            // response schema, and tool schemas form a stable hash that qualifies for Azure OpenAI
-            // Prompt Caching (1,024+ token threshold).
-            ResponseItem.CreateUserMessageItem(userPrompt),
-        };
+            Direction = AgentActivityDirection.Request,
+            RunId = runId,
+            Feature = Feature,
+            FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+            SessionId = activitySessionId,
+            Content = userPrompt,
+            Location = location,
+        }, cancellationToken);
+        var stopwatch = Stopwatch.StartNew();
+        ResponseResult? lastResponse = null;
 
-        bool requiresAnotherLoop;
-        string? content = null;
-        var toolLoopIteration = 0;
-
-        do
+        // Every exit path below -- an explicit validation throw, or any exception raised by the
+        // Foundry client itself (auth failure, network error, timeout) -- lands here, so the
+        // Request row logged above always gets a paired Response row with ErrorMessage set
+        // before the exception propagates. Log write failures are not caught here: they
+        // propagate too, the same fail-closed policy as a missing DB_CONNECTION_STRING.
+        try
         {
-            if (++toolLoopIteration > MaxToolLoopIterations)
-            {
-                LogRunLogOnFailure("tool loop exceeded max iterations");
-                throw new InvalidOperationException(
-                    $"AI Weather tool loop exceeded {MaxToolLoopIterations} iterations.");
-            }
+            var endpoint = Resolve(
+                Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
+                ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL."));
 
-            runLog.AddLog($"Start loop {toolLoopIteration}", null, toolLoopIteration);
+            var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
+                ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
 
-            requiresAnotherLoop = false;
+            var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL")
+                ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_MODEL.");
 
-            CreateResponseOptions options = new(deploymentName, inputItems)
-            {
-                Tools = { getLatLongTool, getPublicWeatherCurrentTool },
-                TextOptions = new ResponseTextOptions
+            var systemPrompt =
+                """
+                # Role & Operational Rules
+                You are a dedicated weather assistant.
+                Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
+                You have access to tools for location mapping and real-time public meteorology data.
+
+                # Tool Protocol
+                1. When given a location, immediately call your coordinates resolution tool. It returns ranked matches (rank 1 is best); select the single best-matching place using name, state, and country — normally rank 1, but you may skip rank 1 when a lower rank is clearly correct.
+                2. Use the latitude and longitude from the best result (normally rank 1) to invoke your weather fetching tool. Fetch weather for that location only — do not query multiple matches.
+                3. You must query these tools whenever real weather data is required to fulfill the request.
+
+                # Constraints
+                - Output raw JSON text only.
+                - Do not wrap the JSON document in markdown code fences (do not wrap in ```json).
+                - GitHub-flavored Markdown is allowed inside the fullSummary string when it makes the summary easier to read. Do not emit raw HTML.
+                - Do not include any conversational pleasantries, introductory text, explanations, or trailing remarks.
+                - Do not ask follow-up questions or offer further assistance.
+
+                # JSON Structure Properties
+                - fullSummary: One or two friendly sentences describing the current weather. Include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the summary even though temperature, wind, and conditions are also JSON fields. Do not include latitude or longitude in fullSummary. When stating wind direction, use the meteorological source compass label from windDirectionSource (where the wind comes from), optionally with source degrees in parentheses (e.g. SW (224°)). Do not add 180 to degrees.
+                - For the place name, prefer a clean, human-friendly city name from your geo tool over a ZIP code, coordinate pair, or opaque user input.
+                - temperatureF: Current temperature in Fahrenheit (convert from the weather tool).
+                - windSpeedMPH: Current wind speed in miles per hour (convert from the weather tool).
+                - windDirectionSourceDegrees: Copy current_weather.winddirection from the weather tool exactly (meteorological source direction — where the wind comes from). Normalize to 0–360 if needed. Do not add 180.
+                - windDirectionSource: 16-point compass label derived from windDirectionSourceDegrees. Round normalized degrees to the nearest 22.5° sector and map to one of: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (e.g. 180 → S, 224 → SW).
+                - conditions: Short current conditions phrase from the weather tool.
+                - latitude: Decimal degrees from the best geo result (positive north, negative south).
+                - longitude: Decimal degrees from the best geo result (positive east, negative west).
+                """;
+
+            var aiOutputSchema = BuildAIOutputSchema();
+
+            _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, deploymentName);
+
+            ResponsesClient client = new(
+                credential: new ApiKeyCredential(apiKey),
+                options: new ResponsesClientOptions
                 {
-                    TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
-                        jsonSchemaFormatName: "ai_weather_response",
-                        jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
-                        jsonSchemaIsStrict: true),
-                },
+                    Endpoint = endpoint,
+                });
+
+            FunctionTool getLatLongTool = WeatherToolDefinitions.CreateGetLatLongTool();
+            FunctionTool getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();
+
+            var inputItems = new List<ResponseItem>
+            {
+                ResponseItem.CreateSystemMessageItem(systemPrompt),
+                // Placing the dynamic query at the absolute end ensures the unchanging system instructions,
+                // response schema, and tool schemas form a stable hash that qualifies for Azure OpenAI
+                // Prompt Caching (1,024+ token threshold).
+                ResponseItem.CreateUserMessageItem(userPrompt),
             };
 
-            runLog.AddLog("Start CreateResponse", null, toolLoopIteration);
-            ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
-            runLog.AddLog("Finish CreateResponse", response, toolLoopIteration);
+            bool requiresAnotherLoop;
+            string? content = null;
+            var toolLoopIteration = 0;
 
-            var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
-            if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
+            do
             {
-                LogRunLogOnFailure("model response did not complete");
+                if (++toolLoopIteration > MaxToolLoopIterations)
+                {
+                    LogRunLogOnFailure("tool loop exceeded max iterations");
+                    throw new InvalidOperationException(
+                        $"AI Weather tool loop exceeded {MaxToolLoopIterations} iterations.");
+                }
+
+                runLog.AddLog($"Start loop {toolLoopIteration}", null, toolLoopIteration);
+
+                requiresAnotherLoop = false;
+
+                CreateResponseOptions options = new(deploymentName, inputItems)
+                {
+                    Tools = { getLatLongTool, getPublicWeatherCurrentTool },
+                    TextOptions = new ResponseTextOptions
+                    {
+                        TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+                            jsonSchemaFormatName: "ai_weather_response",
+                            jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+                            jsonSchemaIsStrict: true),
+                    },
+                };
+
+                runLog.AddLog("Start CreateResponse", null, toolLoopIteration);
+                ResponseResult response = await client.CreateResponseAsync(options, cancellationToken);
+                runLog.AddLog("Finish CreateResponse", response, toolLoopIteration);
+                lastResponse = response;
+
+                var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
+                if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
+                {
+                    LogRunLogOnFailure("model response did not complete");
+                    throw new InvalidOperationException(
+                        $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
+                        $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
+                        $"error: {response.Error?.Message ?? "(none)"}");
+                }
+
+                inputItems.AddRange(response.OutputItems);
+
+                foreach (FunctionCallResponseItem functionCall in functionCalls)
+                {
+                    var toolCallId = await _mediator.Send(new LogAgentActivityEvent
+                    {
+                        Direction = AgentActivityDirection.Request,
+                        RunId = runId,
+                        Feature = Feature,
+                        FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+                        SessionId = activitySessionId,
+                        ToolName = functionCall.FunctionName,
+                        LoopNumber = toolLoopIteration,
+                        Content = ChatToolPayload.Format(functionCall.FunctionArguments),
+                        Location = location,
+                    }, cancellationToken);
+
+                    var functionOutput = await _toolExecutor.ExecuteAsync(functionCall, cancellationToken);
+                    inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+                    requiresAnotherLoop = true;
+
+                    await _mediator.Send(new LogAgentActivityEvent
+                    {
+                        Direction = AgentActivityDirection.Response,
+                        RunId = runId,
+                        CorrelationId = toolCallId,
+                        Feature = Feature,
+                        FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+                        SessionId = activitySessionId,
+                        ToolName = functionCall.FunctionName,
+                        LoopNumber = toolLoopIteration,
+                        Content = functionOutput,
+                        Location = location,
+                    }, cancellationToken);
+                }
+
+                if (!requiresAnotherLoop)
+                {
+                    content = response.GetOutputText();
+                }
+            } while (requiresAnotherLoop);
+
+            if (content is null)
+            {
+                LogRunLogOnFailure("model finished without producing content");
+                throw new InvalidOperationException("Model finished without producing content.");
+            }
+
+            var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(content);
+
+            if (modelOutput is null)
+            {
+                LogRunLogOnFailure("model returned empty or invalid JSON");
                 throw new InvalidOperationException(
-                    $"Model response did not complete. Status: {response.Status?.ToString() ?? "(none)"}, " +
-                    $"incomplete reason: {response.IncompleteStatusDetails?.Reason?.ToString() ?? "(none)"}, " +
-                    $"error: {response.Error?.Message ?? "(none)"}");
+                    $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
             }
 
-            inputItems.AddRange(response.OutputItems);
+            modelOutput.WindDirectionSourceDegrees =
+                WeatherUnitConversion.NormalizeSourceDegrees(modelOutput.WindDirectionSourceDegrees);
+            modelOutput.WindDirectionSource =
+                WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
 
-            foreach (FunctionCallResponseItem functionCall in functionCalls)
+            runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV3Handler)}", null, toolLoopIteration);
+            modelOutput.RunLogDetails = runLog.Hydrate();
+
+            await _mediator.Send(new LogAgentActivityEvent
             {
-                var functionOutput = await _toolExecutor.ExecuteAsync(functionCall, cancellationToken);
-                inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
-                requiresAnotherLoop = true;
-            }
+                Direction = AgentActivityDirection.Response,
+                RunId = runId,
+                CorrelationId = correlationId,
+                Feature = Feature,
+                FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+                SessionId = activitySessionId,
+                Content = content,
+                Location = location,
+                InputTokenCount = lastResponse?.Usage?.InputTokenCount,
+                CachedTokenCount = lastResponse?.Usage?.InputTokenDetails?.CachedTokenCount,
+                OutputTokenCount = lastResponse?.Usage?.OutputTokenCount,
+                ReasoningTokenCount = lastResponse?.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+                TotalTokenCount = lastResponse?.Usage?.TotalTokenCount,
+                RuntimeMs = (int)stopwatch.ElapsedMilliseconds,
+            }, cancellationToken);
 
-            if (!requiresAnotherLoop)
+            return modelOutput;
+        }
+        catch (Exception ex)
+        {
+            await _mediator.Send(new LogAgentActivityEvent
             {
-                content = response.GetOutputText();
-            }
-        } while (requiresAnotherLoop);
-
-        if (content is null)
-        {
-            LogRunLogOnFailure("model finished without producing content");
-            throw new InvalidOperationException("Model finished without producing content.");
+                Direction = AgentActivityDirection.Response,
+                RunId = runId,
+                CorrelationId = correlationId,
+                Feature = Feature,
+                FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
+                SessionId = activitySessionId,
+                Location = location,
+                InputTokenCount = lastResponse?.Usage?.InputTokenCount,
+                CachedTokenCount = lastResponse?.Usage?.InputTokenDetails?.CachedTokenCount,
+                OutputTokenCount = lastResponse?.Usage?.OutputTokenCount,
+                ReasoningTokenCount = lastResponse?.Usage?.OutputTokenDetails?.ReasoningTokenCount,
+                TotalTokenCount = lastResponse?.Usage?.TotalTokenCount,
+                RuntimeMs = (int)stopwatch.ElapsedMilliseconds,
+                ErrorMessage = ex.Message,
+            }, cancellationToken);
+            throw;
         }
-
-        var modelOutput = JsonSerializer.Deserialize<AIWeatherResponse>(content);
-
-        if (modelOutput is null)
-        {
-            LogRunLogOnFailure("model returned empty or invalid JSON");
-            throw new InvalidOperationException(
-                $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
-        }
-
-        modelOutput.WindDirectionSourceDegrees =
-            WeatherUnitConversion.NormalizeSourceDegrees(modelOutput.WindDirectionSourceDegrees);
-        modelOutput.WindDirectionSource =
-            WeatherUnitConversion.DegreesToCompass(modelOutput.WindDirectionSourceDegrees);
-
-        runLog.AddLog($"Finish {nameof(GetCurrentAIWeatherV3Handler)}", null, toolLoopIteration);
-        modelOutput.RunLogDetails = runLog.Hydrate();
-
-        return modelOutput;
     }
 
     private static string BuildAIOutputSchema()
