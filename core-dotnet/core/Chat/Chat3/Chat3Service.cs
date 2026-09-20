@@ -73,8 +73,27 @@ public sealed class Chat3Service : IChatClientService
             options.PreviousResponseId = previousResponseId;
         }
 
-        var updates = client.CreateResponseStreamingAsync(options, cancellationToken);
-        var enumerator = updates.GetAsyncEnumerator(cancellationToken);
+        IAsyncEnumerator<StreamingResponseUpdate> enumerator = null!;
+        ExceptionDispatchInfo? startFailure = null;
+        try
+        {
+            var updates = client.CreateResponseStreamingAsync(options, cancellationToken);
+            enumerator = updates.GetAsyncEnumerator(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            startFailure = ExceptionDispatchInfo.Capture(ex);
+        }
+
+        if (startFailure is not null)
+        {
+            _logger.LogError(
+                startFailure.SourceException,
+                "Chat3 streaming failed to start for agent {AgentName}",
+                _settings.ChatAgentName);
+            yield return ChatStreamEvent.Error(startFailure.SourceException.Message);
+            yield break;
+        }
 
         string? approvalError = null;
         try

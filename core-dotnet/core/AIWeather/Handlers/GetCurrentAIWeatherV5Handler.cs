@@ -147,7 +147,7 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
             {
                 LogRunLogOnFailure("model returned empty or invalid JSON");
                 throw new InvalidOperationException(
-                    $"Model returned empty or invalid JSON. Raw output: {(string.IsNullOrWhiteSpace(content) ? "(empty)" : content)}");
+                    $"Model returned empty or invalid JSON. Raw output: {content}");
             }
 
             modelOutput.WindDirectionSourceDegrees =
