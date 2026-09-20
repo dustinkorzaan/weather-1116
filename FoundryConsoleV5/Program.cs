@@ -59,15 +59,22 @@ internal class Program
 
 		var options = new CreateResponseOptions()
 		{
-			// ProjectResponsesClient reads AgentConversationId (via ApplyClientDefaults) before
-			// every call, which walks into ConversationOptions.Patch and NullReferenceExceptions
-			// in CreateResponseOptions.PropagateGet if ConversationOptions is left null.
 			ConversationOptions = new ResponseConversationOptions(),
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
 			},
 		};
+
+		// ProjectResponsesClient reads AgentConversationId (via ApplyClientDefaults) before every
+		// call, which walks into ConversationOptions.Patch and NullReferenceExceptions in
+		// CreateResponseOptions.PropagateGet if ConversationOptions is left null (hence setting it
+		// above). But if AgentConversationId still reads null afterward, ApplyClientDefaults writes
+		// it back as null, which removes "$.conversation" - and that removal propagates onto
+		// ConversationOptions' own patch in a way that throws a KeyNotFoundException
+		// ("No value found at JSON path '$'") from ResponseConversationOptions' JSON writer the
+		// next time this options object is serialized. Giving it a real value up front avoids that.
+		options.AgentConversationId = Guid.NewGuid().ToString();
 
 		try
 		{
