@@ -15,6 +15,17 @@ from weather_mcp_srv_python.tools.history import HistoryResolution, get_public_w
 
 load_dotenv(find_dotenv(usecwd=True))
 
+# Exports traces/metrics/logs to Application Insights via APPLICATIONINSIGHTS_CONNECTION_STRING
+# (set by infra/modules/container-app.bicep), mirroring mcp-srv-app-service and mcp-srv-func-app.
+# configure_azure_monitor() raises ValueError when the connection string is missing, so it's
+# opt-in -- local dev and pytest runs have no App Insights resource at all.
+if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
+    from azure.monitor.opentelemetry import configure_azure_monitor
+    from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+
+    configure_azure_monitor()
+    HTTPXClientInstrumentor().instrument()
+
 mcp = MCPServer("WeatherMcpSrvPython")
 
 # Tools this host must have registered to report healthy in /About, mirroring
@@ -95,6 +106,12 @@ def build_app():
         transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
     )
     app.add_middleware(BearerTokenMiddleware, token=token, protected_path_prefix="/mcp")
+
+    if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
+        from opentelemetry.instrumentation.starlette import StarletteInstrumentor
+
+        StarletteInstrumentor.instrument_app(app)
+
     return app
 
 
