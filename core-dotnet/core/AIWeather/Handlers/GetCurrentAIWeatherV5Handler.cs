@@ -93,18 +93,28 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
 
             CreateResponseOptions options = new()
             {
-                // ProjectResponsesClient.CreateResponseAsync reads AgentConversationId (via
-                // ApplyClientDefaults) before every call. That getter walks into
-                // ConversationOptions.Patch, and OpenAI.Responses.CreateResponseOptions leaves
-                // ConversationOptions null until set, so a bare CreateResponseOptions crashes
-                // with a NullReferenceException in CreateResponseOptions.PropagateGet before any
-                // request is sent. A default (non-null) ConversationOptions avoids that.
                 ConversationOptions = new ResponseConversationOptions(),
                 InputItems =
                 {
                     ResponseItem.CreateUserMessageItem(userPrompt),
                 },
             };
+
+            // ProjectResponsesClient.CreateResponseAsync reads AgentConversationId (via
+            // ApplyClientDefaults) before every call. That getter walks into
+            // ConversationOptions.Patch, so a bare CreateResponseOptions (ConversationOptions
+            // left null) crashes with a NullReferenceException in
+            // CreateResponseOptions.PropagateGet before any request is sent - hence
+            // ConversationOptions above. But when AgentConversationId still reads null (no
+            // conversation id set), ApplyClientDefaults writes it back as null, which removes
+            // "$.conversation" and - because of how that removal propagates onto
+            // ConversationOptions' own patch - throws a KeyNotFoundException
+            // ("No value found at JSON path '$'") from ResponseConversationOptions' JSON writer
+            // the next time this options object is serialized. Giving AgentConversationId a
+            // real (non-null) value up front short-circuits ApplyClientDefaults's null-check
+            // entirely, so it never touches the patch again. V5 has no multi-turn conversation
+            // to resume, so this is just a stable per-run id, not a real Foundry conversation.
+            options.AgentConversationId = activitySessionId;
 
             // The hosted agent supplies instructions, response schema, and MCP tools itself, so a
             // single call is enough - like V4, there is no local tool-call loop to drive here.
