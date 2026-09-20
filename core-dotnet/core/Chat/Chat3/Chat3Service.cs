@@ -60,6 +60,13 @@ public sealed class Chat3Service : IChatClientService
 
         CreateResponseOptions options = new()
         {
+            // ProjectResponsesClient.CreateResponseStreamingAsync reads AgentConversationId (via
+            // ApplyClientDefaults) before every call. That getter walks into
+            // ConversationOptions.Patch, and OpenAI.Responses.CreateResponseOptions leaves
+            // ConversationOptions null until set, so a bare CreateResponseOptions crashes with a
+            // NullReferenceException in CreateResponseOptions.PropagateGet before streaming
+            // starts. A default (non-null) ConversationOptions avoids that.
+            ConversationOptions = new ResponseConversationOptions(),
             StreamingEnabled = true,
             StoredOutputEnabled = true,
             InputItems =

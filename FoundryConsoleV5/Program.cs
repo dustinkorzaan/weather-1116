@@ -59,6 +59,10 @@ internal class Program
 
 		var options = new CreateResponseOptions()
 		{
+			// ProjectResponsesClient reads AgentConversationId (via ApplyClientDefaults) before
+			// every call, which walks into ConversationOptions.Patch and NullReferenceExceptions
+			// in CreateResponseOptions.PropagateGet if ConversationOptions is left null.
+			ConversationOptions = new ResponseConversationOptions(),
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),

@@ -18,6 +18,19 @@ public class Chat3ServiceTests
     }
 
     [Fact]
+    public void Service_SetsConversationOptions_SoApplyClientDefaultsDoesNotThrow()
+    {
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Chat3/Chat3Service.cs"));
+
+        // ProjectResponsesClient.CreateResponseStreamingAsync reads AgentConversationId (via
+        // ApplyClientDefaults) before every call, which walks into ConversationOptions.Patch and
+        // throws a NullReferenceException in CreateResponseOptions.PropagateGet when
+        // ConversationOptions is left at its default null. A non-null ConversationOptions on the
+        // options literal is required to avoid it.
+        Assert.Contains("ConversationOptions = new ResponseConversationOptions()", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Service_CatchesStreamingFailuresDuringEnumeration()
     {
         var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Chat3/Chat3Service.cs"));
