@@ -86,4 +86,20 @@ public class GetCurrentAIWeatherV3HandlerTests
         Assert.DoesNotContain("LogActivityErrorAsync", source, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Handler_OmitsErrorRowUsage_WhenLastResponseAlreadyLoggedItsOwnRow()
+    {
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV3Handler.cs"));
+
+        // A loop that calls a tool and continues already logs its own per-loop Response row with
+        // that call's usage. If the run then fails later, the catch-all above must not re-log that
+        // same usage onto the run-level error row, or a query summing token columns across a run's
+        // AgentActivity rows double-counts that loop's tokens.
+        Assert.Contains("var lastResponseUsageLogged = false;", source, StringComparison.Ordinal);
+        Assert.Contains("lastResponseUsageLogged = false;", source, StringComparison.Ordinal);
+        Assert.Contains("lastResponseUsageLogged = true;", source, StringComparison.Ordinal);
+        Assert.Contains("var errorUsage = lastResponseUsageLogged ? null : lastResponse?.Usage;", source, StringComparison.Ordinal);
+        Assert.Contains("InputTokenCount = errorUsage?.InputTokenCount,", source, StringComparison.Ordinal);
+    }
+
 }

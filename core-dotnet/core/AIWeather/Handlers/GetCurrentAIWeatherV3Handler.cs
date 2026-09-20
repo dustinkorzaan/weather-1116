@@ -78,6 +78,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         }, cancellationToken);
         var stopwatch = Stopwatch.StartNew();
         ResponseResult? lastResponse = null;
+        var lastResponseUsageLogged = false;
 
         // Every exit path below -- an explicit validation throw, or any exception raised by the
         // Foundry client itself (auth failure, network error, timeout) -- lands here, so the
@@ -185,6 +186,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                 var loopRuntimeMs = (int)(stopwatch.ElapsedMilliseconds - loopCallStartMs);
                 runLog.AddLog("Finish CreateResponse", response, toolLoopIteration);
                 lastResponse = response;
+                lastResponseUsageLogged = false;
 
                 var functionCalls = response.OutputItems.OfType<FunctionCallResponseItem>().ToList();
                 if (response.Status != ResponseStatus.Completed && functionCalls.Count == 0)
@@ -230,6 +232,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                         TotalTokenCount = response.Usage?.TotalTokenCount,
                         RuntimeMs = loopRuntimeMs,
                     }, cancellationToken);
+                    lastResponseUsageLogged = true;
                 }
 
                 inputItems.AddRange(response.OutputItems);
@@ -319,6 +322,10 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
         }
         catch (Exception ex)
         {
+            // If the last CreateResponse call already got its own per-loop Response row above
+            // (it called a tool and the loop continued), its usage must not also land here --
+            // that would double-count the same call's tokens across two AgentActivity rows.
+            var errorUsage = lastResponseUsageLogged ? null : lastResponse?.Usage;
             await _mediator.Send(new LogAgentActivityEvent
             {
                 Direction = AgentActivityDirection.Response,
@@ -328,11 +335,11 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                 FeatureCategory = AgentActivityFeatureCategory.ModelDirect,
                 SessionId = activitySessionId,
                 Location = location,
-                InputTokenCount = lastResponse?.Usage?.InputTokenCount,
-                CachedTokenCount = lastResponse?.Usage?.InputTokenDetails?.CachedTokenCount,
-                OutputTokenCount = lastResponse?.Usage?.OutputTokenCount,
-                ReasoningTokenCount = lastResponse?.Usage?.OutputTokenDetails?.ReasoningTokenCount,
-                TotalTokenCount = lastResponse?.Usage?.TotalTokenCount,
+                InputTokenCount = errorUsage?.InputTokenCount,
+                CachedTokenCount = errorUsage?.InputTokenDetails?.CachedTokenCount,
+                OutputTokenCount = errorUsage?.OutputTokenCount,
+                ReasoningTokenCount = errorUsage?.OutputTokenDetails?.ReasoningTokenCount,
+                TotalTokenCount = errorUsage?.TotalTokenCount,
                 RuntimeMs = (int)stopwatch.ElapsedMilliseconds,
                 ErrorMessage = ex.Message,
             }, cancellationToken);
