@@ -47,6 +47,15 @@ with no children. `isHealthy` is `true` only when `MCP_SRV_PYTHON_KEY` is set an
 `BUILD_BRANCH_NAME` env vars set by the deploy workflow, same as the other hosts. This is
 what api-dotnet/mvc-dotnet's own `/About` fan out to.
 
+## Observability
+
+When `APPLICATIONINSIGHTS_CONNECTION_STRING` is set (by `infra/modules/container-app.bicep` in
+deployed environments), this server exports traces, metrics, and logs to Application Insights via
+the [Azure Monitor OpenTelemetry Distro](https://pypi.org/project/azure-monitor-opentelemetry/),
+instrumenting incoming Starlette requests and outgoing `httpx` calls to Open-Meteo — the same
+opt-in behavior as `mcp-srv-app-service` and `mcp-srv-func-app`. It's unset for local dev and
+`pytest` runs, so no telemetry is sent and no App Insights resource is required.
+
 ## Docker
 
 Built from the repo root so it can reach `mcp-srv-python/`:
