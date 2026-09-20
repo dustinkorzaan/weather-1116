@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Data.Migrations
 {
     [DbContext(typeof(AgentActivityDbContext))]
-    [Migration("20260920143911_InitialCreateAgentActivity")]
+    [Migration("20260920145738_InitialCreateAgentActivity")]
     partial class InitialCreateAgentActivity
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Core.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
