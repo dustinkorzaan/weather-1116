@@ -7,8 +7,10 @@ public class GetCurrentAIWeatherV5HandlerTests
     {
         var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));
 
-        Assert.Contains("ProjectOpenAIClient", source, StringComparison.Ordinal);
-        Assert.Contains("GetProjectResponsesClientForAgent", source, StringComparison.Ordinal);
+        Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgent", source, StringComparison.Ordinal);
+        Assert.Contains("ResolveProjectEndpoint", source, StringComparison.Ordinal);
+        Assert.Contains("TryGetOutputText", source, StringComparison.Ordinal);
+        Assert.Contains("GetOutputItemsOrEmpty", source, StringComparison.Ordinal);
         Assert.Contains("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME", source, StringComparison.Ordinal);
         // An empty (but set) GitHub var must still fall back to the default agent name --
         // ?? only catches null, not "", so this has to be an explicit blank check.

@@ -77,6 +77,11 @@ public sealed class Chat3Service : IChatClientService
         try
         {
             updates = client.CreateResponseStreamingAsync(options, cancellationToken);
+            if (updates is null)
+            {
+                errorOnStart =
+                    "Foundry agent streaming returned no updates. Check AZURE_FOUNDRY_PROD_PROJ_URL, agent name, and agent publish status.";
+            }
         }
         catch (Exception ex)
         {
