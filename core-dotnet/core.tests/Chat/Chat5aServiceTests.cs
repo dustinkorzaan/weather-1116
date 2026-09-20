@@ -33,14 +33,17 @@ public class Chat5aServiceTests
     }
 
     [Fact]
-    public void Service_BlockedMessagesAreStillAppendedToSessionHistoryBeforeGatesRun()
+    public void Service_AppendsToHistoryAfterGatesRunSoAGateThrowingDoesNotRecordAnOrphanedMessage()
     {
-        var appendIndex = Source.IndexOf("_sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = \"user\"", StringComparison.Ordinal);
         var gatesIndex = Source.IndexOf("RunInputGatesAsync(request", StringComparison.Ordinal);
+        var appendIndex = Source.IndexOf("_sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = \"user\"", StringComparison.Ordinal);
+        var blockedIndex = Source.IndexOf("if (blockedReason is not null)", StringComparison.Ordinal);
 
-        Assert.True(appendIndex >= 0);
         Assert.True(gatesIndex >= 0);
-        Assert.True(appendIndex < gatesIndex, "The user message must be saved to history before any gate can block it.");
+        Assert.True(appendIndex >= 0);
+        Assert.True(blockedIndex >= 0);
+        Assert.True(gatesIndex < appendIndex, "The user message must be appended only after gates have run, so a gate error doesn't record an orphaned message.");
+        Assert.True(appendIndex < blockedIndex, "The user message must still be appended before the blocked check, so a blocked message is recorded.");
     }
 
     [Fact]

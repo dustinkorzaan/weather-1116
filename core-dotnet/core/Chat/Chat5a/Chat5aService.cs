@@ -77,10 +77,6 @@ public sealed class Chat5aService : IChat5ClientService
             yield break;
         }
 
-        // Kept in history even if a gate below blocks it, so follow-up turns retain full
-        // context of what was actually typed.
-        _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
-
         string? blockedReason = null;
         string? gateError = null;
         try
@@ -98,6 +94,13 @@ public sealed class Chat5aService : IChat5ClientService
             yield return ChatStreamEvent.Error(gateError);
             yield break;
         }
+
+        // Recorded in this UI-visible chat history whether the request proceeds or a gate
+        // blocks it below, so the transcript reflects what was actually typed either way. This
+        // is display history only, not the orchestrator's own memory: _sessionStore is never
+        // read back by the model, and a blocked turn never calls RunStreamingAsync/RunAsync, so
+        // the orchestrator itself never sees a blocked prompt.
+        _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
         if (blockedReason is not null)
         {

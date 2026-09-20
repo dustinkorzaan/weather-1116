@@ -33,6 +33,20 @@ public class Chat5bServiceTests
     }
 
     [Fact]
+    public void Service_AppendsToHistoryAfterGatesRunSoAGateThrowingDoesNotRecordAnOrphanedMessage()
+    {
+        var gatesIndex = Source.IndexOf("RunInputGatesAsync(request", StringComparison.Ordinal);
+        var appendIndex = Source.IndexOf("_sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = \"user\"", StringComparison.Ordinal);
+        var blockedIndex = Source.IndexOf("if (blockedReason is not null)", StringComparison.Ordinal);
+
+        Assert.True(gatesIndex >= 0);
+        Assert.True(appendIndex >= 0);
+        Assert.True(blockedIndex >= 0);
+        Assert.True(gatesIndex < appendIndex, "The user message must be appended only after gates have run, so a gate error doesn't record an orphaned message.");
+        Assert.True(appendIndex < blockedIndex, "The user message must still be appended before the blocked check, so a blocked message is recorded.");
+    }
+
+    [Fact]
     public void Service_UsesRemoteMcpToolsLikeChat4b()
     {
         Assert.Contains("ChatHostedMcpToolFactory", Source, StringComparison.Ordinal);
