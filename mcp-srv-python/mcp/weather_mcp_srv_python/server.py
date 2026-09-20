@@ -15,11 +15,19 @@ from weather_mcp_srv_python.tools.history import HistoryResolution, get_public_w
 
 load_dotenv(find_dotenv(usecwd=True))
 
+
+def _app_insights_enabled() -> bool:
+    """Mirrors .NET's IsNullOrWhiteSpace guard: a whitespace-only connection string
+    is treated as unset rather than passed to configure_azure_monitor(), which
+    would otherwise raise."""
+    return bool(os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING", "").strip())
+
+
 # Exports traces/metrics/logs to Application Insights via APPLICATIONINSIGHTS_CONNECTION_STRING
 # (set by infra/modules/container-app.bicep), mirroring mcp-srv-app-service and mcp-srv-func-app.
 # configure_azure_monitor() raises ValueError when the connection string is missing, so it's
 # opt-in -- local dev and pytest runs have no App Insights resource at all.
-if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
+if _app_insights_enabled():
     from azure.monitor.opentelemetry import configure_azure_monitor
     from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 
@@ -107,7 +115,7 @@ def build_app():
     )
     app.add_middleware(BearerTokenMiddleware, token=token, protected_path_prefix="/mcp")
 
-    if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
+    if _app_insights_enabled():
         from opentelemetry.instrumentation.starlette import StarletteInstrumentor
 
         StarletteInstrumentor.instrument_app(app)

@@ -82,6 +82,26 @@ def test_about_reports_unhealthy_when_key_unset(monkeypatch):
     assert response.json()["isHealthy"] is False
 
 
+def test_build_app_instruments_when_app_insights_connection_string_set(monkeypatch):
+    """Regression: enabling Application Insights must not break app startup or routing."""
+    monkeypatch.setenv(
+        "APPLICATIONINSIGHTS_CONNECTION_STRING",
+        "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://fake.example.com/",
+    )
+    app = _build_test_app(monkeypatch)
+    client = TestClient(app)
+    assert client.get("/Wake").status_code == 200
+    assert client.get("/About").status_code == 200
+
+
+def test_build_app_ignores_whitespace_only_app_insights_connection_string(monkeypatch):
+    """A whitespace-only connection string is treated as unset (mirrors .NET's IsNullOrWhiteSpace)."""
+    monkeypatch.setenv("APPLICATIONINSIGHTS_CONNECTION_STRING", "   ")
+    app = _build_test_app(monkeypatch)
+    client = TestClient(app)
+    assert client.get("/Wake").status_code == 200
+
+
 def test_about_reports_build_metadata(monkeypatch):
     monkeypatch.setenv("BUILD_NUMBER", "42")
     monkeypatch.setenv("BUILD_START", "2026-01-02T03:04:05Z")
