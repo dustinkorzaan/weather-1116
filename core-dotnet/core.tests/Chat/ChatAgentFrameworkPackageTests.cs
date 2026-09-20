@@ -30,7 +30,7 @@ public class ChatAgentFrameworkPackageTests
         Assert.Equal("Microsoft.Extensions.AI.OpenAI", adapter.Name);
         Assert.Equal(new Version(10, 10, 0, 0), adapter.Version);
         Assert.Equal("OpenAI", openai.Name);
-        Assert.Equal(new Version(2, 14, 0, 0), openai.Version);
+        Assert.Equal(new Version(2, 13, 0, 0), openai.Version);
     }
 
     [Fact]
@@ -77,6 +77,57 @@ public class ChatAgentFrameworkPackageTests
 
         Assert.NotNull(agent);
         Assert.Equal("Chat2b", agent.Name);
+    }
+
+    [Fact]
+    public async Task AsAIAgent_RunAsync_ConvertsHostedMcpApprovalPolicy_WithoutTypeLoadFailure()
+    {
+        // The adapter converts HostedMcpServerTool.ApprovalMode into OpenAI's
+        // McpToolCallApprovalPolicy while building the request, before any bytes
+        // hit the wire. A version mismatch between the OpenAI package and the
+        // Microsoft.Extensions.AI.OpenAI adapter it was compiled against surfaces
+        // here as a TypeLoadException/MissingMethodException, not as a network error.
+        IList<AITool> mcpTools =
+        [
+            new HostedMcpServerTool("McpSrvFuncApp", new Uri("https://func.example.com/runtime/webhooks/mcp"))
+            {
+                ApprovalMode = HostedMcpServerToolApprovalMode.NeverRequire,
+            },
+        ];
+
+        var agent = CreateResponsesClient().AsAIAgent(
+            name: "Chat2b",
+            instructions: "You are a test weather assistant.",
+            model: "gpt-test",
+            tools: mcpTools);
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var ex = await Record.ExceptionAsync(() => agent.RunAsync("hello", cancellationToken: cts.Token));
+
+        Assert.NotNull(ex);
+        Assert.DoesNotContain(
+            FlattenExceptions(ex!),
+            e => e is TypeLoadException or MissingMethodException
+                || (e.Message?.Contains("McpToolCallApprovalPolicy", StringComparison.Ordinal) ?? false));
+    }
+
+    private static IEnumerable<Exception> FlattenExceptions(Exception exception)
+    {
+        yield return exception;
+        if (exception is AggregateException aggregate)
+        {
+            foreach (var inner in aggregate.InnerExceptions.SelectMany(FlattenExceptions))
+            {
+                yield return inner;
+            }
+        }
+        else if (exception.InnerException is not null)
+        {
+            foreach (var inner in FlattenExceptions(exception.InnerException))
+            {
+                yield return inner;
+            }
+        }
     }
 
     [Fact]
