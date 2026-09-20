@@ -15,18 +15,17 @@ namespace Core.Agent.Events;
 /// </summary>
 public class LogAgentActivityEvent : IRequest<Guid>
 {
-    public required string Direction { get; init; }
+    public Guid? RunId { get; init; }
 
-    public required Guid RunId { get; init; }
-
-    /// <summary>Null on a Request row (the new row's own Id becomes this Request's own CorrelationId); that Request row's Id on its paired Response row.</summary>
     public Guid? CorrelationId { get; init; }
+
+    public string SessionId { get; init; }
+
+    public required string Direction { get; init; }
 
     public required string Feature { get; init; }
 
     public required string FeatureCategory { get; init; }
-
-    public required string SessionId { get; init; }
 
     public string? AgentName { get; init; }
 
