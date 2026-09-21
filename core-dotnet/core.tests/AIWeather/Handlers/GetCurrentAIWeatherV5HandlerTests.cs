@@ -8,7 +8,7 @@ public class GetCurrentAIWeatherV5HandlerTests
         var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));
 
         Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgent(agentName, projectEndpoint)", source, StringComparison.Ordinal);
-        Assert.Contains("ResolveProjectEndpoint", source, StringComparison.Ordinal);
+        Assert.Contains("Resolve(projectUrl)", source, StringComparison.Ordinal);
         Assert.Contains("response is null", source, StringComparison.Ordinal);
         Assert.Contains("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME", source, StringComparison.Ordinal);
         // An empty (but set) GitHub var must still fall back to the default agent name --
@@ -28,27 +28,8 @@ public class GetCurrentAIWeatherV5HandlerTests
         Assert.DoesNotContain("BuildAIOutputSchema", source, StringComparison.Ordinal);
         Assert.DoesNotContain("JsonSchemaExporter", source, StringComparison.Ordinal);
         Assert.DoesNotContain("TextOptions", source, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void Handler_SetsConversationOptions_SoApplyClientDefaultsDoesNotThrow()
-    {
-        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));
-
-        // ProjectResponsesClient.CreateResponseAsync reads AgentConversationId (via
-        // ApplyClientDefaults) before every call, which walks into ConversationOptions.Patch and
-        // throws a NullReferenceException in CreateResponseOptions.PropagateGet when
-        // ConversationOptions is left at its default null. A non-null ConversationOptions on the
-        // options literal is required to avoid it.
-        Assert.Contains("ConversationOptions = new ResponseConversationOptions()", source, StringComparison.Ordinal);
-
-        // Setting ConversationOptions alone isn't enough: if AgentConversationId still reads null,
-        // ApplyClientDefaults writes it back as null, which removes "$.conversation" - and that
-        // removal propagates onto ConversationOptions' own patch in a way that throws a
-        // KeyNotFoundException ("No value found at JSON path '$'") from
-        // ResponseConversationOptions' JSON writer the next time options is serialized. Giving
-        // AgentConversationId a real value up front avoids that second failure too.
-        Assert.Contains("options.AgentConversationId = activitySessionId;", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("ConversationOptions", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("AgentConversationId", source, StringComparison.Ordinal);
     }
 
     [Fact]

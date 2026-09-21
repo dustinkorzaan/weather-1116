@@ -7,34 +7,38 @@ namespace Core.AIWeather.Services;
 
 /// <summary>
 /// Builds <see cref="ProjectResponsesClient"/> instances for named Foundry prompt agents
-/// (Chat3, Current AI Weather V5, Foundry Console V5).
+/// (Chat3, Current AI Weather V5). Matches Foundry Console V5: api-key auth, <c>/openai/v1</c>
+/// endpoint, <c>GetProjectResponsesClientForAgent</c>, user prompt only.
 /// </summary>
 public static class FoundryAgentResponsesClientFactory
 {
     public static ProjectResponsesClient CreateForAgent(string agentName) =>
-        CreateForAgent(agentName, ResolveProjectEndpointFromEnvironment());
+        CreateForAgent(agentName, ResolveEndpointFromEnvironment());
 
-    /// <param name="projectEndpoint">
-    /// Foundry project URI (not the <c>/openai/v1</c> inference suffix). When omitted, resolved
-    /// from <c>AZURE_FOUNDRY_PROD_PROJ_URL</c>.
+    /// <param name="endpoint">
+    /// Foundry OpenAI endpoint (<c>.../openai/v1</c>). When omitted, resolved from
+    /// <c>AZURE_FOUNDRY_PROD_PROJ_URL</c> via <see cref="FoundryOpenAiEndpoint.Resolve"/>.
     /// </param>
-    public static ProjectResponsesClient CreateForAgent(string agentName, Uri projectEndpoint)
+    public static ProjectResponsesClient CreateForAgent(string agentName, Uri endpoint)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(agentName);
-        ArgumentNullException.ThrowIfNull(projectEndpoint);
+        ArgumentNullException.ThrowIfNull(endpoint);
 
         var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
 
         ProjectOpenAIClient projectOpenAIClient = new(
             ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-            FoundryOpenAiEndpoint.CreateProjectOpenAIClientOptions(projectEndpoint, agentName));
+            new ProjectOpenAIClientOptions
+            {
+                Endpoint = endpoint,
+            });
 
-        return projectOpenAIClient.GetProjectResponsesClientForAgentEndpoint(agentName);
+        return projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
     }
 
-    public static Uri ResolveProjectEndpointFromEnvironment() =>
-        FoundryOpenAiEndpoint.ResolveProjectEndpoint(
+    public static Uri ResolveEndpointFromEnvironment() =>
+        FoundryOpenAiEndpoint.Resolve(
             Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL."));
 }

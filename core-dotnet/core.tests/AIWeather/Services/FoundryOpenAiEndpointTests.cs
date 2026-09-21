@@ -54,21 +54,4 @@ public class FoundryOpenAiEndpointTests
 
         Assert.Equal(expected, endpoint.ToString());
     }
-
-    [Fact]
-    public void ProjectOpenAiApiVersion_IsSetForProjectOpenAIClient()
-    {
-        Assert.Equal("2025-11-15-preview", FoundryOpenAiEndpoint.ProjectOpenAiApiVersion);
-    }
-
-    [Fact]
-    public void CreateProjectOpenAIClientOptions_SetsAgentNameAndApiVersionForSdkPipeline()
-    {
-        var options = FoundryOpenAiEndpoint.CreateProjectOpenAIClientOptions(
-            new Uri("https://example.services.ai.azure.com/api/projects/wx1116-prod-proj"),
-            "wx1116-agent-for-current-weather");
-
-        Assert.Equal("wx1116-agent-for-current-weather", options.AgentName);
-        Assert.Equal(FoundryOpenAiEndpoint.ProjectOpenAiApiVersion, options.ApiVersion);
-    }
 }

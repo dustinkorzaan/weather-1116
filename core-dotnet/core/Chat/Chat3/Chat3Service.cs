@@ -1,6 +1,5 @@
 using System.Runtime.ExceptionServices;
 using System.Text;
-using Azure.AI.Extensions.OpenAI;
 using Core.Chat.Models;
 using Core.Chat.Services;
 using Microsoft.Extensions.Logging;
@@ -61,7 +60,6 @@ public sealed class Chat3Service : IChatClientService
 
         CreateResponseOptions options = new()
         {
-            ConversationOptions = new ResponseConversationOptions(),
             StreamingEnabled = true,
             StoredOutputEnabled = true,
             InputItems =
@@ -69,21 +67,6 @@ public sealed class Chat3Service : IChatClientService
                 ResponseItem.CreateUserMessageItem(userMessage),
             },
         };
-
-        // ProjectResponsesClient.CreateResponseStreamingAsync reads AgentConversationId (via
-        // ApplyClientDefaults) before every call. That getter walks into ConversationOptions.Patch,
-        // so a bare CreateResponseOptions (ConversationOptions left null) crashes with a
-        // NullReferenceException in CreateResponseOptions.PropagateGet before streaming starts -
-        // hence ConversationOptions above. But when AgentConversationId still reads null (no
-        // conversation id set), ApplyClientDefaults writes it back as null, which removes
-        // "$.conversation" and - because of how that removal propagates onto ConversationOptions'
-        // own patch - throws a KeyNotFoundException ("No value found at JSON path '$'") from
-        // ResponseConversationOptions' JSON writer the next time this options object is
-        // serialized. Giving AgentConversationId a real (non-null) value up front short-circuits
-        // ApplyClientDefaults's null-check entirely, so it never touches the patch again. Chat3
-        // tracks continuity itself via PreviousResponseId, not Foundry's conversation object, so
-        // this is just a stable per-chat-session id, not a real Foundry conversation.
-        options.AgentConversationId = sessionId;
 
         if (!string.IsNullOrWhiteSpace(previousResponseId))
         {
