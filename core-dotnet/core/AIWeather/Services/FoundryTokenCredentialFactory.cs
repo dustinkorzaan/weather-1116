@@ -25,16 +25,18 @@ public static class FoundryTokenCredentialFactory
     // each hold their own token cache internally, so reusing the same instance across
     // requests lets that cache actually do its job instead of forcing a fresh AAD/IMDS
     // token request on every single Foundry call.
-    private static readonly Lazy<TokenCredential> Cached = new(CreateCore);
+    private static readonly Lazy<TokenCredential> Cached =
+        new(() => Resolve(Environment.GetEnvironmentVariable("AZURE_CLIENT_ID")));
 
     public static TokenCredential Create() => Cached.Value;
 
-    private static TokenCredential CreateCore()
-    {
-        var clientId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
-
-        return string.IsNullOrWhiteSpace(clientId)
+    /// <summary>
+    /// The type-selection logic, kept separate from <see cref="Cached"/> so tests can exercise
+    /// both branches directly -- Create() itself is a process-wide singleton once evaluated, so
+    /// toggling AZURE_CLIENT_ID and re-calling it would only ever observe the first branch taken.
+    /// </summary>
+    internal static TokenCredential Resolve(string? managedIdentityClientId) =>
+        string.IsNullOrWhiteSpace(managedIdentityClientId)
             ? new AzureIdentity.DefaultAzureCredential()
-            : new AzureIdentity.ManagedIdentityCredential(AzureIdentity.ManagedIdentityId.FromUserAssignedClientId(clientId));
-    }
+            : new AzureIdentity.ManagedIdentityCredential(AzureIdentity.ManagedIdentityId.FromUserAssignedClientId(managedIdentityClientId));
 }

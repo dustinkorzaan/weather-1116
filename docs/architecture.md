@@ -496,7 +496,8 @@ V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 Run from VS Code or `dotnet run` in each folder. Settings use the
 `AZURE_FOUNDRY_PROD_*` prefix (see each `Program.cs` and `.env.example`).
 
-**V4 settings** (in addition to `AZURE_FOUNDRY_PROD_KEY`):
+**V4 settings** (in addition to `AZURE_FOUNDRY_PROD_KEY` -- consoles only; see the
+"No `AZURE_FOUNDRY_PROD_KEY` here" note under API/MVC AI weather settings below):
 
 | Variable | Required | Purpose |
 | --- | --- | --- |

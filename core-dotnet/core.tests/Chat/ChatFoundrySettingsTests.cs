@@ -35,7 +35,22 @@ public class ChatFoundrySettingsTests
     }
 
     [Fact]
-    public void CreateResponsesClient_BuildsClientViaManagedIdentity()
+    public void CreateResponsesClient_UsesSharedFoundryResponsesClientFactory()
+    {
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Services/ChatFoundrySettings.cs"));
+
+        Assert.Contains("FoundryResponsesClientFactory.Create", source, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// A smoke test only: ResponsesClient's constructor never touches the network (that happens
+    /// on first request), so this can't observe which credential path ran -- that's covered
+    /// separately by FoundryTokenCredentialFactoryTests (type selection) and
+    /// FoundryAgentResponsesClientFactoryTests (the same TokenCredential constructor overload,
+    /// exercised against a real HTTP listener).
+    /// </summary>
+    [Fact]
+    public void CreateResponsesClient_ConstructsWithoutApiKey()
     {
         RunWithFoundryEnvironment(chatAgentName: null, () =>
         {
