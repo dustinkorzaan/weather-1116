@@ -4,6 +4,7 @@ using Core.AIWeather.Services;
 using Core.Json;
 using Core.Weather;
 using DotNetEnv;
+using OpenAI.Conversations;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
@@ -57,7 +58,15 @@ internal class Program
 				Endpoint = projectEndpoint,
 			});
 
-		ProjectResponsesClient responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+		// Hosted-agent Responses calls need a real Foundry conversation id (not a random GUID).
+		// V5 does not send a local system prompt — instructions live on the agent (see V4 for
+		// model-direct systemPrompt + CreateSystemMessageItem).
+		ConversationResource conversation = (await projectOpenAIClient
+			.GetProjectConversationsClient()
+			.CreateProjectConversationAsync(new ConversationCreationOptions())).Value;
+
+		ProjectResponsesClient responseClient =
+			projectOpenAIClient.GetProjectResponsesClientForAgent(agentName, conversation.Id);
 
 		var options = new CreateResponseOptions()
 		{
@@ -68,48 +77,13 @@ internal class Program
 			},
 		};
 
-		// ProjectResponsesClient reads AgentConversationId (via ApplyClientDefaults) before every
-		// call, which walks into ConversationOptions.Patch and NullReferenceExceptions in
-		// CreateResponseOptions.PropagateGet if ConversationOptions is left null (hence setting it
-		// above). But if AgentConversationId still reads null afterward, ApplyClientDefaults writes
-		// it back as null, which removes "$.conversation" - and that removal propagates onto
-		// ConversationOptions' own patch in a way that throws a KeyNotFoundException
-		// ("No value found at JSON path '$'") from ResponseConversationOptions' JSON writer the
-		// next time this options object is serialized. Giving it a real value up front avoids that.
-		options.AgentConversationId = Guid.NewGuid().ToString();
+		// Same SDK workaround as Chat3/V5 handler: non-null ConversationOptions plus a real
+		// conversation id so ApplyClientDefaults does not corrupt the options patch.
+		options.AgentConversationId = conversation.Id;
 
 		try
 		{
-			ResponseResult? response;
-
-			Console.WriteLine("\nStreaming response:");
-			response = null;
-
-			await foreach (var update in responseClient.CreateResponseStreamingAsync(options))
-			{
-				if (update is StreamingResponseOutputTextDeltaUpdate delta)
-				{
-					Console.Write(delta.Delta);
-				}
-				else if (update is StreamingResponseCompletedUpdate completed)
-				{
-					response = completed.Response;
-				}
-				else if (update is StreamingResponseFailedUpdate failed)
-				{
-					response = failed.Response;
-				}
-			}
-
-			Console.WriteLine();
-
-			if (response is null)
-			{
-				Console.WriteLine("Streaming ended without a completed response.");
-				Console.WriteLine("\nPress any key to continue.");
-				Console.ReadKey(true);
-				return;
-			}
+			ResponseResult response = await responseClient.CreateResponseAsync(options);
 
 			var requestedApproval = false;
 			foreach (var item in response.OutputItems)
@@ -146,6 +120,14 @@ internal class Program
 					Console.WriteLine("\nResponse:");
 					Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 				}
+			}
+		}
+		catch (ClientResultException ex)
+		{
+			Console.WriteLine($"Request failed: {ex.Message}");
+			if (ex.InnerException is not null)
+			{
+				Console.WriteLine($"Inner: {ex.InnerException.Message}");
 			}
 		}
 		catch (Exception ex)
