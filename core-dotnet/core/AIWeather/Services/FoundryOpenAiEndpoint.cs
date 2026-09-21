@@ -28,7 +28,9 @@ public static class FoundryOpenAiEndpoint
     }
 
     /// <summary>
-    /// Returns the Foundry <strong>project</strong> URI (strips a trailing <c>/openai/v1</c>).
+    /// Strips a trailing <c>/openai/v1</c> inference suffix. Hosted-agent callers (Chat3, V5,
+    /// Foundry Console V5) must <strong>not</strong> use this — they pass
+    /// <c>AZURE_FOUNDRY_PROD_PROJ_URL</c> to <c>ProjectOpenAIClient</c> as-is.
     /// </summary>
     public static Uri ResolveProjectEndpoint(string projectOrEndpointUrl)
     {
