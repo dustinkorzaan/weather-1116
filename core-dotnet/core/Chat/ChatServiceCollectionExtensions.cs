@@ -5,7 +5,10 @@ using Core.Chat.Chat2b;
 using Core.Chat.Chat3;
 using Core.Chat.Chat4a;
 using Core.Chat.Chat4b;
+using Core.Chat.Chat5a;
+using Core.Chat.Chat5b;
 using Core.Chat.Services;
+using Core.Chat.Services.ChatScopeGate;
 using Core.Data.Domain;
 using CQMediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +40,18 @@ public static class ChatServiceCollectionExtensions
         AddLoggedChatClient<Chat3Service>(services, "Chat3", AgentActivityFeatureCategory.Agent);
         AddLoggedChatClient<Chat4aService>(services, "Chat4a", AgentActivityFeatureCategory.MultiAgent);
         AddLoggedChatClient<Chat4bService>(services, "Chat4b", AgentActivityFeatureCategory.MultiAgent);
+
+        services.AddSingleton<MaxLengthScopeGate>();
+        services.AddSingleton<RuleScopeGate>();
+        services.AddKeyedSingleton<IScopeGate>(
+            "Chat5InputLlmGate",
+            (sp, _) => new LlmScopeGate(sp.GetRequiredService<ChatFoundrySettings>(), "LLM Input"));
+        services.AddKeyedSingleton<IScopeGate>(
+            "Chat5OutputLlmGate",
+            (sp, _) => new LlmScopeGate(sp.GetRequiredService<ChatFoundrySettings>(), "LLM Output"));
+
+        services.AddKeyedScoped<IChat5ClientService, Chat5aService>("Chat5a");
+        services.AddKeyedScoped<IChat5ClientService, Chat5bService>("Chat5b");
 
         return services;
     }

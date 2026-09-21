@@ -1,10 +1,22 @@
 import { resolveApiBaseUrl } from '../services/apiBaseUrl';
 
-export async function streamChatMessage({ endpoint, sessionId, message, onEvent }) {
+export async function streamChatMessage({ endpoint, sessionId, message, gates, onEvent }) {
+  const body = gates
+    ? {
+        sessionId,
+        message,
+        enableMaxLengthGate: gates.maxLength,
+        enableRuleInputGate: gates.ruleInput,
+        enableLlmInputGate: gates.llmInput,
+        enableSystemPromptGuard: gates.systemPrompt,
+        enableLlmOutputGate: gates.llmOutput,
+      }
+    : { sessionId, message };
+
   const response = await fetch(`${resolveApiBaseUrl()}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId, message }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok || !response.body) {

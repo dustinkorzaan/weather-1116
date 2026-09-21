@@ -56,4 +56,15 @@ public class ChatStreamEvent
         Type = "error",
         ErrorMessage = message,
     };
+
+    /// <summary>
+    /// Chat5a/Chat5b only: a guardrail gate refused the request. Distinct from
+    /// <see cref="Error"/> so the UI can style "a gate refused this" differently from a
+    /// real failure.
+    /// </summary>
+    public static ChatStreamEvent Blocked(string message) => new()
+    {
+        Type = "blocked",
+        ErrorMessage = message,
+    };
 }

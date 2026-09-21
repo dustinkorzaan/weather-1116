@@ -15,6 +15,8 @@ public sealed class ChatPanelTests
     [InlineData("Chat3", "3")]
     [InlineData("Chat4a", "4a")]
     [InlineData("Chat4b", "4b")]
+    [InlineData("Chat5a", "5a")]
+    [InlineData("Chat5b", "5b")]
     public void TabShowsShortVisibleLabelUnderFullAccessibleName(string fullLabel, string shortLabel)
     {
         using var context = new BunitContext();
@@ -37,5 +39,20 @@ public sealed class ChatPanelTests
 
         Assert.Contains(shortLabel, innerText);
         Assert.DoesNotContain(fullLabel, innerText);
+    }
+
+    [Fact]
+    public void DefaultActiveTabRendersNoGuardrailGateCheckboxes()
+    {
+        using var context = new BunitContext();
+        context.JSInterop.Mode = JSRuntimeMode.Loose;
+        context.Services.AddHttpClient();
+        context.Services.AddFluentUIComponents();
+        context.Services.AddSingleton(new ChatApiClient(new HttpClient { BaseAddress = new Uri("http://localhost/") }));
+
+        var rendered = context.Render<WeatherBlazor.Shared.ChatPanel>();
+
+        // The default active tab is Chat1a; the gate checkbox row is Chat5a/Chat5b-only.
+        Assert.DoesNotContain("chat-gate-options", rendered.Markup, StringComparison.Ordinal);
     }
 }

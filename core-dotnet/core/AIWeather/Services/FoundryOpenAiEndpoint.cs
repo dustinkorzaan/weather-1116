@@ -1,16 +1,18 @@
 namespace Core.AIWeather.Services;
 
 /// <summary>
-/// Normalizes Azure AI Foundry project or OpenAI endpoint URLs for ResponsesClient.
+/// Normalizes Azure AI Foundry project or OpenAI endpoint URLs for ResponsesClient
+/// and hosted-agent <c>ProjectOpenAIClient</c> (same <c>/openai/v1</c> suffix as Foundry Console V5).
 /// </summary>
 public static class FoundryOpenAiEndpoint
 {
     private const string OpenAiPathSuffix = "/openai/v1";
 
     /// <summary>
-    /// Returns a URI suitable for <c>ResponsesClientOptions.Endpoint</c> (model-direct V3/V4 calls).
-    /// Accepts either a project URL (e.g. <c>.../api/projects/{id}</c>) or an
-    /// already-resolved OpenAI URL (e.g. <c>.../openai/v1</c>).
+    /// Returns a URI suitable for <c>ResponsesClientOptions.Endpoint</c> and
+    /// <c>ProjectOpenAIClientOptions.Endpoint</c>. Accepts either a project URL
+    /// (e.g. <c>.../api/projects/{id}</c>) or an already-resolved OpenAI URL
+    /// (e.g. <c>.../openai/v1</c>).
     /// </summary>
     public static Uri Resolve(string projectOrEndpointUrl)
     {
@@ -26,10 +28,9 @@ public static class FoundryOpenAiEndpoint
     }
 
     /// <summary>
-    /// Returns the Foundry <strong>project</strong> URI for <see cref="ProjectOpenAIClient"/>
-    /// and hosted-agent Responses calls (Chat3, V5). Strips a trailing <c>/openai/v1</c> when
-    /// present so callers can reuse <c>AZURE_FOUNDRY_PROD_PROJ_URL</c> whether or not it already
-    /// includes the inference suffix (see Foundry Console V5).
+    /// Strips a trailing <c>/openai/v1</c> inference suffix. Not used by the hosted-agent callers
+    /// (Chat3, Current AI Weather V5) — they resolve their endpoint with <see cref="Resolve"/>
+    /// instead, which appends the suffix rather than stripping it.
     /// </summary>
     public static Uri ResolveProjectEndpoint(string projectOrEndpointUrl)
     {

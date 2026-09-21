@@ -22,8 +22,8 @@ weather progression:
 
 |  | Project | Description |
 | --- | --- | --- |
-| V1 | [`Foundry Console V1 Model Direct Legacy`](FoundryConsoleV1) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
-| V2 | [`Foundry Console V2 Model Direct Unified AI`](FoundryConsoleV2) | Model-direct via `ResponsesClient` against the unified AI services endpoint |
+| V1 | [`Foundry Console V1 Model Direct Legacy`](FoundryConsoleV1) | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint (last year's libraries) |
+| V2 | [`Foundry Console V2 Model Direct Unified AI`](FoundryConsoleV2) | Model-direct via `ResponsesClient` against the unified AI services endpoint (this year's libraries) |
 | V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) | Model-direct: tools handled by local in-process tool loops |
 | V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools handled by remote MCP servers |
 | V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
@@ -36,7 +36,7 @@ Visit the Map in [React UI](https://wx.korzaan.com/), [Blazor UI](https://wx1116
 
 Presentation reference: [`docs/5-chat-clients/5-chat-clients.md`](docs/5-chat-clients/5-chat-clients.md)
 
-Standalone multi-turn chat page with seven tabs:
+Standalone multi-turn chat page with nine tabs:
 
 | Tab | Pattern | Stack | Notes |
 | --- | --- | --- | --- |
@@ -47,6 +47,8 @@ Standalone multi-turn chat page with seven tabs:
 | Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-for-chat`) |
 | Chat4a | Local Loops, multi-agent | Agent Framework | Like Foundry Console V3 - AI Weather Orchestration delegates to Geo and NonAI Weather |
 | Chat4b | Remote MCP, multi-agent | Agent Framework | Like Foundry Console V4 - AI Weather Orchestration delegates to Geo and NonAI Weather |
+| Chat5a | Local Loops, multi-agent, guardrailed | Agent Framework | Like Chat4a plus five toggleable guardrail gates |
+| Chat5b | Remote MCP, multi-agent, guardrailed | Agent Framework | Like Chat4b plus five toggleable guardrail gates | |
 
 Visit the [React UI](https://wx.korzaan.com/chat-clients) Chat wired to variations of V3, V4, and V5
 
@@ -79,8 +81,7 @@ relationships, and parity guidance live in
 
 ## Out of Scope
 
+- **Shifting more to Microsoft Agent Framework using declarative YAML or code-first**
 - **Authentication**: Login/identity provider (e.g. Auth0)
 - **Per-user custom map pins**: Map pins scoped to individual user accounts
 - **Per-pin photo uploads**: Image upload/download per pin via blob storage SAS URIs
-- **Securing multi-agent orchestration**
-- **Shifting more to Microsoft Agent Framework using declarative YAML or code-first**

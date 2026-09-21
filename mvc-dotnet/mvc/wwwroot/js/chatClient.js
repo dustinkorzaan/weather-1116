@@ -6,7 +6,12 @@
   const input = document.getElementById('chat-input');
   const sendButton = document.getElementById('chat-send');
 
-  const MESSAGE_ROLES = ['user', 'assistant', 'tool', 'error'];
+  const MESSAGE_ROLES = ['user', 'assistant', 'tool', 'error', 'blocked'];
+  const GATE_TABS = ['Chat5a', 'Chat5b'];
+  const gateOptionsEl = document.getElementById('chat-gate-options');
+  const gateCheckboxes = gateOptionsEl
+    ? Array.from(gateOptionsEl.querySelectorAll('input[data-chat-gate]'))
+    : [];
 
   let activeTab = 'Chat1a';
   const sessions = {
@@ -17,6 +22,8 @@
     Chat3: null,
     Chat4a: null,
     Chat4b: null,
+    Chat5a: null,
+    Chat5b: null,
   };
 
   window.chatHistory = window.chatHistory || {
@@ -27,6 +34,8 @@
     Chat3: [],
     Chat4a: [],
     Chat4b: [],
+    Chat5a: [],
+    Chat5b: [],
   };
 
   const sendingTabs = {
@@ -37,7 +46,32 @@
     Chat3: false,
     Chat4a: false,
     Chat4b: false,
+    Chat5a: false,
+    Chat5b: false,
   };
+
+  // All five gates default checked, independently for Chat5a and Chat5b.
+  const gateState = {
+    Chat5a: { maxLength: true, ruleInput: true, llmInput: true, systemPrompt: true, llmOutput: true },
+    Chat5b: { maxLength: true, ruleInput: true, llmInput: true, systemPrompt: true, llmOutput: true },
+  };
+
+  function syncGateCheckboxesToState(tabId) {
+    if (!gateOptionsEl) return;
+    const isGateTab = GATE_TABS.includes(tabId);
+    gateOptionsEl.hidden = !isGateTab;
+    if (!isGateTab) return;
+    gateCheckboxes.forEach((checkbox) => {
+      checkbox.checked = gateState[tabId][checkbox.dataset.chatGate];
+    });
+  }
+
+  gateCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', () => {
+      if (!GATE_TABS.includes(activeTab)) return;
+      gateState[activeTab][checkbox.dataset.chatGate] = checkbox.checked;
+    });
+  });
 
   function updateSendingControls() {
     const isSending = sendingTabs[activeTab];
@@ -62,6 +96,7 @@
     });
     renderMessages();
     updateSendingControls();
+    syncGateCheckboxesToState(tabId);
   }
 
   function scrollToBottom() {
@@ -229,10 +264,22 @@
   }
 
   async function streamChat(tabId, message) {
+    const body = GATE_TABS.includes(tabId)
+      ? {
+          sessionId: sessions[tabId],
+          message,
+          enableMaxLengthGate: gateState[tabId].maxLength,
+          enableRuleInputGate: gateState[tabId].ruleInput,
+          enableLlmInputGate: gateState[tabId].llmInput,
+          enableSystemPromptGuard: gateState[tabId].systemPrompt,
+          enableLlmOutputGate: gateState[tabId].llmOutput,
+        }
+      : { sessionId: sessions[tabId], message };
+
     const response = await fetch(`/${tabId}/Messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: sessions[tabId], message }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok || !response.body) {
@@ -294,6 +341,8 @@
           }
         } else if (payload.type === 'error' && payload.errorMessage) {
           addEntry(tabId, { role: 'error', content: payload.errorMessage });
+        } else if (payload.type === 'blocked' && payload.errorMessage) {
+          addEntry(tabId, { role: 'blocked', content: payload.errorMessage });
         } else if (payload.type === 'done') {
           if (assistantEntry) {
             assistantEntry.streaming = false;

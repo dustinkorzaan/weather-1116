@@ -5,7 +5,7 @@
 <div class="chat-section">
     <h2 class="section-title">Chat Clients</h2>
     <p class="muted">
-        Seven standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a and Chat4b's multi-agent orchestration (AI Weather Orchestration delegating to Geo and NonAI Weather, in-process for Chat4a and remote MCP for Chat4b).
+        Nine standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a and Chat4b's multi-agent orchestration (AI Weather Orchestration delegating to Geo and NonAI Weather, in-process for Chat4a and remote MCP for Chat4b), plus Chat5a and Chat5b, the same orchestration with five toggleable guardrail gates.
     </p>
 
     <FluentTabs @bind-ActiveTabId="ActiveTab">
@@ -59,6 +59,26 @@
                 </FluentButton>
             </div>
         </EditForm>
+        @if (_gateStateByTab.TryGetValue(_activeTab, out var gateState))
+        {
+            <div class="chat-gate-options">
+                <label title="Pre-Orchestration - Deterministic Max Length. Blocks the request if the message is over 500 characters.">
+                    <input type="checkbox" @bind="gateState.MaxLength" /> 500 Char
+                </label>
+                <label title="Pre-Orchestration - Deterministic Input Check. A keyword/regex heuristic classifies the message as in/out of scope, no LLM call.">
+                    <input type="checkbox" @bind="gateState.RuleInput" /> Code Input
+                </label>
+                <label title="Pre-Orchestration - LLM-based Input Check. A separate, cheap LLM call classifies the message as in/out of scope before the orchestrator runs.">
+                    <input type="checkbox" @bind="gateState.LlmInput" /> LLM Input
+                </label>
+                <label title="Orchestration - Prompt-based Scope Guard. An instruction in the orchestrator's own system prompt telling it to only answer weather questions (not a location by itself) — no code enforces this, so it's the easiest gate to bypass.">
+                    <input type="checkbox" @bind="gateState.SystemPrompt" /> Sys Prompt
+                </label>
+                <label title="Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown; requires buffering the complete response first, so token streaming is disabled for that turn.">
+                    <input type="checkbox" @bind="gateState.LlmOutput" /> LLM Output
+                </label>
+            </div>
+        }
     </FluentCard>
     </div>
 </div>
@@ -73,8 +93,10 @@
         new("Chat2a", "Chat2a", "2a", "Agent Framework · Local Loops · Like Foundry Console V3"),
         new("Chat2b", "Chat2b", "2b", "Agent Framework · Remote MCP · Like Foundry Console V4"),
         new("Chat3", "Chat3", "3", "Hosted Foundry agent · Like Foundry Console V5"),
-        new("Chat4a", "Chat4a", "4a", "Agent Framework · Local Loops · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather"),
-        new("Chat4b", "Chat4b", "4b", "Agent Framework · Remote MCP · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather (invalid Token Counts)"),
+        new("Chat4a", "Chat4a", "4a", "Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents (invalid Token Counts)"),
+        new("Chat4b", "Chat4b", "4b", "Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents (invalid Token Counts)"),
+        new("Chat5a", "Chat5a", "5a", "Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed (invalid Token Counts)"),
+        new("Chat5b", "Chat5b", "5b", "Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed (invalid Token Counts)"),
     ];
 
     private readonly Dictionary<string, string?> _sessions = new()
@@ -86,6 +108,8 @@
         ["Chat3"] = null,
         ["Chat4a"] = null,
         ["Chat4b"] = null,
+        ["Chat5a"] = null,
+        ["Chat5b"] = null,
     };
 
     private readonly Dictionary<string, List<ChatEntry>> _histories = new()
@@ -97,6 +121,24 @@
         ["Chat3"] = [],
         ["Chat4a"] = [],
         ["Chat4b"] = [],
+        ["Chat5a"] = [],
+        ["Chat5b"] = [],
+    };
+
+    // Chat5a/Chat5b only — all five gates default checked, independently per tab.
+    private sealed class Chat5GateState
+    {
+        public bool MaxLength { get; set; } = true;
+        public bool RuleInput { get; set; } = true;
+        public bool LlmInput { get; set; } = true;
+        public bool SystemPrompt { get; set; } = true;
+        public bool LlmOutput { get; set; } = true;
+    }
+
+    private readonly Dictionary<string, Chat5GateState> _gateStateByTab = new()
+    {
+        ["Chat5a"] = new Chat5GateState(),
+        ["Chat5b"] = new Chat5GateState(),
     };
 
     private string _activeTab = "Chat1a";
@@ -128,6 +170,8 @@
         ["Chat3"] = false,
         ["Chat4a"] = false,
         ["Chat4b"] = false,
+        ["Chat5a"] = false,
+        ["Chat5b"] = false,
     };
 
     private bool IsActiveTabSending => _isSendingByTab[_activeTab];
@@ -149,6 +193,7 @@
         "user" => "chat-message user",
         "tool" => "chat-message tool",
         "error" => "chat-message error",
+        "blocked" => "chat-message blocked",
         _ => "chat-message assistant",
     };
 
@@ -270,12 +315,28 @@
         var assistantBuilder = new System.Text.StringBuilder();
         ChatEntry? assistantEntry = null;
 
-        try
-        {
-            await foreach (var streamEvent in ChatClient.StreamMessageAsync(
+        var chatEvents = _gateStateByTab.TryGetValue(tabId, out var gateState)
+            ? ChatClient.StreamMessageAsync(
+                tabId,
+                new Chat5SendMessageRequest
+                {
+                    SessionId = _sessions[tabId],
+                    Message = message,
+                    EnableMaxLengthGate = gateState.MaxLength,
+                    EnableRuleInputGate = gateState.RuleInput,
+                    EnableLlmInputGate = gateState.LlmInput,
+                    EnableSystemPromptGuard = gateState.SystemPrompt,
+                    EnableLlmOutputGate = gateState.LlmOutput,
+                },
+                CancellationToken.None)
+            : ChatClient.StreamMessageAsync(
                 tabId,
                 new ChatSendMessageRequest { SessionId = _sessions[tabId], Message = message },
-                CancellationToken.None))
+                CancellationToken.None);
+
+        try
+        {
+            await foreach (var streamEvent in chatEvents)
             {
                 if (streamEvent.Type == "session" && !string.IsNullOrWhiteSpace(streamEvent.SessionId))
                 {
@@ -328,6 +389,11 @@
                 else if (streamEvent.Type == "error" && !string.IsNullOrEmpty(streamEvent.ErrorMessage))
                 {
                     history.Add(new ChatEntry { Role = "error", Content = streamEvent.ErrorMessage });
+                    StateHasChanged();
+                }
+                else if (streamEvent.Type == "blocked" && !string.IsNullOrEmpty(streamEvent.ErrorMessage))
+                {
+                    history.Add(new ChatEntry { Role = "blocked", Content = streamEvent.ErrorMessage });
                     StateHasChanged();
                 }
                 else if (streamEvent.Type == "done")

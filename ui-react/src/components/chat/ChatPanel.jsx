@@ -7,6 +7,7 @@ import { findLastIndex } from '../../utils/array';
 import { formatToolHoverText, TOOL_HOVER_CLOSE_DELAY_MS } from '../../utils/chatToolHover';
 import { streamChatMessage } from '../../utils/chatStream';
 import { formatChatUsageChip, formatChatUsageDetails } from '../../utils/chatUsage';
+import Chat5GateOptions from './Chat5GateOptions';
 
 const TAB_CONFIG = [
   {
@@ -48,23 +49,48 @@ const TAB_CONFIG = [
     id: 'Chat4a',
     label: 'Chat4a',
     shortLabel: '4a',
-    description: 'Agent Framework · Local Loops · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather',
+    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents (invalid Token Counts)',
     endpoint: '/Chat4a/messages',
   },
   {
     id: 'Chat4b',
     label: 'Chat4b',
     shortLabel: '4b',
-    description: 'Agent Framework · Remote MCP · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather (invalid Token Counts)',
+    description: 'Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents (invalid Token Counts)',
     endpoint: '/Chat4b/messages',
   },
+  {
+    id: 'Chat5a',
+    label: 'Chat5a',
+    shortLabel: '5a',
+    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed (invalid Token Counts)',
+    endpoint: '/Chat5a/messages',
+    hasGates: true,
+  },
+  {
+    id: 'Chat5b',
+    label: 'Chat5b',
+    shortLabel: '5b',
+    description: 'Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed (invalid Token Counts)',
+    endpoint: '/Chat5b/messages',
+    hasGates: true,
+  },
 ];
+
+const GATE_DEFAULTS = {
+  maxLength: true,
+  ruleInput: true,
+  llmInput: true,
+  systemPrompt: true,
+  llmOutput: true,
+};
 
 const MESSAGE_CLASSES = {
   user: 'h-max min-h-min shrink-0 self-end max-w-[85%] overflow-visible rounded-2xl bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap',
   assistant: 'h-max min-h-min shrink-0 self-start max-w-[85%] overflow-visible rounded-2xl border border-border bg-muted px-3 py-2 text-foreground',
   tool: 'h-max min-h-min shrink-0 self-center text-xs text-muted-foreground',
   error: 'h-max min-h-min shrink-0 w-full rounded-md bg-destructive/15 px-3 py-2 text-destructive',
+  blocked: 'h-max min-h-min shrink-0 w-full rounded-md bg-amber-500/15 px-3 py-2 text-amber-600 dark:text-amber-400',
 };
 
 function messageClasses(entry) {
@@ -190,11 +216,18 @@ function createEmptySendingState() {
   return Object.fromEntries(TAB_CONFIG.map((tab) => [tab.id, false]));
 }
 
+function createEmptyGateState() {
+  return Object.fromEntries(
+    TAB_CONFIG.filter((tab) => tab.hasGates).map((tab) => [tab.id, { ...GATE_DEFAULTS }]),
+  );
+}
+
 function ChatPanel() {
   const [activeTab, setActiveTab] = useState('Chat1a');
   const [input, setInput] = useState('');
   const [sendingTabs, setSendingTabs] = useState(createEmptySendingState);
   const [histories, setHistories] = useState(createEmptyHistory);
+  const [gateState, setGateState] = useState(createEmptyGateState);
   const [scrollNonce, setScrollNonce] = useState(0);
   const sessionsRef = useRef(createEmptySessions());
   const messagesRef = useRef(null);
@@ -240,6 +273,7 @@ function ChatPanel() {
         endpoint,
         sessionId: sessionsRef.current[tabId],
         message,
+        gates: activeConfig.hasGates ? gateState[tabId] : undefined,
         onEvent: (payload) => {
           if (payload.type === 'session' && payload.sessionId) {
             sessionsRef.current[tabId] = payload.sessionId;
@@ -310,6 +344,14 @@ function ChatPanel() {
             return;
           }
 
+          if (payload.type === 'blocked' && payload.errorMessage) {
+            setHistories((current) => ({
+              ...current,
+              [tabId]: [...current[tabId], { role: 'blocked', content: payload.errorMessage }],
+            }));
+            return;
+          }
+
           if (payload.type === 'done') {
             usage = payload.usage ?? null;
             requestScrollToBottom(tabId);
@@ -356,7 +398,7 @@ function ChatPanel() {
     <div>
       <h2 className="text-xl font-semibold">Chat Clients</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Seven standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a and Chat4b's multi-agent orchestration (AI Weather Orchestration delegating to Geo and NonAI Weather, in-process for Chat4a and remote MCP for Chat4b).
+        Nine standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a and Chat4b's multi-agent orchestration (AI Weather Orchestration delegating to Geo and NonAI Weather, in-process for Chat4a and remote MCP for Chat4b), plus Chat5a and Chat5b, the same orchestration with five toggleable guardrail gates.
       </p>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3 gap-0">
@@ -388,7 +430,7 @@ function ChatPanel() {
             <div
               ref={messagesRef}
               data-chat-messages
-              className="flex min-h-40 max-h-96 flex-col gap-2 overflow-x-auto overflow-y-auto p-1"
+              className="flex min-h-48 max-h-[29rem] flex-col gap-2 overflow-x-auto overflow-y-auto p-1"
             >
               {histories[activeTab].map((entry, index) => (
                 entry.role === 'tool' ? (
@@ -436,6 +478,17 @@ function ChatPanel() {
                 {isActiveTabSending ? 'Sending…' : 'Send'}
               </Button>
             </form>
+            {activeConfig.hasGates ? (
+              <Chat5GateOptions
+                state={gateState[activeTab]}
+                onChange={(key, checked) =>
+                  setGateState((current) => ({
+                    ...current,
+                    [activeTab]: { ...current[activeTab], [key]: checked },
+                  }))
+                }
+              />
+            ) : null}
           </section>
         </TabsContent>
       </Tabs>

@@ -105,9 +105,9 @@ The request path differs by stack:
   or `/AIWeather/CurrentV5`)
 - **MVC** → local `HomeController` + `Core` (same handlers, no API hop)
 
-## Chat Clients (Chat1a–Chat2b, Chat3, and Chat4a–Chat4b)
+## Chat Clients (Chat1a–Chat2b, Chat3, Chat4a–Chat4b, and Chat5a–Chat5b)
 
-Separate from **Current AI Weather**. All three UIs expose a chat panel on `/chat-clients` with seven tabs:
+Separate from **Current AI Weather**. All three UIs expose a chat panel on `/chat-clients` with nine tabs:
 
 | Tab | Stack | Tools |
 | --- | --- | --- |
@@ -118,9 +118,11 @@ Separate from **Current AI Weather**. All three UIs expose a chat panel on `/cha
 | Chat3 | Hosted Foundry agent | MCP on `wx1116-agent-for-chat` (V5) |
 | Chat4a | Agent Framework, multi-agent | In-process, split across Geo/NonAI Weather sub-agents |
 | Chat4b | Agent Framework, multi-agent | Remote MCP, split across Geo/NonAI Weather sub-agents |
+| Chat5a | Agent Framework, multi-agent, guardrailed | Chat4a's in-process shape plus five toggleable guardrail gates |
+| Chat5b | Agent Framework, multi-agent, guardrailed | Chat4b's remote MCP shape plus five toggleable guardrail gates |
 
-- **React / Blazor** → `POST /Chat1a/messages` … `/Chat4b/messages` on Weather API (SSE stream)
-- **MVC** → same routes locally via `Chat1aController` … `Chat4bController` + Core services
+- **React / Blazor** → `POST /Chat1a/messages` … `/Chat5b/messages` on Weather API (SSE stream)
+- **MVC** → same routes locally via `Chat1aController` … `Chat5bController` + Core services
 
 Full detail: [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)
 
@@ -128,14 +130,16 @@ Full detail: [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-cli
 flowchart LR
   UI[React / Blazor / MVC /chat-clients chat panel]
   API[MVC or WeatherAPI Chat controllers]
-  Core[Core.Chat1a…3, Chat4a, Chat4b services]
+  Core[Core.Chat1a…3, Chat4a, Chat4b, Chat5a, Chat5b services]
   Model[Azure OpenAI Responses or hosted Foundry agent]
   Tools[In-process, MCP, or agent-owned MCP]
+  Gates[Chat5a/5b guardrail gates: length, keyword, LLM input/output]
 
   UI --> API
   API --> Core
   Core --> Model
   Core --> Tools
+  Core --> Gates
 ```
 
 ## AI Weather handlers (production path)

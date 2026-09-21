@@ -1,8 +1,10 @@
 ﻿using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Models;
+using Core.AIWeather.Services;
 using Core.Json;
 using Core.Weather;
 using DotNetEnv;
+using OpenAI.Conversations;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
@@ -32,9 +34,10 @@ internal class Program
 		 - JSON output from AI
 		""");
 
-		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
+		var projectUrl = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
+		var endpoint = FoundryOpenAiEndpoint.Resolve(projectUrl);
 		var agentName = "wx1116-agent-for-current-weather";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");		
 
 		var userPrompt = $"""
 		What is today's weather in: {location}?
@@ -52,29 +55,24 @@ internal class Program
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
-				Endpoint = new Uri(endpoint),
+				Endpoint = endpoint,
 			});
 
 		var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+		var conversation = (await projectOpenAIClient
+			.GetProjectConversationsClient()
+			.CreateProjectConversationAsync(new ConversationCreationOptions())).Value;
 
 		var options = new CreateResponseOptions()
 		{
 			ConversationOptions = new ResponseConversationOptions(),
+			AgentConversationId = conversation.Id,
+			StreamingEnabled = true,
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
 			},
 		};
-
-		// ProjectResponsesClient reads AgentConversationId (via ApplyClientDefaults) before every
-		// call, which walks into ConversationOptions.Patch and NullReferenceExceptions in
-		// CreateResponseOptions.PropagateGet if ConversationOptions is left null (hence setting it
-		// above). But if AgentConversationId still reads null afterward, ApplyClientDefaults writes
-		// it back as null, which removes "$.conversation" - and that removal propagates onto
-		// ConversationOptions' own patch in a way that throws a KeyNotFoundException
-		// ("No value found at JSON path '$'") from ResponseConversationOptions' JSON writer the
-		// next time this options object is serialized. Giving it a real value up front avoids that.
-		options.AgentConversationId = Guid.NewGuid().ToString();
 
 		try
 		{

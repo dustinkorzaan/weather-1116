@@ -1,7 +1,7 @@
 <div class="chat-panel">
     <h2 class="section-heading">Chat Clients</h2>
     <p class="chat-lede">
-        Seven standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a and Chat4b's multi-agent orchestration (AI Weather Orchestration delegating to Geo and NonAI Weather, in-process for Chat4a and remote MCP for Chat4b).
+        Nine standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a and Chat4b's multi-agent orchestration (AI Weather Orchestration delegating to Geo and NonAI Weather, in-process for Chat4a and remote MCP for Chat4b), plus Chat5a and Chat5b, the same orchestration with five toggleable guardrail gates.
     </p>
 
     <div class="chat-tabs" role="tablist" aria-label="Chat client tabs">
@@ -12,6 +12,8 @@
         <button type="button" class="chat-tab" data-chat-tab="Chat3" role="tab" aria-selected="false" aria-label="Chat3" title="Chat3">3</button>
         <button type="button" class="chat-tab" data-chat-tab="Chat4a" role="tab" aria-selected="false" aria-label="Chat4a" title="Chat4a">4a</button>
         <button type="button" class="chat-tab" data-chat-tab="Chat4b" role="tab" aria-selected="false" aria-label="Chat4b" title="Chat4b">4b</button>
+        <button type="button" class="chat-tab" data-chat-tab="Chat5a" role="tab" aria-selected="false" aria-label="Chat5a" title="Chat5a">5a</button>
+        <button type="button" class="chat-tab" data-chat-tab="Chat5b" role="tab" aria-selected="false" aria-label="Chat5b" title="Chat5b">5b</button>
     </div>
 
     <div class="chat-tab-descriptions">
@@ -20,8 +22,10 @@
         <p class="chat-tab-description" data-chat-description="Chat2a" hidden>Agent Framework · Local Loops · Like Foundry Console V3</p>
         <p class="chat-tab-description" data-chat-description="Chat2b" hidden>Agent Framework · Remote MCP · Like Foundry Console V4</p>
         <p class="chat-tab-description" data-chat-description="Chat3" hidden>Hosted Foundry agent · Like Foundry Console V5</p>
-        <p class="chat-tab-description" data-chat-description="Chat4a" hidden>Agent Framework · Local Loops · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather</p>
-        <p class="chat-tab-description" data-chat-description="Chat4b" hidden>Agent Framework · Remote MCP · Multi-agent · AI Weather Orchestration delegates to Geo and NonAI Weather (invalid Token Counts)</p>
+        <p class="chat-tab-description" data-chat-description="Chat4a" hidden>Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents (invalid Token Counts)</p>
+        <p class="chat-tab-description" data-chat-description="Chat4b" hidden>Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents (invalid Token Counts)</p>
+        <p class="chat-tab-description" data-chat-description="Chat5a" hidden>Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed (invalid Token Counts)</p>
+        <p class="chat-tab-description" data-chat-description="Chat5b" hidden>Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed (invalid Token Counts)</p>
     </div>
 
     <section class="chat-conversation" aria-label="Chat conversation">
@@ -36,5 +40,22 @@
                     type="submit"
                     class="btn chat-send">Send</button>
         </form>
+        <div id="chat-gate-options" class="chat-gate-options" hidden>
+            <label title="Pre-Orchestration - Deterministic Max Length. Blocks the request if the message is over 500 characters.">
+                <input type="checkbox" data-chat-gate="maxLength" checked> 500 Char
+            </label>
+            <label title="Pre-Orchestration - Deterministic Input Check. A keyword/regex heuristic classifies the message as in/out of scope, no LLM call.">
+                <input type="checkbox" data-chat-gate="ruleInput" checked> Code Input
+            </label>
+            <label title="Pre-Orchestration - LLM-based Input Check. A separate, cheap LLM call classifies the message as in/out of scope before the orchestrator runs.">
+                <input type="checkbox" data-chat-gate="llmInput" checked> LLM Input
+            </label>
+            <label title="Orchestration - Prompt-based Scope Guard. An instruction in the orchestrator's own system prompt telling it to only answer weather questions (not a location by itself) &mdash; no code enforces this, so it's the easiest gate to bypass.">
+                <input type="checkbox" data-chat-gate="systemPrompt" checked> Sys Prompt
+            </label>
+            <label title="Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown; requires buffering the complete response first, so token streaming is disabled for that turn.">
+                <input type="checkbox" data-chat-gate="llmOutput" checked> LLM Output
+            </label>
+        </div>
     </section>
 </div>

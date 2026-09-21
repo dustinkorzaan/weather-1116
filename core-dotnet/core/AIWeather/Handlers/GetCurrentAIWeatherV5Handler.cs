@@ -7,7 +7,6 @@ using Core.AIWeather.Models;
 using Core.AIWeather.Services;
 using Core.Data.Domain;
 using Core.Weather;
-using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using CQMediator;
 using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
@@ -82,44 +81,42 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
             var agentNameEnv = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME");
             var agentName = string.IsNullOrWhiteSpace(agentNameEnv) ? "wx1116-agent-for-current-weather" : agentNameEnv;
 
-            var projectEndpoint = ResolveProjectEndpoint(projectUrl);
-
             _logger.LogInformation(
                 "AI Weather: Foundry project {ProjectEndpoint}, agent {Agent}",
-                projectEndpoint,
+                projectUrl,
                 agentName);
 
-            ProjectResponsesClient client = FoundryAgentResponsesClientFactory.CreateForAgent(agentName, projectEndpoint);
+            var (client, conversationId) = await FoundryAgentResponsesClientFactory.CreateForAgentAsync(
+                agentName,
+                new Uri(projectUrl),
+                cancellationToken);
 
             CreateResponseOptions options = new()
             {
                 ConversationOptions = new ResponseConversationOptions(),
+                AgentConversationId = conversationId,
+                StreamingEnabled = true,
                 InputItems =
                 {
                     ResponseItem.CreateUserMessageItem(userPrompt),
                 },
             };
 
-            // ProjectResponsesClient.CreateResponseAsync reads AgentConversationId (via
-            // ApplyClientDefaults) before every call. That getter walks into
-            // ConversationOptions.Patch, so a bare CreateResponseOptions (ConversationOptions
-            // left null) crashes with a NullReferenceException in
-            // CreateResponseOptions.PropagateGet before any request is sent - hence
-            // ConversationOptions above. But when AgentConversationId still reads null (no
-            // conversation id set), ApplyClientDefaults writes it back as null, which removes
-            // "$.conversation" and - because of how that removal propagates onto
-            // ConversationOptions' own patch - throws a KeyNotFoundException
-            // ("No value found at JSON path '$'") from ResponseConversationOptions' JSON writer
-            // the next time this options object is serialized. Giving AgentConversationId a
-            // real (non-null) value up front short-circuits ApplyClientDefaults's null-check
-            // entirely, so it never touches the patch again. V5 has no multi-turn conversation
-            // to resume, so this is just a stable per-run id, not a real Foundry conversation.
-            options.AgentConversationId = activitySessionId;
-
             // The hosted agent supplies instructions, response schema, and MCP tools itself, so a
             // single call is enough - like V4, there is no local tool-call loop to drive here.
             runLog.AddLog("Start CreateResponse", null);
-            response = await client.CreateResponseAsync(options, cancellationToken);
+            response = null;
+            await foreach (var update in client.CreateResponseStreamingAsync(options, cancellationToken))
+            {
+                if (update is StreamingResponseCompletedUpdate completed)
+                {
+                    response = completed.Response;
+                }
+                else if (update is StreamingResponseFailedUpdate failed)
+                {
+                    response = failed.Response;
+                }
+            }
             runLog.AddLog("Finish CreateResponse", response);
 
             if (response is null)

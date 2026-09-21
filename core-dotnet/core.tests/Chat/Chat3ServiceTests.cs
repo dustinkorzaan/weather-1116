@@ -7,7 +7,7 @@ public class Chat3ServiceTests
     {
         var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Chat3/Chat3Service.cs"));
 
-        Assert.Contains("CreateProjectResponsesClientForChatAgent", source, StringComparison.Ordinal);
+        Assert.Contains("CreateProjectResponsesClientForChatAgentAsync", source, StringComparison.Ordinal);
         Assert.Contains("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME", source, StringComparison.Ordinal);
         Assert.Contains("require_approval: never", source, StringComparison.Ordinal);
         Assert.DoesNotContain("CreateMcpApprovalResponseItem", source, StringComparison.Ordinal);
@@ -15,6 +15,8 @@ public class Chat3ServiceTests
         Assert.DoesNotContain("pendingApprovals", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ChatMcpToolFactory", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolExecutor", source, StringComparison.Ordinal);
+        Assert.Contains("ConversationOptions = new ResponseConversationOptions()", source, StringComparison.Ordinal);
+        Assert.Contains("AgentConversationId = conversationId", source, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -48,6 +50,8 @@ public class Chat3ServiceTests
         Assert.Contains("await enumerator.MoveNextAsync()", source, StringComparison.Ordinal);
         Assert.Contains("ExceptionDispatchInfo.Capture", source, StringComparison.Ordinal);
         Assert.Contains("ChatStreamEvent.Error(failure.SourceException.Message)", source, StringComparison.Ordinal);
+        Assert.Contains("CreateProjectResponsesClientForChatAgentAsync", source, StringComparison.Ordinal);
+        Assert.Contains("Chat3 failed to create Foundry conversation", source, StringComparison.Ordinal);
     }
 
 }

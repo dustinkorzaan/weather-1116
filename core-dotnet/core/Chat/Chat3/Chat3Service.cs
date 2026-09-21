@@ -55,35 +55,43 @@ public sealed class Chat3Service : IChatClientService
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
         var usage = new ChatUsageAccumulator();
-        var client = _settings.CreateProjectResponsesClientForChatAgent();
+        ProjectResponsesClient client = null!;
+        string conversationId = "";
+        ExceptionDispatchInfo? clientFailure = null;
+        try
+        {
+            // Same Foundry client sequence as Console V5. If that HTTP call fails, yield an
+            // SSE error instead of letting the iterator abort (the UI then shows "network error").
+            (client, conversationId) = await _settings.CreateProjectResponsesClientForChatAgentAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            clientFailure = ExceptionDispatchInfo.Capture(ex);
+        }
+
+        if (clientFailure is not null)
+        {
+            _logger.LogError(
+                clientFailure.SourceException,
+                "Chat3 failed to create Foundry conversation for agent {AgentName}",
+                _settings.ChatAgentName);
+            yield return ChatStreamEvent.Error(clientFailure.SourceException.Message);
+            yield break;
+        }
+
         var assistantBuilder = new StringBuilder();
         var previousResponseId = _responseStore.GetPreviousResponseId(sessionId);
 
         CreateResponseOptions options = new()
         {
             ConversationOptions = new ResponseConversationOptions(),
+            AgentConversationId = conversationId,
             StreamingEnabled = true,
-            StoredOutputEnabled = true,
             InputItems =
             {
                 ResponseItem.CreateUserMessageItem(userMessage),
             },
         };
-
-        // ProjectResponsesClient.CreateResponseStreamingAsync reads AgentConversationId (via
-        // ApplyClientDefaults) before every call. That getter walks into ConversationOptions.Patch,
-        // so a bare CreateResponseOptions (ConversationOptions left null) crashes with a
-        // NullReferenceException in CreateResponseOptions.PropagateGet before streaming starts -
-        // hence ConversationOptions above. But when AgentConversationId still reads null (no
-        // conversation id set), ApplyClientDefaults writes it back as null, which removes
-        // "$.conversation" and - because of how that removal propagates onto ConversationOptions'
-        // own patch - throws a KeyNotFoundException ("No value found at JSON path '$'") from
-        // ResponseConversationOptions' JSON writer the next time this options object is
-        // serialized. Giving AgentConversationId a real (non-null) value up front short-circuits
-        // ApplyClientDefaults's null-check entirely, so it never touches the patch again. Chat3
-        // tracks continuity itself via PreviousResponseId, not Foundry's conversation object, so
-        // this is just a stable per-chat-session id, not a real Foundry conversation.
-        options.AgentConversationId = sessionId;
 
         if (!string.IsNullOrWhiteSpace(previousResponseId))
         {

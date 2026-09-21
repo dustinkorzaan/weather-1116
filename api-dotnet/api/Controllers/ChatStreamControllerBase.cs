@@ -33,5 +33,33 @@ public abstract class ChatStreamControllerBase : ControllerBase
         {
             // Client disconnected mid-stream.
         }
+        catch (Exception ex)
+        {
+            await WriteSseEventAsync(Response, ChatStreamEvent.Error(ex.Message), cancellationToken);
+        }
+    }
+
+    // Chat5a/Chat5b only — additive overload bound to IChat5ClientService/Chat5SendMessageRequest
+    // so Chat1-4's overload above stays untouched. Reuses the same SSE writer/serializer.
+    protected async Task StreamChatAsync(
+        IChat5ClientService chatService,
+        Chat5SendMessageRequest request,
+        CancellationToken cancellationToken)
+    {
+        Response.Headers.CacheControl = "no-cache";
+        Response.Headers.Connection = "keep-alive";
+        Response.ContentType = "text/event-stream";
+
+        try
+        {
+            await foreach (var streamEvent in chatService.SendMessageAsync(request, cancellationToken))
+            {
+                await WriteSseEventAsync(Response, streamEvent, cancellationToken);
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Client disconnected mid-stream.
+        }
     }
 }
