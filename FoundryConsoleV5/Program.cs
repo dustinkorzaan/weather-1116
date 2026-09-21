@@ -119,18 +119,14 @@ internal class Program
 		var projectEndpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(endpoint);
 		var projectOpenAIClient = new ProjectOpenAIClient(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-			new ProjectOpenAIClientOptions
-			{
-				Endpoint = projectEndpoint,
-				ApiVersion = FoundryOpenAiEndpoint.ProjectOpenAiApiVersion,
-			});
+			FoundryOpenAiEndpoint.CreateProjectOpenAIClientOptions(projectEndpoint, agentName));
 
 		ConversationResource conversation = (await projectOpenAIClient
 			.GetProjectConversationsClient()
 			.CreateProjectConversationAsync(new ConversationCreationOptions())).Value;
 
 		ProjectResponsesClient responseClient =
-			projectOpenAIClient.GetProjectResponsesClientForAgent(agentName, conversation.Id);
+			projectOpenAIClient.GetProjectResponsesClientForAgentEndpoint(agentName, conversation.Id);
 
 		var options = new CreateResponseOptions()
 		{

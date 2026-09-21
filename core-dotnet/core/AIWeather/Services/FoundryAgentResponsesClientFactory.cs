@@ -28,13 +28,9 @@ public static class FoundryAgentResponsesClientFactory
 
         ProjectOpenAIClient projectOpenAIClient = new(
             ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-            new ProjectOpenAIClientOptions
-            {
-                Endpoint = projectEndpoint,
-                ApiVersion = FoundryOpenAiEndpoint.ProjectOpenAiApiVersion,
-            });
+            FoundryOpenAiEndpoint.CreateProjectOpenAIClientOptions(projectEndpoint, agentName));
 
-        return projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+        return projectOpenAIClient.GetProjectResponsesClientForAgentEndpoint(agentName);
     }
 
     public static Uri ResolveProjectEndpointFromEnvironment() =>

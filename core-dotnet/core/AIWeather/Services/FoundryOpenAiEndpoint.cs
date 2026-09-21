@@ -1,3 +1,5 @@
+using Azure.AI.Extensions.OpenAI;
+
 namespace Core.AIWeather.Services;
 
 /// <summary>
@@ -8,10 +10,29 @@ public static class FoundryOpenAiEndpoint
     private const string OpenAiPathSuffix = "/openai/v1";
 
     /// <summary>
-    /// <c>api-version</c> query parameter for <see cref="Azure.AI.Extensions.OpenAI.ProjectOpenAIClient"/>
-    /// (project conversations and hosted-agent responses). Required — the SDK does not infer a default.
+    /// <c>api-version</c> query parameter for <see cref="ProjectOpenAIClient"/> (project conversations
+    /// and hosted-agent responses). Required — the SDK only adds the query parameter when
+    /// <see cref="ProjectOpenAIClientOptions.AgentName"/> is also set.
     /// </summary>
     public const string ProjectOpenAiApiVersion = "2025-11-15-preview";
+
+    /// <summary>
+    /// Builds <see cref="ProjectOpenAIClientOptions"/> for a hosted Foundry agent. Sets
+    /// <see cref="ProjectOpenAIClientOptions.AgentName"/> so the SDK pipeline includes
+    /// <c>api-version</c> (see Azure.AI.Extensions.OpenAI 3.0.0-beta.2 <c>CreatePipeline</c>).
+    /// </summary>
+    public static ProjectOpenAIClientOptions CreateProjectOpenAIClientOptions(Uri projectEndpoint, string agentName)
+    {
+        ArgumentNullException.ThrowIfNull(projectEndpoint);
+        ArgumentException.ThrowIfNullOrWhiteSpace(agentName);
+
+        return new ProjectOpenAIClientOptions
+        {
+            Endpoint = projectEndpoint,
+            AgentName = agentName,
+            ApiVersion = ProjectOpenAiApiVersion,
+        };
+    }
 
     /// <summary>
     /// Returns a URI suitable for <c>ResponsesClientOptions.Endpoint</c> (model-direct V3/V4 calls).
