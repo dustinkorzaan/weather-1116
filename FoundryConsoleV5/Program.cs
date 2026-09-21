@@ -9,11 +9,18 @@ using OpenAI.Responses;
 using System;
 using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 internal class Program
 {
+	private const string HostedAgentInstructionsRelativePath =
+		".github/foundry-agents/wx1116-agent-for-current-weather.instructions.md";
+
+	private const string HostedAgentSchemaRelativePath =
+		".github/foundry-agents/wx1116-agent-for-current-weather.response-schema.json";
+
 	private static async Task Main(string[] args)
 	{
 		Env.TraversePath().Load();
@@ -38,17 +45,24 @@ internal class Program
 		var agentName = "wx1116-agent-for-current-weather";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
+		var systemPrompt = LoadRepoFileOrThrow(HostedAgentInstructionsRelativePath);
+		var aiOutputSchema = LoadRepoFileOrThrow(HostedAgentSchemaRelativePath);
+
 		var userPrompt = $"""
 		What is today's weather in: {location}?
 		""";
 
 		Console.WriteLine($"OpenAI endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
-		Console.WriteLine("\nConfigured on the agent (not sent by this console):");
-		Console.WriteLine("- Instructions");
-		Console.WriteLine("- Response schema");
-		Console.WriteLine("- MCP tools (lat/long + current weather)");
-		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
+
+		Console.WriteLine("\nSystem Prompt (published on the agent — not sent in this request):");
+		Console.WriteLine(systemPrompt);
+
+		Console.WriteLine("\nUser Prompt (sent):");
+		Console.WriteLine(userPrompt);
+
+		Console.WriteLine("\nAI Output Schema (published on the agent — not sent in this request):");
+		Console.WriteLine(aiOutputSchema);
 
 		var projectEndpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(endpoint);
 		var projectOpenAIClient = new ProjectOpenAIClient(
@@ -58,9 +72,6 @@ internal class Program
 				Endpoint = projectEndpoint,
 			});
 
-		// Hosted-agent Responses calls need a real Foundry conversation id (not a random GUID).
-		// V5 does not send a local system prompt — instructions live on the agent (see V4 for
-		// model-direct systemPrompt + CreateSystemMessageItem).
 		ConversationResource conversation = (await projectOpenAIClient
 			.GetProjectConversationsClient()
 			.CreateProjectConversationAsync(new ConversationCreationOptions())).Value;
@@ -77,8 +88,6 @@ internal class Program
 			},
 		};
 
-		// Same SDK workaround as Chat3/V5 handler: non-null ConversationOptions plus a real
-		// conversation id so ApplyClientDefaults does not corrupt the options patch.
 		options.AgentConversationId = conversation.Id;
 
 		try
@@ -141,5 +150,37 @@ internal class Program
 
 		Console.WriteLine("\nPress any key to continue.");
 		Console.ReadKey(true);
+	}
+
+	private static string LoadRepoFileOrThrow(string repoRelativePath)
+	{
+		var path = TryFindRepoFile(repoRelativePath);
+		if (path is null)
+		{
+			throw new FileNotFoundException(
+				$"Could not find {repoRelativePath}. Run from the repo (e.g. FoundryConsoleV5/) so the hosted-agent instructions and schema can be displayed.");
+		}
+
+		return File.ReadAllText(path);
+	}
+
+	private static string? TryFindRepoFile(string repoRelativePath)
+	{
+		foreach (var startDir in new[] { Directory.GetCurrentDirectory(), AppContext.BaseDirectory })
+		{
+			var dir = new DirectoryInfo(startDir);
+			while (dir is not null)
+			{
+				var candidate = Path.Combine(dir.FullName, repoRelativePath);
+				if (File.Exists(candidate))
+				{
+					return candidate;
+				}
+
+				dir = dir.Parent;
+			}
+		}
+
+		return null;
 	}
 }
