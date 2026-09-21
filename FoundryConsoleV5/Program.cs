@@ -59,6 +59,7 @@ internal class Program
 
 		var options = new CreateResponseOptions()
 		{
+			ConversationOptions = new ResponseConversationOptions(),
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
