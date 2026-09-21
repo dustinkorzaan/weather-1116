@@ -7,7 +7,7 @@ public class Chat3ServiceTests
     {
         var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Chat3/Chat3Service.cs"));
 
-        Assert.Contains("CreateProjectResponsesClientForChatAgent", source, StringComparison.Ordinal);
+        Assert.Contains("CreateProjectResponsesClientForChatAgentAsync", source, StringComparison.Ordinal);
         Assert.Contains("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME", source, StringComparison.Ordinal);
         Assert.Contains("require_approval: never", source, StringComparison.Ordinal);
         Assert.DoesNotContain("CreateMcpApprovalResponseItem", source, StringComparison.Ordinal);
@@ -15,19 +15,8 @@ public class Chat3ServiceTests
         Assert.DoesNotContain("pendingApprovals", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ChatMcpToolFactory", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolExecutor", source, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void Service_SetsConversationOptions_SoApplyClientDefaultsDoesNotThrow()
-    {
-        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Chat3/Chat3Service.cs"));
-
-        // ProjectResponsesClient.CreateResponseStreamingAsync reads AgentConversationId (via
-        // ApplyClientDefaults) before every call, which walks into ConversationOptions.Patch and
-        // throws a NullReferenceException in CreateResponseOptions.PropagateGet when
-        // ConversationOptions is left at its default null. A non-null ConversationOptions on the
-        // options literal is required to avoid it.
         Assert.Contains("ConversationOptions = new ResponseConversationOptions()", source, StringComparison.Ordinal);
+        Assert.Contains("AgentConversationId = conversationId", source, StringComparison.Ordinal);
     }
 
     [Fact]
