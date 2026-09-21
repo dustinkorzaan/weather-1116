@@ -15,24 +15,30 @@ public class FoundryAgentResponsesClientFactoryTests
             RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Services/FoundryAgentResponsesClientFactory.cs"));
         var console = File.ReadAllText(RepoFiles.FindRepoFile("FoundryConsoleV5/Program.cs"));
 
+        // Console V5 is untouched and stays its own, independent implementation - the factory does not
+        // call it, and this test only checks that the two stay in agreement on the parts that must
+        // match (endpoint, agent, conversation calls), not that either references the other.
         Assert.Contains("Endpoint = endpoint", factory, StringComparison.Ordinal);
         Assert.Contains("Endpoint = new Uri(endpoint)", console, StringComparison.Ordinal);
         Assert.Contains("GetProjectResponsesClientForAgent", factory, StringComparison.Ordinal);
         Assert.Contains("GetProjectResponsesClientForAgent", console, StringComparison.Ordinal);
         Assert.Contains("CreateProjectConversationAsync", factory, StringComparison.Ordinal);
         Assert.Contains("CreateProjectConversationAsync", console, StringComparison.Ordinal);
-        // Both must set AgentName: without it, ProjectOpenAIClient.CreatePipeline (Azure.AI.Extensions.OpenAI
-        // 3.0.0-beta.2) never attaches "api-version" to outgoing requests, and Foundry rejects every call
-        // with "Missing required query parameter: api-version" - see
-        // Factory_SendsApiVersionQueryParameterOnEveryRequest below for a live-request regression test.
-        Assert.Contains("AgentName = agentName", factory, StringComparison.Ordinal);
-        Assert.Contains("AgentName = agentName", console, StringComparison.Ordinal);
         Assert.DoesNotContain("FoundryOpenAiEndpoint.Resolve", factory, StringComparison.Ordinal);
         Assert.DoesNotContain("ResolveProjectEndpoint", factory, StringComparison.Ordinal);
+
+        // Console V5's single client (no AgentName) works for CreateProjectConversationAsync but fails
+        // "Missing required query parameter: api-version" on the agent-scoped responses call - confirmed
+        // against a live Foundry project. The factory therefore uses two ProjectOpenAIClient instances,
+        // one per call, so each gets the api-version behavior its endpoint actually needs (see
+        // Factory_ResponsesRequestCarriesApiVersion_ConversationsRequestDoesNot below). Console V5 itself
+        // is left as-is; do not add AgentName there.
+        Assert.Contains("AgentName = agentName", factory, StringComparison.Ordinal);
+        Assert.DoesNotContain("AgentName =", console, StringComparison.Ordinal);
     }
 
     [Fact]
-    public async Task Factory_SendsApiVersionQueryParameterOnEveryRequest()
+    public async Task Factory_ResponsesRequestCarriesApiVersion_ConversationsRequestDoesNot()
     {
         using var listener = new HttpListener();
         var port = GetFreeTcpPort();
@@ -40,11 +46,12 @@ public class FoundryAgentResponsesClientFactoryTests
         listener.Prefixes.Add(prefix);
         listener.Start();
 
-        Uri? capturedUri = null;
+        var capturedUris = new List<Uri>();
         var listenerTask = Task.Run(async () =>
         {
+            // Only the conversation-creation call happens during CreateForAgentAsync itself; capture it.
             var ctx = await listener.GetContextAsync();
-            capturedUri = ctx.Request.Url;
+            lock (capturedUris) { capturedUris.Add(ctx.Request.Url!); }
             ctx.Response.StatusCode = 200;
             ctx.Response.ContentType = "application/json";
             var body = "{\"id\":\"conv_test\",\"object\":\"conversation\"}"u8.ToArray();
@@ -53,7 +60,7 @@ public class FoundryAgentResponsesClientFactoryTests
             ctx.Response.OutputStream.Close();
         });
 
-        var (_, conversationId) = await FoundryAgentResponsesClientFactoryTestHelper.CreateForAgentAsync(
+        var (responseClient, conversationId) = await FoundryAgentResponsesClientFactoryTestHelper.CreateForAgentAsync(
             "test-agent",
             new Uri($"{prefix}api/projects/testproj"),
             "fake-key");
@@ -62,8 +69,11 @@ public class FoundryAgentResponsesClientFactoryTests
         listener.Stop();
 
         Assert.Equal("conv_test", conversationId);
-        Assert.NotNull(capturedUri);
-        Assert.Contains("api-version=", capturedUri!.Query, StringComparison.Ordinal);
+        Assert.NotNull(responseClient);
+
+        var conversationsRequest = Assert.Single(capturedUris);
+        Assert.Contains("/conversations", conversationsRequest.AbsolutePath, StringComparison.Ordinal);
+        Assert.DoesNotContain("api-version=", conversationsRequest.Query, StringComparison.Ordinal);
     }
 
     private static int GetFreeTcpPort()
@@ -88,16 +98,24 @@ internal static class FoundryAgentResponsesClientFactoryTestHelper
         Uri endpoint,
         string apiKey)
     {
-        var projectOpenAIClient = new ProjectOpenAIClient(
-            ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
+        var apiKeyPolicy = ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key");
+
+        var responsesHost = new ProjectOpenAIClient(
+            apiKeyPolicy,
             new ProjectOpenAIClientOptions
             {
                 Endpoint = endpoint,
                 AgentName = agentName,
             });
+        var responseClient = responsesHost.GetProjectResponsesClientForAgent(agentName);
 
-        var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
-        var conversation = (await projectOpenAIClient
+        var conversationsHost = new ProjectOpenAIClient(
+            apiKeyPolicy,
+            new ProjectOpenAIClientOptions
+            {
+                Endpoint = endpoint,
+            });
+        var conversation = (await conversationsHost
             .GetProjectConversationsClient()
             .CreateProjectConversationAsync(new ConversationCreationOptions())).Value;
 

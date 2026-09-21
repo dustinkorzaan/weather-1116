@@ -49,16 +49,11 @@ internal class Program
 		Console.WriteLine("- MCP tools (lat/long + current weather)");
 		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
 
-		// ProjectOpenAIClient.CreatePipeline (Azure.AI.Extensions.OpenAI 3.0.0-beta.2) only attaches the
-		// required "api-version" query parameter when ProjectOpenAIClientOptions.AgentName is set;
-		// without it every request (conversations, responses) fails with
-		// "Missing required query parameter: api-version".
 		var projectOpenAIClient = new ProjectOpenAIClient(
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
 				Endpoint = new Uri(endpoint),
-				AgentName = agentName,
 			});
 
 		var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);

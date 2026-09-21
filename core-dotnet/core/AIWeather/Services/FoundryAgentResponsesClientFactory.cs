@@ -9,10 +9,21 @@ namespace Core.AIWeather.Services;
 /// <summary>
 /// Builds <see cref="ProjectResponsesClient"/> instances the same way Foundry Console V5
 /// <c>Program.cs</c> does: api-key auth, <c>AZURE_FOUNDRY_PROD_PROJ_URL</c> as-is,
-/// <c>GetProjectResponsesClientForAgent</c>, then <c>CreateProjectConversationAsync</c>. Also sets
-/// <c>ProjectOpenAIClientOptions.AgentName</c>, which Console V5 does not - required so the SDK
-/// attaches "api-version" to every request (see comment below).
+/// <c>GetProjectResponsesClientForAgent</c>, then <c>CreateProjectConversationAsync</c>.
+/// <c>FoundryConsoleV5/Program.cs</c> calls this method directly (rather than duplicating the
+/// sequence) so Console V5, Chat3, and Current AI Weather V5 can never drift apart.
 /// </summary>
+/// <remarks>
+/// Uses two <see cref="ProjectOpenAIClient"/> instances, not one, because the two calls need opposite
+/// "api-version" behavior on a live Foundry project: the agent-scoped responses endpoint requires it
+/// (without it, <c>CreateResponseStreamingAsync</c> fails with "Missing required query parameter:
+/// api-version"), while the "/v1"-style conversations endpoint rejects it ("api-version query
+/// parameter is not allowed when using /v1 path"). <c>ProjectOpenAIClient.CreatePipeline</c> (Azure.AI
+/// .Extensions.OpenAI 3.0.0-beta.2) attaches "api-version" to every request on a client's pipeline
+/// once, only when <see cref="ProjectOpenAIClientOptions.AgentName"/> is set - there is no per-call
+/// override - so getting both behaviors right means building the responses client from an instance
+/// with <c>AgentName</c> set and the conversations client from a separate instance without it.
+/// </remarks>
 public static class FoundryAgentResponsesClientFactory
 {
     public static Task<(ProjectResponsesClient ResponseClient, string ConversationId)> CreateForAgentAsync(
@@ -36,25 +47,24 @@ public static class FoundryAgentResponsesClientFactory
         var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
 
-        // ProjectOpenAIClient.CreatePipeline (Azure.AI.Extensions.OpenAI 3.0.0-beta.2) only adds the
-        // "api-version" query parameter to the pipeline when ProjectOpenAIClientOptions.AgentName is
-        // set. Without it, every request through this client (conversations, responses, ...) omits
-        // api-version and Foundry rejects it with "Missing required query parameter: api-version".
-        // Confirmed by capturing the raw outgoing request URI against a local test listener: with
-        // AgentName unset, CreateProjectConversationAsync sent "POST .../conversations" (no query
-        // string); with it set, the same call sent "POST .../conversations?api-version=v1". Setting it
-        // here does not change which endpoint is called or switch auth - it only flips this internal
-        // pipeline check.
-        var projectOpenAIClient = new ProjectOpenAIClient(
-            ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
+        var apiKeyPolicy = ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key");
+
+        var responsesHost = new ProjectOpenAIClient(
+            apiKeyPolicy,
             new ProjectOpenAIClientOptions
             {
                 Endpoint = endpoint,
                 AgentName = agentName,
             });
+        var responseClient = responsesHost.GetProjectResponsesClientForAgent(agentName);
 
-        var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
-        var conversation = (await projectOpenAIClient
+        var conversationsHost = new ProjectOpenAIClient(
+            apiKeyPolicy,
+            new ProjectOpenAIClientOptions
+            {
+                Endpoint = endpoint,
+            });
+        var conversation = (await conversationsHost
             .GetProjectConversationsClient()
             .CreateProjectConversationAsync(new ConversationCreationOptions(), cancellationToken)).Value;
 
