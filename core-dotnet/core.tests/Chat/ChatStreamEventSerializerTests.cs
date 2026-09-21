@@ -59,14 +59,14 @@ public class ChatStreamEventSerializerTests
     public void Serialize_BlockedEvent_UsesCamelCaseErrorMessage()
     {
         var json = ChatStreamEventSerializer.Serialize(
-            ChatStreamEvent.Blocked("Blocked by Code Input: message does not contain a weather/location keyword"));
+            ChatStreamEvent.Blocked("Blocked by Code Input: message does not contain a weather keyword"));
 
         using var document = JsonDocument.Parse(json);
         var root = document.RootElement;
 
         Assert.Equal("blocked", root.GetProperty("type").GetString());
         Assert.Equal(
-            "Blocked by Code Input: message does not contain a weather/location keyword",
+            "Blocked by Code Input: message does not contain a weather keyword",
             root.GetProperty("errorMessage").GetString());
     }
 

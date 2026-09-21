@@ -71,7 +71,7 @@
                 <label title="Pre-Orchestration - LLM-based Input Check. A separate, cheap LLM call classifies the message as in/out of scope before the orchestrator runs.">
                     <input type="checkbox" @bind="gateState.LlmInput" /> LLM Input
                 </label>
-                <label title="Orchestration - Prompt-based Scope Guard. An instruction in the orchestrator's own system prompt telling it to only answer weather/location questions — no code enforces this, so it's the easiest gate to bypass.">
+                <label title="Orchestration - Prompt-based Scope Guard. An instruction in the orchestrator's own system prompt telling it to only answer weather questions (not a location by itself) — no code enforces this, so it's the easiest gate to bypass.">
                     <input type="checkbox" @bind="gateState.SystemPrompt" /> Sys Prompt
                 </label>
                 <label title="Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown; requires buffering the complete response first, so token streaming is disabled for that turn.">

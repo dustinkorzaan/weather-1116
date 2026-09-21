@@ -6,7 +6,10 @@ namespace Core.Chat.Services.ChatScopeGate;
 /// Chat5a/Chat5b gate #2 ("Code Input"). Deterministic, no I/O, no LLM call: a keyword
 /// allow-list and a deny-list decide whether the message is in scope. Kept deliberately
 /// simple/blunt to demonstrate a rule gate's limits (e.g. it false-positives on legitimate
-/// meta-questions like "what tools do you have?").
+/// meta-questions like "what tools do you have?", and it does not catch a genuine weather
+/// question with an unrelated request bundled in, since the deny-list is a fixed set of
+/// patterns rather than semantic understanding — that bundled case is caught by the smarter
+/// "LLM Input"/"LLM Output" gates instead, see <see cref="LlmScopeGate"/>).
 /// </summary>
 public sealed partial class RuleScopeGate : IScopeGate
 {
