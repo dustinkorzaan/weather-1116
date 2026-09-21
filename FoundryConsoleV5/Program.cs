@@ -1,5 +1,6 @@
 ﻿using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Models;
+using Core.AIWeather.Services;
 using Core.Json;
 using Core.Weather;
 using DotNetEnv;
@@ -34,9 +35,7 @@ internal class Program
 		""");
 
 		var projectUrl = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
-		var endpoint = projectUrl.TrimEnd('/').EndsWith("/openai/v1", StringComparison.OrdinalIgnoreCase)
-			? projectUrl.TrimEnd('/')
-			: $"{projectUrl.TrimEnd('/')}/openai/v1";
+		var endpoint = FoundryOpenAiEndpoint.Resolve(projectUrl);
 		var agentName = "wx1116-agent-for-current-weather";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");		
 
@@ -56,7 +55,7 @@ internal class Program
 			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
 			new ProjectOpenAIClientOptions
 			{
-				Endpoint = new Uri(endpoint),
+				Endpoint = endpoint,
 			});
 
 		var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
