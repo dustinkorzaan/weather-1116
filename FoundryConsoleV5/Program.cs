@@ -1,14 +1,14 @@
-﻿using Azure.AI.Extensions.OpenAI;
-using Core.AIWeather.Models;
+﻿using Core.AIWeather.Models;
 using Core.AIWeather.Services;
 using Core.Json;
 using Core.Weather;
 using DotNetEnv;
-using OpenAI.Conversations;
+using OpenAI;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
-using System.ClientModel.Primitives;
+using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -28,14 +28,13 @@ internal class Program
 		Console.WriteLine($"""
 		Example 5
 		 - Ask Foundry Agent "What is today's weather in {location}?"
-		 - Call a hosted Microsoft Foundry Agent (not the model directly)
-		 - MCP tools are configured on the agent
+		 - Model Direct (ResponsesClient + api key, same as V4)
 		 - This console sends the hardcoded system prompt and user prompt
 		 - JSON output from AI
 		""");
 
 		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
-		var agentName = "wx1116-agent-for-current-weather";
+		var deploymentName = "gpt-5.4-mini";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		var systemPrompt = """
@@ -74,37 +73,24 @@ internal class Program
 
 		var aiOutputSchema = """
 		{
-		  "name": "AIWeatherResponse",
-		  "strict": true,
-		  "schema": {
-		    "type": "object",
-		    "properties": {
-		      "fullSummary": { "type": "string" },
-		      "temperatureF": { "type": "number" },
-		      "windSpeedMPH": { "type": "number" },
-		      "windDirectionSource": { "type": "string" },
-		      "windDirectionSourceDegrees": { "type": "integer" },
-		      "conditions": { "type": "string" },
-		      "latitude": { "type": "number" },
-		      "longitude": { "type": "number" }
-		    },
-		    "required": [
-		      "fullSummary",
-		      "temperatureF",
-		      "windSpeedMPH",
-		      "windDirectionSource",
-		      "windDirectionSourceDegrees",
-		      "conditions",
-		      "latitude",
-		      "longitude"
-		    ],
-		    "additionalProperties": false
-		  }
+		  "type": "object",
+		  "properties": {
+		    "fullSummary": { "type": "string" },
+		    "temperatureF": { "type": "number" },
+		    "windSpeedMPH": { "type": "number" },
+		    "windDirectionSourceDegrees": { "type": "integer" },
+		    "windDirectionSource": { "type": "string" },
+		    "conditions": { "type": "string" },
+		    "latitude": { "type": "number" },
+		    "longitude": { "type": "number" }
+		  },
+		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirectionSourceDegrees", "windDirectionSource", "conditions", "latitude", "longitude"],
+		  "additionalProperties": false
 		}
 		""";
 
 		Console.WriteLine($"OpenAI endpoint: {endpoint}");
-		Console.WriteLine($"Agent: {agentName}");
+		Console.WriteLine($"Model: {deploymentName}");
 
 		Console.WriteLine("\nSystem Prompt:");
 		Console.WriteLine(systemPrompt);
@@ -115,77 +101,50 @@ internal class Program
 		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
-		var projectEndpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(endpoint);
-		var projectOpenAIClient = new ProjectOpenAIClient(
-			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-			FoundryOpenAiEndpoint.CreateProjectOpenAIClientOptions(projectEndpoint, agentName));
-
-		ConversationResource conversation = (await projectOpenAIClient
-			.GetProjectConversationsClient()
-			.CreateProjectConversationAsync(new ConversationCreationOptions())).Value;
-
-		ProjectResponsesClient responseClient =
-			projectOpenAIClient.GetProjectResponsesClientForAgentEndpoint(agentName, conversation.Id);
-
-		var options = new CreateResponseOptions()
-		{
-			ConversationOptions = new ResponseConversationOptions(),
-			InputItems =
+		var client = new ResponsesClient(
+			credential: new ApiKeyCredential(apiKey),
+			options: new ResponsesClientOptions()
 			{
-				ResponseItem.CreateSystemMessageItem(systemPrompt),
-				ResponseItem.CreateUserMessageItem(userPrompt),
-			},
+				Endpoint = FoundryOpenAiEndpoint.Resolve(endpoint),
+			});
+
+		var inputItems = new List<ResponseItem>()
+		{
+			ResponseItem.CreateSystemMessageItem(systemPrompt),
+			ResponseItem.CreateUserMessageItem(userPrompt),
 		};
 
-		options.AgentConversationId = conversation.Id;
+		var options = new CreateResponseOptions(deploymentName, inputItems)
+		{
+			TextOptions = new ResponseTextOptions
+			{
+				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
+					jsonSchemaFormatName: "ai_weather_response",
+					jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
+					jsonSchemaIsStrict: true)
+			}
+		};
 
 		try
 		{
-			ResponseResult response = await responseClient.CreateResponseAsync(options);
+			var response = (await client.CreateResponseAsync(options)).Value;
+			var content = response.GetOutputText();
+			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
-			var requestedApproval = false;
-			foreach (var item in response.OutputItems)
+			if (aiWeather is null)
 			{
-				if (item is McpToolCallApprovalRequestItem)
-				{
-					requestedApproval = true;
-					break;
-				}
-			}
-
-			if (requestedApproval)
-			{
-				Console.WriteLine("The agent requested MCP tool approval. V5 does not round-trip approvals.");
-				Console.WriteLine("Set each MCP tool on the agent to require_approval: never (Foundry portal: Agents → this agent → Tools → MCP → Approval = Never), then publish a new version.");
+				Console.WriteLine("Received empty or invalid JSON response.");
+				Console.WriteLine("Raw output:");
+				Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty)" : content);
 			}
 			else
 			{
-				var content = response.GetOutputText();
-				var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
-
-				if (aiWeather is null)
-				{
-					Console.WriteLine("Received empty or invalid JSON response.");
-					Console.WriteLine("Raw output:");
-					Console.WriteLine(string.IsNullOrWhiteSpace(content) ? "(empty)" : content);
-				}
-				else
-				{
-					aiWeather.WindDirectionSourceDegrees =
-						WeatherUnitConversion.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees);
-					aiWeather.WindDirectionSource =
-						WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionSourceDegrees);
-					Console.WriteLine("\nResponse:");
-					Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
-				}
-			}
-		}
-		catch (ClientResultException ex)
-		{
-			Console.WriteLine($"Request failed: {ex.Message}");
-			if (ex.InnerException is not null)
-			{
-				Console.WriteLine($"Inner: {ex.InnerException.Message}");
+				aiWeather.WindDirectionSourceDegrees =
+					WeatherUnitConversion.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees);
+				aiWeather.WindDirectionSource =
+					WeatherUnitConversion.DegreesToCompass(aiWeather.WindDirectionSourceDegrees);
+				Console.WriteLine("\nResponse:");
+				Console.WriteLine(JsonSerializer.Serialize(aiWeather, JsonDefaults.Pretty));
 			}
 		}
 		catch (Exception ex)
