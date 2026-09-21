@@ -7,19 +7,19 @@ const GATES = [
     key: 'maxLength',
     label: '500 Char',
     description:
-      "Preorchestration - Deterministic Max Length. Blocks the request if the message is over 500 characters.",
+      "Pre-Orchestration - Deterministic Max Length. Blocks the request if the message is over 500 characters.",
   },
   {
     key: 'ruleInput',
     label: 'Code Input',
     description:
-      'Preorchestration - Deterministic Input Check. A keyword/regex heuristic classifies the message as in/out of scope, no LLM call.',
+      'Pre-Orchestration - Deterministic Input Check. A keyword/regex heuristic classifies the message as in/out of scope, no LLM call.',
   },
   {
     key: 'llmInput',
     label: 'LLM Input',
     description:
-      'Preorchestration - LLM-based Input Check. A separate, cheap LLM call classifies the message as in/out of scope before the orchestrator runs.',
+      'Pre-Orchestration - LLM-based Input Check. A separate, cheap LLM call classifies the message as in/out of scope before the orchestrator runs.',
   },
   {
     key: 'systemPrompt',
@@ -31,7 +31,7 @@ const GATES = [
     key: 'llmOutput',
     label: 'LLM Output',
     description:
-      "Postorchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown; requires buffering the complete response first, so token streaming is disabled for that turn.",
+      "Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown; requires buffering the complete response first, so token streaming is disabled for that turn.",
   },
 ];
 
