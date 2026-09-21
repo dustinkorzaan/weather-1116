@@ -15,6 +15,15 @@ public class Chat5SystemInstructionsTests
     }
 
     [Fact]
+    public void Chat5HardenedAiWeatherOrchestrationAssistant_TreatsLocationAloneAsOutOfScope()
+    {
+        var prompt = ChatSystemInstructions.Chat5HardenedAiWeatherOrchestrationAssistant;
+
+        Assert.Contains("A location by itself is not something you answer", prompt);
+        Assert.Contains("where is X", prompt);
+    }
+
+    [Fact]
     public void Chat5HardenedAiWeatherOrchestrationAssistant_StillDelegatesToGeoAndNonAiWeather()
     {
         var prompt = ChatSystemInstructions.Chat5HardenedAiWeatherOrchestrationAssistant;
@@ -43,5 +52,22 @@ public class Chat5SystemInstructionsTests
         Assert.Contains("IN_SCOPE", prompt);
         Assert.Contains("OUT_OF_SCOPE", prompt);
         Assert.Contains("Do not answer the text's question", prompt);
+    }
+
+    [Fact]
+    public void Chat5ScopeClassifierPrompt_TreatsLocationAloneAsOutOfScope()
+    {
+        var prompt = ChatSystemInstructions.Chat5ScopeClassifierPrompt;
+
+        Assert.Contains("a location is not in scope by itself", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("where is X", prompt);
+    }
+
+    [Fact]
+    public void Chat5ScopeClassifierPrompt_TreatsBundledOffTopicRequestsAsOutOfScope()
+    {
+        var prompt = ChatSystemInstructions.Chat5ScopeClassifierPrompt;
+
+        Assert.Contains("classify the whole text OUT_OF_SCOPE", prompt, StringComparison.OrdinalIgnoreCase);
     }
 }

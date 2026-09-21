@@ -26,16 +26,6 @@ public class ChatSystemInstructionsTests
     }
 
     [Fact]
-    public void WeatherAssistant_RestrictsScopeToWeatherQuestionsNotLocationAlone()
-    {
-        var prompt = ChatSystemInstructions.WeatherAssistant;
-
-        Assert.Contains("only answer questions about weather", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("a location by itself is not something you discuss", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("where is X", prompt);
-    }
-
-    [Fact]
     public void MultiAgentAiWeatherOrchestrationAssistant_DelegatesToGeoAndNonAiWeather()
     {
         var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
@@ -64,16 +54,6 @@ public class ChatSystemInstructionsTests
 
         Assert.Contains("hourly", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("every 15 minutes", prompt, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Fact]
-    public void MultiAgentAiWeatherOrchestrationAssistant_RestrictsScopeToWeatherQuestionsNotLocationAlone()
-    {
-        var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
-
-        Assert.Contains("only answer questions about weather", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("a location by itself is not something you discuss", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("where is X", prompt);
     }
 
     [Fact]

@@ -22,7 +22,19 @@ public class RuleScopeGateTests
     [InlineData("What tools do you have?")]
     [InlineData("Write me a poem about cats.")]
     [InlineData("Tell me a joke.")]
-    public async Task EvaluateAsync_BlocksMessagesWithoutAWeatherOrLocationKeyword(string message)
+    public async Task EvaluateAsync_BlocksMessagesWithoutAWeatherKeyword(string message)
+    {
+        var result = await _gate.EvaluateAsync(message, CancellationToken.None);
+
+        Assert.False(result.InScope);
+        Assert.NotNull(result.Reason);
+    }
+
+    [Theory]
+    [InlineData("Where is Nashville, TN?")]
+    [InlineData("What city is at these coordinates: 36.16, -86.78?")]
+    [InlineData("What state is Memphis in?")]
+    public async Task EvaluateAsync_BlocksLocationOnlyMessagesWithNoWeatherKeyword(string message)
     {
         var result = await _gate.EvaluateAsync(message, CancellationToken.None);
 

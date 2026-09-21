@@ -21,15 +21,17 @@ public sealed partial class RuleScopeGate : IScopeGate
         RegexOptions.IgnoreCase)]
     private static partial Regex DenyListPattern();
 
-    // Requires at least one weather/location signal to be considered in scope.
+    // Requires at least one weather signal to be considered in scope. Location words
+    // (coordinates, city/town/state, "where is", geocode) are deliberately NOT allow signals on
+    // their own: a location is only in scope as part of a weather question about it, not as a
+    // topic by itself (e.g. "where is Nashville, TN" is out of scope; "weather in Nashville, TN"
+    // is not).
     [GeneratedRegex(
         "weather|forecast|temperature|climate|rain(y|ing|fall)?|snow(y|ing|fall)?|wind(y|s)?|" +
         "humid(ity)?|storm(y)?|hurricane|tornado|precipitation|sunny|cloudy|degrees?|°|" +
-        "\\bhot\\b|\\bcold\\b|\\bwarm\\b|\\bcool\\b|" +
-        "location|coordinates?|latitude|longitude|\\bzip ?code\\b|near me|" +
-        "\\bcity\\b|\\btown\\b|\\bstate\\b|where is|geocod",
+        "\\bhot\\b|\\bcold\\b|\\bwarm\\b|\\bcool\\b",
         RegexOptions.IgnoreCase)]
-    private static partial Regex WeatherOrLocationPattern();
+    private static partial Regex WeatherPattern();
 
     public string Name => "Code Input";
 
@@ -41,10 +43,10 @@ public sealed partial class RuleScopeGate : IScopeGate
                 false, "message matches an off-topic/instruction-override pattern"));
         }
 
-        if (!WeatherOrLocationPattern().IsMatch(text))
+        if (!WeatherPattern().IsMatch(text))
         {
             return Task.FromResult(new ChatScopeGateResult(
-                false, "message does not contain a weather/location keyword"));
+                false, "message does not contain a weather keyword"));
         }
 
         return Task.FromResult(new ChatScopeGateResult(true, null));
