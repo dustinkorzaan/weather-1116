@@ -29,8 +29,8 @@ internal class Program
 		Example 5
 		 - Ask Foundry Agent "What is today's weather in {location}?"
 		 - Call a hosted Microsoft Foundry Agent (not the model directly)
-		 - Instructions, response schema, and MCP tools are configured on the agent
-		 - This console sends only the user prompt
+		 - MCP tools are configured on the agent
+		 - This console sends the hardcoded system prompt and user prompt
 		 - JSON output from AI
 		""");
 
@@ -38,7 +38,6 @@ internal class Program
 		var agentName = "wx1116-agent-for-current-weather";
 		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
-		// Demo copy of wx1116-agent-for-current-weather (published on the agent — not sent by this console).
 		var systemPrompt = """
 		# Role & Operational Rules
 		You are a dedicated weather assistant.
@@ -107,13 +106,13 @@ internal class Program
 		Console.WriteLine($"OpenAI endpoint: {endpoint}");
 		Console.WriteLine($"Agent: {agentName}");
 
-		Console.WriteLine("\nSystem Prompt (on agent — demo text, not sent in this request):");
+		Console.WriteLine("\nSystem Prompt:");
 		Console.WriteLine(systemPrompt);
 
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		Console.WriteLine("\nAI Output Schema (on agent — demo text, not sent in this request):");
+		Console.WriteLine("\nAI Output Schema:");
 		Console.WriteLine(aiOutputSchema);
 
 		var projectEndpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(endpoint);
@@ -133,6 +132,7 @@ internal class Program
 			ConversationOptions = new ResponseConversationOptions(),
 			InputItems =
 			{
+				ResponseItem.CreateSystemMessageItem(systemPrompt),
 				ResponseItem.CreateUserMessageItem(userPrompt),
 			},
 		};
