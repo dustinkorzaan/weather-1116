@@ -54,4 +54,10 @@ public class FoundryOpenAiEndpointTests
 
         Assert.Equal(expected, endpoint.ToString());
     }
+
+    [Fact]
+    public void ProjectOpenAiApiVersion_IsSetForProjectOpenAIClient()
+    {
+        Assert.Equal("2025-11-15-preview", FoundryOpenAiEndpoint.ProjectOpenAiApiVersion);
+    }
 }

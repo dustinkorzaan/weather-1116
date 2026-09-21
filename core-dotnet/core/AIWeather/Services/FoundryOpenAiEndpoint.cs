@@ -8,6 +8,12 @@ public static class FoundryOpenAiEndpoint
     private const string OpenAiPathSuffix = "/openai/v1";
 
     /// <summary>
+    /// <c>api-version</c> query parameter for <see cref="Azure.AI.Extensions.OpenAI.ProjectOpenAIClient"/>
+    /// (project conversations and hosted-agent responses). Required — the SDK does not infer a default.
+    /// </summary>
+    public const string ProjectOpenAiApiVersion = "2025-11-15-preview";
+
+    /// <summary>
     /// Returns a URI suitable for <c>ResponsesClientOptions.Endpoint</c> (model-direct V3/V4 calls).
     /// Accepts either a project URL (e.g. <c>.../api/projects/{id}</c>) or an
     /// already-resolved OpenAI URL (e.g. <c>.../openai/v1</c>).

@@ -31,6 +31,7 @@ public static class FoundryAgentResponsesClientFactory
             new ProjectOpenAIClientOptions
             {
                 Endpoint = projectEndpoint,
+                ApiVersion = FoundryOpenAiEndpoint.ProjectOpenAiApiVersion,
             });
 
         return projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);

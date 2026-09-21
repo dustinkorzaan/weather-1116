@@ -122,6 +122,7 @@ internal class Program
 			new ProjectOpenAIClientOptions
 			{
 				Endpoint = projectEndpoint,
+				ApiVersion = FoundryOpenAiEndpoint.ProjectOpenAiApiVersion,
 			});
 
 		ConversationResource conversation = (await projectOpenAIClient
