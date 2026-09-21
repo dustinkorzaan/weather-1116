@@ -1,5 +1,6 @@
 using System.Runtime.ExceptionServices;
 using System.Text;
+using Azure.AI.Extensions.OpenAI;
 using Core.Chat.Models;
 using Core.Chat.Services;
 using Microsoft.Extensions.Logging;
@@ -54,12 +55,14 @@ public sealed class Chat3Service : IChatClientService
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
         var usage = new ChatUsageAccumulator();
-        var client = _settings.CreateProjectResponsesClientForChatAgent();
+        var (client, conversationId) = await _settings.CreateProjectResponsesClientForChatAgentAsync(cancellationToken);
         var assistantBuilder = new StringBuilder();
         var previousResponseId = _responseStore.GetPreviousResponseId(sessionId);
 
         CreateResponseOptions options = new()
         {
+            ConversationOptions = new ResponseConversationOptions(),
+            AgentConversationId = conversationId,
             StreamingEnabled = true,
             StoredOutputEnabled = true,
             InputItems =

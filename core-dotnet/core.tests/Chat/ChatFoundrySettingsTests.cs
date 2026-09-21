@@ -31,7 +31,7 @@ public class ChatFoundrySettingsTests
     {
         var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Services/ChatFoundrySettings.cs"));
 
-        Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgent", source, StringComparison.Ordinal);
+        Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgentAsync", source, StringComparison.Ordinal);
     }
 
     private static void RunWithFoundryEnvironment(string? chatAgentName, Action action)

@@ -7,7 +7,6 @@ using Core.AIWeather.Models;
 using Core.AIWeather.Services;
 using Core.Data.Domain;
 using Core.Weather;
-using static Core.AIWeather.Services.FoundryOpenAiEndpoint;
 using CQMediator;
 using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
@@ -82,17 +81,21 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
             var agentNameEnv = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME");
             var agentName = string.IsNullOrWhiteSpace(agentNameEnv) ? "wx1116-agent-for-current-weather" : agentNameEnv;
 
-            var projectEndpoint = Resolve(projectUrl);
-
             _logger.LogInformation(
                 "AI Weather: Foundry project {ProjectEndpoint}, agent {Agent}",
-                projectEndpoint,
+                projectUrl,
                 agentName);
 
-            ProjectResponsesClient client = FoundryAgentResponsesClientFactory.CreateForAgent(agentName, projectEndpoint);
+            var (client, conversationId) = await FoundryAgentResponsesClientFactory.CreateForAgentAsync(
+                agentName,
+                new Uri(projectUrl),
+                cancellationToken);
 
             CreateResponseOptions options = new()
             {
+                ConversationOptions = new ResponseConversationOptions(),
+                AgentConversationId = conversationId,
+                StreamingEnabled = true,
                 InputItems =
                 {
                     ResponseItem.CreateUserMessageItem(userPrompt),
@@ -102,7 +105,18 @@ public class GetCurrentAIWeatherV5Handler : IRequestHandler<GetCurrentAIWeatherV
             // The hosted agent supplies instructions, response schema, and MCP tools itself, so a
             // single call is enough - like V4, there is no local tool-call loop to drive here.
             runLog.AddLog("Start CreateResponse", null);
-            response = await client.CreateResponseAsync(options, cancellationToken);
+            response = null;
+            await foreach (var update in client.CreateResponseStreamingAsync(options, cancellationToken))
+            {
+                if (update is StreamingResponseCompletedUpdate completed)
+                {
+                    response = completed.Response;
+                }
+                else if (update is StreamingResponseFailedUpdate failed)
+                {
+                    response = failed.Response;
+                }
+            }
             runLog.AddLog("Finish CreateResponse", response);
 
             if (response is null)

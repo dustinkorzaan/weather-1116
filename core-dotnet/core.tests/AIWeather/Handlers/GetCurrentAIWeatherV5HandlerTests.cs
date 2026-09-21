@@ -7,8 +7,8 @@ public class GetCurrentAIWeatherV5HandlerTests
     {
         var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Handlers/GetCurrentAIWeatherV5Handler.cs"));
 
-        Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgent(agentName, projectEndpoint)", source, StringComparison.Ordinal);
-        Assert.Contains("Resolve(projectUrl)", source, StringComparison.Ordinal);
+        Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgentAsync", source, StringComparison.Ordinal);
+        Assert.Contains("new Uri(projectUrl)", source, StringComparison.Ordinal);
         Assert.Contains("response is null", source, StringComparison.Ordinal);
         Assert.Contains("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME", source, StringComparison.Ordinal);
         // An empty (but set) GitHub var must still fall back to the default agent name --
@@ -28,8 +28,9 @@ public class GetCurrentAIWeatherV5HandlerTests
         Assert.DoesNotContain("BuildAIOutputSchema", source, StringComparison.Ordinal);
         Assert.DoesNotContain("JsonSchemaExporter", source, StringComparison.Ordinal);
         Assert.DoesNotContain("TextOptions", source, StringComparison.Ordinal);
-        Assert.DoesNotContain("ConversationOptions", source, StringComparison.Ordinal);
-        Assert.DoesNotContain("AgentConversationId", source, StringComparison.Ordinal);
+        Assert.Contains("ConversationOptions = new ResponseConversationOptions()", source, StringComparison.Ordinal);
+        Assert.Contains("AgentConversationId = conversationId", source, StringComparison.Ordinal);
+        Assert.Contains("CreateResponseStreamingAsync", source, StringComparison.Ordinal);
     }
 
     [Fact]
