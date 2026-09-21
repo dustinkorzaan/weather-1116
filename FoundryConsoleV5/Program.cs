@@ -1,12 +1,11 @@
 ﻿using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Models;
+using Core.AIWeather.Services;
 using Core.Json;
 using Core.Weather;
 using DotNetEnv;
 using OpenAI.Responses;
 using System;
-using System.ClientModel;
-using System.ClientModel.Primitives;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -34,7 +33,6 @@ internal class Program
 
 		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
 		var agentName = "wx1116-agent-for-current-weather";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
 
 		var userPrompt = $"""
 		What is today's weather in: {location}?
@@ -48,14 +46,8 @@ internal class Program
 		Console.WriteLine("- MCP tools (lat/long + current weather)");
 		Console.WriteLine($"\nUser Prompt (only input sent by this console):\n{userPrompt}");
 
-		var projectOpenAIClient = new ProjectOpenAIClient(
-			ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-			new ProjectOpenAIClientOptions
-			{
-				Endpoint = new Uri(endpoint),
-			});
-
-		var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+		var projectEndpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(endpoint);
+		ProjectResponsesClient responseClient = FoundryAgentResponsesClientFactory.CreateForAgent(agentName, projectEndpoint);
 
 		var options = new CreateResponseOptions()
 		{
@@ -79,7 +71,6 @@ internal class Program
 		try
 		{
 			ResponseResult? response;
-			// response = (await responseClient.CreateResponseAsync(options)).Value;
 
 			Console.WriteLine("\nStreaming response:");
 			response = null;
