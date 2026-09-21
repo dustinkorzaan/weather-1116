@@ -28,9 +28,9 @@ public static class FoundryOpenAiEndpoint
     }
 
     /// <summary>
-    /// Strips a trailing <c>/openai/v1</c> inference suffix. Hosted-agent callers (Chat3, V5,
-    /// Foundry Console V5) must <strong>not</strong> use this — they pass
-    /// <c>AZURE_FOUNDRY_PROD_PROJ_URL</c> to <c>ProjectOpenAIClient</c> as-is.
+    /// Strips a trailing <c>/openai/v1</c> inference suffix. Not used by the hosted-agent callers
+    /// (Chat3, Current AI Weather V5) — they resolve their endpoint with <see cref="Resolve"/>
+    /// instead, which appends the suffix rather than stripping it.
     /// </summary>
     public static Uri ResolveProjectEndpoint(string projectOrEndpointUrl)
     {
