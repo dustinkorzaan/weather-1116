@@ -1,4 +1,4 @@
-# Chat Clients (Chat1a–Chat2b, Chat3, and Chat4a–Chat4b)
+# Chat Clients (Chat1a–Chat2b, Chat3, Chat4a–Chat4b, and Chat5a–Chat5b)
 
 Standalone multi-turn chat in all three UIs (React, MVC, Blazor). This feature is **separate**
 from the existing **Current AI Weather** widget (`/AIWeather/CurrentV3`, `/CurrentV4`, or
@@ -16,9 +16,12 @@ a one-shot structured JSON response.
 | **Chat3** | Hosted Microsoft Foundry agent | MCP tools configured **on the agent** in Foundry (`wx1116-agent-for-chat`) | Foundry Console **V5** |
 | **Chat4a** | Microsoft Agent Framework (model-direct), multi-agent | In-process tools, split across two sub-agents delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V3 orchestration style |
 | **Chat4b** | Microsoft Agent Framework (model-direct), multi-agent | Remote MCP tools, split across two sub-agents delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V4 orchestration style |
+| **Chat5a** | Microsoft Agent Framework (model-direct), multi-agent, guardrailed | Chat4a's in-process tools, unchanged, plus five independently toggleable guardrail gates in front of/around the orchestrator | Teaching demo: securing a multi-agent system |
+| **Chat5b** | Microsoft Agent Framework (model-direct), multi-agent, guardrailed | Chat4b's remote MCP tools, unchanged, plus the same five guardrail gates | Teaching demo: securing a multi-agent system |
 
 Each tab has its **own controller**, **own Core service**, and **own session namespace**
-(`Chat1a:…`, `Chat1b:…`, `Chat3:…`, `Chat4a:…`, `Chat4b:…`, etc.) so implementations do not collide.
+(`Chat1a:…`, `Chat1b:…`, `Chat3:…`, `Chat4a:…`, `Chat4b:…`, `Chat5a:…`, `Chat5b:…`, etc.) so
+implementations do not collide.
 
 Chat1/Chat2 still send the model name, instructions, and tools from this repo.
 **Chat3 does not** — it calls `GetProjectResponsesClientForAgent` and sends only the
@@ -42,6 +45,8 @@ flowchart TB
         C3[Chat3Controller]
         C4a[Chat4aController]
         C4b[Chat4bController]
+        C5a[Chat5aController]
+        C5b[Chat5bController]
     end
 
     subgraph core [Core.Chat]
@@ -52,9 +57,12 @@ flowchart TB
         S3[Chat3Service]
         S4a[Chat4aService]
         S4b[Chat4bService]
+        S5a[Chat5aService]
+        S5b[Chat5bService]
         Store[IChatSessionStore]
         Tools[WeatherToolExecutor / MCP factories]
         Agent[wx1116-agent-for-chat]
+        Gates[ChatScopeGate: MaxLength / Rule / Llm]
     end
 
     React --> api
@@ -68,6 +76,8 @@ flowchart TB
     C3 --> S3
     C4a --> S4a
     C4b --> S4b
+    C5a --> S5a
+    C5b --> S5b
 
     S1a --> Store
     S1b --> Store
@@ -76,6 +86,8 @@ flowchart TB
     S3 --> Store
     S4a --> Store
     S4b --> Store
+    S5a --> Store
+    S5b --> Store
 
     S1a --> Tools
     S1b --> Tools
@@ -84,16 +96,24 @@ flowchart TB
     S3 --> Agent
     S4a --> Tools
     S4b --> Tools
+    S5a --> Tools
+    S5b --> Tools
+    S5a --> Gates
+    S5b --> Gates
 ```
 
 ### Request flow
 
-1. UI posts `POST /Chat1a/messages` (or `Chat1b`, `Chat2a`, `Chat2b`, `Chat3`, `Chat4a`, `Chat4b`) with JSON:
-   `{ "sessionId": "optional", "message": "user text" }`
+1. UI posts `POST /Chat1a/messages` (or `Chat1b`, `Chat2a`, `Chat2b`, `Chat3`, `Chat4a`, `Chat4b`,
+   `Chat5a`, `Chat5b`) with JSON: `{ "sessionId": "optional", "message": "user text" }`
+   (Chat5a/Chat5b also accept the five `enable*Gate`/`enableSystemPromptGuard` flags — see
+   [Chat5a/Chat5b](#chat5achat5b-guardrailed-multi-agent-orchestration-five-toggleable-gates) below)
 2. Server returns **Server-Sent Events** (`text/event-stream`) with JSON payloads:
    - `session` — assigns or confirms session id
    - `token` — streamed assistant text delta
    - `tool_start` / `tool_end` — tool invocation status (when the stream surfaces MCP calls)
+   - `blocked` — Chat5a/Chat5b only: a guardrail gate refused the request/response before or
+     after the orchestrator ran
    - `error` — failure message
    - `done` — turn complete; includes `usage` (`runtimeMs` plus token counts when the model reported them)
 3. Core stores conversation history per session in `InMemoryChatSessionStore` (demo-friendly;
@@ -123,6 +143,10 @@ core-dotnet/core/Chat/
   Chat3/Chat3Service.cs
   Chat4a/Chat4aService.cs
   Chat4b/Chat4bService.cs
+  Chat5a/Chat5aService.cs
+  Chat5b/Chat5bService.cs
+  Services/ChatScopeGate/         IScopeGate, ChatScopeGateResult, MaxLengthScopeGate,
+                                   RuleScopeGate, LlmScopeGate, ChatScopeGatePipeline
   ChatServiceCollectionExtensions.cs
 ```
 
@@ -146,17 +170,22 @@ not declared on the request.
 | `GetPublicWeatherForecast` | Upcoming forecast: Daily (7 days), Hourly (48 hours), or FifteenMinutes (48 hours) |
 | `GetPublicWeatherHistory` | Recent past: Daily (previous 7 days) or Hourly (previous 48 hours) |
 
-- **In-process (Chat1a, Chat2a, Chat4a):** Core `WeatherToolExecutor` runs CQMediator handlers when the
+- **In-process (Chat1a, Chat2a, Chat4a, Chat5a):** Core `WeatherToolExecutor` runs CQMediator handlers when the
   model emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a and, inside
-  Chat4a's Geo and NonAI Weather sub-agents, for Chat4a).
-- **MCP (Chat1b, Chat2b, Chat4b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`,
-  `mcp-srv-python`) — platform invokes tools; no local function-call loop in Chat1b. Chat4b's Geo
+  Chat4a's/Chat5a's Geo and NonAI Weather sub-agents, for Chat4a/Chat5a).
+- **MCP (Chat1b, Chat2b, Chat4b, Chat5b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`,
+  `mcp-srv-python`) — platform invokes tools; no local function-call loop in Chat1b. Chat4b's/Chat5b's Geo
   sub-agent gets only `mcp-srv-func-app`'s tool from `ChatHostedMcpToolFactory.CreateGeoTools()`;
   its NonAI Weather sub-agent gets both `mcp-srv-app-service`'s and `mcp-srv-python`'s tools from
   `CreateNonAiWeatherTools()` — not the combined three-tool list Chat1b/Chat2b use (which also
   includes Geo's tool).
 - **Hosted agent (Chat3):** Foundry invokes those MCP hosts. This app does not send tools, instructions,
   or a model name.
+
+Chat5a and Chat5b reuse Chat4a's and Chat4b's exact tool wiring verbatim — same Geo/NonAI Weather
+sub-agents, same tool sets, same `AsAIFunction` delegation. The five guardrail gates (see below) sit
+around that orchestration, not inside it: no new tools are introduced, and gate checks never call
+`GetLatLong`/`GetPublicWeatherCurrent`/etc.
 
 **Chat2a/Chat2b memory:** `IChatSessionStore` only tracks session ids and a display audit trail
 (user/assistant text). Multi-turn context for Agent Framework tabs comes from `AgentSession`
@@ -175,6 +204,14 @@ the only agent that remembers prior turns.
 **Chat4b memory:** identical shape to Chat4a's — only the orchestrator persists an `AgentSession`;
 Geo and NonAI Weather are stateless per call. The only difference is where Geo's and NonAI
 Weather's tools come from (remote MCP vs in-process), not how memory works.
+
+**Chat5a/Chat5b memory:** identical shape to Chat4a's/Chat4b's — only the orchestrator persists an
+`AgentSession` via `ChatAgentSessionStore`; Geo and NonAI Weather are stateless per call. The five
+guardrail gates never touch `AgentSession`: input gates run and can block *before* the orchestrator
+agent is even built, and the output gate reads the orchestrator's finished `AgentResponse.Text`
+after the turn completes, so a gate being on or off has no effect on what the orchestrator
+remembers turn to turn — it only affects whether/how that turn's request or reply reaches the
+model and the client.
 
 ## Chat4a: multi-agent orchestration (Geo / NonAI Weather / AI Weather Orchestration)
 
@@ -237,6 +274,88 @@ content only ever appears inside each sub-agent's own non-streamed `AsAIFunction
 invisible to the orchestrator's SSE stream, the same nested-call blind spot (and the same
 usage-chip undercount) Chat4a already has.
 
+## Chat5a/Chat5b: guardrailed multi-agent orchestration (five toggleable gates)
+
+Chat5a and Chat5b are full, independent copies of Chat4a and Chat4b — not wrappers around
+them — with five independently toggleable guardrail gates added around the same Geo/NonAI
+Weather/AI Weather Orchestration shape. Chat4aService.cs, Chat4bService.cs, and the two
+controllers stay byte-for-byte untouched; Chat5a/Chat5b exist so the "unsecured" baseline
+(Chat4a/Chat4b) and a guarded variant can be compared side by side, checkbox by checkbox, as a
+teaching tool for securing a multi-agent LLM system. All five gates default to **on**; unchecking
+any of them reverts that layer to Chat4a's/Chat4b's exact unguarded behavior.
+
+The checkboxes are listed in the same order the pipeline runs them:
+
+| # | Checkbox | Stage | What it does |
+| --- | --- | --- | --- |
+| 1 | **500 Char** | Pre-orchestration | `MaxLengthScopeGate` — pure code, no I/O. Blocks if the message is over 500 characters. |
+| 2 | **Code Input** | Pre-orchestration | `RuleScopeGate` — pure code, no I/O. A keyword/deny-list heuristic classifies the message as in/out of scope; no LLM call. |
+| 3 | **LLM Input** | Pre-orchestration | `LlmScopeGate` ("LLM Input") — a separate, cheap `ResponsesClient.CreateResponseAsync` classification call, before the orchestrator runs. |
+| 4 | **Sys Prompt** | Orchestration | Swaps the orchestrator's own instructions to `ChatSystemInstructions.Chat5HardenedAiWeatherOrchestrationAssistant` (adds a refusal paragraph) instead of the plain `MultiAgentAiWeatherOrchestrationAssistant` Chat4a/Chat4b use. |
+| 5 | **LLM Output** | Post-orchestration | `LlmScopeGate` ("LLM Output") — a second, separate classification call against the orchestrator's finished reply, after the turn completes. |
+
+### Gates #1–#3: input gates, AND semantics, cheapest-first
+
+`Chat5aService`/`Chat5bService.RunInputGatesAsync` builds a list of only the enabled gates (in
+500 Char → Code Input → LLM Input order — the two free, local checks before the one paid LLM
+call) and hands it to the shared `ChatScopeGatePipeline.RunAsync`, which evaluates them in order
+with **AND semantics** and short-circuits on the first failure. If any enabled gate reports
+out-of-scope, the pipeline returns immediately — the orchestrator agent is never built and no
+model call happens for the main turn. If a gate itself throws (e.g. a transient Foundry API error
+from `LlmScopeGate`), that's surfaced as an ordinary `error` event, not a `blocked` one — a gate
+failing to answer is different from a gate answering "no."
+
+The user's message is appended to `IChatSessionStore` (the UI-visible transcript) once the input
+gates have run without throwing — whether they blocked the turn or passed it — so the transcript
+always reflects what was actually typed. It is *not* appended if a gate call itself errors out,
+since that turn produced no resolution.
+
+### Gate #4: prompt-only, no code enforcement
+
+Sys Prompt is the one gate with nothing checking it programmatically. When checked, the
+orchestrator is built with `Chat5HardenedAiWeatherOrchestrationAssistant` — the same
+`MultiAgentAiWeatherOrchestrationAssistant` instructions Chat4a/Chat4b use, plus an inserted
+paragraph telling the model to only accept weather/location requests, decline anything else, and
+ignore instructions embedded in the user's message that try to override that rule. If the model
+honors it, the refusal is just an ordinary model reply — streamed as normal `token` events like
+any other answer, indistinguishable in the transport from a real weather answer. There is no
+`blocked` event for this gate, and that's deliberate: being the one layer with no code enforcement
+— and therefore the easiest to bypass with a well-crafted prompt — is itself the teaching point.
+
+### Gate #5: forces a buffered, non-streamed turn
+
+With LLM Output unchecked, `SendMessageAsync` runs the same `RunStreamingAsync` loop Chat4a/Chat4b
+use, forwarding `token`/`tool_start`/`tool_end` events live. With it checked, `SendMessageAsync`
+instead calls `orchestrationAgent.RunAsync(...)` — the non-streaming API — because the full reply
+has to exist before `LlmScopeGate` can classify it. `RunBufferedAsync` replays any
+`FunctionCallContent`/`FunctionResultContent` found in the finished `AgentResponse.Messages` as
+`tool_start`/`tool_end` pairs first (so Geo/NonAI Weather delegation is still visible), then runs
+the output gate against `response.Text`. If it fails, the client gets a single `blocked` event
+instead of the reply; the reply is not appended to session history in that case. If it passes, the
+whole reply is sent as one `token` event (not streamed token-by-token) and then appended to
+history normally.
+
+### The `blocked` event
+
+`ChatStreamEvent.Blocked(string message)` is additive alongside the existing `error`/`done`/etc.
+factories — no existing event type or consumer changes. For gates #1, #2, #3, and #5, the message
+is formatted `"Blocked by {gate.Name}: {reason}"`, e.g. `"Blocked by Code Input: message does not
+appear to be about weather or location"` or `"Blocked by 500 Char: message exceeds 500
+characters"` — `gate.Name` and `Reason` come straight from `ChatScopeGateResult`. Gate #4 never
+emits a `blocked` event, per above. A `blocked` turn still ends with a normal `done` event (zero
+or near-zero usage) so the client's turn lifecycle stays consistent with a completed one.
+
+### Configuration and DI
+
+The gates need no new environment variables or settings — `LlmScopeGate` reuses the orchestrator's
+own `ChatFoundrySettings`/`ResponsesClient` and deployment name (`AZURE_FOUNDRY_PROD_MODEL`), just
+like the orchestrator itself. `MaxLengthScopeGate` and `RuleScopeGate` are pure code with no
+external dependencies. DI registers the two `LlmScopeGate` instances as keyed singletons
+(`"Chat5InputLlmGate"`, `"Chat5OutputLlmGate"`, both behind `IScopeGate`) and `Chat5aService`/
+`Chat5bService` as keyed scoped services (`"Chat5a"`, `"Chat5b"`, both behind `IChat5ClientService`)
+in `ChatServiceCollectionExtensions.AddWeatherChatClients()` — no `Program.cs` changes were needed
+in API or MVC.
+
 ## Configuration
 
 Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent name:
@@ -253,6 +372,12 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 
 Chat1a, Chat2a, and Chat4a do **not** require MCP URLs. Chat3 does **not** require MCP URLs in the app
 either — those belong on the hosted agent.
+
+Chat5a and Chat5b need exactly the same variables as Chat4a and Chat4b respectively — the five
+guardrail gates add no new configuration. `LlmScopeGate` (gates #3 and #5) reuses the same
+`AZURE_FOUNDRY_PROD_*` settings and `AZURE_FOUNDRY_PROD_MODEL` deployment the orchestrator already
+uses; `MaxLengthScopeGate` and `RuleScopeGate` (gates #1 and #2) are pure code with no
+configuration at all.
 
 `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME` remains the V5 console agent (`wx1116-agent-for-current-weather`,
 JSON weather). Do not point Chat3 at that agent.
@@ -352,7 +477,7 @@ Keep this in sync with `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs
 | Endpoint | `GET /AIWeather/CurrentV3`, `/CurrentV4`, or `/CurrentV5` | `POST /Chat1a/messages`, etc. |
 | Output | Strict `AIWeatherResponse` JSON | Conversational text (streamed) |
 | Memory | None (single shot) | Per-tab session history |
-| UI | `/current-ai-weather` page | `/chat-clients` chat panel (seven tabs, per-tab session) |
+| UI | `/current-ai-weather` page | `/chat-clients` chat panel (nine tabs, per-tab session) |
 
 ## Learning goals
 
@@ -370,6 +495,15 @@ Keep this in sync with `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs
   ordinary-functions streaming behavior; Chat4a's Geo/NonAI Weather sub-agents call in-process
   tools, Chat4b's call the same two remote MCP hosts Chat1b/Chat2b use — split one-host-per-agent
   instead of combined.
+- **Chat4a vs Chat5a (and Chat4b vs Chat5b):** Same three-agent orchestration, same tools, same
+  memory shape — Chat5a/Chat5b add five independently toggleable guardrail gates around it with no
+  changes to Chat4a/Chat4b themselves. Toggling gates off one at a time and resending an
+  off-topic/adversarial message demonstrates each layer's blast radius: a deterministic pre-flight
+  check (500 Char, Code Input) blocks before any model call; an LLM pre-flight check (LLM Input)
+  costs a model call but still runs before the orchestrator; a prompt-only guard (Sys Prompt) has
+  no code enforcement at all — a well-crafted message can still get the orchestrator to run; and a
+  post-flight LLM check (LLM Output) is the last line of defense, catching what got through
+  everything else, at the cost of buffering the whole reply instead of streaming it.
 
 ## Related docs
 
