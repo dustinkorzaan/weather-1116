@@ -53,8 +53,8 @@
             <label title="Orchestration - Prompt-based Scope Guard. An instruction in the orchestrator's own system prompt telling it to only answer weather questions (not a location by itself) &mdash; no code enforces this, so it's the easiest gate to bypass.">
                 <input type="checkbox" data-chat-gate="systemPrompt" checked> Sys Prompt
             </label>
-            <label title="Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown; requires buffering the complete response first, so token streaming is disabled for that turn.">
-                <input type="checkbox" data-chat-gate="llmOutput" checked> LLM Output
+            <label title="Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown. You will have to wait for the complete reply to finish generating before you see any of it, since streaming is disabled for that turn.">
+                <input type="checkbox" data-chat-gate="llmOutput" checked> LLM Output (waits for full reply)
             </label>
         </div>
     </section>
