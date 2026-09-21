@@ -430,7 +430,7 @@ function ChatPanel() {
             <div
               ref={messagesRef}
               data-chat-messages
-              className="flex min-h-48 max-h-[28.8rem] flex-col gap-2 overflow-x-auto overflow-y-auto p-1"
+              className="flex min-h-48 max-h-[29rem] flex-col gap-2 overflow-x-auto overflow-y-auto p-1"
             >
               {histories[activeTab].map((entry, index) => (
                 entry.role === 'tool' ? (

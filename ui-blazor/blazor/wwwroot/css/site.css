@@ -917,7 +917,7 @@ html[data-theme="dark"] .weather-map-logo-pin {
     flex-direction: column;
     gap: 0.5rem;
     min-height: 12rem;
-    max-height: 28.8rem;
+    max-height: 29rem;
     overflow-x: auto;
     overflow-y: auto;
     padding: 0.25rem;
