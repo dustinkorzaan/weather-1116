@@ -36,7 +36,7 @@ Visit the Map in [React UI](https://wx.korzaan.com/), [Blazor UI](https://wx1116
 
 Presentation reference: [`docs/5-chat-clients/5-chat-clients.md`](docs/5-chat-clients/5-chat-clients.md)
 
-Standalone multi-turn chat page with seven tabs:
+Standalone multi-turn chat page with nine tabs:
 
 | Tab | Pattern | Stack | Notes |
 | --- | --- | --- | --- |
@@ -47,6 +47,8 @@ Standalone multi-turn chat page with seven tabs:
 | Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-for-chat`) |
 | Chat4a | Local Loops, multi-agent | Agent Framework | Like Foundry Console V3 - AI Weather Orchestration delegates to Geo and NonAI Weather |
 | Chat4b | Remote MCP, multi-agent | Agent Framework | Like Foundry Console V4 - AI Weather Orchestration delegates to Geo and NonAI Weather |
+| Chat5a | Local Loops, multi-agent, guardrailed | Agent Framework | Like Chat4a plus five toggleable guardrail gates |
+| Chat5b | Remote MCP, multi-agent, guardrailed | Agent Framework | Like Chat4b plus five toggleable guardrail gates | |
 
 Visit the [React UI](https://wx.korzaan.com/chat-clients) Chat wired to variations of V3, V4, and V5
 
