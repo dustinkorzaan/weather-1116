@@ -46,12 +46,12 @@ test('scrolls the visible chat to the bottom when a turn completes', async () =>
   });
 });
 
-test('scrolls to the bottom when switching among the seven chats', async () => {
+test('scrolls to the bottom when switching among the nine chats', async () => {
   stubChatMessagesScrollHeight(640);
   const user = userEvent.setup();
   const { container } = render(<ChatPanel />);
 
-  for (const name of ['Chat1b', 'Chat2a', 'Chat2b', 'Chat3', 'Chat4a', 'Chat4b', 'Chat1a']) {
+  for (const name of ['Chat1b', 'Chat2a', 'Chat2b', 'Chat3', 'Chat4a', 'Chat4b', 'Chat5a', 'Chat5b', 'Chat1a']) {
     await user.click(screen.getByRole('tab', { name }));
     expect(container.querySelector('[data-chat-messages]').scrollTop).toBe(640);
   }
@@ -68,6 +68,8 @@ test('chat tab buttons show a short visible label under the full accessible name
     Chat3: '3',
     Chat4a: '4a',
     Chat4b: '4b',
+    Chat5a: '5a',
+    Chat5b: '5b',
   };
 
   for (const [name, shortLabel] of Object.entries(shortLabelByAccessibleName)) {
@@ -257,4 +259,72 @@ test('renders assistant markdown after the stream finishes, including tables', a
   expect(screen.getByText('Nashville')).toBeDefined();
   expect(screen.getByText('Warmest').tagName).toBe('STRONG');
   expect(screen.queryByText(/\| City \| Temp \|/)).toBeNull();
+});
+
+test('Chat5a shows five guardrail-gate checkboxes, in order, checked by default', async () => {
+  const user = userEvent.setup();
+  render(<ChatPanel />);
+
+  await user.click(screen.getByRole('tab', { name: 'Chat5a' }));
+
+  const checkboxes = screen.getAllByRole('checkbox');
+  expect(checkboxes).toHaveLength(5);
+  checkboxes.forEach((checkbox) => expect(checkbox.checked).toBe(true));
+
+  const labels = checkboxes.map((checkbox) => checkbox.closest('label').textContent.trim());
+  expect(labels).toEqual(['500 Char', 'Code Input', 'LLM Input', 'Sys Prompt', 'LLM Output']);
+});
+
+test('other chat tabs do not render the guardrail-gate checkboxes', async () => {
+  const user = userEvent.setup();
+  render(<ChatPanel />);
+
+  for (const name of ['Chat1a', 'Chat4a', 'Chat4b']) {
+    await user.click(screen.getByRole('tab', { name }));
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+  }
+});
+
+test('unchecking a gate changes the outgoing request payload', async () => {
+  streamChatMessage.mockImplementation(async ({ onEvent }) => {
+    onEvent({ type: 'token', text: 'ok' });
+    onEvent({ type: 'done' });
+  });
+
+  const user = userEvent.setup();
+  render(<ChatPanel />);
+
+  await user.click(screen.getByRole('tab', { name: 'Chat5a' }));
+  await user.click(screen.getByRole('checkbox', { name: /llm output/i }));
+  await user.type(screen.getByLabelText(/message/i), 'weather in nashville');
+  await user.click(screen.getByRole('button', { name: /^send$/i }));
+
+  await waitFor(() => expect(streamChatMessage).toHaveBeenCalled());
+  const call = streamChatMessage.mock.calls[0][0];
+  expect(call.endpoint).toBe('/Chat5a/messages');
+  expect(call.gates).toEqual({
+    maxLength: true,
+    ruleInput: true,
+    llmInput: true,
+    systemPrompt: true,
+    llmOutput: false,
+  });
+});
+
+test('a blocked event renders with distinct styling from an error', async () => {
+  streamChatMessage.mockImplementation(async ({ onEvent }) => {
+    onEvent({ type: 'blocked', errorMessage: 'Blocked by Code Input: message is out of scope' });
+    onEvent({ type: 'done' });
+  });
+
+  const user = userEvent.setup();
+  render(<ChatPanel />);
+
+  await user.click(screen.getByRole('tab', { name: 'Chat5a' }));
+  await user.type(screen.getByLabelText(/message/i), 'write me a poem');
+  await user.click(screen.getByRole('button', { name: /^send$/i }));
+
+  const blockedEntry = await screen.findByText('Blocked by Code Input: message is out of scope');
+  expect(blockedEntry.className).toContain('amber');
+  expect(blockedEntry.className).not.toContain('destructive');
 });

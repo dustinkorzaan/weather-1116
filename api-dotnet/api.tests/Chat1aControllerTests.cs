@@ -204,6 +204,8 @@ public class ChatApiWebApplicationFactory : WebApplicationFactory<Program>
             services.Replace(ServiceDescriptor.KeyedScoped<IChatClientService, StubChat3ClientService>("Chat3"));
             services.Replace(ServiceDescriptor.KeyedScoped<IChatClientService, StubChat4aClientService>("Chat4a"));
             services.Replace(ServiceDescriptor.KeyedScoped<IChatClientService, StubChat4bClientService>("Chat4b"));
+            services.Replace(ServiceDescriptor.KeyedScoped<IChat5ClientService, StubChat5aClientService>("Chat5a"));
+            services.Replace(ServiceDescriptor.KeyedScoped<IChat5ClientService, StubChat5bClientService>("Chat5b"));
         });
     }
 }
