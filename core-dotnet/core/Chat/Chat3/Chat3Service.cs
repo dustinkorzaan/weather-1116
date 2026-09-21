@@ -55,7 +55,31 @@ public sealed class Chat3Service : IChatClientService
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
         var usage = new ChatUsageAccumulator();
-        var (client, conversationId) = await _settings.CreateProjectResponsesClientForChatAgentAsync(cancellationToken);
+        ProjectResponsesClient client = null!;
+        string conversationId = "";
+        ExceptionDispatchInfo? clientFailure = null;
+        try
+        {
+            // CreateProjectConversationAsync is a real HTTP call. On main this throws HTTP 400
+            // (missing api-version) before streaming starts. If that exception escapes the
+            // iterator, SSE aborts and the UI shows "network error" instead of the Foundry message.
+            (client, conversationId) = await _settings.CreateProjectResponsesClientForChatAgentAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            clientFailure = ExceptionDispatchInfo.Capture(ex);
+        }
+
+        if (clientFailure is not null)
+        {
+            _logger.LogError(
+                clientFailure.SourceException,
+                "Chat3 failed to create Foundry conversation for agent {AgentName}",
+                _settings.ChatAgentName);
+            yield return ChatStreamEvent.Error(clientFailure.SourceException.Message);
+            yield break;
+        }
+
         var assistantBuilder = new StringBuilder();
         var previousResponseId = _responseStore.GetPreviousResponseId(sessionId);
 

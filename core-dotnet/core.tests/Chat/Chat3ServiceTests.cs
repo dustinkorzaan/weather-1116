@@ -29,6 +29,8 @@ public class Chat3ServiceTests
         Assert.Contains("await enumerator.MoveNextAsync()", source, StringComparison.Ordinal);
         Assert.Contains("ExceptionDispatchInfo.Capture", source, StringComparison.Ordinal);
         Assert.Contains("ChatStreamEvent.Error(failure.SourceException.Message)", source, StringComparison.Ordinal);
+        Assert.Contains("CreateProjectResponsesClientForChatAgentAsync", source, StringComparison.Ordinal);
+        Assert.Contains("Chat3 failed to create Foundry conversation", source, StringComparison.Ordinal);
     }
 
 }
