@@ -28,6 +28,19 @@ public class FoundryAgentResponsesClientFactoryTests
     }
 
     [Fact]
+    public void Factory_AuthenticatesViaFoundryTokenCredentialFactory()
+    {
+        // The tests below inject a fake TokenCredential into a duplicate helper (necessary to
+        // point the SDK at a local listener instead of real IMDS/AAD) - that duplication means
+        // nothing else pins the real factory to actually call FoundryTokenCredentialFactory.Create()
+        // rather than, say, some other credential source. Pin it here.
+        var factory = File.ReadAllText(
+            RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Services/FoundryAgentResponsesClientFactory.cs"));
+
+        Assert.Contains("FoundryTokenCredentialFactory.Create()", factory, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Factory_SendsRequestsAgainstOpenAiV1Endpoint()
     {
         using var listener = new HttpListener();

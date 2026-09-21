@@ -5,10 +5,14 @@
 #
 # Usage:
 #   aca-container-configure.sh --container-app NAME --resource-group RG \
-#     [--secrets-file FILE] [--env-overlay-file FILE] [--image IMAGE]
+#     [--secrets-file FILE] [--env-overlay-file FILE] [--env-remove-file FILE] \
+#     [--secret-remove-file FILE] [--image IMAGE]
 #
 # secrets-file: lines of secret-name=secret-value (optional)
 # env-overlay-file: lines of ENV_NAME=value or ENV_NAME=secretref:secret-name (optional)
+# env-remove-file: lines of ENV_NAME to drop from the live app's env, even though
+#   overlay merging otherwise only touches names present in env-overlay-file (optional)
+# secret-remove-file: lines of secret-name to delete from the live app (optional)
 # image: full image reference for a single atomic containerapp update (optional)
 
 set -euo pipefail
@@ -17,6 +21,8 @@ APP_NAME=""
 RESOURCE_GROUP=""
 SECRETS_FILE=""
 ENV_OVERLAY_FILE=""
+ENV_REMOVE_FILE=""
+SECRET_REMOVE_FILE=""
 IMAGE=""
 
 while [[ $# -gt 0 ]]; do
@@ -35,6 +41,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --env-overlay-file)
       ENV_OVERLAY_FILE="${2:?}"
+      shift 2
+      ;;
+    --env-remove-file)
+      ENV_REMOVE_FILE="${2:?}"
+      shift 2
+      ;;
+    --secret-remove-file)
+      SECRET_REMOVE_FILE="${2:?}"
       shift 2
       ;;
     --image)
@@ -81,13 +95,48 @@ if [ -n "$SECRETS_FILE" ] && [ -f "$SECRETS_FILE" ]; then
   fi
 fi
 
+if [ -n "$SECRET_REMOVE_FILE" ] && [ -f "$SECRET_REMOVE_FILE" ]; then
+  SECRET_REMOVE_NAMES=()
+  while IFS= read -r line || [ -n "$line" ]; do
+    [[ -z "$line" || "$line" =~ ^# ]] && continue
+    SECRET_REMOVE_NAMES+=("$line")
+  done < "$SECRET_REMOVE_FILE"
+
+  if [ "${#SECRET_REMOVE_NAMES[@]}" -gt 0 ]; then
+    EXISTING_SECRET_NAMES="$(az containerapp secret list \
+      --name "$APP_NAME" \
+      --resource-group "$RESOURCE_GROUP" \
+      --query "[].name" \
+      --output tsv)"
+
+    PRESENT_SECRET_REMOVE_NAMES=()
+    for name in "${SECRET_REMOVE_NAMES[@]}"; do
+      if grep -qx "$name" <<< "$EXISTING_SECRET_NAMES"; then
+        PRESENT_SECRET_REMOVE_NAMES+=("$name")
+      fi
+    done
+
+    if [ "${#PRESENT_SECRET_REMOVE_NAMES[@]}" -gt 0 ]; then
+      az containerapp secret remove \
+        --name "$APP_NAME" \
+        --resource-group "$RESOURCE_GROUP" \
+        --secret-names "${PRESENT_SECRET_REMOVE_NAMES[@]}"
+    fi
+  fi
+fi
+
 HAS_ENV_OVERLAY=false
 if [ -n "$ENV_OVERLAY_FILE" ] && [ -f "$ENV_OVERLAY_FILE" ]; then
   HAS_ENV_OVERLAY=true
 fi
 
-if [ "$HAS_ENV_OVERLAY" = false ] && [ -z "$IMAGE" ]; then
-  echo "No env overlay or image specified; nothing to update on $APP_NAME."
+HAS_ENV_REMOVE=false
+if [ -n "$ENV_REMOVE_FILE" ] && [ -f "$ENV_REMOVE_FILE" ]; then
+  HAS_ENV_REMOVE=true
+fi
+
+if [ "$HAS_ENV_OVERLAY" = false ] && [ "$HAS_ENV_REMOVE" = false ] && [ -z "$IMAGE" ]; then
+  echo "No env overlay, env removal, or image specified; nothing to update on $APP_NAME."
   exit 0
 fi
 
@@ -101,7 +150,7 @@ if [ -n "$IMAGE" ]; then
   UPDATE_ARGS+=(--image "$IMAGE")
 fi
 
-if [ "$HAS_ENV_OVERLAY" = true ]; then
+if [ "$HAS_ENV_OVERLAY" = true ] || [ "$HAS_ENV_REMOVE" = true ]; then
   EXISTING_ENV="$(az containerapp show \
     --name "$APP_NAME" \
     --resource-group "$RESOURCE_GROUP" \
@@ -117,23 +166,34 @@ if [ "$HAS_ENV_OVERLAY" = true ]; then
   fi
 
   MERGED_ENV="$EXISTING_ENV"
-  while IFS= read -r line || [ -n "$line" ]; do
-    [[ -z "$line" || "$line" =~ ^# ]] && continue
 
-    KEY="${line%%=*}"
-    VALUE="${line#*=}"
+  if [ "$HAS_ENV_OVERLAY" = true ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+      [[ -z "$line" || "$line" =~ ^# ]] && continue
 
-    if [[ "$VALUE" == secretref:* ]]; then
-      SECRET_NAME="${VALUE#secretref:}"
-      MERGED_ENV="$(jq --arg key "$KEY" --arg secret "$SECRET_NAME" \
-        'map(select(.name != $key)) + [{"name": $key, "secretRef": $secret}]' \
-        <<< "$MERGED_ENV")"
-    else
-      MERGED_ENV="$(jq --arg key "$KEY" --arg value "$VALUE" \
-        'map(select(.name != $key)) + [{"name": $key, "value": $value}]' \
-        <<< "$MERGED_ENV")"
-    fi
-  done < "$ENV_OVERLAY_FILE"
+      KEY="${line%%=*}"
+      VALUE="${line#*=}"
+
+      if [[ "$VALUE" == secretref:* ]]; then
+        SECRET_NAME="${VALUE#secretref:}"
+        MERGED_ENV="$(jq --arg key "$KEY" --arg secret "$SECRET_NAME" \
+          'map(select(.name != $key)) + [{"name": $key, "secretRef": $secret}]' \
+          <<< "$MERGED_ENV")"
+      else
+        MERGED_ENV="$(jq --arg key "$KEY" --arg value "$VALUE" \
+          'map(select(.name != $key)) + [{"name": $key, "value": $value}]' \
+          <<< "$MERGED_ENV")"
+      fi
+    done < "$ENV_OVERLAY_FILE"
+  fi
+
+  if [ "$HAS_ENV_REMOVE" = true ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+      [[ -z "$line" || "$line" =~ ^# ]] && continue
+
+      MERGED_ENV="$(jq --arg key "$line" 'map(select(.name != $key))' <<< "$MERGED_ENV")"
+    done < "$ENV_REMOVE_FILE"
+  fi
 
   ENV_ARGS=()
   while IFS= read -r arg; do
@@ -153,7 +213,7 @@ fi
 
 "${UPDATE_ARGS[@]}"
 
-if [ "$HAS_ENV_OVERLAY" = true ]; then
+if [ "$HAS_ENV_OVERLAY" = true ] || [ "$HAS_ENV_REMOVE" = true ]; then
   echo "Updated $APP_NAME with merged environment variables${IMAGE:+, image $IMAGE}."
 elif [ -n "$IMAGE" ]; then
   echo "Updated $APP_NAME image to $IMAGE."

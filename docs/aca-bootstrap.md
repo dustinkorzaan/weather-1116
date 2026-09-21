@@ -289,6 +289,13 @@ Consequences worth knowing:
 - Adding a provision-owned env var means adding it to the module's
   `provisionEnvVars`. Adding a deploy-time var means adding it to the workflow's
   `env_overlay_multiline`. Putting the same name in both makes provision win.
+- Removing a deploy-time var means adding its name to the workflow's
+  `env_remove_multiline`, not just deleting it from `env_overlay_multiline`.
+  `aca-container-configure.sh`'s merge only touches names present in the
+  overlay file, so a name simply dropped from the overlay stays on the live
+  app (and gets carried forward by the next provision's "union the env
+  lists" step) until something explicitly removes it. Same idea for an
+  orphaned secret via `secret_remove_multiline`.
 - Deleting a container app by hand is fine: the next capture pass simply omits
   it and provision recreates it from the placeholder.
 
