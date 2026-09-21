@@ -6,7 +6,10 @@ namespace Core.Chat.Services.ChatScopeGate;
 /// Chat5a/Chat5b gate #2 ("Code Input"). Deterministic, no I/O, no LLM call: a keyword
 /// allow-list and a deny-list decide whether the message is in scope. Kept deliberately
 /// simple/blunt to demonstrate a rule gate's limits (e.g. it false-positives on legitimate
-/// meta-questions like "what tools do you have?").
+/// meta-questions like "what tools do you have?", and it does not catch a genuine weather
+/// question with an unrelated request bundled in, since the deny-list is a fixed set of
+/// patterns rather than semantic understanding — that bundled case is caught by the smarter
+/// "LLM Input"/"LLM Output" gates instead, see <see cref="LlmScopeGate"/>).
 /// </summary>
 public sealed partial class RuleScopeGate : IScopeGate
 {
@@ -21,15 +24,17 @@ public sealed partial class RuleScopeGate : IScopeGate
         RegexOptions.IgnoreCase)]
     private static partial Regex DenyListPattern();
 
-    // Requires at least one weather/location signal to be considered in scope.
+    // Requires at least one weather signal to be considered in scope. Location words
+    // (coordinates, city/town/state, "where is", geocode) are deliberately NOT allow signals on
+    // their own: a location is only in scope as part of a weather question about it, not as a
+    // topic by itself (e.g. "where is Nashville, TN" is out of scope; "weather in Nashville, TN"
+    // is not).
     [GeneratedRegex(
         "weather|forecast|temperature|climate|rain(y|ing|fall)?|snow(y|ing|fall)?|wind(y|s)?|" +
         "humid(ity)?|storm(y)?|hurricane|tornado|precipitation|sunny|cloudy|degrees?|°|" +
-        "\\bhot\\b|\\bcold\\b|\\bwarm\\b|\\bcool\\b|" +
-        "location|coordinates?|latitude|longitude|\\bzip ?code\\b|near me|" +
-        "\\bcity\\b|\\btown\\b|\\bstate\\b|where is|geocod",
+        "\\bhot\\b|\\bcold\\b|\\bwarm\\b|\\bcool\\b",
         RegexOptions.IgnoreCase)]
-    private static partial Regex WeatherOrLocationPattern();
+    private static partial Regex WeatherPattern();
 
     public string Name => "Code Input";
 
@@ -41,10 +46,10 @@ public sealed partial class RuleScopeGate : IScopeGate
                 false, "message matches an off-topic/instruction-override pattern"));
         }
 
-        if (!WeatherOrLocationPattern().IsMatch(text))
+        if (!WeatherPattern().IsMatch(text))
         {
             return Task.FromResult(new ChatScopeGateResult(
-                false, "message does not contain a weather/location keyword"));
+                false, "message does not contain a weather keyword"));
         }
 
         return Task.FromResult(new ChatScopeGateResult(true, null));

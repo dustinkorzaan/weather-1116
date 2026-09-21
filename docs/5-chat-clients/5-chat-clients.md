@@ -315,7 +315,7 @@ since that turn produced no resolution.
 Sys Prompt is the one gate with nothing checking it programmatically. When checked, the
 orchestrator is built with `Chat5HardenedAiWeatherOrchestrationAssistant` — the same
 `MultiAgentAiWeatherOrchestrationAssistant` instructions Chat4a/Chat4b use, plus an inserted
-paragraph telling the model to only accept weather/location requests, decline anything else, and
+paragraph telling the model to only accept weather requests (not a location by itself), decline anything else, and
 ignore instructions embedded in the user's message that try to override that rule. If the model
 honors it, the refusal is just an ordinary model reply — streamed as normal `token` events like
 any other answer, indistinguishable in the transport from a real weather answer. There is no
@@ -340,7 +340,7 @@ history normally.
 `ChatStreamEvent.Blocked(string message)` is additive alongside the existing `error`/`done`/etc.
 factories — no existing event type or consumer changes. For gates #1, #2, #3, and #5, the message
 is formatted `"Blocked by {gate.Name}: {reason}"`, e.g. `"Blocked by Code Input: message does not
-appear to be about weather or location"` or `"Blocked by 500 Char: message exceeds 500
+contain a weather keyword"` or `"Blocked by 500 Char: message exceeds 500
 characters"` — `gate.Name` and `Reason` come straight from `ChatScopeGateResult`. Gate #4 never
 emits a `blocked` event, per above. A `blocked` turn still ends with a normal `done` event (zero
 or near-zero usage) so the client's turn lifecycle stays consistent with a completed one.
