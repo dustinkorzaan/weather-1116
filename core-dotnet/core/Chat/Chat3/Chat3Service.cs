@@ -55,7 +55,30 @@ public sealed class Chat3Service : IChatClientService
         _sessionStore.AppendMessage(sessionId, new Models.ChatMessage { Role = "user", Content = userMessage });
 
         var usage = new ChatUsageAccumulator();
-        var (client, conversationId) = await _settings.CreateProjectResponsesClientForChatAgentAsync(cancellationToken);
+        ProjectResponsesClient client = null!;
+        string conversationId = "";
+        ExceptionDispatchInfo? clientFailure = null;
+        try
+        {
+            // Same Foundry client sequence as Console V5. If that HTTP call fails, yield an
+            // SSE error instead of letting the iterator abort (the UI then shows "network error").
+            (client, conversationId) = await _settings.CreateProjectResponsesClientForChatAgentAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            clientFailure = ExceptionDispatchInfo.Capture(ex);
+        }
+
+        if (clientFailure is not null)
+        {
+            _logger.LogError(
+                clientFailure.SourceException,
+                "Chat3 failed to create Foundry conversation for agent {AgentName}",
+                _settings.ChatAgentName);
+            yield return ChatStreamEvent.Error(clientFailure.SourceException.Message);
+            yield break;
+        }
+
         var assistantBuilder = new StringBuilder();
         var previousResponseId = _responseStore.GetPreviousResponseId(sessionId);
 
@@ -64,7 +87,6 @@ public sealed class Chat3Service : IChatClientService
             ConversationOptions = new ResponseConversationOptions(),
             AgentConversationId = conversationId,
             StreamingEnabled = true,
-            StoredOutputEnabled = true,
             InputItems =
             {
                 ResponseItem.CreateUserMessageItem(userMessage),

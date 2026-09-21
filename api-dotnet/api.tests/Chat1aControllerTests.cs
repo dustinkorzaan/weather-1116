@@ -126,6 +126,70 @@ public class Chat3ControllerTests(ChatApiWebApplicationFactory factory) : IClass
     }
 }
 
+public class Chat3UnhandledExceptionTests(ThrowingChat3ApiFactory factory) : IClassFixture<ThrowingChat3ApiFactory>
+{
+    private readonly HttpClient _client = factory.CreateClient();
+
+    [Fact]
+    public async Task PostMessage_WritesErrorEventWhenServiceThrowsAfterSession()
+    {
+        using var response = await _client.PostAsJsonAsync(
+            "/Chat3/messages",
+            new ChatSendMessageRequest { Message = "test" });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        var events = ParseThrowingSse(body);
+        Assert.Equal(2, events.Count);
+        Assert.Equal("session", events[0].GetProperty("type").GetString());
+        Assert.Equal("error", events[1].GetProperty("type").GetString());
+        Assert.Equal(
+            "HTTP 400: Missing required query parameter: api-version",
+            events[1].GetProperty("errorMessage").GetString());
+    }
+
+    private static List<JsonElement> ParseThrowingSse(string body)
+    {
+        var events = new List<JsonElement>();
+        foreach (var block in body.Split("\n\n", StringSplitOptions.RemoveEmptyEntries))
+        {
+            var line = block.Trim();
+            if (!line.StartsWith("data:", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            events.Add(JsonDocument.Parse(line["data:".Length..].Trim()).RootElement.Clone());
+        }
+
+        return events;
+    }
+}
+
+public class ThrowingChat3ApiFactory : ChatApiWebApplicationFactory
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        base.ConfigureWebHost(builder);
+        builder.ConfigureServices(services =>
+        {
+            services.Replace(ServiceDescriptor.KeyedScoped<IChatClientService, ThrowingChat3ClientService>("Chat3"));
+        });
+    }
+}
+
+internal sealed class ThrowingChat3ClientService : IChatClientService
+{
+    public async IAsyncEnumerable<ChatStreamEvent> SendMessageAsync(
+        ChatSendMessageRequest request,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        yield return ChatStreamEvent.Session("Chat3:throw");
+        throw new InvalidOperationException("HTTP 400: Missing required query parameter: api-version");
+    }
+}
+
 public class ChatApiWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)

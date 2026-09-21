@@ -9,6 +9,7 @@ public class GetCurrentAIWeatherV5HandlerTests
 
         Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgentAsync", source, StringComparison.Ordinal);
         Assert.Contains("new Uri(projectUrl)", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("ResolveProjectEndpoint", source, StringComparison.Ordinal);
         Assert.Contains("response is null", source, StringComparison.Ordinal);
         Assert.Contains("AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME", source, StringComparison.Ordinal);
         // An empty (but set) GitHub var must still fall back to the default agent name --

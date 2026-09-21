@@ -7,10 +7,9 @@ using OpenAI.Responses;
 namespace Core.AIWeather.Services;
 
 /// <summary>
-/// Builds <see cref="ProjectResponsesClient"/> instances for named Foundry prompt agents
-/// (Chat3, Current AI Weather V5). Same sequence as Foundry Console V5
-/// <c>Program.cs</c>: api-key <see cref="ProjectOpenAIClient"/>, env URL as-is,
-/// <c>GetProjectResponsesClientForAgent</c>, then a real project conversation id.
+/// Builds <see cref="ProjectResponsesClient"/> instances the same way Foundry Console V5
+/// <c>Program.cs</c> does: api-key auth, <c>AZURE_FOUNDRY_PROD_PROJ_URL</c> as-is,
+/// <c>GetProjectResponsesClientForAgent</c>, then <c>CreateProjectConversationAsync</c>.
 /// </summary>
 public static class FoundryAgentResponsesClientFactory
 {
