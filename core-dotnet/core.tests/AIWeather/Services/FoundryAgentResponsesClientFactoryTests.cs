@@ -3,18 +3,20 @@ namespace Core.Tests.AIWeather.Services;
 public class FoundryAgentResponsesClientFactoryTests
 {
     [Fact]
-    public void Factory_SetsAgentName_SoSdkAddsApiVersionQuery()
+    public void Factory_MatchesFoundryConsoleV5ClientConstruction()
     {
-        var source = File.ReadAllText(
+        var factory = File.ReadAllText(
             RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Services/FoundryAgentResponsesClientFactory.cs"));
+        var console = File.ReadAllText(RepoFiles.FindRepoFile("FoundryConsoleV5/Program.cs"));
 
-        // Azure.AI.Extensions.OpenAI 3.0.0-beta.2 only appends ?api-version= when AgentName is set.
-        // Without it, project-root conversations/responses calls return HTTP 400
-        // "Missing required query parameter: api-version".
-        Assert.Contains("AgentName = agentName", source, StringComparison.Ordinal);
-        Assert.Contains("FoundryOpenAiEndpoint.Resolve", source, StringComparison.Ordinal);
-        Assert.DoesNotContain("ResolveProjectEndpoint", source, StringComparison.Ordinal);
-        Assert.Contains("GetProjectResponsesClientForAgent", source, StringComparison.Ordinal);
-        Assert.Contains("CreateProjectConversationAsync", source, StringComparison.Ordinal);
+        Assert.Contains("Endpoint = endpoint", factory, StringComparison.Ordinal);
+        Assert.Contains("Endpoint = new Uri(endpoint)", console, StringComparison.Ordinal);
+        Assert.Contains("GetProjectResponsesClientForAgent", factory, StringComparison.Ordinal);
+        Assert.Contains("GetProjectResponsesClientForAgent", console, StringComparison.Ordinal);
+        Assert.Contains("CreateProjectConversationAsync", factory, StringComparison.Ordinal);
+        Assert.Contains("CreateProjectConversationAsync", console, StringComparison.Ordinal);
+        Assert.DoesNotContain("AgentName =", factory, StringComparison.Ordinal);
+        Assert.DoesNotContain("FoundryOpenAiEndpoint.Resolve", factory, StringComparison.Ordinal);
+        Assert.DoesNotContain("ResolveProjectEndpoint", factory, StringComparison.Ordinal);
     }
 }

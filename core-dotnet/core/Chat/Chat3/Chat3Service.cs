@@ -60,9 +60,8 @@ public sealed class Chat3Service : IChatClientService
         ExceptionDispatchInfo? clientFailure = null;
         try
         {
-            // CreateProjectConversationAsync is a real HTTP call. On main this throws HTTP 400
-            // (missing api-version) before streaming starts. If that exception escapes the
-            // iterator, SSE aborts and the UI shows "network error" instead of the Foundry message.
+            // Same Foundry client sequence as Console V5. If that HTTP call fails, yield an
+            // SSE error instead of letting the iterator abort (the UI then shows "network error").
             (client, conversationId) = await _settings.CreateProjectResponsesClientForChatAgentAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -88,7 +87,6 @@ public sealed class Chat3Service : IChatClientService
             ConversationOptions = new ResponseConversationOptions(),
             AgentConversationId = conversationId,
             StreamingEnabled = true,
-            StoredOutputEnabled = true,
             InputItems =
             {
                 ResponseItem.CreateUserMessageItem(userMessage),
