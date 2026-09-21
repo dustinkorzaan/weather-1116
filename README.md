@@ -81,7 +81,7 @@ relationships, and parity guidance live in
 
 ## Out of Scope
 
+- **Shifting more to Microsoft Agent Framework using declarative YAML or code-first**
 - **Authentication**: Login/identity provider (e.g. Auth0)
 - **Per-user custom map pins**: Map pins scoped to individual user accounts
 - **Per-pin photo uploads**: Image upload/download per pin via blob storage SAS URIs
-- **Shifting more to Microsoft Agent Framework using declarative YAML or code-first**
