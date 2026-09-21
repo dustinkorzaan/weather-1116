@@ -351,7 +351,10 @@ The gates need no new environment variables or settings — `LlmScopeGate` reuse
 own `ChatFoundrySettings`/`ResponsesClient` and deployment name (`AZURE_FOUNDRY_PROD_MODEL`), just
 like the orchestrator itself. `MaxLengthScopeGate` and `RuleScopeGate` are pure code with no
 external dependencies. DI registers the two `LlmScopeGate` instances as keyed singletons
-(`"Chat5InputLlmGate"`, `"Chat5OutputLlmGate"`, both behind `IScopeGate`) and `Chat5aService`/
+(`"Chat5InputLlmGate"`, `"Chat5OutputLlmGate"`, both behind `IScopeGate`), each constructed with
+its own classifier prompt (`ChatSystemInstructions.Chat5InputScopeClassifierPrompt` /
+`Chat5OutputScopeClassifierPrompt` — a request is a question and a reply is a statement, so each
+gate gets a prompt worded for the shape of text it actually classifies), and `Chat5aService`/
 `Chat5bService` as keyed scoped services (`"Chat5a"`, `"Chat5b"`, both behind `IChat5ClientService`)
 in `ChatServiceCollectionExtensions.AddWeatherChatClients()` — no `Program.cs` changes were needed
 in API or MVC.

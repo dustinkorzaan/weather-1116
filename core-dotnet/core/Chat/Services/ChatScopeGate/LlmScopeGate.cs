@@ -8,16 +8,22 @@ namespace Core.Chat.Services.ChatScopeGate;
 /// orchestration agent itself — classifying whether the given text is about weather (a
 /// location by itself does not count).
 /// Registered twice under different <see cref="Name"/> values, once for the user's message
-/// (gate #3) and once for the orchestrator's completed reply (gate #5).
+/// (gate #3, with <see cref="ChatSystemInstructions.Chat5InputScopeClassifierPrompt"/>) and once
+/// for the orchestrator's completed reply (gate #5, with
+/// <see cref="ChatSystemInstructions.Chat5OutputScopeClassifierPrompt"/>) — a request is a
+/// question and a reply is a statement, so each gets its own classifier prompt rather than one
+/// prompt trying to cover both shapes.
 /// </summary>
 public sealed class LlmScopeGate : IScopeGate
 {
     private readonly ChatFoundrySettings _settings;
+    private readonly string _classifierPrompt;
 
-    public LlmScopeGate(ChatFoundrySettings settings, string name)
+    public LlmScopeGate(ChatFoundrySettings settings, string name, string classifierPrompt)
     {
         _settings = settings;
         Name = name;
+        _classifierPrompt = classifierPrompt;
     }
 
     public string Name { get; }
@@ -28,7 +34,7 @@ public sealed class LlmScopeGate : IScopeGate
         var options = new CreateResponseOptions
         {
             Model = _settings.DeploymentName,
-            Instructions = ChatSystemInstructions.Chat5ScopeClassifierPrompt,
+            Instructions = _classifierPrompt,
             InputItems = { ResponseItem.CreateUserMessageItem(text) },
         };
 

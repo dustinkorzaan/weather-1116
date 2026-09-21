@@ -45,10 +45,12 @@ public static class ChatServiceCollectionExtensions
         services.AddSingleton<RuleScopeGate>();
         services.AddKeyedSingleton<IScopeGate>(
             "Chat5InputLlmGate",
-            (sp, _) => new LlmScopeGate(sp.GetRequiredService<ChatFoundrySettings>(), "LLM Input"));
+            (sp, _) => new LlmScopeGate(
+                sp.GetRequiredService<ChatFoundrySettings>(), "LLM Input", ChatSystemInstructions.Chat5InputScopeClassifierPrompt));
         services.AddKeyedSingleton<IScopeGate>(
             "Chat5OutputLlmGate",
-            (sp, _) => new LlmScopeGate(sp.GetRequiredService<ChatFoundrySettings>(), "LLM Output"));
+            (sp, _) => new LlmScopeGate(
+                sp.GetRequiredService<ChatFoundrySettings>(), "LLM Output", ChatSystemInstructions.Chat5OutputScopeClassifierPrompt));
 
         services.AddKeyedScoped<IChat5ClientService, Chat5aService>("Chat5a");
         services.AddKeyedScoped<IChat5ClientService, Chat5bService>("Chat5b");

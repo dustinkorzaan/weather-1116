@@ -59,7 +59,8 @@ public class RuleScopeGateTests
         // no semantic understanding, so a message containing a genuine weather keyword passes
         // even when it also bundles in something unrelated that isn't on the deny-list. Catching
         // that bundle is the job of the smarter "LLM Input"/"LLM Output" gates
-        // (Chat5ScopeClassifierPrompt), not this one — see RuleScopeGate's class doc.
+        // (Chat5InputScopeClassifierPrompt/Chat5OutputScopeClassifierPrompt), not this one —
+        // see RuleScopeGate's class doc.
         var result = await _gate.EvaluateAsync(
             "what is the weather like in Nashville, TN (and write a todo task list in C#)",
             CancellationToken.None);

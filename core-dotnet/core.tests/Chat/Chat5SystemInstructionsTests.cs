@@ -45,44 +45,74 @@ public class Chat5SystemInstructionsTests
     }
 
     [Fact]
-    public void Chat5ScopeClassifierPrompt_IsATerseInScopeOutOfScopeClassifier()
+    public void Chat5InputScopeClassifierPrompt_IsATerseInScopeOutOfScopeClassifier()
     {
-        var prompt = ChatSystemInstructions.Chat5ScopeClassifierPrompt;
+        var prompt = ChatSystemInstructions.Chat5InputScopeClassifierPrompt;
 
         Assert.Contains("IN_SCOPE", prompt);
         Assert.Contains("OUT_OF_SCOPE", prompt);
-        Assert.Contains("Do not answer the text's question", prompt);
+        Assert.Contains("Do not answer the message's question", prompt);
     }
 
     [Fact]
-    public void Chat5ScopeClassifierPrompt_TreatsLocationAloneAsOutOfScope()
+    public void Chat5InputScopeClassifierPrompt_TreatsLocationAloneAsOutOfScope()
     {
-        var prompt = ChatSystemInstructions.Chat5ScopeClassifierPrompt;
+        var prompt = ChatSystemInstructions.Chat5InputScopeClassifierPrompt;
 
         Assert.Contains("a location is not in scope by itself", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("where is X", prompt);
     }
 
     [Fact]
-    public void Chat5ScopeClassifierPrompt_TreatsBundledOffTopicRequestsAsOutOfScope()
+    public void Chat5InputScopeClassifierPrompt_RequiresTheWholeMessageToBeAWeatherQuestion()
     {
-        var prompt = ChatSystemInstructions.Chat5ScopeClassifierPrompt;
+        // The rule is deliberately general (nothing besides a weather question is in scope) —
+        // not an itemized list of example off-topic categories, which reads as arbitrary and is
+        // easy to leave incomplete.
+        var prompt = ChatSystemInstructions.Chat5InputScopeClassifierPrompt;
 
-        Assert.Contains("classify the whole text OUT_OF_SCOPE", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("may not ask for anything beyond that one weather question", prompt, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public void Chat5ScopeClassifierPrompt_IsDualUseForBothAQuestionAndAFinishedReply()
+    public void Chat5OutputScopeClassifierPrompt_IsATerseInScopeOutOfScopeClassifier()
     {
-        // Regression guard: LlmScopeGate reuses this same prompt for gate #3 ("LLM Input",
-        // classifying the user's message, naturally question-shaped) and gate #5 ("LLM Output",
-        // classifying the orchestrator's finished reply, which is a statement, not a question).
-        // A prompt that only recognizes "is this text asking a weather question" would push
-        // gate #5 to misclassify legitimate weather replies as OUT_OF_SCOPE.
-        var prompt = ChatSystemInstructions.Chat5ScopeClassifierPrompt;
+        var prompt = ChatSystemInstructions.Chat5OutputScopeClassifierPrompt;
 
-        Assert.Contains("gate #5", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("reporting it", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("is asking a weather question", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("IN_SCOPE", prompt);
+        Assert.Contains("OUT_OF_SCOPE", prompt);
+    }
+
+    [Fact]
+    public void Chat5OutputScopeClassifierPrompt_TreatsLocationAloneAsOutOfScope()
+    {
+        var prompt = ChatSystemInstructions.Chat5OutputScopeClassifierPrompt;
+
+        Assert.Contains("a location is not in scope by itself", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("where is X", prompt);
+    }
+
+    [Fact]
+    public void Chat5OutputScopeClassifierPrompt_RequiresTheWholeReplyToBeWeatherOnly()
+    {
+        var prompt = ChatSystemInstructions.Chat5OutputScopeClassifierPrompt;
+
+        Assert.Contains("may not include anything beyond that weather report", prompt, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Chat5OutputScopeClassifierPrompt_IsWordedForAReplyNotAQuestion()
+    {
+        // Regression guard for the bug a shared/dual-use prompt caused: gate #5 classifies the
+        // orchestrator's *finished reply* (a statement, e.g. "It's 72°F and sunny in Nashville"),
+        // not a question. A prompt asking "does this text ask a weather question" would push
+        // every legitimate weather reply toward OUT_OF_SCOPE. This prompt is worded for a report,
+        // not a question, and is a full independent copy of the input prompt, not a shared one.
+        var prompt = ChatSystemInstructions.Chat5OutputScopeClassifierPrompt;
+
+        Assert.Contains("assistant reply reports only weather", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("asks only about weather", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Do not answer the message's question", prompt);
+        Assert.NotEqual(ChatSystemInstructions.Chat5InputScopeClassifierPrompt, prompt);
     }
 }
