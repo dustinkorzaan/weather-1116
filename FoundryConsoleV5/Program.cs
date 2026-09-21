@@ -1,16 +1,20 @@
-﻿using Core.AIWeather.Models;
+﻿extern alias AzIdentity;
+using DefaultAzureCredential = AzIdentity::Azure.Identity.DefaultAzureCredential;
+
+using Azure.AI.Extensions.OpenAI;
+using Azure.AI.Projects;
+using Azure.AI.Projects.Agents;
+using Core.AIWeather.Models;
 using Core.AIWeather.Services;
 using Core.Json;
 using Core.Weather;
 using DotNetEnv;
-using OpenAI;
 using OpenAI.Responses;
 using System;
-using System.ClientModel;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+
+#pragma warning disable OPENAI001
 
 internal class Program
 {
@@ -28,14 +32,17 @@ internal class Program
 		Console.WriteLine($"""
 		Example 5
 		 - Ask Foundry Agent "What is today's weather in {location}?"
-		 - Model Direct (ResponsesClient + api key, same as V4)
-		 - This console sends the hardcoded system prompt and user prompt
+		 - Hosted Microsoft Foundry Agent (AIProjectClient + ProjectResponsesClient)
+		 - Instructions, response schema, and MCP tools are configured on the agent
+		 - This console sends the user prompt
 		 - JSON output from AI
 		""");
 
-		var endpoint = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL") ?? throw new InvalidOperationException("AZURE_FOUNDRY_PROD_PROJ_URL not found in environment variables.");
-		var deploymentName = "gpt-5.4-mini";
-		var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.");
+		var endpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(
+			Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
+			?? "https://wx1116prod2th7yydhws5h6.services.ai.azure.com/api/projects/wx1116-prod-proj").ToString();
+		var agentName = "wx1116-agent-for-current-weather";
+		var agentVersion = "1";
 
 		var systemPrompt = """
 		# Role & Operational Rules
@@ -71,26 +78,8 @@ internal class Program
 		What is today's weather in: {location}?
 		""";
 
-		var aiOutputSchema = """
-		{
-		  "type": "object",
-		  "properties": {
-		    "fullSummary": { "type": "string" },
-		    "temperatureF": { "type": "number" },
-		    "windSpeedMPH": { "type": "number" },
-		    "windDirectionSourceDegrees": { "type": "integer" },
-		    "windDirectionSource": { "type": "string" },
-		    "conditions": { "type": "string" },
-		    "latitude": { "type": "number" },
-		    "longitude": { "type": "number" }
-		  },
-		  "required": ["fullSummary", "temperatureF", "windSpeedMPH", "windDirectionSourceDegrees", "windDirectionSource", "conditions", "latitude", "longitude"],
-		  "additionalProperties": false
-		}
-		""";
-
-		Console.WriteLine($"OpenAI endpoint: {endpoint}");
-		Console.WriteLine($"Model: {deploymentName}");
+		Console.WriteLine($"Project endpoint: {endpoint}");
+		Console.WriteLine($"Agent: {agentName} (v{agentVersion})");
 
 		Console.WriteLine("\nSystem Prompt:");
 		Console.WriteLine(systemPrompt);
@@ -98,36 +87,14 @@ internal class Program
 		Console.WriteLine("\nUser Prompt:");
 		Console.WriteLine(userPrompt);
 
-		Console.WriteLine("\nAI Output Schema:");
-		Console.WriteLine(aiOutputSchema);
+		AIProjectClient projectClient = new(endpoint: new Uri(endpoint), tokenProvider: new DefaultAzureCredential());
 
-		var client = new ResponsesClient(
-			credential: new ApiKeyCredential(apiKey),
-			options: new ResponsesClientOptions()
-			{
-				Endpoint = FoundryOpenAiEndpoint.Resolve(endpoint),
-			});
-
-		var inputItems = new List<ResponseItem>()
-		{
-			ResponseItem.CreateSystemMessageItem(systemPrompt),
-			ResponseItem.CreateUserMessageItem(userPrompt),
-		};
-
-		var options = new CreateResponseOptions(deploymentName, inputItems)
-		{
-			TextOptions = new ResponseTextOptions
-			{
-				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
-					jsonSchemaFormatName: "ai_weather_response",
-					jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(aiOutputSchema)),
-					jsonSchemaIsStrict: true)
-			}
-		};
+		AgentReference agentReference = new(name: agentName, version: agentVersion);
+		ProjectResponsesClient responseClient = projectClient.OpenAI.GetProjectResponsesClientForAgent(agentReference);
 
 		try
 		{
-			var response = (await client.CreateResponseAsync(options)).Value;
+			ResponseResult response = await responseClient.CreateResponseAsync(userPrompt);
 			var content = response.GetOutputText();
 			var aiWeather = JsonSerializer.Deserialize<AIWeatherResponse>(content);
 
