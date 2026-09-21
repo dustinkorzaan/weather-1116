@@ -272,7 +272,7 @@ test('Chat5a shows five guardrail-gate checkboxes, in order, checked by default'
   checkboxes.forEach((checkbox) => expect(checkbox.checked).toBe(true));
 
   const labels = checkboxes.map((checkbox) => checkbox.closest('label').textContent.trim());
-  expect(labels).toEqual(['500 Char', 'Code Input', 'LLM Input', 'Sys Prompt', 'LLM Output']);
+  expect(labels).toEqual(['500 Char', 'Code Input', 'LLM Input', 'Sys Prompt', 'LLM Output (waits for full reply)']);
 });
 
 test('other chat tabs do not render the guardrail-gate checkboxes', async () => {

@@ -1,7 +1,7 @@
 // Chat5a/Chat5b only: the row of 5 guardrail-gate checkboxes below the chat input.
 // Order matches the real request pipeline: 500 Char -> Code Input -> LLM Input (pre-flight,
-// AND semantics) -> Sys Prompt (inside the orchestrator's own instructions) -> LLM Output
-// (post-flight, disables streaming for that turn when checked).
+// AND semantics) -> Sys Prompt (inside the orchestrator's own instructions) ->
+// LLM Output (waits for full reply) (post-flight, disables streaming for that turn when checked).
 const GATES = [
   {
     key: 'maxLength',
@@ -29,9 +29,9 @@ const GATES = [
   },
   {
     key: 'llmOutput',
-    label: 'LLM Output',
+    label: 'LLM Output (waits for full reply)',
     description:
-      "Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown; requires buffering the complete response first, so token streaming is disabled for that turn.",
+      "Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown. You will have to wait for the complete reply to finish generating before you see any of it, since streaming is disabled for that turn.",
   },
 ];
 
