@@ -3,6 +3,7 @@ using Core.AIWeather.Models;
 using Core.Json;
 using Core.Weather;
 using DotNetEnv;
+using OpenAI.Conversations;
 using OpenAI.Responses;
 using System;
 using System.ClientModel;
@@ -56,9 +57,15 @@ internal class Program
 			});
 
 		var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+		var conversation = (await projectOpenAIClient
+			.GetProjectConversationsClient()
+			.CreateProjectConversationAsync(new ConversationCreationOptions())).Value;
 
 		var options = new CreateResponseOptions()
 		{
+			ConversationOptions = new ResponseConversationOptions(),
+			AgentConversationId = conversation.Id,
+			StreamingEnabled = true,
 			InputItems =
 			{
 				ResponseItem.CreateUserMessageItem(userPrompt),
