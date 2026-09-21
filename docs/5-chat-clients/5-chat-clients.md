@@ -363,7 +363,6 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 | Variable | Used by |
 | --- | --- |
 | `AZURE_FOUNDRY_PROD_PROJ_URL` | All chat tabs |
-| `AZURE_FOUNDRY_PROD_KEY` | All chat tabs |
 | `AZURE_FOUNDRY_PROD_MODEL` | Chat1a–Chat2b and Chat4a–Chat4b (not Chat3) |
 | `AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME` | Chat3 only (required). GitHub var / App Service. Independent of V5's `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`. |
 | `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b, Chat4b (Geo sub-agent) |
@@ -378,6 +377,10 @@ guardrail gates add no new configuration. `LlmScopeGate` (gates #3 and #5) reuse
 `AZURE_FOUNDRY_PROD_*` settings and `AZURE_FOUNDRY_PROD_MODEL` deployment the orchestrator already
 uses; `MaxLengthScopeGate` and `RuleScopeGate` (gates #1 and #2) are pure code with no
 configuration at all.
+
+No `AZURE_FOUNDRY_PROD_KEY` is needed here: MVC authenticates to Foundry via its
+managed identity (see docs/architecture.md). The key is only for the
+FoundryConsoleV1-V5 local dev-tool consoles.
 
 `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME` remains the V5 console agent (`wx1116-agent-for-current-weather`,
 JSON weather). Do not point Chat3 at that agent.

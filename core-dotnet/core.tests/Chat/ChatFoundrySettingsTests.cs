@@ -34,7 +34,24 @@ public class ChatFoundrySettingsTests
         Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgentAsync", source, StringComparison.Ordinal);
     }
 
-    private static void RunWithFoundryEnvironment(string? chatAgentName, Action action)
+    [Fact]
+    public void CreateResponsesClient_UsesManagedIdentityWhenApiKeyUnset()
+    {
+        RunWithFoundryEnvironment(chatAgentName: null, hasApiKey: false, () =>
+        {
+            var settings = new ChatFoundrySettings();
+
+            Assert.Null(settings.ApiKey);
+            var client = settings.CreateResponsesClient();
+
+            Assert.NotNull(client);
+        });
+    }
+
+    private static void RunWithFoundryEnvironment(string? chatAgentName, Action action) =>
+        RunWithFoundryEnvironment(chatAgentName, hasApiKey: true, action);
+
+    private static void RunWithFoundryEnvironment(string? chatAgentName, bool hasApiKey, Action action)
     {
         var previousUrl = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL");
         var previousKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY");
@@ -45,7 +62,7 @@ public class ChatFoundrySettingsTests
             Environment.SetEnvironmentVariable(
                 "AZURE_FOUNDRY_PROD_PROJ_URL",
                 "https://example.services.ai.azure.com/api/projects/demo");
-            Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY", "test-key");
+            Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY", hasApiKey ? "test-key" : null);
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL", "gpt-5.4-mini");
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME", chatAgentName);
             action();
