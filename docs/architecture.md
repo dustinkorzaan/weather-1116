@@ -516,13 +516,15 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-for-current-weather`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
 
 No `AZURE_FOUNDRY_PROD_KEY` here: that API key is only for the FoundryConsoleV1-V5
-dev-tool consoles. API, MVC, and Worker authenticate to Foundry passwordlessly via
-this app's managed identity instead (`AZURE_CLIENT_ID` in Azure, developer sign-in
-locally) — see `Core.AIWeather.Services.FoundryTokenCredentialFactory`, used by
+dev-tool consoles, which build their own clients directly and never call into
+these Core classes. API, MVC, and Worker always authenticate to Foundry
+passwordlessly via this app's managed identity instead (`AZURE_CLIENT_ID` in
+Azure, developer sign-in locally) — see
+`Core.AIWeather.Services.FoundryTokenCredentialFactory`, used unconditionally by
 `ChatFoundrySettings`, `FoundryResponsesClientFactory`, and
-`FoundryAgentResponsesClientFactory` whenever no key is configured. `ai-foundry.bicep`
-grants api/mvc/worker's managed identities both **Cognitive Services User** (account
-scope, direct model inference — V3/V4/Chat tabs) and **Foundry User** (project scope,
+`FoundryAgentResponsesClientFactory`. `ai-foundry.bicep` grants api/mvc/worker's
+managed identities both **Cognitive Services User** (account scope, direct model
+inference — V3/V4/Chat tabs) and **Foundry User** (project scope,
 `agents/*/action` — Chat3/V5's hosted-agent calls), the same two roles the GitHub
 Actions identity and the Foundry project's own identity already hold for their
 respective Agents API use.

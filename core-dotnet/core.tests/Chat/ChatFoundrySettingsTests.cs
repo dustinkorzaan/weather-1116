@@ -35,26 +35,21 @@ public class ChatFoundrySettingsTests
     }
 
     [Fact]
-    public void CreateResponsesClient_UsesManagedIdentityWhenApiKeyUnset()
+    public void CreateResponsesClient_BuildsClientViaManagedIdentity()
     {
-        RunWithFoundryEnvironment(chatAgentName: null, hasApiKey: false, () =>
+        RunWithFoundryEnvironment(chatAgentName: null, () =>
         {
             var settings = new ChatFoundrySettings();
 
-            Assert.Null(settings.ApiKey);
             var client = settings.CreateResponsesClient();
 
             Assert.NotNull(client);
         });
     }
 
-    private static void RunWithFoundryEnvironment(string? chatAgentName, Action action) =>
-        RunWithFoundryEnvironment(chatAgentName, hasApiKey: true, action);
-
-    private static void RunWithFoundryEnvironment(string? chatAgentName, bool hasApiKey, Action action)
+    private static void RunWithFoundryEnvironment(string? chatAgentName, Action action)
     {
         var previousUrl = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL");
-        var previousKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY");
         var previousModel = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL");
         var previousAgent = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME");
         try
@@ -62,7 +57,6 @@ public class ChatFoundrySettingsTests
             Environment.SetEnvironmentVariable(
                 "AZURE_FOUNDRY_PROD_PROJ_URL",
                 "https://example.services.ai.azure.com/api/projects/demo");
-            Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY", hasApiKey ? "test-key" : null);
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL", "gpt-5.4-mini");
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME", chatAgentName);
             action();
@@ -70,7 +64,6 @@ public class ChatFoundrySettingsTests
         finally
         {
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL", previousUrl);
-            Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY", previousKey);
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL", previousModel);
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME", previousAgent);
         }

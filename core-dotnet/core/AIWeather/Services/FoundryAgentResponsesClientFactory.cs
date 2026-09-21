@@ -1,5 +1,3 @@
-using System.ClientModel;
-using System.ClientModel.Primitives;
 using Azure.AI.Extensions.OpenAI;
 using OpenAI.Conversations;
 using OpenAI.Responses;
@@ -7,12 +5,12 @@ using OpenAI.Responses;
 namespace Core.AIWeather.Services;
 
 /// <summary>
-/// Builds <see cref="ProjectResponsesClient"/> instances for Chat3 and Current AI Weather V5, the
-/// same shape as Foundry Console V5 <c>Program.cs</c>: <c>GetProjectResponsesClientForAgent</c>,
-/// then <c>CreateProjectConversationAsync</c>. Uses AZURE_FOUNDRY_PROD_KEY when set (console V5),
-/// otherwise this app's managed identity via <see cref="FoundryTokenCredentialFactory"/> (Chat3,
-/// Current AI Weather V5 in API/MVC). This is its own implementation, independent of Console
-/// V5 - it does not call it and Console V5 does not call this.
+/// Builds <see cref="ProjectResponsesClient"/> instances for Chat3 and Current AI Weather V5:
+/// <c>GetProjectResponsesClientForAgent</c>, then <c>CreateProjectConversationAsync</c>. Always
+/// authenticates via this app's managed identity (<see cref="FoundryTokenCredentialFactory"/>) -
+/// no API key. This is its own implementation, independent of Console V5's own
+/// <c>Program.cs</c> (which builds its client directly with AZURE_FOUNDRY_PROD_KEY) - neither
+/// calls the other.
 /// </summary>
 /// <remarks>
 /// Unlike Console V5, the endpoint is resolved through <see cref="FoundryOpenAiEndpoint.Resolve"/>,
@@ -41,21 +39,12 @@ public static class FoundryAgentResponsesClientFactory
         ArgumentException.ThrowIfNullOrWhiteSpace(agentName);
         ArgumentNullException.ThrowIfNull(endpoint);
 
-        var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY");
-
         var resolvedEndpoint = FoundryOpenAiEndpoint.Resolve(endpoint.ToString());
 
-        ProjectOpenAIClient projectOpenAIClient = string.IsNullOrEmpty(apiKey)
-            ? new ProjectOpenAIClient(
-                resolvedEndpoint,
-                FoundryTokenCredentialFactory.Create(),
-                new ProjectOpenAIClientOptions())
-            : new ProjectOpenAIClient(
-                ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
-                new ProjectOpenAIClientOptions
-                {
-                    Endpoint = resolvedEndpoint,
-                });
+        var projectOpenAIClient = new ProjectOpenAIClient(
+            resolvedEndpoint,
+            FoundryTokenCredentialFactory.Create(),
+            new ProjectOpenAIClientOptions());
 
         var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
         var conversation = (await projectOpenAIClient
