@@ -16,8 +16,8 @@ a one-shot structured JSON response.
 | **Chat3** | Hosted Microsoft Foundry agent | MCP tools configured **on the agent** in Foundry (`wx1116-agent-for-chat`) | Foundry Console **V5** |
 | **Chat4a** | Microsoft Agent Framework (model-direct), multi-agent | In-process tools, split across two sub-agents delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V3 orchestration style |
 | **Chat4b** | Microsoft Agent Framework (model-direct), multi-agent | Remote MCP tools, split across two sub-agents delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V4 orchestration style |
-| **Chat5a** | Microsoft Agent Framework (model-direct), multi-agent, guardrailed | Chat4a's in-process tools, unchanged, plus five independently toggleable guardrail gates in front of/around the orchestrator | Teaching demo: securing a multi-agent system |
-| **Chat5b** | Microsoft Agent Framework (model-direct), multi-agent, guardrailed | Chat4b's remote MCP tools, unchanged, plus the same five guardrail gates | Teaching demo: securing a multi-agent system |
+| **Chat5a** | Microsoft Agent Framework (model-direct), multi-agent, guardrailed | Chat4a's in-process tools, unchanged, plus five independently toggleable guardrail gates in front of/around the orchestrator | Guardrailed extension of Chat4a |
+| **Chat5b** | Microsoft Agent Framework (model-direct), multi-agent, guardrailed | Chat4b's remote MCP tools, unchanged, plus the same five guardrail gates | Guardrailed extension of Chat4b |
 
 Each tab has its **own controller**, **own Core service**, and **own session namespace**
 (`Chat1a:…`, `Chat1b:…`, `Chat3:…`, `Chat4a:…`, `Chat4b:…`, `Chat5a:…`, `Chat5b:…`, etc.) so
