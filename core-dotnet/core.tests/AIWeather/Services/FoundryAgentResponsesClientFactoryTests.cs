@@ -2,6 +2,7 @@ using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Net;
 using Azure.AI.Extensions.OpenAI;
+using Core.AIWeather.Services;
 using OpenAI.Conversations;
 
 namespace Core.Tests.AIWeather.Services;
@@ -9,36 +10,24 @@ namespace Core.Tests.AIWeather.Services;
 public class FoundryAgentResponsesClientFactoryTests
 {
     [Fact]
-    public void Factory_MatchesFoundryConsoleV5ClientConstruction()
+    public void Factory_ResolvesEndpointThroughFoundryOpenAiEndpoint()
     {
         var factory = File.ReadAllText(
             RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Services/FoundryAgentResponsesClientFactory.cs"));
-        var console = File.ReadAllText(RepoFiles.FindRepoFile("FoundryConsoleV5/Program.cs"));
 
-        // Console V5 is untouched and stays its own, independent implementation - the factory does not
-        // call it, and this test only checks that the two stay in agreement on the parts that must
-        // match (endpoint, agent, conversation calls), not that either references the other.
-        Assert.Contains("Endpoint = endpoint", factory, StringComparison.Ordinal);
-        Assert.Contains("Endpoint = new Uri(endpoint)", console, StringComparison.Ordinal);
+        // AZURE_FOUNDRY_PROD_PROJ_URL must resolve through FoundryOpenAiEndpoint.Resolve (which
+        // appends /openai/v1 when missing). Passing the raw project URL resolves both calls to an
+        // Azure-classic path that needs an explicit api-version query parameter neither call sends,
+        // and CreateResponseStreamingAsync fails with "Missing required query parameter: api-version" -
+        // see Factory_SendsRequestsAgainstOpenAiV1Endpoint below for a live-request regression test.
+        Assert.Contains("FoundryOpenAiEndpoint.Resolve", factory, StringComparison.Ordinal);
         Assert.Contains("GetProjectResponsesClientForAgent", factory, StringComparison.Ordinal);
-        Assert.Contains("GetProjectResponsesClientForAgent", console, StringComparison.Ordinal);
         Assert.Contains("CreateProjectConversationAsync", factory, StringComparison.Ordinal);
-        Assert.Contains("CreateProjectConversationAsync", console, StringComparison.Ordinal);
-        Assert.DoesNotContain("FoundryOpenAiEndpoint.Resolve", factory, StringComparison.Ordinal);
         Assert.DoesNotContain("ResolveProjectEndpoint", factory, StringComparison.Ordinal);
-
-        // Console V5's single client (no AgentName) works for CreateProjectConversationAsync but fails
-        // "Missing required query parameter: api-version" on the agent-scoped responses call - confirmed
-        // against a live Foundry project. The factory therefore uses two ProjectOpenAIClient instances,
-        // one per call, so each gets the api-version behavior its endpoint actually needs (see
-        // Factory_ResponsesRequestCarriesApiVersion_ConversationsRequestDoesNot below). Console V5 itself
-        // is left as-is; do not add AgentName there.
-        Assert.Contains("AgentName = agentName", factory, StringComparison.Ordinal);
-        Assert.DoesNotContain("AgentName =", console, StringComparison.Ordinal);
     }
 
     [Fact]
-    public async Task Factory_ResponsesRequestCarriesApiVersion_ConversationsRequestDoesNot()
+    public async Task Factory_SendsRequestsAgainstOpenAiV1Endpoint()
     {
         using var listener = new HttpListener();
         var port = GetFreeTcpPort();
@@ -46,12 +35,11 @@ public class FoundryAgentResponsesClientFactoryTests
         listener.Prefixes.Add(prefix);
         listener.Start();
 
-        var capturedUris = new List<Uri>();
+        Uri? capturedUri = null;
         var listenerTask = Task.Run(async () =>
         {
-            // Only the conversation-creation call happens during CreateForAgentAsync itself; capture it.
             var ctx = await listener.GetContextAsync();
-            lock (capturedUris) { capturedUris.Add(ctx.Request.Url!); }
+            capturedUri = ctx.Request.Url;
             ctx.Response.StatusCode = 200;
             ctx.Response.ContentType = "application/json";
             var body = "{\"id\":\"conv_test\",\"object\":\"conversation\"}"u8.ToArray();
@@ -60,7 +48,9 @@ public class FoundryAgentResponsesClientFactoryTests
             ctx.Response.OutputStream.Close();
         });
 
-        var (responseClient, conversationId) = await FoundryAgentResponsesClientFactoryTestHelper.CreateForAgentAsync(
+        // Deliberately pass the raw project URL (no /openai/v1 suffix), matching what
+        // AZURE_FOUNDRY_PROD_PROJ_URL actually holds - the factory itself must append the suffix.
+        var (_, conversationId) = await FoundryAgentResponsesClientFactoryTestHelper.CreateForAgentAsync(
             "test-agent",
             new Uri($"{prefix}api/projects/testproj"),
             "fake-key");
@@ -69,11 +59,8 @@ public class FoundryAgentResponsesClientFactoryTests
         listener.Stop();
 
         Assert.Equal("conv_test", conversationId);
-        Assert.NotNull(responseClient);
-
-        var conversationsRequest = Assert.Single(capturedUris);
-        Assert.Contains("/conversations", conversationsRequest.AbsolutePath, StringComparison.Ordinal);
-        Assert.DoesNotContain("api-version=", conversationsRequest.Query, StringComparison.Ordinal);
+        Assert.NotNull(capturedUri);
+        Assert.Contains("/openai/v1/", capturedUri!.AbsolutePath, StringComparison.Ordinal);
     }
 
     private static int GetFreeTcpPort()
@@ -98,24 +85,17 @@ internal static class FoundryAgentResponsesClientFactoryTestHelper
         Uri endpoint,
         string apiKey)
     {
-        var apiKeyPolicy = ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key");
+        var resolvedEndpoint = FoundryOpenAiEndpoint.Resolve(endpoint.ToString());
 
-        var responsesHost = new ProjectOpenAIClient(
-            apiKeyPolicy,
+        var projectOpenAIClient = new ProjectOpenAIClient(
+            ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
             new ProjectOpenAIClientOptions
             {
-                Endpoint = endpoint,
-                AgentName = agentName,
+                Endpoint = resolvedEndpoint,
             });
-        var responseClient = responsesHost.GetProjectResponsesClientForAgent(agentName);
 
-        var conversationsHost = new ProjectOpenAIClient(
-            apiKeyPolicy,
-            new ProjectOpenAIClientOptions
-            {
-                Endpoint = endpoint,
-            });
-        var conversation = (await conversationsHost
+        var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+        var conversation = (await projectOpenAIClient
             .GetProjectConversationsClient()
             .CreateProjectConversationAsync(new ConversationCreationOptions())).Value;
 
