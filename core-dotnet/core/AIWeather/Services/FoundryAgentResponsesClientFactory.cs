@@ -8,9 +8,7 @@ namespace Core.AIWeather.Services;
 
 /// <summary>
 /// Builds <see cref="ProjectResponsesClient"/> instances for named Foundry prompt agents
-/// (Chat3, Current AI Weather V5). Same sequence as Foundry Console V5
-/// <c>Program.cs</c>: api-key <see cref="ProjectOpenAIClient"/>, env URL as-is,
-/// <c>GetProjectResponsesClientForAgent</c>, then a real project conversation id.
+/// (Chat3, Current AI Weather V5, Foundry Console V5).
 /// </summary>
 public static class FoundryAgentResponsesClientFactory
 {
@@ -35,11 +33,17 @@ public static class FoundryAgentResponsesClientFactory
         var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
 
+        // Azure.AI.Extensions.OpenAI 3.0.0-beta.2 only appends ?api-version= when AgentName is set.
+        // ApiVersion alone is ignored. Without the query param, Foundry returns HTTP 400
+        // "Missing required query parameter: api-version" on the project-root conversations
+        // and responses paths used when AZURE_FOUNDRY_PROD_PROJ_URL has no /openai/v1 suffix
+        // (production). Console V5 works locally because its .env already includes /openai/v1.
         var projectOpenAIClient = new ProjectOpenAIClient(
             ApiKeyAuthenticationPolicy.CreateHeaderApiKeyPolicy(new ApiKeyCredential(apiKey), "api-key"),
             new ProjectOpenAIClientOptions
             {
-                Endpoint = endpoint,
+                Endpoint = FoundryOpenAiEndpoint.Resolve(endpoint.ToString()),
+                AgentName = agentName,
             });
 
         var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
