@@ -28,9 +28,10 @@ public static class FoundryOpenAiEndpoint
     }
 
     /// <summary>
-    /// Strips a trailing <c>/openai/v1</c> inference suffix. Not used by the hosted-agent callers
-    /// (Chat3, Current AI Weather V5) — they resolve their endpoint with <see cref="Resolve"/>
-    /// instead, which appends the suffix rather than stripping it.
+    /// Strips a trailing <c>/openai/v1</c> inference suffix. Used by Chat3 / Current AI Weather V5
+    /// for the TokenCredential <c>ProjectOpenAIClient(Uri projectEndpoint, ...)</c> constructor,
+    /// which appends <c>/openai/v1</c> itself. <see cref="Resolve"/> stays the right helper for
+    /// <c>ResponsesClient</c> and for Console V5's api-key <c>ProjectOpenAIClientOptions.Endpoint</c>.
     /// </summary>
     public static Uri ResolveProjectEndpoint(string projectOrEndpointUrl)
     {

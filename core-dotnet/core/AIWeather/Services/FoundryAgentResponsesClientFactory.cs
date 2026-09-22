@@ -13,11 +13,13 @@ namespace Core.AIWeather.Services;
 /// calls the other.
 /// </summary>
 /// <remarks>
-/// Unlike Console V5, the endpoint is resolved through <see cref="FoundryOpenAiEndpoint.Resolve"/>,
-/// which appends <c>/openai/v1</c> to <c>AZURE_FOUNDRY_PROD_PROJ_URL</c> when it's not already there.
-/// Passing the raw project URL (no <c>/openai/v1</c>) resolves both calls to an Azure-classic path
-/// that requires an explicit <c>api-version</c> query parameter neither call sends, and
-/// <c>CreateResponseStreamingAsync</c> fails with "Missing required query parameter: api-version".
+/// The TokenCredential constructor takes the Azure AI <em>project</em> endpoint and appends
+/// <c>/openai/v1</c> itself. Passing an already-resolved <c>.../openai/v1</c> URL (what
+/// <see cref="FoundryOpenAiEndpoint.Resolve"/> produces for <c>ResponsesClient</c>) double-appends
+/// the suffix and <c>CreateProjectConversationAsync</c> 404s against
+/// <c>.../openai/v1/openai/v1/conversations</c>. Console V5's api-key constructor is different:
+/// it sets <c>ProjectOpenAIClientOptions.Endpoint</c> as the request base URI and therefore
+/// still needs <see cref="FoundryOpenAiEndpoint.Resolve"/>.
 /// </remarks>
 public static class FoundryAgentResponsesClientFactory
 {
@@ -39,7 +41,7 @@ public static class FoundryAgentResponsesClientFactory
         ArgumentException.ThrowIfNullOrWhiteSpace(agentName);
         ArgumentNullException.ThrowIfNull(endpoint);
 
-        var resolvedEndpoint = FoundryOpenAiEndpoint.Resolve(endpoint.ToString());
+        var projectEndpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(endpoint.ToString());
 
         // Confirmed empirically (capturing TokenRequestContext.Scopes from a test credential):
         // this ctor overload requests https://ai.azure.com/.default, the same audience
@@ -47,7 +49,7 @@ public static class FoundryAgentResponsesClientFactory
         // Wx1116GeoNonAIWeather toolbox connection use. Foundry User at project scope
         // (ai-foundry.bicep) is the right role for this.
         var projectOpenAIClient = new ProjectOpenAIClient(
-            resolvedEndpoint,
+            projectEndpoint,
             FoundryTokenCredentialFactory.Create(),
             new ProjectOpenAIClientOptions());
 

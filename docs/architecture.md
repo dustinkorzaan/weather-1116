@@ -527,6 +527,10 @@ Azure, developer sign-in locally) — see
 and the hosted-agent path (Chat3/V5) request an Entra token for
 `https://ai.azure.com/.default` — a `cognitiveservices.azure.com` token 401s
 against the project OpenAI endpoint (`…/api/projects/…/openai/v1`).
+Chat3 / Current AI Weather V5 pass the project URL (not `…/openai/v1`) into
+`ProjectOpenAIClient`'s TokenCredential constructor, which appends `/openai/v1`
+itself; feeding it an already-resolved URL 404s against
+`…/openai/v1/openai/v1/conversations`.
 `ai-foundry.bicep` grants api/mvc/worker's managed identities both **Cognitive
 Services User** (account scope) and **Foundry User** (project scope,
 `agents/*/action`), the same two roles the GitHub Actions identity and the
