@@ -11,6 +11,14 @@ Thumbs.db
 *.swo
 *~
 
+# Visual Studio (solution-root cache: .vs/Weather/v18/.suo, DocumentLayout.json, FileContentIndex)
+.vs/
+*.user
+*.suo
+*.rsuser
+*.userosscache
+*.sln.docstates
+
 # Dependencies
 node_modules/
 *.lock
