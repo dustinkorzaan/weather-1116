@@ -62,6 +62,9 @@ jobs:
             UI_BLAZOR_URL=${{ vars.PROD_UI_BLAZOR_URL }}
             MVC_URL=${{ vars.PROD_MVC_DOTNET_URL }}
             WORKER_DOTNET_URL=${{ vars.PROD_WORKER_DOTNET_URL }}
+            MCP_SRV_APP_SERVICE_URL=${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
+            MCP_SRV_FUNC_APP_URL=${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
+            MCP_SRV_PYTHON_URL=${{ vars.PROD_MCP_SRV_PYTHON_URL }}
             GOOGLE_MAPS_API_KEY=secretref:google-maps-key
             ASPNETCORE_DETAILEDERRORS=false
             BUILD_NUMBER=${{ env.BUILD_NUMBER }}

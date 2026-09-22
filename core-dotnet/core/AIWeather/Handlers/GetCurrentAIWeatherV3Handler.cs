@@ -1,4 +1,3 @@
-using System.ClientModel;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -91,9 +90,6 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
                 Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
                 ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL."));
 
-            var apiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
-                ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
-
             var deploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL")
                 ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_MODEL.");
 
@@ -132,12 +128,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
 
             _logger.LogInformation("AI Weather: OpenAI endpoint {Endpoint}, deployment {Deployment}", endpoint, deploymentName);
 
-            ResponsesClient client = new(
-                credential: new ApiKeyCredential(apiKey),
-                options: new ResponsesClientOptions
-                {
-                    Endpoint = endpoint,
-                });
+            ResponsesClient client = FoundryResponsesClientFactory.Create(endpoint);
 
             FunctionTool getLatLongTool = WeatherToolDefinitions.CreateGetLatLongTool();
             FunctionTool getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();

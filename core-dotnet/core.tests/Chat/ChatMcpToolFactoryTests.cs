@@ -2,6 +2,7 @@ using Core.Chat.Services;
 
 namespace Core.Tests.Chat;
 
+[Collection(McpEnvironmentCollection.Name)]
 public class ChatMcpToolFactoryTests
 {
     [Fact]

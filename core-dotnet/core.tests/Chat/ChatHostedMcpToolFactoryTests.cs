@@ -3,6 +3,7 @@ using Microsoft.Extensions.AI;
 
 namespace Core.Tests.Chat;
 
+[Collection(McpEnvironmentCollection.Name)]
 public class ChatHostedMcpToolFactoryTests
 {
     [Fact]

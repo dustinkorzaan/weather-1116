@@ -1,8 +1,9 @@
 // AI Foundry resource + project (new unified Foundry model, not the older
 // ML-workspace-based Hub). Lives in Central US alongside the rest of the
 // stack; connects to the Central US App Insights instance for tracing,
-// grants api/mvc/worker's managed identities passwordless
-// Cognitive Services User access, deploys the gpt-5.4-mini model on the
+// grants api/mvc/worker's managed identities passwordless Cognitive Services
+// User access (account scope, direct model inference) plus Foundry User
+// (project scope, hosted agents), deploys the gpt-5.4-mini model on the
 // account, and registers the three MCP tool hosts as RemoteTool connections
 // on the project (MyMcpSrvAppService, MyMcpSrvFuncApp, MyMcpSrvPython) so
 // hosted agents can attach them as MCP tools by project_connection_id. Also grants the GitHub
@@ -226,6 +227,20 @@ resource cognitiveServicesUserAssignments 'Microsoft.Authorization/roleAssignmen
     principalId: principalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesUserRoleId)
+  }
+}]
+
+// api/mvc/worker also call the hosted Foundry Agents (Chat3, Current AI Weather V5) via
+// their managed identity, which needs agents/*/action -- the account-scoped Cognitive
+// Services User role above only covers model inference, not agent management (same
+// reasoning as githubActionsFoundryUserAssignment below).
+resource grantedPrincipalsFoundryUserAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for principalId in grantedPrincipalIds: {
+  name: guid(foundryProject.id, principalId, foundryUserRoleId)
+  scope: foundryProject
+  properties: {
+    principalId: principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
   }
 }]
 

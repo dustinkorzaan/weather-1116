@@ -10,9 +10,11 @@
 # model so Tools / Used in agents render correctly.
 #
 # Auth: the Agents API is a data-plane operation that requires a Microsoft
-# Entra ID bearer token, unlike the /openai/v1 inference endpoints the rest
-# of this app calls with AZURE_FOUNDRY_PROD_KEY. The caller
-# (prod-deploy-foundry-agents.yml) logs in via azure/login and passes a
+# Entra ID bearer token, unlike the /openai/v1 inference endpoints. Those are
+# called with AZURE_FOUNDRY_PROD_KEY only by the FoundryConsoleV1-V5 dev-tool
+# consoles; api/mvc/worker authenticate to them via managed identity instead
+# (Core.AIWeather.Services.FoundryTokenCredentialFactory). This script's
+# caller (prod-deploy-foundry-agents.yml) logs in via azure/login and passes a
 # token scoped to https://ai.azure.com/.default as
 # AZURE_FOUNDRY_ACCESS_TOKEN. The identity used must hold the "Foundry
 # User" role (agents/*/action) at project scope -- infra/modules/ai-foundry.bicep

@@ -13,6 +13,16 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.AI.Extensions.OpenAI" Version="3.0.0-beta.2" />
+    <!--
+      Aliased: Azure.AI.Extensions.OpenAI pulls in a preview Azure.Core that
+      vendors its own copies of DefaultAzureCredential/ManagedIdentityCredential
+      alongside the real Azure.Identity assembly that
+      Microsoft.Data.SqlClient.Extensions.Azure depends on, so both are loaded
+      side by side and the unaliased type names are ambiguous. The alias picks
+      Azure.Identity's copy explicitly wherever those two types are used
+      (see FoundryTokenCredentialFactory.cs).
+    -->
+    <PackageReference Include="Azure.Identity" Version="1.18.0" Aliases="AzureIdentityExplicit" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
       <PrivateAssets>all</PrivateAssets>

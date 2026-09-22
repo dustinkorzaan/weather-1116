@@ -496,7 +496,8 @@ V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 Run from VS Code or `dotnet run` in each folder. Settings use the
 `AZURE_FOUNDRY_PROD_*` prefix (see each `Program.cs` and `.env.example`).
 
-**V4 settings** (in addition to `AZURE_FOUNDRY_PROD_KEY`):
+**V4 settings** (in addition to `AZURE_FOUNDRY_PROD_KEY` -- consoles only; see the
+"No `AZURE_FOUNDRY_PROD_KEY` here" note under API/MVC AI weather settings below):
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
@@ -509,12 +510,25 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `AZURE_FOUNDRY_PROD_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
-| `AZURE_FOUNDRY_PROD_KEY` | Yes | Microsoft Foundry API key |
 | `AZURE_FOUNDRY_PROD_MODEL` | Yes (V3/V4) | Hosted model deployment name (e.g. `gpt-5.4-mini`); not used by V5, which sends only the user prompt |
 | `MCP_SRV_FUNC_APP_URL` / `MCP_SRV_FUNC_APP_KEY` | V4 only | `McpSrvFuncApp` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_APP_SERVICE_URL` / `MCP_SRV_APP_SERVICE_KEY` | V4 only | `McpSrvAppService` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_PYTHON_URL` / `MCP_SRV_PYTHON_KEY` | V4 only | `McpSrvPython` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-for-current-weather`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
+
+No `AZURE_FOUNDRY_PROD_KEY` here: that API key is only for the FoundryConsoleV1-V5
+dev-tool consoles, which build their own clients directly and never call into
+these Core classes. API, MVC, and Worker always authenticate to Foundry
+passwordlessly via this app's managed identity instead (`AZURE_CLIENT_ID` in
+Azure, developer sign-in locally) — see
+`Core.AIWeather.Services.FoundryTokenCredentialFactory`, used unconditionally by
+`ChatFoundrySettings`, `FoundryResponsesClientFactory`, and
+`FoundryAgentResponsesClientFactory`. `ai-foundry.bicep` grants api/mvc/worker's
+managed identities both **Cognitive Services User** (account scope, direct model
+inference — V3/V4/Chat tabs) and **Foundry User** (project scope,
+`agents/*/action` — Chat3/V5's hosted-agent calls), the same two roles the GitHub
+Actions identity and the Foundry project's own identity already hold for their
+respective Agents API use.
 
 `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on
 `/current-ai-weather`) runs tools in-process and does not need

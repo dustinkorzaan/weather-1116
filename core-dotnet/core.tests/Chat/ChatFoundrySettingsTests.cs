@@ -34,10 +34,37 @@ public class ChatFoundrySettingsTests
         Assert.Contains("FoundryAgentResponsesClientFactory.CreateForAgentAsync", source, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void CreateResponsesClient_UsesSharedFoundryResponsesClientFactory()
+    {
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Services/ChatFoundrySettings.cs"));
+
+        Assert.Contains("FoundryResponsesClientFactory.Create", source, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// A smoke test only: ResponsesClient's constructor never touches the network (that happens
+    /// on first request), so this can't observe which credential path ran -- that's covered
+    /// separately by FoundryTokenCredentialFactoryTests (type selection) and
+    /// FoundryAgentResponsesClientFactoryTests (the same TokenCredential constructor overload,
+    /// exercised against a real HTTP listener).
+    /// </summary>
+    [Fact]
+    public void CreateResponsesClient_ConstructsWithoutApiKey()
+    {
+        RunWithFoundryEnvironment(chatAgentName: null, () =>
+        {
+            var settings = new ChatFoundrySettings();
+
+            var client = settings.CreateResponsesClient();
+
+            Assert.NotNull(client);
+        });
+    }
+
     private static void RunWithFoundryEnvironment(string? chatAgentName, Action action)
     {
         var previousUrl = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL");
-        var previousKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY");
         var previousModel = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL");
         var previousAgent = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME");
         try
@@ -45,7 +72,6 @@ public class ChatFoundrySettingsTests
             Environment.SetEnvironmentVariable(
                 "AZURE_FOUNDRY_PROD_PROJ_URL",
                 "https://example.services.ai.azure.com/api/projects/demo");
-            Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY", "test-key");
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL", "gpt-5.4-mini");
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME", chatAgentName);
             action();
@@ -53,7 +79,6 @@ public class ChatFoundrySettingsTests
         finally
         {
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL", previousUrl);
-            Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY", previousKey);
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL", previousModel);
             Environment.SetEnvironmentVariable("AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME", previousAgent);
         }

@@ -1,7 +1,5 @@
-using System.ClientModel;
 using Azure.AI.Extensions.OpenAI;
 using Core.AIWeather.Services;
-using OpenAI;
 using OpenAI.Responses;
 
 namespace Core.Chat.Services;
@@ -9,7 +7,7 @@ namespace Core.Chat.Services;
 public sealed class ChatFoundrySettings
 {
     public string Endpoint { get; }
-    public string ApiKey { get; }
+
     public string DeploymentName { get; }
 
     private readonly string? _chatAgentName;
@@ -19,9 +17,6 @@ public sealed class ChatFoundrySettings
         Endpoint = FoundryOpenAiEndpoint.Resolve(
             Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL.")).ToString();
-
-        ApiKey = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_KEY")
-            ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_KEY.");
 
         DeploymentName = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_MODEL")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_MODEL.");
@@ -34,12 +29,8 @@ public sealed class ChatFoundrySettings
         _chatAgentName
         ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME.");
 
-    public ResponsesClient CreateResponsesClient() => new(
-        credential: new ApiKeyCredential(ApiKey),
-        options: new ResponsesClientOptions
-        {
-            Endpoint = new Uri(Endpoint),
-        });
+    public ResponsesClient CreateResponsesClient() =>
+        FoundryResponsesClientFactory.Create(new Uri(Endpoint));
 
     /// <summary>
     /// Responses client bound to the hosted Foundry agent. Chat3 sends only the
