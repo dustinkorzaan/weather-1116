@@ -523,12 +523,14 @@ passwordlessly via this app's managed identity instead (`AZURE_CLIENT_ID` in
 Azure, developer sign-in locally) — see
 `Core.AIWeather.Services.FoundryTokenCredentialFactory`, used unconditionally by
 `ChatFoundrySettings`, `FoundryResponsesClientFactory`, and
-`FoundryAgentResponsesClientFactory`. `ai-foundry.bicep` grants api/mvc/worker's
-managed identities both **Cognitive Services User** (account scope, direct model
-inference — V3/V4/Chat tabs) and **Foundry User** (project scope,
-`agents/*/action` — Chat3/V5's hosted-agent calls), the same two roles the GitHub
-Actions identity and the Foundry project's own identity already hold for their
-respective Agents API use.
+`FoundryAgentResponsesClientFactory`. Both the inference path (V3/V4/Chat tabs)
+and the hosted-agent path (Chat3/V5) request an Entra token for
+`https://ai.azure.com/.default` — a `cognitiveservices.azure.com` token 401s
+against the project OpenAI endpoint (`…/api/projects/…/openai/v1`).
+`ai-foundry.bicep` grants api/mvc/worker's managed identities both **Cognitive
+Services User** (account scope) and **Foundry User** (project scope,
+`agents/*/action`), the same two roles the GitHub Actions identity and the
+Foundry project's own identity already hold for their respective Agents API use.
 
 `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on
 `/current-ai-weather`) runs tools in-process and does not need

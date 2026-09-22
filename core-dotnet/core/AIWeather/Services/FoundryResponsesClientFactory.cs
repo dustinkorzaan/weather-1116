@@ -5,10 +5,11 @@ namespace Core.AIWeather.Services;
 
 /// <summary>
 /// Builds a <see cref="ResponsesClient"/> for direct model inference against a
-/// Foundry account endpoint (Chat tabs, Current AI Weather V3/V4). Always
-/// authenticates via this app's managed identity (<see cref="FoundryTokenCredentialFactory"/>) -
-/// no API key. Only the FoundryConsoleV1-V5 dev-tool consoles build their own
-/// clients directly with AZURE_FOUNDRY_PROD_KEY; they do not call this.
+/// Foundry project OpenAI endpoint (Chat tabs, Current AI Weather V3/V4). Always
+/// authenticates via this app's managed identity (<see cref="FoundryTokenCredentialFactory"/>)
+/// with the <c>https://ai.azure.com/.default</c> audience — no API key. Only the
+/// FoundryConsoleV1-V5 dev-tool consoles build their own clients directly with
+/// AZURE_FOUNDRY_PROD_KEY; they do not call this.
 /// </summary>
 public static class FoundryResponsesClientFactory
 {
@@ -18,7 +19,7 @@ public static class FoundryResponsesClientFactory
 
         var tokenPolicy = new BearerTokenPolicy(
             FoundryTokenCredentialFactory.Create(),
-            FoundryTokenCredentialFactory.CognitiveServicesScope);
+            FoundryTokenCredentialFactory.FoundryScope);
 
         return new ResponsesClient(
             authenticationPolicy: tokenPolicy,
