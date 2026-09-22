@@ -82,7 +82,3 @@ jobs:
             BUILD_NUMBER=${{ env.BUILD_NUMBER }}
             BUILD_START=${{ steps.build_start.outputs.build_start }}
             BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}
-          env_remove_multiline: |
-            AZURE_FOUNDRY_PROD_KEY
-          secret_remove_multiline: |
-            foundry-key

@@ -33,19 +33,6 @@ inputs:
       Values may use secretref:SECRET_NAME for secret references.
     required: false
     default: ''
-  env_remove_multiline:
-    description: |
-      Multiline env var NAMEs to delete from the live Container App. Overlay
-      merging only touches names present in env_overlay_multiline, so a var
-      removed from the overlay stays on the app forever unless listed here too.
-    required: false
-    default: ''
-  secret_remove_multiline:
-    description: |
-      Multiline secret NAMEs to delete from the live Container App (e.g. once
-      no env var references them via secretref anymore).
-    required: false
-    default: ''
 
 runs:
   using: composite
@@ -64,13 +51,9 @@ runs:
       env:
         ACA_SECRETS_MULTILINE: ${{ inputs.secrets_multiline }}
         ACA_ENV_OVERLAY_MULTILINE: ${{ inputs.env_overlay_multiline }}
-        ACA_ENV_REMOVE_MULTILINE: ${{ inputs.env_remove_multiline }}
-        ACA_SECRET_REMOVE_MULTILINE: ${{ inputs.secret_remove_multiline }}
       run: |
         SECRETS_FILE=""
         ENV_OVERLAY_FILE=""
-        ENV_REMOVE_FILE=""
-        SECRET_REMOVE_FILE=""
         if [ -n "${ACA_SECRETS_MULTILINE}" ]; then
           SECRETS_FILE="${RUNNER_TEMP}/aca-secrets.env"
           printf '%s\n' "${ACA_SECRETS_MULTILINE}" > "${SECRETS_FILE}"
@@ -79,20 +62,10 @@ runs:
           ENV_OVERLAY_FILE="${RUNNER_TEMP}/aca-env-overlay.env"
           printf '%s\n' "${ACA_ENV_OVERLAY_MULTILINE}" > "${ENV_OVERLAY_FILE}"
         fi
-        if [ -n "${ACA_ENV_REMOVE_MULTILINE}" ]; then
-          ENV_REMOVE_FILE="${RUNNER_TEMP}/aca-env-remove.env"
-          printf '%s\n' "${ACA_ENV_REMOVE_MULTILINE}" > "${ENV_REMOVE_FILE}"
-        fi
-        if [ -n "${ACA_SECRET_REMOVE_MULTILINE}" ]; then
-          SECRET_REMOVE_FILE="${RUNNER_TEMP}/aca-secret-remove.env"
-          printf '%s\n' "${ACA_SECRET_REMOVE_MULTILINE}" > "${SECRET_REMOVE_FILE}"
-        fi
         IMAGE="${{ inputs.acr_name }}.azurecr.io/${{ inputs.image_name }}:${{ inputs.image_tag }}"
         bash "${GITHUB_WORKSPACE}/.github/scripts/aca-container-configure.sh" \
           --container-app "${{ inputs.container_app_name }}" \
           --resource-group "${{ inputs.resource_group }}" \
           --image "${IMAGE}" \
           ${SECRETS_FILE:+--secrets-file "${SECRETS_FILE}"} \
-          ${ENV_OVERLAY_FILE:+--env-overlay-file "${ENV_OVERLAY_FILE}"} \
-          ${ENV_REMOVE_FILE:+--env-remove-file "${ENV_REMOVE_FILE}"} \
-          ${SECRET_REMOVE_FILE:+--secret-remove-file "${SECRET_REMOVE_FILE}"}
+          ${ENV_OVERLAY_FILE:+--env-overlay-file "${ENV_OVERLAY_FILE}"}
