@@ -29,4 +29,21 @@ public class FoundryTokenCredentialFactoryTests
 
         Assert.Equal("DefaultAzureCredential", credential.GetType().Name);
     }
+
+    [Fact]
+    public void FoundryScope_IsAiAzureComAudience()
+    {
+        Assert.Equal("https://ai.azure.com/.default", FoundryTokenCredentialFactory.FoundryScope);
+    }
+
+    [Fact]
+    public void FoundryResponsesClientFactory_UsesFoundryScope()
+    {
+        var source = File.ReadAllText(
+            RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Services/FoundryResponsesClientFactory.cs"));
+
+        Assert.Contains("FoundryTokenCredentialFactory.FoundryScope", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("CognitiveServicesScope", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("cognitiveservices.azure.com", source, StringComparison.Ordinal);
+    }
 }

@@ -97,12 +97,10 @@ public class FoundryAgentResponsesClientFactoryTests
     [Fact]
     public async Task Factory_RequestsAiAzureComAudience()
     {
-        // Agent publishing (prod-deploy-foundry-agents.yml) and the Wx1116GeoNonAIWeather
-        // toolbox connection's ProjectManagedIdentity audience both use
-        // https://ai.azure.com/.default for the Agents API - confirm this constructor overload
-        // requests the same audience, not the cognitiveservices.azure.com one
-        // FoundryResponsesClientFactory uses for direct model inference. A scope mismatch here
-        // would 401 Chat3/V5 even with Foundry User correctly assigned.
+        // Agent publishing (prod-deploy-foundry-agents.yml), FoundryResponsesClientFactory
+        // inference, and the Wx1116GeoNonAIWeather toolbox connection all use
+        // https://ai.azure.com/.default. Confirm this constructor overload requests that
+        // audience. A cognitiveservices.azure.com token 401s against the project endpoint.
         var capturedScopes = new List<string>();
         var credential = new CapturingTokenCredential(capturedScopes);
 

@@ -42,11 +42,10 @@ public static class FoundryAgentResponsesClientFactory
         var resolvedEndpoint = FoundryOpenAiEndpoint.Resolve(endpoint.ToString());
 
         // Confirmed empirically (capturing TokenRequestContext.Scopes from a test credential):
-        // this ctor overload requests https://ai.azure.com/.default, the same Agents API audience
-        // prod-deploy-foundry-agents.yml mints manually and the Wx1116GeoNonAIWeather toolbox
-        // connection's ProjectManagedIdentity audience uses - not the cognitiveservices.azure.com
-        // audience FoundryResponsesClientFactory uses for direct model inference. Foundry User at
-        // project scope (ai-foundry.bicep) is the right role for this.
+        // this ctor overload requests https://ai.azure.com/.default, the same audience
+        // FoundryResponsesClientFactory, prod-deploy-foundry-agents.yml, and the
+        // Wx1116GeoNonAIWeather toolbox connection use. Foundry User at project scope
+        // (ai-foundry.bicep) is the right role for this.
         var projectOpenAIClient = new ProjectOpenAIClient(
             resolvedEndpoint,
             FoundryTokenCredentialFactory.Create(),

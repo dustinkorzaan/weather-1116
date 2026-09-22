@@ -18,8 +18,13 @@ namespace Core.AIWeather.Services;
 /// </summary>
 public static class FoundryTokenCredentialFactory
 {
-    /// <summary>Scope for direct model inference (chat/responses) against the Foundry account.</summary>
-    public const string CognitiveServicesScope = "https://cognitiveservices.azure.com/.default";
+    /// <summary>
+    /// Entra audience for Foundry project endpoints (<c>*.services.ai.azure.com/api/projects/...</c>),
+    /// used by both direct model inference (<see cref="FoundryResponsesClientFactory"/>) and
+    /// hosted-agent calls (<see cref="FoundryAgentResponsesClientFactory"/>). A
+    /// <c>cognitiveservices.azure.com</c> token 401s against the project OpenAI path.
+    /// </summary>
+    public const string FoundryScope = "https://ai.azure.com/.default";
 
     // Cached rather than rebuilt per call: DefaultAzureCredential/ManagedIdentityCredential
     // each hold their own token cache internally, so reusing the same instance across
