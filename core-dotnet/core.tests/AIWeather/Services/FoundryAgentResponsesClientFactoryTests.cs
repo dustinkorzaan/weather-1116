@@ -1,6 +1,7 @@
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Net;
+using System.Net.Http;
 using Azure.AI.Extensions.OpenAI;
 using Azure.Core;
 using Core.AIWeather.Services;
@@ -16,15 +17,13 @@ public class FoundryAgentResponsesClientFactoryTests
         var factory = File.ReadAllText(
             RepoFiles.FindRepoFile("core-dotnet/core/AIWeather/Services/FoundryAgentResponsesClientFactory.cs"));
 
-        // AZURE_FOUNDRY_PROD_PROJ_URL must resolve through FoundryOpenAiEndpoint.Resolve (which
-        // appends /openai/v1 when missing). Passing the raw project URL resolves both calls to an
-        // Azure-classic path that needs an explicit api-version query parameter neither call sends,
-        // and CreateResponseStreamingAsync fails with "Missing required query parameter: api-version" -
-        // see Factory_SendsRequestsAgainstOpenAiV1Endpoint below for a live-request regression test.
-        Assert.Contains("FoundryOpenAiEndpoint.Resolve", factory, StringComparison.Ordinal);
+        // The TokenCredential ProjectOpenAIClient ctor takes the project URL and appends
+        // /openai/v1 itself. Passing FoundryOpenAiEndpoint.Resolve(...) (already .../openai/v1)
+        // double-appends and CreateProjectConversationAsync 404s.
+        Assert.Contains("FoundryOpenAiEndpoint.ResolveProjectEndpoint", factory, StringComparison.Ordinal);
         Assert.Contains("GetProjectResponsesClientForAgent", factory, StringComparison.Ordinal);
         Assert.Contains("CreateProjectConversationAsync", factory, StringComparison.Ordinal);
-        Assert.DoesNotContain("ResolveProjectEndpoint", factory, StringComparison.Ordinal);
+        Assert.DoesNotContain("FoundryOpenAiEndpoint.Resolve(", factory, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -115,6 +114,29 @@ public class FoundryAgentResponsesClientFactoryTests
         Assert.Contains("https://ai.azure.com/.default", capturedScopes);
     }
 
+    [Theory]
+    [InlineData("https://example.services.ai.azure.com/api/projects/testproj")]
+    [InlineData("https://example.services.ai.azure.com/api/projects/testproj/openai/v1")]
+    public async Task Factory_TokenCredentialConversationPathDoesNotDoubleOpenAiSuffix(string endpoint)
+    {
+        var handler = new CapturingHttpHandler();
+        var options = new ProjectOpenAIClientOptions
+        {
+            Transport = new HttpClientPipelineTransport(new HttpClient(handler)),
+        };
+
+        var (_, conversationId) = await FoundryAgentResponsesClientFactoryTestHelper.CreateForAgentAsync(
+            "test-agent",
+            new Uri(endpoint),
+            new FakeTokenCredential(),
+            options);
+
+        Assert.Equal("conv_test", conversationId);
+        Assert.NotNull(handler.Uri);
+        Assert.Equal("/api/projects/testproj/openai/v1/conversations", handler.Uri!.AbsolutePath);
+        Assert.DoesNotContain("/openai/v1/openai/v1", handler.Uri.AbsolutePath, StringComparison.Ordinal);
+    }
+
     private static int GetFreeTcpPort()
     {
         var listener = new System.Net.Sockets.TcpListener(IPAddress.Loopback, 0);
@@ -160,14 +182,15 @@ internal static class FoundryAgentResponsesClientFactoryTestHelper
     public static async Task<(ProjectResponsesClient ResponseClient, string ConversationId)> CreateForAgentAsync(
         string agentName,
         Uri endpoint,
-        TokenCredential credential)
+        TokenCredential credential,
+        ProjectOpenAIClientOptions? options = null)
     {
-        var resolvedEndpoint = FoundryOpenAiEndpoint.Resolve(endpoint.ToString());
+        var projectEndpoint = FoundryOpenAiEndpoint.ResolveProjectEndpoint(endpoint.ToString());
 
         var projectOpenAIClient = new ProjectOpenAIClient(
-            resolvedEndpoint,
+            projectEndpoint,
             credential,
-            new ProjectOpenAIClientOptions());
+            options ?? new ProjectOpenAIClientOptions());
 
         var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
         var conversation = (await projectOpenAIClient
@@ -199,4 +222,23 @@ internal sealed class CapturingTokenCredential(List<string> capturedScopes) : To
 
     public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken) =>
         new(GetToken(requestContext, cancellationToken));
+}
+
+/// <summary>
+/// Records the first request URI so tests can assert the TokenCredential
+/// <c>ProjectOpenAIClient</c> path does not double-append <c>/openai/v1</c>.
+/// </summary>
+internal sealed class CapturingHttpHandler : HttpMessageHandler
+{
+    public Uri? Uri { get; private set; }
+
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        Uri = request.RequestUri;
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{\"id\":\"conv_test\",\"object\":\"conversation\"}", System.Text.Encoding.UTF8, "application/json"),
+        };
+        return Task.FromResult(response);
+    }
 }
