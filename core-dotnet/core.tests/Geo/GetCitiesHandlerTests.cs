@@ -213,6 +213,19 @@ public class GetCitiesHandlerTests
         Assert.Equal(GetCitiesEvent.DefaultMaxCities, request.MaxCities);
     }
 
+    [Fact]
+    public async Task WeatherToolExecutor_GetCitiesFailure_ReturnsErrorJsonInsteadOfThrowing()
+    {
+        var executor = new WeatherToolExecutor(new ThrowingMediator());
+
+        var output = await executor.ExecuteAsync(
+            ResponseItem.CreateFunctionCallItem("call-1", "GetCities", BinaryData.FromString("""{"latitude":36.16,"longitude":-86.78,"radiusKm":null,"minPopulation":null,"maxCities":null}""")),
+            CancellationToken.None);
+
+        using var json = JsonDocument.Parse(output);
+        Assert.Contains("GeoDB rejected", json.RootElement.GetProperty("error").GetString());
+    }
+
     private static GetCitiesHandler CreateHandler(HttpMessageHandler http) =>
         new(
             new CacheHelper(new MemoryCache(new MemoryCacheOptions())),
@@ -268,6 +281,14 @@ public class GetCitiesHandlerTests
                 Content = new StringContent(body, Encoding.UTF8, "application/json"),
             });
         }
+    }
+
+    private sealed class ThrowingMediator : IMediator
+    {
+        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("GeoDB rejected the request with HTTP 403.");
+
+        public Task Send(IRequest request, CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 
     private sealed class RecordingMediator : IMediator

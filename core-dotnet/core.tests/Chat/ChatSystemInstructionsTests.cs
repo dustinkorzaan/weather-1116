@@ -35,6 +35,7 @@ public class ChatSystemInstructionsTests
         Assert.Contains("Geo", prompt);
         Assert.Contains("NonAI Weather", prompt);
         Assert.Contains("largest cities", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("pass every city through to the user", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Never guess a location or weather fact yourself", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("GitHub-flavored Markdown", prompt);
     }
@@ -68,6 +69,7 @@ public class ChatSystemInstructionsTests
         Assert.Contains("GetLatLong", prompt);
         Assert.Contains("GetLocation", prompt);
         Assert.Contains("GetCities", prompt);
+        Assert.Contains("For GetCities, answer with every returned city", prompt);
         Assert.DoesNotContain("°F", prompt);
         Assert.DoesNotContain("GetPublicWeather", prompt);
     }

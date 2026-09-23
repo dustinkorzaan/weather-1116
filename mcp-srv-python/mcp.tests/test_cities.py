@@ -219,3 +219,58 @@ def test_get_cities_tool_call_end_to_end(monkeypatch, fake_geodb):
     assert result["radiusKm"] == 100
     assert result["minPopulation"] == 50000
     assert all("radius=100&" in url and "minPopulation=50000" in url for url in fake.requested_urls)
+
+
+def _install_transport(monkeypatch, handler):
+    real_client = httpx.AsyncClient
+
+    def client_factory(*args, **kwargs):
+        kwargs["transport"] = httpx.MockTransport(handler)
+        return real_client(*args, **kwargs)
+
+    monkeypatch.setattr(cities.httpx, "AsyncClient", client_factory)
+
+
+@pytest.mark.asyncio
+async def test_get_cities_retries_429_then_succeeds(monkeypatch):
+    fake = _FakeGeoDb(3)
+    calls = {"count": 0}
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        calls["count"] += 1
+        if calls["count"] == 1:
+            return httpx.Response(429)
+        return fake(request)
+
+    _install_transport(monkeypatch, transport)
+    result = await get_cities(36.16, -86.78, 50, 0, 3, page_delay_seconds=0)
+    assert result["returned"] == 3
+    assert calls["count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_get_cities_does_not_retry_403(monkeypatch):
+    calls = {"count": 0}
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        calls["count"] += 1
+        return httpx.Response(403)
+
+    _install_transport(monkeypatch, transport)
+    with pytest.raises(httpx.HTTPStatusError):
+        await get_cities(36.16, -86.78, 50, 0, 3, page_delay_seconds=0)
+    assert calls["count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_get_cities_gives_up_after_repeated_429(monkeypatch):
+    calls = {"count": 0}
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        calls["count"] += 1
+        return httpx.Response(429)
+
+    _install_transport(monkeypatch, transport)
+    with pytest.raises(httpx.HTTPStatusError):
+        await get_cities(36.16, -86.78, 50, 0, 3, page_delay_seconds=0)
+    assert calls["count"] == cities.PAGE_ATTEMPTS

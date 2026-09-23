@@ -13,6 +13,7 @@ import httpx
 GEODB_BASE_URL = "https://geodb-free-service.wirefreethought.com/v1/geo"
 GEODB_PAGE_LIMIT = 10
 GEODB_MAX_RADIUS_KM = 100.0
+PAGE_ATTEMPTS = 3
 PAGE_DELAY_SECONDS = 1.1
 
 MIN_RADIUS_KM = 1.0
@@ -81,6 +82,24 @@ def _to_city(city: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+async def _get_page(client: httpx.AsyncClient, url: str, page_delay_seconds: float) -> dict[str, Any]:
+    """GET one GeoDB page, retrying throttling (429), server errors (5xx), and transport errors a
+    few times with a growing pause; other 4xx (e.g. 403 for a too-large radius) fail immediately."""
+    for attempt in range(PAGE_ATTEMPTS):
+        last_attempt = attempt == PAGE_ATTEMPTS - 1
+        try:
+            response = await client.get(url)
+        except httpx.TransportError:
+            if last_attempt:
+                raise
+        else:
+            if not (response.status_code == 429 or response.status_code >= 500) or last_attempt:
+                response.raise_for_status()
+                return response.json()
+        await asyncio.sleep(page_delay_seconds * (attempt + 1))
+    raise AssertionError("unreachable")
+
+
 async def get_cities(
     latitude: float,
     longitude: float,
@@ -120,9 +139,7 @@ async def get_cities(
 
             limit = min(GEODB_PAGE_LIMIT, max_cities - len(cities))
             url = build_nearby_cities_url(latitude, longitude, radius_km, min_population, limit, offset)
-            response = await client.get(url)
-            response.raise_for_status()
-            page: dict[str, Any] = response.json()
+            page = await _get_page(client, url, page_delay_seconds)
 
             data = page.get("data") or []
             result["totalAvailable"] = (page.get("metadata") or {}).get("totalCount", result["totalAvailable"])
