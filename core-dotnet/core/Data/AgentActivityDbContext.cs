@@ -7,6 +7,10 @@ public class AgentActivityDbContext(DbContextOptions<AgentActivityDbContext> opt
 {
     public DbSet<AgentActivity> AgentActivity => Set<AgentActivity>();
 
+    public DbSet<User> User => Set<User>();
+
+    public DbSet<UserPin> UserPin => Set<UserPin>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AgentActivityDbContext).Assembly);

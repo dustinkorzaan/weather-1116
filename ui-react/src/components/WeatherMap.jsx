@@ -165,7 +165,7 @@ function WeatherMap() {
 
     const added = citiesRef.current.filter((city) => !previousIds.has(city.id));
     if (added.length === 1 && typeof map.panTo === 'function') {
-      map.panTo({ lat: added[0].lat, lng: added[0].lng });
+      map.panTo({ lat: added[0].latitude, lng: added[0].longitude });
     }
   }, [cities, navigate]);
 
@@ -199,9 +199,9 @@ function paintMarkers(maps, map, resolvedTheme, navigate, citiesRef, markersRef,
   const logoUrl = logoPinUrl(resolvedTheme);
   const markers = citiesRef.current.map((city, index) => {
     const overlay = createLogoPinOverlay(maps, {
-      lat: city.lat,
-      lng: city.lng,
-      cityName: city.name,
+      lat: city.latitude,
+      lng: city.longitude,
+      cityName: city.locationName,
       logoUrl,
       spinOffsetSec: logoPinSpinOffsetSec(index),
     });
@@ -212,13 +212,13 @@ function paintMarkers(maps, map, resolvedTheme, navigate, citiesRef, markersRef,
       maps,
       map,
       marker: overlay,
-      cityName: city.name,
+      cityName: city.locationName,
       onGetWeather: () => {
         navigate(
           weatherModalPath({
-            name: city.name,
-            lat: city.lat,
-            lng: city.lng,
+            name: city.locationName,
+            lat: city.latitude,
+            lng: city.longitude,
             tab: DEFAULT_WEATHER_MODAL_TAB,
           })
         );

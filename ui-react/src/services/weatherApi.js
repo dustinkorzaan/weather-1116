@@ -7,6 +7,7 @@ const apiBaseUrl = resolveApiBaseUrl();
 export const weatherApi = createApi({
   reducerPath: 'weatherApi',
   baseQuery: fetchBaseQuery({ baseUrl: apiBaseUrl }),
+  tagTypes: ['User'],
   endpoints: (builder) => ({
     getHello: builder.query({
       query: () => '/Home/Hello',
@@ -43,6 +44,25 @@ export const weatherApi = createApi({
       query: ({ latitude, longitude, resolution }) =>
         `/History?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&resolution=${encodeURIComponent(resolution)}`,
     }),
+    getUser: builder.query({
+      query: () => '/User',
+      providesTags: ['User'],
+    }),
+    addUserPin: builder.mutation({
+      query: (pin) => ({
+        url: '/User/AddPin',
+        method: 'POST',
+        body: pin,
+      }),
+      invalidatesTags: ['User'],
+    }),
+    deleteUserPin: builder.mutation({
+      query: (userPinId) => ({
+        url: `/User/DeletePin?userPinId=${encodeURIComponent(userPinId)}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['User'],
+    }),
   }),
 });
 
@@ -59,4 +79,8 @@ export const {
   useLazyGetLocationQuery,
   useGetForecastQuery,
   useGetHistoryQuery,
+  useGetUserQuery,
+  useLazyGetUserQuery,
+  useAddUserPinMutation,
+  useDeleteUserPinMutation,
 } = weatherApi;
