@@ -1,21 +1,21 @@
 # weather-mcp-srv-python
 
-Standalone Python MCP server exposing two public weather tools, backed directly by the
-[Open-Meteo](https://open-meteo.com/) API:
+Standalone Python MCP server exposing one geo tool, backed directly by the free (no-key)
+[GeoDB Cities](https://wirefreethought.github.io/geodb-rest-api-docs/) service:
 
-- `GetPublicWeatherForecast` — upcoming forecast (`Daily`, `Hourly`, or `FifteenMinutes` resolution)
-- `GetPublicWeatherHistory` — recent past weather (`Daily` or `Hourly` resolution)
+- `GetCities(latitude, longitude, distanceKM=161, size=25)` — the largest cities (by population)
+  within `distanceKM` of a coordinate, largest first. Each city has `name`, `region`, `country`,
+  `latitude`, `longitude`, `distanceKm`, and `population`; the result also carries the effective
+  `distanceKm`/`size`, `returned`, and `totalAvailable`.
 
-> **Currently disabled here.** Both tools are commented out in
-> `mcp/weather_mcp_srv_python/server.py` (and `EXPECTED_TOOLS` is empty) while
-> [`mcp-srv-node`](../mcp-srv-node) serves them. This server still runs, stays healthy, and
-> answers `tools/list` with an empty list, so callers keep it attached. To move a tool back,
-> uncomment it here, add it to `EXPECTED_TOOLS`, and comment it out in `mcp-srv-node` — two hosts
-> must never register the same tool name.
+`distanceKM` is reset into 1–1000 km and `size` into 0–100 on every call — out-of-range values
+are adjusted, never rejected. `size` 0 returns an empty list without calling GeoDB. GeoDB's free
+tier returns at most 10 cities per request at about 1 request per second, so larger sizes are
+fetched page by page (25 cities ≈ 3 requests). The same tool is implemented in-process in Core
+(`GetCitiesEvent`/`GetCitiesHandler`) for the local-loop chat paths.
 
-The `resolution` values are PascalCase (`Daily`/`Hourly`/`FifteenMinutes`) to match what
-these tools returned when `GetPublicWeatherForecast`/`GetPublicWeatherHistory` still lived on
-`mcp-srv-app-service`, so existing callers/prompts don't need to change.
+`GetPublicWeatherForecast`/`GetPublicWeatherHistory` used to live here; they are served by
+[`mcp-srv-node`](../mcp-srv-node).
 
 This project has no dependency on the rest of this repo (no shared `core` project, no
 caching layer) — it's a self-contained MCP server you can build, run, and deploy on its
@@ -49,7 +49,7 @@ scaled-to-zero state) — it does no tool resolution and doesn't check `MCP_SRV_
 `GET /About` is an unauthenticated health probe returning the same `AboutNode` JSON shape
 (`Core.About.AboutNode`) as this repo's other backends — a leaf node named `mcp-srv-python`
 with no children. `isHealthy` is `true` only when `MCP_SRV_PYTHON_KEY` is set and every tool
-in `EXPECTED_TOOLS` is registered (currently none — see the note above). `buildNumber`,
+in `EXPECTED_TOOLS` (`GetCities`) is registered. `buildNumber`,
 `buildStart`, and `buildBranchName` are read from the `BUILD_NUMBER`/`BUILD_START`/
 `BUILD_BRANCH_NAME` env vars set by the deploy workflow, same as the other hosts. This is
 what api-dotnet/mvc-dotnet's own `/About` fan out to.
@@ -59,7 +59,7 @@ what api-dotnet/mvc-dotnet's own `/About` fan out to.
 When `APPLICATIONINSIGHTS_CONNECTION_STRING` is set (by `infra/modules/container-app.bicep` in
 deployed environments), this server exports traces, metrics, and logs to Application Insights via
 the [Azure Monitor OpenTelemetry Distro](https://pypi.org/project/azure-monitor-opentelemetry/),
-instrumenting incoming Starlette requests and outgoing `httpx` calls to Open-Meteo — the same
+instrumenting incoming Starlette requests and outgoing `httpx` calls to GeoDB — the same
 opt-in behavior as `mcp-srv-app-service` and `mcp-srv-func-app`. It's unset for local dev and
 `pytest` runs, so no telemetry is sent and no App Insights resource is required.
 

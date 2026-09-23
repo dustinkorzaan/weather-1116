@@ -23,6 +23,7 @@ public sealed class WeatherToolExecutor
         {
             "GetLatLong" => await ExecuteGetLatLong(functionCall.FunctionArguments, cancellationToken),
             "GetLocation" => await ExecuteGetLocation(functionCall.FunctionArguments, cancellationToken),
+            "GetCities" => await ExecuteGetCities(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherCurrent" => await ExecuteGetPublicWeatherCurrent(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherForecast" => await ExecuteGetPublicWeatherForecast(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherHistory" => await ExecuteGetPublicWeatherHistory(functionCall.FunctionArguments, cancellationToken),
@@ -54,6 +55,28 @@ public sealed class WeatherToolExecutor
             Longitude = longitude,
         }, cancellationToken);
         return JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
+    }
+
+    private async Task<string> ExecuteGetCities(BinaryData arguments, CancellationToken cancellationToken)
+    {
+        using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
+        var root = argumentsJson.RootElement;
+        var citiesEvent = new GetCitiesEvent
+        {
+            Latitude = root.GetProperty("latitude").GetDouble(),
+            Longitude = root.GetProperty("longitude").GetDouble(),
+        };
+        if (root.TryGetProperty("distanceKM", out var distanceElement) && distanceElement.ValueKind == JsonValueKind.Number)
+        {
+            citiesEvent.DistanceKm = distanceElement.GetDouble();
+        }
+        if (root.TryGetProperty("size", out var sizeElement) && sizeElement.ValueKind == JsonValueKind.Number)
+        {
+            citiesEvent.Size = sizeElement.TryGetInt32(out var size) ? size : (int)Math.Clamp(sizeElement.GetDouble(), int.MinValue, int.MaxValue);
+        }
+
+        var cities = await _mediator.Send(citiesEvent, cancellationToken);
+        return JsonSerializer.Serialize(cities, JsonDefaults.Pretty);
     }
 
     private async Task<string> ExecuteGetPublicWeatherCurrent(BinaryData arguments, CancellationToken cancellationToken)

@@ -45,6 +45,36 @@ public static class WeatherToolDefinitions
         """)),
         strictModeEnabled: true);
 
+    public static FunctionTool CreateGetCitiesTool() => ResponseTool.CreateFunctionTool(
+        functionName: "GetCities",
+        functionDescription: "Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. distanceKM defaults to 161 (range 1-1000) and size defaults to 25 (range 0-100); out-of-range values are adjusted, not rejected.",
+        functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+        {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "description": "Latitude in decimal degrees"
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Longitude in decimal degrees"
+            },
+            "distanceKM": {
+              "type": ["number", "null"],
+              "description": "Search radius in kilometers (1-1000). Null uses the default of 161."
+            },
+            "size": {
+              "type": ["integer", "null"],
+              "description": "Maximum number of cities to return (0-100). Null uses the default of 25."
+            }
+          },
+          "required": ["latitude", "longitude", "distanceKM", "size"],
+          "additionalProperties": false
+        }
+        """)),
+        strictModeEnabled: true);
+
     public static FunctionTool CreateGetPublicWeatherCurrentTool() => ResponseTool.CreateFunctionTool(
         functionName: "GetPublicWeatherCurrent",
         functionDescription: "Get current public weather conditions for a latitude and longitude.",

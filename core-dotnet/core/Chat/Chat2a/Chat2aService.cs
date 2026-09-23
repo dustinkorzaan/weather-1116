@@ -148,6 +148,7 @@ public sealed class Chat2aService : IChatClientService
     [
         AIFunctionFactory.Create(GetLatLong),
         AIFunctionFactory.Create(GetLocation),
+        AIFunctionFactory.Create(GetCities),
         AIFunctionFactory.Create(GetPublicWeatherCurrent),
         AIFunctionFactory.Create(GetPublicWeatherForecast),
         AIFunctionFactory.Create(GetPublicWeatherHistory),
@@ -174,6 +175,24 @@ public sealed class Chat2aService : IChatClientService
             Longitude = longitude,
         }, cancellationToken);
         return JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
+    }
+
+    [Description("Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. Out-of-range distanceKM/size values are adjusted, not rejected.")]
+    private async Task<string> GetCities(
+        [Description("Latitude in decimal degrees")] double latitude,
+        [Description("Longitude in decimal degrees")] double longitude,
+        [Description("Search radius in kilometers (1-1000). Defaults to 161.")] double distanceKM = GetCitiesEvent.DefaultDistanceKm,
+        [Description("Maximum number of cities to return (0-100). Defaults to 25.")] int size = GetCitiesEvent.DefaultSize,
+        CancellationToken cancellationToken = default)
+    {
+        var cities = await _mediator.Send(new GetCitiesEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+            DistanceKm = distanceKM,
+            Size = size,
+        }, cancellationToken);
+        return JsonSerializer.Serialize(cities, JsonDefaults.Pretty);
     }
 
     [Description("Get current public weather conditions for a latitude and longitude.")]

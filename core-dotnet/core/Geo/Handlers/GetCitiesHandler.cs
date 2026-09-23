@@ -1,0 +1,129 @@
+using System.Globalization;
+using System.Text.Json;
+using Core.Caching;
+using Core.Geo.Events;
+using Core.Geo.Models;
+using Core.Http;
+using CQMediator;
+using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Logging;
+
+namespace Core.Geo.Handlers;
+
+/// <summary>
+/// Finds the largest cities within a radius of a lat/long via GeoDB Cities' free (no-key) service,
+/// paging until <see cref="GetCitiesEvent.Size"/> cities are collected or GeoDB runs out.
+/// </summary>
+public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesResponse>
+{
+    internal const string GeoDbBaseUrl = "http://geodb-free-service.wirefreethought.com/v1/geo";
+
+    // GeoDB's free tier returns at most 10 results per request and allows about 1 request per second.
+    internal const int GeoDbPageLimit = 10;
+
+    private readonly CacheHelper _cache;
+    private readonly TransientRetryHelper _retry;
+    private readonly IHttpClientFactory _clientFactory;
+    private readonly ILogger<GetCitiesHandler> _logger;
+
+    public GetCitiesHandler(
+        CacheHelper cache,
+        TransientRetryHelper retry,
+        IHttpClientFactory clientFactory,
+        ILogger<GetCitiesHandler> logger)
+    {
+        _cache = cache;
+        _retry = retry;
+        _clientFactory = clientFactory;
+        _logger = logger;
+    }
+
+    internal TimeSpan PageDelay { get; init; } = TimeSpan.FromMilliseconds(1100);
+
+    public async Task<NonAICitiesResponse> Handle(GetCitiesEvent request, CancellationToken cancellationToken)
+    {
+        request.DistanceKm = GetCitiesEvent.NormalizeDistanceKm(request.DistanceKm);
+        request.Size = GetCitiesEvent.NormalizeSize(request.Size);
+
+        if (request.Size == 0)
+        {
+            return new NonAICitiesResponse { DistanceKm = request.DistanceKm, Size = 0 };
+        }
+
+        var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetCitiesHandler), Request = request });
+        return await _cache.GetOrCreate(
+            cacheKey: cacheKey,
+            cacheDuration: TimeSpan.FromMinutes(60),
+            valueFactory: ct => GetCities(request, ct),
+            cancellationToken: cancellationToken);
+    }
+
+    private async Task<NonAICitiesResponse> GetCities(GetCitiesEvent request, CancellationToken cancellationToken)
+    {
+        using var client = _clientFactory.CreateClient();
+        client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", GetLocationHandler.UserAgent);
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");
+
+        var response = new NonAICitiesResponse { DistanceKm = request.DistanceKm, Size = request.Size };
+        var offset = 0;
+
+        while (response.Cities.Count < request.Size)
+        {
+            if (offset > 0)
+            {
+                await Task.Delay(PageDelay, cancellationToken);
+            }
+
+            var limit = Math.Min(GeoDbPageLimit, request.Size - response.Cities.Count);
+            var url = BuildNearbyCitiesUrl(request.Latitude, request.Longitude, request.DistanceKm, limit, offset);
+
+            // codeql[cs/exposure-of-sensitive-information]
+            var page = await _retry.Execute(async ct =>
+            {
+                using var httpResponse = await client.GetAsync(url, ct);
+                httpResponse.EnsureSuccessStatusCode();
+                var json = await httpResponse.Content.ReadAsStringAsync(ct);
+                return JsonSerializer.Deserialize<GeoDbNearbyCitiesResponse>(json) ?? new GeoDbNearbyCitiesResponse();
+            }, cancellationToken);
+
+            var data = page.Data ?? [];
+            response.TotalAvailable = page.Metadata?.TotalCount ?? response.TotalAvailable;
+            response.Cities.AddRange(data.Select(ToCity));
+            offset += data.Count;
+
+            if (data.Count == 0 || offset >= response.TotalAvailable)
+            {
+                break;
+            }
+        }
+
+        response.Returned = response.Cities.Count;
+        _logger.LogInformation(
+            "GeoDB: {Returned} of {TotalAvailable} cities within {DistanceKm} km",
+            response.Returned,
+            response.TotalAvailable,
+            response.DistanceKm);
+
+        return response;
+    }
+
+    internal static NonAICity ToCity(GeoDbCity city) => new()
+    {
+        Name = city.Name ?? city.City ?? string.Empty,
+        Region = city.Region,
+        Country = city.Country,
+        Latitude = city.Latitude,
+        Longitude = city.Longitude,
+        DistanceKm = city.Distance ?? 0,
+        Population = city.Population,
+    };
+
+    // GeoDB location ids are ISO-6709 (e.g. +36.1627-086.7816); the leading '+' must be escaped.
+    internal static string BuildNearbyCitiesUrl(double latitude, double longitude, double distanceKm, int limit, int offset)
+    {
+        var locationId = string.Create(CultureInfo.InvariantCulture, $"{latitude:+00.0000;-00.0000}{longitude:+000.0000;-000.0000}");
+        return string.Create(
+            CultureInfo.InvariantCulture,
+            $"{GeoDbBaseUrl}/locations/{Uri.EscapeDataString(locationId)}/nearbyCities?radius={distanceKm:0.###}&distanceUnit=KM&types=CITY&sort=-population&limit={limit}&offset={offset}");
+    }
+}

@@ -9,7 +9,7 @@ a one-shot structured JSON response.
 
 | Tab | Stack | Tools | Maps to console demo |
 | --- | --- | --- | --- |
-| **Chat1a** | Responses API (model-direct) | In-process (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) | Foundry Console **V3** |
+| **Chat1a** | Responses API (model-direct) | In-process (`GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) | Foundry Console **V3** |
 | **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-srv-func-app`, `mcp-srv-app-service`, `mcp-srv-python`, `mcp-srv-node`) | Foundry Console **V4** |
 | **Chat2a** | Microsoft Agent Framework (model-direct) | In-process tools via `AIFunctionFactory` | V3 orchestration style |
 | **Chat2b** | Microsoft Agent Framework (model-direct) | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
@@ -166,6 +166,7 @@ not declared on the request.
 | --- | --- |
 | `GetLatLong` | Resolve a place name to ranked coordinates (default top 5) |
 | `GetLocation` | Reverse-geocode lat/long to a place label |
+| `GetCities` | Largest cities (by population) within a radius of lat/long — `distanceKM` default 161 (1–1000), `size` default 25 (0–100); out-of-range values are reset, never rejected. In-process via Core's `GetCitiesHandler`; remote via `mcp-srv-python`. Both call GeoDB Cities |
 | `GetPublicWeatherCurrent` | Fetch current weather for lat/long |
 | `GetPublicWeatherForecast` | Upcoming forecast: Daily (7 days), Hourly (48 hours), or FifteenMinutes (48 hours) |
 | `GetPublicWeatherHistory` | Recent past: Daily (previous 7 days) or Hourly (previous 48 hours) |
@@ -175,11 +176,10 @@ not declared on the request.
   Chat4a's/Chat5a's Geo and NonAI Weather sub-agents, for Chat4a/Chat5a).
 - **MCP (Chat1b, Chat2b, Chat4b, Chat5b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`,
   `mcp-srv-python`, `mcp-srv-node`) — platform invokes tools; no local function-call loop in Chat1b. Chat4b's/Chat5b's Geo
-  sub-agent gets only `mcp-srv-func-app`'s tool from `ChatHostedMcpToolFactory.CreateGeoTools()`;
-  its NonAI Weather sub-agent gets `mcp-srv-app-service`'s, `mcp-srv-python`'s, and `mcp-srv-node`'s tools from
-  `CreateNonAiWeatherTools()` — not the combined four-server list Chat1b/Chat2b use (which also
-  includes Geo's tool). Forecast/history live on exactly one of `mcp-srv-python`/`mcp-srv-node` at
-  a time (currently `mcp-srv-node`); both hosts stay attached so moving a tool needs no code change here.
+  sub-agent gets `mcp-srv-func-app`'s and `mcp-srv-python`'s (`GetCities`) tools from
+  `ChatHostedMcpToolFactory.CreateGeoTools()`; its NonAI Weather sub-agent gets `mcp-srv-app-service`'s
+  and `mcp-srv-node`'s tools from `CreateNonAiWeatherTools()` — not the combined four-server list
+  Chat1b/Chat2b use.
 - **Hosted agent (Chat3):** Foundry invokes those MCP hosts. This app does not send tools, instructions,
   or a model name.
 
@@ -223,7 +223,7 @@ Chat4a restructures Chat2a's single flat-tool agent into a small multi-agent sys
 a `// Agent <name> 👤` comment directly above its construction so the three names stay
 unambiguous in code:
 
-- **Agent Geo 👤** — geo sub-agent. Owns exactly `GetLatLong` and `GetLocation`.
+- **Agent Geo 👤** — geo sub-agent. Owns exactly `GetLatLong`, `GetLocation`, and `GetCities`.
 - **Agent NonAI Weather 👤** — weather sub-agent. Owns exactly `GetPublicWeatherCurrent`,
   `GetPublicWeatherForecast`, and `GetPublicWeatherHistory`.
 - **Agent AI Weather Orchestration 👤** — orchestrator. Has no geo/weather tools of its own; its
@@ -253,15 +253,14 @@ earlier turn even within the same chat session; the orchestrator has to resend t
 Chat4b is Chat4a with one change: Geo and NonAI Weather get their tools from the existing remote
 MCP hosts instead of in-process CQMediator calls — mirroring how Chat2b differs from Chat2a. This
 works cleanly because the MCP hosts are already split along exactly the Geo/NonAI Weather
-boundary: `mcp-srv-func-app` exposes `GetLatLong`/`GetLocation` (Geo's tools) and
-`mcp-srv-app-service`/`mcp-srv-python`/`mcp-srv-node` together expose `GetPublicWeatherCurrent`/`Forecast`/`History`
-(NonAI Weather's tools — current conditions stayed on `mcp-srv-app-service`, forecast/history moved
-to the standalone `mcp-srv-python` server and are currently served by its Node counterpart,
-`mcp-srv-node`). `ChatHostedMcpToolFactory` (already used by
-Chat1b/Chat2b) gained two new methods, `CreateGeoTools()` and `CreateNonAiWeatherTools()` — Geo's
-returns only `mcp-srv-func-app`'s tool, NonAI Weather's returns `mcp-srv-app-service`'s,
-`mcp-srv-python`'s, and `mcp-srv-node`'s tools — its existing `CreateTools()` (all four hosts combined) is unchanged and
-still used by Chat1b/Chat2b.
+boundary: `mcp-srv-func-app` (`GetLatLong`/`GetLocation`) and `mcp-srv-python` (`GetCities`)
+expose Geo's tools, and `mcp-srv-app-service`/`mcp-srv-node` together expose
+`GetPublicWeatherCurrent`/`Forecast`/`History` (NonAI Weather's tools — current conditions stayed on
+`mcp-srv-app-service`, forecast/history moved to the standalone `mcp-srv-node` server).
+`ChatHostedMcpToolFactory` (already used by Chat1b/Chat2b) gained two new methods,
+`CreateGeoTools()` and `CreateNonAiWeatherTools()` — Geo's returns `mcp-srv-func-app`'s and
+`mcp-srv-python`'s tools, NonAI Weather's returns `mcp-srv-app-service`'s and `mcp-srv-node`'s —
+its existing `CreateTools()` (all four hosts combined) is still used by Chat1b/Chat2b.
 
 The three `// Agent <name> 👤` construction sites, the instruction constants
 (`MultiAgentGeoAssistant`, `MultiAgentNonAiWeatherAssistant`,
@@ -440,7 +439,7 @@ headers stay on those connections, not on the agent.
 | --- | --- | --- | --- |
 | `McpSrvFuncApp` | `https://<prod-mcp-srv-func-app>/runtime/webhooks/mcp` | Header `x-functions-key` = Functions `mcp_extension` system key (`MCP_SRV_FUNC_APP_KEY`) | `GetLatLong`, `GetLocation` |
 | `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetPublicWeatherCurrent` |
-| `McpSrvPython` | `https://<prod-mcp-srv-python>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_PYTHON_KEY>` | none right now (`GetPublicWeatherForecast`/`GetPublicWeatherHistory` commented out) |
+| `McpSrvPython` | `https://<prod-mcp-srv-python>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_PYTHON_KEY>` | `GetCities` |
 | `McpSrvNode` | `https://<prod-mcp-srv-node>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_NODE_KEY>` | `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
 
 Production host names are in [`docs/architecture.md`](../architecture.md) (MCP Tool Hosts).
@@ -464,9 +463,10 @@ Agent-side toolbox MCP tool (approval never):
 ```
 You are a helpful weather assistant in a multi-turn chat.
 Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
-You have tools to resolve locations to ranked coordinates, turn coordinates into a place label, and fetch public weather.
+You have tools to resolve locations to ranked coordinates, turn coordinates into a place label, list the largest cities near a coordinate, and fetch public weather.
 GetLatLong returns up to 5 matches (rank 1 is best); use state and country if you need to skip rank 1.
 GetLocation reverse-geocodes latitude/longitude to City, State in the US, or City, State, Country elsewhere. If that is unavailable it returns a feature name, then a formatted coordinate such as 35.51° N, 86.58° W — use it instead of guessing the place name from coordinates.
+GetCities lists the largest cities (by population) within a radius of a latitude/longitude, largest first, with each city's distance in km. distanceKM defaults to 161 (range 1-1000) and size to 25 (range 0-100). Report distances in miles.
 GetPublicWeatherCurrent is conditions right now.
 GetPublicWeatherForecast is upcoming weather: Daily (next 7 days), Hourly (next 48 hours), or FifteenMinutes (next 48 hours). Prefer Daily unless the user asks for hourly or 15-minute detail.
 GetPublicWeatherHistory is recent past weather: Daily (previous 7 days) or Hourly (previous 48 hours). Prefer Daily unless the user asks for hourly detail.
@@ -497,7 +497,7 @@ Keep this in sync with `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs
 - **Chat2b vs Chat3:** Same remote MCP weather tools; Chat2b still defines the agent in-process,
   Chat3 uses the Foundry-defined agent.
 - **Chat2a vs Chat4a:** Same in-process tools and same model-direct Agent Framework stack; Chat2a
-  owns all five tools directly on one agent, Chat4a splits them across two narrowly-scoped
+  owns all the geo and weather tools directly on one agent, Chat4a splits them across two narrowly-scoped
   sub-agents (Geo, NonAI Weather) delegated to by an orchestrator (AI Weather Orchestration) via
   `AsAIFunction` — same capability, now visibly decomposed into a multi-agent shape.
 - **Chat4a vs Chat4b:** Same three-agent shape, same instructions, same orchestrator-sees-

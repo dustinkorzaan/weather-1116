@@ -56,8 +56,8 @@ not need them.
 | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | Remote MCP server exposing `GetPublicWeatherCurrent` via `Core` |
 | MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetLatLong` via `Core` |
-| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | Standalone Python MCP server that can expose `GetPublicWeatherForecast` and `GetPublicWeatherHistory` directly against Open-Meteo (no `Core` dependency, no caching); both are currently commented out and served by `mcp-srv-node` |
-| MCP Server on Node | [`mcp-srv-node`](../mcp-srv-node) | Standalone Node.js (TypeScript) MCP server exposing `GetPublicWeatherForecast` and `GetPublicWeatherHistory` directly against Open-Meteo — the Node counterpart of `mcp-srv-python` (no `Core` dependency, no caching) |
+| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | Standalone Python MCP server exposing `GetCities` (largest cities near a coordinate) directly against GeoDB Cities (no `Core` dependency, no caching) |
+| MCP Server on Node | [`mcp-srv-node`](../mcp-srv-node) | Standalone Node.js (TypeScript) MCP server exposing `GetPublicWeatherForecast` and `GetPublicWeatherHistory` directly against Open-Meteo (no `Core` dependency, no caching) |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
 Ports for runnable apps are in [`README.md`](../README.md); worker and console
@@ -73,7 +73,7 @@ auth/env details are in this doc and each project's `.env.example`.
   dependency between those projects), except for shared cross-cutting code
   (events/handlers) provided by `Core`, which both MVC and API reference.
 - **MCP hosts are not called by any UI directly.** `GetCurrentAIWeatherV3Handler`
-  resolves its `GetLatLong` and `GetPublicWeatherCurrent` tools in-process (V3
+  resolves its `GetLatLong`, `GetCities`, and `GetPublicWeatherCurrent` tools in-process (V3
   pattern, see below) and is used by the `/weather` modal.
   `GetCurrentAIWeatherV4Handler` calls the same tools on
   the remote MCP hosts (V4 pattern). `GetCurrentAIWeatherV5Handler` sends only the user prompt to a hosted
@@ -85,7 +85,7 @@ auth/env details are in this doc and each project's `.env.example`.
 
 All three UIs expose **Current AI Weather**, in three versions:
 
-- **V3** (`GetCurrentAIWeatherV3Handler`). Tools (`GetLatLong`,
+- **V3** (`GetCurrentAIWeatherV3Handler`). Tools (`GetLatLong`, `GetCities`,
   `GetPublicWeatherCurrent`) run in-process via the shared
   `WeatherToolDefinitions`/`WeatherToolExecutor` helpers — no network hop to
   the MCP hosts.
@@ -188,20 +188,21 @@ CQMediator handlers the sample uses in-process elsewhere.
 | --- | --- | --- | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | `GetPublicWeatherCurrent` | 8110 | `/mcp` | Bearer `MCP_SRV_APP_SERVICE_KEY` (no default — must be set by developer) |
 | MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLong`, `GetLocation` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
-| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | none (forecast/history commented out) | 8140 | `/mcp` | Bearer `MCP_SRV_PYTHON_KEY` (no default — must be set by developer) |
+| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | `GetCities` | 8140 | `/mcp` | Bearer `MCP_SRV_PYTHON_KEY` (no default — must be set by developer) |
 | MCP Server on Node | [`mcp-srv-node`](../mcp-srv-node) | `GetPublicWeatherForecast`, `GetPublicWeatherHistory` | 8150 | `/mcp` | Bearer `MCP_SRV_NODE_KEY` (no default — must be set by developer) |
 
 `GetPublicWeatherForecast` and `GetPublicWeatherHistory` used to live on MCP
 Server on App Service; they moved to the standalone Python server, which
 calls Open-Meteo directly instead of going through `Core`/CQMediator (no
 shared library, no caching layer — see [`mcp-srv-python/README.md`](../mcp-srv-python/README.md)).
-`mcp-srv-node` is a line-for-line Node port of that server (same tool names,
+They now live on `mcp-srv-node`, a line-for-line Node port (same tool names,
 descriptions, resolutions, and response shape — see
-[`mcp-srv-node/README.md`](../mcp-srv-node/README.md)). Each tool is registered on
-exactly one of the two at a time; the other keeps it commented out and out of
-its `EXPECTED_TOOLS`. Every caller attaches both hosts, so moving a tool between
-them needs no caller, prompt, or infra change. Today both tools are on
-`mcp-srv-node`, and `mcp-srv-python` answers `tools/list` with an empty list.
+[`mcp-srv-node/README.md`](../mcp-srv-node/README.md)). `mcp-srv-python` serves
+`GetCities` instead: the largest cities (by population) within `distanceKM`
+(default 161, reset into 1–1000) of a coordinate, `size` results (default 25,
+reset into 0–100), via the free GeoDB Cities service. The same tool runs
+in-process through Core's `GetCitiesEvent`/`GetCitiesHandler` on the local-loop
+paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, FoundryConsoleV3).
 
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json)
@@ -294,7 +295,7 @@ and `children`.
 and handlers, including:
 
 - `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
-- `core-dotnet/core/Geo/` — geocoding (`GetLatLong`)
+- `core-dotnet/core/Geo/` — geocoding (`GetLatLong`, `GetLocation`) and nearby cities (`GetCities`, via GeoDB Cities)
 - `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`), fetched in Open-Meteo's native metric units (°C, km/h, mm) for the AI/MCP tool path. The `WeatherMVC`/`WeatherAPI` Forecast and History HTTP endpoints instead go through `GetUIWeatherForecast`/`GetUIWeatherHistory`, which wrap the same metric fetch and map it via `WeatherResponseMapper` into US customary units (°F, mph, in) so the UIs only format values, not convert them.
 - `core-dotnet/core/AIWeather/`: model-direct AI weather (`GetCurrentAIWeatherV3Handler`, `GetCurrentAIWeatherV4Handler`, `GetCurrentAIWeatherV5Handler`)
 - `core-dotnet/core/About/` — About tree builder and remote about client
@@ -505,7 +506,7 @@ V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | Model-direct: tools handled by local in-process tool loops (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on `/current-ai-weather`) |
+| **V3** | Model-direct: tools handled by local in-process tool loops (`GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on `/current-ai-weather`) |
 | **V4** | Model-direct: tools handled by remote MCP servers - used by the Chat1b/Chat2b remote-MCP chat tabs, and the production pattern in `GetCurrentAIWeatherV4Handler` (the V4 tab on `/current-ai-weather`) |
 | **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`) sends only the user prompt |
 

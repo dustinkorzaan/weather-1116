@@ -81,7 +81,7 @@ on `/current-ai-weather`) **→ V5 →**
 
 - **V3 — Local in-process looping** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
   (`FoundryConsoleV3InProcessToolCallbacks.csproj`)
-  - Registers `GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as tools
+  - Registers `GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as tools
     answered by local in-process looping (same Core code reused in the tools).
   - Model chooses tools that are actually handled locally; no remote MCP servers yet.
   - This is the production pattern in `GetCurrentAIWeatherV3Handler` (API/MVC, a tab on `/current-ai-weather`).

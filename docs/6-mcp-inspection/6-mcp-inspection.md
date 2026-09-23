@@ -58,10 +58,9 @@ notification accepted (`202`), a `GET` rejected (`405` - no SSE stream in
 stateless mode), and the `tools/call` `POST`s for
 `GetPublicWeatherCurrent`/`GetPublicWeatherHistory` returning `200` with the
 tool's JSON content. (This screenshot predates the split below -
-`GetPublicWeatherHistory` has since moved off `mcp-srv-app-service`. It is
-registered on exactly one of `mcp-srv-python`/`mcp-srv-node` at a time -
-currently `mcp-srv-node` - so the same Postman/curl steps apply against that
-host's `/mcp` endpoint with its bearer token, `MCP_SRV_NODE_KEY` today.)
+`GetPublicWeatherHistory` has since moved to `mcp-srv-node`; the same
+Postman/curl steps apply against its `/mcp` endpoint with a
+`MCP_SRV_NODE_KEY` bearer token.)
 
 ## curl example
 
@@ -99,11 +98,11 @@ curl -sS -X POST "https://wx1116-prod-mcp-srv-app-service.thankfulrock-0d49c0fe.
   | python -m json.tool
 ```
 
-The same `tools/list`/`tools/call` requests work against `mcp-srv-python` and
-`mcp-srv-node`, substituting the URL and bearer token. Forecast/history are
-registered on exactly one of the two at a time, so `tools/list` on the other
-returns only what it currently serves (today `mcp-srv-python` returns an empty
-list):
+The same `tools/list`/`tools/call` requests work against `mcp-srv-python`
+(`GetCities`) and `mcp-srv-node` (`GetPublicWeatherForecast`,
+`GetPublicWeatherHistory`), substituting the URL and bearer token. For example,
+`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"GetCities","arguments":{"latitude":36.1627,"longitude":-86.7816,"distanceKM":300,"size":10}}}`
+lists the 10 largest cities within 300 km of Nashville:
 
 ```bash
 curl -sS -X POST "https://wx1116-prod-mcp-srv-python.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp" \

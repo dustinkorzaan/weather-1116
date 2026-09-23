@@ -5,16 +5,15 @@ namespace Core.Chat.Services;
 public sealed class ChatHostedMcpToolFactory
 {
     public IList<AITool> CreateTools() =>
-        [CreateGeoTool(), CreateNonAiWeatherTool(), CreateNonAiWeatherPythonTool(), CreateNonAiWeatherNodeTool()];
+        [CreateGeoTool(), CreateGeoPythonTool(), CreateNonAiWeatherTool(), CreateNonAiWeatherNodeTool()];
 
-    // Agent Geo 👤's remote MCP tool — mcp-srv-func-app only.
-    public IList<AITool> CreateGeoTools() => [CreateGeoTool()];
+    // Agent Geo 👤's remote MCP tools — mcp-srv-func-app (GetLatLong/GetLocation) and
+    // mcp-srv-python (GetCities).
+    public IList<AITool> CreateGeoTools() => [CreateGeoTool(), CreateGeoPythonTool()];
 
-    // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-app-service (current) plus
-    // mcp-srv-python and mcp-srv-node; each forecast/history tool is registered on exactly one of
-    // those two at a time (both on mcp-srv-node today), so both hosts stay attached.
-    public IList<AITool> CreateNonAiWeatherTools() =>
-        [CreateNonAiWeatherTool(), CreateNonAiWeatherPythonTool(), CreateNonAiWeatherNodeTool()];
+    // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-app-service (current) and
+    // mcp-srv-node (forecast/history).
+    public IList<AITool> CreateNonAiWeatherTools() => [CreateNonAiWeatherTool(), CreateNonAiWeatherNodeTool()];
 
     private static HostedMcpServerTool CreateGeoTool()
     {
@@ -54,7 +53,7 @@ public sealed class ChatHostedMcpToolFactory
         };
     }
 
-    private static HostedMcpServerTool CreateNonAiWeatherPythonTool()
+    private static HostedMcpServerTool CreateGeoPythonTool()
     {
         var mcpSrvPythonUrl = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_URL")
             ?? throw new InvalidOperationException("Missing MCP_SRV_PYTHON_URL.");

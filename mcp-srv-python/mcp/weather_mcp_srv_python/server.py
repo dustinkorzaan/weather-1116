@@ -1,4 +1,4 @@
-"""Standalone MCP server exposing public weather forecast and history tools."""
+"""Standalone MCP server exposing the GetCities tool (largest cities near a coordinate, via GeoDB)."""
 
 import os
 
@@ -10,8 +10,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse
 
 from weather_mcp_srv_python.auth import BearerTokenMiddleware
-from weather_mcp_srv_python.tools.forecast import ForecastResolution, get_public_weather_forecast
-from weather_mcp_srv_python.tools.history import HistoryResolution, get_public_weather_history
+from weather_mcp_srv_python.tools.cities import DEFAULT_DISTANCE_KM, DEFAULT_SIZE, get_cities
 
 load_dotenv(find_dotenv(usecwd=True))
 
@@ -38,8 +37,7 @@ mcp = MCPServer("WeatherMcpSrvPython")
 
 # Tools this host must have registered to report healthy in /About, mirroring
 # mcp-srv-app-service's AboutController and mcp-srv-func-app's AboutFunction.
-# Empty while both weather tools are served by mcp-srv-node (see the commented-out tools below).
-EXPECTED_TOOLS: set[str] = set()
+EXPECTED_TOOLS = {"GetCities"}
 
 
 @mcp.custom_route("/Wake", methods=["GET"])
@@ -73,39 +71,22 @@ async def about(request: Request) -> JSONResponse:
     )
 
 
-# Temporarily disabled: GetPublicWeatherForecast and GetPublicWeatherHistory are served by
-# mcp-srv-node. Uncomment (and add back to EXPECTED_TOOLS) to serve them from here again --
-# two MCP hosts must never register the same tool name.
-#
-# @mcp.tool(
-#     name="GetPublicWeatherForecast",
-#     description=(
-#         "Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 "
-#         "days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute "
-#         "steps. Use Daily unless the user asks for hourly or 15-minute detail."
-#     ),
-# )
-# async def get_public_weather_forecast_tool(
-#     latitude: float,
-#     longitude: float,
-#     resolution: ForecastResolution = "Daily",
-# ) -> dict:
-#     return await get_public_weather_forecast(latitude, longitude, resolution)
-#
-#
-# @mcp.tool(
-#     name="GetPublicWeatherHistory",
-#     description=(
-#         "Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, "
-#         "Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail."
-#     ),
-# )
-# async def get_public_weather_history_tool(
-#     latitude: float,
-#     longitude: float,
-#     resolution: HistoryResolution = "Daily",
-# ) -> dict:
-#     return await get_public_weather_history(latitude, longitude, resolution)
+@mcp.tool(
+    name="GetCities",
+    description=(
+        "Find the largest cities (by population) within a radius of a latitude and longitude. "
+        "Returns each city's name, region, country, coordinates, distance in km, and population, "
+        "largest first. distanceKM defaults to 161 (range 1-1000) and size defaults to 25 "
+        "(range 0-100); out-of-range values are adjusted, not rejected."
+    ),
+)
+async def get_cities_tool(
+    latitude: float,
+    longitude: float,
+    distanceKM: float | None = DEFAULT_DISTANCE_KM,
+    size: int | None = DEFAULT_SIZE,
+) -> dict:
+    return await get_cities(latitude, longitude, distanceKM, size)
 
 
 def build_app():

@@ -57,15 +57,15 @@ public class ChatHostedMcpToolFactoryTests
     }
 
     [Fact]
-    public void CreateGeoTools_ReturnsOnlyMcpSrvFuncAppTool()
+    public void CreateGeoTools_ReturnsMcpSrvFuncAppAndPythonTools()
     {
         RunWithMcpEnvironment(
             funcAppUrl: "https://func.example.com/",
             funcAppKey: "func-key",
             appServiceUrl: null,
             appServiceKey: null,
-            pythonUrl: null,
-            pythonKey: null,
+            pythonUrl: "https://python.example.com/",
+            pythonKey: "python-key",
             nodeUrl: null,
             nodeKey: null,
             () =>
@@ -74,22 +74,27 @@ public class ChatHostedMcpToolFactoryTests
                     .Cast<HostedMcpServerTool>()
                     .ToList();
 
-                var tool = Assert.Single(tools);
-                Assert.Equal("McpSrvFuncApp", tool.ServerName);
-                Assert.Equal("https://func.example.com/runtime/webhooks/mcp", tool.ServerAddress);
+                Assert.Equal(2, tools.Count);
+
+                var funcApp = Assert.Single(tools, tool => tool.ServerName == "McpSrvFuncApp");
+                Assert.Equal("https://func.example.com/runtime/webhooks/mcp", funcApp.ServerAddress);
+
+                var python = Assert.Single(tools, tool => tool.ServerName == "McpSrvPython");
+                Assert.Equal("https://python.example.com/mcp", python.ServerAddress);
+                Assert.Equal("Bearer python-key", python.Headers!["Authorization"]);
             });
     }
 
     [Fact]
-    public void CreateNonAiWeatherTools_ReturnsMcpSrvAppServicePythonAndNodeTools()
+    public void CreateNonAiWeatherTools_ReturnsMcpSrvAppServiceAndNodeTools()
     {
         RunWithMcpEnvironment(
             funcAppUrl: null,
             funcAppKey: null,
             appServiceUrl: "https://app.example.com/",
             appServiceKey: "app-key",
-            pythonUrl: "https://python.example.com/",
-            pythonKey: "python-key",
+            pythonUrl: null,
+            pythonKey: null,
             nodeUrl: "https://node.example.com/",
             nodeKey: "node-key",
             () =>
@@ -98,13 +103,10 @@ public class ChatHostedMcpToolFactoryTests
                     .Cast<HostedMcpServerTool>()
                     .ToList();
 
-                Assert.Equal(3, tools.Count);
+                Assert.Equal(2, tools.Count);
 
                 var appService = Assert.Single(tools, tool => tool.ServerName == "McpSrvAppService");
                 Assert.Equal("https://app.example.com/mcp", appService.ServerAddress);
-
-                var python = Assert.Single(tools, tool => tool.ServerName == "McpSrvPython");
-                Assert.Equal("https://python.example.com/mcp", python.ServerAddress);
 
                 var node = Assert.Single(tools, tool => tool.ServerName == "McpSrvNode");
                 Assert.Equal("https://node.example.com/mcp", node.ServerAddress);
