@@ -60,9 +60,12 @@ public sealed class Chat3Service : IChatClientService
         ExceptionDispatchInfo? clientFailure = null;
         try
         {
-            // Same Foundry client sequence as Console V5. If that HTTP call fails, yield an
+            // Same Foundry client sequence as Console V5. The first turn creates the conversation;
+            // later turns reuse it so the agent sees prior messages. If that HTTP call fails, yield an
             // SSE error instead of letting the iterator abort (the UI then shows "network error").
-            (client, conversationId) = await _settings.CreateProjectResponsesClientForChatAgentAsync(cancellationToken);
+            (client, conversationId) = await _settings.CreateProjectResponsesClientForChatAgentAsync(
+                _responseStore.GetConversationId(sessionId),
+                cancellationToken);
         }
         catch (Exception ex)
         {
@@ -80,8 +83,8 @@ public sealed class Chat3Service : IChatClientService
         }
 
         var assistantBuilder = new StringBuilder();
-        var previousResponseId = _responseStore.GetPreviousResponseId(sessionId);
 
+        // Conversation state carries prior turns; Foundry rejects previous_response_id alongside it.
         CreateResponseOptions options = new()
         {
             ConversationOptions = new ResponseConversationOptions(),
@@ -92,11 +95,6 @@ public sealed class Chat3Service : IChatClientService
                 ResponseItem.CreateUserMessageItem(userMessage),
             },
         };
-
-        if (!string.IsNullOrWhiteSpace(previousResponseId))
-        {
-            options.PreviousResponseId = previousResponseId;
-        }
 
         IAsyncEnumerator<StreamingResponseUpdate> enumerator = null!;
         ExceptionDispatchInfo? startFailure = null;
@@ -156,18 +154,6 @@ public sealed class Chat3Service : IChatClientService
 
                 usage.Add(update);
 
-                if (update is StreamingResponseCreatedUpdate created
-                    && !string.IsNullOrWhiteSpace(created.Response?.Id))
-                {
-                    previousResponseId = created.Response.Id;
-                }
-
-                if (update is StreamingResponseCompletedUpdate completed
-                    && !string.IsNullOrWhiteSpace(completed.Response?.Id))
-                {
-                    previousResponseId = completed.Response.Id;
-                }
-
                 if (update is StreamingResponseOutputTextDeltaUpdate textDelta && !string.IsNullOrEmpty(textDelta.Delta))
                 {
                     assistantBuilder.Append(textDelta.Delta);
@@ -211,10 +197,9 @@ public sealed class Chat3Service : IChatClientService
             yield break;
         }
 
-        if (!string.IsNullOrWhiteSpace(previousResponseId))
-        {
-            _responseStore.SetPreviousResponseId(sessionId, previousResponseId);
-        }
+        // Only a turn that completes cleanly pins the session to this conversation, so a first turn
+        // that fails or stops on an MCP approval request leaves the next message a clean conversation.
+        _responseStore.SetConversationId(sessionId, conversationId);
 
         var assistantText = assistantBuilder.ToString();
         if (!string.IsNullOrWhiteSpace(assistantText))

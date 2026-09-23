@@ -6,7 +6,8 @@ namespace Core.AIWeather.Services;
 
 /// <summary>
 /// Builds <see cref="ProjectResponsesClient"/> instances for Chat3 and Current AI Weather V5:
-/// <c>GetProjectResponsesClientForAgent</c>, then <c>CreateProjectConversationAsync</c>. Always
+/// <c>GetProjectResponsesClientForAgent</c>, then <c>CreateProjectConversationAsync</c> (skipped
+/// when the caller passes an existing conversation id to continue, as Chat3 does on later turns). Always
 /// authenticates via this app's managed identity (<see cref="FoundryTokenCredentialFactory"/>) -
 /// no API key. This is its own implementation, independent of Console V5's own
 /// <c>Program.cs</c> (which builds its client directly with AZURE_FOUNDRY_PROD_KEY) - neither
@@ -25,17 +26,30 @@ public static class FoundryAgentResponsesClientFactory
 {
     public static Task<(ProjectResponsesClient ResponseClient, string ConversationId)> CreateForAgentAsync(
         string agentName,
+        CancellationToken cancellationToken = default) =>
+        CreateForAgentAsync(agentName, existingConversationId: null, cancellationToken);
+
+    public static Task<(ProjectResponsesClient ResponseClient, string ConversationId)> CreateForAgentAsync(
+        string agentName,
+        string? existingConversationId,
         CancellationToken cancellationToken = default)
     {
         var projectUrl = Environment.GetEnvironmentVariable("AZURE_FOUNDRY_PROD_PROJ_URL")
             ?? throw new InvalidOperationException("Missing AZURE_FOUNDRY_PROD_PROJ_URL.");
 
-        return CreateForAgentAsync(agentName, new Uri(projectUrl), cancellationToken);
+        return CreateForAgentAsync(agentName, new Uri(projectUrl), existingConversationId, cancellationToken);
     }
+
+    public static Task<(ProjectResponsesClient ResponseClient, string ConversationId)> CreateForAgentAsync(
+        string agentName,
+        Uri endpoint,
+        CancellationToken cancellationToken = default) =>
+        CreateForAgentAsync(agentName, endpoint, existingConversationId: null, cancellationToken);
 
     public static async Task<(ProjectResponsesClient ResponseClient, string ConversationId)> CreateForAgentAsync(
         string agentName,
         Uri endpoint,
+        string? existingConversationId,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(agentName);
@@ -54,6 +68,11 @@ public static class FoundryAgentResponsesClientFactory
             new ProjectOpenAIClientOptions());
 
         var responseClient = projectOpenAIClient.GetProjectResponsesClientForAgent(agentName);
+        if (!string.IsNullOrWhiteSpace(existingConversationId))
+        {
+            return (responseClient, existingConversationId);
+        }
+
         var conversation = (await projectOpenAIClient
             .GetProjectConversationsClient()
             .CreateProjectConversationAsync(new ConversationCreationOptions(), cancellationToken)).Value;

@@ -191,8 +191,10 @@ around that orchestration, not inside it: no new tools are introduced, and gate 
 (user/assistant text). Multi-turn context for Agent Framework tabs comes from `AgentSession`
 (`ChatAgentSessionStore`), not from replaying `IChatSessionStore` history.
 
-**Chat3 memory:** later turns send `previous_response_id` (`ChatHostedAgentResponseStore`). Chat3
-does **not** replay a system prompt — Foundry rejects `instructions` when an agent is specified.
+**Chat3 memory:** the first turn creates a Foundry conversation; once that turn completes, its id
+is stored per session (`ChatHostedAgentResponseStore`) and later turns reuse it. Chat3 does **not**
+send `previous_response_id` — Foundry rejects it alongside `conversation`. The store is in-process,
+so a turn that lands on another replica starts a new conversation. Chat3 does **not** replay a system prompt — Foundry rejects `instructions` when an agent is specified.
 
 **Chat4a memory:** only the orchestrator (AI Weather Orchestration) has a persistent `AgentSession`
 via `ChatAgentSessionStore`, exactly like Chat2a. The two sub-agents (Geo, NonAI Weather) are
