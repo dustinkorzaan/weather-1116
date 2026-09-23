@@ -106,6 +106,7 @@ internal class Program
 		var mcpSrvFuncAppKey = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_KEY") ?? throw new InvalidOperationException("MCP_SRV_FUNC_APP_KEY not found in environment variables.");
 		var mcpSrvAppServiceKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY") ?? throw new InvalidOperationException("MCP_SRV_APP_SERVICE_KEY not found in environment variables.");
 		var mcpSrvPythonKey = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_KEY") ?? throw new InvalidOperationException("MCP_SRV_PYTHON_KEY not found in environment variables.");
+		var mcpSrvNodeKey = Environment.GetEnvironmentVariable("MCP_SRV_NODE_KEY") ?? throw new InvalidOperationException("MCP_SRV_NODE_KEY not found in environment variables.");
 
 		// Hardcoded prod ACA FQDNs (wx1116-prod stack). Edit here when reprovisioning
 		// to a different environment's MCP_SRV_*_HOSTNAME azd outputs.
@@ -127,7 +128,13 @@ internal class Program
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvPythonKey}" },
 			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
-		Console.WriteLine($"\nMCP Servers:\n{myMcpSrvFuncApp.ServerLabel} {myMcpSrvFuncApp.ServerUri}\n{myMcpSrvAppService.ServerLabel} {myMcpSrvAppService.ServerUri}\n{myMcpSrvPython.ServerLabel} {myMcpSrvPython.ServerUri}");
+		var myMcpSrvNode = ResponseTool.CreateMcpTool(
+			serverLabel: "McpSrvNode",
+			serverUri: new Uri("https://wx1116-prod-mcp-srv-node.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp"),
+			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvNodeKey}" },
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+
+		Console.WriteLine($"\nMCP Servers:\n{myMcpSrvFuncApp.ServerLabel} {myMcpSrvFuncApp.ServerUri}\n{myMcpSrvAppService.ServerLabel} {myMcpSrvAppService.ServerUri}\n{myMcpSrvPython.ServerLabel} {myMcpSrvPython.ServerUri}\n{myMcpSrvNode.ServerLabel} {myMcpSrvNode.ServerUri}");
 
 		var inputItems = new List<ResponseItem>()
 		{
@@ -137,7 +144,7 @@ internal class Program
 
 		var options = new CreateResponseOptions(deploymentName, inputItems)
 		{
-			Tools = { myMcpSrvFuncApp, myMcpSrvAppService, myMcpSrvPython },
+			Tools = { myMcpSrvFuncApp, myMcpSrvAppService, myMcpSrvPython, myMcpSrvNode },
 			TextOptions = new ResponseTextOptions
 			{
 				TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(

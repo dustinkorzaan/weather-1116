@@ -4,14 +4,17 @@ namespace Core.Chat.Services;
 
 public sealed class ChatHostedMcpToolFactory
 {
-    public IList<AITool> CreateTools() => [CreateGeoTool(), CreateNonAiWeatherTool(), CreateNonAiWeatherPythonTool()];
+    public IList<AITool> CreateTools() =>
+        [CreateGeoTool(), CreateNonAiWeatherTool(), CreateNonAiWeatherPythonTool(), CreateNonAiWeatherNodeTool()];
 
     // Agent Geo 👤's remote MCP tool — mcp-srv-func-app only.
     public IList<AITool> CreateGeoTools() => [CreateGeoTool()];
 
-    // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-app-service (current) and
-    // mcp-srv-python (forecast/history).
-    public IList<AITool> CreateNonAiWeatherTools() => [CreateNonAiWeatherTool(), CreateNonAiWeatherPythonTool()];
+    // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-app-service (current) plus
+    // mcp-srv-python and mcp-srv-node; each forecast/history tool is registered on exactly one of
+    // those two at a time (both on mcp-srv-node today), so both hosts stay attached.
+    public IList<AITool> CreateNonAiWeatherTools() =>
+        [CreateNonAiWeatherTool(), CreateNonAiWeatherPythonTool(), CreateNonAiWeatherNodeTool()];
 
     private static HostedMcpServerTool CreateGeoTool()
     {
@@ -66,6 +69,25 @@ public sealed class ChatHostedMcpToolFactory
             Headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["Authorization"] = $"Bearer {mcpSrvPythonKey}",
+            },
+        };
+    }
+
+    private static HostedMcpServerTool CreateNonAiWeatherNodeTool()
+    {
+        var mcpSrvNodeUrl = Environment.GetEnvironmentVariable("MCP_SRV_NODE_URL")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_NODE_URL.");
+        var mcpSrvNodeKey = Environment.GetEnvironmentVariable("MCP_SRV_NODE_KEY")
+            ?? throw new InvalidOperationException("Missing MCP_SRV_NODE_KEY.");
+
+        return new HostedMcpServerTool(
+            "McpSrvNode",
+            new Uri($"{mcpSrvNodeUrl.TrimEnd('/')}/mcp"))
+        {
+            ApprovalMode = HostedMcpServerToolApprovalMode.NeverRequire,
+            Headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Authorization"] = $"Bearer {mcpSrvNodeKey}",
             },
         };
     }

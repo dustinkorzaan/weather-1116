@@ -12,6 +12,8 @@
     var mcpSrvFuncAppAboutUrl = $"{mcpSrvFuncAppUrl}/about";
     var mcpSrvPythonUrl = (Configuration["MCP_SRV_PYTHON_URL"] ?? "http://localhost:8140").TrimEnd('/');
     var mcpSrvPythonAboutUrl = $"{mcpSrvPythonUrl}/About";
+    var mcpSrvNodeUrl = (Configuration["MCP_SRV_NODE_URL"] ?? "http://localhost:8150").TrimEnd('/');
+    var mcpSrvNodeAboutUrl = $"{mcpSrvNodeUrl}/About";
     var isMapPage = string.Equals(ViewContext.RouteData.Values["action"] as string, "Index", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
@@ -168,6 +170,7 @@
                     <a href="@mcpSrvAppServiceAboutUrl" target="_blank" rel="noopener noreferrer">MCP App Service About</a>
                     <a href="@mcpSrvFuncAppAboutUrl" target="_blank" rel="noopener noreferrer">MCP Func App About</a>
                     <a href="@mcpSrvPythonAboutUrl" target="_blank" rel="noopener noreferrer">MCP Python About</a>
+                    <a href="@mcpSrvNodeAboutUrl" target="_blank" rel="noopener noreferrer">MCP Node About</a>
                     <a href="https://github.com/dustinkorzaan/weather-1116" target="_blank" rel="noopener noreferrer">GitHub</a>
                 </div>
             </div>

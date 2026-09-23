@@ -6,7 +6,7 @@ namespace Core.Tests.Chat;
 public class ChatMcpToolFactoryTests
 {
     [Fact]
-    public void CreateTools_ReturnsThreeMcpToolsWithAuthOnHeaders()
+    public void CreateTools_ReturnsFourMcpToolsWithAuthOnHeaders()
     {
         RunWithMcpEnvironment(
             funcAppUrl: "https://func.example.com/",
@@ -15,9 +15,11 @@ public class ChatMcpToolFactoryTests
             appServiceKey: "app-key",
             pythonUrl: "https://python.example.com/",
             pythonKey: "python-key",
+            nodeUrl: "https://node.example.com/",
+            nodeKey: "node-key",
             () =>
             {
-                var (geoMcpTools, weatherMcpTools, weatherPythonMcpTools) = new ChatMcpToolFactory().CreateTools();
+                var (geoMcpTools, weatherMcpTools, weatherPythonMcpTools, weatherNodeMcpTools) = new ChatMcpToolFactory().CreateTools();
 
                 Assert.Equal("McpSrvFuncApp", geoMcpTools.ServerLabel);
                 Assert.Equal(new Uri("https://func.example.com/runtime/webhooks/mcp"), geoMcpTools.ServerUri);
@@ -30,13 +32,17 @@ public class ChatMcpToolFactoryTests
                 Assert.Equal("McpSrvPython", weatherPythonMcpTools.ServerLabel);
                 Assert.Equal(new Uri("https://python.example.com/mcp"), weatherPythonMcpTools.ServerUri);
                 Assert.Equal("Bearer python-key", weatherPythonMcpTools.Headers["Authorization"]);
+
+                Assert.Equal("McpSrvNode", weatherNodeMcpTools.ServerLabel);
+                Assert.Equal(new Uri("https://node.example.com/mcp"), weatherNodeMcpTools.ServerUri);
+                Assert.Equal("Bearer node-key", weatherNodeMcpTools.Headers["Authorization"]);
             });
     }
 
     [Fact]
     public void CreateTools_ThrowsWhenMcpEnvironmentIsMissing()
     {
-        RunWithMcpEnvironment(null, null, null, null, null, null, () =>
+        RunWithMcpEnvironment(null, null, null, null, null, null, null, null, () =>
         {
             var factory = new ChatMcpToolFactory();
             var ex = Assert.Throws<InvalidOperationException>(() => factory.CreateTools());
@@ -51,6 +57,8 @@ public class ChatMcpToolFactoryTests
         string? appServiceKey,
         string? pythonUrl,
         string? pythonKey,
+        string? nodeUrl,
+        string? nodeKey,
         Action action)
     {
         var previousFuncAppUrl = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_URL");
@@ -59,6 +67,8 @@ public class ChatMcpToolFactoryTests
         var previousAppServiceKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY");
         var previousPythonUrl = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_URL");
         var previousPythonKey = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_KEY");
+        var previousNodeUrl = Environment.GetEnvironmentVariable("MCP_SRV_NODE_URL");
+        var previousNodeKey = Environment.GetEnvironmentVariable("MCP_SRV_NODE_KEY");
         try
         {
             Environment.SetEnvironmentVariable("MCP_SRV_FUNC_APP_URL", funcAppUrl);
@@ -67,6 +77,8 @@ public class ChatMcpToolFactoryTests
             Environment.SetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY", appServiceKey);
             Environment.SetEnvironmentVariable("MCP_SRV_PYTHON_URL", pythonUrl);
             Environment.SetEnvironmentVariable("MCP_SRV_PYTHON_KEY", pythonKey);
+            Environment.SetEnvironmentVariable("MCP_SRV_NODE_URL", nodeUrl);
+            Environment.SetEnvironmentVariable("MCP_SRV_NODE_KEY", nodeKey);
             action();
         }
         finally
@@ -77,6 +89,8 @@ public class ChatMcpToolFactoryTests
             Environment.SetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY", previousAppServiceKey);
             Environment.SetEnvironmentVariable("MCP_SRV_PYTHON_URL", previousPythonUrl);
             Environment.SetEnvironmentVariable("MCP_SRV_PYTHON_KEY", previousPythonKey);
+            Environment.SetEnvironmentVariable("MCP_SRV_NODE_URL", previousNodeUrl);
+            Environment.SetEnvironmentVariable("MCP_SRV_NODE_KEY", previousNodeKey);
         }
     }
 }

@@ -20,6 +20,7 @@ and assigns Contributor + User Access Administrator on this resource group.
 | Container Apps Environment | `wx1116-prod-aca-env` |
 | Container Apps (ASP.NET) | `wx1116-prod-api`, `-mvc`, `-blazor`, `-worker`, `-mcp-srv-app-service` |
 | Container App (Python) | `wx1116-prod-mcp-srv-python` |
+| Container App (Node.js) | `wx1116-prod-mcp-srv-node` |
 | Functions on ACA | `wx1116-prod-mcp-srv-func-app` |
 | Storage (Functions host) | `wx1116prodblob` |
 | Static Web App | `wx1116-prod-react` |
@@ -47,7 +48,7 @@ rely on this in production, not just during the demo:
   only thing that wakes it from zero is an inbound HTTP request, which today
   means the React UI's `useBackendWake` hook (`ui-react/src/app/useBackendWake.js`,
   used from `App.jsx`) pinging `worker`'s own `/About` directly on page load,
-  in parallel with API, MVC, Blazor, and all three MCP hosts, rather than relying
+  in parallel with API, MVC, Blazor, and all four MCP hosts, rather than relying
   on API's `/About` fan-out to reach it (see below for why that changed).
   `useBackendWake` fires a fresh ping per target roughly every 30s -- without
   cancelling ones still in flight -- until each succeeds, rather than giving
@@ -102,6 +103,7 @@ rely on this in production, not just during the demo:
 | `PROD_MCP_SRV_APP_SERVICE_KEY` | Bearer token for MCP app-service host |
 | `PROD_MCP_SRV_FUNC_APP_KEY` | `mcp_extension` system key — you choose the value; deploy applies it |
 | `PROD_MCP_SRV_PYTHON_KEY` | Bearer token for the standalone Python MCP host |
+| `PROD_MCP_SRV_NODE_KEY` | Bearer token for the standalone Node.js MCP host |
 | `GOOGLE_MAPS_API_KEY` | Maps on React/MVC/Blazor |
 | `AZURE_UI_REACT_TOKEN` | SWA deploy token (after provision) |
 | `PROD_APPINSIGHTS_CONNECTION_STRING` | Browser telemetry for React -- same value as the `APP_INSIGHTS_CONNECTION_STRING` infra output. Missing/empty is safe (React just runs with no browser telemetry), but leaving it unset makes browser telemetry silently absent once the backends start reporting. |
@@ -146,6 +148,7 @@ PROD_WORKER_DOTNET_URL       = https://<WORKER_HOSTNAME>
 PROD_MCP_SRV_APP_SERVICE_URL = https://<MCP_SRV_APP_SERVICE_HOSTNAME>
 PROD_MCP_SRV_FUNC_APP_URL    = https://<MCP_SRV_FUNC_APP_HOSTNAME>
 PROD_MCP_SRV_PYTHON_URL      = https://<MCP_SRV_PYTHON_HOSTNAME>
+PROD_MCP_SRV_NODE_URL        = https://<MCP_SRV_NODE_HOSTNAME>
 PROD_UI_REACT_URL            = https://<STATIC_WEB_APP_CUSTOM_DOMAIN>
 ```
 
@@ -210,6 +213,7 @@ in parallel. Each can also be run directly via `workflow_dispatch`:
 | `prod-deploy-mcp-srv-app.yml` | Container App + ACR image |
 | `prod-deploy-mcp-srv-func.yml` | Functions-on-ACA container image (ACR) |
 | `prod-deploy-mcp-srv-python.yml` | Container App + ACR image |
+| `prod-deploy-mcp-srv-node.yml` | Container App + ACR image |
 | `prod-deploy-react.yml` | Static Web App |
 | `prod-deploy-foundry-agents.yml` | Foundry agents (`wx1116-agent-for-current-weather`, `wx1116-agent-for-chat`) |
 
@@ -329,7 +333,7 @@ Do not configure MCP servers or agents in the Foundry portal.
 ## Step 7 — Validate
 
 - Each app: `GET https://<host>/About`
-- API `/About` aggregates worker + both MCP hosts
+- API `/About` aggregates worker + all four MCP hosts
 - React SWA: hello, map, `/current-ai-weather`, `/chat-clients`
 - React custom domain (when bound): `https://<STATIC_WEB_APP_CUSTOM_DOMAIN>`
   returns `200` with a valid TLS certificate

@@ -45,6 +45,7 @@ test('shows a blank screen during the 250ms grace period, then the wake screen w
     'MCP App Service waking…',
     'MCP Func App waking…',
     'MCP Python waking…',
+    'MCP Node waking…',
     'MVC waking…',
     'Blazor waking…',
   ]);

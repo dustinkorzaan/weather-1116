@@ -20,7 +20,8 @@ namespace Core.Chat.Chat4b;
 /// The difference from Chat4a: Geo and NonAI Weather get their tools from the existing remote MCP
 /// hosts (<see cref="ChatHostedMcpToolFactory"/>) instead of in-process CQMediator calls — Geo
 /// gets only the <c>mcp-srv-func-app</c> tool, NonAI Weather gets the <c>mcp-srv-app-service</c>
-/// (current conditions) and <c>mcp-srv-python</c> (forecast/history) tools. From the
+/// (current conditions), <c>mcp-srv-python</c>, and <c>mcp-srv-node</c> (forecast/history, each
+/// registered on exactly one of those two hosts at a time) tools. From the
 /// orchestrator's point of view nothing changes: Geo and
 /// NonAI Weather are still ordinary <c>AsAIFunction</c>-wrapped tools, so the orchestrator's
 /// stream still shows <see cref="FunctionCallContent"/>/<see cref="FunctionResultContent"/>, not
@@ -170,7 +171,7 @@ public sealed class Chat4bService : IChatClientService
             tools: _hostedMcpToolFactory.CreateGeoTools());
 
         // Agent NonAI Weather 👤: weather sub-agent — current/forecast/history for a given
-        // lat/long only, via the mcp-srv-app-service (current) and mcp-srv-python
+        // lat/long only, via the mcp-srv-app-service (current), mcp-srv-python, and mcp-srv-node
         // (forecast/history) remote MCP hosts.
         AIAgent nonAiWeatherAgent = responsesClient.AsAIAgent(
             name: "NonAIWeather",

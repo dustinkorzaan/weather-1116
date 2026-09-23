@@ -38,7 +38,8 @@ mcp = MCPServer("WeatherMcpSrvPython")
 
 # Tools this host must have registered to report healthy in /About, mirroring
 # mcp-srv-app-service's AboutController and mcp-srv-func-app's AboutFunction.
-EXPECTED_TOOLS = {"GetPublicWeatherForecast", "GetPublicWeatherHistory"}
+# Empty while both weather tools are served by mcp-srv-node (see the commented-out tools below).
+EXPECTED_TOOLS: set[str] = set()
 
 
 @mcp.custom_route("/Wake", methods=["GET"])
@@ -50,8 +51,8 @@ async def wake(request: Request) -> PlainTextResponse:
 @mcp.custom_route("/About", methods=["GET"])
 async def about(request: Request) -> JSONResponse:
     """Anonymous About probe -- leaf AboutNode (Core.About.AboutNode shape) named
-    mcp-srv-python, no children. Healthy only when MCP_SRV_PYTHON_KEY is set and both
-    weather tools are registered."""
+    mcp-srv-python, no children. Healthy only when MCP_SRV_PYTHON_KEY is set and every
+    tool in EXPECTED_TOOLS is registered."""
     key = os.environ.get("MCP_SRV_PYTHON_KEY", "")
     tools = await mcp.list_tools()
     tool_names = {tool.name for tool in tools}
@@ -72,35 +73,39 @@ async def about(request: Request) -> JSONResponse:
     )
 
 
-@mcp.tool(
-    name="GetPublicWeatherForecast",
-    description=(
-        "Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 "
-        "days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute "
-        "steps. Use Daily unless the user asks for hourly or 15-minute detail."
-    ),
-)
-async def get_public_weather_forecast_tool(
-    latitude: float,
-    longitude: float,
-    resolution: ForecastResolution = "Daily",
-) -> dict:
-    return await get_public_weather_forecast(latitude, longitude, resolution)
-
-
-@mcp.tool(
-    name="GetPublicWeatherHistory",
-    description=(
-        "Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, "
-        "Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail."
-    ),
-)
-async def get_public_weather_history_tool(
-    latitude: float,
-    longitude: float,
-    resolution: HistoryResolution = "Daily",
-) -> dict:
-    return await get_public_weather_history(latitude, longitude, resolution)
+# Temporarily disabled: GetPublicWeatherForecast and GetPublicWeatherHistory are served by
+# mcp-srv-node. Uncomment (and add back to EXPECTED_TOOLS) to serve them from here again --
+# two MCP hosts must never register the same tool name.
+#
+# @mcp.tool(
+#     name="GetPublicWeatherForecast",
+#     description=(
+#         "Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 "
+#         "days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute "
+#         "steps. Use Daily unless the user asks for hourly or 15-minute detail."
+#     ),
+# )
+# async def get_public_weather_forecast_tool(
+#     latitude: float,
+#     longitude: float,
+#     resolution: ForecastResolution = "Daily",
+# ) -> dict:
+#     return await get_public_weather_forecast(latitude, longitude, resolution)
+#
+#
+# @mcp.tool(
+#     name="GetPublicWeatherHistory",
+#     description=(
+#         "Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, "
+#         "Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail."
+#     ),
+# )
+# async def get_public_weather_history_tool(
+#     latitude: float,
+#     longitude: float,
+#     resolution: HistoryResolution = "Daily",
+# ) -> dict:
+#     return await get_public_weather_history(latitude, longitude, resolution)
 
 
 def build_app():

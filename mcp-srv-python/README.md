@@ -6,6 +6,13 @@ Standalone Python MCP server exposing two public weather tools, backed directly 
 - `GetPublicWeatherForecast` — upcoming forecast (`Daily`, `Hourly`, or `FifteenMinutes` resolution)
 - `GetPublicWeatherHistory` — recent past weather (`Daily` or `Hourly` resolution)
 
+> **Currently disabled here.** Both tools are commented out in
+> `mcp/weather_mcp_srv_python/server.py` (and `EXPECTED_TOOLS` is empty) while
+> [`mcp-srv-node`](../mcp-srv-node) serves them. This server still runs, stays healthy, and
+> answers `tools/list` with an empty list, so callers keep it attached. To move a tool back,
+> uncomment it here, add it to `EXPECTED_TOOLS`, and comment it out in `mcp-srv-node` — two hosts
+> must never register the same tool name.
+
 The `resolution` values are PascalCase (`Daily`/`Hourly`/`FifteenMinutes`) to match what
 these tools returned when `GetPublicWeatherForecast`/`GetPublicWeatherHistory` still lived on
 `mcp-srv-app-service`, so existing callers/prompts don't need to change.
@@ -41,8 +48,8 @@ scaled-to-zero state) — it does no tool resolution and doesn't check `MCP_SRV_
 
 `GET /About` is an unauthenticated health probe returning the same `AboutNode` JSON shape
 (`Core.About.AboutNode`) as this repo's other backends — a leaf node named `mcp-srv-python`
-with no children. `isHealthy` is `true` only when `MCP_SRV_PYTHON_KEY` is set and both
-`GetPublicWeatherForecast`/`GetPublicWeatherHistory` are registered. `buildNumber`,
+with no children. `isHealthy` is `true` only when `MCP_SRV_PYTHON_KEY` is set and every tool
+in `EXPECTED_TOOLS` is registered (currently none — see the note above). `buildNumber`,
 `buildStart`, and `buildBranchName` are read from the `BUILD_NUMBER`/`BUILD_START`/
 `BUILD_BRANCH_NAME` env vars set by the deploy workflow, same as the other hosts. This is
 what api-dotnet/mvc-dotnet's own `/About` fan out to.

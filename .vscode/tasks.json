@@ -239,6 +239,16 @@
             "problemMatcher": []
         },
         {
+            "label": "run mcp srv node",
+            "type": "shell",
+            "command": "npm start",
+            "options": {
+                "cwd": "${workspaceFolder}/mcp-srv-node"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
             "label": "build foundry console v1",
             "command": "dotnet",
             "type": "process",

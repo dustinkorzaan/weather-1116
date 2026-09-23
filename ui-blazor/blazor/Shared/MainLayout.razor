@@ -137,6 +137,7 @@
                 <FluentAnchor Href="@_mcpSrvAppServiceAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP App Service About</FluentAnchor>
                 <FluentAnchor Href="@_mcpSrvFuncAppAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP Func App About</FluentAnchor>
                 <FluentAnchor Href="@_mcpSrvPythonAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP Python About</FluentAnchor>
+                <FluentAnchor Href="@_mcpSrvNodeAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP Node About</FluentAnchor>
                 <FluentAnchor Href="https://github.com/dustinkorzaan/weather-1116" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">GitHub</FluentAnchor>
             </div>
         </div>
@@ -154,6 +155,7 @@
     private string _mcpSrvAppServiceAboutUrl = "http://localhost:8110/About";
     private string _mcpSrvFuncAppAboutUrl = "http://localhost:8120/about";
     private string _mcpSrvPythonAboutUrl = "http://localhost:8140/About";
+    private string _mcpSrvNodeAboutUrl = "http://localhost:8150/About";
 
     private bool _aboutDialogHidden = true;
     private bool _isAboutLoading;
@@ -187,6 +189,8 @@
         _mcpSrvFuncAppAboutUrl = $"{mcpSrvFuncAppUrl}/about";
         var mcpSrvPythonUrl = (Configuration["MCP_SRV_PYTHON_URL"] ?? "http://localhost:8140").TrimEnd('/');
         _mcpSrvPythonAboutUrl = $"{mcpSrvPythonUrl}/About";
+        var mcpSrvNodeUrl = (Configuration["MCP_SRV_NODE_URL"] ?? "http://localhost:8150").TrimEnd('/');
+        _mcpSrvNodeAboutUrl = $"{mcpSrvNodeUrl}/About";
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

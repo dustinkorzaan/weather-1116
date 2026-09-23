@@ -1,7 +1,7 @@
 # MCP Inspection
 
-How to examine this repo's three remote MCP hosts (`mcp-srv-app-service`,
-`mcp-srv-func-app`, `mcp-srv-python`) directly - outside a chat tab or
+How to examine this repo's four remote MCP hosts (`mcp-srv-app-service`,
+`mcp-srv-func-app`, `mcp-srv-python`, `mcp-srv-node`) directly - outside a chat tab or
 Foundry console - with the MCP Inspector, Postman, and curl.
 
 ## MCP 2026-07-28 vs Legacy
@@ -32,6 +32,8 @@ Point it at:
   header `x-functions-key: <mcp_extension system key>`
 * Local `mcp-srv-python` - `http://localhost:8140/mcp`, header
   `Authorization: Bearer <MCP_SRV_PYTHON_KEY>`
+* Local `mcp-srv-node` - `http://localhost:8150/mcp`, header
+  `Authorization: Bearer <MCP_SRV_NODE_KEY>`
 * Prod hosts - see [`docs/architecture.md`](../architecture.md#mcp-tool-hosts)
   for the production URLs and auth headers
 
@@ -56,9 +58,10 @@ notification accepted (`202`), a `GET` rejected (`405` - no SSE stream in
 stateless mode), and the `tools/call` `POST`s for
 `GetPublicWeatherCurrent`/`GetPublicWeatherHistory` returning `200` with the
 tool's JSON content. (This screenshot predates the split below -
-`GetPublicWeatherHistory` has since moved to `mcp-srv-python`; the same
-Postman/curl steps apply against its `/mcp` endpoint with a
-`MCP_SRV_PYTHON_KEY` bearer token.)
+`GetPublicWeatherHistory` has since moved off `mcp-srv-app-service`. It is
+registered on exactly one of `mcp-srv-python`/`mcp-srv-node` at a time -
+currently `mcp-srv-node` - so the same Postman/curl steps apply against that
+host's `/mcp` endpoint with its bearer token, `MCP_SRV_NODE_KEY` today.)
 
 ## curl example
 
@@ -96,11 +99,23 @@ curl -sS -X POST "https://wx1116-prod-mcp-srv-app-service.thankfulrock-0d49c0fe.
   | python -m json.tool
 ```
 
-The same `tools/list`/`tools/call` requests work against `mcp-srv-python`,
-substituting its URL and bearer token:
+The same `tools/list`/`tools/call` requests work against `mcp-srv-python` and
+`mcp-srv-node`, substituting the URL and bearer token. Forecast/history are
+registered on exactly one of the two at a time, so `tools/list` on the other
+returns only what it currently serves (today `mcp-srv-python` returns an empty
+list):
 
 ```bash
 curl -sS -X POST "https://wx1116-prod-mcp-srv-python.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp" \
+  -H "accept: application/json, text/event-stream" \
+  -H "authorization: Bearer ..." \
+  -H "content-type: application/json" \
+  -H "mcp-protocol-version: 2025-11-25" \
+  --data '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+  | sed -n 's/^[[:space:]]*data:[[:space:]]*//p' \
+  | python -m json.tool
+
+curl -sS -X POST "https://wx1116-prod-mcp-srv-node.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp" \
   -H "accept: application/json, text/event-stream" \
   -H "authorization: Bearer ..." \
   -H "content-type: application/json" \

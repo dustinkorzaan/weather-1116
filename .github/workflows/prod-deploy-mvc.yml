@@ -60,6 +60,7 @@ jobs:
             mcp-func-key=${{ secrets.PROD_MCP_SRV_FUNC_APP_KEY }}
             mcp-app-key=${{ secrets.PROD_MCP_SRV_APP_SERVICE_KEY }}
             mcp-python-key=${{ secrets.PROD_MCP_SRV_PYTHON_KEY }}
+            mcp-node-key=${{ secrets.PROD_MCP_SRV_NODE_KEY }}
           env_overlay_multiline: |
             DB_CONNECTION_STRING=secretref:db-connection-string
             UI_REACT_URL=${{ vars.PROD_UI_REACT_URL }}
@@ -70,6 +71,7 @@ jobs:
             MCP_SRV_APP_SERVICE_URL=${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
             MCP_SRV_FUNC_APP_URL=${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
             MCP_SRV_PYTHON_URL=${{ vars.PROD_MCP_SRV_PYTHON_URL }}
+            MCP_SRV_NODE_URL=${{ vars.PROD_MCP_SRV_NODE_URL }}
             GOOGLE_MAPS_API_KEY=secretref:google-maps-key
             AZURE_FOUNDRY_PROD_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_PROJ_URL }}
             AZURE_FOUNDRY_PROD_MODEL=${{ vars.AZURE_FOUNDRY_PROD_MODEL }}
@@ -78,6 +80,7 @@ jobs:
             MCP_SRV_FUNC_APP_KEY=secretref:mcp-func-key
             MCP_SRV_APP_SERVICE_KEY=secretref:mcp-app-key
             MCP_SRV_PYTHON_KEY=secretref:mcp-python-key
+            MCP_SRV_NODE_KEY=secretref:mcp-node-key
             ASPNETCORE_DETAILEDERRORS=false
             BUILD_NUMBER=${{ env.BUILD_NUMBER }}
             BUILD_START=${{ steps.build_start.outputs.build_start }}

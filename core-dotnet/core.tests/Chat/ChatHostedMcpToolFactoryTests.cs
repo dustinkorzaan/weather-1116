@@ -16,13 +16,15 @@ public class ChatHostedMcpToolFactoryTests
             appServiceKey: "app-key",
             pythonUrl: "https://python.example.com/",
             pythonKey: "python-key",
+            nodeUrl: "https://node.example.com/",
+            nodeKey: "node-key",
             () =>
             {
                 var tools = new ChatHostedMcpToolFactory().CreateTools()
                     .Cast<HostedMcpServerTool>()
                     .ToList();
 
-                Assert.Equal(3, tools.Count);
+                Assert.Equal(4, tools.Count);
 
                 var funcApp = Assert.Single(tools, tool => tool.ServerName == "McpSrvFuncApp");
                 Assert.Equal("https://func.example.com/runtime/webhooks/mcp", funcApp.ServerAddress);
@@ -44,6 +46,13 @@ public class ChatHostedMcpToolFactoryTests
                 Assert.NotNull(python.Headers);
                 Assert.Equal("Bearer python-key", python.Headers["Authorization"]);
                 Assert.DoesNotContain("Authorization", python.AdditionalProperties.Keys);
+
+                var node = Assert.Single(tools, tool => tool.ServerName == "McpSrvNode");
+                Assert.Equal("https://node.example.com/mcp", node.ServerAddress);
+                Assert.Equal(HostedMcpServerToolApprovalMode.NeverRequire, node.ApprovalMode);
+                Assert.NotNull(node.Headers);
+                Assert.Equal("Bearer node-key", node.Headers["Authorization"]);
+                Assert.DoesNotContain("Authorization", node.AdditionalProperties.Keys);
             });
     }
 
@@ -57,6 +66,8 @@ public class ChatHostedMcpToolFactoryTests
             appServiceKey: null,
             pythonUrl: null,
             pythonKey: null,
+            nodeUrl: null,
+            nodeKey: null,
             () =>
             {
                 var tools = new ChatHostedMcpToolFactory().CreateGeoTools()
@@ -70,7 +81,7 @@ public class ChatHostedMcpToolFactoryTests
     }
 
     [Fact]
-    public void CreateNonAiWeatherTools_ReturnsMcpSrvAppServiceAndPythonTools()
+    public void CreateNonAiWeatherTools_ReturnsMcpSrvAppServicePythonAndNodeTools()
     {
         RunWithMcpEnvironment(
             funcAppUrl: null,
@@ -79,26 +90,31 @@ public class ChatHostedMcpToolFactoryTests
             appServiceKey: "app-key",
             pythonUrl: "https://python.example.com/",
             pythonKey: "python-key",
+            nodeUrl: "https://node.example.com/",
+            nodeKey: "node-key",
             () =>
             {
                 var tools = new ChatHostedMcpToolFactory().CreateNonAiWeatherTools()
                     .Cast<HostedMcpServerTool>()
                     .ToList();
 
-                Assert.Equal(2, tools.Count);
+                Assert.Equal(3, tools.Count);
 
                 var appService = Assert.Single(tools, tool => tool.ServerName == "McpSrvAppService");
                 Assert.Equal("https://app.example.com/mcp", appService.ServerAddress);
 
                 var python = Assert.Single(tools, tool => tool.ServerName == "McpSrvPython");
                 Assert.Equal("https://python.example.com/mcp", python.ServerAddress);
+
+                var node = Assert.Single(tools, tool => tool.ServerName == "McpSrvNode");
+                Assert.Equal("https://node.example.com/mcp", node.ServerAddress);
             });
     }
 
     [Fact]
     public void CreateTools_ThrowsWhenMcpEnvironmentIsMissing()
     {
-        RunWithMcpEnvironment(null, null, null, null, null, null, () =>
+        RunWithMcpEnvironment(null, null, null, null, null, null, null, null, () =>
         {
             var factory = new ChatHostedMcpToolFactory();
             var ex = Assert.Throws<InvalidOperationException>(factory.CreateTools);
@@ -113,6 +129,8 @@ public class ChatHostedMcpToolFactoryTests
         string? appServiceKey,
         string? pythonUrl,
         string? pythonKey,
+        string? nodeUrl,
+        string? nodeKey,
         Action action)
     {
         var previousFuncAppUrl = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_URL");
@@ -121,6 +139,8 @@ public class ChatHostedMcpToolFactoryTests
         var previousAppServiceKey = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY");
         var previousPythonUrl = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_URL");
         var previousPythonKey = Environment.GetEnvironmentVariable("MCP_SRV_PYTHON_KEY");
+        var previousNodeUrl = Environment.GetEnvironmentVariable("MCP_SRV_NODE_URL");
+        var previousNodeKey = Environment.GetEnvironmentVariable("MCP_SRV_NODE_KEY");
         try
         {
             Environment.SetEnvironmentVariable("MCP_SRV_FUNC_APP_URL", funcAppUrl);
@@ -129,6 +149,8 @@ public class ChatHostedMcpToolFactoryTests
             Environment.SetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY", appServiceKey);
             Environment.SetEnvironmentVariable("MCP_SRV_PYTHON_URL", pythonUrl);
             Environment.SetEnvironmentVariable("MCP_SRV_PYTHON_KEY", pythonKey);
+            Environment.SetEnvironmentVariable("MCP_SRV_NODE_URL", nodeUrl);
+            Environment.SetEnvironmentVariable("MCP_SRV_NODE_KEY", nodeKey);
             action();
         }
         finally
@@ -139,6 +161,8 @@ public class ChatHostedMcpToolFactoryTests
             Environment.SetEnvironmentVariable("MCP_SRV_APP_SERVICE_KEY", previousAppServiceKey);
             Environment.SetEnvironmentVariable("MCP_SRV_PYTHON_URL", previousPythonUrl);
             Environment.SetEnvironmentVariable("MCP_SRV_PYTHON_KEY", previousPythonKey);
+            Environment.SetEnvironmentVariable("MCP_SRV_NODE_URL", previousNodeUrl);
+            Environment.SetEnvironmentVariable("MCP_SRV_NODE_KEY", previousNodeKey);
         }
     }
 }

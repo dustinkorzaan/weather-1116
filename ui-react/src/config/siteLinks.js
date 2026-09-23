@@ -12,3 +12,5 @@ export const mcpSrvFuncAppBaseUrl =
   trimUrl(import.meta.env.VITE_MCP_SRV_FUNC_APP_URL) || 'http://localhost:8120';
 export const mcpSrvPythonBaseUrl =
   trimUrl(import.meta.env.VITE_MCP_SRV_PYTHON_URL) || 'http://localhost:8140';
+export const mcpSrvNodeBaseUrl =
+  trimUrl(import.meta.env.VITE_MCP_SRV_NODE_URL) || 'http://localhost:8150';

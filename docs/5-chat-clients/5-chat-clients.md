@@ -10,7 +10,7 @@ a one-shot structured JSON response.
 | Tab | Stack | Tools | Maps to console demo |
 | --- | --- | --- | --- |
 | **Chat1a** | Responses API (model-direct) | In-process (`GetLatLong`, `GetLocation`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) | Foundry Console **V3** |
-| **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-srv-func-app`, `mcp-srv-app-service`, `mcp-srv-python`) | Foundry Console **V4** |
+| **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-srv-func-app`, `mcp-srv-app-service`, `mcp-srv-python`, `mcp-srv-node`) | Foundry Console **V4** |
 | **Chat2a** | Microsoft Agent Framework (model-direct) | In-process tools via `AIFunctionFactory` | V3 orchestration style |
 | **Chat2b** | Microsoft Agent Framework (model-direct) | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
 | **Chat3** | Hosted Microsoft Foundry agent | MCP tools configured **on the agent** in Foundry (`wx1116-agent-for-chat`) | Foundry Console **V5** |
@@ -174,11 +174,12 @@ not declared on the request.
   model emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a and, inside
   Chat4a's/Chat5a's Geo and NonAI Weather sub-agents, for Chat4a/Chat5a).
 - **MCP (Chat1b, Chat2b, Chat4b, Chat5b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`,
-  `mcp-srv-python`) — platform invokes tools; no local function-call loop in Chat1b. Chat4b's/Chat5b's Geo
+  `mcp-srv-python`, `mcp-srv-node`) — platform invokes tools; no local function-call loop in Chat1b. Chat4b's/Chat5b's Geo
   sub-agent gets only `mcp-srv-func-app`'s tool from `ChatHostedMcpToolFactory.CreateGeoTools()`;
-  its NonAI Weather sub-agent gets both `mcp-srv-app-service`'s and `mcp-srv-python`'s tools from
-  `CreateNonAiWeatherTools()` — not the combined three-tool list Chat1b/Chat2b use (which also
-  includes Geo's tool).
+  its NonAI Weather sub-agent gets `mcp-srv-app-service`'s, `mcp-srv-python`'s, and `mcp-srv-node`'s tools from
+  `CreateNonAiWeatherTools()` — not the combined four-server list Chat1b/Chat2b use (which also
+  includes Geo's tool). Forecast/history live on exactly one of `mcp-srv-python`/`mcp-srv-node` at
+  a time (currently `mcp-srv-node`); both hosts stay attached so moving a tool needs no code change here.
 - **Hosted agent (Chat3):** Foundry invokes those MCP hosts. This app does not send tools, instructions,
   or a model name.
 
@@ -253,12 +254,13 @@ Chat4b is Chat4a with one change: Geo and NonAI Weather get their tools from the
 MCP hosts instead of in-process CQMediator calls — mirroring how Chat2b differs from Chat2a. This
 works cleanly because the MCP hosts are already split along exactly the Geo/NonAI Weather
 boundary: `mcp-srv-func-app` exposes `GetLatLong`/`GetLocation` (Geo's tools) and
-`mcp-srv-app-service`/`mcp-srv-python` together expose `GetPublicWeatherCurrent`/`Forecast`/`History`
+`mcp-srv-app-service`/`mcp-srv-python`/`mcp-srv-node` together expose `GetPublicWeatherCurrent`/`Forecast`/`History`
 (NonAI Weather's tools — current conditions stayed on `mcp-srv-app-service`, forecast/history moved
-to the standalone `mcp-srv-python` server). `ChatHostedMcpToolFactory` (already used by
+to the standalone `mcp-srv-python` server and are currently served by its Node counterpart,
+`mcp-srv-node`). `ChatHostedMcpToolFactory` (already used by
 Chat1b/Chat2b) gained two new methods, `CreateGeoTools()` and `CreateNonAiWeatherTools()` — Geo's
-returns only `mcp-srv-func-app`'s tool, NonAI Weather's returns both `mcp-srv-app-service`'s and
-`mcp-srv-python`'s tools — its existing `CreateTools()` (all three hosts combined) is unchanged and
+returns only `mcp-srv-func-app`'s tool, NonAI Weather's returns `mcp-srv-app-service`'s,
+`mcp-srv-python`'s, and `mcp-srv-node`'s tools — its existing `CreateTools()` (all four hosts combined) is unchanged and
 still used by Chat1b/Chat2b.
 
 The three `// Agent <name> 👤` construction sites, the instruction constants
@@ -370,6 +372,7 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 | `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b, Chat4b (Geo sub-agent) |
 | `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent) |
 | `MCP_SRV_PYTHON_URL`, `MCP_SRV_PYTHON_KEY` | Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent) |
+| `MCP_SRV_NODE_URL`, `MCP_SRV_NODE_KEY` | Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent) |
 
 Chat1a, Chat2a, and Chat4a do **not** require MCP URLs. Chat3 does **not** require MCP URLs in the app
 either — those belong on the hosted agent.
@@ -403,8 +406,8 @@ JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form
 ### Automated publish
 
 Do not create Chat3 (or V5) by hand. `prod-provision-infra.yml` registers the
-three MCP hosts as Foundry **RemoteTool** connections (`MyMcpSrvAppService`,
-`MyMcpSrvFuncApp`, `MyMcpSrvPython`). `prod-deploy-foundry-agents.yml` then publishes
+four MCP hosts as Foundry **RemoteTool** connections (`MyMcpSrvAppService`,
+`MyMcpSrvFuncApp`, `MyMcpSrvPython`, `MyMcpSrvNode`). `prod-deploy-foundry-agents.yml` then publishes
 `wx1116-geo-nonaiweather-toolbox` (wrapping those connections) and attaches the
 toolbox to `wx1116-agent-for-chat` and `wx1116-agent-for-current-weather`
 with `require_approval: never`. Instructions live in `.github/foundry-agents/`.
@@ -430,14 +433,15 @@ Only if you need to inspect or repair a published version:
 ### MCP tools (toolbox)
 
 Agents attach the shared `wx1116-geo-nonaiweather-toolbox` toolbox as a single MCP
-tool. The toolbox wraps the three IaC **RemoteTool** connections below; auth
+tool. The toolbox wraps the four IaC **RemoteTool** connections below; auth
 headers stay on those connections, not on the agent.
 
 | `server_label` (inside toolbox) | `server_url` | Auth | Tools the server exposes |
 | --- | --- | --- | --- |
 | `McpSrvFuncApp` | `https://<prod-mcp-srv-func-app>/runtime/webhooks/mcp` | Header `x-functions-key` = Functions `mcp_extension` system key (`MCP_SRV_FUNC_APP_KEY`) | `GetLatLong`, `GetLocation` |
 | `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetPublicWeatherCurrent` |
-| `McpSrvPython` | `https://<prod-mcp-srv-python>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_PYTHON_KEY>` | `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
+| `McpSrvPython` | `https://<prod-mcp-srv-python>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_PYTHON_KEY>` | none right now (`GetPublicWeatherForecast`/`GetPublicWeatherHistory` commented out) |
+| `McpSrvNode` | `https://<prod-mcp-srv-node>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_NODE_KEY>` | `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
 
 Production host names are in [`docs/architecture.md`](../architecture.md) (MCP Tool Hosts).
 

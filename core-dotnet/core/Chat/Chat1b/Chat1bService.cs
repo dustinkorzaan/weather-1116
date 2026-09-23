@@ -57,11 +57,11 @@ public sealed class Chat1bService : IChatClientService
         string? errorOnStart = null;
         try
         {
-            var (geoMcpTools, weatherMcpTools, weatherPythonMcpTools) = _mcpToolFactory.CreateTools();
+            var (geoMcpTools, weatherMcpTools, weatherPythonMcpTools, weatherNodeMcpTools) = _mcpToolFactory.CreateTools();
 
             CreateResponseOptions options = new(_settings.DeploymentName, inputItems)
             {
-                Tools = { geoMcpTools, weatherMcpTools, weatherPythonMcpTools },
+                Tools = { geoMcpTools, weatherMcpTools, weatherPythonMcpTools, weatherNodeMcpTools },
                 StreamingEnabled = true,
             };
 
