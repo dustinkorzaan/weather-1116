@@ -31,17 +31,17 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("AddPin")]
-    public async Task<ActionResult<UserDTO>> AddUserPin([FromBody] AddUserPinRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult> AddUserPin([FromBody] AddUserPinRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var user = await _mediator.Send(new AddUserPinEvent
+            await _mediator.Send(new AddUserPinEvent
             {
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
                 LocationName = request.LocationName,
             }, cancellationToken);
-            return Ok(user);
+            return Ok(new { success = true });
         }
         catch (InvalidOperationException)
         {
@@ -50,12 +50,12 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete("DeletePin")]
-    public async Task<ActionResult<UserDTO>> DeleteUserPin([FromQuery] Guid userPinId, CancellationToken cancellationToken)
+    public async Task<ActionResult> DeleteUserPin([FromQuery] Guid userPinId, CancellationToken cancellationToken)
     {
         try
         {
-            var user = await _mediator.Send(new DeleteUserPinEvent { UserPinId = userPinId }, cancellationToken);
-            return Ok(user);
+            await _mediator.Send(new DeleteUserPinEvent { UserPinId = userPinId }, cancellationToken);
+            return Ok(new { success = true });
         }
         catch (InvalidOperationException)
         {

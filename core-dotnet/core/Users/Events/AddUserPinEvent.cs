@@ -1,4 +1,3 @@
-using Core.Users.Models;
 using CQMediator;
 
 namespace Core.Users.Events;
@@ -6,7 +5,7 @@ namespace Core.Users.Events;
 /// <summary>
 /// Adds a new pin to the current user.
 /// </summary>
-public class AddUserPinEvent : IRequest<UserDTO>
+public class AddUserPinEvent : IRequest
 {
     public Guid UserId { get; set; } = Core.Data.Domain.UserConstants.AnonymousUserId;
 

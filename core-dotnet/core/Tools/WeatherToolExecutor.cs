@@ -125,14 +125,14 @@ public sealed class WeatherToolExecutor
         string locationName = argumentsJson.RootElement.GetProperty("locationName").GetString()
             ?? throw new InvalidOperationException("AddUserPin requires a locationName argument.");
 
-        var result = await _mediator.Send(new AddUserPinEvent
+        await _mediator.Send(new AddUserPinEvent
         {
             Latitude = latitude,
             Longitude = longitude,
             LocationName = locationName,
         }, cancellationToken);
 
-        return JsonSerializer.Serialize(result, JsonDefaults.Pretty);
+        return JsonSerializer.Serialize(new { success = true }, JsonDefaults.Pretty);
     }
 
     private async Task<string> ExecuteDeleteUserPin(BinaryData arguments, CancellationToken cancellationToken)
@@ -146,11 +146,11 @@ public sealed class WeatherToolExecutor
             throw new InvalidOperationException("userPinId must be a valid GUID.");
         }
 
-        var result = await _mediator.Send(new DeleteUserPinEvent
+        await _mediator.Send(new DeleteUserPinEvent
         {
             UserPinId = pinId,
         }, cancellationToken);
 
-        return JsonSerializer.Serialize(result, JsonDefaults.Pretty);
+        return JsonSerializer.Serialize(new { success = true }, JsonDefaults.Pretty);
     }
 }
