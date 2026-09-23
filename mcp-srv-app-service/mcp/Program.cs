@@ -22,7 +22,7 @@ builder.Services.AddControllers();
 
 // MCP service is stateless with no database. Register a no-op DbContext for handlers that depend on it
 // but won't be used by any MCP tools (User handlers are auto-registered but unused here).
-builder.Services.AddDbContext<AgentActivityDbContext>((_, options) =>
+builder.Services.AddDbContext<WX1116DbContext>((_, options) =>
 {
 	// Use SqlServer with no connection string - will fail if actually used, but handlers won't be.
 	options.UseSqlServer("Server=(local);");

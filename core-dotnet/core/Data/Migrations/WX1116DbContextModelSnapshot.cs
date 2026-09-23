@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Core.Data.Migrations
 {
-    [DbContext(typeof(AgentActivityDbContext))]
-    partial class AgentActivityDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(WX1116DbContext))]
+    partial class WX1116DbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

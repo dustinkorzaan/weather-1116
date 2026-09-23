@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Core.Data.Migrations
 {
-    [DbContext(typeof(AgentActivityDbContext))]
+    [DbContext(typeof(WX1116DbContext))]
     [Migration("20260923120000_AddUserAndUserPin")]
     partial class AddUserAndUserPin
     {

@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Microsoft.Data.SqlClient (pulled in transitively via Core.csproj's
-         Microsoft.EntityFrameworkCore.SqlServer, added for AgentActivityDbContext)
+         Microsoft.EntityFrameworkCore.SqlServer, added for WX1116DbContext)
          needs ICU for connection setup, so invariant mode throws
          "Globalization Invariant Mode is not supported" from SqlConnection.Open,
          which crashed Database.Migrate() on startup. MVC and Worker never set

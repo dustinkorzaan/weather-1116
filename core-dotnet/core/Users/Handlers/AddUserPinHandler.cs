@@ -9,9 +9,9 @@ namespace Core.Users.Handlers;
 
 public class AddUserPinHandler : IRequestHandler<AddUserPinEvent, UserDTO>
 {
-    private readonly AgentActivityDbContext _dbContext;
+    private readonly WX1116DbContext _dbContext;
 
-    public AddUserPinHandler(AgentActivityDbContext dbContext)
+    public AddUserPinHandler(WX1116DbContext dbContext)
     {
         _dbContext = dbContext;
     }

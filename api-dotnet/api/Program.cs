@@ -69,7 +69,7 @@ builder.Services.AddWeatherChatClients();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAgentActivityContextProvider, HttpAgentActivityContextProvider>();
 builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Api));
-builder.Services.AddDbContext<AgentActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
+builder.Services.AddDbContext<WX1116DbContext>(options => options.UseSqlServer(dbConnectionString));
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("ReactClient", policy =>
@@ -99,11 +99,11 @@ var app = builder.Build();
 
 // Applies any pending EF Core migrations (dbo.AgentActivity and future tables) on every
 // startup, so a deploy never needs a separate manual migration step. API is the only host that
-// does this -- MVC and the worker also register AgentActivityDbContext, but only read/write the
+// does this -- MVC and the worker also register WX1116DbContext, but only read/write the
 // schema API has already migrated.
 using (var migrationScope = app.Services.CreateScope())
 {
-	migrationScope.ServiceProvider.GetRequiredService<AgentActivityDbContext>().Database.Migrate();
+	migrationScope.ServiceProvider.GetRequiredService<WX1116DbContext>().Database.Migrate();
 }
 
 app.UseHttpsRedirection();

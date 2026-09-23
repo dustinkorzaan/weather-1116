@@ -9,9 +9,9 @@ namespace Core.Users.Handlers;
 
 public class GetUserHandler : IRequestHandler<GetUserEvent, UserDTO>
 {
-    private readonly AgentActivityDbContext _dbContext;
+    private readonly WX1116DbContext _dbContext;
 
-    public GetUserHandler(AgentActivityDbContext dbContext)
+    public GetUserHandler(WX1116DbContext dbContext)
     {
         _dbContext = dbContext;
     }

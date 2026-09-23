@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Core.Data;
 
-public class AgentActivityDbContext(DbContextOptions<AgentActivityDbContext> options) : DbContext(options)
+public class WX1116DbContext(DbContextOptions<WX1116DbContext> options) : DbContext(options)
 {
     public DbSet<AgentActivity> AgentActivity => Set<AgentActivity>();
 
@@ -14,6 +14,6 @@ public class AgentActivityDbContext(DbContextOptions<AgentActivityDbContext> opt
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AgentActivityDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(WX1116DbContext).Assembly);
     }
 }

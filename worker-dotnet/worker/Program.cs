@@ -60,7 +60,7 @@ if (string.IsNullOrWhiteSpace(dbConnectionString))
 	throw new InvalidOperationException("Missing DB_CONNECTION_STRING (required for dbo.AgentActivity logging).");
 }
 
-builder.Services.AddDbContext<AgentActivityDbContext>(options => options.UseSqlServer(dbConnectionString));
+builder.Services.AddDbContext<WX1116DbContext>(options => options.UseSqlServer(dbConnectionString));
 
 // Explicit, non-zero poll interval: a value > TimeSpan.Zero keeps Hangfire on
 // interval polling (every 60s) rather than the aggressive/continuous mode.

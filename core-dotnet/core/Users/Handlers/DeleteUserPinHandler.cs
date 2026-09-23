@@ -9,9 +9,9 @@ namespace Core.Users.Handlers;
 
 public class DeleteUserPinHandler : IRequestHandler<DeleteUserPinEvent, UserDTO>
 {
-    private readonly AgentActivityDbContext _dbContext;
+    private readonly WX1116DbContext _dbContext;
 
-    public DeleteUserPinHandler(AgentActivityDbContext dbContext)
+    public DeleteUserPinHandler(WX1116DbContext dbContext)
     {
         _dbContext = dbContext;
     }
