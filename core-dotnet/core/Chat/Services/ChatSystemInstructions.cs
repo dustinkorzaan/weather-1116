@@ -22,9 +22,7 @@ public static class ChatSystemInstructions
         When stating wind direction, use the meteorological source compass label from windDirectionSource (where the wind comes from), optionally with source degrees in parentheses (e.g. SW (224°)). Do not add 180 to degrees.
         """;
     // Keep in sync with the hosted Foundry chat agent
-    // (AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME; see docs/5-chat-clients/5-chat-clients.md) -- except
-    // the three saved-pin lines (GetUser/AddUserPin/DeleteUserPin): the hosted agent's toolbox
-    // deliberately leaves out mcp-srv-app-service's user/pin tools.
+    // (AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME; see docs/5-chat-clients/5-chat-clients.md).
 
     // Chat4a/Chat4b (and Chat5a/Chat5b with the "Sys Prompt" gate off) — no hosted Foundry agent
     // counterpart for these. They never mention transport, so the remote-MCP sub-agents reuse

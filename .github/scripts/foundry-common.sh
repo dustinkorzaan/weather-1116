@@ -180,11 +180,11 @@ foundry_toolbox_consumer_url() {
     "$project_endpoint" "$FOUNDRY_TOOLBOX_NAME" "$FOUNDRY_API_VERSION"
 }
 
-# McpSrvAppService is deliberately NOT in this toolbox: it serves the user/pin write tools
-# (GetUser/AddUserPin/DeleteUserPin), and the hosted Foundry agents that attach this toolbox
-# (chat agent and current-weather agent) are geo + weather only.
 foundry_build_weather_toolbox_tools_json() {
   jq -n \
+    --arg appLabel "McpSrvAppService" \
+    --arg appUrl "$FOUNDRY_MCP_APP_TARGET" \
+    --arg appConn "$FOUNDRY_MCP_APP_CONNECTION_ID" \
     --arg funcLabel "McpSrvFuncApp" \
     --arg funcUrl "$FOUNDRY_MCP_FUNC_TARGET" \
     --arg funcConn "$FOUNDRY_MCP_FUNC_CONNECTION_ID" \
@@ -195,6 +195,13 @@ foundry_build_weather_toolbox_tools_json() {
     --arg nodeUrl "$FOUNDRY_MCP_NODE_TARGET" \
     --arg nodeConn "$FOUNDRY_MCP_NODE_CONNECTION_ID" \
     '[
+      {
+        type: "mcp",
+        server_label: $appLabel,
+        server_url: $appUrl,
+        project_connection_id: $appConn,
+        require_approval: "never"
+      },
       {
         type: "mcp",
         server_label: $funcLabel,

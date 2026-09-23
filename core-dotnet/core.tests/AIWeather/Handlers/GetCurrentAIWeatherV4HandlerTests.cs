@@ -29,9 +29,8 @@ public class GetCurrentAIWeatherV4HandlerTests
 
         Assert.Contains("ChatMcpToolFactory", source, StringComparison.Ordinal);
         Assert.Contains("_mcpToolFactory.CreateTools()", source, StringComparison.Ordinal);
-        // V4 is a read-only weather lookup: it must never attach mcp-srv-app-service's user/pin tools.
-        Assert.Contains("var (geoMcpTools, _, weatherPythonMcpTools, weatherNodeMcpTools)", source, StringComparison.Ordinal);
-        Assert.DoesNotContain("userMcpTools", source, StringComparison.Ordinal);
+        // All four MCP hosts, so V4 has all 9 tools (geo, weather, and the saved-pin tools).
+        Assert.Contains("Tools = { geoMcpTools, userMcpTools, weatherPythonMcpTools, weatherNodeMcpTools }", source, StringComparison.Ordinal);
         Assert.Contains("AIWeatherResponse", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolExecutor", source, StringComparison.Ordinal);
         Assert.DoesNotContain("WeatherToolDefinitions", source, StringComparison.Ordinal);

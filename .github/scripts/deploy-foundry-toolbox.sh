@@ -3,9 +3,8 @@
 # toolbox and upserts the RemoteTool connection agents use to reach its consumer
 # MCP endpoint via the ARM connections API.
 #
-# The toolbox wraps three of the IaC-provisioned MCP RemoteTool connections
-# (MyMcpSrvFuncApp, MyMcpSrvPython, MyMcpSrvNode). MyMcpSrvAppService is left out:
-# it serves the user/pin tools, which the hosted geo + weather agents must not get. Agents attach the
+# The toolbox wraps the four IaC-provisioned MCP RemoteTool connections
+# (MyMcpSrvAppService, MyMcpSrvFuncApp, MyMcpSrvPython, MyMcpSrvNode). Agents attach the
 # toolbox as a single MCP tool so the Foundry portal can render tool
 # associations correctly.
 #
@@ -64,7 +63,7 @@ ARM_CONNECTION_URL="$(foundry_arm_connection_url "$SUBSCRIPTION_ID" "$AZURE_RESO
 
 TOOLS_JSON="$(foundry_build_weather_toolbox_tools_json)"
 VERSION_BODY=$(jq -n \
-  --arg description "Geo + NonAI Weather toolbox (func-app/python geo + node weather)" \
+  --arg description "Geo + NonAI Weather + User toolbox (func-app/python geo + node weather + app-service user pins)" \
   --argjson tools "$TOOLS_JSON" \
   '{description: $description, tools: $tools}')
 

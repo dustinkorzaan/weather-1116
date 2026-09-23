@@ -73,11 +73,10 @@ auth/env details are in this doc and each project's `.env.example`.
   dependency between those projects), except for shared cross-cutting code
   (events/handlers) provided by `Core`, which both MVC and API reference.
 - **MCP hosts are not called by any UI directly.** `GetCurrentAIWeatherV3Handler`
-  resolves its `GetLatLong`, `GetCities`, and `GetPublicWeatherCurrent` tools in-process (V3
+  resolves all 9 tools (geo, weather, and the saved-pin tools) in-process (V3
   pattern, see below) and is used by the `/weather` modal.
   `GetCurrentAIWeatherV4Handler` calls the same tools on
-  the remote MCP hosts (V4 pattern), leaving out `mcp-srv-app-service` so a
-  weather lookup never gets the saved-pin write tools. `GetCurrentAIWeatherV5Handler` sends only the user prompt to a hosted
+  the remote MCP hosts (V4 pattern). `GetCurrentAIWeatherV5Handler` sends only the user prompt to a hosted
   Foundry agent, which owns its own tool resolution (V5 pattern). All three
   are tabs on `/current-ai-weather`. The MCP hosts also remain required for
   the Chat1b/Chat2b remote-MCP chat tabs.
@@ -86,8 +85,9 @@ auth/env details are in this doc and each project's `.env.example`.
 
 All three UIs expose **Current AI Weather**, in three versions:
 
-- **V3** (`GetCurrentAIWeatherV3Handler`). Tools (`GetLatLong`, `GetCities`,
-  `GetPublicWeatherCurrent`) run in-process via the shared
+- **V3** (`GetCurrentAIWeatherV3Handler`). All 9 tools (`GetLatLong`, `GetLocation`,
+  `GetCities`, `GetPublicWeatherCurrent`/`Forecast`/`History`, `GetUser`, `AddUserPin`,
+  `DeleteUserPin`) run in-process via the shared
   `WeatherToolDefinitions`/`WeatherToolExecutor` helpers — no network hop to
   the MCP hosts.
 - **V4** (`GetCurrentAIWeatherV4Handler`), which resolves the same tools via
@@ -214,8 +214,9 @@ saved-pin tools — `GetUser`, `AddUserPin`, and `DeleteUserPin` — which call 
 `Users` handlers against `dbo.User`/`dbo.UserPin`. It needs `DB_CONNECTION_STRING`
 (managed-identity SQL auth) and reports unhealthy in `/About` without it. Like MVC and
 the worker, it only reads/writes the schema the API's EF Core migrations
-(`Database.Migrate()`) have already applied — it never migrates. Only the Chat tabs attach it (Chat1b/Chat2b directly; Chat4b/Chat5b via the User
-sub-agent); V4 and the hosted Foundry toolbox deliberately leave it out.
+(`Database.Migrate()`) have already applied — it never migrates. Every MCP consumer attaches it: Chat1b/Chat2b directly, Chat4b/Chat5b via the User
+sub-agent, AI Weather V4 and FoundryConsoleV4, and the hosted Foundry toolbox
+(Chat3/V5).
 
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json)
@@ -519,7 +520,7 @@ V1 and V2 stay console-only; V3, V4, and V5 also back a production handler
 | --- | --- |
 | **V1** | Model-direct via legacy `AzureOpenAIClient` / Cognitive Services endpoint |
 | **V2** | Model-direct via `ResponsesClient` against the unified AI services endpoint |
-| **V3** | Model-direct: tools handled by local in-process tool loops (`GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on `/current-ai-weather`) |
+| **V3** | Model-direct: tools handled by local in-process tool loops (`GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`, `GetUser`, `AddUserPin`, `DeleteUserPin`) - same Core code reused in the tools; also the production pattern in `GetCurrentAIWeatherV3Handler` (used by `/weather` and the V3 tab on `/current-ai-weather`) |
 | **V4** | Model-direct: tools handled by remote MCP servers - used by the Chat1b/Chat2b remote-MCP chat tabs, and the production pattern in `GetCurrentAIWeatherV4Handler` (the V4 tab on `/current-ai-weather`) |
 | **V5** | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console (and `GetCurrentAIWeatherV5Handler`) sends only the user prompt |
 
@@ -543,7 +544,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `AZURE_FOUNDRY_PROD_PROJ_URL` | Yes | Foundry project URL or OpenAI endpoint URL (e.g. `.../api/projects/{id}` or `.../openai/v1`; handler appends `/openai/v1` when missing) |
 | `AZURE_FOUNDRY_PROD_MODEL` | Yes (V3/V4) | Hosted model deployment name (e.g. `gpt-5.4-mini`); not used by V5, which sends only the user prompt |
 | `MCP_SRV_FUNC_APP_URL` / `MCP_SRV_FUNC_APP_KEY` | V4 only | `McpSrvFuncApp` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
-| `MCP_SRV_APP_SERVICE_URL` / `MCP_SRV_APP_SERVICE_KEY` | V4 only | `McpSrvAppService` server URL/key. Still required by `ChatMcpToolFactory` for `GetCurrentAIWeatherV4Handler`, which then leaves the saved-pin host out of its tool list |
+| `MCP_SRV_APP_SERVICE_URL` / `MCP_SRV_APP_SERVICE_KEY` | V4 only | `McpSrvAppService` server URL/key (saved-pin tools), used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_PYTHON_URL` / `MCP_SRV_PYTHON_KEY` | V4 only | `McpSrvPython` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_NODE_URL` / `MCP_SRV_NODE_KEY` | V4 only | `McpSrvNode` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-for-current-weather`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
@@ -596,7 +597,7 @@ by the `prod-deploy-foundry-agents` workflow
 (`.github/workflows/prod-deploy-foundry-agents.yml`,
 `.github/scripts/deploy-foundry-toolbox.sh`,
 `.github/scripts/deploy-foundry-agent.sh`). `deploy-foundry-toolbox.sh` wraps
-the func-app, python, and node connections in `wx1116-geo-nonaiweather-toolbox` and upserts the
+those connections in `wx1116-geo-nonaiweather-toolbox` and upserts the
 `Wx1116GeoNonAIWeather` RemoteTool connection to the toolbox consumer MCP
 endpoint. `deploy-foundry-agent.sh` then POSTs each prompt agent to
 `{project}/agents?api-version=v1` (or `{project}/agents/{name}/versions` when
@@ -626,9 +627,8 @@ Portal fallback (only if you need to inspect or repair by hand):
 3. Confirm the model is the `gpt-5.4-mini` deployment provisioned above.
 4. Confirm the agent's toolbox MCP tool uses the `Wx1116GeoNonAIWeather`
    connection and **Approval** is **Never** (`require_approval: never`).
-   The toolbox itself should list `MyMcpSrvFuncApp`, `MyMcpSrvPython`, and
-   `MyMcpSrvNode` — not `MyMcpSrvAppService`, whose saved-pin write tools the
-   hosted agents must not get.
+   The toolbox itself should list `MyMcpSrvAppService`, `MyMcpSrvFuncApp`,
+   `MyMcpSrvPython`, and `MyMcpSrvNode`.
 5. V5 calls the agent **by name** (project default version).
 
 Both agents attach the same toolbox MCP tool (`require_approval: never`). Chat3

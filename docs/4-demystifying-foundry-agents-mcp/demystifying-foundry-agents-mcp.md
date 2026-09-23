@@ -81,7 +81,7 @@ on `/current-ai-weather`) **→ V5 →**
 
 - **V3 — Local in-process looping** — [`FoundryConsoleV3`](../../FoundryConsoleV3)
   (`FoundryConsoleV3InProcessToolCallbacks.csproj`)
-  - Registers `GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` as tools
+  - Registers `GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`, `GetUser`, `AddUserPin`, and `DeleteUserPin` as tools
     answered by local in-process looping (same Core code reused in the tools).
   - Model chooses tools that are actually handled locally; no remote MCP servers yet.
   - This is the production pattern in `GetCurrentAIWeatherV3Handler` (API/MVC, a tab on `/current-ai-weather`).
@@ -208,8 +208,8 @@ on `/current-ai-weather`) **→ V5 →**
   (`FoundryConsoleV5Agent.csproj`)
   - Agent-hosted alternative to V4: calls a **hosted Foundry agent**
     (`wx1116-agent-for-current-weather` by default).
-  - Instructions, response schema, and MCP tools (`mcp-srv-func-app`, `mcp-srv-python`,
-    `mcp-srv-node`) are configured on the agent in Azure.
+  - Instructions, response schema, and MCP tools (`mcp-srv-func-app`, `mcp-srv-app-service`,
+    `mcp-srv-python`, `mcp-srv-node`) are configured on the agent in Azure.
   - The console sends **only the user prompt** - Responses `instructions` and
     `text` fields are rejected when an agent is specified.
   - Each MCP tool on the agent must use `require_approval: never`. V5 and Chat3

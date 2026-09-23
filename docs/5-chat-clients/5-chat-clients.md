@@ -160,8 +160,8 @@ builder.Services.AddWeatherChatClients();
 
 Chat1 and Chat2 expose the same public geo and weather tools from this repo (no web search), plus
 three saved-pin tools (`GetUser`, `AddUserPin`, `DeleteUserPin`).
-Chat3 uses the **same geo/weather tool names**, but they are attached to `wx1116-agent-for-chat` in
-Foundry, not declared on the request — and its toolbox deliberately has no saved-pin tools.
+Chat3 uses the **same tool names** (all 9), but they are attached to `wx1116-agent-for-chat` in
+Foundry, not declared on the request.
 
 | Tool | Purpose |
 | --- | --- |
@@ -184,8 +184,9 @@ Foundry, not declared on the request — and its toolbox deliberately has no sav
   `ChatHostedMcpToolFactory.CreateGeoTools()`; its NonAI Weather sub-agent gets `mcp-srv-node`'s
   tools from `CreateNonAiWeatherTools()`; its User sub-agent gets `mcp-srv-app-service`'s saved-pin
   tools from `CreateUserTools()` — not the combined four-server list Chat1b/Chat2b use.
-- **AI Weather V4** uses the same remote hosts minus `mcp-srv-app-service`: a current-weather lookup
-  never gets the saved-pin write tools.
+- **AI Weather V3/V4/V5 and FoundryConsoleV3/V4/V5** also carry all 9 tools (in-process for V3,
+  all four remote hosts for V4, the hosted-agent toolbox for V5), even though a one-shot
+  current-weather lookup only needs a few of them.
 - **Hosted agent (Chat3):** Foundry invokes those MCP hosts. This app does not send tools, instructions,
   or a model name.
 
@@ -423,8 +424,7 @@ JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form
 Do not create Chat3 (or V5) by hand. `prod-provision-infra.yml` registers the
 four MCP hosts as Foundry **RemoteTool** connections (`MyMcpSrvAppService`,
 `MyMcpSrvFuncApp`, `MyMcpSrvPython`, `MyMcpSrvNode`). `prod-deploy-foundry-agents.yml` then publishes
-`wx1116-geo-nonaiweather-toolbox` (wrapping the func-app, python, and node connections —
-not `MyMcpSrvAppService`, whose saved-pin write tools the hosted agents must not get) and attaches the
+`wx1116-geo-nonaiweather-toolbox` (wrapping those connections) and attaches the
 toolbox to `wx1116-agent-for-chat` and `wx1116-agent-for-current-weather`
 with `require_approval: never`. Instructions live in `.github/foundry-agents/`.
 
@@ -438,7 +438,7 @@ Only if you need to inspect or repair a published version:
 3. Confirm the model is the same deployment as `AZURE_FOUNDRY_PROD_MODEL`
    (for example `gpt-5.4-mini`).
 4. **Instructions:** the Chat3 text below (same as
-   `ChatSystemInstructions.WeatherAssistant` minus its three saved-pin lines /
+   `ChatSystemInstructions.WeatherAssistant` /
    `.github/foundry-agents/wx1116-agent-for-chat.instructions.md`).
 5. **Response format:** text / none. Do **not** attach a JSON schema.
 6. **Tools:** the `wx1116-geo-nonaiweather-toolbox` toolbox (via the
@@ -449,15 +449,13 @@ Only if you need to inspect or repair a published version:
 ### MCP tools (toolbox)
 
 Agents attach the shared `wx1116-geo-nonaiweather-toolbox` toolbox as a single MCP
-tool. The toolbox wraps three of the four IaC **RemoteTool** connections below; auth
-headers stay on those connections, not on the agent. `McpSrvAppService` is listed for
-reference but is **not** in the toolbox: it serves the saved-pin tools, and the hosted
-agents (Chat3, V5) are geo + weather only.
+tool. The toolbox wraps the four IaC **RemoteTool** connections below; auth
+headers stay on those connections, not on the agent.
 
 | `server_label` (inside toolbox) | `server_url` | Auth | Tools the server exposes |
 | --- | --- | --- | --- |
 | `McpSrvFuncApp` | `https://<prod-mcp-srv-func-app>/runtime/webhooks/mcp` | Header `x-functions-key` = Functions `mcp_extension` system key (`MCP_SRV_FUNC_APP_KEY`) | `GetLatLong`, `GetLocation` |
-| `McpSrvAppService` (not in toolbox) | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetUser`, `AddUserPin`, `DeleteUserPin` |
+| `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetUser`, `AddUserPin`, `DeleteUserPin` |
 | `McpSrvPython` | `https://<prod-mcp-srv-python>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_PYTHON_KEY>` | `GetCities` |
 | `McpSrvNode` | `https://<prod-mcp-srv-node>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_NODE_KEY>` | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
 
@@ -490,6 +488,9 @@ GetPublicWeatherCurrent is conditions right now.
 GetPublicWeatherForecast is upcoming weather: Daily (next 7 days), Hourly (next 48 hours), or FifteenMinutes (next 48 hours). Prefer Daily unless the user asks for hourly or 15-minute detail.
 GetPublicWeatherHistory is recent past weather: Daily (previous 7 days) or Hourly (previous 48 hours). Prefer Daily unless the user asks for hourly detail.
 Call those tools whenever you need real data instead of guessing.
+The user has saved map pins. GetUser returns them (each with an id, locationName, latitude, and longitude) — call it when the user asks about their saved locations or pins, e.g. "weather at my pins".
+AddUserPin saves a location: resolve the place to coordinates with GetLatLong first, then pass the latitude, longitude, and a clean location name.
+DeleteUserPin removes a saved location by its id: call GetUser first to find the pin's id, and never guess an id.
 Be conversational, concise, and helpful.
 GitHub-flavored Markdown (bold, lists, tables, code) is allowed when it makes the answer easier to read. Do not emit raw HTML.
 When you report current weather, use one or two friendly sentences and include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the reply even if a tool also returned them as JSON.

@@ -70,8 +70,7 @@ hot reload); React uses `npm start`. Ports come from each project's
   also exist in-process in Core (`GetCitiesHandler`, `Users/Handlers`) for the local-loop paths.
   Never register the same tool name on two MCP hosts.
 - `mcp-srv-app-service` needs `DB_CONNECTION_STRING` for its pin tools; without it the host
-  still starts but `/About` reports unhealthy and tool calls fail. V4 AI weather and the hosted
-  Foundry toolbox (Chat3/V5) deliberately do not attach it.
+  still starts but `/About` reports unhealthy and tool calls fail.
 - React's `BackendWakeGate` pings `mcp-srv-python`'s and `mcp-srv-node`'s `/Wake` at
   `http://localhost:8140/Wake` and `http://localhost:8150/Wake` like every other backend
   layer — without those servers running locally, `npm start` sits on the wake screen
