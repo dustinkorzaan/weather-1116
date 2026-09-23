@@ -368,10 +368,10 @@ Same Foundry settings as AI Weather and Foundry consoles, plus the Chat3 agent n
 | `AZURE_FOUNDRY_PROD_PROJ_URL` | All chat tabs |
 | `AZURE_FOUNDRY_PROD_MODEL` | Chat1a–Chat2b and Chat4a–Chat4b (not Chat3) |
 | `AZURE_FOUNDRY_PROD_CHAT_AGENT_NAME` | Chat3 only (required). GitHub var / App Service. Independent of V5's `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`. |
-| `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b, Chat4b (Geo sub-agent) |
-| `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent) |
-| `MCP_SRV_PYTHON_URL`, `MCP_SRV_PYTHON_KEY` | Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent) |
-| `MCP_SRV_NODE_URL`, `MCP_SRV_NODE_KEY` | Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent) |
+| `MCP_SRV_FUNC_APP_URL`, `MCP_SRV_FUNC_APP_KEY` | Chat1b, Chat2b, Chat4b/Chat5b (Geo sub-agent) |
+| `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_APP_SERVICE_KEY` | Chat1b, Chat2b, Chat4b/Chat5b (NonAI Weather sub-agent) |
+| `MCP_SRV_PYTHON_URL`, `MCP_SRV_PYTHON_KEY` | Chat1b, Chat2b, Chat4b/Chat5b (Geo sub-agent) |
+| `MCP_SRV_NODE_URL`, `MCP_SRV_NODE_KEY` | Chat1b, Chat2b, Chat4b/Chat5b (NonAI Weather sub-agent) |
 
 Chat1a, Chat2a, and Chat4a do **not** require MCP URLs. Chat3 does **not** require MCP URLs in the app
 either — those belong on the hosted agent.
