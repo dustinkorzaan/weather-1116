@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   useAddUserPinMutation,
   useDeleteUserPinMutation,
@@ -8,7 +9,23 @@ import {
 const MapPinsContext = createContext(null);
 
 export function MapPinsProvider({ children }) {
-  const { data: user, isLoading, error } = useGetUserQuery();
+  const { data: user, isLoading, error, refetch } = useGetUserQuery();
+  const { pathname, key: locationKey } = useLocation();
+  const hasMountedRef = useRef(false);
+
+  // Pins can change outside this tab's mutations (a chat agent calling AddUserPin,
+  // or another browser tab), so every navigation to Home re-reads the user.
+  // locationKey changes even when Home is clicked while already on Home.
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    if (pathname === '/') {
+      refetch();
+    }
+  }, [pathname, locationKey, refetch]);
   const [addUserPin] = useAddUserPinMutation();
   const [deleteUserPin] = useDeleteUserPinMutation();
 
