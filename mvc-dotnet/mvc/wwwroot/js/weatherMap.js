@@ -741,43 +741,6 @@ window.weatherMap = (function () {
     );
   }
 
-  function loadStoredCities() {
-    try {
-      const raw = window.sessionStorage && window.sessionStorage.getItem(STORAGE_KEY);
-      if (raw == null) {
-        return null;
-      }
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.every(isValidCity)) {
-        return parsed;
-      }
-    } catch (e) {
-      return null;
-    }
-    return null;
-  }
-
-  function saveCities(cities) {
-    try {
-      if (window.sessionStorage) {
-        window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(cities));
-      }
-    } catch (e) {
-      // Ignore quota / private-mode failures.
-    }
-  }
-
-  function ensureCities(fallback) {
-    const stored = loadStoredCities();
-    if (stored) {
-      return stored.slice();
-    }
-    const seed = ((fallback && fallback.length ? fallback : DEFAULT_CITIES) || []).map(function (city) {
-      return { id: city.id, name: city.name, lat: city.lat, lng: city.lng };
-    });
-    saveCities(seed);
-    return seed;
-  }
 
   function mapEntries() {
     return mapsByElement;
@@ -787,52 +750,40 @@ window.weatherMap = (function () {
     if (!isValidCity(city)) {
       return;
     }
-    const nextCity = { id: city.id, name: city.name, lat: city.lat, lng: city.lng };
-    const cities = ensureCities(DEFAULT_CITIES);
-    const exists = cities.some(function (item) {
-      return item.id === nextCity.id || (item.lat === nextCity.lat && item.lng === nextCity.lng);
-    });
-    if (!exists) {
-      cities.push(nextCity);
-      saveCities(cities);
-    }
-    mapEntries().forEach(function (entry) {
-      entry.cities = cities.slice();
-      const already = (entry.markers || []).some(function (pin) {
-        return pin.cityId === nextCity.id;
+    fetch('/User/AddPin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        latitude: city.lat,
+        longitude: city.lng,
+        locationName: city.name
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to add pin');
+        }
+        location.reload();
+      })
+      .catch(function (error) {
+        console.error('Error adding city:', error);
       });
-      if (already || !entry.map || !entry.maps) {
-        return;
-      }
-      const appearance = mapAppearance(entry.theme || resolvedTheme());
-      entry.markers = (entry.markers || []).concat(
-        createOneMarker(entry.maps, entry.map, nextCity, appearance, entry.markers.length)
-      );
-      if (typeof entry.map.panTo === 'function') {
-        entry.map.panTo({ lat: nextCity.lat, lng: nextCity.lng });
-      }
-    });
   }
 
   function removeCity(cityId) {
-    const cities = ensureCities(DEFAULT_CITIES).filter(function (city) {
-      return city.id !== cityId;
-    });
-    saveCities(cities);
-    mapEntries().forEach(function (entry) {
-      entry.cities = cities.slice();
-      const remaining = [];
-      (entry.markers || []).forEach(function (pin) {
-        if (pin.cityId === cityId) {
-          if (pin && typeof pin.setMap === 'function') {
-            pin.setMap(null);
-          }
-        } else {
-          remaining.push(pin);
+    fetch('/User/DeletePin?userPinId=' + encodeURIComponent(cityId), {
+      method: 'DELETE',
+      headers: { Accept: 'application/json' }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to delete pin');
         }
+        location.reload();
+      })
+      .catch(function (error) {
+        console.error('Error removing city:', error);
       });
-      entry.markers = remaining;
-    });
   }
 
   function resolveElement(elementOrId) {
@@ -862,7 +813,9 @@ window.weatherMap = (function () {
 
     return loadGoogleMaps(apiKey).then(function (maps) {
       const appearance = mapAppearance(resolvedTheme());
-      const resolvedCities = ensureCities(cities);
+      const resolvedCities = (cities || []).map(function (city) {
+        return { id: city.id, name: city.name || city.locationName, lat: city.lat || city.latitude, lng: city.lng || city.longitude };
+      });
       const entry = {
         maps: maps,
         map: null,

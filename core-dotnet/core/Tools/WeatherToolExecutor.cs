@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Core.Geo.Events;
 using Core.Json;
+using Core.User.Events;
 using Core.Weather.Events;
 using CQMediator;
 using OpenAI.Responses;
@@ -25,6 +26,8 @@ public sealed class WeatherToolExecutor
             "GetPublicWeatherCurrent" => await ExecuteGetPublicWeatherCurrent(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherForecast" => await ExecuteGetPublicWeatherForecast(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherHistory" => await ExecuteGetPublicWeatherHistory(functionCall.FunctionArguments, cancellationToken),
+            "AddUserPin" => await ExecuteAddUserPin(functionCall.FunctionArguments, cancellationToken),
+            "DeleteUserPin" => await ExecuteDeleteUserPin(functionCall.FunctionArguments, cancellationToken),
             _ => throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}"),
         };
     }
@@ -112,5 +115,42 @@ public sealed class WeatherToolExecutor
         }, cancellationToken);
 
         return JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
+    }
+
+    private async Task<string> ExecuteAddUserPin(BinaryData arguments, CancellationToken cancellationToken)
+    {
+        using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
+        double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+        double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+        string locationName = argumentsJson.RootElement.GetProperty("locationName").GetString()
+            ?? throw new InvalidOperationException("AddUserPin requires a locationName argument.");
+
+        await _mediator.Send(new AddUserPinEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+            LocationName = locationName,
+        }, cancellationToken);
+
+        return JsonSerializer.Serialize(new { success = true }, JsonDefaults.Pretty);
+    }
+
+    private async Task<string> ExecuteDeleteUserPin(BinaryData arguments, CancellationToken cancellationToken)
+    {
+        using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
+        string userPinId = argumentsJson.RootElement.GetProperty("userPinId").GetString()
+            ?? throw new InvalidOperationException("DeleteUserPin requires a userPinId argument.");
+
+        if (!Guid.TryParse(userPinId, out var pinId))
+        {
+            throw new InvalidOperationException("userPinId must be a valid GUID.");
+        }
+
+        await _mediator.Send(new DeleteUserPinEvent
+        {
+            UserPinId = pinId,
+        }, cancellationToken);
+
+        return JsonSerializer.Serialize(new { success = true }, JsonDefaults.Pretty);
     }
 }

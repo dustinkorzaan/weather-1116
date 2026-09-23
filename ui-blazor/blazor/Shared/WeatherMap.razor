@@ -1,5 +1,7 @@
 @inject IConfiguration Configuration
 @using System.Text.Json
+@using System.Net.Http
+@using System.Net.Http.Json
 
 <section class="weather-map-section" aria-label="Map">
     @if (string.IsNullOrWhiteSpace(_apiKey))
@@ -27,20 +29,41 @@
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
-    private static readonly object[] Cities =
-    [
-        new { id = new Guid("59e2459a-b25d-44a7-bcb0-2a4f2e444272"), name = "New York, NY", lat = 40.7128, lng = -74.006 },
-        new { id = new Guid("329735f1-cfc0-42b4-a48f-0d41677145e8"), name = "Toronto, ON", lat = 43.6532, lng = -79.3832 },
-        new { id = new Guid("9daab691-7885-400f-8aed-5e21a63f9a7a"), name = "Atlanta, GA", lat = 33.749, lng = -84.388 },
-        new { id = new Guid("04f5d22f-ca31-4d29-ac9e-a1c4f0127ed1"), name = "Charlotte, NC", lat = 35.2271, lng = -80.8431 },
-    ];
+    [Inject]
+    private HttpClient HttpClient { get; set; } = default!;
 
     private string _apiKey = "";
     private string _citiesJson = "[]";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _apiKey = Configuration["GOOGLE_MAPS_API_KEY"] ?? "";
-        _citiesJson = JsonSerializer.Serialize(Cities, JsonOptions);
+
+        try
+        {
+            var response = await HttpClient.GetAsync("/User");
+            if (response.IsSuccessStatusCode)
+            {
+                var responseJson = await response.Content.ReadAsStringAsync();
+                using (var doc = JsonDocument.Parse(responseJson))
+                {
+                    var root = doc.RootElement;
+                    var userPinsElement = root.GetProperty("userPins");
+                    var pins = userPinsElement.EnumerateArray().Select(pin => new
+                    {
+                        id = pin.GetProperty("id").GetString(),
+                        name = pin.GetProperty("locationName").GetString(),
+                        lat = pin.GetProperty("latitude").GetDouble(),
+                        lng = pin.GetProperty("longitude").GetDouble(),
+                    }).ToList();
+                    _citiesJson = JsonSerializer.Serialize(pins, JsonOptions);
+                }
+            }
+        }
+        catch
+        {
+            // If fetching user data fails, initialize with empty array
+            _citiesJson = "[]";
+        }
     }
 }

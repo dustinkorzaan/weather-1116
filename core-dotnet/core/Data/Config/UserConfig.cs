@@ -1,12 +1,11 @@
 using Core.Data.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
 namespace Core.Data.Config;
 
-public class UserConfig : IEntityTypeConfiguration<User>
+public class UserConfig : IEntityTypeConfiguration<global::Core.Data.Domain.User>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<global::Core.Data.Domain.User> builder)
     {
         builder.ToTable("User", "dbo");
         builder.HasKey(user => user.Id);

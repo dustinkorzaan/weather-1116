@@ -7,7 +7,7 @@ public class AgentActivityDbContext(DbContextOptions<AgentActivityDbContext> opt
 {
     public DbSet<AgentActivity> AgentActivity => Set<AgentActivity>();
 
-    public DbSet<User> User => Set<User>();
+    public DbSet<global::Core.Data.Domain.User> User => Set<global::Core.Data.Domain.User>();
 
     public DbSet<UserPin> UserPin => Set<UserPin>();
 
