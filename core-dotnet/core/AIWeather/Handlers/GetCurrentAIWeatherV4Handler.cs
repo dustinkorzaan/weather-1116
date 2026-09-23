@@ -124,7 +124,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
             ResponsesClient client = FoundryResponsesClientFactory.Create(endpoint);
 
-            var (geoMcpTools, weatherMcpTools, weatherPythonMcpTools, weatherNodeMcpTools) = _mcpToolFactory.CreateTools();
+            var (geoMcpTools, userMcpTools, weatherPythonMcpTools, weatherNodeMcpTools) = _mcpToolFactory.CreateTools();
 
             var inputItems = new List<ResponseItem>
             {
@@ -137,7 +137,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
             CreateResponseOptions options = new(deploymentName, inputItems)
             {
-                Tools = { geoMcpTools, weatherMcpTools, weatherPythonMcpTools, weatherNodeMcpTools },
+                Tools = { geoMcpTools, userMcpTools, weatherPythonMcpTools, weatherNodeMcpTools },
                 TextOptions = new ResponseTextOptions
                 {
                     TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(

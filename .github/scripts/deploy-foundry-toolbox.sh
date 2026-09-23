@@ -63,7 +63,7 @@ ARM_CONNECTION_URL="$(foundry_arm_connection_url "$SUBSCRIPTION_ID" "$AZURE_RESO
 
 TOOLS_JSON="$(foundry_build_weather_toolbox_tools_json)"
 VERSION_BODY=$(jq -n \
-  --arg description "Geo + NonAI Weather toolbox (func-app geocoding + app-service/python/node weather)" \
+  --arg description "Geo + NonAI Weather + User toolbox (func-app/python geo + node weather + app-service user pins)" \
   --argjson tools "$TOOLS_JSON" \
   '{description: $description, tools: $tools}')
 

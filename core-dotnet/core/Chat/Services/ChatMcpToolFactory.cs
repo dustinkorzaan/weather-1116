@@ -4,7 +4,7 @@ namespace Core.Chat.Services;
 
 public sealed class ChatMcpToolFactory
 {
-    public (McpTool GeoMcpTools, McpTool WeatherMcpTools, McpTool WeatherPythonMcpTools, McpTool WeatherNodeMcpTools) CreateTools()
+    public (McpTool GeoMcpTools, McpTool UserMcpTools, McpTool WeatherPythonMcpTools, McpTool WeatherNodeMcpTools) CreateTools()
     {
         var mcpSrvFuncAppUrl = Environment.GetEnvironmentVariable("MCP_SRV_FUNC_APP_URL")
             ?? throw new InvalidOperationException("Missing MCP_SRV_FUNC_APP_URL.");
@@ -32,7 +32,8 @@ public sealed class ChatMcpToolFactory
             headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
             toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
-        McpTool weatherMcpTools = ResponseTool.CreateMcpTool(
+        // mcp-srv-app-service serves the user/pin tools (GetUser, AddUserPin, DeleteUserPin).
+        McpTool userMcpTools = ResponseTool.CreateMcpTool(
             serverLabel: "McpSrvAppService",
             serverUri: new Uri($"{mcpSrvAppServiceUrl.TrimEnd('/')}/mcp"),
             headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
@@ -50,6 +51,6 @@ public sealed class ChatMcpToolFactory
             headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvNodeKey}" },
             toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
-        return (geoMcpTools, weatherMcpTools, weatherPythonMcpTools, weatherNodeMcpTools);
+        return (geoMcpTools, userMcpTools, weatherPythonMcpTools, weatherNodeMcpTools);
     }
 }

@@ -1,11 +1,14 @@
 ﻿using Core;
 using Core.AIWeather.Models;
+using Core.Data;
 using Core.Geo.Events;
 using Core.Json;
+using Core.Users.Events;
 using Core.Weather;
 using Core.Weather.Events;
 using DotNetEnv;
 using CQMediator;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenAI;
@@ -26,6 +29,17 @@ internal class Program
 		var services = new ServiceCollection();
 		services.AddLogging(logging => logging.AddConsole());
 		services.AddStandardCoreServices();
+
+		// GetUser/AddUserPin/DeleteUserPin read and write dbo.User/dbo.UserPin. The API owns EF Core
+		// migrations; this console only reads/writes the already-migrated schema. Without
+		// DB_CONNECTION_STRING the placeholder connection makes those three tool calls fail, while the
+		// geo and weather tools still work.
+		var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
+			Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"),
+			Environment.GetEnvironmentVariable("AZURE_CLIENT_ID"));
+		services.AddDbContext<WX1116DbContext>(options =>
+			options.UseSqlServer(dbConnectionString ?? "Server=(local);"));
+
 		using var serviceProvider = services.BuildServiceProvider();
 		var mediator = serviceProvider.GetRequiredService<IMediator>();
 
@@ -44,7 +58,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - ResponsesClient with in-process tool callbacks (GetLatLong, GetLocation, GetCities, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory)
+		 - ResponsesClient with in-process tool callbacks (GetLatLong, GetLocation, GetCities, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory, GetUser, AddUserPin, DeleteUserPin)
 		 - Model can call tools to derive lat/long, label a coordinate, and fetch public weather
 		 - JSON output from AI
 		""");
@@ -275,6 +289,63 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
+		var getUserTool = ResponseTool.CreateFunctionTool(
+			functionName: "GetUser",
+			functionDescription: "Get the current user and their saved map pins. Each pin has an id (GUID), locationName, latitude, and longitude. Call this to see which locations the user has saved, and to find a pin's id before calling DeleteUserPin.",
+			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+			{
+			  "type": "object",
+			  "properties": {},
+			  "required": [],
+			  "additionalProperties": false
+			}
+			""")),
+			strictModeEnabled: true);
+
+		var addUserPinTool = ResponseTool.CreateFunctionTool(
+			functionName: "AddUserPin",
+			functionDescription: "Add a new pin to the user's saved locations map. Use this when the user wants to save a location. Requires numeric latitude/longitude and a location name.",
+			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+			{
+			  "type": "object",
+			  "properties": {
+			    "latitude": {
+			      "type": "number",
+			      "description": "Latitude in decimal degrees"
+			    },
+			    "longitude": {
+			      "type": "number",
+			      "description": "Longitude in decimal degrees"
+			    },
+			    "locationName": {
+			      "type": "string",
+			      "description": "Name of the location, e.g. Nashville, Tennessee"
+			    }
+			  },
+			  "required": ["latitude", "longitude", "locationName"],
+			  "additionalProperties": false
+			}
+			""")),
+			strictModeEnabled: true);
+
+		var deleteUserPinTool = ResponseTool.CreateFunctionTool(
+			functionName: "DeleteUserPin",
+			functionDescription: "Remove a pin from the user's saved locations map. Use this when the user wants to delete a saved location. Requires the pin's id from GetUser; never guess an id.",
+			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+			{
+			  "type": "object",
+			  "properties": {
+			    "userPinId": {
+			      "type": "string",
+			      "description": "The unique identifier (GUID) of the pin to delete, from GetUser"
+			    }
+			  },
+			  "required": ["userPinId"],
+			  "additionalProperties": false
+			}
+			""")),
+			strictModeEnabled: true);
+
 		var inputItems = new List<ResponseItem>
 		{
 			ResponseItem.CreateUserMessageItem(userPrompt),
@@ -292,7 +363,7 @@ internal class Program
 				var options = new CreateResponseOptions(deploymentName, inputItems)
 				{
 					Instructions = systemPrompt,
-					Tools = { getLatLongTool, getLocationTool, getCitiesTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool },
+					Tools = { getLatLongTool, getLocationTool, getCitiesTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool, getUserTool, addUserPinTool, deleteUserPinTool },
 					TextOptions = new ResponseTextOptions
 					{
 						TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
@@ -441,6 +512,54 @@ internal class Program
 										Resolution = resolution,
 									});
 									var functionOutput = JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
+									Console.WriteLine($"Tool output: {functionOutput}");
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
+								}
+
+							case "GetUser":
+								{
+									Console.WriteLine("\nTool call: GetUser()");
+									var user = await mediator.Send(new GetUserEvent());
+									var functionOutput = JsonSerializer.Serialize(user, JsonDefaults.Pretty);
+									Console.WriteLine($"Tool output: {functionOutput}");
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
+								}
+
+							case "AddUserPin":
+								{
+									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									var latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
+									var longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
+									var locationName = argumentsJson.RootElement.GetProperty("locationName").GetString()
+										?? throw new InvalidOperationException("AddUserPin requires a locationName argument.");
+
+									Console.WriteLine($"\nTool call: AddUserPin({latitude}, {longitude}, {locationName})");
+									await mediator.Send(new AddUserPinEvent
+									{
+										Latitude = latitude,
+										Longitude = longitude,
+										LocationName = locationName,
+									});
+									var functionOutput = JsonSerializer.Serialize(new { success = true }, JsonDefaults.Pretty);
+									Console.WriteLine($"Tool output: {functionOutput}");
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
+								}
+
+							case "DeleteUserPin":
+								{
+									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									var userPinId = argumentsJson.RootElement.GetProperty("userPinId").GetString();
+									if (!Guid.TryParse(userPinId, out var pinId))
+									{
+										throw new InvalidOperationException("userPinId must be a valid GUID.");
+									}
+
+									Console.WriteLine($"\nTool call: DeleteUserPin({pinId})");
+									await mediator.Send(new DeleteUserPinEvent { UserPinId = pinId });
+									var functionOutput = JsonSerializer.Serialize(new { success = true }, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;

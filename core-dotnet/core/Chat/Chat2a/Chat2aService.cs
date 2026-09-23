@@ -153,6 +153,7 @@ public sealed class Chat2aService : IChatClientService
         AIFunctionFactory.Create(GetPublicWeatherCurrent),
         AIFunctionFactory.Create(GetPublicWeatherForecast),
         AIFunctionFactory.Create(GetPublicWeatherHistory),
+        .. new UserToolFunctions(_mediator).CreateTools(),
     ];
 
     [Description("Resolve a location name to ranked latitude/longitude matches using public geocoding data. Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right place if rank 1 is wrong.")]

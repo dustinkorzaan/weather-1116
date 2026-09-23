@@ -84,7 +84,7 @@ var containerAppsConfig = [
   { key: 'mvc', setAzureClientId: true, maxReplicas: 5, stickySessions: false }
   { key: 'blazor', setAzureClientId: false, maxReplicas: 5, stickySessions: true }
   { key: 'worker', setAzureClientId: true, maxReplicas: 1, stickySessions: false }
-  { key: 'mcp-srv-app-service', setAzureClientId: false, maxReplicas: 5, stickySessions: false }
+  { key: 'mcp-srv-app-service', setAzureClientId: true, maxReplicas: 5, stickySessions: false }
   { key: 'mcp-srv-python', setAzureClientId: false, maxReplicas: 5, stickySessions: false }
   { key: 'mcp-srv-node', setAzureClientId: false, maxReplicas: 5, stickySessions: false }
 ]

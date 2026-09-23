@@ -53,4 +53,13 @@ public class Chat5bServiceTests
         Assert.Contains("_hostedMcpToolFactory.CreateGeoTools()", Source, StringComparison.Ordinal);
         Assert.Contains("_hostedMcpToolFactory.CreateNonAiWeatherTools()", Source, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Service_DelegatesPinsToAUserSubAgent()
+    {
+        Assert.Contains("name: \"User\"", Source, StringComparison.Ordinal);
+        Assert.Contains("ChatSystemInstructions.MultiAgentUserAssistant", Source, StringComparison.Ordinal);
+        Assert.Contains("userAgent.AsAIFunction(", Source, StringComparison.Ordinal);
+        Assert.Contains("_hostedMcpToolFactory.CreateUserTools()", Source, StringComparison.Ordinal);
+    }
 }

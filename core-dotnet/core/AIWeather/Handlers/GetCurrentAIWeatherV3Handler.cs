@@ -131,8 +131,14 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             ResponsesClient client = FoundryResponsesClientFactory.Create(endpoint);
 
             FunctionTool getLatLongTool = WeatherToolDefinitions.CreateGetLatLongTool();
+            FunctionTool getLocationTool = WeatherToolDefinitions.CreateGetLocationTool();
             FunctionTool getCitiesTool = WeatherToolDefinitions.CreateGetCitiesTool();
             FunctionTool getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();
+            FunctionTool getPublicWeatherForecastTool = WeatherToolDefinitions.CreateGetPublicWeatherForecastTool();
+            FunctionTool getPublicWeatherHistoryTool = WeatherToolDefinitions.CreateGetPublicWeatherHistoryTool();
+            FunctionTool getUserTool = WeatherToolDefinitions.CreateGetUserTool();
+            FunctionTool addUserPinTool = WeatherToolDefinitions.CreateAddUserPinTool();
+            FunctionTool deleteUserPinTool = WeatherToolDefinitions.CreateDeleteUserPinTool();
 
             var inputItems = new List<ResponseItem>
             {
@@ -162,7 +168,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
 
                 CreateResponseOptions options = new(deploymentName, inputItems)
                 {
-                    Tools = { getLatLongTool, getCitiesTool, getPublicWeatherCurrentTool },
+                    Tools = { getLatLongTool, getLocationTool, getCitiesTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool, getUserTool, addUserPinTool, deleteUserPinTool },
                     TextOptions = new ResponseTextOptions
                     {
                         TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(

@@ -20,13 +20,18 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNEC
 
 builder.Services.AddControllers();
 
-// MCP service is stateless with no database. Register a no-op DbContext for handlers that depend on it
-// but won't be used by any MCP tools (User handlers are auto-registered but unused here).
-builder.Services.AddDbContext<WX1116DbContext>((_, options) =>
-{
-	// Use SqlServer with no connection string - will fail if actually used, but handlers won't be.
-	options.UseSqlServer("Server=(local);");
-});
+// The user/pin MCP tools (GetUser, AddUserPin, DeleteUserPin) read and write dbo.User/dbo.UserPin.
+// API's Program.cs owns applying EF Core migrations (Database.Migrate()); this app only
+// reads/writes the already-migrated schema, same as MVC and the worker.
+// Authenticates via this app's user-assigned managed identity (AZURE_CLIENT_ID, set by
+// infra/modules/container-app.bicep) -- see ManagedIdentitySqlConnectionStringFactory. Without
+// DB_CONNECTION_STRING the app still starts (so /Wake and /About answer) with an unusable
+// placeholder connection; the user tools then fail per call and /About reports unhealthy.
+var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
+	builder.Configuration["DB_CONNECTION_STRING"],
+	builder.Configuration["AZURE_CLIENT_ID"]);
+builder.Services.AddDbContext<WX1116DbContext>(options =>
+	options.UseSqlServer(dbConnectionString ?? "Server=(local);"));
 
 builder.Services.AddStandardCoreServices();
 

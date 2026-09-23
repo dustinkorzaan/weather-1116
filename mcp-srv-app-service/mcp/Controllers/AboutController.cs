@@ -17,10 +17,13 @@ public sealed class AboutController(
     {
         string[] expectedTools =
         [
-            "GetPublicWeatherCurrent",
+            "GetUser",
+            "AddUserPin",
+            "DeleteUserPin",
         ];
         var mcpSrvAppServiceKey = configuration["MCP_SRV_APP_SERVICE_KEY"];
         var isHealthy = !string.IsNullOrWhiteSpace(mcpSrvAppServiceKey)
+            && !string.IsNullOrWhiteSpace(configuration["DB_CONNECTION_STRING"])
             && expectedTools.All(expectedTool => tools.Any(tool =>
                 string.Equals(tool.ProtocolTool.Name, expectedTool, StringComparison.Ordinal)));
 

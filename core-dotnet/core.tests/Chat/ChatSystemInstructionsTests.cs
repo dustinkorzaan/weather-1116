@@ -28,6 +28,46 @@ public class ChatSystemInstructionsTests
     }
 
     [Fact]
+    public void WeatherAssistant_KnowsTheSavedPinTools()
+    {
+        var prompt = ChatSystemInstructions.WeatherAssistant;
+
+        Assert.Contains("GetUser", prompt);
+        Assert.Contains("AddUserPin", prompt);
+        Assert.Contains("DeleteUserPin", prompt);
+        Assert.Contains("never guess an id", prompt, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void MultiAgentAiWeatherOrchestrationAssistant_DelegatesPinsToUser()
+    {
+        var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
+
+        Assert.Contains("exactly three tools", prompt);
+        Assert.DoesNotContain("exactly two tools", prompt);
+        Assert.Contains("User lists the user's saved map pins", prompt);
+        Assert.Contains("call Geo first for its coordinates, then ask User to add the pin", prompt);
+        Assert.Contains("never guess a pin id", prompt, StringComparison.OrdinalIgnoreCase);
+        // The orchestrator only delegates; the pin tools themselves belong to the User agent.
+        Assert.DoesNotContain("AddUserPin", prompt);
+        Assert.DoesNotContain("DeleteUserPin", prompt);
+    }
+
+    [Fact]
+    public void MultiAgentUserAssistant_IsPinsOnly()
+    {
+        var prompt = ChatSystemInstructions.MultiAgentUserAssistant;
+
+        Assert.Contains("GetUser", prompt);
+        Assert.Contains("AddUserPin", prompt);
+        Assert.Contains("DeleteUserPin", prompt);
+        Assert.Contains("never guess or invent an id", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("GetLatLong", prompt);
+        Assert.DoesNotContain("GetPublicWeather", prompt);
+        Assert.DoesNotContain("°F", prompt);
+    }
+
+    [Fact]
     public void MultiAgentAiWeatherOrchestrationAssistant_DelegatesToGeoAndNonAiWeather()
     {
         var prompt = ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant;
@@ -72,6 +112,7 @@ public class ChatSystemInstructionsTests
         Assert.Contains("For GetCities, answer with every returned city", prompt);
         Assert.DoesNotContain("°F", prompt);
         Assert.DoesNotContain("GetPublicWeather", prompt);
+        Assert.DoesNotContain("UserPin", prompt);
     }
 
     [Fact]
@@ -87,5 +128,6 @@ public class ChatSystemInstructionsTests
         Assert.Contains("GetPublicWeatherForecast", prompt);
         Assert.Contains("GetPublicWeatherHistory", prompt);
         Assert.DoesNotContain("GetLatLong", prompt);
+        Assert.DoesNotContain("UserPin", prompt);
     }
 }

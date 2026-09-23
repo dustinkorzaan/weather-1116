@@ -313,15 +313,22 @@ public sealed class Chat5bService : IChat5ClientService
             tools: _hostedMcpToolFactory.CreateGeoTools());
 
         // Agent NonAI Weather 👤: weather sub-agent — current/forecast/history for a given
-        // lat/long only, via the mcp-srv-app-service (current) and mcp-srv-node (forecast/history)
-        // remote MCP hosts.
+        // lat/long only, via the mcp-srv-node (current/forecast/history) remote MCP host.
         AIAgent nonAiWeatherAgent = responsesClient.AsAIAgent(
             name: "NonAIWeather",
             instructions: ChatSystemInstructions.MultiAgentNonAiWeatherAssistant,
             model: _settings.DeploymentName,
             tools: _hostedMcpToolFactory.CreateNonAiWeatherTools());
 
-        // Agent AI Weather Orchestration 👤: orchestrator — delegates to Geo and NonAI Weather, holds the multi-turn session.
+        // Agent User 👤: user sub-agent — lists, adds, and deletes the user's saved map pins, via the
+        // mcp-srv-app-service (GetUser/AddUserPin/DeleteUserPin) remote MCP host.
+        AIAgent userAgent = responsesClient.AsAIAgent(
+            name: "User",
+            instructions: ChatSystemInstructions.MultiAgentUserAssistant,
+            model: _settings.DeploymentName,
+            tools: _hostedMcpToolFactory.CreateUserTools());
+
+        // Agent AI Weather Orchestration 👤: orchestrator — delegates to Geo, NonAI Weather, and User, holds the multi-turn session.
         // Gate #4 ("Sys Prompt"): when checked, uses the hardened instructions with the
         // refusal paragraph; when unchecked, the same plain instructions Chat4b uses.
         return responsesClient.AsAIAgent(
@@ -345,6 +352,13 @@ public sealed class Chat5bService : IChat5ClientService
                 {
                     Name = "NonAIWeather",
                     Description = "Weather assistant. Reports current conditions, an upcoming forecast (daily, hourly, or every 15 minutes), or recent history (daily or hourly) for a latitude/longitude. Accepts numeric coordinates only — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the coordinates on every call, including follow-up turns. Send it a natural-language weather question that names the coordinates and the level of detail you want (daily, hourly, or every 15 minutes); it returns the answer as text.",
+                }),
+                // session omitted — AsAIFunction creates a fresh, throwaway session per call, so User
+                // is stateless per delegated call; the orchestrator alone owns memory.
+                userAgent.AsAIFunction(new AIFunctionFactoryOptions
+                {
+                    Name = "User",
+                    Description = "User assistant. Lists the user's saved map pins (location name, latitude/longitude, and id), adds a pin from numeric latitude/longitude and a location name, or deletes a pin by its id. It never geocodes — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the pin id or coordinates on every call. Send it a natural-language request; it returns the answer as text.",
                 }),
             ]);
     }

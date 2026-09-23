@@ -61,7 +61,7 @@ describe('mcp-srv-node', () => {
     expect(response.status).not.toBe(401);
   });
 
-  it('lists both weather tools with PascalCase resolutions', async () => {
+  it('lists all three weather tools with PascalCase resolutions', async () => {
     const response = await request(buildTestApp())
       .post('/mcp')
       .set(MCP_HEADERS)
@@ -72,10 +72,39 @@ describe('mcp-srv-node', () => {
     const tools = payload.result.tools as Array<{ name: string; inputSchema: { properties: Record<string, { enum?: string[] }>; required?: string[] } }>;
     const byName = Object.fromEntries(tools.map((tool) => [tool.name, tool]));
 
-    expect(Object.keys(byName).sort()).toEqual(['GetPublicWeatherForecast', 'GetPublicWeatherHistory']);
+    expect(Object.keys(byName).sort()).toEqual(['GetPublicWeatherCurrent', 'GetPublicWeatherForecast', 'GetPublicWeatherHistory']);
+    expect(byName.GetPublicWeatherCurrent.inputSchema.required).toEqual(['latitude', 'longitude']);
     expect(byName.GetPublicWeatherForecast.inputSchema.properties.resolution.enum).toEqual(['Daily', 'Hourly', 'FifteenMinutes']);
     expect(byName.GetPublicWeatherHistory.inputSchema.properties.resolution.enum).toEqual(['Daily', 'Hourly']);
     expect(byName.GetPublicWeatherForecast.inputSchema.required).toEqual(['latitude', 'longitude']);
+  });
+
+  it('calls GetPublicWeatherCurrent end to end and returns the Open-Meteo payload', async () => {
+    const fetchMock = vi.fn(async () =>
+      Response.json({ latitude: 36.17, current_weather: { temperature: 21.4, windspeed: 9.7, winddirection: 224, weathercode: 1 } }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const response = await request(buildTestApp())
+        .post('/mcp')
+        .set(MCP_HEADERS)
+        .send({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name: 'GetPublicWeatherCurrent', arguments: { latitude: 36.166, longitude: -86.784 } },
+        });
+      expect(response.status).toBe(200);
+
+      const payload = JSON.parse(response.text.match(/^data: (.*)$/m)?.[1] ?? response.text);
+      expect(payload.result.isError).toBeUndefined();
+      const data = JSON.parse(payload.result.content[0].text);
+      expect(data.current_weather.temperature).toBe(21.4);
+      expect(data.current_weather.winddirection).toBe(224);
+      expect(String(fetchMock.mock.calls[0][0])).toContain('current_weather=true');
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('calls GetPublicWeatherHistory end to end and normalizes the Open-Meteo payload', async () => {

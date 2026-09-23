@@ -5,6 +5,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import express, { type Express } from 'express';
 import { z } from 'zod';
 import { bearerTokenAuth } from './auth.ts';
+import { getPublicWeatherCurrent } from './tools/current.ts';
 import { FORECAST_RESOLUTIONS, getPublicWeatherForecast } from './tools/forecast.ts';
 import { getPublicWeatherHistory, HISTORY_RESOLUTIONS } from './tools/history.ts';
 
@@ -13,6 +14,18 @@ const SERVER_INFO = { name: 'WeatherMcpSrvNode', version: '1.0.0' };
 // Every tool this host serves. Comment an entry out (and drop it from EXPECTED_TOOLS) to stop
 // serving it here -- two MCP hosts must never register the same tool name.
 export const TOOLS: Array<(server: McpServer) => unknown> = [
+  (server) =>
+    server.registerTool(
+      'GetPublicWeatherCurrent',
+      {
+        description: 'Get current public weather conditions for a latitude and longitude.',
+        inputSchema: {
+          latitude: z.number(),
+          longitude: z.number(),
+        },
+      },
+      async ({ latitude, longitude }) => toToolResult(await getPublicWeatherCurrent(latitude, longitude)),
+    ),
   (server) =>
     server.registerTool(
       'GetPublicWeatherForecast',
@@ -50,7 +63,7 @@ export const TOOLS: Array<(server: McpServer) => unknown> = [
 
 // Tools this host must have registered to report healthy in /About, mirroring
 // mcp-srv-python's EXPECTED_TOOLS and mcp-srv-app-service's AboutController.
-export const EXPECTED_TOOLS = new Set(['GetPublicWeatherForecast', 'GetPublicWeatherHistory']);
+export const EXPECTED_TOOLS = new Set(['GetPublicWeatherCurrent', 'GetPublicWeatherForecast', 'GetPublicWeatherHistory']);
 
 function toToolResult(data: Record<string, unknown>) {
   return {

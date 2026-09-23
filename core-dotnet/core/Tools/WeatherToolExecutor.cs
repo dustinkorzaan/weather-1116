@@ -27,6 +27,7 @@ public sealed class WeatherToolExecutor
             "GetPublicWeatherCurrent" => await ExecuteGetPublicWeatherCurrent(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherForecast" => await ExecuteGetPublicWeatherForecast(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherHistory" => await ExecuteGetPublicWeatherHistory(functionCall.FunctionArguments, cancellationToken),
+            "GetUser" => await ExecuteGetUser(cancellationToken),
             "AddUserPin" => await ExecuteAddUserPin(functionCall.FunctionArguments, cancellationToken),
             "DeleteUserPin" => await ExecuteDeleteUserPin(functionCall.FunctionArguments, cancellationToken),
             _ => throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}"),
@@ -154,6 +155,12 @@ public sealed class WeatherToolExecutor
         }, cancellationToken);
 
         return JsonSerializer.Serialize(weatherData, JsonDefaults.Pretty);
+    }
+
+    private async Task<string> ExecuteGetUser(CancellationToken cancellationToken)
+    {
+        var user = await _mediator.Send(new GetUserEvent(), cancellationToken);
+        return JsonSerializer.Serialize(user, JsonDefaults.Pretty);
     }
 
     private async Task<string> ExecuteAddUserPin(BinaryData arguments, CancellationToken cancellationToken)

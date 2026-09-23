@@ -53,6 +53,8 @@ public class GetCurrentAIWeatherV3HandlerTests
         Assert.DoesNotContain("ToApiResponse", source, StringComparison.Ordinal);
         Assert.DoesNotContain("properties.Remove(\"windDirectionSource\")", source, StringComparison.Ordinal);
         Assert.Contains("MaxToolLoopIterations = 32", source, StringComparison.Ordinal);
+        // All 9 tools, same set as Chat1a.
+        Assert.Contains("Tools = { getLatLongTool, getLocationTool, getCitiesTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool, getUserTool, addUserPinTool, deleteUserPinTool }", source, StringComparison.Ordinal);
         Assert.DoesNotContain("ProjectOpenAIClient", source, StringComparison.Ordinal);
         Assert.DoesNotContain("GetProjectResponsesClientForModel", source, StringComparison.Ordinal);
         Assert.Contains("ResponsesClient", source, StringComparison.Ordinal);

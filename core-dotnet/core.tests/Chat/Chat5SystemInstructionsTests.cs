@@ -37,6 +37,29 @@ public class Chat5SystemInstructionsTests
     }
 
     [Fact]
+    public void Chat5HardenedAiWeatherOrchestrationAssistant_ListsUserAgentButStaysWeatherOnly()
+    {
+        var prompt = ChatSystemInstructions.Chat5HardenedAiWeatherOrchestrationAssistant;
+
+        // The User sub-agent is attached, so the tool list must describe it...
+        Assert.Contains("exactly three tools", prompt);
+        Assert.Contains("User lists the user's saved map pins", prompt);
+
+        // ...but the guardrail scope is unchanged: weather only, no pin-management carve-out.
+        Assert.Contains("Only accept requests about weather — current conditions, forecasts, or weather history for a place.", prompt);
+        Assert.Contains("say you can only help with weather questions", prompt);
+        Assert.DoesNotContain("saved pins are in scope", prompt, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Chat5ScopeClassifierPrompt_HasNoPinCarveOut()
+    {
+        var prompt = ChatSystemInstructions.Chat5ScopeClassifierPrompt;
+
+        Assert.DoesNotContain("pin", prompt, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void MultiAgentAiWeatherOrchestrationAssistant_IsUnchangedByChat5()
     {
         // Regression guard: Chat5's hardened prompt must be a full independent copy, not a
