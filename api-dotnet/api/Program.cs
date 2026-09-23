@@ -101,9 +101,13 @@ var app = builder.Build();
 // startup, so a deploy never needs a separate manual migration step. API is the only host that
 // does this -- MVC and the worker also register WX1116DbContext, but only read/write the
 // schema API has already migrated.
-using (var migrationScope = app.Services.CreateScope())
+// Skip migrations in test environments to allow tests to run without a real database.
+if (!app.Environment.IsEnvironment("Testing"))
 {
-	migrationScope.ServiceProvider.GetRequiredService<WX1116DbContext>().Database.Migrate();
+	using (var migrationScope = app.Services.CreateScope())
+	{
+		migrationScope.ServiceProvider.GetRequiredService<AgentActivityDbContext>().Database.Migrate();
+	}
 }
 
 app.UseHttpsRedirection();
