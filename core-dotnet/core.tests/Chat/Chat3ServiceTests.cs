@@ -29,6 +29,12 @@ public class Chat3ServiceTests
         Assert.Contains("_responseStore.GetConversationId(sessionId)", source, StringComparison.Ordinal);
         Assert.Contains("_responseStore.SetConversationId(sessionId, conversationId)", source, StringComparison.Ordinal);
         Assert.DoesNotContain("options.PreviousResponseId", source, StringComparison.Ordinal);
+
+        // Store the conversation only after a turn completes, not on failure or approval errors.
+        Assert.True(
+            source.IndexOf("_responseStore.SetConversationId", StringComparison.Ordinal)
+                > source.IndexOf("yield return ChatStreamEvent.Error(approvalError)", StringComparison.Ordinal),
+            "SetConversationId must run after the approval-error early exit.");
     }
 
     [Fact]

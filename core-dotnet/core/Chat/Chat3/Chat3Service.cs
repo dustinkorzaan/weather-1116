@@ -82,8 +82,6 @@ public sealed class Chat3Service : IChatClientService
             yield break;
         }
 
-        _responseStore.SetConversationId(sessionId, conversationId);
-
         var assistantBuilder = new StringBuilder();
 
         // Conversation state carries prior turns; Foundry rejects previous_response_id alongside it.
@@ -198,6 +196,10 @@ public sealed class Chat3Service : IChatClientService
             yield return ChatStreamEvent.Error(approvalError);
             yield break;
         }
+
+        // Only a turn that completes cleanly pins the session to this conversation, so a first turn
+        // that fails or stops on an MCP approval request leaves the next message a clean conversation.
+        _responseStore.SetConversationId(sessionId, conversationId);
 
         var assistantText = assistantBuilder.ToString();
         if (!string.IsNullOrWhiteSpace(assistantText))

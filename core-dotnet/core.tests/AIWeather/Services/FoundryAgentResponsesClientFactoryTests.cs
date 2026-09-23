@@ -94,6 +94,20 @@ public class FoundryAgentResponsesClientFactoryTests
     }
 
     [Fact]
+    public async Task Factory_ReusesExistingConversationWithoutCreatingOne()
+    {
+        // Chat3 memory depends on this early return. Calls the real factory: creating a
+        // conversation against a non-TLS endpoint throws client-side (see the test above), so
+        // getting the passed id back proves CreateProjectConversationAsync was skipped.
+        var (_, conversationId) = await FoundryAgentResponsesClientFactory.CreateForAgentAsync(
+            "test-agent",
+            new Uri("http://127.0.0.1:1/api/projects/testproj"),
+            "conv_existing");
+
+        Assert.Equal("conv_existing", conversationId);
+    }
+
+    [Fact]
     public async Task Factory_RequestsAiAzureComAudience()
     {
         // Agent publishing (prod-deploy-foundry-agents.yml), FoundryResponsesClientFactory
