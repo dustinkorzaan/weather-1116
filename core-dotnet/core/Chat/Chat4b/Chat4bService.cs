@@ -191,7 +191,7 @@ public sealed class Chat4bService : IChatClientService
                 geoAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "Geo",
-                    Description = "Geo assistant. Resolves a location name to latitude/longitude, or reverse-geocodes latitude/longitude to a place label. Send it a natural-language geo question; it returns the answer as text.",
+                    Description = "Geo assistant. Resolves a location name to latitude/longitude, reverse-geocodes latitude/longitude to a place label, or lists the largest cities within a radius of a latitude/longitude. Send it a natural-language geo question; it returns the answer as text.",
                 }),
                 // session omitted — AsAIFunction creates a fresh, throwaway session per call, so NonAI
                 // Weather is stateless per delegated call; the orchestrator alone owns memory.

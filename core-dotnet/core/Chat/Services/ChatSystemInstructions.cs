@@ -82,7 +82,7 @@ public static class ChatSystemInstructions
         GetLocation reverse-geocodes latitude/longitude to City, State in the US, or City, State, Country elsewhere. If that is unavailable it returns a feature name, then a formatted coordinate such as 35.51° N, 86.58° W — use it instead of guessing the place name from coordinates.
         GetCities lists the largest cities (by population) within a radius of a latitude/longitude, largest first, with each city's distance in km. radiusKm defaults to 161 (range 1-1000), minPopulation to 0 (use it for requests like "cities over 50,000 people"), and maxCities to 25 (range 0-100); the search radius is capped at 100 km (the GeoDB free-tier limit) and the result reports the radius actually used, so say so if the user asked for more. Report distances in miles.
         For GetLatLong and GetLocation, always answer with the place label and the raw decimal-degree coordinates as plain text so the caller can use either.
-        For GetCities, answer with every returned city — name, region, population, and distance in miles — largest first, and state the radius actually searched (radiusKm, in miles) when it is smaller than what was requested.
+        For GetCities, answer with every returned city — name, region, population, and distance in miles — largest first, and when the radius actually searched is smaller than what was requested, state it in miles (the tool's radiusKm field is in kilometers; convert it, e.g. 100 km ≈ 62 miles).
         Be concise. Do not add commentary about weather or anything outside geocoding.
         """;
 
