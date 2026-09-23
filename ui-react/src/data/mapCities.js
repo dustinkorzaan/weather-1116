@@ -1,52 +1,17 @@
-/** Sample city pins for the weather map. Temperature reserved for a later pass. */
-export const MAP_CITIES = [
-  { id: '59e2459a-b25d-44a7-bcb0-2a4f2e444272', name: 'New York, NY', lat: 40.7128, lng: -74.006 },
-  { id: '329735f1-cfc0-42b4-a48f-0d41677145e8', name: 'Toronto, ON', lat: 43.6532, lng: -79.3832 },
-  { id: '9daab691-7885-400f-8aed-5e21a63f9a7a', name: 'Atlanta, GA', lat: 33.749, lng: -84.388 },
-  { id: '04f5d22f-ca31-4d29-ac9e-a1c4f0127ed1', name: 'Charlotte, NC', lat: 35.2271, lng: -80.8431 },
-];
-
 /** Default map center (Nashville, TN / south-central US). */
 export const MAP_DEFAULT_CENTER = { lat: 36.16, lng: -86.78 };
 export const MAP_DEFAULT_ZOOM = 4;
-
-export const MAP_CITIES_STORAGE_KEY = 'weather-map-cities';
 
 function isValidCity(city) {
   return (
     city &&
     typeof city.id === 'string' &&
     city.id &&
-    typeof city.name === 'string' &&
-    city.name &&
-    Number.isFinite(city.lat) &&
-    Number.isFinite(city.lng)
+    typeof city.locationName === 'string' &&
+    city.locationName &&
+    Number.isFinite(city.latitude) &&
+    Number.isFinite(city.longitude)
   );
-}
-
-/** Loads the mutable pin list, seeding the sample cities on first visit. */
-export function loadMapCities() {
-  try {
-    const raw = window.sessionStorage?.getItem(MAP_CITIES_STORAGE_KEY);
-    if (raw != null) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.every(isValidCity)) {
-        return parsed;
-      }
-    }
-  } catch {
-    // Ignore quota / private-mode / malformed JSON and fall back.
-  }
-
-  return MAP_CITIES.map((city) => ({ ...city }));
-}
-
-export function saveMapCities(cities) {
-  try {
-    window.sessionStorage?.setItem(MAP_CITIES_STORAGE_KEY, JSON.stringify(cities));
-  } catch {
-    // Ignore quota / private-mode failures.
-  }
 }
 
 export function newCityId() {
@@ -63,30 +28,30 @@ export function newCityId() {
 
 /**
  * Builds a map pin from GET /Geo/GetLocation, keeping the clicked coordinates.
- * @returns {{ id: string, name: string, lat: number, lng: number } | null}
+ * @returns {{ id: string, locationName: string, latitude: number, longitude: number } | null}
  */
 export function cityFromReverseLookup(lat, lng, data) {
-  const name = String(data?.location || '').trim();
-  if (!name || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
+  const locationName = String(data?.location || '').trim();
+  if (!locationName || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
     return null;
   }
 
   return {
     id: newCityId(),
-    name,
-    lat: Number(lat),
-    lng: Number(lng),
+    locationName,
+    latitude: Number(lat),
+    longitude: Number(lng),
   };
 }
 
 /**
  * Builds a map pin from the first GET /Geo match.
- * @returns {{ id: string, name: string, lat: number, lng: number } | null}
+ * @returns {{ id: string, locationName: string, latitude: number, longitude: number } | null}
  */
 export function cityFromLatLongSearch(locationInput, data) {
-  const lat = Number(data?.latitude);
-  const lng = Number(data?.longitude);
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+  const latitude = Number(data?.latitude);
+  const longitude = Number(data?.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     return null;
   }
 
@@ -94,16 +59,16 @@ export function cityFromLatLongSearch(locationInput, data) {
     .map((part) => String(part || '').trim())
     .filter(Boolean)
     .join(', ');
-  const name = resolved || String(locationInput || '').trim();
-  if (!name) {
+  const locationName = resolved || String(locationInput || '').trim();
+  if (!locationName) {
     return null;
   }
 
   return {
     id: newCityId(),
-    name,
-    lat,
-    lng,
+    locationName,
+    latitude,
+    longitude,
   };
 }
 
@@ -113,7 +78,7 @@ export function upsertMapCity(cities, city) {
   }
 
   const existingIndex = cities.findIndex(
-    (item) => item.id === city.id || (item.lat === city.lat && item.lng === city.lng)
+    (item) => item.id === city.id || (item.latitude === city.latitude && item.longitude === city.longitude)
   );
   if (existingIndex >= 0) {
     const next = cities.slice();

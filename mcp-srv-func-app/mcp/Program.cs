@@ -1,8 +1,10 @@
 using Azure.Monitor.OpenTelemetry.Exporter;
 using Core;
+using Core.Data;
 using DotNetEnv;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Azure.Functions.Worker.OpenTelemetry;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -31,6 +33,14 @@ if (!string.IsNullOrWhiteSpace(appInsightsConnectionString))
 		.UseFunctionsWorkerDefaults()
 		.UseAzureMonitorExporter(o => o.ConnectionString = appInsightsConnectionString);
 }
+
+// MCP service is stateless with no database. Register a no-op DbContext for handlers that depend on it
+// but won't be used by any MCP tools (User handlers are auto-registered but unused here).
+builder.Services.AddDbContext<WX1116DbContext>((_, options) =>
+{
+	// Use SqlServer with no connection string - will fail if actually used, but handlers won't be.
+	options.UseSqlServer("Server=(local);");
+});
 
 builder.Services.AddStandardCoreServices();
 

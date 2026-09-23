@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Core.Data.Migrations
 {
-    [DbContext(typeof(AgentActivityDbContext))]
-    partial class AgentActivityDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(WX1116DbContext))]
+    partial class WX1116DbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -101,6 +101,69 @@ namespace Core.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AgentActivity", "dbo");
+                });
+
+            modelBuilder.Entity("Core.Data.Domain.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("User", "dbo");
+                });
+
+            modelBuilder.Entity("Core.Data.Domain.UserPin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("LocationName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserPin", "dbo");
+                });
+
+            modelBuilder.Entity("Core.Data.Domain.UserPin", b =>
+                {
+                    b.HasOne("Core.Data.Domain.User", "User")
+                        .WithMany("UserPins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Data.Domain.User", b =>
+                {
+                    b.Navigation("UserPins");
                 });
 #pragma warning restore 612, 618
         }

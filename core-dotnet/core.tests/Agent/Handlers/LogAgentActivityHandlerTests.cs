@@ -8,8 +8,8 @@ namespace Core.Tests.Agent.Handlers;
 
 public class LogAgentActivityHandlerTests
 {
-    private static AgentActivityDbContext CreateDbContext(string dbName) =>
-        new(new DbContextOptionsBuilder<AgentActivityDbContext>().UseInMemoryDatabase(dbName).Options);
+    private static WX1116DbContext CreateDbContext(string dbName) =>
+        new(new DbContextOptionsBuilder<WX1116DbContext>().UseInMemoryDatabase(dbName).Options);
 
     private sealed class FakeContextProvider(string? context) : IAgentActivityContextProvider
     {
@@ -113,7 +113,7 @@ public class LogAgentActivityHandlerTests
     {
         // Mirrors mcp-srv-app-service/mcp-srv-func-app: AddStandardCoreServices() registers this
         // handler via CQMediator's assembly scan, but those hosts never register
-        // AgentActivityDbContext/IAgentActivityHostProvider.
+        // WX1116DbContext/IAgentActivityHostProvider.
         var handler = new LogAgentActivityHandler();
 
         var id = await handler.Handle(new LogAgentActivityEvent

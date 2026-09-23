@@ -138,19 +138,19 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
-    public void IndexView_UsesCityAndStateMapPinLabels()
+    public void IndexView_FetchesUserPinsFromApiAndLoadsMap()
     {
         var view = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/Views/Home/Index.cshtml"));
-        Assert.Contains("Atlanta, GA", view);
-        Assert.Contains("New York, NY", view);
-        Assert.Contains("Toronto, ON", view);
-        Assert.Contains("Charlotte, NC", view);
-        Assert.Contains("new Guid(\"", view);
-        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", view);
-        Assert.DoesNotContain("id = \"nyc\"", view);
-        Assert.DoesNotContain("id = \"atlanta\"", view);
+        Assert.Contains("fetch('/User'", view);
+        Assert.Contains("user.userPins", view);
+        Assert.Contains("pin.locationName", view);
+        Assert.Contains("pin.latitude", view);
+        Assert.Contains("pin.longitude", view);
+        Assert.Contains("weatherMap.init", view);
         Assert.Contains("data-get-location-url", view);
         Assert.Contains("GetLocation", view);
+        Assert.DoesNotContain("id = \"nyc\"", view);
+        Assert.DoesNotContain("id = \"atlanta\"", view);
     }
 
     [Fact]

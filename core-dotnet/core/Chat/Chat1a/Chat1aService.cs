@@ -57,6 +57,8 @@ public sealed class Chat1aService : IChatClientService
         var getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();
         var getPublicWeatherForecastTool = WeatherToolDefinitions.CreateGetPublicWeatherForecastTool();
         var getPublicWeatherHistoryTool = WeatherToolDefinitions.CreateGetPublicWeatherHistoryTool();
+        var addUserPinTool = WeatherToolDefinitions.CreateAddUserPinTool();
+        var deleteUserPinTool = WeatherToolDefinitions.CreateDeleteUserPinTool();
 
         var assistantBuilder = new StringBuilder();
         string? errorMessage = null;
@@ -68,7 +70,7 @@ public sealed class Chat1aService : IChatClientService
 
             CreateResponseOptions options = new(_settings.DeploymentName, inputItems)
             {
-                Tools = { getLatLongTool, getLocationTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool },
+                Tools = { getLatLongTool, getLocationTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool, addUserPinTool, deleteUserPinTool },
                 StreamingEnabled = true,
             };
 

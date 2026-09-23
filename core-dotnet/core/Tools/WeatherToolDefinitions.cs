@@ -120,4 +120,48 @@ public static class WeatherToolDefinitions
         }
         """)),
         strictModeEnabled: true);
+
+    public static FunctionTool CreateAddUserPinTool() => ResponseTool.CreateFunctionTool(
+        functionName: "AddUserPin",
+        functionDescription: "Add a new pin to the user's saved locations map. Use this when the user wants to save a location.",
+        functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+        {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "description": "Latitude in decimal degrees"
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Longitude in decimal degrees"
+            },
+            "locationName": {
+              "type": "string",
+              "description": "Name of the location, e.g. Nashville, Tennessee"
+            }
+          },
+          "required": ["latitude", "longitude", "locationName"],
+          "additionalProperties": false
+        }
+        """)),
+        strictModeEnabled: true);
+
+    public static FunctionTool CreateDeleteUserPinTool() => ResponseTool.CreateFunctionTool(
+        functionName: "DeleteUserPin",
+        functionDescription: "Remove a pin from the user's saved locations map. Use this when the user wants to delete a saved location.",
+        functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+        {
+          "type": "object",
+          "properties": {
+            "userPinId": {
+              "type": "string",
+              "description": "The unique identifier (GUID) of the pin to delete"
+            }
+          },
+          "required": ["userPinId"],
+          "additionalProperties": false
+        }
+        """)),
+        strictModeEnabled: true);
 }

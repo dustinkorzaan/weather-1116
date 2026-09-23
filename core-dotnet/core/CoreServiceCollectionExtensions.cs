@@ -13,7 +13,7 @@ public static class CoreServiceCollectionExtensions
     public static IServiceCollection AddStandardCoreServices(this IServiceCollection services)
     {
         // Also registers LogAgentActivityHandler (Core.Agent.Handlers) via assembly scanning --
-        // AgentActivityDbContext and IAgentActivityHostProvider it depends on are registered
+        // WX1116DbContext and IAgentActivityHostProvider it depends on are registered
         // per-host in Program.cs, since each needs that host's DB_CONNECTION_STRING and Api/Mvc tag.
         services.AddCQMediator(cfg => cfg.RegisterServicesFromAssemblyContaining<HelloWorldHandler>());
         services.AddMemoryCache();

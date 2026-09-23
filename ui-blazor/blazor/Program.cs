@@ -56,6 +56,46 @@ app.MapGet("/Geo/GetLocation", async (
     var result = await client.GetLocation(latitude, longitude, cancellationToken);
     return result is null ? Results.NotFound() : Results.Ok(result);
 });
+
+app.MapGet("/User", async (WeatherApiClient client, CancellationToken cancellationToken) =>
+{
+    try
+    {
+        var response = await client.GetUser(cancellationToken);
+        return Results.Ok(response);
+    }
+    catch (InvalidOperationException)
+    {
+        return Results.NotFound();
+    }
+});
+
+app.MapPost("/User/AddPin", async (AddUserPinRequest request, WeatherApiClient client, CancellationToken cancellationToken) =>
+{
+    try
+    {
+        await client.AddUserPin(request, cancellationToken);
+        return Results.Ok(new { success = true });
+    }
+    catch (InvalidOperationException)
+    {
+        return Results.NotFound();
+    }
+});
+
+app.MapDelete("/User/DeletePin", async (Guid userPinId, WeatherApiClient client, CancellationToken cancellationToken) =>
+{
+    try
+    {
+        await client.DeleteUserPin(userPinId, cancellationToken);
+        return Results.Ok(new { success = true });
+    }
+    catch (InvalidOperationException)
+    {
+        return Results.NotFound();
+    }
+});
+
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 app.Run();
