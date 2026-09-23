@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildCurrentUrl } from '../mcp/src/tools/current.ts';
 
 describe('buildCurrentUrl', () => {
-  it('builds a current-weather URL with metric units and auto timezone', () => {
+  it('builds a current-weather URL with metric units and no timezone (GMT, like Core)', () => {
     const url = buildCurrentUrl(36.1627, -86.7816);
     expect(url.startsWith('https://api.open-meteo.com/v1/forecast?')).toBe(true);
     expect(url).toContain('latitude=36.1627');
@@ -11,6 +11,6 @@ describe('buildCurrentUrl', () => {
     expect(url).toContain('temperature_unit=celsius');
     expect(url).toContain('wind_speed_unit=kmh');
     expect(url).toContain('precipitation_unit=mm');
-    expect(url).toContain('timezone=auto');
+    expect(url).not.toContain('timezone');
   });
 });

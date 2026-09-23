@@ -1,7 +1,7 @@
 import { buildOpenMeteoUrl, fetchOpenMeteo, type OpenMeteoResponse } from './openMeteo.ts';
 
 export function buildCurrentUrl(latitude: number, longitude: number): string {
-  return buildOpenMeteoUrl(latitude, longitude, { current_weather: 'true' });
+  return buildOpenMeteoUrl(latitude, longitude, { current_weather: 'true' }, false);
 }
 
 /**

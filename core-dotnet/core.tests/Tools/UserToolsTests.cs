@@ -32,9 +32,9 @@ public class UserToolsTests
         var result = await getUser.InvokeAsync(new AIFunctionArguments());
 
         using var json = JsonDocument.Parse(result!.ToString()!);
-        var pin = Assert.Single(json.RootElement.GetProperty("UserPins").EnumerateArray());
-        Assert.Equal(PinId, pin.GetProperty("Id").GetGuid());
-        Assert.Equal("Nashville, Tennessee", pin.GetProperty("LocationName").GetString());
+        var pin = Assert.Single(json.RootElement.GetProperty("userPins").EnumerateArray());
+        Assert.Equal(PinId, pin.GetProperty("id").GetGuid());
+        Assert.Equal("Nashville, Tennessee", pin.GetProperty("locationName").GetString());
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class UserToolsTests
         var output = await executor.ExecuteAsync(call, CancellationToken.None);
 
         using var json = JsonDocument.Parse(output);
-        Assert.Equal(PinId, json.RootElement.GetProperty("UserPins")[0].GetProperty("Id").GetGuid());
+        Assert.Equal(PinId, json.RootElement.GetProperty("userPins")[0].GetProperty("id").GetGuid());
     }
 
     [Fact]

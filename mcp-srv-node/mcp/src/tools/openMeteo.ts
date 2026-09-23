@@ -31,13 +31,22 @@ const PRECIPITATION_KEYS = ['precipitation', 'precipitation_sum'];
 export type SeriesBlock = Record<string, unknown>;
 export type OpenMeteoResponse = Record<string, unknown>;
 
-export function buildOpenMeteoUrl(latitude: number, longitude: number, resolutionQuery: Record<string, string>): string {
+/**
+ * `timezoneAuto` (default true) asks Open-Meteo for local time, which keeps forecast/history daily
+ * buckets on local days. Current weather passes false to match Core's current-weather URL (GMT).
+ */
+export function buildOpenMeteoUrl(
+  latitude: number,
+  longitude: number,
+  resolutionQuery: Record<string, string>,
+  timezoneAuto = true,
+): string {
   const params = new URLSearchParams({
     latitude: String(latitude),
     longitude: String(longitude),
     ...resolutionQuery,
     ...OPEN_METEO_UNITS,
-    timezone: 'auto',
+    ...(timezoneAuto ? { timezone: 'auto' } : {}),
   });
   return `${OPEN_METEO_FORECAST_URL}?${params.toString()}`;
 }
