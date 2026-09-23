@@ -158,6 +158,39 @@ public class UIWeatherDailySeries
     public List<string> WindDirectionSource { get; set; } = [];
 }
 
+public class AddUserPinRequest
+{
+    public required double Latitude { get; set; }
+
+    public required double Longitude { get; set; }
+
+    public required string LocationName { get; set; }
+}
+
+public class UserPinDTO
+{
+    public Guid Id { get; set; }
+
+    public double Latitude { get; set; }
+
+    public double Longitude { get; set; }
+
+    public string LocationName { get; set; } = string.Empty;
+}
+
+public class UserDTO
+{
+    public Guid Id { get; set; }
+
+    public string FirstName { get; set; } = string.Empty;
+
+    public string LastName { get; set; } = string.Empty;
+
+    public string Email { get; set; } = string.Empty;
+
+    public List<UserPinDTO> UserPins { get; set; } = new();
+}
+
 public class WeatherApiClient
 {
     private HttpClient _httpClient;
@@ -235,6 +268,29 @@ public class WeatherApiClient
             CultureInfo.InvariantCulture,
             $"History?latitude={latitude}&longitude={longitude}&resolution={resolution}");
         return await _httpClient.GetFromJsonAsync<UIWeatherHistoryResponse>(route, cancellationToken);
+    }
+
+    public async Task<UserDTO?> GetUser(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<UserDTO>("User", cancellationToken: cancellationToken);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task AddUserPin(AddUserPinRequest request, CancellationToken cancellationToken = default)
+    {
+        using var content = JsonContent.Create(request);
+        await _httpClient.PostAsync("User/AddPin", content, cancellationToken);
+    }
+
+    public async Task DeleteUserPin(Guid userPinId, CancellationToken cancellationToken = default)
+    {
+        await _httpClient.DeleteAsync($"User/DeletePin?userPinId={userPinId}", cancellationToken);
     }
 
     public async Task<AboutNode> GetAbout()
