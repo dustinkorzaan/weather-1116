@@ -212,8 +212,9 @@ Service onto `mcp-srv-node` (the raw Open-Meteo `current_weather` payload, the s
 Core's `NonAICurrentWeatherResponse` returned). MCP Server on App Service now hosts the
 saved-pin tools — `GetUser`, `AddUserPin`, and `DeleteUserPin` — which call Core's
 `Users` handlers against `dbo.User`/`dbo.UserPin`. It needs `DB_CONNECTION_STRING`
-(managed-identity SQL auth, read/write only) and reports unhealthy in `/About` without
-it. Only the Chat tabs attach it (Chat1b/Chat2b directly; Chat4b/Chat5b via the User
+(managed-identity SQL auth) and reports unhealthy in `/About` without it. Like MVC and
+the worker, it only reads/writes the schema the API's EF Core migrations
+(`Database.Migrate()`) have already applied — it never migrates. Only the Chat tabs attach it (Chat1b/Chat2b directly; Chat4b/Chat5b via the User
 sub-agent); V4 and the hosted Foundry toolbox deliberately leave it out.
 
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
@@ -291,8 +292,7 @@ so they can enqueue jobs without running servers; the worker processes them.
   Hangfire's `SqlServerStorage` and would cover an Entity Framework Core
   `DbContext` (`UseSqlServer`) the same way with no extra code -- both just
   hand the string to the same driver. The matching SQL-side contained users
-  (`FROM EXTERNAL PROVIDER`; `db_owner` for api/mvc/worker, read/write only for
-  `mcp-srv-app-service`'s user/pin tools) are created by
+  (`FROM EXTERNAL PROVIDER`, `db_owner`) are created by
   `infra/scripts/create-contained-users.sql`.
 
 ## About and Health

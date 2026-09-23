@@ -21,6 +21,8 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNEC
 builder.Services.AddControllers();
 
 // The user/pin MCP tools (GetUser, AddUserPin, DeleteUserPin) read and write dbo.User/dbo.UserPin.
+// API's Program.cs owns applying EF Core migrations (Database.Migrate()); this app only
+// reads/writes the already-migrated schema, same as MVC and the worker.
 // Authenticates via this app's user-assigned managed identity (AZURE_CLIENT_ID, set by
 // infra/modules/container-app.bicep) -- see ManagedIdentitySqlConnectionStringFactory. Without
 // DB_CONNECTION_STRING the app still starts (so /Wake and /About answer) with an unusable
