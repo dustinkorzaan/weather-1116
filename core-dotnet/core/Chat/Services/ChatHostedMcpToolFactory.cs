@@ -11,7 +11,8 @@ public sealed class ChatHostedMcpToolFactory
     public IList<AITool> CreateGeoTools() => [CreateGeoTool()];
 
     // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-app-service (current) plus
-    // mcp-srv-python and mcp-srv-node, which split forecast/history between them.
+    // mcp-srv-python and mcp-srv-node; each forecast/history tool is registered on exactly one of
+    // those two at a time (both on mcp-srv-node today), so both hosts stay attached.
     public IList<AITool> CreateNonAiWeatherTools() =>
         [CreateNonAiWeatherTool(), CreateNonAiWeatherPythonTool(), CreateNonAiWeatherNodeTool()];
 

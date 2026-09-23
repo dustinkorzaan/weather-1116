@@ -1,3 +1,5 @@
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import express, { type Express } from 'express';
@@ -10,46 +12,40 @@ const SERVER_INFO = { name: 'WeatherMcpSrvNode', version: '1.0.0' };
 
 // Every tool this host serves. Comment an entry out (and drop it from EXPECTED_TOOLS) to stop
 // serving it here -- two MCP hosts must never register the same tool name.
-export const TOOLS = [
-  {
-    name: 'GetPublicWeatherForecast',
-    register: (server: McpServer) =>
-      server.registerTool(
-        'GetPublicWeatherForecast',
-        {
-          description:
-            'Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 ' +
-            'days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute ' +
-            'steps. Use Daily unless the user asks for hourly or 15-minute detail.',
-          inputSchema: {
-            latitude: z.number(),
-            longitude: z.number(),
-            resolution: z.enum(FORECAST_RESOLUTIONS).default('Daily'),
-          },
+export const TOOLS: Array<(server: McpServer) => unknown> = [
+  (server) =>
+    server.registerTool(
+      'GetPublicWeatherForecast',
+      {
+        description:
+          'Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 ' +
+          'days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute ' +
+          'steps. Use Daily unless the user asks for hourly or 15-minute detail.',
+        inputSchema: {
+          latitude: z.number(),
+          longitude: z.number(),
+          resolution: z.enum(FORECAST_RESOLUTIONS).default('Daily'),
         },
-        async ({ latitude, longitude, resolution }) =>
-          toToolResult(await getPublicWeatherForecast(latitude, longitude, resolution)),
-      ),
-  },
-  {
-    name: 'GetPublicWeatherHistory',
-    register: (server: McpServer) =>
-      server.registerTool(
-        'GetPublicWeatherHistory',
-        {
-          description:
-            'Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, ' +
-            'Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail.',
-          inputSchema: {
-            latitude: z.number(),
-            longitude: z.number(),
-            resolution: z.enum(HISTORY_RESOLUTIONS).default('Daily'),
-          },
+      },
+      async ({ latitude, longitude, resolution }) =>
+        toToolResult(await getPublicWeatherForecast(latitude, longitude, resolution)),
+    ),
+  (server) =>
+    server.registerTool(
+      'GetPublicWeatherHistory',
+      {
+        description:
+          'Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, ' +
+          'Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail.',
+        inputSchema: {
+          latitude: z.number(),
+          longitude: z.number(),
+          resolution: z.enum(HISTORY_RESOLUTIONS).default('Daily'),
         },
-        async ({ latitude, longitude, resolution }) =>
-          toToolResult(await getPublicWeatherHistory(latitude, longitude, resolution)),
-      ),
-  },
+      },
+      async ({ latitude, longitude, resolution }) =>
+        toToolResult(await getPublicWeatherHistory(latitude, longitude, resolution)),
+    ),
 ];
 
 // Tools this host must have registered to report healthy in /About, mirroring
@@ -65,10 +61,27 @@ function toToolResult(data: Record<string, unknown>) {
 
 function createMcpServer(): McpServer {
   const server = new McpServer(SERVER_INFO);
-  for (const tool of TOOLS) {
-    tool.register(server);
+  for (const registerTool of TOOLS) {
+    registerTool(server);
   }
   return server;
+}
+
+// Live tools/list against a fresh server over an in-memory transport, so /About reflects what
+// actually registered (mirroring mcp-srv-python's `await mcp.list_tools()`), not a static list.
+async function listRegisteredToolNames(): Promise<Set<string>> {
+  const server = createMcpServer();
+  const client = new Client({ name: 'about-probe', version: '1.0.0' });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  try {
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+    const { tools } = await client.listTools();
+    return new Set(tools.map((tool) => tool.name));
+  } finally {
+    await client.close();
+    await server.close();
+  }
 }
 
 function parseBuildNumber(value: string | undefined): number | null {
@@ -87,8 +100,8 @@ export function buildApp(): Express {
 
   // Anonymous About probe -- leaf AboutNode (Core.About.AboutNode shape) named mcp-srv-node,
   // no children. Healthy only when MCP_SRV_NODE_KEY is set and every EXPECTED_TOOLS entry is registered.
-  app.get('/About', (_req, res) => {
-    const registered = new Set(TOOLS.map((tool) => tool.name));
+  app.get('/About', async (_req, res) => {
+    const registered = await listRegisteredToolNames();
     const isHealthy = Boolean(process.env.MCP_SRV_NODE_KEY) && [...EXPECTED_TOOLS].every((name) => registered.has(name));
 
     res.json({

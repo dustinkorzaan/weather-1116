@@ -1,4 +1,5 @@
-// This tool has moved to the standalone mcp-srv-python MCP server.
+// This tool has moved to the standalone mcp-srv-python / mcp-srv-node MCP servers (whichever
+// currently registers it -- see mcp-srv-python/README.md).
 // using System.ComponentModel;
 // using Core.Weather.Events;
 // using Core.Weather.Models;

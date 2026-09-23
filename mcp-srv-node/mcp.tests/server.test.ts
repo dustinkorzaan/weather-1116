@@ -1,6 +1,8 @@
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildApp } from '../mcp/src/server.ts';
+import { buildApp, TOOLS } from '../mcp/src/server.ts';
 
 const MCP_HEADERS = {
   Authorization: 'Bearer test-key',
@@ -104,6 +106,45 @@ describe('mcp-srv-node', () => {
     }
   });
 
+  it('calls GetPublicWeatherForecast end to end with the requested resolution', async () => {
+    const fetchMock = vi.fn(async () =>
+      Response.json({ latitude: 36.17, hourly: { time: ['2026-01-01T00:00'], precipitation: [-0.2], wind_speed_10m: null } }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const response = await request(buildTestApp())
+        .post('/mcp')
+        .set(MCP_HEADERS)
+        .send({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name: 'GetPublicWeatherForecast', arguments: { latitude: 36.166, longitude: -86.784, resolution: 'Hourly' } },
+        });
+      expect(response.status).toBe(200);
+
+      const payload = JSON.parse(response.text.match(/^data: (.*)$/m)?.[1] ?? response.text);
+      expect(payload.result.isError).toBeUndefined();
+      const data = JSON.parse(payload.result.content[0].text);
+      expect(data.hourly.precipitation).toEqual([0]);
+      expect(data.hourly.wind_speed_10m).toEqual([]);
+      expect(String(fetchMock.mock.calls[0][0])).toContain('forecast_hours=48');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('reports unhealthy in /About when an expected tool is not actually registered', async () => {
+    const removed = TOOLS.splice(0, 1);
+    try {
+      const response = await request(buildTestApp()).get('/About');
+      expect(response.status).toBe(200);
+      expect(response.body.isHealthy).toBe(false);
+    } finally {
+      TOOLS.unshift(...removed);
+    }
+  });
+
   it('returns 405 for GET /mcp in stateless mode', async () => {
     const response = await request(buildTestApp()).get('/mcp').set('Authorization', 'Bearer test-key');
     expect(response.status).toBe(405);
@@ -139,4 +180,38 @@ describe('mcp-srv-node', () => {
     expect(body.buildStart).toBeNull();
     expect(body.buildBranchName).toBeNull();
   });
+});
+
+describe('mcp-srv-node entry point', () => {
+  // Regression: enabling Application Insights must not break startup or routing (mirrors
+  // mcp-srv-python's test_build_app_instruments_when_app_insights_connection_string_set).
+  it('starts and serves /About with an App Insights connection string set', async () => {
+    const port = 18000 + Math.floor(Math.random() * 1000);
+    const child = spawn(process.execPath, [fileURLToPath(new URL('../mcp/src/index.ts', import.meta.url))], {
+      env: {
+        ...process.env,
+        MCP_SRV_NODE_KEY: 'test-key',
+        MCP_SRV_NODE_HOST: '127.0.0.1',
+        MCP_SRV_NODE_PORT: String(port),
+        APPLICATIONINSIGHTS_CONNECTION_STRING:
+          'InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://fake.example.com/',
+      },
+      stdio: 'ignore',
+    });
+    try {
+      let body: { name?: string; isHealthy?: boolean } | undefined;
+      for (let attempt = 0; attempt < 50 && !body; attempt++) {
+        try {
+          const response = await fetch(`http://127.0.0.1:${port}/About`);
+          body = await response.json();
+        } catch {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }
+      expect(body?.name).toBe('mcp-srv-node');
+      expect(body?.isHealthy).toBe(true);
+    } finally {
+      child.kill();
+    }
+  }, 15_000);
 });

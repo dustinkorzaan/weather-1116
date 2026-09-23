@@ -58,9 +58,10 @@ notification accepted (`202`), a `GET` rejected (`405` - no SSE stream in
 stateless mode), and the `tools/call` `POST`s for
 `GetPublicWeatherCurrent`/`GetPublicWeatherHistory` returning `200` with the
 tool's JSON content. (This screenshot predates the split below -
-`GetPublicWeatherHistory` has since moved to `mcp-srv-python`, and is
-currently served by `mcp-srv-node`; the same Postman/curl steps apply against
-its `/mcp` endpoint with a `MCP_SRV_NODE_KEY` bearer token.)
+`GetPublicWeatherHistory` has since moved off `mcp-srv-app-service`. It is
+registered on exactly one of `mcp-srv-python`/`mcp-srv-node` at a time -
+currently `mcp-srv-node` - so the same Postman/curl steps apply against that
+host's `/mcp` endpoint with its bearer token, `MCP_SRV_NODE_KEY` today.)
 
 ## curl example
 
