@@ -181,7 +181,7 @@ public sealed class Chat2aService : IChatClientService
     private async Task<string> GetCities(
         [Description("Latitude in decimal degrees")] double latitude,
         [Description("Longitude in decimal degrees")] double longitude,
-        [Description("Search radius in kilometers (1-1000). Defaults to 161.")] double distanceKM = GetCitiesEvent.DefaultDistanceKm,
+        [Description("Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit.")] double distanceKM = GetCitiesEvent.DefaultDistanceKm,
         [Description("Maximum number of cities to return (0-100). Defaults to 25.")] int size = GetCitiesEvent.DefaultSize,
         CancellationToken cancellationToken = default)
     {

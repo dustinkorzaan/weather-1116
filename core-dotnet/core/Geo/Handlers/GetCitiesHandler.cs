@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Text.Json;
 using Core.Caching;
 using Core.Geo.Events;
@@ -16,10 +17,12 @@ namespace Core.Geo.Handlers;
 /// </summary>
 public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesResponse>
 {
-    internal const string GeoDbBaseUrl = "http://geodb-free-service.wirefreethought.com/v1/geo";
+    internal const string GeoDbBaseUrl = "https://geodb-free-service.wirefreethought.com/v1/geo";
 
-    // GeoDB's free tier returns at most 10 results per request and allows about 1 request per second.
+    // GeoDB's free tier returns at most 10 results per request, allows about 1 request per second,
+    // and rejects (403) any radius above 100 of the requested unit.
     internal const int GeoDbPageLimit = 10;
+    internal const double GeoDbMaxRadiusKm = 100;
 
     private readonly CacheHelper _cache;
     private readonly TransientRetryHelper _retry;
@@ -42,7 +45,7 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
 
     public async Task<NonAICitiesResponse> Handle(GetCitiesEvent request, CancellationToken cancellationToken)
     {
-        request.DistanceKm = GetCitiesEvent.NormalizeDistanceKm(request.DistanceKm);
+        request.DistanceKm = Math.Min(GetCitiesEvent.NormalizeDistanceKm(request.DistanceKm), GeoDbMaxRadiusKm);
         request.Size = GetCitiesEvent.NormalizeSize(request.Size);
 
         if (request.Size == 0)
@@ -81,6 +84,12 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
             var page = await _retry.Execute(async ct =>
             {
                 using var httpResponse = await client.GetAsync(url, ct);
+                if (IsPermanentFailure(httpResponse.StatusCode))
+                {
+                    // Not an HttpRequestException, so TransientRetryHelper does not retry it.
+                    throw new InvalidOperationException($"GeoDB rejected the request with HTTP {(int)httpResponse.StatusCode}.");
+                }
+
                 httpResponse.EnsureSuccessStatusCode();
                 var json = await httpResponse.Content.ReadAsStringAsync(ct);
                 return JsonSerializer.Deserialize<GeoDbNearbyCitiesResponse>(json) ?? new GeoDbNearbyCitiesResponse();
@@ -106,6 +115,9 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
 
         return response;
     }
+
+    internal static bool IsPermanentFailure(HttpStatusCode statusCode) =>
+        (int)statusCode is >= 400 and < 500 && statusCode != HttpStatusCode.TooManyRequests;
 
     internal static NonAICity ToCity(GeoDbCity city) => new()
     {

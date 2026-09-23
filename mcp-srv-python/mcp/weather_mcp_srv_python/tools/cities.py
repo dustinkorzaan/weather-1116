@@ -7,10 +7,12 @@ from urllib.parse import quote, urlencode
 
 import httpx
 
-# GeoDB's free no-key service. It returns at most 10 results per request and allows about
-# 1 request per second, so pages are fetched sequentially with a short pause between them.
-GEODB_BASE_URL = "http://geodb-free-service.wirefreethought.com/v1/geo"
+# GeoDB's free no-key service. It returns at most 10 results per request, allows about 1 request
+# per second (so pages are fetched sequentially with a short pause), and rejects (403) any radius
+# above 100 of the requested unit.
+GEODB_BASE_URL = "https://geodb-free-service.wirefreethought.com/v1/geo"
 GEODB_PAGE_LIMIT = 10
+GEODB_MAX_RADIUS_KM = 100.0
 PAGE_DELAY_SECONDS = 1.1
 
 MIN_DISTANCE_KM = 1.0
@@ -80,7 +82,7 @@ async def get_cities(
     distance_km is reset into [1, 1000] and size into [0, 100] on every call; size 0 returns an
     empty list without calling GeoDB.
     """
-    distance_km = normalize_distance_km(distance_km)
+    distance_km = min(normalize_distance_km(distance_km), GEODB_MAX_RADIUS_KM)
     size = normalize_size(size)
     result: dict[str, Any] = {
         "distanceKm": distance_km,
@@ -94,7 +96,7 @@ async def get_cities(
 
     cities: list[dict[str, Any]] = result["cities"]
     offset = 0
-    async with httpx.AsyncClient(timeout=30.0, headers={"Accept": "application/json"}) as client:
+    async with httpx.AsyncClient(timeout=30.0, headers={"Accept": "application/json"}, follow_redirects=True) as client:
         while len(cities) < size:
             if offset > 0:
                 await asyncio.sleep(page_delay_seconds)

@@ -77,7 +77,8 @@ async def about(request: Request) -> JSONResponse:
         "Find the largest cities (by population) within a radius of a latitude and longitude. "
         "Returns each city's name, region, country, coordinates, distance in km, and population, "
         "largest first. distanceKM defaults to 161 (range 1-1000) and size defaults to 25 "
-        "(range 0-100); out-of-range values are adjusted, not rejected."
+        "(range 0-100); out-of-range values are adjusted, not rejected. The search radius is capped "
+        "at 100 km (the GeoDB free-tier limit), and the result reports the radius actually used."
     ),
 )
 async def get_cities_tool(

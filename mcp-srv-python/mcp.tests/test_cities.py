@@ -29,7 +29,7 @@ def test_normalize_size_resets_into_range(value, expected):
 def test_build_nearby_cities_url_uses_escaped_iso6709_location_and_population_sort():
     url = build_nearby_cities_url(36.1627, -86.7816, 161, 10, 20)
     assert url.startswith(
-        "http://geodb-free-service.wirefreethought.com/v1/geo/locations/%2B36.1627-086.7816/nearbyCities?"
+        "https://geodb-free-service.wirefreethought.com/v1/geo/locations/%2B36.1627-086.7816/nearbyCities?"
     )
     query = parse_qs(urlparse(url).query)
     assert query["radius"] == ["161"]
@@ -96,10 +96,41 @@ async def test_get_cities_size_zero_returns_empty_without_calling_geodb(fake_geo
 async def test_get_cities_resets_out_of_range_inputs_instead_of_failing(fake_geodb):
     fake = fake_geodb(500)
     result = await get_cities(36.16, -86.78, 20000, 1000, page_delay_seconds=0)
-    assert result["distanceKm"] == 1000.0
+    assert result["distanceKm"] == 100.0
     assert result["size"] == 100
     assert result["returned"] == 100
-    assert all("radius=1000" in url for url in fake.requested_urls)
+    assert all("radius=100&" in url for url in fake.requested_urls)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("requested", "sent"), [(161, 100.0), (1000, 100.0), (50, 50.0)])
+async def test_get_cities_caps_radius_at_geodb_free_tier_maximum(fake_geodb, requested, sent):
+    fake = fake_geodb(5)
+    result = await get_cities(36.16, -86.78, requested, page_delay_seconds=0)
+    assert result["distanceKm"] == sent
+    assert f"radius={int(sent)}&" in fake.requested_urls[0]
+
+
+@pytest.mark.asyncio
+async def test_get_cities_follows_redirects(monkeypatch):
+    fake = _FakeGeoDb(3)
+    https_prefix = "https://geodb-free-service.wirefreethought.com"
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        if str(request.url).startswith(https_prefix):
+            return fake(request)
+        return httpx.Response(308, headers={"Location": https_prefix + request.url.raw_path.decode()})
+
+    real_client = httpx.AsyncClient
+
+    def client_factory(*args, **kwargs):
+        kwargs["transport"] = httpx.MockTransport(transport)
+        return real_client(*args, **kwargs)
+
+    monkeypatch.setattr(cities.httpx, "AsyncClient", client_factory)
+    monkeypatch.setattr(cities, "GEODB_BASE_URL", "http://geodb-free-service.wirefreethought.com/v1/geo")
+    result = await get_cities(36.16, -86.78, 50, 3, page_delay_seconds=0)
+    assert result["returned"] == 3
 
 
 @pytest.mark.asyncio
@@ -173,5 +204,5 @@ def test_get_cities_tool_call_end_to_end(monkeypatch, fake_geodb):
     assert not payload["result"].get("isError")
     result = json.loads(payload["result"]["content"][0]["text"])
     assert result["returned"] == 12
-    assert result["distanceKm"] == 300
-    assert all("radius=300" in url for url in fake.requested_urls)
+    assert result["distanceKm"] == 100
+    assert all("radius=100&" in url for url in fake.requested_urls)

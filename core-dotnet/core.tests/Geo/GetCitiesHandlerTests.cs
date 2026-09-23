@@ -48,7 +48,7 @@ public class GetCitiesHandlerTests
     {
         var url = GetCitiesHandler.BuildNearbyCitiesUrl(36.1627, -86.7816, 161, 10, 20);
 
-        Assert.StartsWith("http://geodb-free-service.wirefreethought.com/v1/geo/locations/%2B36.1627-086.7816/nearbyCities?", url);
+        Assert.StartsWith("https://geodb-free-service.wirefreethought.com/v1/geo/locations/%2B36.1627-086.7816/nearbyCities?", url);
         Assert.Contains("radius=161", url);
         Assert.Contains("distanceUnit=KM", url);
         Assert.Contains("types=CITY", url);
@@ -82,11 +82,49 @@ public class GetCitiesHandlerTests
             new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, DistanceKm = 20000, Size = 1000 },
             CancellationToken.None);
 
-        Assert.Equal(GetCitiesEvent.MaxDistanceKm, response.DistanceKm);
+        Assert.Equal(GetCitiesHandler.GeoDbMaxRadiusKm, response.DistanceKm);
         Assert.Equal(GetCitiesEvent.MaxSize, response.Size);
         Assert.Equal(GetCitiesEvent.MaxSize, response.Returned);
-        Assert.All(http.RequestedUrls, url => Assert.Contains("radius=1000", url));
+        Assert.All(http.RequestedUrls, url => Assert.Contains("radius=100&", url));
     }
+
+    [Theory]
+    [InlineData(GetCitiesEvent.DefaultDistanceKm, 100)]
+    [InlineData(GetCitiesEvent.MaxDistanceKm, 100)]
+    [InlineData(50, 50)]
+    public async Task Handle_CapsRadiusAtGeoDbFreeTierMaximum(double requested, double sent)
+    {
+        var http = new PagingHandler(totalCount: 5);
+        var handler = CreateHandler(http);
+
+        var response = await handler.Handle(
+            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, DistanceKm = requested },
+            CancellationToken.None);
+
+        Assert.Equal(sent, response.DistanceKm);
+        Assert.Contains(string.Create(System.Globalization.CultureInfo.InvariantCulture, $"radius={sent}&"), http.RequestedUrls[0]);
+    }
+
+    [Fact]
+    public async Task Handle_GeoDbAccessDenied_IsNotRetried()
+    {
+        var http = new PagingHandler(totalCount: 5, status: HttpStatusCode.Forbidden);
+        var handler = CreateHandler(http);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(
+            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78 },
+            CancellationToken.None));
+
+        Assert.Single(http.RequestedUrls);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Forbidden, true)]
+    [InlineData(HttpStatusCode.BadRequest, true)]
+    [InlineData(HttpStatusCode.TooManyRequests, false)]
+    [InlineData(HttpStatusCode.ServiceUnavailable, false)]
+    public void IsPermanentFailure_ClassifiesStatusCodes(HttpStatusCode statusCode, bool expected) =>
+        Assert.Equal(expected, GetCitiesHandler.IsPermanentFailure(statusCode));
 
     [Fact]
     public async Task Handle_PagesTenAtATimeUntilSizeIsReached()
@@ -174,7 +212,7 @@ public class GetCitiesHandlerTests
     }
 
     /// <summary>Serves GeoDB-shaped pages from a fixed-size result set, honoring limit/offset.</summary>
-    private sealed class PagingHandler(int totalCount) : HttpMessageHandler
+    private sealed class PagingHandler(int totalCount, HttpStatusCode status = HttpStatusCode.OK) : HttpMessageHandler
     {
         public List<string> RequestedUrls { get; } = [];
 
@@ -182,6 +220,10 @@ public class GetCitiesHandlerTests
         {
             var url = request.RequestUri!.ToString();
             RequestedUrls.Add(url);
+            if (status != HttpStatusCode.OK)
+            {
+                return Task.FromResult(new HttpResponseMessage(status));
+            }
 
             var query = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
             var limit = int.Parse(query["limit"]!);

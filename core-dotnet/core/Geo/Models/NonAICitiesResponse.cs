@@ -4,7 +4,7 @@ namespace Core.Geo.Models;
 
 public class NonAICitiesResponse
 {
-    /// <summary>Search radius actually used, after resetting into range.</summary>
+    /// <summary>Search radius actually used, after resetting into range and capping to GeoDB's free-tier maximum (100 km).</summary>
     [JsonPropertyName("distanceKm")]
     public double DistanceKm { get; set; }
 

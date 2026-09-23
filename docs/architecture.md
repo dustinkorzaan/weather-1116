@@ -199,8 +199,8 @@ They now live on `mcp-srv-node`, a line-for-line Node port (same tool names,
 descriptions, resolutions, and response shape — see
 [`mcp-srv-node/README.md`](../mcp-srv-node/README.md)). `mcp-srv-python` serves
 `GetCities` instead: the largest cities (by population) within `distanceKM`
-(default 161, reset into 1–1000) of a coordinate, `size` results (default 25,
-reset into 0–100), via the free GeoDB Cities service. The same tool runs
+(default 161, reset into 1–1000, then capped at GeoDB's 100 km free-tier limit) of a
+coordinate, `size` results (default 25, reset into 0–100), via the free GeoDB Cities service. The same tool runs
 in-process through Core's `GetCitiesEvent`/`GetCitiesHandler` on the local-loop
 paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, FoundryConsoleV3).
 

@@ -47,7 +47,7 @@ public static class WeatherToolDefinitions
 
     public static FunctionTool CreateGetCitiesTool() => ResponseTool.CreateFunctionTool(
         functionName: "GetCities",
-        functionDescription: "Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. distanceKM defaults to 161 (range 1-1000) and size defaults to 25 (range 0-100); out-of-range values are adjusted, not rejected.",
+        functionDescription: "Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. distanceKM defaults to 161 (range 1-1000) and size defaults to 25 (range 0-100); out-of-range values are adjusted, not rejected. The search radius is capped at 100 km (the GeoDB free-tier limit), and the result reports the radius actually used.",
         functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
         {
           "type": "object",
@@ -62,7 +62,7 @@ public static class WeatherToolDefinitions
             },
             "distanceKM": {
               "type": ["number", "null"],
-              "description": "Search radius in kilometers (1-1000). Null uses the default of 161."
+              "description": "Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit. Null uses the default."
             },
             "size": {
               "type": ["integer", "null"],
