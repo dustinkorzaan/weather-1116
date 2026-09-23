@@ -86,13 +86,13 @@ public class ChatHostedMcpToolFactoryTests
     }
 
     [Fact]
-    public void CreateNonAiWeatherTools_ReturnsMcpSrvAppServiceAndNodeTools()
+    public void CreateNonAiWeatherTools_ReturnsOnlyMcpSrvNodeTool()
     {
         RunWithMcpEnvironment(
             funcAppUrl: null,
             funcAppKey: null,
-            appServiceUrl: "https://app.example.com/",
-            appServiceKey: "app-key",
+            appServiceUrl: null,
+            appServiceKey: null,
             pythonUrl: null,
             pythonKey: null,
             nodeUrl: "https://node.example.com/",
@@ -103,13 +103,34 @@ public class ChatHostedMcpToolFactoryTests
                     .Cast<HostedMcpServerTool>()
                     .ToList();
 
-                Assert.Equal(2, tools.Count);
-
-                var appService = Assert.Single(tools, tool => tool.ServerName == "McpSrvAppService");
-                Assert.Equal("https://app.example.com/mcp", appService.ServerAddress);
-
-                var node = Assert.Single(tools, tool => tool.ServerName == "McpSrvNode");
+                var node = Assert.Single(tools);
+                Assert.Equal("McpSrvNode", node.ServerName);
                 Assert.Equal("https://node.example.com/mcp", node.ServerAddress);
+            });
+    }
+
+    [Fact]
+    public void CreateUserTools_ReturnsOnlyMcpSrvAppServiceTool()
+    {
+        RunWithMcpEnvironment(
+            funcAppUrl: null,
+            funcAppKey: null,
+            appServiceUrl: "https://app.example.com/",
+            appServiceKey: "app-key",
+            pythonUrl: null,
+            pythonKey: null,
+            nodeUrl: null,
+            nodeKey: null,
+            () =>
+            {
+                var tools = new ChatHostedMcpToolFactory().CreateUserTools()
+                    .Cast<HostedMcpServerTool>()
+                    .ToList();
+
+                var appService = Assert.Single(tools);
+                Assert.Equal("McpSrvAppService", appService.ServerName);
+                Assert.Equal("https://app.example.com/mcp", appService.ServerAddress);
+                Assert.Equal("Bearer app-key", appService.Headers!["Authorization"]);
             });
     }
 

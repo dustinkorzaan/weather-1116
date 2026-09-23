@@ -10,20 +10,21 @@ namespace Core.Chat.Chat4b;
 
 /// <summary>
 /// Microsoft Agent Framework, remote MCP tools, multi-agent (V4 orchestration style).
-/// Same three-agent shape as Chat4a: Agent AI Weather Orchestration 👤 is the orchestrator the
-/// user talks to and delegates to Agent Geo 👤 (geo) and Agent NonAI Weather 👤 (weather), each
-/// wrapped as a callable tool via <see cref="AIAgentExtensions.AsAIFunction"/>. Only the
-/// orchestrator carries a persistent <see cref="AgentSession"/> (multi-turn memory); Geo and
-/// NonAI Weather are rebuilt per request. Omitting <c>session</c> from AsAIFunction does not
-/// leave it null — a fresh, throwaway <see cref="AgentSession"/> is created for each delegated
-/// call, which is what makes Geo and NonAI Weather stateless, same as Chat4a.
-/// The difference from Chat4a: Geo and NonAI Weather get their tools from the existing remote MCP
+/// Same four-agent shape as Chat4a: Agent AI Weather Orchestration 👤 is the orchestrator the
+/// user talks to and delegates to Agent Geo 👤 (geo), Agent NonAI Weather 👤 (weather), and Agent
+/// User 👤 (saved map pins), each wrapped as a callable tool via
+/// <see cref="AIAgentExtensions.AsAIFunction"/>. Only the orchestrator carries a persistent
+/// <see cref="AgentSession"/> (multi-turn memory); the sub-agents are rebuilt per request.
+/// Omitting <c>session</c> from AsAIFunction does not leave it null — a fresh, throwaway
+/// <see cref="AgentSession"/> is created for each delegated call, which is what makes the
+/// sub-agents stateless, same as Chat4a.
+/// The difference from Chat4a: the sub-agents get their tools from the existing remote MCP
 /// hosts (<see cref="ChatHostedMcpToolFactory"/>) instead of in-process CQMediator calls — Geo
 /// gets the <c>mcp-srv-func-app</c> (GetLatLong/GetLocation) and <c>mcp-srv-python</c> (GetCities)
-/// tools, NonAI Weather gets the <c>mcp-srv-app-service</c> (current conditions) and
-/// <c>mcp-srv-node</c> (forecast/history) tools. From the
-/// orchestrator's point of view nothing changes: Geo and
-/// NonAI Weather are still ordinary <c>AsAIFunction</c>-wrapped tools, so the orchestrator's
+/// tools, NonAI Weather gets the <c>mcp-srv-node</c> (current/forecast/history) tools, and User
+/// gets the <c>mcp-srv-app-service</c> (GetUser/AddUserPin/DeleteUserPin) tools. From the
+/// orchestrator's point of view nothing changes: the sub-agents are still ordinary
+/// <c>AsAIFunction</c>-wrapped tools, so the orchestrator's
 /// stream still shows <see cref="FunctionCallContent"/>/<see cref="FunctionResultContent"/>, not
 /// MCP content types — those only ever appear inside each sub-agent's own non-streamed
 /// <c>AsAIFunction</c>-generated call, invisible to the outer SSE stream, the same nested-call
@@ -171,15 +172,22 @@ public sealed class Chat4bService : IChatClientService
             tools: _hostedMcpToolFactory.CreateGeoTools());
 
         // Agent NonAI Weather 👤: weather sub-agent — current/forecast/history for a given
-        // lat/long only, via the mcp-srv-app-service (current) and mcp-srv-node (forecast/history)
-        // remote MCP hosts.
+        // lat/long only, via the mcp-srv-node (current/forecast/history) remote MCP host.
         AIAgent nonAiWeatherAgent = responsesClient.AsAIAgent(
             name: "NonAIWeather",
             instructions: ChatSystemInstructions.MultiAgentNonAiWeatherAssistant,
             model: _settings.DeploymentName,
             tools: _hostedMcpToolFactory.CreateNonAiWeatherTools());
 
-        // Agent AI Weather Orchestration 👤: orchestrator — delegates to Geo and NonAI Weather, holds the multi-turn session.
+        // Agent User 👤: user sub-agent — lists, adds, and deletes the user's saved map pins, via the
+        // mcp-srv-app-service (GetUser/AddUserPin/DeleteUserPin) remote MCP host.
+        AIAgent userAgent = responsesClient.AsAIAgent(
+            name: "User",
+            instructions: ChatSystemInstructions.MultiAgentUserAssistant,
+            model: _settings.DeploymentName,
+            tools: _hostedMcpToolFactory.CreateUserTools());
+
+        // Agent AI Weather Orchestration 👤: orchestrator — delegates to Geo, NonAI Weather, and User, holds the multi-turn session.
         return responsesClient.AsAIAgent(
             name: "AIWeatherOrchestration",
             instructions: ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant,
@@ -199,6 +207,13 @@ public sealed class Chat4bService : IChatClientService
                 {
                     Name = "NonAIWeather",
                     Description = "Weather assistant. Reports current conditions, an upcoming forecast (daily, hourly, or every 15 minutes), or recent history (daily or hourly) for a latitude/longitude. Accepts numeric coordinates only — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the coordinates on every call, including follow-up turns. Send it a natural-language weather question that names the coordinates and the level of detail you want (daily, hourly, or every 15 minutes); it returns the answer as text.",
+                }),
+                // session omitted — AsAIFunction creates a fresh, throwaway session per call, so User
+                // is stateless per delegated call; the orchestrator alone owns memory.
+                userAgent.AsAIFunction(new AIFunctionFactoryOptions
+                {
+                    Name = "User",
+                    Description = "User assistant. Lists the user's saved map pins (location name, latitude/longitude, and id), adds a pin from numeric latitude/longitude and a location name, or deletes a pin by its id. It never geocodes — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the pin id or coordinates on every call. Send it a natural-language request; it returns the answer as text.",
                 }),
             ]);
     }

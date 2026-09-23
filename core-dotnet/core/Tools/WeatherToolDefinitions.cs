@@ -158,9 +158,25 @@ public static class WeatherToolDefinitions
         """)),
         strictModeEnabled: true);
 
+    public static FunctionTool CreateGetUserTool() => ResponseTool.CreateFunctionTool(
+        functionName: "GetUser",
+        functionDescription: GetUserDescription,
+        functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+        {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+        """)),
+        strictModeEnabled: true);
+
+    public const string GetUserDescription =
+        "Get the current user and their saved map pins. Each pin has an id (GUID), locationName, latitude, and longitude. Call this to see which locations the user has saved, and to find a pin's id before calling DeleteUserPin.";
+
     public static FunctionTool CreateAddUserPinTool() => ResponseTool.CreateFunctionTool(
         functionName: "AddUserPin",
-        functionDescription: "Add a new pin to the user's saved locations map. Use this when the user wants to save a location.",
+        functionDescription: AddUserPinDescription,
         functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
         {
           "type": "object",
@@ -186,14 +202,14 @@ public static class WeatherToolDefinitions
 
     public static FunctionTool CreateDeleteUserPinTool() => ResponseTool.CreateFunctionTool(
         functionName: "DeleteUserPin",
-        functionDescription: "Remove a pin from the user's saved locations map. Use this when the user wants to delete a saved location.",
+        functionDescription: DeleteUserPinDescription,
         functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
         {
           "type": "object",
           "properties": {
             "userPinId": {
               "type": "string",
-              "description": "The unique identifier (GUID) of the pin to delete"
+              "description": "The unique identifier (GUID) of the pin to delete, from GetUser"
             }
           },
           "required": ["userPinId"],
@@ -201,4 +217,10 @@ public static class WeatherToolDefinitions
         }
         """)),
         strictModeEnabled: true);
+
+    public const string AddUserPinDescription =
+        "Add a new pin to the user's saved locations map. Use this when the user wants to save a location. Requires numeric latitude/longitude and a location name.";
+
+    public const string DeleteUserPinDescription =
+        "Remove a pin from the user's saved locations map. Use this when the user wants to delete a saved location. Requires the pin's id from GetUser; never guess an id.";
 }

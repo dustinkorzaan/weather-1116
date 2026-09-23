@@ -50,17 +50,17 @@ FOUNDARY_FEATURES="$(echo "$PAYLOAD" | jq -r '.foundry_features')"
 [[ "$FOUNDARY_FEATURES" == 'Toolboxes=V1Preview' ]] \
   || fail "foundry_features should request toolbox preview APIs"
 
-echo "$PAYLOAD" | jq -e '.version_body.tools | length == 4' >/dev/null \
-  || fail "toolbox should wrap four MCP tools"
-echo "$PAYLOAD" | jq -e '.version_body.tools[0].project_connection_id == "conn-app-id"' >/dev/null \
-  || fail "toolbox app tool should reference the IaC connection id"
-echo "$PAYLOAD" | jq -e '.version_body.tools[1].project_connection_id == "conn-func-id"' >/dev/null \
+echo "$PAYLOAD" | jq -e '.version_body.tools | length == 3' >/dev/null \
+  || fail "toolbox should wrap three MCP tools"
+echo "$PAYLOAD" | jq -e '[.version_body.tools[].server_label] | index("McpSrvAppService") == null' >/dev/null \
+  || fail "toolbox must not include McpSrvAppService (user/pin write tools)"
+echo "$PAYLOAD" | jq -e '.version_body.tools[0].project_connection_id == "conn-func-id"' >/dev/null \
   || fail "toolbox func tool should reference the IaC connection id"
-echo "$PAYLOAD" | jq -e '.version_body.tools[2].project_connection_id == "conn-python-id"' >/dev/null \
+echo "$PAYLOAD" | jq -e '.version_body.tools[1].project_connection_id == "conn-python-id"' >/dev/null \
   || fail "toolbox python tool should reference the IaC connection id"
-echo "$PAYLOAD" | jq -e '.version_body.tools[3].project_connection_id == "conn-node-id"' >/dev/null \
+echo "$PAYLOAD" | jq -e '.version_body.tools[2].project_connection_id == "conn-node-id"' >/dev/null \
   || fail "toolbox node tool should reference the IaC connection id"
-echo "$PAYLOAD" | jq -e '.version_body.tools[3].server_label == "McpSrvNode" and .version_body.tools[3].server_url == "https://node.example/mcp"' >/dev/null \
+echo "$PAYLOAD" | jq -e '.version_body.tools[2].server_label == "McpSrvNode" and .version_body.tools[2].server_url == "https://node.example/mcp"' >/dev/null \
   || fail "toolbox node tool should use the McpSrvNode label and the connection target"
 echo "$PAYLOAD" | jq -e '.version_body.tools[0].require_approval == "never"' >/dev/null \
   || fail "toolbox tools should set require_approval never"

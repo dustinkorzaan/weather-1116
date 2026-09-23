@@ -124,7 +124,9 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
             ResponsesClient client = FoundryResponsesClientFactory.Create(endpoint);
 
-            var (geoMcpTools, weatherMcpTools, weatherPythonMcpTools, weatherNodeMcpTools) = _mcpToolFactory.CreateTools();
+            // mcp-srv-app-service's user/pin tools are deliberately left out: a current-weather lookup
+            // must never be able to add or delete the user's saved pins.
+            var (geoMcpTools, _, weatherPythonMcpTools, weatherNodeMcpTools) = _mcpToolFactory.CreateTools();
 
             var inputItems = new List<ResponseItem>
             {
@@ -137,7 +139,7 @@ public class GetCurrentAIWeatherV4Handler : IRequestHandler<GetCurrentAIWeatherV
 
             CreateResponseOptions options = new(deploymentName, inputItems)
             {
-                Tools = { geoMcpTools, weatherMcpTools, weatherPythonMcpTools, weatherNodeMcpTools },
+                Tools = { geoMcpTools, weatherPythonMcpTools, weatherNodeMcpTools },
                 TextOptions = new ResponseTextOptions
                 {
                     TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(

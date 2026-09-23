@@ -10,11 +10,13 @@ public class AboutControllerTests : IClassFixture<WeatherMcpSrvAppServiceWebAppl
 
     public AboutControllerTests(WeatherMcpSrvAppServiceWebApplicationFactory factory)
     {
-        _factory = factory.WithSetting("MCP_SRV_APP_SERVICE_KEY", "integration-test-mcp-key");
+        _factory = factory
+            .WithSetting("MCP_SRV_APP_SERVICE_KEY", "integration-test-mcp-key")
+            .WithSetting("DB_CONNECTION_STRING", "Server=localhost;Database=AboutTests;");
     }
 
     [Fact]
-    public async Task Get_ReturnsHealthyMcpSrvAppServiceNode_WhenKeyAndToolConfigured()
+    public async Task Get_ReturnsHealthyMcpSrvAppServiceNode_WhenKeyDbAndToolsConfigured()
     {
         using var client = _factory.CreateClient();
         var response = await client.GetAsync("/About");
@@ -41,6 +43,22 @@ public class AboutControllerTests : IClassFixture<WeatherMcpSrvAppServiceWebAppl
         var node = await response.Content.ReadFromJsonAsync<AboutNode>();
         Assert.NotNull(node);
         Assert.Equal("mcp-srv-app-service", node.Name);
+        Assert.False(node.IsHealthy);
+    }
+
+    [Fact]
+    public async Task Get_ReturnsUnhealthyNode_WhenDbConnectionStringMissing()
+    {
+        using var factory = new WeatherMcpSrvAppServiceWebApplicationFactory()
+            .WithSetting("MCP_SRV_APP_SERVICE_KEY", "integration-test-mcp-key");
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/About");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var node = await response.Content.ReadFromJsonAsync<AboutNode>();
+        Assert.NotNull(node);
         Assert.False(node.IsHealthy);
     }
 

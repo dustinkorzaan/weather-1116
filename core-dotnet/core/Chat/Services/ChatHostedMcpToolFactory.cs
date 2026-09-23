@@ -5,15 +5,17 @@ namespace Core.Chat.Services;
 public sealed class ChatHostedMcpToolFactory
 {
     public IList<AITool> CreateTools() =>
-        [CreateGeoTool(), CreateGeoPythonTool(), CreateNonAiWeatherTool(), CreateNonAiWeatherNodeTool()];
+        [CreateGeoTool(), CreateGeoPythonTool(), CreateNonAiWeatherNodeTool(), CreateUserTool()];
 
     // Agent Geo 👤's remote MCP tools — mcp-srv-func-app (GetLatLong/GetLocation) and
     // mcp-srv-python (GetCities).
     public IList<AITool> CreateGeoTools() => [CreateGeoTool(), CreateGeoPythonTool()];
 
-    // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-app-service (current) and
-    // mcp-srv-node (forecast/history).
-    public IList<AITool> CreateNonAiWeatherTools() => [CreateNonAiWeatherTool(), CreateNonAiWeatherNodeTool()];
+    // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-node (current/forecast/history).
+    public IList<AITool> CreateNonAiWeatherTools() => [CreateNonAiWeatherNodeTool()];
+
+    // Agent User 👤's remote MCP tools — mcp-srv-app-service (GetUser/AddUserPin/DeleteUserPin).
+    public IList<AITool> CreateUserTools() => [CreateUserTool()];
 
     private static HostedMcpServerTool CreateGeoTool()
     {
@@ -34,7 +36,7 @@ public sealed class ChatHostedMcpToolFactory
         };
     }
 
-    private static HostedMcpServerTool CreateNonAiWeatherTool()
+    private static HostedMcpServerTool CreateUserTool()
     {
         var mcpSrvAppServiceUrl = Environment.GetEnvironmentVariable("MCP_SRV_APP_SERVICE_URL")
             ?? throw new InvalidOperationException("Missing MCP_SRV_APP_SERVICE_URL.");

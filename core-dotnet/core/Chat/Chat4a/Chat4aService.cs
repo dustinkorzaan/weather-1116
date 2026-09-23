@@ -17,17 +17,17 @@ namespace Core.Chat.Chat4a;
 
 /// <summary>
 /// Microsoft Agent Framework, in-process tools, multi-agent (V3 orchestration style).
-/// Three agents: Agent AI Weather Orchestration 👤 is the orchestrator the user talks to and
-/// delegates to Agent Geo 👤 (geo) and Agent NonAI Weather 👤 (weather), each wrapped as a
-/// callable tool via <see cref="AIAgentExtensions.AsAIFunction"/>. Only the orchestrator carries
-/// a persistent <see cref="AgentSession"/> (multi-turn memory); Geo and NonAI Weather are
-/// rebuilt per request. Omitting <c>session</c> from AsAIFunction does not leave it null — a
-/// fresh, throwaway <see cref="AgentSession"/> is created for each delegated call, which is what
-/// makes Geo and NonAI Weather stateless: nothing carries over between calls.
-/// Geo's and NonAI Weather's own inner tool calls (e.g. Geo calling GetLatLong) run inside the
+/// Four agents: Agent AI Weather Orchestration 👤 is the orchestrator the user talks to and
+/// delegates to Agent Geo 👤 (geo), Agent NonAI Weather 👤 (weather), and Agent User 👤 (saved
+/// map pins), each wrapped as a callable tool via <see cref="AIAgentExtensions.AsAIFunction"/>.
+/// Only the orchestrator carries a persistent <see cref="AgentSession"/> (multi-turn memory); the
+/// sub-agents are rebuilt per request. Omitting <c>session</c> from AsAIFunction does not leave it
+/// null — a fresh, throwaway <see cref="AgentSession"/> is created for each delegated call, which
+/// is what makes the sub-agents stateless: nothing carries over between calls.
+/// The sub-agents' own inner tool calls (e.g. Geo calling GetLatLong) run inside the
 /// non-streamed async call AsAIFunction generates (<c>InvokeAgentAsync</c>) and do not surface as
-/// separate SSE events — only the orchestrator's delegation calls to Geo and NonAI Weather do.
-/// For the same reason, Geo's and NonAI Weather's own model token usage never reaches
+/// separate SSE events — only the orchestrator's delegation calls to Geo, NonAI Weather, and User do.
+/// For the same reason, the sub-agents' own model token usage never reaches
 /// <see cref="ChatUsageAccumulator"/> (only the orchestrator's own <see cref="AgentResponseUpdate"/>
 /// contents do) — the usage chip a user sees undercounts a multi-agent turn.
 /// </summary>
@@ -173,7 +173,14 @@ public sealed class Chat4aService : IChatClientService
             model: _settings.DeploymentName,
             tools: CreateNonAiWeatherTools());
 
-        // Agent AI Weather Orchestration 👤: orchestrator — delegates to Geo and NonAI Weather, holds the multi-turn session.
+        // Agent User 👤: user sub-agent — lists, adds, and deletes the user's saved map pins.
+        AIAgent userAgent = responsesClient.AsAIAgent(
+            name: "User",
+            instructions: ChatSystemInstructions.MultiAgentUserAssistant,
+            model: _settings.DeploymentName,
+            tools: new UserToolFunctions(_mediator).CreateTools());
+
+        // Agent AI Weather Orchestration 👤: orchestrator — delegates to Geo, NonAI Weather, and User, holds the multi-turn session.
         return responsesClient.AsAIAgent(
             name: "AIWeatherOrchestration",
             instructions: ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant,
@@ -193,6 +200,13 @@ public sealed class Chat4aService : IChatClientService
                 {
                     Name = "NonAIWeather",
                     Description = "Weather assistant. Reports current conditions, an upcoming forecast (daily, hourly, or every 15 minutes), or recent history (daily or hourly) for a latitude/longitude. Accepts numeric coordinates only — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the coordinates on every call, including follow-up turns. Send it a natural-language weather question that names the coordinates and the level of detail you want (daily, hourly, or every 15 minutes); it returns the answer as text.",
+                }),
+                // session omitted — AsAIFunction creates a fresh, throwaway session per call, so User
+                // is stateless per delegated call; the orchestrator alone owns memory.
+                userAgent.AsAIFunction(new AIFunctionFactoryOptions
+                {
+                    Name = "User",
+                    Description = "User assistant. Lists the user's saved map pins (location name, latitude/longitude, and id), adds a pin from numeric latitude/longitude and a location name, or deletes a pin by its id. It never geocodes — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the pin id or coordinates on every call. Send it a natural-language request; it returns the answer as text.",
                 }),
             ]);
     }

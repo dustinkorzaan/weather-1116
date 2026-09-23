@@ -52,4 +52,13 @@ public class Chat5aServiceTests
         Assert.Contains("IMediator", Source, StringComparison.Ordinal);
         Assert.DoesNotContain("ChatHostedMcpToolFactory", Source, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Service_DelegatesPinsToAUserSubAgent()
+    {
+        Assert.Contains("name: \"User\"", Source, StringComparison.Ordinal);
+        Assert.Contains("ChatSystemInstructions.MultiAgentUserAssistant", Source, StringComparison.Ordinal);
+        Assert.Contains("userAgent.AsAIFunction(", Source, StringComparison.Ordinal);
+        Assert.Contains("new UserToolFunctions(_mediator).CreateTools()", Source, StringComparison.Ordinal);
+    }
 }

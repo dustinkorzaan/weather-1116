@@ -19,15 +19,15 @@ public class ChatMcpToolFactoryTests
             nodeKey: "node-key",
             () =>
             {
-                var (geoMcpTools, weatherMcpTools, weatherPythonMcpTools, weatherNodeMcpTools) = new ChatMcpToolFactory().CreateTools();
+                var (geoMcpTools, userMcpTools, weatherPythonMcpTools, weatherNodeMcpTools) = new ChatMcpToolFactory().CreateTools();
 
                 Assert.Equal("McpSrvFuncApp", geoMcpTools.ServerLabel);
                 Assert.Equal(new Uri("https://func.example.com/runtime/webhooks/mcp"), geoMcpTools.ServerUri);
                 Assert.Equal("func-key", geoMcpTools.Headers["x-functions-key"]);
 
-                Assert.Equal("McpSrvAppService", weatherMcpTools.ServerLabel);
-                Assert.Equal(new Uri("https://app.example.com/mcp"), weatherMcpTools.ServerUri);
-                Assert.Equal("Bearer app-key", weatherMcpTools.Headers["Authorization"]);
+                Assert.Equal("McpSrvAppService", userMcpTools.ServerLabel);
+                Assert.Equal(new Uri("https://app.example.com/mcp"), userMcpTools.ServerUri);
+                Assert.Equal("Bearer app-key", userMcpTools.Headers["Authorization"]);
 
                 Assert.Equal("McpSrvPython", weatherPythonMcpTools.ServerLabel);
                 Assert.Equal(new Uri("https://python.example.com/mcp"), weatherPythonMcpTools.ServerUri);

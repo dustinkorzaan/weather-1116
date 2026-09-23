@@ -49,21 +49,21 @@ const TAB_CONFIG = [
     id: 'Chat4a',
     label: 'Chat4a',
     shortLabel: '4a',
-    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents (invalid Token Counts)',
+    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo, NonAI Weather and User Agents (invalid Token Counts)',
     endpoint: '/Chat4a/messages',
   },
   {
     id: 'Chat4b',
     label: 'Chat4b',
     shortLabel: '4b',
-    description: 'Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents (invalid Token Counts)',
+    description: 'Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo, NonAI Weather and User Agents (invalid Token Counts)',
     endpoint: '/Chat4b/messages',
   },
   {
     id: 'Chat5a',
     label: 'Chat5a',
     shortLabel: '5a',
-    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed (invalid Token Counts)',
+    description: 'Agent Framework · Local Loops · Multi-agent · Orchestration agent delegates to Geo, NonAI Weather and User Agents · 5 Guardrailed (invalid Token Counts)',
     endpoint: '/Chat5a/messages',
     hasGates: true,
   },
@@ -71,7 +71,7 @@ const TAB_CONFIG = [
     id: 'Chat5b',
     label: 'Chat5b',
     shortLabel: '5b',
-    description: 'Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo and NonAI Weather Agents · 5 Guardrailed (invalid Token Counts)',
+    description: 'Agent Framework · Remote MCP · Multi-agent · Orchestration agent delegates to Geo, NonAI Weather and User Agents · 5 Guardrailed (invalid Token Counts)',
     endpoint: '/Chat5b/messages',
     hasGates: true,
   },
@@ -398,7 +398,7 @@ function ChatPanel() {
     <div>
       <h2 className="text-xl font-semibold">Chat Clients</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Nine standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a and Chat4b's multi-agent orchestration (AI Weather Orchestration delegating to Geo and NonAI Weather, in-process for Chat4a and remote MCP for Chat4b), plus Chat5a and Chat5b, the same orchestration with five toggleable guardrail gates.
+        Nine standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a and Chat4b's multi-agent orchestration (AI Weather Orchestration delegating to Geo, NonAI Weather and User, in-process for Chat4a and remote MCP for Chat4b), plus Chat5a and Chat5b, the same orchestration with five toggleable guardrail gates.
       </p>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3 gap-0">

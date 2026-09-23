@@ -45,8 +45,8 @@ Standalone multi-turn chat page with nine tabs:
 | Chat2a | Local Loops | Agent Framework | Like Foundry Console V3 |
 | Chat2b | Remote MCP | Agent Framework | Like Foundry Console V4 |
 | Chat3 | Hosted Foundry agent | Fully managed agent orchestration | Like Foundry Console V5 (`wx1116-agent-for-chat`) |
-| Chat4a | Local Loops, multi-agent | Agent Framework | Like Foundry Console V3 - AI Weather Orchestration delegates to Geo and NonAI Weather |
-| Chat4b | Remote MCP, multi-agent | Agent Framework | Like Foundry Console V4 - AI Weather Orchestration delegates to Geo and NonAI Weather |
+| Chat4a | Local Loops, multi-agent | Agent Framework | Like Foundry Console V3 - AI Weather Orchestration delegates to Geo, NonAI Weather and User |
+| Chat4b | Remote MCP, multi-agent | Agent Framework | Like Foundry Console V4 - AI Weather Orchestration delegates to Geo, NonAI Weather and User |
 | Chat5a | Local Loops, multi-agent, guardrailed | Agent Framework | Like Chat4a plus five toggleable guardrail gates |
 | Chat5b | Remote MCP, multi-agent, guardrailed | Agent Framework | Like Chat4b plus five toggleable guardrail gates | |
 

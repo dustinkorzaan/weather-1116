@@ -9,13 +9,13 @@ a one-shot structured JSON response.
 
 | Tab | Stack | Tools | Maps to console demo |
 | --- | --- | --- | --- |
-| **Chat1a** | Responses API (model-direct) | In-process (`GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`) | Foundry Console **V3** |
+| **Chat1a** | Responses API (model-direct) | In-process (`GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`, `GetUser`, `AddUserPin`, `DeleteUserPin`) | Foundry Console **V3** |
 | **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-srv-func-app`, `mcp-srv-app-service`, `mcp-srv-python`, `mcp-srv-node`) | Foundry Console **V4** |
 | **Chat2a** | Microsoft Agent Framework (model-direct) | In-process tools via `AIFunctionFactory` | V3 orchestration style |
 | **Chat2b** | Microsoft Agent Framework (model-direct) | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
 | **Chat3** | Hosted Microsoft Foundry agent | MCP tools configured **on the agent** in Foundry (`wx1116-agent-for-chat`) | Foundry Console **V5** |
-| **Chat4a** | Microsoft Agent Framework (model-direct), multi-agent | In-process tools, split across two sub-agents delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V3 orchestration style |
-| **Chat4b** | Microsoft Agent Framework (model-direct), multi-agent | Remote MCP tools, split across two sub-agents delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V4 orchestration style |
+| **Chat4a** | Microsoft Agent Framework (model-direct), multi-agent | In-process tools, split across three sub-agents (Geo, NonAI Weather, User) delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V3 orchestration style |
+| **Chat4b** | Microsoft Agent Framework (model-direct), multi-agent | Remote MCP tools, split across three sub-agents (Geo, NonAI Weather, User) delegated to by an orchestrator via `AsAIFunction` | Multi-agent extension of V4 orchestration style |
 | **Chat5a** | Microsoft Agent Framework (model-direct), multi-agent, guardrailed | Chat4a's in-process tools, unchanged, plus five independently toggleable guardrail gates in front of/around the orchestrator | Guardrailed extension of Chat4a |
 | **Chat5b** | Microsoft Agent Framework (model-direct), multi-agent, guardrailed | Chat4b's remote MCP tools, unchanged, plus the same five guardrail gates | Guardrailed extension of Chat4b |
 
@@ -158,9 +158,10 @@ builder.Services.AddWeatherChatClients();
 
 ## Tools (no web search)
 
-Chat1 and Chat2 expose the same public geo and weather tools from this repo (no web search).
-Chat3 uses the **same tool names**, but they are attached to `wx1116-agent-for-chat` in Foundry,
-not declared on the request.
+Chat1 and Chat2 expose the same public geo and weather tools from this repo (no web search), plus
+three saved-pin tools (`GetUser`, `AddUserPin`, `DeleteUserPin`).
+Chat3 uses the **same geo/weather tool names**, but they are attached to `wx1116-agent-for-chat` in
+Foundry, not declared on the request — and its toolbox deliberately has no saved-pin tools.
 
 | Tool | Purpose |
 | --- | --- |
@@ -170,23 +171,35 @@ not declared on the request.
 | `GetPublicWeatherCurrent` | Fetch current weather for lat/long |
 | `GetPublicWeatherForecast` | Upcoming forecast: Daily (7 days), Hourly (48 hours), or FifteenMinutes (48 hours) |
 | `GetPublicWeatherHistory` | Recent past: Daily (previous 7 days) or Hourly (previous 48 hours) |
+| `GetUser` | The user and their saved map pins (each with an id, location name, and lat/long). In-process via Core's `GetUserHandler`; remote via `mcp-srv-app-service` |
+| `AddUserPin` | Save a map pin from lat/long and a location name |
+| `DeleteUserPin` | Delete a saved map pin by its id (from `GetUser`) |
 
 - **In-process (Chat1a, Chat2a, Chat4a, Chat5a):** Core `WeatherToolExecutor` runs CQMediator handlers when the
   model emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a and, inside
-  Chat4a's/Chat5a's Geo and NonAI Weather sub-agents, for Chat4a/Chat5a).
+  Chat4a's/Chat5a's Geo, NonAI Weather, and User sub-agents, for Chat4a/Chat5a).
 - **MCP (Chat1b, Chat2b, Chat4b, Chat5b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`,
   `mcp-srv-python`, `mcp-srv-node`) — platform invokes tools; no local function-call loop in Chat1b. Chat4b's/Chat5b's Geo
   sub-agent gets `mcp-srv-func-app`'s and `mcp-srv-python`'s (`GetCities`) tools from
-  `ChatHostedMcpToolFactory.CreateGeoTools()`; its NonAI Weather sub-agent gets `mcp-srv-app-service`'s
-  and `mcp-srv-node`'s tools from `CreateNonAiWeatherTools()` — not the combined four-server list
-  Chat1b/Chat2b use.
+  `ChatHostedMcpToolFactory.CreateGeoTools()`; its NonAI Weather sub-agent gets `mcp-srv-node`'s
+  tools from `CreateNonAiWeatherTools()`; its User sub-agent gets `mcp-srv-app-service`'s saved-pin
+  tools from `CreateUserTools()` — not the combined four-server list Chat1b/Chat2b use.
+- **AI Weather V4** uses the same remote hosts minus `mcp-srv-app-service`: a current-weather lookup
+  never gets the saved-pin write tools.
 - **Hosted agent (Chat3):** Foundry invokes those MCP hosts. This app does not send tools, instructions,
   or a model name.
 
-Chat5a and Chat5b reuse Chat4a's and Chat4b's exact tool wiring verbatim — same Geo/NonAI Weather
+Chat5a and Chat5b reuse Chat4a's and Chat4b's exact tool wiring verbatim — same Geo/NonAI Weather/User
 sub-agents, same tool sets, same `AsAIFunction` delegation. The five guardrail gates (see below) sit
 around that orchestration, not inside it: no new tools are introduced, and gate checks never call
 `GetLatLong`/`GetPublicWeatherCurrent`/etc.
+
+The gates stay **weather-only** even though a User sub-agent is attached. With the gates on, a
+pin-only request ("save Nashville", "delete my Austin pin") is blocked — it has no weather keyword
+for the Code Input gate, and the LLM gates and hardened prompt treat it as off-topic. A weather
+question that happens to mention pins ("what's the weather at my saved pins?") can still get
+through. With the gates off, Chat5a/Chat5b handle pins exactly like Chat4a/Chat4b. The hardened
+prompt only lists the User agent in its tool list; its scope and refusal rules are unchanged.
 
 **Chat2a/Chat2b memory:** `IChatSessionStore` only tracks session ids and a display audit trail
 (user/assistant text). Multi-turn context for Agent Framework tabs comes from `AgentSession`
@@ -198,50 +211,55 @@ send `previous_response_id` — Foundry rejects it alongside `conversation`. The
 so a turn that lands on another replica starts a new conversation. Chat3 does **not** replay a system prompt — Foundry rejects `instructions` when an agent is specified.
 
 **Chat4a memory:** only the orchestrator (AI Weather Orchestration) has a persistent `AgentSession`
-via `ChatAgentSessionStore`, exactly like Chat2a. The two sub-agents (Geo, NonAI Weather) are
+via `ChatAgentSessionStore`, exactly like Chat2a. The three sub-agents (Geo, NonAI Weather, User) are
 rebuilt on every request and invoked with `session` omitted from `AsAIFunction` — which creates a
 fresh, throwaway `AgentSession` per call rather than leaving it null — so they are stateless,
 single-purpose "query in, text out" tools with no memory of their own; AI Weather Orchestration is
 the only agent that remembers prior turns.
 
 **Chat4b memory:** identical shape to Chat4a's — only the orchestrator persists an `AgentSession`;
-Geo and NonAI Weather are stateless per call. The only difference is where Geo's and NonAI
-Weather's tools come from (remote MCP vs in-process), not how memory works.
+Geo, NonAI Weather, and User are stateless per call. The only difference is where the sub-agents'
+tools come from (remote MCP vs in-process), not how memory works.
 
 **Chat5a/Chat5b memory:** identical shape to Chat4a's/Chat4b's — only the orchestrator persists an
-`AgentSession` via `ChatAgentSessionStore`; Geo and NonAI Weather are stateless per call. The five
+`AgentSession` via `ChatAgentSessionStore`; Geo, NonAI Weather, and User are stateless per call. The five
 guardrail gates never touch `AgentSession`: input gates run and can block *before* the orchestrator
 agent is even built, and the output gate reads the orchestrator's finished `AgentResponse.Text`
 after the turn completes, so a gate being on or off has no effect on what the orchestrator
 remembers turn to turn — it only affects whether/how that turn's request or reply reaches the
 model and the client.
 
-## Chat4a: multi-agent orchestration (Geo / NonAI Weather / AI Weather Orchestration)
+## Chat4a: multi-agent orchestration (Geo / NonAI Weather / User / AI Weather Orchestration)
 
-Chat4a restructures Chat2a's single flat-tool agent into a small multi-agent system. Three
+Chat4a restructures Chat2a's single flat-tool agent into a small multi-agent system. Four
 `AIAgent` instances are built per request in `Chat4aService`, each with a fixed nickname kept in
-a `// Agent <name> 👤` comment directly above its construction so the three names stay
+a `// Agent <name> 👤` comment directly above its construction so the four names stay
 unambiguous in code:
 
 - **Agent Geo 👤** — geo sub-agent. Owns exactly `GetLatLong`, `GetLocation`, and `GetCities`.
 - **Agent NonAI Weather 👤** — weather sub-agent. Owns exactly `GetPublicWeatherCurrent`,
   `GetPublicWeatherForecast`, and `GetPublicWeatherHistory`.
-- **Agent AI Weather Orchestration 👤** — orchestrator. Has no geo/weather tools of its own; its
-  only two tools *are* Geo and NonAI Weather, wrapped via `AIAgentExtensions.AsAIFunction`
+- **Agent User 👤** — saved-pin sub-agent. Owns exactly `GetUser`, `AddUserPin`, and
+  `DeleteUserPin` (in-process via Core's `UserToolFunctions`). It never geocodes and never
+  reports weather.
+- **Agent AI Weather Orchestration 👤** — orchestrator. Has no geo/weather/pin tools of its own; its
+  only three tools *are* Geo, NonAI Weather, and User, wrapped via `AIAgentExtensions.AsAIFunction`
   (`Microsoft.Agents.AI` 1.20.0, already referenced by this repo — no `Microsoft.Agents.AI.Workflows`
-  package is used or needed for this two-agent delegation). AI Weather Orchestration decides when
-  to call Geo, when to call NonAI Weather, and passes Geo's resolved coordinates into NonAI
-  Weather's request.
+  package is used or needed for this delegation). AI Weather Orchestration decides when
+  to call each sub-agent, passes Geo's resolved coordinates into NonAI Weather's request, and
+  for "save this place" calls Geo first and then User. For "delete a pin" or "weather at my
+  pins" it asks User for the pin list (ids and coordinates) first.
 
 **Nested tool calls are not individually traced.** AI Weather Orchestration's SSE stream shows
-`tool_start`/`tool_end` for the two delegation calls ("Geo", "NonAIWeather") the same way Chat2a
+`tool_start`/`tool_end` for the delegation calls ("Geo", "NonAIWeather", "User") the same way Chat2a
 shows its five direct tool calls. Geo's and NonAI Weather's own inner tool calls (e.g. Geo calling
 `GetLatLong`) run inside the non-streamed async call `AsAIFunction` generates and do not produce
 separate stream events — the UI shows "AI Weather Orchestration called Geo" → "Geo returned an
 answer", not the geocoding call nested inside Geo. This is an intentional scope boundary for this
 tab, not a bug. The same boundary means Geo's and NonAI Weather's own model token usage never
 reaches the `usage` chip on `done` — only tokens from the orchestrator's own stream are counted, so
-the usage shown for a Chat4a turn undercounts the true 3-agent total.
+the usage shown for a Chat4a turn undercounts the true multi-agent total. Pins changed by the User
+agent do not refresh the map until the page is reloaded (UI refresh is out of scope).
 
 **Geo and NonAI Weather only speak coordinates.** The orchestrator must resolve a place name via
 Geo before asking NonAI Weather anything, and must pass NonAI Weather numeric latitude/longitude on
@@ -250,20 +268,18 @@ earlier turn even within the same chat session; the orchestrator has to resend t
 
 ## Chat4b: multi-agent orchestration (remote MCP)
 
-Chat4b is Chat4a with one change: Geo and NonAI Weather get their tools from the existing remote
-MCP hosts instead of in-process CQMediator calls — mirroring how Chat2b differs from Chat2a. This
-works cleanly because the MCP hosts are already split along exactly the Geo/NonAI Weather
-boundary: `mcp-srv-func-app` (`GetLatLong`/`GetLocation`) and `mcp-srv-python` (`GetCities`)
-expose Geo's tools, and `mcp-srv-app-service`/`mcp-srv-node` together expose
-`GetPublicWeatherCurrent`/`Forecast`/`History` (NonAI Weather's tools — current conditions stayed on
-`mcp-srv-app-service`, forecast/history moved to the standalone `mcp-srv-node` server).
-`ChatHostedMcpToolFactory` (already used by Chat1b/Chat2b) gained two new methods,
-`CreateGeoTools()` and `CreateNonAiWeatherTools()` — Geo's returns `mcp-srv-func-app`'s and
-`mcp-srv-python`'s tools, NonAI Weather's returns `mcp-srv-app-service`'s and `mcp-srv-node`'s —
-its existing `CreateTools()` (all four hosts combined) is still used by Chat1b/Chat2b.
+Chat4b is Chat4a with one change: the sub-agents get their tools from the existing remote MCP
+hosts instead of in-process CQMediator calls — mirroring how Chat2b differs from Chat2a. This
+works cleanly because the MCP hosts are split along exactly the sub-agent boundaries:
+`mcp-srv-func-app` (`GetLatLong`/`GetLocation`) and `mcp-srv-python` (`GetCities`) expose Geo's
+tools, `mcp-srv-node` exposes `GetPublicWeatherCurrent`/`Forecast`/`History` (NonAI Weather's
+tools), and `mcp-srv-app-service` exposes `GetUser`/`AddUserPin`/`DeleteUserPin` (User's tools).
+`ChatHostedMcpToolFactory` (already used by Chat1b/Chat2b) has one method per sub-agent —
+`CreateGeoTools()`, `CreateNonAiWeatherTools()`, and `CreateUserTools()` — and its
+`CreateTools()` (all four hosts combined) is still used by Chat1b/Chat2b.
 
-The three `// Agent <name> 👤` construction sites, the instruction constants
-(`MultiAgentGeoAssistant`, `MultiAgentNonAiWeatherAssistant`,
+The four `// Agent <name> 👤` construction sites, the instruction constants
+(`MultiAgentGeoAssistant`, `MultiAgentNonAiWeatherAssistant`, `MultiAgentUserAssistant`,
 `MultiAgentAiWeatherOrchestrationAssistant`), and the coordinates-only contract between the
 orchestrator and NonAI Weather are all identical to Chat4a's — they never mention transport, so
 Chat4b reuses them verbatim.
@@ -407,7 +423,8 @@ JSON schema for the one-shot V5 / Current AI Weather path. Chat3 needs free-form
 Do not create Chat3 (or V5) by hand. `prod-provision-infra.yml` registers the
 four MCP hosts as Foundry **RemoteTool** connections (`MyMcpSrvAppService`,
 `MyMcpSrvFuncApp`, `MyMcpSrvPython`, `MyMcpSrvNode`). `prod-deploy-foundry-agents.yml` then publishes
-`wx1116-geo-nonaiweather-toolbox` (wrapping those connections) and attaches the
+`wx1116-geo-nonaiweather-toolbox` (wrapping the func-app, python, and node connections —
+not `MyMcpSrvAppService`, whose saved-pin write tools the hosted agents must not get) and attaches the
 toolbox to `wx1116-agent-for-chat` and `wx1116-agent-for-current-weather`
 with `require_approval: never`. Instructions live in `.github/foundry-agents/`.
 
@@ -421,7 +438,7 @@ Only if you need to inspect or repair a published version:
 3. Confirm the model is the same deployment as `AZURE_FOUNDRY_PROD_MODEL`
    (for example `gpt-5.4-mini`).
 4. **Instructions:** the Chat3 text below (same as
-   `ChatSystemInstructions.WeatherAssistant` /
+   `ChatSystemInstructions.WeatherAssistant` minus its three saved-pin lines /
    `.github/foundry-agents/wx1116-agent-for-chat.instructions.md`).
 5. **Response format:** text / none. Do **not** attach a JSON schema.
 6. **Tools:** the `wx1116-geo-nonaiweather-toolbox` toolbox (via the
@@ -432,15 +449,17 @@ Only if you need to inspect or repair a published version:
 ### MCP tools (toolbox)
 
 Agents attach the shared `wx1116-geo-nonaiweather-toolbox` toolbox as a single MCP
-tool. The toolbox wraps the four IaC **RemoteTool** connections below; auth
-headers stay on those connections, not on the agent.
+tool. The toolbox wraps three of the four IaC **RemoteTool** connections below; auth
+headers stay on those connections, not on the agent. `McpSrvAppService` is listed for
+reference but is **not** in the toolbox: it serves the saved-pin tools, and the hosted
+agents (Chat3, V5) are geo + weather only.
 
 | `server_label` (inside toolbox) | `server_url` | Auth | Tools the server exposes |
 | --- | --- | --- | --- |
 | `McpSrvFuncApp` | `https://<prod-mcp-srv-func-app>/runtime/webhooks/mcp` | Header `x-functions-key` = Functions `mcp_extension` system key (`MCP_SRV_FUNC_APP_KEY`) | `GetLatLong`, `GetLocation` |
-| `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetPublicWeatherCurrent` |
+| `McpSrvAppService` (not in toolbox) | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetUser`, `AddUserPin`, `DeleteUserPin` |
 | `McpSrvPython` | `https://<prod-mcp-srv-python>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_PYTHON_KEY>` | `GetCities` |
-| `McpSrvNode` | `https://<prod-mcp-srv-node>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_NODE_KEY>` | `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
+| `McpSrvNode` | `https://<prod-mcp-srv-node>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_NODE_KEY>` | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
 
 Production host names are in [`docs/architecture.md`](../architecture.md) (MCP Tool Hosts).
 

@@ -30,6 +30,27 @@ public class RuleScopeGateTests
         Assert.NotNull(result.Reason);
     }
 
+    // Chat5's guardrails stay weather-only even though Chat5a/Chat5b have a User sub-agent:
+    // a pin-management request with no weather keyword is blocked by the Code Input gate.
+    [Theory]
+    [InlineData("Save Nashville to my pins.")]
+    [InlineData("Delete my Austin pin.")]
+    [InlineData("List my saved locations.")]
+    public async Task EvaluateAsync_BlocksPinOnlyMessagesWithNoWeatherKeyword(string message)
+    {
+        var result = await _gate.EvaluateAsync(message, CancellationToken.None);
+
+        Assert.False(result.InScope);
+    }
+
+    [Fact]
+    public async Task EvaluateAsync_AllowsAWeatherQuestionAboutSavedPins()
+    {
+        var result = await _gate.EvaluateAsync("What's the weather at my saved pins?", CancellationToken.None);
+
+        Assert.True(result.InScope);
+    }
+
     [Theory]
     [InlineData("Where is Nashville, TN?")]
     [InlineData("What city is at these coordinates: 36.16, -86.78?")]

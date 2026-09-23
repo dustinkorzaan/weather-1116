@@ -62,11 +62,16 @@ hot reload); React uses `npm start`. Ports come from each project's
 - Chat1b, Chat2b, Chat4b/Chat5b, and the V4 AI weather path need
   `MCP_SRV_PYTHON_URL`/`MCP_SRV_PYTHON_KEY` (Geo sub-agent in Chat4b/5b) and
   `MCP_SRV_NODE_URL`/`MCP_SRV_NODE_KEY` (NonAI Weather sub-agent) on api/mvc/worker, in
-  addition to the existing `MCP_SRV_APP_SERVICE_*`/`MCP_SRV_FUNC_APP_*` pairs.
-- `mcp-srv-node` serves `GetPublicWeatherForecast`/`GetPublicWeatherHistory`; `mcp-srv-python`
-  serves `GetCities` (GeoDB, largest cities near a coordinate). `GetCities` also exists in-process
-  in Core (`GetCitiesEvent`/`GetCitiesHandler`) for the local-loop paths. Never register the same
-  tool name on two MCP hosts.
+  addition to the existing `MCP_SRV_APP_SERVICE_*` (User sub-agent in Chat4b/5b) and
+  `MCP_SRV_FUNC_APP_*` pairs.
+- `mcp-srv-node` serves `GetPublicWeatherCurrent`/`GetPublicWeatherForecast`/`GetPublicWeatherHistory`;
+  `mcp-srv-python` serves `GetCities` (GeoDB, largest cities near a coordinate); `mcp-srv-app-service`
+  serves the saved-pin tools `GetUser`/`AddUserPin`/`DeleteUserPin`. `GetCities` and the pin tools
+  also exist in-process in Core (`GetCitiesHandler`, `Users/Handlers`) for the local-loop paths.
+  Never register the same tool name on two MCP hosts.
+- `mcp-srv-app-service` needs `DB_CONNECTION_STRING` for its pin tools; without it the host
+  still starts but `/About` reports unhealthy and tool calls fail. V4 AI weather and the hosted
+  Foundry toolbox (Chat3/V5) deliberately do not attach it.
 - React's `BackendWakeGate` pings `mcp-srv-python`'s and `mcp-srv-node`'s `/Wake` at
   `http://localhost:8140/Wake` and `http://localhost:8150/Wake` like every other backend
   layer — without those servers running locally, `npm start` sits on the wake screen
