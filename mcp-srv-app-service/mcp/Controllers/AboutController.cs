@@ -18,6 +18,8 @@ public sealed class AboutController(
         string[] expectedTools =
         [
             "GetPublicWeatherCurrent",
+            "AddUserPin",
+            "DeleteUserPin",
         ];
         var mcpSrvAppServiceKey = configuration["MCP_SRV_APP_SERVICE_KEY"];
         var isHealthy = !string.IsNullOrWhiteSpace(mcpSrvAppServiceKey)
