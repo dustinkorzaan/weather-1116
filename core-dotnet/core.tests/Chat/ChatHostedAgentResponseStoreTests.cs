@@ -5,23 +5,23 @@ namespace Core.Tests.Chat;
 public class ChatHostedAgentResponseStoreTests
 {
     [Fact]
-    public void GetPreviousResponseId_ReturnsNullWhenUnset()
+    public void GetConversationId_ReturnsNullWhenUnset()
     {
         var store = new ChatHostedAgentResponseStore();
 
-        Assert.Null(store.GetPreviousResponseId("Chat3:abc"));
+        Assert.Null(store.GetConversationId("Chat3:abc"));
     }
 
     [Fact]
-    public void SetPreviousResponseId_RoundTripsPerSession()
+    public void SetConversationId_RoundTripsPerSession()
     {
         var store = new ChatHostedAgentResponseStore();
 
-        store.SetPreviousResponseId("Chat3:one", "resp_1");
-        store.SetPreviousResponseId("Chat3:two", "resp_2");
-        store.SetPreviousResponseId("Chat3:one", "resp_1b");
+        store.SetConversationId("Chat3:one", "conv_1");
+        store.SetConversationId("Chat3:two", "conv_2");
+        store.SetConversationId("Chat3:one", "conv_1b");
 
-        Assert.Equal("resp_1b", store.GetPreviousResponseId("Chat3:one"));
-        Assert.Equal("resp_2", store.GetPreviousResponseId("Chat3:two"));
+        Assert.Equal("conv_1b", store.GetConversationId("Chat3:one"));
+        Assert.Equal("conv_2", store.GetConversationId("Chat3:two"));
     }
 }

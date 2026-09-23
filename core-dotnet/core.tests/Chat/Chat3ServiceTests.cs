@@ -20,6 +20,18 @@ public class Chat3ServiceTests
     }
 
     [Fact]
+    public void Service_ReusesSessionConversationWithoutPreviousResponseId()
+    {
+        var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Chat3/Chat3Service.cs"));
+
+        // Foundry returns HTTP 400 "Cannot provide both 'previous_response_id' and 'conversation'"
+        // if a later turn sends both, so later turns continue the stored conversation instead.
+        Assert.Contains("_responseStore.GetConversationId(sessionId)", source, StringComparison.Ordinal);
+        Assert.Contains("_responseStore.SetConversationId(sessionId, conversationId)", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("options.PreviousResponseId", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Service_CatchesStreamingFailuresDuringEnumeration()
     {
         var source = File.ReadAllText(RepoFiles.FindRepoFile("core-dotnet/core/Chat/Chat3/Chat3Service.cs"));

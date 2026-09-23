@@ -35,9 +35,11 @@ public sealed class ChatFoundrySettings
     /// <summary>
     /// Responses client bound to the hosted Foundry agent. Chat3 sends only the
     /// user prompt; instructions, tools, model, and MCP approval live on the agent.
-    /// Same client + conversation sequence as Foundry Console V5.
+    /// Same client + conversation sequence as Foundry Console V5; pass the session's
+    /// existing conversation id to continue it instead of starting a new one.
     /// </summary>
     public Task<(ProjectResponsesClient ResponseClient, string ConversationId)> CreateProjectResponsesClientForChatAgentAsync(
+        string? existingConversationId,
         CancellationToken cancellationToken = default) =>
-        FoundryAgentResponsesClientFactory.CreateForAgentAsync(ChatAgentName, cancellationToken);
+        FoundryAgentResponsesClientFactory.CreateForAgentAsync(ChatAgentName, existingConversationId, cancellationToken);
 }
