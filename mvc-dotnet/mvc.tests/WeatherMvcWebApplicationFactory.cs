@@ -8,6 +8,15 @@ namespace WeatherMVC.Tests;
 
 public class WeatherMvcWebApplicationFactory : WebApplicationFactory<Program>
 {
+    public WeatherMvcWebApplicationFactory()
+    {
+        // Set DB_CONNECTION_STRING environment variable before the app starts.
+        // This must happen before Program.cs runs Env.TraversePath().Load()
+        Environment.SetEnvironmentVariable("DB_CONNECTION_STRING",
+            "Server=(localdb)\\mssqllocaldb;Database=WeatherMvcTest;Integrated Security=true;",
+            EnvironmentVariableTarget.Process);
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Development");

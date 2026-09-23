@@ -20,10 +20,14 @@ public sealed class PageSplitTests
         using var context = CreateContext();
         var rendered = context.Render<WeatherBlazor.Pages.Index>();
 
-        Assert.Contains("id=\"weather-map\"", rendered.Markup);
-        Assert.Contains("Atlanta, GA", rendered.Markup);
-        Assert.Contains("New York, NY", rendered.Markup);
-        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", rendered.Markup);
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("id=\"weather-map\"", rendered.Markup);
+            Assert.Contains("Atlanta, GA", rendered.Markup);
+            Assert.Contains("New York, NY", rendered.Markup);
+            Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", rendered.Markup);
+        });
+
         Assert.DoesNotContain("\"nyc\"", rendered.Markup);
         Assert.DoesNotContain("Chat Clients", rendered.Markup);
         Assert.DoesNotContain("<h2 class=\"section-title\">Current AI Weather</h2>", rendered.Markup);
@@ -274,7 +278,6 @@ public sealed class PageSplitTests
     {
         var context = new BunitContext();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
-        context.Services.AddHttpClient();
         context.Services.AddFluentUIComponents();
         context.Services.AddSingleton<IConfiguration>(
             new ConfigurationBuilder()
@@ -289,6 +292,7 @@ public sealed class PageSplitTests
         {
             BaseAddress = new Uri("http://localhost/"),
         };
+        context.Services.AddSingleton(http);
         context.Services.AddSingleton(new WeatherApiClient(http, NullLogger<WeatherApiClient>.Instance));
         context.Services.AddSingleton(new ChatApiClient(http));
         return context;
@@ -311,6 +315,21 @@ public sealed class PageSplitTests
                     {
                         RequestMessage = "from test",
                         RequestResponse = "Hello from test API.",
+                    }),
+                };
+            }
+
+            if (path.Equals("/User", StringComparison.OrdinalIgnoreCase))
+            {
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = JsonContent.Create(new
+                    {
+                        userPins = new[]
+                        {
+                            new { id = "59e2459a-b25d-44a7-bcb0-2a4f2e444272", locationName = "Atlanta, GA", latitude = 33.749, longitude = -84.388 },
+                            new { id = "test-id-2", locationName = "New York, NY", latitude = 40.7128, longitude = -74.0060 },
+                        },
                     }),
                 };
             }
