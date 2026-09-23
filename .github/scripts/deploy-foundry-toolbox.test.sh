@@ -13,6 +13,7 @@ fail() {
 APP_JSON='{"id":"conn-app-id","name":"MyMcpSrvAppService","target":"https://app.example/mcp"}'
 FUNC_JSON='{"id":"conn-func-id","name":"MyMcpSrvFuncApp","target":"https://func.example/runtime/webhooks/mcp"}'
 PYTHON_JSON='{"id":"conn-python-id","name":"MyMcpSrvPython","target":"https://python.example/mcp"}'
+NODE_JSON='{"id":"conn-node-id","name":"MyMcpSrvNode","target":"https://node.example/mcp"}'
 
 PAYLOAD="$(
   AZURE_FOUNDRY_PROD_PROJ_URL='https://acct.services.ai.azure.com/api/projects/proj' \
@@ -23,6 +24,7 @@ PAYLOAD="$(
   FOUNDRY_MCP_APP_CONNECTION_JSON="$APP_JSON" \
   FOUNDRY_MCP_FUNC_CONNECTION_JSON="$FUNC_JSON" \
   FOUNDRY_MCP_PYTHON_CONNECTION_JSON="$PYTHON_JSON" \
+  FOUNDRY_MCP_NODE_CONNECTION_JSON="$NODE_JSON" \
   bash "$SCRIPT" --print-body
 )"
 
@@ -48,14 +50,18 @@ FOUNDARY_FEATURES="$(echo "$PAYLOAD" | jq -r '.foundry_features')"
 [[ "$FOUNDARY_FEATURES" == 'Toolboxes=V1Preview' ]] \
   || fail "foundry_features should request toolbox preview APIs"
 
-echo "$PAYLOAD" | jq -e '.version_body.tools | length == 3' >/dev/null \
-  || fail "toolbox should wrap three MCP tools"
+echo "$PAYLOAD" | jq -e '.version_body.tools | length == 4' >/dev/null \
+  || fail "toolbox should wrap four MCP tools"
 echo "$PAYLOAD" | jq -e '.version_body.tools[0].project_connection_id == "conn-app-id"' >/dev/null \
   || fail "toolbox app tool should reference the IaC connection id"
 echo "$PAYLOAD" | jq -e '.version_body.tools[1].project_connection_id == "conn-func-id"' >/dev/null \
   || fail "toolbox func tool should reference the IaC connection id"
 echo "$PAYLOAD" | jq -e '.version_body.tools[2].project_connection_id == "conn-python-id"' >/dev/null \
   || fail "toolbox python tool should reference the IaC connection id"
+echo "$PAYLOAD" | jq -e '.version_body.tools[3].project_connection_id == "conn-node-id"' >/dev/null \
+  || fail "toolbox node tool should reference the IaC connection id"
+echo "$PAYLOAD" | jq -e '.version_body.tools[3].server_label == "McpSrvNode" and .version_body.tools[3].server_url == "https://node.example/mcp"' >/dev/null \
+  || fail "toolbox node tool should use the McpSrvNode label and the connection target"
 echo "$PAYLOAD" | jq -e '.version_body.tools[0].require_approval == "never"' >/dev/null \
   || fail "toolbox tools should set require_approval never"
 echo "$PAYLOAD" | jq -e '.connection_properties.category == "RemoteTool"' >/dev/null \

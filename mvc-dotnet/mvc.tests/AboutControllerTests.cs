@@ -28,7 +28,8 @@ public class AboutControllerTests(WeatherMvcWebApplicationFactory factory) : ICl
         Assert.Contains(apiRoot.Children, child => child.Name == "mcp-srv-app-service" && child.IsHealthy);
         Assert.Contains(apiRoot.Children, child => child.Name == "mcp-srv-func-app" && child.IsHealthy);
         Assert.Contains(apiRoot.Children, child => child.Name == "mcp-srv-python" && child.IsHealthy);
+        Assert.Contains(apiRoot.Children, child => child.Name == "mcp-srv-node" && child.IsHealthy);
         Assert.Contains(apiRoot.Children, child => child.Name == "Worker Root" && child.IsHealthy);
-        Assert.Equal(5, apiRoot.Children.Count);
+        Assert.Equal(6, apiRoot.Children.Count);
     }
 }

@@ -1,0 +1,30 @@
+{
+  "name": "weather-mcp-srv-node",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone Node.js MCP server exposing public weather forecast and history tools backed by Open-Meteo.",
+  "type": "module",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
+  "scripts": {
+    "start": "node mcp/src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@azure/monitor-opentelemetry": "^1.20.0",
+    "@modelcontextprotocol/sdk": "^1.30.1",
+    "express": "^5.2.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.0.0",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.3.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.1"
+  }
+}

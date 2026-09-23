@@ -255,6 +255,33 @@ jobs:
         run: python -m pytest -q mcp.tests
         working-directory: mcp-srv-python
 
+  test-mcp-srv-node:
+    name: Test MCP Server on Node
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mcp-srv-node/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: mcp-srv-node
+
+      - name: Typecheck
+        run: npm run typecheck
+        working-directory: mcp-srv-node
+
+      - name: Run mcp-srv-node tests
+        run: npm test -- --run
+        working-directory: mcp-srv-node
+
   bicep-validate:
     name: Validate Bicep Templates
     runs-on: ubuntu-latest
@@ -319,6 +346,7 @@ jobs:
           VITE_MCP_SRV_APP_SERVICE_URL: ${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}
           VITE_MCP_SRV_FUNC_APP_URL: ${{ vars.PROD_MCP_SRV_FUNC_APP_URL }}
           VITE_MCP_SRV_PYTHON_URL: ${{ vars.PROD_MCP_SRV_PYTHON_URL }}
+          VITE_MCP_SRV_NODE_URL: ${{ vars.PROD_MCP_SRV_NODE_URL }}
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Run React tests
@@ -340,6 +368,7 @@ jobs:
           - dockerfile: mcp-srv-app-service/mcp/Dockerfile
           - dockerfile: mcp-srv-func-app/mcp/Dockerfile
           - dockerfile: mcp-srv-python/mcp/Dockerfile
+          - dockerfile: mcp-srv-node/mcp/Dockerfile
 
     steps:
       - name: Checkout repository
@@ -365,6 +394,7 @@ jobs:
       - test-mcp-srv-app-service
       - test-mcp-srv-func-app
       - test-mcp-srv-python
+      - test-mcp-srv-node
       - build-and-test-react
       - bicep-validate
       - docker-build

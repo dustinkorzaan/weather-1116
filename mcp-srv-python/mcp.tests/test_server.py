@@ -49,6 +49,27 @@ def test_mcp_accepts_non_localhost_host_header(monkeypatch):
     assert response.status_code != 401
 
 
+def test_tools_list_is_empty_while_weather_tools_live_on_mcp_srv_node(monkeypatch):
+    """GetPublicWeatherForecast/GetPublicWeatherHistory are commented out here and served by
+    mcp-srv-node; tools/list must still succeed (callers keep this server attached) and must
+    not advertise either name, so the two hosts never register the same tool."""
+    app = _build_test_app(monkeypatch)
+    with TestClient(app) as client:
+        response = client.post(
+            "/mcp",
+            headers={
+                "Authorization": "Bearer test-key",
+                "Content-Type": "application/json",
+                "Accept": "application/json, text/event-stream",
+            },
+            json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
+        )
+    assert response.status_code == 200
+    assert "GetPublicWeatherForecast" not in response.text
+    assert "GetPublicWeatherHistory" not in response.text
+    assert '"tools":[]' in response.text.replace(" ", "")
+
+
 def test_mcp_rejects_all_requests_when_key_unset(monkeypatch):
     monkeypatch.delenv("MCP_SRV_PYTHON_KEY", raising=False)
     from weather_mcp_srv_python.server import build_app

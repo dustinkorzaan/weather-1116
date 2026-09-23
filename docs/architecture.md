@@ -5,7 +5,7 @@
 This sample demystifies Foundry, agents, and models: from model-direct, to
 local in-process tool loops, to remote MCP, to a hosted agent, behind a pin map.
 
-This repository is a Weather sample app implemented across eight runnable
+This repository is a Weather sample app implemented across nine runnable
 stacks plus one shared .NET class library.
 
 Six of those projects are primary: five runnable applications (React UI,
@@ -13,7 +13,7 @@ Blazor UI, MVC UI, API, and Worker) plus the shared `Core` class library.
 The goal is feature parity across all UI implementations while keeping each
 project idiomatic for its framework.
 
-The remaining three runnable stacks are the **MCP tool hosts**. The UIs never
+The remaining four runnable stacks are the **MCP tool hosts**. The UIs never
 call them directly. Current AI Weather now ships three handler versions side
 by side: `GetCurrentAIWeatherV3Handler` resolves geo/weather tools in-process
 (V3 pattern, used by the `/weather` modal's "current" tab),
@@ -56,7 +56,8 @@ not need them.
 | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | Remote MCP server exposing `GetPublicWeatherCurrent` via `Core` |
 | MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetLatLong` via `Core` |
-| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | Standalone Python MCP server exposing `GetPublicWeatherForecast` and `GetPublicWeatherHistory` directly against Open-Meteo (no `Core` dependency, no caching) |
+| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | Standalone Python MCP server that can expose `GetPublicWeatherForecast` and `GetPublicWeatherHistory` directly against Open-Meteo (no `Core` dependency, no caching); both are currently commented out and served by `mcp-srv-node` |
+| MCP Server on Node | [`mcp-srv-node`](../mcp-srv-node) | Standalone Node.js (TypeScript) MCP server exposing `GetPublicWeatherForecast` and `GetPublicWeatherHistory` directly against Open-Meteo — the Node counterpart of `mcp-srv-python` (no `Core` dependency, no caching) |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
 Ports for runnable apps are in [`README.md`](../README.md); worker and console
@@ -187,22 +188,31 @@ CQMediator handlers the sample uses in-process elsewhere.
 | --- | --- | --- | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | `GetPublicWeatherCurrent` | 8110 | `/mcp` | Bearer `MCP_SRV_APP_SERVICE_KEY` (no default — must be set by developer) |
 | MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLong`, `GetLocation` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
-| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | `GetPublicWeatherForecast`, `GetPublicWeatherHistory` | 8140 | `/mcp` | Bearer `MCP_SRV_PYTHON_KEY` (no default — must be set by developer) |
+| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | none (forecast/history commented out) | 8140 | `/mcp` | Bearer `MCP_SRV_PYTHON_KEY` (no default — must be set by developer) |
+| MCP Server on Node | [`mcp-srv-node`](../mcp-srv-node) | `GetPublicWeatherForecast`, `GetPublicWeatherHistory` | 8150 | `/mcp` | Bearer `MCP_SRV_NODE_KEY` (no default — must be set by developer) |
 
 `GetPublicWeatherForecast` and `GetPublicWeatherHistory` used to live on MCP
 Server on App Service; they moved to the standalone Python server, which
 calls Open-Meteo directly instead of going through `Core`/CQMediator (no
 shared library, no caching layer — see [`mcp-srv-python/README.md`](../mcp-srv-python/README.md)).
+`mcp-srv-node` is a line-for-line Node port of that server (same tool names,
+descriptions, resolutions, and response shape — see
+[`mcp-srv-node/README.md`](../mcp-srv-node/README.md)). Each tool is registered on
+exactly one of the two at a time; the other keeps it commented out and out of
+its `EXPECTED_TOOLS`. Every caller attaches both hosts, so moving a tool between
+them needs no caller, prompt, or infra change. Today both tools are on
+`mcp-srv-node`, and `mcp-srv-python` answers `tools/list` with an empty list.
 
 VS Code launch configs: **WeatherMcpSrvAppService**, **WeatherMcpSrvFuncApp**. Ports are
 also forwarded in [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json)
-(mcp-srv-python is run directly, e.g. `weather-mcp-srv-python`, rather than via a
-VS Code launch config, since it isn't a .NET project).
+(mcp-srv-python and mcp-srv-node are run directly, e.g. `weather-mcp-srv-python` or
+`npm start`, or via the **run mcp srv python** / **run mcp srv node** VS Code tasks,
+rather than a launch config, since they aren't .NET projects).
 
 Prod apps (ACA): `wx1116-prod-mcp-srv-app-service`, `wx1116-prod-mcp-srv-func-app`,
-`wx1116-prod-mcp-srv-python`
+`wx1116-prod-mcp-srv-python`, `wx1116-prod-mcp-srv-node`
 (`https://<MCP_SRV_APP_SERVICE_HOSTNAME>`, `https://<MCP_SRV_FUNC_APP_HOSTNAME>`,
-`https://<MCP_SRV_PYTHON_HOSTNAME>` from `azd provision` outputs; see
+`https://<MCP_SRV_PYTHON_HOSTNAME>`, `https://<MCP_SRV_NODE_HOSTNAME>` from `azd provision` outputs; see
 `docs/aca-bootstrap.md` and `prod-deploy-mcp-srv-*.yml`).
 
 Auth examples:
@@ -210,21 +220,24 @@ Auth examples:
 - MCP Server on App Service: `Authorization: Bearer {your MCP_SRV_APP_SERVICE_KEY value}` (`/About` stays open)
 - MCP Server on Function App (Azure): `x-functions-key: {mcp_extension system key from App keys}` (`/About` is anonymous)
 - MCP Server on Python: `Authorization: Bearer {your MCP_SRV_PYTHON_KEY value}`
+- MCP Server on Node: `Authorization: Bearer {your MCP_SRV_NODE_KEY value}`
 
 Each host also exposes an anonymous **`/About`** probe that returns a leaf
-`AboutNode` (`mcp-srv-app-service`, `mcp-srv-func-app`, or `mcp-srv-python`)
+`AboutNode` (`mcp-srv-app-service`, `mcp-srv-func-app`, `mcp-srv-python`, or `mcp-srv-node`)
 with tool-registration health and optional `BUILD_NUMBER` / `BUILD_START` /
 `BUILD_BRANCH_NAME` metadata. mcp-srv-python's is a plain Starlette route
 (`@mcp.custom_route("/About", ...)` in `server.py`) returning the same
-`AboutNode` JSON shape, healthy when `MCP_SRV_PYTHON_KEY` is set and both
-`GetPublicWeatherForecast`/`GetPublicWeatherHistory` are registered.
+`AboutNode` JSON shape, healthy when `MCP_SRV_PYTHON_KEY` is set and every tool in
+its `EXPECTED_TOOLS` is registered (currently empty). mcp-srv-node's is an Express
+route with the same shape, healthy when `MCP_SRV_NODE_KEY` is set and every tool in
+its `EXPECTED_TOOLS` is registered.
 
 API and MVC `/About` aggregate those remote nodes as children under their
 `API Root` subtree (see [About and health](#about-and-health)). Production base
 URLs are configured via `MCP_SRV_APP_SERVICE_URL`, `MCP_SRV_FUNC_APP_URL`,
-`MCP_SRV_PYTHON_URL`, and `WORKER_DOTNET_URL` (GitHub variables
+`MCP_SRV_PYTHON_URL`, `MCP_SRV_NODE_URL`, and `WORKER_DOTNET_URL` (GitHub variables
 `PROD_MCP_SRV_APP_SERVICE_URL`, `PROD_MCP_SRV_FUNC_APP_URL`,
-`PROD_MCP_SRV_PYTHON_URL`, `PROD_WORKER_DOTNET_URL`); `/About` is appended in code.
+`PROD_MCP_SRV_PYTHON_URL`, `PROD_MCP_SRV_NODE_URL`, `PROD_WORKER_DOTNET_URL`); `/About` is appended in code.
 
 ## Background Worker (Hangfire)
 
@@ -440,9 +453,9 @@ Each stage's workflow file can also be triggered directly via
 `workflow_dispatch` on any branch (e.g. hotfixes) -- including the
 orchestrator itself, which runs the full chain against that branch's code.
 Deployables include API,
-MVC, React, Blazor, worker-dotnet, and all three MCP hosts on **Azure Container
+MVC, React, Blazor, worker-dotnet, and all four MCP hosts on **Azure Container
 Apps + ACR** (Functions-on-ACA for `mcp-srv-func-app`; plain container apps for
-`mcp-srv-app-service` and `mcp-srv-python`). Bootstrap:
+`mcp-srv-app-service`, `mcp-srv-python`, and `mcp-srv-node`). Bootstrap:
 [`docs/aca-bootstrap.md`](aca-bootstrap.md).
 
 ## Repository Layout
@@ -473,6 +486,9 @@ mcp-srv-func-app/
 mcp-srv-python/
   mcp/                       Standalone Python MCP server (weather_mcp_srv_python)
   mcp.tests/                 pytest suite
+mcp-srv-node/
+  mcp/                       Standalone Node.js MCP server (TypeScript, run via Node type stripping)
+  mcp.tests/                 Vitest suite
 FoundryConsoleV1…V5/         Foundry learning console demos
 docs/                        Documentation (including this file)
 ```
@@ -504,6 +520,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `MCP_SRV_FUNC_APP_KEY` | Yes | `mcp_extension` system key for the `McpSrvFuncApp` server (`x-functions-key`) |
 | `MCP_SRV_APP_SERVICE_KEY` | Yes | Bearer token for the `McpSrvAppService` server |
 | `MCP_SRV_PYTHON_KEY` | Yes | Bearer token for the `McpSrvPython` server |
+| `MCP_SRV_NODE_KEY` | Yes | Bearer token for the `McpSrvNode` server |
 
 **API/MVC AI weather settings:**
 
@@ -514,6 +531,7 @@ Run from VS Code or `dotnet run` in each folder. Settings use the
 | `MCP_SRV_FUNC_APP_URL` / `MCP_SRV_FUNC_APP_KEY` | V4 only | `McpSrvFuncApp` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_APP_SERVICE_URL` / `MCP_SRV_APP_SERVICE_KEY` | V4 only | `McpSrvAppService` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `MCP_SRV_PYTHON_URL` / `MCP_SRV_PYTHON_KEY` | V4 only | `McpSrvPython` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
+| `MCP_SRV_NODE_URL` / `MCP_SRV_NODE_KEY` | V4 only | `McpSrvNode` server URL/key, used by `GetCurrentAIWeatherV4Handler` |
 | `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME` | No (V5 only) | Hosted agent name for `GetCurrentAIWeatherV5Handler`. Defaults to `wx1116-agent-for-current-weather`. The agent's own response schema must match `AIWeatherResponse`'s camelCase fields and must not require `runLogDetails` - V5 has no local schema to strip it from. Each MCP tool on the agent must use `require_approval: never` (see below); V5 does not round-trip approvals. |
 
 No `AZURE_FOUNDRY_PROD_KEY` here: that API key is only for the FoundryConsoleV1-V5
@@ -540,7 +558,7 @@ Foundry project's own identity already hold for their respective Agents API use.
 `/current-ai-weather`) runs tools in-process and does not need
 `MCP_SRV_*`. `GetCurrentAIWeatherV4Handler` (the V4 tab on
 `/current-ai-weather`) needs the same `MCP_SRV_FUNC_APP_*`/
-`MCP_SRV_APP_SERVICE_*`/`MCP_SRV_PYTHON_*` variables as the Chat1b/Chat2b
+`MCP_SRV_APP_SERVICE_*`/`MCP_SRV_PYTHON_*`/`MCP_SRV_NODE_*` variables as the Chat1b/Chat2b
 remote-MCP chat tabs
 (see [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)).
 The confirm-nashville-ai-weather-v4 worker recurring job needs them too.
@@ -552,12 +570,12 @@ sends only the user prompt. The hosted agent (`wx1116-agent-for-current-weather`
 MCP tools without asking this app to approve.
 
 The Foundry account/project itself (`infra/modules/ai-foundry.bicep`) now
-provisions the `gpt-5.4-mini` model deployment and registers all three MCP
+provisions the `gpt-5.4-mini` model deployment and registers all four MCP
 tool hosts as **RemoteTool** connections on the project (`MyMcpSrvAppService`,
-`MyMcpSrvFuncApp`, `MyMcpSrvPython` — target URL + auth header,
+`MyMcpSrvFuncApp`, `MyMcpSrvPython`, `MyMcpSrvNode` — target URL + auth header,
 `metadata.type=generic_mcp`, kept in sync with the live
 `PROD_MCP_SRV_APP_SERVICE_KEY` / `PROD_MCP_SRV_FUNC_APP_KEY` /
-`PROD_MCP_SRV_PYTHON_KEY` secrets on every push to `main`). That is the
+`PROD_MCP_SRV_PYTHON_KEY` / `PROD_MCP_SRV_NODE_KEY` secrets on every push to `main`). That is the
 IaC home for the tools: Foundry has no ARM resource for agents themselves,
 so publishing `wx1116-agent-for-current-weather` and `wx1116-agent-for-chat` is handled
 by the `prod-deploy-foundry-agents` workflow
@@ -595,7 +613,7 @@ Portal fallback (only if you need to inspect or repair by hand):
 4. Confirm the agent's toolbox MCP tool uses the `Wx1116GeoNonAIWeather`
    connection and **Approval** is **Never** (`require_approval: never`).
    The toolbox itself should list `MyMcpSrvAppService`, `MyMcpSrvFuncApp`,
-   and `MyMcpSrvPython`.
+   `MyMcpSrvPython`, and `MyMcpSrvNode`.
 5. V5 calls the agent **by name** (project default version).
 
 Both agents attach the same toolbox MCP tool (`require_approval: never`). Chat3

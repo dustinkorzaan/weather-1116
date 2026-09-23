@@ -313,7 +313,8 @@ public sealed class Chat5bService : IChat5ClientService
             tools: _hostedMcpToolFactory.CreateGeoTools());
 
         // Agent NonAI Weather 👤: weather sub-agent — current/forecast/history for a given
-        // lat/long only, via the mcp-srv-app-service remote MCP host.
+        // lat/long only, via the mcp-srv-app-service (current), mcp-srv-python, and mcp-srv-node
+        // (forecast/history) remote MCP hosts.
         AIAgent nonAiWeatherAgent = responsesClient.AsAIAgent(
             name: "NonAIWeather",
             instructions: ChatSystemInstructions.MultiAgentNonAiWeatherAssistant,

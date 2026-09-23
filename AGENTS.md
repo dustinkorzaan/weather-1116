@@ -2,12 +2,12 @@
 
 ## Cursor Cloud specific instructions
 
-This repo is one Weather sample implemented across eight runnable stacks plus
+This repo is one Weather sample implemented across nine runnable stacks plus
 one shared `Core` class library (see `README.md` and `docs/architecture.md`).
 Six of those projects are primary: five runnable applications (React UI,
 Blazor UI, MVC UI, API, and Worker) plus the shared `Core` class library;
-the other three runnable stacks are the MCP hosts (Container App, Functions
-on ACA, and a standalone Python server with no dependency on `Core`).
+the other four runnable stacks are the MCP hosts (Container App, Functions
+on ACA, and standalone Python and Node.js servers with no dependency on `Core`).
 
 ## Git / PR policy
 
@@ -48,6 +48,7 @@ hot reload); React uses `npm start`. Ports come from each project's
 | MCP Server on App Service | `mcp-srv-app-service/mcp` | `ASPNETCORE_ENVIRONMENT=Development dotnet run` | 8110 |
 | MCP Server on Function App | `mcp-srv-func-app/mcp` | `func start` from `mcp-srv-func-app/mcp` (or VS Code **WeatherMcpSrvFuncApp**) | 8120 |
 | MCP Server on Python | `mcp-srv-python/mcp` | `pip install -e "./mcp[dev]"` then `weather-mcp-srv-python` from `mcp-srv-python/mcp/`, with `MCP_SRV_PYTHON_KEY` set (see `mcp-srv-python/mcp/.env.example`) | 8140 |
+| MCP Server on Node | `mcp-srv-node` | `npm ci` then `npm start` from `mcp-srv-node/`, with `MCP_SRV_NODE_KEY` set (see `mcp-srv-node/mcp/.env.example`) | 8150 |
 
 ### Non-obvious caveats
 
@@ -58,13 +59,16 @@ hot reload); React uses `npm start`. Ports come from each project's
  Blazor's hello call fails.
 - `WeatherMVC` is standalone (duplicates backend logic via `Core`/CQMediator) and
   does not call the API.
-- Chat1b, Chat2b, Chat4b (NonAI Weather sub-agent), and the V4 AI weather path
-  now need `MCP_SRV_PYTHON_URL`/`MCP_SRV_PYTHON_KEY` on api/mvc/worker, in
-  addition to the existing `MCP_SRV_APP_SERVICE_*`/`MCP_SRV_FUNC_APP_*` pairs.
-- React's `BackendWakeGate` pings `mcp-srv-python`'s `/Wake` at
-  `http://localhost:8140/Wake` like every other backend layer — without that
-  server running locally, `npm start` sits on the wake screen indefinitely
-  (same as the existing MCP App Service/Func App targets).
+- Chat1b, Chat2b, Chat4b/Chat5b (NonAI Weather sub-agent), and the V4 AI weather path
+  need `MCP_SRV_PYTHON_URL`/`MCP_SRV_PYTHON_KEY` and `MCP_SRV_NODE_URL`/`MCP_SRV_NODE_KEY`
+  on api/mvc/worker, in addition to the existing `MCP_SRV_APP_SERVICE_*`/`MCP_SRV_FUNC_APP_*` pairs.
+- `GetPublicWeatherForecast`/`GetPublicWeatherHistory` are served by exactly one of
+  `mcp-srv-python`/`mcp-srv-node` at a time; the other keeps the tool commented out
+  (and out of its `EXPECTED_TOOLS`). Never register the same tool name on both hosts.
+- React's `BackendWakeGate` pings `mcp-srv-python`'s and `mcp-srv-node`'s `/Wake` at
+  `http://localhost:8140/Wake` and `http://localhost:8150/Wake` like every other backend
+  layer — without those servers running locally, `npm start` sits on the wake screen
+  indefinitely (same as the existing MCP App Service/Func App targets).
 - `worker-dotnet` runs Hangfire job servers and exposes `/hangfire` (dashboard,
   POC — no auth) and `/About`. API and MVC are Hangfire clients only (shared
   `DB_CONNECTION_STRING` storage); without a DB connection string each process
@@ -98,12 +102,15 @@ for ordinary implementation work.
   `build-test.yml`).
 - `mcp-srv-python` tests: `pip install -e "./mcp[dev]"` then `python -m pytest mcp.tests`
   from `mcp-srv-python/` (pytest, not a .NET test project).
+- `mcp-srv-node` tests: `npm ci`, `npm run typecheck`, then `npm test -- --run` from
+  `mcp-srv-node/` (Vitest). It runs TypeScript directly via Node 24 type stripping — no build step.
 - On push to `main`, `build-test-provision-deploy.yml` calls `build-test.yml`,
   then `prod-provision-infra.yml` (`needs: [build_test]`), then every
   `prod-deploy-*.yml` in parallel (`needs: [provision]`). Each stage's
   workflow file can also be run standalone via `workflow_dispatch` on any
   branch (e.g. hotfixes).
 - Production hosting is **Azure Container Apps + ACR** (five ASP.NET images
-  plus one Python image for `mcp-srv-python`) plus **Functions on ACA** for
+  plus one Python image for `mcp-srv-python` and one Node image for `mcp-srv-node`)
+  plus **Functions on ACA** for
   `mcp-srv-func-app` and **Static Web Apps** for React.
   First-deploy bootstrap: `docs/aca-bootstrap.md`.

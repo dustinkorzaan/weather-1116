@@ -29,6 +29,9 @@
     "mcpSrvPythonKey": {
       "value": "${MCP_SRV_PYTHON_KEY}"
     },
+    "mcpSrvNodeKey": {
+      "value": "${MCP_SRV_NODE_KEY}"
+    },
     "staticWebAppCustomDomain": {
       "value": "${STATIC_WEB_APP_CUSTOM_DOMAIN=wx.korzaan.com}"
     }

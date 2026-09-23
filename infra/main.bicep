@@ -42,6 +42,10 @@ param mcpSrvFuncAppKey string
 @description('Bearer token for the standalone Python MCP server tool host, registered as the MyMcpSrvPython Foundry RemoteTool connection. Supply via azd env set / --parameters at deploy time.')
 param mcpSrvPythonKey string
 
+@secure()
+@description('Bearer token for the standalone Node.js MCP server tool host, registered as the MyMcpSrvNode Foundry RemoteTool connection. Supply via azd env set / --parameters at deploy time.')
+param mcpSrvNodeKey string
+
 @description('Custom domain hostname to bind to the Static Web App, e.g. wx.korzaan.com. Its CNAME must already point at the Static Web App default hostname before this deploys, or validation fails. Empty skips custom domain binding.')
 param staticWebAppCustomDomain string = 'wx.korzaan.com'
 
@@ -56,8 +60,8 @@ var placeholderImage = 'mcr.microsoft.com/dotnet/samples:aspnetapp'
 
 var existingKeys = empty(existingContainerAppKeys) ? [] : split(existingContainerAppKeys, ',')
 
-// Per-app identity configuration. Indices 0-5 align 1:1 with containerAppsConfig
-// below (generic container apps). Index 6 is the Functions-on-ACA MCP host, which
+// Per-app identity configuration. Indices 0-6 align 1:1 with containerAppsConfig
+// below (generic container apps). Index 7 is the Functions-on-ACA MCP host, which
 // isn't in containerAppsConfig and is referenced by its own hardcoded index instead.
 var appIdentityConfig = [
   { key: 'api', name: '${namePrefix}-${environmentName}-api-mi' }
@@ -66,6 +70,7 @@ var appIdentityConfig = [
   { key: 'worker', name: '${namePrefix}-${environmentName}-worker-mi' }
   { key: 'mcp-srv-app-service', name: '${namePrefix}-${environmentName}-mcp-srv-app-service-mi' }
   { key: 'mcp-srv-python', name: '${namePrefix}-${environmentName}-mcp-srv-python-mi' }
+  { key: 'mcp-srv-node', name: '${namePrefix}-${environmentName}-mcp-srv-node-mi' }
   { key: 'mcp-srv-func-app', name: '${namePrefix}-${environmentName}-mcp-srv-func-app-mi' }
 ]
 
@@ -81,6 +86,7 @@ var containerAppsConfig = [
   { key: 'worker', setAzureClientId: true, maxReplicas: 1, stickySessions: false }
   { key: 'mcp-srv-app-service', setAzureClientId: false, maxReplicas: 5, stickySessions: false }
   { key: 'mcp-srv-python', setAzureClientId: false, maxReplicas: 5, stickySessions: false }
+  { key: 'mcp-srv-node', setAzureClientId: false, maxReplicas: 5, stickySessions: false }
 ]
 
 module githubActionsIdentity 'modules/managed-identity.bicep' = {
@@ -148,9 +154,9 @@ module acrPullForFunctionsApp 'modules/acr-role-assignment.bicep' = {
   name: 'acr-pull-mcp-srv-func-app'
   params: {
     registryName: acr.outputs.name
-    principalId: appIdentities[6].outputs.principalId
+    principalId: appIdentities[7].outputs.principalId
     roleDefinitionId: acrPullRoleId
-    assignmentName: guid(acr.outputs.id, appIdentities[6].outputs.principalId, acrPullRoleId)
+    assignmentName: guid(acr.outputs.id, appIdentities[7].outputs.principalId, acrPullRoleId)
   }
 }
 
@@ -203,9 +209,9 @@ module functionsContainerApp 'modules/functions-container-app.bicep' = {
     location: location
     managedEnvironmentId: acaEnvironment.outputs.id
     storageAccountName: storageAccountName
-    userAssignedIdentityId: appIdentities[6].outputs.id
-    userAssignedIdentityPrincipalId: appIdentities[6].outputs.principalId
-    userAssignedIdentityClientId: appIdentities[6].outputs.clientId
+    userAssignedIdentityId: appIdentities[7].outputs.id
+    userAssignedIdentityPrincipalId: appIdentities[7].outputs.principalId
+    userAssignedIdentityClientId: appIdentities[7].outputs.clientId
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
     acrLoginServer: acr.outputs.loginServer
     existingImage: existingFunctionsContainerApp.outputs.image
@@ -252,9 +258,11 @@ module aiFoundry 'modules/ai-foundry.bicep' = {
     mcpSrvAppServiceUrl: 'https://${containerApps[4].outputs.fqdn}/mcp'
     mcpSrvFuncAppUrl: 'https://${functionsContainerApp.outputs.fqdn}/runtime/webhooks/mcp'
     mcpSrvPythonUrl: 'https://${containerApps[5].outputs.fqdn}/mcp'
+    mcpSrvNodeUrl: 'https://${containerApps[6].outputs.fqdn}/mcp'
     mcpSrvAppServiceKey: mcpSrvAppServiceKey
     mcpSrvFuncAppKey: mcpSrvFuncAppKey
     mcpSrvPythonKey: mcpSrvPythonKey
+    mcpSrvNodeKey: mcpSrvNodeKey
   }
 }
 
@@ -271,6 +279,7 @@ output BLAZOR_HOSTNAME string = containerApps[2].outputs.fqdn
 output WORKER_HOSTNAME string = containerApps[3].outputs.fqdn
 output MCP_SRV_APP_SERVICE_HOSTNAME string = containerApps[4].outputs.fqdn
 output MCP_SRV_PYTHON_HOSTNAME string = containerApps[5].outputs.fqdn
+output MCP_SRV_NODE_HOSTNAME string = containerApps[6].outputs.fqdn
 output MCP_SRV_FUNC_APP_HOSTNAME string = functionsContainerApp.outputs.fqdn
 
 output SQL_SERVER_FQDN string = sql.outputs.serverFullyQualifiedDomainName
@@ -288,6 +297,7 @@ output AI_FOUNDRY_MODEL_DEPLOYMENT_NAME string = aiFoundry.outputs.modelDeployme
 output AI_FOUNDRY_MCP_SRV_APP_SERVICE_CONNECTION_NAME string = aiFoundry.outputs.mcpSrvAppServiceConnectionName
 output AI_FOUNDRY_MCP_SRV_FUNC_APP_CONNECTION_NAME string = aiFoundry.outputs.mcpSrvFuncAppConnectionName
 output AI_FOUNDRY_MCP_SRV_PYTHON_CONNECTION_NAME string = aiFoundry.outputs.mcpSrvPythonConnectionName
+output AI_FOUNDRY_MCP_SRV_NODE_CONNECTION_NAME string = aiFoundry.outputs.mcpSrvNodeConnectionName
 
 output GITHUB_ACTIONS_IDENTITY_CLIENT_ID string = githubActionsIdentity.outputs.clientId
 output GITHUB_ACTIONS_IDENTITY_PRINCIPAL_ID string = githubActionsIdentity.outputs.principalId
@@ -298,4 +308,5 @@ output MI_BLAZOR_CLIENT_ID string = appIdentities[2].outputs.clientId
 output MI_WORKER_CLIENT_ID string = appIdentities[3].outputs.clientId
 output MI_MCP_SRV_APP_SERVICE_CLIENT_ID string = appIdentities[4].outputs.clientId
 output MI_MCP_SRV_PYTHON_CLIENT_ID string = appIdentities[5].outputs.clientId
-output MI_MCP_SRV_FUNC_APP_CLIENT_ID string = appIdentities[6].outputs.clientId
+output MI_MCP_SRV_NODE_CLIENT_ID string = appIdentities[6].outputs.clientId
+output MI_MCP_SRV_FUNC_APP_CLIENT_ID string = appIdentities[7].outputs.clientId

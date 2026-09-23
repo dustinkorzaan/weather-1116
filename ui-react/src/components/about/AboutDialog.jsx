@@ -5,6 +5,7 @@ import {
   blazorBaseUrl,
   mcpSrvAppServiceBaseUrl,
   mcpSrvFuncAppBaseUrl,
+  mcpSrvNodeBaseUrl,
   mcpSrvPythonBaseUrl,
   mvcBaseUrl,
   workerBaseUrl,
@@ -20,6 +21,7 @@ const SITE_LINKS = [
   { label: 'MCP App Service About', href: `${mcpSrvAppServiceBaseUrl}/About` },
   { label: 'MCP Func App About', href: `${mcpSrvFuncAppBaseUrl}/about` },
   { label: 'MCP Python About', href: `${mcpSrvPythonBaseUrl}/About` },
+  { label: 'MCP Node About', href: `${mcpSrvNodeBaseUrl}/About` },
 ];
 
 function SiteLinksFooter() {
