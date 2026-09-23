@@ -106,7 +106,7 @@ if (!app.Environment.IsEnvironment("Testing"))
 {
 	using (var migrationScope = app.Services.CreateScope())
 	{
-		migrationScope.ServiceProvider.GetRequiredService<AgentActivityDbContext>().Database.Migrate();
+		migrationScope.ServiceProvider.GetRequiredService<WX1116DbContext>().Database.Migrate();
 	}
 }
 
