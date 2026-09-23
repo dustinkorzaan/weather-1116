@@ -9,7 +9,6 @@ import { Provider } from 'react-redux';
 import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-dom';
 import App from './App';
 import { AboutTreeNode } from './components/about/AboutTreeNode';
-import { MAP_CITIES_STORAGE_KEY } from './data/mapCities';
 import { weatherApi } from './services/weatherApi';
 
 function createTestStore() {
@@ -60,6 +59,45 @@ function mockHelloFetch(weather = {}) {
     if (url.includes('/Home/Hello')) {
       return new Response(
         JSON.stringify({ requestResponse: 'Hello from test API.' }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    if (url.includes('/User/AddPin')) {
+      return new Response(
+        JSON.stringify({
+          id: '00000000-0000-0000-0000-000000000000',
+          firstName: '',
+          lastName: '',
+          email: '',
+          userPins: [
+            {
+              id: '12345678-1234-1234-1234-123456789012',
+              latitude: 36.1627,
+              longitude: -86.7816,
+              locationName: 'Nashville, Tennessee',
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    if (url.includes('/User')) {
+      return new Response(
+        JSON.stringify({
+          id: '00000000-0000-0000-0000-000000000000',
+          firstName: '',
+          lastName: '',
+          email: '',
+          userPins: [],
+        }),
         {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
@@ -150,7 +188,6 @@ afterEach(() => {
   document.documentElement.removeAttribute('data-theme');
   document.documentElement.removeAttribute('data-theme-preference');
   window.localStorage.removeItem('weather-theme');
-  window.sessionStorage.removeItem(MAP_CITIES_STORAGE_KEY);
 });
 
 test('user menu is a gray outline control instead of a solid blue button', async () => {
@@ -533,7 +570,4 @@ test('header plus control opens a location popdown and stays open while geo sear
     .find((url) => url.includes('/Geo'));
   expect(geoUrl).toBeDefined();
   expect(geoUrl).toContain('location=Nashville');
-  expect(JSON.parse(window.sessionStorage.getItem(MAP_CITIES_STORAGE_KEY)).at(-1).name).toBe(
-    'Nashville, Tennessee'
-  );
 });

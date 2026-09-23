@@ -1,11 +1,11 @@
 using Core.Data;
 using Core.Data.Domain;
-using Core.User.Events;
-using Core.User.Models;
+using Core.Users.Events;
+using Core.Users.Models;
 using CQMediator;
 using Microsoft.EntityFrameworkCore;
 
-namespace Core.User.Handlers;
+namespace Core.Users.Handlers;
 
 public class DeleteUserPinHandler : IRequestHandler<DeleteUserPinEvent, UserDTO>
 {

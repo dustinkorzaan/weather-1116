@@ -1,4 +1,4 @@
-namespace Core.User.Models;
+namespace Core.Users.Models;
 
 public class UserDTO
 {

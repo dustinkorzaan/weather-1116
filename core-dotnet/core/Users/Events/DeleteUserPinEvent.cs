@@ -1,7 +1,7 @@
-using Core.User.Models;
+using Core.Users.Models;
 using CQMediator;
 
-namespace Core.User.Events;
+namespace Core.Users.Events;
 
 /// <summary>
 /// Deletes a pin from the current user.

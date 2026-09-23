@@ -1,5 +1,5 @@
-using Core.User.Events;
-using Core.User.Models;
+using Core.Users.Events;
+using Core.Users.Models;
 using CQMediator;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,27 +19,48 @@ public class UserController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<UserDTO>> GetUser(CancellationToken cancellationToken)
     {
-        var user = await _mediator.Send(new GetUserEvent(), cancellationToken);
-        return Ok(user);
+        try
+        {
+            var user = await _mediator.Send(new GetUserEvent(), cancellationToken);
+            return Ok(user);
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound();
+        }
     }
 
     [HttpPost("AddPin")]
     public async Task<ActionResult<UserDTO>> AddUserPin([FromBody] AddUserPinRequest request, CancellationToken cancellationToken)
     {
-        var user = await _mediator.Send(new AddUserPinEvent
+        try
         {
-            Latitude = request.Latitude,
-            Longitude = request.Longitude,
-            LocationName = request.LocationName,
-        }, cancellationToken);
-        return Ok(user);
+            var user = await _mediator.Send(new AddUserPinEvent
+            {
+                Latitude = request.Latitude,
+                Longitude = request.Longitude,
+                LocationName = request.LocationName,
+            }, cancellationToken);
+            return Ok(user);
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound();
+        }
     }
 
     [HttpDelete("DeletePin")]
     public async Task<ActionResult<UserDTO>> DeleteUserPin([FromQuery] Guid userPinId, CancellationToken cancellationToken)
     {
-        var user = await _mediator.Send(new DeleteUserPinEvent { UserPinId = userPinId }, cancellationToken);
-        return Ok(user);
+        try
+        {
+            var user = await _mediator.Send(new DeleteUserPinEvent { UserPinId = userPinId }, cancellationToken);
+            return Ok(user);
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound();
+        }
     }
 }
 
