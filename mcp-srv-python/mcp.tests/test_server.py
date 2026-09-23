@@ -49,10 +49,11 @@ def test_mcp_accepts_non_localhost_host_header(monkeypatch):
     assert response.status_code != 401
 
 
-def test_tools_list_is_empty_while_weather_tools_live_on_mcp_srv_node(monkeypatch):
-    """GetPublicWeatherForecast/GetPublicWeatherHistory are commented out here and served by
-    mcp-srv-node; tools/list must still succeed (callers keep this server attached) and must
-    not advertise either name, so the two hosts never register the same tool."""
+def test_tools_list_returns_only_get_cities(monkeypatch):
+    """Forecast/history live on mcp-srv-node; this host serves GetCities only, with
+    radiusKm/minPopulation/maxCities optional (in that order) so callers can omit them."""
+    import json
+
     app = _build_test_app(monkeypatch)
     with TestClient(app) as client:
         response = client.post(
@@ -65,9 +66,13 @@ def test_tools_list_is_empty_while_weather_tools_live_on_mcp_srv_node(monkeypatc
             json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
         )
     assert response.status_code == 200
-    assert "GetPublicWeatherForecast" not in response.text
-    assert "GetPublicWeatherHistory" not in response.text
-    assert '"tools":[]' in response.text.replace(" ", "")
+    data_line = next((line for line in response.text.splitlines() if line.startswith("data: ")), None)
+    payload = json.loads(data_line[len("data: "):] if data_line else response.text)
+    tools = payload["result"]["tools"]
+    assert [tool["name"] for tool in tools] == ["GetCities"]
+    schema = tools[0]["inputSchema"]
+    assert sorted(schema["required"]) == ["latitude", "longitude"]
+    assert list(schema["properties"]) == ["latitude", "longitude", "radiusKm", "minPopulation", "maxCities"]
 
 
 def test_mcp_rejects_all_requests_when_key_unset(monkeypatch):

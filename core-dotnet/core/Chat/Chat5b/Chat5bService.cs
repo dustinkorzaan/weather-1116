@@ -304,8 +304,8 @@ public sealed class Chat5bService : IChat5ClientService
 
     private AIAgent BuildOrchestrationAgent(ResponsesClient responsesClient, bool useHardenedPrompt)
     {
-        // Agent Geo 👤: geo sub-agent — resolves location name ↔ latitude/longitude only, via the
-        // mcp-srv-func-app remote MCP host.
+        // Agent Geo 👤: geo sub-agent — location name ↔ latitude/longitude and nearby cities, via the
+        // mcp-srv-func-app (GetLatLong/GetLocation) and mcp-srv-python (GetCities) remote MCP hosts.
         AIAgent geoAgent = responsesClient.AsAIAgent(
             name: "Geo",
             instructions: ChatSystemInstructions.MultiAgentGeoAssistant,
@@ -313,8 +313,8 @@ public sealed class Chat5bService : IChat5ClientService
             tools: _hostedMcpToolFactory.CreateGeoTools());
 
         // Agent NonAI Weather 👤: weather sub-agent — current/forecast/history for a given
-        // lat/long only, via the mcp-srv-app-service (current), mcp-srv-python, and mcp-srv-node
-        // (forecast/history) remote MCP hosts.
+        // lat/long only, via the mcp-srv-app-service (current) and mcp-srv-node (forecast/history)
+        // remote MCP hosts.
         AIAgent nonAiWeatherAgent = responsesClient.AsAIAgent(
             name: "NonAIWeather",
             instructions: ChatSystemInstructions.MultiAgentNonAiWeatherAssistant,

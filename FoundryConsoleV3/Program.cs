@@ -44,7 +44,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - ResponsesClient with in-process tool callbacks (GetLatLong, GetLocation, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory)
+		 - ResponsesClient with in-process tool callbacks (GetLatLong, GetLocation, GetCities, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory)
 		 - Model can call tools to derive lat/long, label a coordinate, and fetch public weather
 		 - JSON output from AI
 		""");
@@ -65,7 +65,8 @@ internal class Program
 		You can call the GetLatLong tool to resolve a place name to ranked latitude/longitude
 		matches (up to 5; rank 1 is the best match). Call GetLocation to turn latitude/longitude into
 		a City, State label (City, State, Country outside the US), then a feature name, then a
-		formatted coordinate such as 35.51° N, 86.58° W. Call GetPublicWeatherCurrent
+		formatted coordinate such as 35.51° N, 86.58° W. Call GetCities to list the largest cities
+		within a radius of a latitude/longitude. Call GetPublicWeatherCurrent
 		for conditions now, GetPublicWeatherForecast for upcoming weather, or GetPublicWeatherHistory
 		for the recent past.
 
@@ -164,6 +165,40 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
+		var getCitiesTool = ResponseTool.CreateFunctionTool(
+			functionName: "GetCities",
+			functionDescription: "Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. radiusKm defaults to 161 (range 1-1000), minPopulation to 0, and maxCities to 25 (range 0-100); out-of-range values are adjusted, not rejected. The search radius is capped at 100 km (the GeoDB free-tier limit), and the result reports the radius actually used.",
+			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+			{
+			  "type": "object",
+			  "properties": {
+			    "latitude": {
+			      "type": "number",
+			      "description": "Latitude in decimal degrees"
+			    },
+			    "longitude": {
+			      "type": "number",
+			      "description": "Longitude in decimal degrees"
+			    },
+			    "radiusKm": {
+			      "type": ["number", "null"],
+			      "description": "Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit. Null uses the default."
+			    },
+			    "minPopulation": {
+			      "type": ["integer", "null"],
+			      "description": "Only include cities with at least this many people (0 or more, default 0). Null uses the default."
+			    },
+			    "maxCities": {
+			      "type": ["integer", "null"],
+			      "description": "Maximum number of cities to return (0-100, default 25). Null uses the default."
+			    }
+			  },
+			  "required": ["latitude", "longitude", "radiusKm", "minPopulation", "maxCities"],
+			  "additionalProperties": false
+			}
+			""")),
+			strictModeEnabled: true);
+
 		var getPublicWeatherCurrentTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetPublicWeatherCurrent",
 			functionDescription: "Get current public weather conditions for a latitude and longitude.",
@@ -257,7 +292,7 @@ internal class Program
 				var options = new CreateResponseOptions(deploymentName, inputItems)
 				{
 					Instructions = systemPrompt,
-					Tools = { getLatLongTool, getLocationTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool },
+					Tools = { getLatLongTool, getLocationTool, getCitiesTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool },
 					TextOptions = new ResponseTextOptions
 					{
 						TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
@@ -306,6 +341,36 @@ internal class Program
 										Longitude = longitude,
 									});
 									var functionOutput = JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
+									Console.WriteLine($"Tool output: {functionOutput}");
+									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
+									break;
+								}
+
+							case "GetCities":
+								{
+									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
+									var root = argumentsJson.RootElement;
+									var citiesEvent = new GetCitiesEvent
+									{
+										Latitude = root.GetProperty("latitude").GetDouble(),
+										Longitude = root.GetProperty("longitude").GetDouble(),
+									};
+									if (root.TryGetProperty("radiusKm", out var radiusElement) && radiusElement.ValueKind == JsonValueKind.Number)
+									{
+										citiesEvent.RadiusKm = radiusElement.GetDouble();
+									}
+									if (root.TryGetProperty("minPopulation", out var populationElement) && populationElement.ValueKind == JsonValueKind.Number && populationElement.TryGetInt64(out var minPopulation))
+									{
+										citiesEvent.MinPopulation = minPopulation;
+									}
+									if (root.TryGetProperty("maxCities", out var maxCitiesElement) && maxCitiesElement.ValueKind == JsonValueKind.Number && maxCitiesElement.TryGetInt32(out var maxCities))
+									{
+										citiesEvent.MaxCities = maxCities;
+									}
+
+									Console.WriteLine($"\nTool call: GetCities({citiesEvent.Latitude}, {citiesEvent.Longitude}, {citiesEvent.RadiusKm}, {citiesEvent.MinPopulation}, {citiesEvent.MaxCities})");
+									var citiesData = await mediator.Send(citiesEvent);
+									var functionOutput = JsonSerializer.Serialize(citiesData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
 									break;

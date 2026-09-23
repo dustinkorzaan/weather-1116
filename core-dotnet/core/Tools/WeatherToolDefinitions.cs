@@ -45,6 +45,43 @@ public static class WeatherToolDefinitions
         """)),
         strictModeEnabled: true);
 
+    public static FunctionTool CreateGetCitiesTool() => ResponseTool.CreateFunctionTool(
+        functionName: "GetCities",
+        functionDescription: GetCitiesDescription,
+        functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
+        {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "description": "Latitude in decimal degrees"
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Longitude in decimal degrees"
+            },
+            "radiusKm": {
+              "type": ["number", "null"],
+              "description": "Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit. Null uses the default."
+            },
+            "minPopulation": {
+              "type": ["integer", "null"],
+              "description": "Only include cities with at least this many people (0 or more, default 0). Null uses the default."
+            },
+            "maxCities": {
+              "type": ["integer", "null"],
+              "description": "Maximum number of cities to return (0-100, default 25). Null uses the default."
+            }
+          },
+          "required": ["latitude", "longitude", "radiusKm", "minPopulation", "maxCities"],
+          "additionalProperties": false
+        }
+        """)),
+        strictModeEnabled: true);
+
+    public const string GetCitiesDescription =
+        "Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. radiusKm defaults to 161 (range 1-1000), minPopulation to 0, and maxCities to 25 (range 0-100); out-of-range values are adjusted, not rejected. The search radius is capped at 100 km (the GeoDB free-tier limit), and the result reports the radius actually used.";
+
     public static FunctionTool CreateGetPublicWeatherCurrentTool() => ResponseTool.CreateFunctionTool(
         functionName: "GetPublicWeatherCurrent",
         functionDescription: "Get current public weather conditions for a latitude and longitude.",

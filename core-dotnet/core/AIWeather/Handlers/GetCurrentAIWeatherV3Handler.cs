@@ -131,6 +131,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             ResponsesClient client = FoundryResponsesClientFactory.Create(endpoint);
 
             FunctionTool getLatLongTool = WeatherToolDefinitions.CreateGetLatLongTool();
+            FunctionTool getCitiesTool = WeatherToolDefinitions.CreateGetCitiesTool();
             FunctionTool getPublicWeatherCurrentTool = WeatherToolDefinitions.CreateGetPublicWeatherCurrentTool();
 
             var inputItems = new List<ResponseItem>
@@ -161,7 +162,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
 
                 CreateResponseOptions options = new(deploymentName, inputItems)
                 {
-                    Tools = { getLatLongTool, getPublicWeatherCurrentTool },
+                    Tools = { getLatLongTool, getCitiesTool, getPublicWeatherCurrentTool },
                     TextOptions = new ResponseTextOptions
                     {
                         TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(

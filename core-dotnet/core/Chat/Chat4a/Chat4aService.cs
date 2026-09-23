@@ -4,6 +4,7 @@ using System.Text.Json;
 using Core.Chat.Models;
 using Core.Chat.Services;
 using Core.Geo.Events;
+using Core.Tools;
 using Core.Json;
 using Core.Weather.Events;
 using CQMediator;
@@ -158,7 +159,7 @@ public sealed class Chat4aService : IChatClientService
 
     private AIAgent BuildOrchestrationAgent(ResponsesClient responsesClient)
     {
-        // Agent Geo 👤: geo sub-agent — resolves location name ↔ latitude/longitude only.
+        // Agent Geo 👤: geo sub-agent — location name ↔ latitude/longitude and nearby cities.
         AIAgent geoAgent = responsesClient.AsAIAgent(
             name: "Geo",
             instructions: ChatSystemInstructions.MultiAgentGeoAssistant,
@@ -184,7 +185,7 @@ public sealed class Chat4aService : IChatClientService
                 geoAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "Geo",
-                    Description = "Geo assistant. Resolves a location name to latitude/longitude, or reverse-geocodes latitude/longitude to a place label. Send it a natural-language geo question; it returns the answer as text.",
+                    Description = "Geo assistant. Resolves a location name to latitude/longitude, reverse-geocodes latitude/longitude to a place label, or lists the largest cities within a radius of a latitude/longitude. Send it a natural-language geo question; it returns the answer as text.",
                 }),
                 // session omitted — AsAIFunction creates a fresh, throwaway session per call, so NonAI
                 // Weather is stateless per delegated call; the orchestrator alone owns memory.
@@ -196,11 +197,12 @@ public sealed class Chat4aService : IChatClientService
             ]);
     }
 
-    // Agent Geo 👤's tools: geo resolution only.
+    // Agent Geo 👤's tools: geo resolution and nearby cities.
     private IList<AITool> CreateGeoTools() =>
     [
         AIFunctionFactory.Create(GetLatLong),
         AIFunctionFactory.Create(GetLocation),
+        AIFunctionFactory.Create(GetCities),
     ];
 
     // Agent NonAI Weather 👤's tools: weather facts only.
@@ -232,6 +234,26 @@ public sealed class Chat4aService : IChatClientService
             Longitude = longitude,
         }, cancellationToken);
         return JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
+    }
+
+    [Description(WeatherToolDefinitions.GetCitiesDescription)]
+    private async Task<string> GetCities(
+        [Description("Latitude in decimal degrees")] double latitude,
+        [Description("Longitude in decimal degrees")] double longitude,
+        [Description("Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit.")] double radiusKm = GetCitiesEvent.DefaultRadiusKm,
+        [Description("Only include cities with at least this many people (0 or more, default 0).")] long minPopulation = GetCitiesEvent.DefaultMinPopulation,
+        [Description("Maximum number of cities to return (0-100, default 25).")] int maxCities = GetCitiesEvent.DefaultMaxCities,
+        CancellationToken cancellationToken = default)
+    {
+        var cities = await _mediator.Send(new GetCitiesEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+            RadiusKm = radiusKm,
+            MinPopulation = minPopulation,
+            MaxCities = maxCities,
+        }, cancellationToken);
+        return JsonSerializer.Serialize(cities, JsonDefaults.Pretty);
     }
 
     [Description("Get current public weather conditions for a latitude and longitude.")]

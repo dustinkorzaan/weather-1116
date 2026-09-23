@@ -59,12 +59,14 @@ hot reload); React uses `npm start`. Ports come from each project's
  Blazor's hello call fails.
 - `WeatherMVC` is standalone (duplicates backend logic via `Core`/CQMediator) and
   does not call the API.
-- Chat1b, Chat2b, Chat4b/Chat5b (NonAI Weather sub-agent), and the V4 AI weather path
-  need `MCP_SRV_PYTHON_URL`/`MCP_SRV_PYTHON_KEY` and `MCP_SRV_NODE_URL`/`MCP_SRV_NODE_KEY`
-  on api/mvc/worker, in addition to the existing `MCP_SRV_APP_SERVICE_*`/`MCP_SRV_FUNC_APP_*` pairs.
-- `GetPublicWeatherForecast`/`GetPublicWeatherHistory` are served by exactly one of
-  `mcp-srv-python`/`mcp-srv-node` at a time; the other keeps the tool commented out
-  (and out of its `EXPECTED_TOOLS`). Never register the same tool name on both hosts.
+- Chat1b, Chat2b, Chat4b/Chat5b, and the V4 AI weather path need
+  `MCP_SRV_PYTHON_URL`/`MCP_SRV_PYTHON_KEY` (Geo sub-agent in Chat4b/5b) and
+  `MCP_SRV_NODE_URL`/`MCP_SRV_NODE_KEY` (NonAI Weather sub-agent) on api/mvc/worker, in
+  addition to the existing `MCP_SRV_APP_SERVICE_*`/`MCP_SRV_FUNC_APP_*` pairs.
+- `mcp-srv-node` serves `GetPublicWeatherForecast`/`GetPublicWeatherHistory`; `mcp-srv-python`
+  serves `GetCities` (GeoDB, largest cities near a coordinate). `GetCities` also exists in-process
+  in Core (`GetCitiesEvent`/`GetCitiesHandler`) for the local-loop paths. Never register the same
+  tool name on two MCP hosts.
 - React's `BackendWakeGate` pings `mcp-srv-python`'s and `mcp-srv-node`'s `/Wake` at
   `http://localhost:8140/Wake` and `http://localhost:8150/Wake` like every other backend
   layer — without those servers running locally, `npm start` sits on the wake screen

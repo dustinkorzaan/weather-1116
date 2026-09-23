@@ -4,6 +4,7 @@ using System.Text.Json;
 using Core.Chat.Models;
 using Core.Chat.Services;
 using Core.Geo.Events;
+using Core.Tools;
 using Core.Json;
 using Core.Weather.Events;
 using CQMediator;
@@ -148,6 +149,7 @@ public sealed class Chat2aService : IChatClientService
     [
         AIFunctionFactory.Create(GetLatLong),
         AIFunctionFactory.Create(GetLocation),
+        AIFunctionFactory.Create(GetCities),
         AIFunctionFactory.Create(GetPublicWeatherCurrent),
         AIFunctionFactory.Create(GetPublicWeatherForecast),
         AIFunctionFactory.Create(GetPublicWeatherHistory),
@@ -174,6 +176,26 @@ public sealed class Chat2aService : IChatClientService
             Longitude = longitude,
         }, cancellationToken);
         return JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
+    }
+
+    [Description(WeatherToolDefinitions.GetCitiesDescription)]
+    private async Task<string> GetCities(
+        [Description("Latitude in decimal degrees")] double latitude,
+        [Description("Longitude in decimal degrees")] double longitude,
+        [Description("Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit.")] double radiusKm = GetCitiesEvent.DefaultRadiusKm,
+        [Description("Only include cities with at least this many people (0 or more, default 0).")] long minPopulation = GetCitiesEvent.DefaultMinPopulation,
+        [Description("Maximum number of cities to return (0-100, default 25).")] int maxCities = GetCitiesEvent.DefaultMaxCities,
+        CancellationToken cancellationToken = default)
+    {
+        var cities = await _mediator.Send(new GetCitiesEvent
+        {
+            Latitude = latitude,
+            Longitude = longitude,
+            RadiusKm = radiusKm,
+            MinPopulation = minPopulation,
+            MaxCities = maxCities,
+        }, cancellationToken);
+        return JsonSerializer.Serialize(cities, JsonDefaults.Pretty);
     }
 
     [Description("Get current public weather conditions for a latitude and longitude.")]

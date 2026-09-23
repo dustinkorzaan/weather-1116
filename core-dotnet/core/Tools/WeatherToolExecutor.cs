@@ -23,6 +23,7 @@ public sealed class WeatherToolExecutor
         {
             "GetLatLong" => await ExecuteGetLatLong(functionCall.FunctionArguments, cancellationToken),
             "GetLocation" => await ExecuteGetLocation(functionCall.FunctionArguments, cancellationToken),
+            "GetCities" => await ExecuteGetCities(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherCurrent" => await ExecuteGetPublicWeatherCurrent(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherForecast" => await ExecuteGetPublicWeatherForecast(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherHistory" => await ExecuteGetPublicWeatherHistory(functionCall.FunctionArguments, cancellationToken),
@@ -55,6 +56,44 @@ public sealed class WeatherToolExecutor
         }, cancellationToken);
         return JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
     }
+
+    private async Task<string> ExecuteGetCities(BinaryData arguments, CancellationToken cancellationToken)
+    {
+        using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
+        var root = argumentsJson.RootElement;
+        var citiesEvent = new GetCitiesEvent
+        {
+            Latitude = root.GetProperty("latitude").GetDouble(),
+            Longitude = root.GetProperty("longitude").GetDouble(),
+        };
+        if (TryGetNumber(root, "radiusKm") is double radiusKm)
+        {
+            citiesEvent.RadiusKm = radiusKm;
+        }
+        if (TryGetNumber(root, "minPopulation") is double minPopulation)
+        {
+            citiesEvent.MinPopulation = (long)Math.Clamp(minPopulation, 0, long.MaxValue);
+        }
+        if (TryGetNumber(root, "maxCities") is double maxCities)
+        {
+            citiesEvent.MaxCities = (int)Math.Clamp(maxCities, int.MinValue, int.MaxValue);
+        }
+
+        // GeoDB's free tier can refuse or throttle; report that to the model instead of failing the
+        // whole chat turn or AI weather request that happened to call GetCities.
+        try
+        {
+            var cities = await _mediator.Send(citiesEvent, cancellationToken);
+            return JsonSerializer.Serialize(cities, JsonDefaults.Pretty);
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            return JsonSerializer.Serialize(new { error = $"GetCities is unavailable right now: {ex.Message}" }, JsonDefaults.Pretty);
+        }
+    }
+
+    private static double? TryGetNumber(JsonElement root, string name) =>
+        root.TryGetProperty(name, out var element) && element.ValueKind == JsonValueKind.Number ? element.GetDouble() : null;
 
     private async Task<string> ExecuteGetPublicWeatherCurrent(BinaryData arguments, CancellationToken cancellationToken)
     {

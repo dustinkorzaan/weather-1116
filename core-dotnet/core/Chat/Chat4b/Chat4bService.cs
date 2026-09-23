@@ -19,9 +19,9 @@ namespace Core.Chat.Chat4b;
 /// call, which is what makes Geo and NonAI Weather stateless, same as Chat4a.
 /// The difference from Chat4a: Geo and NonAI Weather get their tools from the existing remote MCP
 /// hosts (<see cref="ChatHostedMcpToolFactory"/>) instead of in-process CQMediator calls — Geo
-/// gets only the <c>mcp-srv-func-app</c> tool, NonAI Weather gets the <c>mcp-srv-app-service</c>
-/// (current conditions), <c>mcp-srv-python</c>, and <c>mcp-srv-node</c> (forecast/history, each
-/// registered on exactly one of those two hosts at a time) tools. From the
+/// gets the <c>mcp-srv-func-app</c> (GetLatLong/GetLocation) and <c>mcp-srv-python</c> (GetCities)
+/// tools, NonAI Weather gets the <c>mcp-srv-app-service</c> (current conditions) and
+/// <c>mcp-srv-node</c> (forecast/history) tools. From the
 /// orchestrator's point of view nothing changes: Geo and
 /// NonAI Weather are still ordinary <c>AsAIFunction</c>-wrapped tools, so the orchestrator's
 /// stream still shows <see cref="FunctionCallContent"/>/<see cref="FunctionResultContent"/>, not
@@ -162,8 +162,8 @@ public sealed class Chat4bService : IChatClientService
 
     private AIAgent BuildOrchestrationAgent(ResponsesClient responsesClient)
     {
-        // Agent Geo 👤: geo sub-agent — resolves location name ↔ latitude/longitude only, via the
-        // mcp-srv-func-app remote MCP host.
+        // Agent Geo 👤: geo sub-agent — location name ↔ latitude/longitude and nearby cities, via the
+        // mcp-srv-func-app (GetLatLong/GetLocation) and mcp-srv-python (GetCities) remote MCP hosts.
         AIAgent geoAgent = responsesClient.AsAIAgent(
             name: "Geo",
             instructions: ChatSystemInstructions.MultiAgentGeoAssistant,
@@ -171,8 +171,8 @@ public sealed class Chat4bService : IChatClientService
             tools: _hostedMcpToolFactory.CreateGeoTools());
 
         // Agent NonAI Weather 👤: weather sub-agent — current/forecast/history for a given
-        // lat/long only, via the mcp-srv-app-service (current), mcp-srv-python, and mcp-srv-node
-        // (forecast/history) remote MCP hosts.
+        // lat/long only, via the mcp-srv-app-service (current) and mcp-srv-node (forecast/history)
+        // remote MCP hosts.
         AIAgent nonAiWeatherAgent = responsesClient.AsAIAgent(
             name: "NonAIWeather",
             instructions: ChatSystemInstructions.MultiAgentNonAiWeatherAssistant,
@@ -191,7 +191,7 @@ public sealed class Chat4bService : IChatClientService
                 geoAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "Geo",
-                    Description = "Geo assistant. Resolves a location name to latitude/longitude, or reverse-geocodes latitude/longitude to a place label. Send it a natural-language geo question; it returns the answer as text.",
+                    Description = "Geo assistant. Resolves a location name to latitude/longitude, reverse-geocodes latitude/longitude to a place label, or lists the largest cities within a radius of a latitude/longitude. Send it a natural-language geo question; it returns the answer as text.",
                 }),
                 // session omitted — AsAIFunction creates a fresh, throwaway session per call, so NonAI
                 // Weather is stateless per delegated call; the orchestrator alone owns memory.

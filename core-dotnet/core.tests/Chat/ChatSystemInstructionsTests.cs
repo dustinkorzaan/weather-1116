@@ -15,6 +15,8 @@ public class ChatSystemInstructionsTests
         Assert.DoesNotContain("place name, latitude, longitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("latitude/longitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("GetLocation", prompt);
+        Assert.Contains("GetCities", prompt);
+        Assert.Contains("Report distances in miles", prompt);
         Assert.Contains("GetPublicWeatherCurrent", prompt);
         Assert.Contains("GetPublicWeatherForecast", prompt);
         Assert.Contains("GetPublicWeatherHistory", prompt);
@@ -32,6 +34,8 @@ public class ChatSystemInstructionsTests
 
         Assert.Contains("Geo", prompt);
         Assert.Contains("NonAI Weather", prompt);
+        Assert.Contains("largest cities", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("pass every city through to the user", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Never guess a location or weather fact yourself", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("GitHub-flavored Markdown", prompt);
     }
@@ -64,6 +68,8 @@ public class ChatSystemInstructionsTests
         Assert.Contains("latitude", prompt, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("GetLatLong", prompt);
         Assert.Contains("GetLocation", prompt);
+        Assert.Contains("GetCities", prompt);
+        Assert.Contains("For GetCities, answer with every returned city", prompt);
         Assert.DoesNotContain("°F", prompt);
         Assert.DoesNotContain("GetPublicWeather", prompt);
     }
@@ -72,6 +78,8 @@ public class ChatSystemInstructionsTests
     public void MultiAgentNonAiWeatherAssistant_IsWeatherOnlyWithUnitRules()
     {
         var prompt = ChatSystemInstructions.MultiAgentNonAiWeatherAssistant;
+
+        Assert.DoesNotContain("GetCities", prompt);
 
         Assert.Contains("°F", prompt);
         Assert.Contains("mph", prompt);

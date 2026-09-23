@@ -1,7 +1,7 @@
 [project]
 name = "weather-mcp-srv-python"
 version = "0.1.0"
-description = "Standalone Python MCP server exposing public weather forecast and history tools backed by Open-Meteo."
+description = "Standalone Python MCP server exposing the GetCities tool (largest cities near a coordinate) backed by GeoDB Cities."
 requires-python = ">=3.11"
 dependencies = [
     "mcp[cli]>=2.0",
