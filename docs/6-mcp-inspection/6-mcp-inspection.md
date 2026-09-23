@@ -101,8 +101,8 @@ curl -sS -X POST "https://wx1116-prod-mcp-srv-app-service.thankfulrock-0d49c0fe.
 The same `tools/list`/`tools/call` requests work against `mcp-srv-python`
 (`GetCities`) and `mcp-srv-node` (`GetPublicWeatherForecast`,
 `GetPublicWeatherHistory`), substituting the URL and bearer token. For example,
-`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"GetCities","arguments":{"latitude":36.1627,"longitude":-86.7816,"distanceKM":300,"size":10}}}`
-lists the 10 largest cities within 300 km of Nashville:
+`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"GetCities","arguments":{"latitude":36.1627,"longitude":-86.7816,"radiusKm":100,"minPopulation":50000,"maxCities":10}}}`
+lists the 10 largest cities of at least 50,000 people within 100 km of Nashville:
 
 ```bash
 curl -sS -X POST "https://wx1116-prod-mcp-srv-python.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp" \

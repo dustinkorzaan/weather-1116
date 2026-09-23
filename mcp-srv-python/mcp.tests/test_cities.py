@@ -8,8 +8,9 @@ from weather_mcp_srv_python.tools import cities
 from weather_mcp_srv_python.tools.cities import (
     build_nearby_cities_url,
     get_cities,
-    normalize_distance_km,
-    normalize_size,
+    normalize_max_cities,
+    normalize_min_population,
+    normalize_radius_km,
 )
 
 
@@ -17,17 +18,27 @@ from weather_mcp_srv_python.tools.cities import (
     ("value", "expected"),
     [(0, 1.0), (-50, 1.0), (5000, 1000.0), (math.inf, 1000.0), (math.nan, 161.0), (None, 161.0), (250.5, 250.5)],
 )
-def test_normalize_distance_km_resets_into_range(value, expected):
-    assert normalize_distance_km(value) == expected
+def test_normalize_radius_km_resets_into_range(value, expected):
+    assert normalize_radius_km(value) == expected
 
 
 @pytest.mark.parametrize(("value", "expected"), [(-5, 0), (500, 100), (40, 40), (None, 25), (12.9, 12)])
-def test_normalize_size_resets_into_range(value, expected):
-    assert normalize_size(value) == expected
+def test_normalize_max_cities_resets_into_range(value, expected):
+    assert normalize_max_cities(value) == expected
+
+
+@pytest.mark.parametrize(("value", "expected"), [(-5, 0), (0, 0), (None, 0), (50000, 50000), (-math.inf, 0)])
+def test_normalize_min_population_resets_negative_to_zero(value, expected):
+    assert normalize_min_population(value) == expected
+
+
+def test_build_nearby_cities_url_adds_min_population_only_when_positive():
+    assert "minPopulation" not in build_nearby_cities_url(36.1627, -86.7816, 100, 0, 10, 0)
+    assert "minPopulation=50000" in build_nearby_cities_url(36.1627, -86.7816, 100, 50000, 10, 0)
 
 
 def test_build_nearby_cities_url_uses_escaped_iso6709_location_and_population_sort():
-    url = build_nearby_cities_url(36.1627, -86.7816, 161, 10, 20)
+    url = build_nearby_cities_url(36.1627, -86.7816, 161, 0, 10, 20)
     assert url.startswith(
         "https://geodb-free-service.wirefreethought.com/v1/geo/locations/%2B36.1627-086.7816/nearbyCities?"
     )
@@ -84,20 +95,21 @@ def fake_geodb(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_get_cities_size_zero_returns_empty_without_calling_geodb(fake_geodb):
+async def test_get_cities_max_cities_zero_returns_empty_without_calling_geodb(fake_geodb):
     fake = fake_geodb(50)
-    result = await get_cities(36.16, -86.78, size=-3, page_delay_seconds=0)
+    result = await get_cities(36.16, -86.78, max_cities=-3, page_delay_seconds=0)
     assert result["cities"] == []
-    assert result["size"] == 0
+    assert result["maxCities"] == 0
     assert fake.requested_urls == []
 
 
 @pytest.mark.asyncio
 async def test_get_cities_resets_out_of_range_inputs_instead_of_failing(fake_geodb):
     fake = fake_geodb(500)
-    result = await get_cities(36.16, -86.78, 20000, 1000, page_delay_seconds=0)
-    assert result["distanceKm"] == 100.0
-    assert result["size"] == 100
+    result = await get_cities(36.16, -86.78, 20000, -10, 1000, page_delay_seconds=0)
+    assert result["radiusKm"] == 100.0
+    assert result["minPopulation"] == 0
+    assert result["maxCities"] == 100
     assert result["returned"] == 100
     assert all("radius=100&" in url for url in fake.requested_urls)
 
@@ -107,7 +119,7 @@ async def test_get_cities_resets_out_of_range_inputs_instead_of_failing(fake_geo
 async def test_get_cities_caps_radius_at_geodb_free_tier_maximum(fake_geodb, requested, sent):
     fake = fake_geodb(5)
     result = await get_cities(36.16, -86.78, requested, page_delay_seconds=0)
-    assert result["distanceKm"] == sent
+    assert result["radiusKm"] == sent
     assert f"radius={int(sent)}&" in fake.requested_urls[0]
 
 
@@ -129,12 +141,12 @@ async def test_get_cities_follows_redirects(monkeypatch):
 
     monkeypatch.setattr(cities.httpx, "AsyncClient", client_factory)
     monkeypatch.setattr(cities, "GEODB_BASE_URL", "http://geodb-free-service.wirefreethought.com/v1/geo")
-    result = await get_cities(36.16, -86.78, 50, 3, page_delay_seconds=0)
+    result = await get_cities(36.16, -86.78, 50, 0, 3, page_delay_seconds=0)
     assert result["returned"] == 3
 
 
 @pytest.mark.asyncio
-async def test_get_cities_pages_ten_at_a_time_until_default_size(fake_geodb):
+async def test_get_cities_pages_ten_at_a_time_until_default_max_cities(fake_geodb):
     fake = fake_geodb(500)
     result = await get_cities(36.16, -86.78, page_delay_seconds=0)
     assert result["returned"] == 25
@@ -148,7 +160,7 @@ async def test_get_cities_pages_ten_at_a_time_until_default_size(fake_geodb):
 @pytest.mark.asyncio
 async def test_get_cities_stops_when_geodb_runs_out(fake_geodb):
     fake = fake_geodb(12)
-    result = await get_cities(36.16, -86.78, size=100, page_delay_seconds=0)
+    result = await get_cities(36.16, -86.78, max_cities=100, page_delay_seconds=0)
     assert result["returned"] == 12
     assert result["totalAvailable"] == 12
     assert len(fake.requested_urls) == 2
@@ -157,7 +169,7 @@ async def test_get_cities_stops_when_geodb_runs_out(fake_geodb):
 @pytest.mark.asyncio
 async def test_get_cities_maps_geodb_fields(fake_geodb):
     fake_geodb(1)
-    result = await get_cities(36.16, -86.78, size=1, page_delay_seconds=0)
+    result = await get_cities(36.16, -86.78, max_cities=1, page_delay_seconds=0)
     assert result["cities"] == [
         {
             "name": "City 0",
@@ -194,7 +206,7 @@ def test_get_cities_tool_call_end_to_end(monkeypatch, fake_geodb):
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "tools/call",
-                "params": {"name": "GetCities", "arguments": {"latitude": 36.16, "longitude": -86.78, "distanceKM": 300, "size": 12}},
+                "params": {"name": "GetCities", "arguments": {"latitude": 36.16, "longitude": -86.78, "radiusKm": 300, "minPopulation": 50000, "maxCities": 12}},
             },
         )
 
@@ -204,5 +216,6 @@ def test_get_cities_tool_call_end_to_end(monkeypatch, fake_geodb):
     assert not payload["result"].get("isError")
     result = json.loads(payload["result"]["content"][0]["text"])
     assert result["returned"] == 12
-    assert result["distanceKm"] == 100
-    assert all("radius=100&" in url for url in fake.requested_urls)
+    assert result["radiusKm"] == 100
+    assert result["minPopulation"] == 50000
+    assert all("radius=100&" in url and "minPopulation=50000" in url for url in fake.requested_urls)

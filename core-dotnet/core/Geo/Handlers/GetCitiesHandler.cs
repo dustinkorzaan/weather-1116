@@ -13,7 +13,7 @@ namespace Core.Geo.Handlers;
 
 /// <summary>
 /// Finds the largest cities within a radius of a lat/long via GeoDB Cities' free (no-key) service,
-/// paging until <see cref="GetCitiesEvent.Size"/> cities are collected or GeoDB runs out.
+/// paging until <see cref="GetCitiesEvent.MaxCities"/> cities are collected or GeoDB runs out.
 /// </summary>
 public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesResponse>
 {
@@ -45,12 +45,13 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
 
     public async Task<NonAICitiesResponse> Handle(GetCitiesEvent request, CancellationToken cancellationToken)
     {
-        request.DistanceKm = Math.Min(GetCitiesEvent.NormalizeDistanceKm(request.DistanceKm), GeoDbMaxRadiusKm);
-        request.Size = GetCitiesEvent.NormalizeSize(request.Size);
+        request.RadiusKm = Math.Min(GetCitiesEvent.NormalizeRadiusKm(request.RadiusKm), GeoDbMaxRadiusKm);
+        request.MinPopulation = GetCitiesEvent.NormalizeMinPopulation(request.MinPopulation);
+        request.MaxCities = GetCitiesEvent.NormalizeMaxCities(request.MaxCities);
 
-        if (request.Size == 0)
+        if (request.MaxCities == 0)
         {
-            return new NonAICitiesResponse { DistanceKm = request.DistanceKm, Size = 0 };
+            return NewResponse(request);
         }
 
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetCitiesHandler), Request = request });
@@ -67,18 +68,18 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
         client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", GetLocationHandler.UserAgent);
         client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");
 
-        var response = new NonAICitiesResponse { DistanceKm = request.DistanceKm, Size = request.Size };
+        var response = NewResponse(request);
         var offset = 0;
 
-        while (response.Cities.Count < request.Size)
+        while (response.Cities.Count < request.MaxCities)
         {
             if (offset > 0)
             {
                 await Task.Delay(PageDelay, cancellationToken);
             }
 
-            var limit = Math.Min(GeoDbPageLimit, request.Size - response.Cities.Count);
-            var url = BuildNearbyCitiesUrl(request.Latitude, request.Longitude, request.DistanceKm, limit, offset);
+            var limit = Math.Min(GeoDbPageLimit, request.MaxCities - response.Cities.Count);
+            var url = BuildNearbyCitiesUrl(request.Latitude, request.Longitude, request.RadiusKm, request.MinPopulation, limit, offset);
 
             // codeql[cs/exposure-of-sensitive-information]
             var page = await _retry.Execute(async ct =>
@@ -108,13 +109,20 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
 
         response.Returned = response.Cities.Count;
         _logger.LogInformation(
-            "GeoDB: {Returned} of {TotalAvailable} cities within {DistanceKm} km",
+            "GeoDB: {Returned} of {TotalAvailable} cities within {RadiusKm} km",
             response.Returned,
             response.TotalAvailable,
-            response.DistanceKm);
+            response.RadiusKm);
 
         return response;
     }
+
+    private static NonAICitiesResponse NewResponse(GetCitiesEvent request) => new()
+    {
+        RadiusKm = request.RadiusKm,
+        MinPopulation = request.MinPopulation,
+        MaxCities = request.MaxCities,
+    };
 
     internal static bool IsPermanentFailure(HttpStatusCode statusCode) =>
         (int)statusCode is >= 400 and < 500 && statusCode != HttpStatusCode.TooManyRequests;
@@ -131,11 +139,14 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
     };
 
     // GeoDB location ids are ISO-6709 (e.g. +36.1627-086.7816); the leading '+' must be escaped.
-    internal static string BuildNearbyCitiesUrl(double latitude, double longitude, double distanceKm, int limit, int offset)
+    internal static string BuildNearbyCitiesUrl(double latitude, double longitude, double radiusKm, long minPopulation, int limit, int offset)
     {
         var locationId = string.Create(CultureInfo.InvariantCulture, $"{latitude:+00.0000;-00.0000}{longitude:+000.0000;-000.0000}");
+        var populationFilter = minPopulation > 0
+            ? string.Create(CultureInfo.InvariantCulture, $"&minPopulation={minPopulation}")
+            : string.Empty;
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"{GeoDbBaseUrl}/locations/{Uri.EscapeDataString(locationId)}/nearbyCities?radius={distanceKm:0.###}&distanceUnit=KM&types=CITY&sort=-population&limit={limit}&offset={offset}");
+            $"{GeoDbBaseUrl}/locations/{Uri.EscapeDataString(locationId)}/nearbyCities?radius={radiusKm:0.###}&distanceUnit=KM&types=CITY{populationFilter}&sort=-population&limit={limit}&offset={offset}");
     }
 }

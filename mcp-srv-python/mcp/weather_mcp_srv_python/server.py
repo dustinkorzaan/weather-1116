@@ -10,7 +10,12 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse
 
 from weather_mcp_srv_python.auth import BearerTokenMiddleware
-from weather_mcp_srv_python.tools.cities import DEFAULT_DISTANCE_KM, DEFAULT_SIZE, get_cities
+from weather_mcp_srv_python.tools.cities import (
+    DEFAULT_MAX_CITIES,
+    DEFAULT_MIN_POPULATION,
+    DEFAULT_RADIUS_KM,
+    get_cities,
+)
 
 load_dotenv(find_dotenv(usecwd=True))
 
@@ -76,18 +81,19 @@ async def about(request: Request) -> JSONResponse:
     description=(
         "Find the largest cities (by population) within a radius of a latitude and longitude. "
         "Returns each city's name, region, country, coordinates, distance in km, and population, "
-        "largest first. distanceKM defaults to 161 (range 1-1000) and size defaults to 25 "
-        "(range 0-100); out-of-range values are adjusted, not rejected. The search radius is capped "
-        "at 100 km (the GeoDB free-tier limit), and the result reports the radius actually used."
+        "largest first. radiusKm defaults to 161 (range 1-1000), minPopulation to 0, and maxCities "
+        "to 25 (range 0-100); out-of-range values are adjusted, not rejected. The search radius is "
+        "capped at 100 km (the GeoDB free-tier limit), and the result reports the radius actually used."
     ),
 )
 async def get_cities_tool(
     latitude: float,
     longitude: float,
-    distanceKM: float | None = DEFAULT_DISTANCE_KM,
-    size: int | None = DEFAULT_SIZE,
+    radiusKm: float | None = DEFAULT_RADIUS_KM,
+    minPopulation: int | None = DEFAULT_MIN_POPULATION,
+    maxCities: int | None = DEFAULT_MAX_CITIES,
 ) -> dict:
-    return await get_cities(latitude, longitude, distanceKM, size)
+    return await get_cities(latitude, longitude, radiusKm, minPopulation, maxCities)
 
 
 def build_app():

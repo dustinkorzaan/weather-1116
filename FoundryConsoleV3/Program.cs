@@ -167,7 +167,7 @@ internal class Program
 
 		var getCitiesTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetCities",
-			functionDescription: "Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. distanceKM defaults to 161 (range 1-1000) and size defaults to 25 (range 0-100); out-of-range values are adjusted, not rejected. The search radius is capped at 100 km (the GeoDB free-tier limit), and the result reports the radius actually used.",
+			functionDescription: "Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. radiusKm defaults to 161 (range 1-1000), minPopulation to 0, and maxCities to 25 (range 0-100); out-of-range values are adjusted, not rejected. The search radius is capped at 100 km (the GeoDB free-tier limit), and the result reports the radius actually used.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
 			  "type": "object",
@@ -180,16 +180,20 @@ internal class Program
 			      "type": "number",
 			      "description": "Longitude in decimal degrees"
 			    },
-			    "distanceKM": {
+			    "radiusKm": {
 			      "type": ["number", "null"],
 			      "description": "Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit. Null uses the default."
 			    },
-			    "size": {
+			    "minPopulation": {
 			      "type": ["integer", "null"],
-			      "description": "Maximum number of cities to return (0-100). Null uses the default of 25."
+			      "description": "Only include cities with at least this many people (0 or more, default 0). Null uses the default."
+			    },
+			    "maxCities": {
+			      "type": ["integer", "null"],
+			      "description": "Maximum number of cities to return (0-100, default 25). Null uses the default."
 			    }
 			  },
-			  "required": ["latitude", "longitude", "distanceKM", "size"],
+			  "required": ["latitude", "longitude", "radiusKm", "minPopulation", "maxCities"],
 			  "additionalProperties": false
 			}
 			""")),
@@ -351,16 +355,20 @@ internal class Program
 										Latitude = root.GetProperty("latitude").GetDouble(),
 										Longitude = root.GetProperty("longitude").GetDouble(),
 									};
-									if (root.TryGetProperty("distanceKM", out var distanceElement) && distanceElement.ValueKind == JsonValueKind.Number)
+									if (root.TryGetProperty("radiusKm", out var radiusElement) && radiusElement.ValueKind == JsonValueKind.Number)
 									{
-										citiesEvent.DistanceKm = distanceElement.GetDouble();
+										citiesEvent.RadiusKm = radiusElement.GetDouble();
 									}
-									if (root.TryGetProperty("size", out var sizeElement) && sizeElement.ValueKind == JsonValueKind.Number && sizeElement.TryGetInt32(out var size))
+									if (root.TryGetProperty("minPopulation", out var populationElement) && populationElement.ValueKind == JsonValueKind.Number && populationElement.TryGetInt64(out var minPopulation))
 									{
-										citiesEvent.Size = size;
+										citiesEvent.MinPopulation = minPopulation;
+									}
+									if (root.TryGetProperty("maxCities", out var maxCitiesElement) && maxCitiesElement.ValueKind == JsonValueKind.Number && maxCitiesElement.TryGetInt32(out var maxCities))
+									{
+										citiesEvent.MaxCities = maxCities;
 									}
 
-									Console.WriteLine($"\nTool call: GetCities({citiesEvent.Latitude}, {citiesEvent.Longitude}, {citiesEvent.DistanceKm}, {citiesEvent.Size})");
+									Console.WriteLine($"\nTool call: GetCities({citiesEvent.Latitude}, {citiesEvent.Longitude}, {citiesEvent.RadiusKm}, {citiesEvent.MinPopulation}, {citiesEvent.MaxCities})");
 									var citiesData = await mediator.Send(citiesEvent);
 									var functionOutput = JsonSerializer.Serialize(citiesData, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");

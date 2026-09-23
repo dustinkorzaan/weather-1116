@@ -166,7 +166,7 @@ not declared on the request.
 | --- | --- |
 | `GetLatLong` | Resolve a place name to ranked coordinates (default top 5) |
 | `GetLocation` | Reverse-geocode lat/long to a place label |
-| `GetCities` | Largest cities (by population) within a radius of lat/long — `distanceKM` default 161 (1–1000), `size` default 25 (0–100); out-of-range values are reset, never rejected, and the radius sent to GeoDB is capped at its 100 km free-tier limit. In-process via Core's `GetCitiesHandler`; remote via `mcp-srv-python`. Both call GeoDB Cities |
+| `GetCities` | Largest cities (by population) within a radius of lat/long — `radiusKm` default 161 (1–1000), `minPopulation` default 0, `maxCities` default 25 (0–100); out-of-range values are reset, never rejected, and the radius sent to GeoDB is capped at its 100 km free-tier limit. In-process via Core's `GetCitiesHandler`; remote via `mcp-srv-python`. Both call GeoDB Cities |
 | `GetPublicWeatherCurrent` | Fetch current weather for lat/long |
 | `GetPublicWeatherForecast` | Upcoming forecast: Daily (7 days), Hourly (48 hours), or FifteenMinutes (48 hours) |
 | `GetPublicWeatherHistory` | Recent past: Daily (previous 7 days) or Hourly (previous 48 hours) |
@@ -466,7 +466,7 @@ Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert 
 You have tools to resolve locations to ranked coordinates, turn coordinates into a place label, list the largest cities near a coordinate, and fetch public weather.
 GetLatLong returns up to 5 matches (rank 1 is best); use state and country if you need to skip rank 1.
 GetLocation reverse-geocodes latitude/longitude to City, State in the US, or City, State, Country elsewhere. If that is unavailable it returns a feature name, then a formatted coordinate such as 35.51° N, 86.58° W — use it instead of guessing the place name from coordinates.
-GetCities lists the largest cities (by population) within a radius of a latitude/longitude, largest first, with each city's distance in km. distanceKM defaults to 161 (range 1-1000) and size to 25 (range 0-100); the search radius is capped at 100 km (the GeoDB free-tier limit) and the result reports the radius actually used, so say so if the user asked for more. Report distances in miles.
+GetCities lists the largest cities (by population) within a radius of a latitude/longitude, largest first, with each city's distance in km. radiusKm defaults to 161 (range 1-1000), minPopulation to 0 (use it for requests like "cities over 50,000 people"), and maxCities to 25 (range 0-100); the search radius is capped at 100 km (the GeoDB free-tier limit) and the result reports the radius actually used, so say so if the user asked for more. Report distances in miles.
 GetPublicWeatherCurrent is conditions right now.
 GetPublicWeatherForecast is upcoming weather: Daily (next 7 days), Hourly (next 48 hours), or FifteenMinutes (next 48 hours). Prefer Daily unless the user asks for hourly or 15-minute detail.
 GetPublicWeatherHistory is recent past weather: Daily (previous 7 days) or Hourly (previous 48 hours). Prefer Daily unless the user asks for hourly detail.

@@ -66,18 +66,25 @@ public sealed class WeatherToolExecutor
             Latitude = root.GetProperty("latitude").GetDouble(),
             Longitude = root.GetProperty("longitude").GetDouble(),
         };
-        if (root.TryGetProperty("distanceKM", out var distanceElement) && distanceElement.ValueKind == JsonValueKind.Number)
+        if (TryGetNumber(root, "radiusKm") is double radiusKm)
         {
-            citiesEvent.DistanceKm = distanceElement.GetDouble();
+            citiesEvent.RadiusKm = radiusKm;
         }
-        if (root.TryGetProperty("size", out var sizeElement) && sizeElement.ValueKind == JsonValueKind.Number)
+        if (TryGetNumber(root, "minPopulation") is double minPopulation)
         {
-            citiesEvent.Size = sizeElement.TryGetInt32(out var size) ? size : (int)Math.Clamp(sizeElement.GetDouble(), int.MinValue, int.MaxValue);
+            citiesEvent.MinPopulation = (long)Math.Clamp(minPopulation, 0, long.MaxValue);
+        }
+        if (TryGetNumber(root, "maxCities") is double maxCities)
+        {
+            citiesEvent.MaxCities = (int)Math.Clamp(maxCities, int.MinValue, int.MaxValue);
         }
 
         var cities = await _mediator.Send(citiesEvent, cancellationToken);
         return JsonSerializer.Serialize(cities, JsonDefaults.Pretty);
     }
+
+    private static double? TryGetNumber(JsonElement root, string name) =>
+        root.TryGetProperty(name, out var element) && element.ValueKind == JsonValueKind.Number ? element.GetDouble() : null;
 
     private async Task<string> ExecuteGetPublicWeatherCurrent(BinaryData arguments, CancellationToken cancellationToken)
     {

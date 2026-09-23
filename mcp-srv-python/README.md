@@ -3,16 +3,17 @@
 Standalone Python MCP server exposing one geo tool, backed directly by the free (no-key)
 [GeoDB Cities](https://wirefreethought.github.io/geodb-rest-api-docs/) service:
 
-- `GetCities(latitude, longitude, distanceKM=161, size=25)` — the largest cities (by population)
-  within `distanceKM` of a coordinate, largest first. Each city has `name`, `region`, `country`,
-  `latitude`, `longitude`, `distanceKm`, and `population`; the result also carries the effective
-  `distanceKm`/`size`, `returned`, and `totalAvailable`.
+- `GetCities(latitude, longitude, radiusKm=161, minPopulation=0, maxCities=25)` — the largest
+  cities (by population) within `radiusKm` of a coordinate with at least `minPopulation` people,
+  largest first, at most `maxCities` of them. Each city has `name`, `region`, `country`,
+  `latitude`, `longitude`, `distanceKm` (from the coordinate), and `population`; the result also
+  carries the effective `radiusKm`/`minPopulation`/`maxCities`, `returned`, and `totalAvailable`.
 
-`distanceKM` is reset into 1–1000 km and `size` into 0–100 on every call — out-of-range values
-are adjusted, never rejected. GeoDB's free host rejects (403) any radius above 100 km, so the
-radius actually sent is further capped at 100 km; the result's `distanceKm` reports it. `size` 0
-returns an empty list without calling GeoDB. GeoDB's free tier returns at most 10 cities per
-request at about 1 request per second, so larger sizes are
+On every call `radiusKm` is reset into 1–1000 km, `minPopulation` to 0 or more, and `maxCities`
+into 0–100 — out-of-range values are adjusted, never rejected. GeoDB's free host rejects (403)
+any radius above 100 km, so the radius actually sent is further capped at 100 km; the result's
+`radiusKm` reports it. `maxCities` 0 returns an empty list without calling GeoDB. GeoDB's free
+tier returns at most 10 cities per request at about 1 request per second, so larger counts are
 fetched page by page (25 cities ≈ 3 requests). The same tool is implemented in-process in Core
 (`GetCitiesEvent`/`GetCitiesHandler`) for the local-loop chat paths.
 

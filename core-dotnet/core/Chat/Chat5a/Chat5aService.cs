@@ -5,6 +5,7 @@ using Core.Chat.Models;
 using Core.Chat.Services;
 using Core.Chat.Services.ChatScopeGate;
 using Core.Geo.Events;
+using Core.Tools;
 using Core.Json;
 using Core.Weather.Events;
 using CQMediator;
@@ -394,20 +395,22 @@ public sealed class Chat5aService : IChat5ClientService
         return JsonSerializer.Serialize(locationData, JsonDefaults.Pretty);
     }
 
-    [Description("Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. Out-of-range distanceKM/size values are adjusted, not rejected.")]
+    [Description(WeatherToolDefinitions.GetCitiesDescription)]
     private async Task<string> GetCities(
         [Description("Latitude in decimal degrees")] double latitude,
         [Description("Longitude in decimal degrees")] double longitude,
-        [Description("Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit.")] double distanceKM = GetCitiesEvent.DefaultDistanceKm,
-        [Description("Maximum number of cities to return (0-100). Defaults to 25.")] int size = GetCitiesEvent.DefaultSize,
+        [Description("Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit.")] double radiusKm = GetCitiesEvent.DefaultRadiusKm,
+        [Description("Only include cities with at least this many people (0 or more, default 0).")] long minPopulation = GetCitiesEvent.DefaultMinPopulation,
+        [Description("Maximum number of cities to return (0-100, default 25).")] int maxCities = GetCitiesEvent.DefaultMaxCities,
         CancellationToken cancellationToken = default)
     {
         var cities = await _mediator.Send(new GetCitiesEvent
         {
             Latitude = latitude,
             Longitude = longitude,
-            DistanceKm = distanceKM,
-            Size = size,
+            RadiusKm = radiusKm,
+            MinPopulation = minPopulation,
+            MaxCities = maxCities,
         }, cancellationToken);
         return JsonSerializer.Serialize(cities, JsonDefaults.Pretty);
     }

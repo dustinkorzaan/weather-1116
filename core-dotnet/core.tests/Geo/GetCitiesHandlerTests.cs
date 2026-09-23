@@ -18,35 +18,36 @@ namespace Core.Tests.Geo;
 public class GetCitiesHandlerTests
 {
     [Theory]
-    [InlineData(0, GetCitiesEvent.MinDistanceKm)]
-    [InlineData(-50, GetCitiesEvent.MinDistanceKm)]
-    [InlineData(5000, GetCitiesEvent.MaxDistanceKm)]
-    [InlineData(double.PositiveInfinity, GetCitiesEvent.MaxDistanceKm)]
-    [InlineData(double.NaN, GetCitiesEvent.DefaultDistanceKm)]
+    [InlineData(0, GetCitiesEvent.MinRadiusKm)]
+    [InlineData(-50, GetCitiesEvent.MinRadiusKm)]
+    [InlineData(5000, GetCitiesEvent.MaxRadiusKm)]
+    [InlineData(double.PositiveInfinity, GetCitiesEvent.MaxRadiusKm)]
+    [InlineData(double.NaN, GetCitiesEvent.DefaultRadiusKm)]
     [InlineData(250.5, 250.5)]
-    public void NormalizeDistanceKm_ResetsIntoRange(double input, double expected) =>
-        Assert.Equal(expected, GetCitiesEvent.NormalizeDistanceKm(input));
+    public void NormalizeRadiusKm_ResetsIntoRange(double input, double expected) =>
+        Assert.Equal(expected, GetCitiesEvent.NormalizeRadiusKm(input));
 
     [Theory]
     [InlineData(-5, 0)]
-    [InlineData(500, GetCitiesEvent.MaxSize)]
+    [InlineData(500, GetCitiesEvent.MaxMaxCities)]
     [InlineData(40, 40)]
-    public void NormalizeSize_ResetsIntoRange(int input, int expected) =>
-        Assert.Equal(expected, GetCitiesEvent.NormalizeSize(input));
+    public void NormalizeMaxCities_ResetsIntoRange(int input, int expected) =>
+        Assert.Equal(expected, GetCitiesEvent.NormalizeMaxCities(input));
 
     [Fact]
-    public void Event_Defaults_Are161KmAnd25Cities()
+    public void Event_Defaults_Are161KmNoPopulationFloorAnd25Cities()
     {
         var request = new GetCitiesEvent { Latitude = 36.1627, Longitude = -86.7816 };
 
-        Assert.Equal(161, request.DistanceKm);
-        Assert.Equal(25, request.Size);
+        Assert.Equal(161, request.RadiusKm);
+        Assert.Equal(0, request.MinPopulation);
+        Assert.Equal(25, request.MaxCities);
     }
 
     [Fact]
     public void BuildNearbyCitiesUrl_UsesEscapedIso6709LocationAndPopulationSort()
     {
-        var url = GetCitiesHandler.BuildNearbyCitiesUrl(36.1627, -86.7816, 161, 10, 20);
+        var url = GetCitiesHandler.BuildNearbyCitiesUrl(36.1627, -86.7816, 161, 0, 10, 20);
 
         Assert.StartsWith("https://geodb-free-service.wirefreethought.com/v1/geo/locations/%2B36.1627-086.7816/nearbyCities?", url);
         Assert.Contains("radius=161", url);
@@ -57,18 +58,32 @@ public class GetCitiesHandlerTests
         Assert.Contains("offset=20", url);
     }
 
+    [Theory]
+    [InlineData(-5, 0)]
+    [InlineData(0, 0)]
+    [InlineData(50000, 50000)]
+    public void NormalizeMinPopulation_ResetsNegativeToZero(long input, long expected) =>
+        Assert.Equal(expected, GetCitiesEvent.NormalizeMinPopulation(input));
+
     [Fact]
-    public async Task Handle_SizeZero_ReturnsEmptyWithoutCallingGeoDb()
+    public void BuildNearbyCitiesUrl_AddsMinPopulationOnlyWhenPositive()
+    {
+        Assert.DoesNotContain("minPopulation", GetCitiesHandler.BuildNearbyCitiesUrl(36.1627, -86.7816, 100, 0, 10, 0));
+        Assert.Contains("minPopulation=50000", GetCitiesHandler.BuildNearbyCitiesUrl(36.1627, -86.7816, 100, 50000, 10, 0));
+    }
+
+    [Fact]
+    public async Task Handle_MaxCitiesZero_ReturnsEmptyWithoutCallingGeoDb()
     {
         var http = new PagingHandler(totalCount: 50);
         var handler = CreateHandler(http);
 
         var response = await handler.Handle(
-            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, Size = -3 },
+            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, MaxCities = -3 },
             CancellationToken.None);
 
         Assert.Empty(response.Cities);
-        Assert.Equal(0, response.Size);
+        Assert.Equal(0, response.MaxCities);
         Assert.Empty(http.RequestedUrls);
     }
 
@@ -79,18 +94,19 @@ public class GetCitiesHandlerTests
         var handler = CreateHandler(http);
 
         var response = await handler.Handle(
-            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, DistanceKm = 20000, Size = 1000 },
+            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, RadiusKm = 20000, MinPopulation = -10, MaxCities = 1000 },
             CancellationToken.None);
 
-        Assert.Equal(GetCitiesHandler.GeoDbMaxRadiusKm, response.DistanceKm);
-        Assert.Equal(GetCitiesEvent.MaxSize, response.Size);
-        Assert.Equal(GetCitiesEvent.MaxSize, response.Returned);
+        Assert.Equal(GetCitiesHandler.GeoDbMaxRadiusKm, response.RadiusKm);
+        Assert.Equal(0, response.MinPopulation);
+        Assert.Equal(GetCitiesEvent.MaxMaxCities, response.MaxCities);
+        Assert.Equal(GetCitiesEvent.MaxMaxCities, response.Returned);
         Assert.All(http.RequestedUrls, url => Assert.Contains("radius=100&", url));
     }
 
     [Theory]
-    [InlineData(GetCitiesEvent.DefaultDistanceKm, 100)]
-    [InlineData(GetCitiesEvent.MaxDistanceKm, 100)]
+    [InlineData(GetCitiesEvent.DefaultRadiusKm, 100)]
+    [InlineData(GetCitiesEvent.MaxRadiusKm, 100)]
     [InlineData(50, 50)]
     public async Task Handle_CapsRadiusAtGeoDbFreeTierMaximum(double requested, double sent)
     {
@@ -98,10 +114,10 @@ public class GetCitiesHandlerTests
         var handler = CreateHandler(http);
 
         var response = await handler.Handle(
-            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, DistanceKm = requested },
+            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, RadiusKm = requested },
             CancellationToken.None);
 
-        Assert.Equal(sent, response.DistanceKm);
+        Assert.Equal(sent, response.RadiusKm);
         Assert.Contains(string.Create(System.Globalization.CultureInfo.InvariantCulture, $"radius={sent}&"), http.RequestedUrls[0]);
     }
 
@@ -127,7 +143,7 @@ public class GetCitiesHandlerTests
         Assert.Equal(expected, GetCitiesHandler.IsPermanentFailure(statusCode));
 
     [Fact]
-    public async Task Handle_PagesTenAtATimeUntilSizeIsReached()
+    public async Task Handle_PagesTenAtATimeUntilMaxCitiesIsReached()
     {
         var http = new PagingHandler(totalCount: 500);
         var handler = CreateHandler(http);
@@ -151,7 +167,7 @@ public class GetCitiesHandlerTests
         var handler = CreateHandler(http);
 
         var response = await handler.Handle(
-            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, Size = 100 },
+            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, MaxCities = 100 },
             CancellationToken.None);
 
         Assert.Equal(12, response.Returned);
@@ -166,7 +182,7 @@ public class GetCitiesHandlerTests
         var handler = CreateHandler(http);
 
         var response = await handler.Handle(
-            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, Size = 1 },
+            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, MaxCities = 1 },
             CancellationToken.None);
 
         var city = Assert.Single(response.Cities);
@@ -186,14 +202,15 @@ public class GetCitiesHandlerTests
         var executor = new WeatherToolExecutor(mediator);
 
         await executor.ExecuteAsync(
-            ResponseItem.CreateFunctionCallItem("call-1", "GetCities", BinaryData.FromString("""{"latitude":36.16,"longitude":-86.78,"distanceKM":300,"size":null}""")),
+            ResponseItem.CreateFunctionCallItem("call-1", "GetCities", BinaryData.FromString("""{"latitude":36.16,"longitude":-86.78,"radiusKm":300,"minPopulation":50000,"maxCities":null}""")),
             CancellationToken.None);
 
         var request = Assert.IsType<GetCitiesEvent>(mediator.LastRequest);
         Assert.Equal(36.16, request.Latitude);
         Assert.Equal(-86.78, request.Longitude);
-        Assert.Equal(300, request.DistanceKm);
-        Assert.Equal(GetCitiesEvent.DefaultSize, request.Size);
+        Assert.Equal(300, request.RadiusKm);
+        Assert.Equal(50000, request.MinPopulation);
+        Assert.Equal(GetCitiesEvent.DefaultMaxCities, request.MaxCities);
     }
 
     private static GetCitiesHandler CreateHandler(HttpMessageHandler http) =>

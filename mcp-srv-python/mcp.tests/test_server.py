@@ -51,7 +51,7 @@ def test_mcp_accepts_non_localhost_host_header(monkeypatch):
 
 def test_tools_list_returns_only_get_cities(monkeypatch):
     """Forecast/history live on mcp-srv-node; this host serves GetCities only, with
-    distanceKM/size optional so callers can omit them."""
+    radiusKm/minPopulation/maxCities optional (in that order) so callers can omit them."""
     import json
 
     app = _build_test_app(monkeypatch)
@@ -72,7 +72,7 @@ def test_tools_list_returns_only_get_cities(monkeypatch):
     assert [tool["name"] for tool in tools] == ["GetCities"]
     schema = tools[0]["inputSchema"]
     assert sorted(schema["required"]) == ["latitude", "longitude"]
-    assert {"distanceKM", "size"} <= set(schema["properties"])
+    assert list(schema["properties"]) == ["latitude", "longitude", "radiusKm", "minPopulation", "maxCities"]
 
 
 def test_mcp_rejects_all_requests_when_key_unset(monkeypatch):
