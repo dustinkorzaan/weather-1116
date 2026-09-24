@@ -15,11 +15,12 @@ namespace Core.Geo.Handlers;
 
 /// <summary>
 /// Downloads GeoNames' cities500 export (every populated place with 500+ people) plus its admin1
-/// (state/province) names and merges it into dbo.Cities. The zip is streamed to a temp file and its
-/// rows are read one at a time: each row is looked up by GeonameId and inserted or updated on its
-/// own, so memory stays flat no matter how large the export grows. Only the imported GeonameIds are
-/// kept, and once more than <see cref="MinimumCityCount"/> cities were imported the rows GeoNames
-/// no longer lists are bulk-deleted.
+/// (state/province) names and merges it into dbo.Cities. The zip is streamed to a temp file and read
+/// twice, one row at a time, so memory stays flat no matter how large the export grows: the first
+/// pass only collects GeonameIds and confirms the export (more than <see cref="MinimumCityCount"/>
+/// cities, no duplicate ids, at least <see cref="MinimumShareOfExistingCities"/> of dbo.Cities)
+/// before anything is written; the second looks up each row by GeonameId and inserts or updates it
+/// on its own. Rows GeoNames no longer lists are then bulk-deleted.
 /// </summary>
 public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCitiesResponse>
 {
@@ -27,12 +28,12 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     internal const string CitiesEntryName = "cities500.txt";
     internal const string Admin1CodesUrl = "https://download.geonames.org/export/dump/admin1CodesASCII.txt";
 
-    // A truncated or empty download must never wipe the table, so the bulk delete only runs above this.
+    // A truncated or empty download must never wipe the table, so the import only runs above this.
     internal const int MinimumCityCount = 100_000;
 
     // A download that is large but partial (or partly unparsable) would still pass the absolute
     // floor above and then bulk-delete every city it is missing, so once dbo.Cities holds data the
-    // export must also keep at least this share of the rows that were there before the import.
+    // export must also keep at least this share of the current rows.
     internal const double MinimumShareOfExistingCities = 0.9;
 
     // admin1CodesASCII.txt lists about 3,900 regions; an empty or broken body would otherwise blank
@@ -70,8 +71,8 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         _logger = logger;
     }
 
-    /// <summary>Imported-city floor for the bulk delete; tests lower it to exercise deletes on a few rows.</summary>
-    internal int DeleteFloor { get; init; } = MinimumCityCount;
+    /// <summary>City-count floor for an import; tests lower it to exercise a merge on a few rows.</summary>
+    internal int CityFloor { get; init; } = MinimumCityCount;
 
     public async Task<ImportCitiesResponse> Handle(ImportCitiesEvent request, CancellationToken cancellationToken)
     {
@@ -91,46 +92,50 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         // ZipArchive needs a seekable stream, so the zip goes to a temp file rather than a byte[].
         await using var citiesZip = await _retry.Execute(ct => DownloadToTempFile(client, CitiesUrl, ct), cancellationToken);
         using var archive = new ZipArchive(citiesZip, ZipArchiveMode.Read);
-        var entry = archive.GetEntry(CitiesEntryName)
-            ?? throw new InvalidOperationException($"GeoNames zip is missing {CitiesEntryName}.");
-        using var reader = new StreamReader(entry.Open());
 
-        var response = await Merge(Parse(reader), admin1Names, cancellationToken);
+        var response = await Merge(ReadCities(archive), admin1Names, cancellationToken);
 
-        LogResponse(response);
+        _logger.LogInformation(
+            "ImportCities: {Downloaded} downloaded, {Inserted} inserted, {Updated} updated, {Deleted} deleted, {Unchanged} unchanged",
+            response.Downloaded,
+            response.Inserted,
+            response.Updated,
+            response.Deleted,
+            response.Unchanged);
+
         return response;
     }
 
     /// <summary>
-    /// Upserts each city in <paramref name="incoming"/> one at a time (one lookup, and a save only
-    /// when something changed), recording its GeonameId. Afterwards, provided more than
-    /// <see cref="DeleteFloor"/> cities were imported and they cover
-    /// <see cref="MinimumShareOfExistingCities"/> of the rows that existed beforehand, rows whose
-    /// GeonameId was not imported are bulk-deleted; otherwise the delete is skipped and this throws.
+    /// Enumerates <paramref name="incoming"/> twice. Pass 1 collects the GeonameIds and confirms the
+    /// export (see <see cref="ConfirmCityCount"/>) without writing, so a short, partial, duplicated
+    /// or unreadable export leaves dbo.Cities untouched. Pass 2 upserts each city one at a time (one
+    /// lookup, and a save only when something changed). Rows whose GeonameId was not imported are
+    /// then bulk-deleted.
     /// </summary>
     internal async Task<ImportCitiesResponse> Merge(
         IEnumerable<GeoNamesCityDto> incoming,
         IReadOnlyDictionary<string, string> admin1Names,
         CancellationToken cancellationToken)
     {
-        var response = new ImportCitiesResponse();
-        var existingCount = await _db.Cities.CountAsync(cancellationToken);
         var importedIds = new HashSet<int>();
-
         foreach (var dto in incoming)
         {
-            response.Downloaded++;
             if (!importedIds.Add(dto.GeonameId))
             {
-                // First row wins; a repeat would otherwise overwrite it with whatever came later.
-                _logger.LogWarning("ImportCities: geonameid {GeonameId} listed more than once; later row skipped", dto.GeonameId);
-                continue;
+                throw new InvalidOperationException(
+                    $"GeoNames cities500 export lists geonameid {dto.GeonameId} more than once; import skipped.");
             }
-
-            await Upsert(dto, admin1Names, response, cancellationToken);
         }
 
-        ConfirmCanDelete(importedIds.Count, existingCount, response);
+        var existingCount = await _db.Cities.CountAsync(cancellationToken);
+        ConfirmCityCount(importedIds.Count, existingCount, CityFloor);
+
+        var response = new ImportCitiesResponse { Downloaded = importedIds.Count };
+        foreach (var dto in incoming)
+        {
+            await Upsert(dto, admin1Names, response, cancellationToken);
+        }
 
         // Only GeonameIds come back (about 1 MB for 250k rows), never whole City rows.
         var existingIds = await _db.Cities.Select(city => city.GeonameId).ToListAsync(cancellationToken);
@@ -180,33 +185,25 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         _db.ChangeTracker.Clear();
     }
 
-    private void ConfirmCanDelete(int importedCount, int existingCount, ImportCitiesResponse response)
+    /// <summary>
+    /// Rejects an export of <paramref name="incomingCount"/> cities that is at or under
+    /// <paramref name="floor"/>, or under <see cref="MinimumShareOfExistingCities"/> of the
+    /// <paramref name="existingCount"/> rows already in dbo.Cities.
+    /// </summary>
+    internal static void ConfirmCityCount(int incomingCount, int existingCount, int floor = MinimumCityCount)
     {
-        string? reason = null;
-        if (importedCount <= DeleteFloor)
+        if (incomingCount <= floor)
         {
-            reason = $"GeoNames cities500 export held only {importedCount} cities (expected more than {DeleteFloor})";
-        }
-        else if (importedCount < existingCount * MinimumShareOfExistingCities)
-        {
-            reason = $"GeoNames cities500 export held {importedCount} cities, under {MinimumShareOfExistingCities:P0} of the {existingCount} already in dbo.Cities";
+            throw new InvalidOperationException(
+                $"GeoNames cities500 export held only {incomingCount} cities (expected more than {floor}); import skipped.");
         }
 
-        if (reason is not null)
+        if (incomingCount < existingCount * MinimumShareOfExistingCities)
         {
-            LogResponse(response);
-            throw new InvalidOperationException($"{reason}; rows were upserted but the delete was skipped.");
+            throw new InvalidOperationException(
+                $"GeoNames cities500 export held {incomingCount} cities, under {MinimumShareOfExistingCities:P0} of the {existingCount} already in dbo.Cities; import skipped.");
         }
     }
-
-    private void LogResponse(ImportCitiesResponse response) =>
-        _logger.LogInformation(
-            "ImportCities: {Downloaded} downloaded, {Inserted} inserted, {Updated} updated, {Deleted} deleted, {Unchanged} unchanged",
-            response.Downloaded,
-            response.Inserted,
-            response.Updated,
-            response.Deleted,
-            response.Unchanged);
 
     /// <summary>
     /// Copies <paramref name="dto"/> onto <paramref name="city"/>, assigning only fields whose value
@@ -245,6 +242,19 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         {
             throw new InvalidOperationException(
                 $"GeoNames admin1CodesASCII.txt held only {admin1Names.Count} regions (expected at least {MinimumAdmin1Count}); import skipped.");
+        }
+    }
+
+    /// <summary>Re-opens cities500.txt on every enumeration, so Merge can stream it twice.</summary>
+    private static IEnumerable<GeoNamesCityDto> ReadCities(ZipArchive archive)
+    {
+        var entry = archive.GetEntry(CitiesEntryName)
+            ?? throw new InvalidOperationException($"GeoNames zip is missing {CitiesEntryName}.");
+
+        using var reader = new StreamReader(entry.Open());
+        foreach (var city in Parse(reader))
+        {
+            yield return city;
         }
     }
 

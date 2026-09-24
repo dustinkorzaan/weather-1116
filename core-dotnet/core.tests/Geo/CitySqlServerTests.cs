@@ -155,8 +155,8 @@ public class CitySqlServerTests : IAsyncLifetime
             new NoHttpClientFactory(),
             NullLogger<ImportCitiesHandler>.Instance)
         {
-            // Seven fixture cities: lift the 100k floor so the bulk delete runs.
-            DeleteFloor = 0,
+            // Seven fixture cities: lift the 100k floor so the merge runs.
+            CityFloor = 0,
         };
 
     // Each test gets its own database, so the four tests never see each other's merges.
