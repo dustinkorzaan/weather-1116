@@ -78,15 +78,16 @@ var appIdentityConfig = [
 // see modules/container-app.bicep's cooldownPeriod default. worker stays
 // capped at maxReplicas 1: Hangfire recurring jobs assume a single active
 // server, so a second cold-started replica racing the first would double-run
-// jobs instead of adding throughput.
+// jobs instead of adding throughput. worker is also doubled to 0.5 vCPU / 1Gi (temporarily)
+// for the daily import-cities GeoNames merge, which tracks ~225k City rows in EF Core.
 var containerAppsConfig = [
-  { key: 'api', setAzureClientId: true, maxReplicas: 5, stickySessions: false }
-  { key: 'mvc', setAzureClientId: true, maxReplicas: 5, stickySessions: false }
-  { key: 'blazor', setAzureClientId: false, maxReplicas: 5, stickySessions: true }
-  { key: 'worker', setAzureClientId: true, maxReplicas: 1, stickySessions: false }
-  { key: 'mcp-srv-app-service', setAzureClientId: true, maxReplicas: 5, stickySessions: false }
-  { key: 'mcp-srv-python', setAzureClientId: false, maxReplicas: 5, stickySessions: false }
-  { key: 'mcp-srv-node', setAzureClientId: false, maxReplicas: 5, stickySessions: false }
+  { key: 'api', setAzureClientId: true, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'mvc', setAzureClientId: true, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'blazor', setAzureClientId: false, maxReplicas: 5, stickySessions: true, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'worker', setAzureClientId: true, maxReplicas: 1, stickySessions: false, cpu: '0.5', memory: '1Gi' }
+  { key: 'mcp-srv-app-service', setAzureClientId: true, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'mcp-srv-python', setAzureClientId: false, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'mcp-srv-node', setAzureClientId: false, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
 ]
 
 module githubActionsIdentity 'modules/managed-identity.bicep' = {
@@ -194,6 +195,8 @@ module containerApps 'modules/container-app.bicep' = [for (cfg, i) in containerA
     existingSecrets: existingContainerApps[i].outputs.secrets
     maxReplicas: cfg.maxReplicas
     stickySessions: cfg.stickySessions
+    cpu: cfg.cpu
+    memory: cfg.memory
     userAssignedIdentityId: appIdentities[i].outputs.id
     userAssignedIdentityClientId: appIdentities[i].outputs.clientId
     setAzureClientId: cfg.setAzureClientId
