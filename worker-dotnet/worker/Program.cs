@@ -29,7 +29,7 @@ builder.Services.Configure<HangfireAboutHealthOptions>(options =>
 	HangfireAboutHealthOptions.Configure(options, builder.Configuration));
 builder.Services.AddControllers();
 
-// dbo.AgentActivity logging: the confirm-nashville-ai-weather-v3/v4 recurring jobs below call
+// dbo.AgentActivities logging: the confirm-nashville-ai-weather-v3/v4 recurring jobs below call
 // straight into GetCurrentAIWeatherV3Handler/V4Handler, the same handlers API's AIWeatherController
 // and MVC's HomeController call -- this is the third host (alongside Api and Mvc) that can produce
 // AgentActivity rows. DB_CONNECTION_STRING is a hard requirement here, same as API and MVC.
@@ -57,7 +57,7 @@ var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
 // schema.
 if (string.IsNullOrWhiteSpace(dbConnectionString))
 {
-	throw new InvalidOperationException("Missing DB_CONNECTION_STRING (required for dbo.AgentActivity logging).");
+	throw new InvalidOperationException("Missing DB_CONNECTION_STRING (required for dbo.AgentActivities logging).");
 }
 
 builder.Services.AddDbContext<WX1116DbContext>(options => options.UseSqlServer(dbConnectionString, sql => sql.UseNetTopologySuite()));

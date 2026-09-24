@@ -62,7 +62,7 @@ builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 builder.Services.AddStandardCoreServices();
 builder.Services.AddWeatherChatClients();
 
-// dbo.AgentActivity logging (Chat1a-Chat4b and Current AI Weather V3/V4/V5). Unlike Hangfire
+// dbo.AgentActivities logging (Chat1a-Chat4b and Current AI Weather V3/V4/V5). Unlike Hangfire
 // above, DB_CONNECTION_STRING is a hard requirement here -- there is no in-memory fallback, so
 // this throws at startup if it's missing. HttpAgentActivityContextProvider lets
 // LogAgentActivityHandler capture the inbound request into each row's Context column.
@@ -97,7 +97,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Applies any pending EF Core migrations (dbo.AgentActivity and future tables) on every
+// Applies any pending EF Core migrations (dbo.AgentActivities and future tables) on every
 // startup, so a deploy never needs a separate manual migration step. API is the only host that
 // does this -- MVC and the worker also register WX1116DbContext, but only read/write the
 // schema API has already migrated.

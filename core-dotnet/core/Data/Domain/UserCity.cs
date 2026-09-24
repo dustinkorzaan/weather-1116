@@ -1,6 +1,6 @@
 namespace Core.Data.Domain;
 
-public class UserPin
+public class UserCity
 {
     public Guid Id { get; set; }
 

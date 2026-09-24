@@ -8,7 +8,7 @@ public class CityConfig : IEntityTypeConfiguration<City>
 {
     public void Configure(EntityTypeBuilder<City> builder)
     {
-        builder.ToTable("City", "dbo");
+        builder.ToTable("Cities", "dbo");
         builder.HasKey(city => city.Id);
         builder.Property(city => city.Id).ValueGeneratedNever();
 
@@ -25,7 +25,7 @@ public class CityConfig : IEntityTypeConfiguration<City>
         builder.Property(city => city.Population);
         builder.Property(city => city.Timezone).HasMaxLength(40);
 
-        // Spatial index IX_City_GeoPoint is created by raw SQL in the AddCity migration --
+        // Spatial index IX_Cities_GeoPoint was created by raw SQL in the AddCity migration (as IX_City_GeoPoint, renamed by PluralizeTablesAndRenameUserCities) --
         // EF Core cannot declare spatial indexes.
         builder.Property(city => city.GeoPoint).HasColumnType("geography");
 

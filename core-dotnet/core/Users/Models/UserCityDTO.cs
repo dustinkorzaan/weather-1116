@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Core.Users.Models;
 
-public class UserPinDTO
+public class UserCityDTO
 {
     [JsonPropertyName("id")]
     public Guid Id { get; set; }

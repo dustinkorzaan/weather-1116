@@ -33,7 +33,7 @@ public class LogAgentActivityHandlerTests
             Content = "hello",
         }, CancellationToken.None);
 
-        var row = await dbContext.AgentActivity.SingleAsync();
+        var row = await dbContext.AgentActivities.SingleAsync();
         Assert.Equal(id, row.Id);
         Assert.Equal(id, row.CorrelationId);
         Assert.Equal(runId, row.RunId);
@@ -60,7 +60,7 @@ public class LogAgentActivityHandlerTests
             Content = "hi there",
         }, CancellationToken.None);
 
-        var row = await dbContext.AgentActivity.SingleAsync(a => a.Id == id);
+        var row = await dbContext.AgentActivities.SingleAsync(a => a.Id == id);
         Assert.Equal(correlationId, row.CorrelationId);
         Assert.NotEqual(correlationId, row.Id);
     }
@@ -84,7 +84,7 @@ public class LogAgentActivityHandlerTests
             Content = "hello",
         }, CancellationToken.None);
 
-        var row = await dbContext.AgentActivity.SingleAsync();
+        var row = await dbContext.AgentActivities.SingleAsync();
         Assert.Equal("""{"path":"/Chat1a/messages"}""", row.Context);
     }
 
@@ -104,7 +104,7 @@ public class LogAgentActivityHandlerTests
             Content = "hello",
         }, CancellationToken.None);
 
-        var row = await dbContext.AgentActivity.SingleAsync();
+        var row = await dbContext.AgentActivities.SingleAsync();
         Assert.Null(row.Context);
     }
 

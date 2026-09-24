@@ -60,7 +60,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             : request.Location.Trim();
 
         // No real multi-turn session exists for this one-shot endpoint; a fresh GUID per
-        // request still gives every dbo.AgentActivity row a SessionId, and ties this
+        // request still gives every dbo.AgentActivities row a SessionId, and ties this
         // Request row to its Response row the same way CorrelationId does.
         var activitySessionId = Guid.NewGuid().ToString();
         var runId = Guid.NewGuid();
@@ -137,8 +137,8 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
             FunctionTool getPublicWeatherForecastTool = WeatherToolDefinitions.CreateGetPublicWeatherForecastTool();
             FunctionTool getPublicWeatherHistoryTool = WeatherToolDefinitions.CreateGetPublicWeatherHistoryTool();
             FunctionTool getUserTool = WeatherToolDefinitions.CreateGetUserTool();
-            FunctionTool addUserPinTool = WeatherToolDefinitions.CreateAddUserPinTool();
-            FunctionTool deleteUserPinTool = WeatherToolDefinitions.CreateDeleteUserPinTool();
+            FunctionTool addUserCityTool = WeatherToolDefinitions.CreateAddUserCityTool();
+            FunctionTool deleteUserCityTool = WeatherToolDefinitions.CreateDeleteUserCityTool();
 
             var inputItems = new List<ResponseItem>
             {
@@ -168,7 +168,7 @@ public class GetCurrentAIWeatherV3Handler : IRequestHandler<GetCurrentAIWeatherV
 
                 CreateResponseOptions options = new(deploymentName, inputItems)
                 {
-                    Tools = { getLatLongTool, getLocationTool, getCitiesTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool, getUserTool, addUserPinTool, deleteUserPinTool },
+                    Tools = { getLatLongTool, getLocationTool, getCitiesTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool, getUserTool, addUserCityTool, deleteUserCityTool },
                     TextOptions = new ResponseTextOptions
                     {
                         TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(

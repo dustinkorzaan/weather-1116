@@ -43,12 +43,12 @@ public class Chat5SystemInstructionsTests
 
         // The User sub-agent is attached, so the tool list must describe it...
         Assert.Contains("exactly three tools", prompt);
-        Assert.Contains("User lists the user's saved map pins", prompt);
+        Assert.Contains("User lists the user's saved cities", prompt);
 
-        // ...but the guardrail scope is unchanged: weather only, no pin-management carve-out.
+        // ...but the guardrail scope is unchanged: weather only, no saved-city management carve-out.
         Assert.Contains("Only accept requests about weather — current conditions, forecasts, or weather history for a place.", prompt);
         Assert.Contains("say you can only help with weather questions", prompt);
-        Assert.DoesNotContain("saved pins are in scope", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("saved cities are in scope", prompt, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -57,6 +57,7 @@ public class Chat5SystemInstructionsTests
         var prompt = ChatSystemInstructions.Chat5ScopeClassifierPrompt;
 
         Assert.DoesNotContain("pin", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("saved cit", prompt, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

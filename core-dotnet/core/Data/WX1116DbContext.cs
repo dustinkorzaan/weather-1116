@@ -6,13 +6,13 @@ namespace Core.Data;
 
 public class WX1116DbContext(DbContextOptions<WX1116DbContext> options) : DbContext(options)
 {
-    public DbSet<AgentActivity> AgentActivity => Set<AgentActivity>();
+    public DbSet<AgentActivity> AgentActivities => Set<AgentActivity>();
 
-    public DbSet<UserEntity> User => Set<UserEntity>();
+    public DbSet<UserEntity> Users => Set<UserEntity>();
 
-    public DbSet<UserPin> UserPin => Set<UserPin>();
+    public DbSet<UserCity> UserCities => Set<UserCity>();
 
-    public DbSet<City> City => Set<City>();
+    public DbSet<City> Cities => Set<City>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

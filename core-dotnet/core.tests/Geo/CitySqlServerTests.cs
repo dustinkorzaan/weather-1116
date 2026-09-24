@@ -15,7 +15,7 @@ namespace Core.Tests.Geo;
 
 /// <summary>
 /// ImportCitiesHandler.Merge and GetCitiesHandler against a real, freshly migrated SQL Server
-/// database (geography distances in meters, the IX_City_GeoPoint spatial index, ExecuteDelete).
+/// database (geography distances in meters, the IX_Cities_GeoPoint spatial index, ExecuteDelete).
 /// </summary>
 public class CitySqlServerTests : IAsyncLifetime
 {
@@ -128,9 +128,9 @@ public class CitySqlServerTests : IAsyncLifetime
         Assert.Equal(5, response.Unchanged);
 
         await using var verify = CreateDb();
-        Assert.Equal(7, await verify.City.CountAsync());
-        Assert.Equal(720000, (await verify.City.SingleAsync(city => city.GeonameId == 4644585)).Population);
-        Assert.False(await verify.City.AnyAsync(city => city.GeonameId == 2643743));
+        Assert.Equal(7, await verify.Cities.CountAsync());
+        Assert.Equal(720000, (await verify.Cities.SingleAsync(city => city.GeonameId == 4644585)).Population);
+        Assert.False(await verify.Cities.AnyAsync(city => city.GeonameId == 2643743));
     }
 
     private async Task<NonAICitiesResponse> GetCities(GetCitiesEvent request)

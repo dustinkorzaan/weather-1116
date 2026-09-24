@@ -158,7 +158,7 @@ public class UIWeatherDailySeries
     public List<string> WindDirectionSource { get; set; } = [];
 }
 
-public class AddUserPinRequest
+public class AddUserCityRequest
 {
     public required double Latitude { get; set; }
 
@@ -167,7 +167,7 @@ public class AddUserPinRequest
     public required string LocationName { get; set; }
 }
 
-public class UserPinDTO
+public class UserCityDTO
 {
     public Guid Id { get; set; }
 
@@ -188,7 +188,7 @@ public class UserDTO
 
     public string Email { get; set; } = string.Empty;
 
-    public List<UserPinDTO> UserPins { get; set; } = new();
+    public List<UserCityDTO> UserCities { get; set; } = new();
 }
 
 public class WeatherApiClient
@@ -282,16 +282,16 @@ public class WeatherApiClient
         }
     }
 
-    public async Task AddUserPin(AddUserPinRequest request, CancellationToken cancellationToken = default)
+    public async Task AddUserCity(AddUserCityRequest request, CancellationToken cancellationToken = default)
     {
         using var content = JsonContent.Create(request);
-        using var response = await _httpClient.PostAsync("User/AddPin", content, cancellationToken);
+        using var response = await _httpClient.PostAsync("User/AddCity", content, cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task DeleteUserPin(Guid userPinId, CancellationToken cancellationToken = default)
+    public async Task DeleteUserCity(Guid userCityId, CancellationToken cancellationToken = default)
     {
-        using var response = await _httpClient.DeleteAsync($"User/DeletePin?userPinId={userPinId}", cancellationToken);
+        using var response = await _httpClient.DeleteAsync($"User/DeleteCity?userCityId={userCityId}", cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 

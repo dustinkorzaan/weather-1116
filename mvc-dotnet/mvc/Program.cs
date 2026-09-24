@@ -63,7 +63,7 @@ builder.Services.AddHttpClient<IAboutClient, AboutClient>(client =>
 builder.Services.AddStandardCoreServices();
 builder.Services.AddWeatherChatClients();
 
-// dbo.AgentActivity logging (Chat1a-Chat4b and Current AI Weather V3/V4/V5). Unlike Hangfire
+// dbo.AgentActivities logging (Chat1a-Chat4b and Current AI Weather V3/V4/V5). Unlike Hangfire
 // above, DB_CONNECTION_STRING is a hard requirement here -- there is no in-memory fallback.
 // AddDbContext's UseSqlServer(null) does NOT throw eagerly (EF Core only fails the first time
 // something actually opens a connection), so this app would otherwise start up fine and only
@@ -73,7 +73,7 @@ builder.Services.AddWeatherChatClients();
 // Database.Migrate(), which throws eagerly on its own).
 if (string.IsNullOrWhiteSpace(dbConnectionString))
 {
-    throw new InvalidOperationException("Missing DB_CONNECTION_STRING (required for dbo.AgentActivity logging).");
+    throw new InvalidOperationException("Missing DB_CONNECTION_STRING (required for dbo.AgentActivities logging).");
 }
 
 // HttpAgentActivityContextProvider lets LogAgentActivityHandler capture the inbound request

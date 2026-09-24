@@ -9,7 +9,7 @@ a one-shot structured JSON response.
 
 | Tab | Stack | Tools | Maps to console demo |
 | --- | --- | --- | --- |
-| **Chat1a** | Responses API (model-direct) | In-process (`GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`, `GetUser`, `AddUserPin`, `DeleteUserPin`) | Foundry Console **V3** |
+| **Chat1a** | Responses API (model-direct) | In-process (`GetLatLong`, `GetLocation`, `GetCities`, `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`, `GetUser`, `AddUserCity`, `DeleteUserCity`) | Foundry Console **V3** |
 | **Chat1b** | Responses API (model-direct) | Remote MCP (`mcp-srv-func-app`, `mcp-srv-app-service`, `mcp-srv-python`, `mcp-srv-node`) | Foundry Console **V4** |
 | **Chat2a** | Microsoft Agent Framework (model-direct) | In-process tools via `AIFunctionFactory` | V3 orchestration style |
 | **Chat2b** | Microsoft Agent Framework (model-direct) | Remote MCP via `HostedMcpServerTool` | V4 orchestration style |
@@ -159,7 +159,7 @@ builder.Services.AddWeatherChatClients();
 ## Tools (no web search)
 
 Chat1 and Chat2 expose the same public geo and weather tools from this repo (no web search), plus
-three saved-pin tools (`GetUser`, `AddUserPin`, `DeleteUserPin`).
+three saved-city tools (`GetUser`, `AddUserCity`, `DeleteUserCity`).
 Chat3 uses the **same tool names** (all 9), but they are attached to `wx1116-agent-for-chat` in
 Foundry, not declared on the request.
 
@@ -167,13 +167,13 @@ Foundry, not declared on the request.
 | --- | --- |
 | `GetLatLong` | Resolve a place name to ranked coordinates (default top 5) |
 | `GetLocation` | Reverse-geocode lat/long to a place label |
-| `GetCities` | Largest cities (by population) within a radius of lat/long — `radiusKm` default 161 (1–1000), `minPopulation` default 0, `maxCities` default 25 (0–100); out-of-range values are reset, never rejected. Queries `dbo.City` (GeoNames cities500, imported daily). In-process via Core's `GetCitiesHandler`; remote via `mcp-srv-func-app` (the same handler) |
+| `GetCities` | Largest cities (by population) within a radius of lat/long — `radiusKm` default 161 (1–1000), `minPopulation` default 0, `maxCities` default 25 (0–100); out-of-range values are reset, never rejected. Queries `dbo.Cities` (GeoNames cities500, imported daily). In-process via Core's `GetCitiesHandler`; remote via `mcp-srv-func-app` (the same handler) |
 | `GetPublicWeatherCurrent` | Fetch current weather for lat/long |
 | `GetPublicWeatherForecast` | Upcoming forecast: Daily (7 days), Hourly (48 hours), or FifteenMinutes (48 hours) |
 | `GetPublicWeatherHistory` | Recent past: Daily (previous 7 days) or Hourly (previous 48 hours) |
-| `GetUser` | The user and their saved map pins (each with an id, location name, and lat/long). In-process via Core's `GetUserHandler`; remote via `mcp-srv-app-service` |
-| `AddUserPin` | Save a map pin from lat/long and a location name |
-| `DeleteUserPin` | Delete a saved map pin by its id (from `GetUser`) |
+| `GetUser` | The user and their saved cities (each with an id, location name, and lat/long). In-process via Core's `GetUserHandler`; remote via `mcp-srv-app-service` |
+| `AddUserCity` | Save a city from lat/long and a location name |
+| `DeleteUserCity` | Delete a saved city by its id (from `GetUser`) |
 
 - **In-process (Chat1a, Chat2a, Chat4a, Chat5a):** Core `WeatherToolExecutor` runs CQMediator handlers when the
   model emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a and, inside
@@ -182,7 +182,7 @@ Foundry, not declared on the request.
   `mcp-srv-python`, `mcp-srv-node`) — platform invokes tools; no local function-call loop in Chat1b. Chat4b's/Chat5b's Geo
   sub-agent gets `mcp-srv-func-app`'s (`GetCities`) and `mcp-srv-python`'s (`GetLatLong`/`GetLocation`) tools from
   `ChatHostedMcpToolFactory.CreateGeoTools()`; its NonAI Weather sub-agent gets `mcp-srv-node`'s
-  tools from `CreateNonAiWeatherTools()`; its User sub-agent gets `mcp-srv-app-service`'s saved-pin
+  tools from `CreateNonAiWeatherTools()`; its User sub-agent gets `mcp-srv-app-service`'s saved-city
   tools from `CreateUserTools()` — not the combined four-server list Chat1b/Chat2b use.
 - **AI Weather V3/V4/V5 and FoundryConsoleV3/V4/V5** also carry all 9 tools (in-process for V3,
   all four remote hosts for V4, the hosted-agent toolbox for V5), even though a one-shot
@@ -196,10 +196,10 @@ around that orchestration, not inside it: no new tools are introduced, and gate 
 `GetLatLong`/`GetPublicWeatherCurrent`/etc.
 
 The gates stay **weather-only** even though a User sub-agent is attached. With the gates on, a
-pin-only request ("save Nashville", "delete my Austin pin") is blocked — it has no weather keyword
+saved-city-only request ("save Nashville", "delete my Austin pin") is blocked — it has no weather keyword
 for the Code Input gate, and the LLM gates and hardened prompt treat it as off-topic. A weather
-question that happens to mention pins ("what's the weather at my saved pins?") can still get
-through. With the gates off, Chat5a/Chat5b handle pins exactly like Chat4a/Chat4b. The hardened
+question that happens to mention saved cities ("what's the weather at my saved cities?") can still get
+through. With the gates off, Chat5a/Chat5b handle saved cities exactly like Chat4a/Chat4b. The hardened
 prompt only lists the User agent in its tool list; its scope and refusal rules are unchanged.
 
 **Chat2a/Chat2b memory:** `IChatSessionStore` only tracks session ids and a display audit trail
@@ -240,16 +240,16 @@ unambiguous in code:
 - **Agent Geo 👤** — geo sub-agent. Owns exactly `GetLatLong`, `GetLocation`, and `GetCities`.
 - **Agent NonAI Weather 👤** — weather sub-agent. Owns exactly `GetPublicWeatherCurrent`,
   `GetPublicWeatherForecast`, and `GetPublicWeatherHistory`.
-- **Agent User 👤** — saved-pin sub-agent. Owns exactly `GetUser`, `AddUserPin`, and
-  `DeleteUserPin` (in-process via Core's `UserToolFunctions`). It never geocodes and never
+- **Agent User 👤** — saved-city sub-agent. Owns exactly `GetUser`, `AddUserCity`, and
+  `DeleteUserCity` (in-process via Core's `UserToolFunctions`). It never geocodes and never
   reports weather.
-- **Agent AI Weather Orchestration 👤** — orchestrator. Has no geo/weather/pin tools of its own; its
+- **Agent AI Weather Orchestration 👤** — orchestrator. Has no geo/weather/saved-city tools of its own; its
   only three tools *are* Geo, NonAI Weather, and User, wrapped via `AIAgentExtensions.AsAIFunction`
   (`Microsoft.Agents.AI` 1.20.0, already referenced by this repo — no `Microsoft.Agents.AI.Workflows`
   package is used or needed for this delegation). AI Weather Orchestration decides when
   to call each sub-agent, passes Geo's resolved coordinates into NonAI Weather's request, and
-  for "save this place" calls Geo first and then User. For "delete a pin" or "weather at my
-  pins" it asks User for the pin list (ids and coordinates) first.
+  for "save this place" calls Geo first and then User. For "delete a saved city" or "weather at my
+  saved cities" it asks User for the saved-city list (ids and coordinates) first.
 
 **Nested tool calls are not individually traced.** AI Weather Orchestration's SSE stream shows
 `tool_start`/`tool_end` for the delegation calls ("Geo", "NonAIWeather", "User") the same way Chat2a
@@ -259,7 +259,7 @@ separate stream events — the UI shows "AI Weather Orchestration called Geo" �
 answer", not the geocoding call nested inside Geo. This is an intentional scope boundary for this
 tab, not a bug. The same boundary means Geo's and NonAI Weather's own model token usage never
 reaches the `usage` chip on `done` — only tokens from the orchestrator's own stream are counted, so
-the usage shown for a Chat4a turn undercounts the true multi-agent total. Pins changed by the User
+the usage shown for a Chat4a turn undercounts the true multi-agent total. Saved cities changed by the User
 agent do not refresh the map until the page is reloaded (UI refresh is out of scope).
 
 **Geo and NonAI Weather only speak coordinates.** The orchestrator must resolve a place name via
@@ -274,7 +274,7 @@ hosts instead of in-process CQMediator calls — mirroring how Chat2b differs fr
 works cleanly because the MCP hosts are split along exactly the sub-agent boundaries:
 `mcp-srv-func-app` (`GetCities`) and `mcp-srv-python` (`GetLatLong`/`GetLocation`) expose Geo's
 tools, `mcp-srv-node` exposes `GetPublicWeatherCurrent`/`Forecast`/`History` (NonAI Weather's
-tools), and `mcp-srv-app-service` exposes `GetUser`/`AddUserPin`/`DeleteUserPin` (User's tools).
+tools), and `mcp-srv-app-service` exposes `GetUser`/`AddUserCity`/`DeleteUserCity` (User's tools).
 `ChatHostedMcpToolFactory` (already used by Chat1b/Chat2b) has one method per sub-agent —
 `CreateGeoTools()`, `CreateNonAiWeatherTools()`, and `CreateUserTools()` — and its
 `CreateTools()` (all four hosts combined) is still used by Chat1b/Chat2b.
@@ -455,7 +455,7 @@ headers stay on those connections, not on the agent.
 | `server_label` (inside toolbox) | `server_url` | Auth | Tools the server exposes |
 | --- | --- | --- | --- |
 | `McpSrvFuncApp` | `https://<prod-mcp-srv-func-app>/runtime/webhooks/mcp` | Header `x-functions-key` = Functions `mcp_extension` system key (`MCP_SRV_FUNC_APP_KEY`) | `GetCities` |
-| `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetUser`, `AddUserPin`, `DeleteUserPin` |
+| `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetUser`, `AddUserCity`, `DeleteUserCity` |
 | `McpSrvPython` | `https://<prod-mcp-srv-python>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_PYTHON_KEY>` | `GetLatLong`, `GetLocation` |
 | `McpSrvNode` | `https://<prod-mcp-srv-node>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_NODE_KEY>` | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
 
@@ -488,9 +488,9 @@ GetPublicWeatherCurrent is conditions right now.
 GetPublicWeatherForecast is upcoming weather: Daily (next 7 days), Hourly (next 48 hours), or FifteenMinutes (next 48 hours). Prefer Daily unless the user asks for hourly or 15-minute detail.
 GetPublicWeatherHistory is recent past weather: Daily (previous 7 days) or Hourly (previous 48 hours). Prefer Daily unless the user asks for hourly detail.
 Call those tools whenever you need real data instead of guessing.
-The user has saved map pins. GetUser returns them (each with an id, locationName, latitude, and longitude) — call it when the user asks about their saved locations or pins, e.g. "weather at my pins".
-AddUserPin saves a location: resolve the place to coordinates with GetLatLong first, then pass the latitude, longitude, and a clean location name.
-DeleteUserPin removes a saved location by its id: call GetUser first to find the pin's id, and never guess an id.
+The user has saved cities. GetUser returns them (each with an id, locationName, latitude, and longitude) — call it when the user asks about their saved cities or locations, e.g. "weather at my saved cities".
+AddUserCity saves a city: resolve the place to coordinates with GetLatLong first, then pass the latitude, longitude, and a clean location name.
+DeleteUserCity removes a saved city by its id: call GetUser first to find the saved city's id, and never guess an id.
 Be conversational, concise, and helpful.
 GitHub-flavored Markdown (bold, lists, tables, code) is allowed when it makes the answer easier to read. Do not emit raw HTML.
 When you report current weather, use one or two friendly sentences and include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the reply even if a tool also returned them as JSON.

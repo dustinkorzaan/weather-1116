@@ -141,7 +141,7 @@ public class ImportCitiesHandlerTests
         var ex = Assert.Throws<InvalidOperationException>(() =>
             ImportCitiesHandler.ConfirmShareOfExisting(120_000, 225_000));
 
-        Assert.Contains("already in dbo.City", ex.Message);
+        Assert.Contains("already in dbo.Cities", ex.Message);
     }
 
     [Fact]
@@ -157,7 +157,7 @@ public class ImportCitiesHandlerTests
     public async Task Merge_PartialExport_ThrowsWithoutTouchingTheDatabase()
     {
         using var db = CreateDb();
-        db.City.AddRange(NewCity(Dto(NashvilleLine)), NewCity(Dto(AndorraLine)), NewCity(Dto(ManhattanLine)));
+        db.Cities.AddRange(NewCity(Dto(NashvilleLine)), NewCity(Dto(AndorraLine)), NewCity(Dto(ManhattanLine)));
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
         var handler = CreateHandler(db, new GeoNamesHandler([], string.Empty));
@@ -165,14 +165,14 @@ public class ImportCitiesHandlerTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             handler.Merge([Dto(NashvilleLine)], new Dictionary<string, string>(), CancellationToken.None));
 
-        Assert.Equal(3, await db.City.CountAsync());
+        Assert.Equal(3, await db.Cities.CountAsync());
     }
 
     [Fact]
     public async Task Handle_TooFewCities_ThrowsWithoutTouchingTheDatabase()
     {
         using var db = CreateDb();
-        db.City.Add(NewCity(Dto(NashvilleLine)));
+        db.Cities.Add(NewCity(Dto(NashvilleLine)));
         await db.SaveChangesAsync();
         var http = new GeoNamesHandler(Zip(string.Join('\n', NashvilleLine, AndorraLine)), Admin1Text);
         var handler = CreateHandler(db, http);
@@ -181,7 +181,7 @@ public class ImportCitiesHandlerTests
             handler.Handle(new ImportCitiesEvent(), CancellationToken.None));
 
         Assert.Contains("held only 2 cities", ex.Message);
-        Assert.Equal(1, await db.City.CountAsync());
+        Assert.Equal(1, await db.Cities.CountAsync());
         Assert.Equal(
             [ImportCitiesHandler.CitiesUrl, ImportCitiesHandler.Admin1CodesUrl],
             http.RequestedUrls);
@@ -195,7 +195,7 @@ public class ImportCitiesHandlerTests
         nashville.Admin1Name = "Tennessee";
         var andorra = NewCity(Dto(AndorraLine));
         andorra.Population = 1;
-        db.City.AddRange(nashville, andorra);
+        db.Cities.AddRange(nashville, andorra);
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
         var admin1Names = ImportCitiesHandler.ParseAdmin1Names(new StringReader(Admin1Text));
@@ -210,7 +210,7 @@ public class ImportCitiesHandlerTests
         Assert.Equal(1, first.Unchanged);
         Assert.Equal(0, first.Deleted);
         db.ChangeTracker.Clear();
-        var saved = await db.City.OrderBy(city => city.GeonameId).ToListAsync();
+        var saved = await db.Cities.OrderBy(city => city.GeonameId).ToListAsync();
         Assert.Equal(20430, saved.Single(city => city.GeonameId == 3041563).Population);
         var manhattan = saved.Single(city => city.GeonameId == 5125771);
         Assert.NotEqual(Guid.Empty, manhattan.Id);

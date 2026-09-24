@@ -18,8 +18,8 @@ public sealed class AboutController(
         string[] expectedTools =
         [
             "GetUser",
-            "AddUserPin",
-            "DeleteUserPin",
+            "AddUserCity",
+            "DeleteUserCity",
         ];
         var mcpSrvAppServiceKey = configuration["MCP_SRV_APP_SERVICE_KEY"];
         var isHealthy = !string.IsNullOrWhiteSpace(mcpSrvAppServiceKey)

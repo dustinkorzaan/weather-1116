@@ -70,11 +70,11 @@ app.MapGet("/User", async (WeatherApiClient client, CancellationToken cancellati
     }
 });
 
-app.MapPost("/User/AddPin", async (AddUserPinRequest request, WeatherApiClient client, CancellationToken cancellationToken) =>
+app.MapPost("/User/AddCity", async (AddUserCityRequest request, WeatherApiClient client, CancellationToken cancellationToken) =>
 {
     try
     {
-        await client.AddUserPin(request, cancellationToken);
+        await client.AddUserCity(request, cancellationToken);
         return Results.Ok(new { success = true });
     }
     catch (InvalidOperationException)
@@ -83,11 +83,11 @@ app.MapPost("/User/AddPin", async (AddUserPinRequest request, WeatherApiClient c
     }
 });
 
-app.MapDelete("/User/DeletePin", async (Guid userPinId, WeatherApiClient client, CancellationToken cancellationToken) =>
+app.MapDelete("/User/DeleteCity", async (Guid userCityId, WeatherApiClient client, CancellationToken cancellationToken) =>
 {
     try
     {
-        await client.DeleteUserPin(userPinId, cancellationToken);
+        await client.DeleteUserCity(userCityId, cancellationToken);
         return Results.Ok(new { success = true });
     }
     catch (InvalidOperationException)

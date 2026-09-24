@@ -20,7 +20,7 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNEC
 
 builder.Services.AddControllers();
 
-// The user/pin MCP tools (GetUser, AddUserPin, DeleteUserPin) read and write dbo.User/dbo.UserPin.
+// The user/city MCP tools (GetUser, AddUserCity, DeleteUserCity) read and write dbo.Users/dbo.UserCities.
 // API's Program.cs owns applying EF Core migrations (Database.Migrate()); this app only
 // reads/writes the already-migrated schema, same as MVC and the worker.
 // Authenticates via this app's user-assigned managed identity (AZURE_CLIENT_ID, set by

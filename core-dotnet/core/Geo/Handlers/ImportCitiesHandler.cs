@@ -16,7 +16,7 @@ namespace Core.Geo.Handlers;
 /// <summary>
 /// Downloads GeoNames' cities500 export (every populated place with 500+ people) plus its admin1
 /// (state/province) names, confirms it holds more than <see cref="MinimumCityCount"/> cities, then
-/// merges it into dbo.City: updates changed rows, inserts new ones, and bulk-deletes rows GeoNames
+/// merges it into dbo.Cities: updates changed rows, inserts new ones, and bulk-deletes rows GeoNames
 /// no longer lists.
 /// </summary>
 public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCitiesResponse>
@@ -29,7 +29,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     internal const int MinimumCityCount = 100_000;
 
     // A download that is large but partial (or partly unparsable) would still pass the absolute
-    // floor above and then bulk-delete every city it is missing, so once dbo.City holds data the
+    // floor above and then bulk-delete every city it is missing, so once dbo.Cities holds data the
     // export must also keep at least this share of the current rows.
     internal const double MinimumShareOfExistingCities = 0.9;
 
@@ -104,7 +104,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     {
         var response = new ImportCitiesResponse { Downloaded = incoming.Count };
 
-        var existing = await _db.City.ToDictionaryAsync(city => city.GeonameId, cancellationToken);
+        var existing = await _db.Cities.ToDictionaryAsync(city => city.GeonameId, cancellationToken);
         ConfirmShareOfExisting(incoming.Count, existing.Count);
         var inserts = new List<City>();
 
@@ -131,7 +131,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
             }
         }
 
-        _db.City.AddRange(inserts);
+        _db.Cities.AddRange(inserts);
         response.Inserted = inserts.Count;
 
         if (_db.ChangeTracker.HasChanges())
@@ -142,7 +142,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         // Whatever is left in `existing` is no longer in the GeoNames export.
         foreach (var chunk in existing.Keys.Chunk(DeleteChunkSize))
         {
-            response.Deleted += await _db.City
+            response.Deleted += await _db.Cities
                 .Where(city => chunk.Contains(city.GeonameId))
                 .ExecuteDeleteAsync(cancellationToken);
         }
@@ -202,7 +202,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         if (incomingCount < existingCount * MinimumShareOfExistingCities)
         {
             throw new InvalidOperationException(
-                $"GeoNames cities500 export held {incomingCount} cities, under {MinimumShareOfExistingCities:P0} of the {existingCount} already in dbo.City; import skipped.");
+                $"GeoNames cities500 export held {incomingCount} cities, under {MinimumShareOfExistingCities:P0} of the {existingCount} already in dbo.Cities; import skipped.");
         }
     }
 

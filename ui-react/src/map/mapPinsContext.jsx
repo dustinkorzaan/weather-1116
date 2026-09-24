@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  useAddUserPinMutation,
-  useDeleteUserPinMutation,
+  useAddUserCityMutation,
+  useDeleteUserCityMutation,
   useGetUserQuery,
 } from '../services/weatherApi';
 
@@ -13,7 +13,7 @@ export function MapPinsProvider({ children }) {
   const { pathname, key: locationKey } = useLocation();
   const hasMountedRef = useRef(false);
 
-  // Pins can change outside this tab's mutations (a chat agent calling AddUserPin,
+  // Pins can change outside this tab's mutations (a chat agent calling AddUserCity,
   // or another browser tab), so every navigation to Home re-reads the user.
   // locationKey changes even when Home is clicked while already on Home.
   useEffect(() => {
@@ -26,20 +26,20 @@ export function MapPinsProvider({ children }) {
       refetch();
     }
   }, [pathname, locationKey, refetch]);
-  const [addUserPin] = useAddUserPinMutation();
-  const [deleteUserPin] = useDeleteUserPinMutation();
+  const [addUserCity] = useAddUserCityMutation();
+  const [deleteUserCity] = useDeleteUserCityMutation();
 
-  const cities = user?.userPins?.map((pin) => ({
-    id: pin.id,
-    locationName: pin.locationName,
-    latitude: pin.latitude,
-    longitude: pin.longitude,
+  const cities = user?.userCities?.map((userCity) => ({
+    id: userCity.id,
+    locationName: userCity.locationName,
+    latitude: userCity.latitude,
+    longitude: userCity.longitude,
   })) ?? [];
 
   const addCity = useCallback(
     async (city) => {
       try {
-        await addUserPin({
+        await addUserCity({
           latitude: city.latitude,
           longitude: city.longitude,
           locationName: city.locationName,
@@ -48,18 +48,18 @@ export function MapPinsProvider({ children }) {
         console.error('Failed to add city:', err);
       }
     },
-    [addUserPin]
+    [addUserCity]
   );
 
   const removeCity = useCallback(
     async (cityId) => {
       try {
-        await deleteUserPin(cityId).unwrap();
+        await deleteUserCity(cityId).unwrap();
       } catch (err) {
         console.error('Failed to remove city:', err);
       }
     },
-    [deleteUserPin]
+    [deleteUserCity]
   );
 
   const value = useMemo(

@@ -22,13 +22,13 @@ public class UserToolsTests : IDisposable
 
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<WX1116DbContext>();
-        dbContext.User.Add(new User
+        dbContext.Users.Add(new User
         {
             Id = UserConstants.AnonymousUserId,
             FirstName = "Anonymous",
-            UserPins =
+            UserCities =
             {
-                new UserPin
+                new UserCity
                 {
                     Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                     UserId = UserConstants.AnonymousUserId,
@@ -52,51 +52,51 @@ public class UserToolsTests : IDisposable
             .Select(tool => tool.GetProperty("name").GetString()!)
             .Order()
             .ToArray();
-        Assert.Equal(["AddUserPin", "DeleteUserPin", "GetUser"], names);
+        Assert.Equal(["AddUserCity", "DeleteUserCity", "GetUser"], names);
     }
 
     [Fact]
     public async Task GetUser_ReturnsSavedPins()
     {
-        var pins = await GetPinsAsync();
+        var cities = await GetCitiesAsync();
 
-        var pin = Assert.Single(pins);
-        Assert.Equal("Nashville, Tennessee", pin.GetProperty("locationName").GetString());
-        Assert.Equal("11111111-1111-1111-1111-111111111111", pin.GetProperty("id").GetString());
+        var city = Assert.Single(cities);
+        Assert.Equal("Nashville, Tennessee", city.GetProperty("locationName").GetString());
+        Assert.Equal("11111111-1111-1111-1111-111111111111", city.GetProperty("id").GetString());
     }
 
     [Fact]
-    public async Task AddUserPin_ThenDeleteUserPin_RoundTrips()
+    public async Task AddUserCity_ThenDeleteUserCity_RoundTrips()
     {
-        using (var added = await CallToolAsync("AddUserPin", new { latitude = 30.2672, longitude = -97.7431, locationName = "Austin, Texas" }))
+        using (var added = await CallToolAsync("AddUserCity", new { latitude = 30.2672, longitude = -97.7431, locationName = "Austin, Texas" }))
         {
             Assert.False(IsError(added));
         }
 
-        var austin = (await GetPinsAsync()).Single(pin => pin.GetProperty("locationName").GetString() == "Austin, Texas");
+        var austin = (await GetCitiesAsync()).Single(city => city.GetProperty("locationName").GetString() == "Austin, Texas");
 
-        using (var deleted = await CallToolAsync("DeleteUserPin", new { userPinId = austin.GetProperty("id").GetString() }))
+        using (var deleted = await CallToolAsync("DeleteUserCity", new { userCityId = austin.GetProperty("id").GetString() }))
         {
             Assert.False(IsError(deleted));
         }
 
-        Assert.DoesNotContain(await GetPinsAsync(), pin => pin.GetProperty("locationName").GetString() == "Austin, Texas");
+        Assert.DoesNotContain(await GetCitiesAsync(), city => city.GetProperty("locationName").GetString() == "Austin, Texas");
     }
 
     [Fact]
-    public async Task DeleteUserPin_UnknownId_ReturnsToolError()
+    public async Task DeleteUserCity_UnknownId_ReturnsToolError()
     {
-        using var result = await CallToolAsync("DeleteUserPin", new { userPinId = Guid.NewGuid() });
+        using var result = await CallToolAsync("DeleteUserCity", new { userCityId = Guid.NewGuid() });
 
         Assert.True(IsError(result));
     }
 
-    private async Task<List<JsonElement>> GetPinsAsync()
+    private async Task<List<JsonElement>> GetCitiesAsync()
     {
         using var result = await CallToolAsync("GetUser", new { });
         var text = result.RootElement.GetProperty("result").GetProperty("content")[0].GetProperty("text").GetString()!;
         using var user = JsonDocument.Parse(text);
-        return user.RootElement.GetProperty("userPins").EnumerateArray().Select(pin => pin.Clone()).ToList();
+        return user.RootElement.GetProperty("userCities").EnumerateArray().Select(city => city.Clone()).ToList();
     }
 
     private Task<JsonDocument> CallToolAsync(string name, object arguments) =>

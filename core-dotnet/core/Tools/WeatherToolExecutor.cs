@@ -28,8 +28,8 @@ public sealed class WeatherToolExecutor
             "GetPublicWeatherForecast" => await ExecuteGetPublicWeatherForecast(functionCall.FunctionArguments, cancellationToken),
             "GetPublicWeatherHistory" => await ExecuteGetPublicWeatherHistory(functionCall.FunctionArguments, cancellationToken),
             "GetUser" => await ExecuteGetUser(cancellationToken),
-            "AddUserPin" => await ExecuteAddUserPin(functionCall.FunctionArguments, cancellationToken),
-            "DeleteUserPin" => await ExecuteDeleteUserPin(functionCall.FunctionArguments, cancellationToken),
+            "AddUserCity" => await ExecuteAddUserCity(functionCall.FunctionArguments, cancellationToken),
+            "DeleteUserCity" => await ExecuteDeleteUserCity(functionCall.FunctionArguments, cancellationToken),
             _ => throw new NotImplementedException($"Unexpected tool call: {functionCall.FunctionName}"),
         };
     }
@@ -163,15 +163,15 @@ public sealed class WeatherToolExecutor
         return JsonSerializer.Serialize(user, JsonDefaults.Pretty);
     }
 
-    private async Task<string> ExecuteAddUserPin(BinaryData arguments, CancellationToken cancellationToken)
+    private async Task<string> ExecuteAddUserCity(BinaryData arguments, CancellationToken cancellationToken)
     {
         using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
         double latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
         double longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
         string locationName = argumentsJson.RootElement.GetProperty("locationName").GetString()
-            ?? throw new InvalidOperationException("AddUserPin requires a locationName argument.");
+            ?? throw new InvalidOperationException("AddUserCity requires a locationName argument.");
 
-        await _mediator.Send(new AddUserPinEvent
+        await _mediator.Send(new AddUserCityEvent
         {
             Latitude = latitude,
             Longitude = longitude,
@@ -181,20 +181,20 @@ public sealed class WeatherToolExecutor
         return JsonSerializer.Serialize(new { success = true }, JsonDefaults.Pretty);
     }
 
-    private async Task<string> ExecuteDeleteUserPin(BinaryData arguments, CancellationToken cancellationToken)
+    private async Task<string> ExecuteDeleteUserCity(BinaryData arguments, CancellationToken cancellationToken)
     {
         using JsonDocument argumentsJson = JsonDocument.Parse(arguments);
-        string userPinId = argumentsJson.RootElement.GetProperty("userPinId").GetString()
-            ?? throw new InvalidOperationException("DeleteUserPin requires a userPinId argument.");
+        string userCityId = argumentsJson.RootElement.GetProperty("userCityId").GetString()
+            ?? throw new InvalidOperationException("DeleteUserCity requires a userCityId argument.");
 
-        if (!Guid.TryParse(userPinId, out var pinId))
+        if (!Guid.TryParse(userCityId, out var cityId))
         {
-            throw new InvalidOperationException("userPinId must be a valid GUID.");
+            throw new InvalidOperationException("userCityId must be a valid GUID.");
         }
 
-        await _mediator.Send(new DeleteUserPinEvent
+        await _mediator.Send(new DeleteUserCityEvent
         {
-            UserPinId = pinId,
+            UserCityId = cityId,
         }, cancellationToken);
 
         return JsonSerializer.Serialize(new { success = true }, JsonDefaults.Pretty);

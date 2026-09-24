@@ -19,7 +19,7 @@ namespace Core.Chat.Chat4a;
 /// Microsoft Agent Framework, in-process tools, multi-agent (V3 orchestration style).
 /// Four agents: Agent AI Weather Orchestration 👤 is the orchestrator the user talks to and
 /// delegates to Agent Geo 👤 (geo), Agent NonAI Weather 👤 (weather), and Agent User 👤 (saved
-/// map pins), each wrapped as a callable tool via <see cref="AIAgentExtensions.AsAIFunction"/>.
+/// cities), each wrapped as a callable tool via <see cref="AIAgentExtensions.AsAIFunction"/>.
 /// Only the orchestrator carries a persistent <see cref="AgentSession"/> (multi-turn memory); the
 /// sub-agents are rebuilt per request. Omitting <c>session</c> from AsAIFunction does not leave it
 /// null — a fresh, throwaway <see cref="AgentSession"/> is created for each delegated call, which
@@ -173,7 +173,7 @@ public sealed class Chat4aService : IChatClientService
             model: _settings.DeploymentName,
             tools: CreateNonAiWeatherTools());
 
-        // Agent User 👤: user sub-agent — lists, adds, and deletes the user's saved map pins.
+        // Agent User 👤: user sub-agent — lists, adds, and deletes the user's saved cities.
         AIAgent userAgent = responsesClient.AsAIAgent(
             name: "User",
             instructions: ChatSystemInstructions.MultiAgentUserAssistant,
@@ -206,7 +206,7 @@ public sealed class Chat4aService : IChatClientService
                 userAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "User",
-                    Description = "User assistant. Lists the user's saved map pins (location name, latitude/longitude, and id), adds a pin from numeric latitude/longitude and a location name, or deletes a pin by its id. It never geocodes — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the pin id or coordinates on every call. Send it a natural-language request; it returns the answer as text.",
+                    Description = "User assistant. Lists the user's saved cities (location name, latitude/longitude, and id), adds a city from numeric latitude/longitude and a location name, or deletes a city by its id. It never geocodes — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the city id or coordinates on every call. Send it a natural-language request; it returns the answer as text.",
                 }),
             ]);
     }

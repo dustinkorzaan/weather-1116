@@ -32,7 +32,7 @@ public sealed class ChatMcpToolFactory
             headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
             toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
 
-        // mcp-srv-app-service serves the user/pin tools (GetUser, AddUserPin, DeleteUserPin).
+        // mcp-srv-app-service serves the user/city tools (GetUser, AddUserCity, DeleteUserCity).
         McpTool userMcpTools = ResponseTool.CreateMcpTool(
             serverLabel: "McpSrvAppService",
             serverUri: new Uri($"{mcpSrvAppServiceUrl.TrimEnd('/')}/mcp"),

@@ -23,12 +23,12 @@ public class UserControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
-    public async Task AddPin_IsServedAtUserAddPinRoute()
+    public async Task AddCity_IsServedAtUserAddCityRoute()
     {
         var mediator = new RecordingMediator();
         using var client = CreateClient(mediator);
 
-        var response = await client.PostAsJsonAsync("/User/AddPin", new
+        var response = await client.PostAsJsonAsync("/User/AddCity", new
         {
             latitude = 36.1627,
             longitude = -86.7816,
@@ -36,22 +36,22 @@ public class UserControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var added = Assert.IsType<AddUserPinEvent>(Assert.Single(mediator.Requests));
+        var added = Assert.IsType<AddUserCityEvent>(Assert.Single(mediator.Requests));
         Assert.Equal("Nashville, Tennessee", added.LocationName);
     }
 
     [Fact]
-    public async Task DeletePin_IsServedAtUserDeletePinRoute()
+    public async Task DeleteCity_IsServedAtUserDeleteCityRoute()
     {
         var mediator = new RecordingMediator();
         using var client = CreateClient(mediator);
         var pinId = Guid.NewGuid();
 
-        var response = await client.DeleteAsync($"/User/DeletePin?userPinId={pinId}");
+        var response = await client.DeleteAsync($"/User/DeleteCity?userCityId={pinId}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var deleted = Assert.IsType<DeleteUserPinEvent>(Assert.Single(mediator.Requests));
-        Assert.Equal(pinId, deleted.UserPinId);
+        var deleted = Assert.IsType<DeleteUserCityEvent>(Assert.Single(mediator.Requests));
+        Assert.Equal(pinId, deleted.UserCityId);
     }
 
     private HttpClient CreateClient(IMediator mediator) =>

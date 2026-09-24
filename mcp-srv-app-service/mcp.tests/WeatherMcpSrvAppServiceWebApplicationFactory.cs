@@ -21,7 +21,7 @@ public class WeatherMcpSrvAppServiceWebApplicationFactory : WebApplicationFactor
     }
 
     /// <summary>
-    /// Swaps the SQL Server DbContext for an EF Core in-memory database so the user/pin MCP tools
+    /// Swaps the SQL Server DbContext for an EF Core in-memory database so the user/city MCP tools
     /// can run end to end without a real SQL Server.
     /// </summary>
     public WeatherMcpSrvAppServiceWebApplicationFactory WithInMemoryDatabase()

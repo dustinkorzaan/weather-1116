@@ -48,17 +48,17 @@ export const weatherApi = createApi({
       query: () => '/User',
       providesTags: ['User'],
     }),
-    addUserPin: builder.mutation({
+    addUserCity: builder.mutation({
       query: (pin) => ({
-        url: '/User/AddPin',
+        url: '/User/AddCity',
         method: 'POST',
         body: pin,
       }),
       invalidatesTags: ['User'],
     }),
-    deleteUserPin: builder.mutation({
-      query: (userPinId) => ({
-        url: `/User/DeletePin?userPinId=${encodeURIComponent(userPinId)}`,
+    deleteUserCity: builder.mutation({
+      query: (userCityId) => ({
+        url: `/User/DeleteCity?userCityId=${encodeURIComponent(userCityId)}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['User'],
@@ -81,6 +81,6 @@ export const {
   useGetHistoryQuery,
   useGetUserQuery,
   useLazyGetUserQuery,
-  useAddUserPinMutation,
-  useDeleteUserPinMutation,
+  useAddUserCityMutation,
+  useDeleteUserCityMutation,
 } = weatherApi;

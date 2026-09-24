@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # api.tests boots the real Program.cs via WebApplicationFactory<Program>, which requires
-    # DB_CONNECTION_STRING unconditionally (dbo.AgentActivity logging -- see docs/5-chat-clients)
+    # DB_CONNECTION_STRING unconditionally (dbo.AgentActivities logging -- see docs/5-chat-clients)
     # and applies migrations itself on startup, so no separate migrate step is needed here.
     services:
       sql-server:
@@ -187,7 +187,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # mvc.tests boots the real Program.cs via WebApplicationFactory<Program>, which requires
-    # DB_CONNECTION_STRING unconditionally (dbo.AgentActivity logging -- see docs/5-chat-clients).
+    # DB_CONNECTION_STRING unconditionally (dbo.AgentActivities logging -- see docs/5-chat-clients).
     # Unlike API, MVC does not call Database.Migrate() itself, so no schema exists in this DB --
     # fine today since no MVC test exercises a logging path, but a real reachable server (not
     # just a non-blank string) keeps that true if a future test does.

@@ -9,7 +9,7 @@ using CQMediator;
 namespace Core.Chat.Services;
 
 /// <summary>
-/// Decorates a Chat1a-Chat4b <see cref="IChatClientService"/> with dbo.AgentActivity logging.
+/// Decorates a Chat1a-Chat4b <see cref="IChatClientService"/> with dbo.AgentActivities logging.
 /// Registered once per keyed service in <see cref="ChatServiceCollectionExtensions"/> so none of
 /// the 7 chat tabs, their controllers, or their Core services need to know this exists.
 ///

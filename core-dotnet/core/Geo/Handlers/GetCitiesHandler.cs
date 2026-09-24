@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace Core.Geo.Handlers;
 
 /// <summary>
-/// Finds the largest cities within a radius of a lat/long by querying dbo.City (GeoNames cities500,
+/// Finds the largest cities within a radius of a lat/long by querying dbo.Cities (GeoNames cities500,
 /// loaded daily by <see cref="ImportCitiesHandler"/>) with a NetTopologySuite geography distance filter.
 /// </summary>
 public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesResponse>
@@ -58,7 +58,7 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
         var radiusMeters = request.RadiusKm * 1000;
         var minPopulation = request.MinPopulation;
 
-        var query = _db.City
+        var query = _db.Cities
             .AsNoTracking()
             .Where(city => city.GeoPoint.IsWithinDistance(origin, radiusMeters)
                 && city.Population >= minPopulation

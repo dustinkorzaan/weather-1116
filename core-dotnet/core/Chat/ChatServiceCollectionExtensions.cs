@@ -28,7 +28,7 @@ public static class ChatServiceCollectionExtensions
         services.AddSingleton<ChatHostedAgentResponseStore>();
 
         // Each registration wraps the real service in AgentActivityLoggingChatClientService so
-        // every prompt/response for every tab lands in dbo.AgentActivity with no per-controller
+        // every prompt/response for every tab lands in dbo.AgentActivities with no per-controller
         // or per-service changes. FeatureCategory mirrors docs/5-chat-clients/5-chat-clients.md's
         // "Stack" column. "feature" below is only the keyed-DI lookup key controllers/views use
         // (unchanged); the Feature value actually logged is TService's own type name, so it can't

@@ -8,8 +8,8 @@ Standalone Node.js MCP server exposing three public weather tools, backed direct
 - `GetPublicWeatherHistory` — recent past weather (`Daily` or `Hourly` resolution)
 
 Forecast and history used to live on [`mcp-srv-python`](../mcp-srv-python) (which now serves
-`GetCities`), and current weather on [`mcp-srv-app-service`](../mcp-srv-app-service) (which now
-serves the user/pin tools); this server kept the same tool names, descriptions, PascalCase `resolution` values,
+`GetLatLong`/`GetLocation`), and current weather on [`mcp-srv-app-service`](../mcp-srv-app-service) (which now
+serves the saved-city tools `GetUser`/`AddUserCity`/`DeleteUserCity`); this server kept the same tool names, descriptions, PascalCase `resolution` values,
 Open-Meteo queries, and response shape, so callers and prompts didn't change when they moved.
 
 This project has no dependency on the rest of this repo (no shared `core` project, no caching

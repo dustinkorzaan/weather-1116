@@ -127,7 +127,7 @@
           if (window.weatherMap && typeof window.weatherMap.addCity === 'function') {
             return window.weatherMap.addCity(city);
           }
-          return fetch('/User/AddPin', {
+          return fetch('/User/AddCity', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             body: JSON.stringify({ latitude: city.lat, longitude: city.lng, locationName: city.name }),

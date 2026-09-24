@@ -30,7 +30,7 @@ internal class Program
 		services.AddLogging(logging => logging.AddConsole());
 		services.AddStandardCoreServices();
 
-		// GetUser/AddUserPin/DeleteUserPin read and write dbo.User/dbo.UserPin. The API owns EF Core
+		// GetUser/AddUserCity/DeleteUserCity read and write dbo.Users/dbo.UserCities. The API owns EF Core
 		// migrations; this console only reads/writes the already-migrated schema. Without
 		// DB_CONNECTION_STRING the placeholder connection makes those three tool calls fail, while the
 		// geo and weather tools still work.
@@ -58,7 +58,7 @@ internal class Program
 		Console.WriteLine($"""
 		Example 4
 		 - Ask AI "What is the current weather in {location}?"
-		 - ResponsesClient with in-process tool callbacks (GetLatLong, GetLocation, GetCities, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory, GetUser, AddUserPin, DeleteUserPin)
+		 - ResponsesClient with in-process tool callbacks (GetLatLong, GetLocation, GetCities, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory, GetUser, AddUserCity, DeleteUserCity)
 		 - Model can call tools to derive lat/long, label a coordinate, and fetch public weather
 		 - JSON output from AI
 		""");
@@ -291,7 +291,7 @@ internal class Program
 
 		var getUserTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetUser",
-			functionDescription: "Get the current user and their saved map pins. Each pin has an id (GUID), locationName, latitude, and longitude. Call this to see which locations the user has saved, and to find a pin's id before calling DeleteUserPin.",
+			functionDescription: "Get the current user and their saved cities. Each saved city has an id (GUID), locationName, latitude, and longitude. Call this to see which locations the user has saved, and to find a saved city's id before calling DeleteUserCity.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
 			  "type": "object",
@@ -302,9 +302,9 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
-		var addUserPinTool = ResponseTool.CreateFunctionTool(
-			functionName: "AddUserPin",
-			functionDescription: "Add a new pin to the user's saved locations map. Use this when the user wants to save a location. Requires numeric latitude/longitude and a location name.",
+		var addUserCityTool = ResponseTool.CreateFunctionTool(
+			functionName: "AddUserCity",
+			functionDescription: "Add a city to the user's saved cities. Use this when the user wants to save a city or place. Requires numeric latitude/longitude and a location name.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
 			  "type": "object",
@@ -328,19 +328,19 @@ internal class Program
 			""")),
 			strictModeEnabled: true);
 
-		var deleteUserPinTool = ResponseTool.CreateFunctionTool(
-			functionName: "DeleteUserPin",
-			functionDescription: "Remove a pin from the user's saved locations map. Use this when the user wants to delete a saved location. Requires the pin's id from GetUser; never guess an id.",
+		var deleteUserCityTool = ResponseTool.CreateFunctionTool(
+			functionName: "DeleteUserCity",
+			functionDescription: "Remove a city from the user's saved cities. Use this when the user wants to delete a saved city. Requires the saved city's id from GetUser; never guess an id.",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
 			  "type": "object",
 			  "properties": {
-			    "userPinId": {
+			    "userCityId": {
 			      "type": "string",
-			      "description": "The unique identifier (GUID) of the pin to delete, from GetUser"
+			      "description": "The unique identifier (GUID) of the saved city to delete, from GetUser"
 			    }
 			  },
-			  "required": ["userPinId"],
+			  "required": ["userCityId"],
 			  "additionalProperties": false
 			}
 			""")),
@@ -363,7 +363,7 @@ internal class Program
 				var options = new CreateResponseOptions(deploymentName, inputItems)
 				{
 					Instructions = systemPrompt,
-					Tools = { getLatLongTool, getLocationTool, getCitiesTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool, getUserTool, addUserPinTool, deleteUserPinTool },
+					Tools = { getLatLongTool, getLocationTool, getCitiesTool, getPublicWeatherCurrentTool, getPublicWeatherForecastTool, getPublicWeatherHistoryTool, getUserTool, addUserCityTool, deleteUserCityTool },
 					TextOptions = new ResponseTextOptions
 					{
 						TextFormat = ResponseTextFormat.CreateJsonSchemaFormat(
@@ -527,16 +527,16 @@ internal class Program
 									break;
 								}
 
-							case "AddUserPin":
+							case "AddUserCity":
 								{
 									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
 									var latitude = argumentsJson.RootElement.GetProperty("latitude").GetDouble();
 									var longitude = argumentsJson.RootElement.GetProperty("longitude").GetDouble();
 									var locationName = argumentsJson.RootElement.GetProperty("locationName").GetString()
-										?? throw new InvalidOperationException("AddUserPin requires a locationName argument.");
+										?? throw new InvalidOperationException("AddUserCity requires a locationName argument.");
 
-									Console.WriteLine($"\nTool call: AddUserPin({latitude}, {longitude}, {locationName})");
-									await mediator.Send(new AddUserPinEvent
+									Console.WriteLine($"\nTool call: AddUserCity({latitude}, {longitude}, {locationName})");
+									await mediator.Send(new AddUserCityEvent
 									{
 										Latitude = latitude,
 										Longitude = longitude,
@@ -548,17 +548,17 @@ internal class Program
 									break;
 								}
 
-							case "DeleteUserPin":
+							case "DeleteUserCity":
 								{
 									using var argumentsJson = JsonDocument.Parse(functionCall.FunctionArguments);
-									var userPinId = argumentsJson.RootElement.GetProperty("userPinId").GetString();
-									if (!Guid.TryParse(userPinId, out var pinId))
+									var userCityId = argumentsJson.RootElement.GetProperty("userCityId").GetString();
+									if (!Guid.TryParse(userCityId, out var pinId))
 									{
-										throw new InvalidOperationException("userPinId must be a valid GUID.");
+										throw new InvalidOperationException("userCityId must be a valid GUID.");
 									}
 
-									Console.WriteLine($"\nTool call: DeleteUserPin({pinId})");
-									await mediator.Send(new DeleteUserPinEvent { UserPinId = pinId });
+									Console.WriteLine($"\nTool call: DeleteUserCity({pinId})");
+									await mediator.Send(new DeleteUserCityEvent { UserCityId = pinId });
 									var functionOutput = JsonSerializer.Serialize(new { success = true }, JsonDefaults.Pretty);
 									Console.WriteLine($"Tool output: {functionOutput}");
 									inputItems.Add(new FunctionCallOutputResponseItem(functionCall.CallId, functionOutput));
