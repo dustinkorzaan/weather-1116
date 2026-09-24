@@ -75,7 +75,9 @@ var appIdentityConfig = [
 ]
 
 // Every app scales to zero (minReplicas 0) on the same extended cooldown --
-// see modules/container-app.bicep's cooldownPeriod default. worker stays
+// see modules/container-app.bicep's cooldownPeriod default -- except daily
+// 11:00-13:30 UTC, when a cron scale rule holds each app (mcp-srv-func-app
+// included) at one replica. worker stays
 // capped at maxReplicas 1: Hangfire recurring jobs assume a single active
 // server, so a second cold-started replica racing the first would double-run
 // jobs instead of adding throughput.

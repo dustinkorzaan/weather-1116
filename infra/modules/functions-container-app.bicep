@@ -167,8 +167,9 @@ resource tempLifecycle 'Microsoft.Storage/storageAccounts/managementPolicies@202
 // `az containerapp function keys` then rejects with "is not an Azure
 // Functions on Container App" -- kind: 'functionapp' only takes effect from
 // 2024-10-02-preview onward (matches the Azure/azure-functions-on-container-apps
-// sample templates).
-resource functionContainerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
+// sample templates). 2026-03-02-preview adds scale.allowScalingRuleOverride,
+// needed below for the scheduled-warm cron rule.
+resource functionContainerApp 'Microsoft.App/containerApps@2026-03-02-preview' = {
   name: name
   location: location
   kind: 'functionapp'
@@ -212,6 +213,32 @@ resource functionContainerApp 'Microsoft.App/containerApps@2024-10-02-preview' =
         minReplicas: 0
         maxReplicas: 5
         cooldownPeriod: 1800
+        // Override replaces the platform's trigger-generated rules, so the MCP
+        // webhook's HTTP rule is restated alongside the cron rule, which holds
+        // one replica 11:00-13:30 UTC daily (matches modules/container-app.bicep).
+        allowScalingRuleOverride: true
+        rules: [
+          {
+            name: 'http-scale'
+            http: {
+              metadata: {
+                concurrentRequests: '10'
+              }
+            }
+          }
+          {
+            name: 'scheduled-warm'
+            custom: {
+              type: 'cron'
+              metadata: {
+                timezone: 'Etc/UTC'
+                start: '0 11 * * *'
+                end: '30 13 * * *'
+                desiredReplicas: '1'
+              }
+            }
+          }
+        ]
       }
     }
   }
