@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # CitySqlServerTests ([SqlServerFact]) migrate a fresh database per test and run the
-    # GetCities geography queries and the ImportCities merge against it -- the EF InMemory
+    # GetCities geography queries, the ImportCities upsert and bulk delete against it -- the EF InMemory
     # provider can't evaluate geography distances. They skip when
     # CORE_TESTS_SQL_CONNECTION_STRING is unset (e.g. local runs without SQL Server).
     services:

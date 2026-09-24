@@ -10,7 +10,8 @@ namespace Core.AIWeather.Services;
 /// (no AZURE_FOUNDRY_PROD_KEY): this app's user-assigned managed identity in
 /// Azure (AZURE_CLIENT_ID, set per app by infra/modules/container-app.bicep,
 /// the same variable <see cref="Data.ManagedIdentitySqlConnectionStringFactory"/>
-/// uses for SQL), or DefaultAzureCredential locally (developer sign-in).
+/// uses for SQL), or DefaultAzureCredential locally (developer sign-in). The worker's
+/// import-cities blob store (Core.Geo.Services.AzureCityImportBlobStore) reuses it too.
 /// TokenCredential derives from System.ClientModel.AuthenticationTokenProvider,
 /// so instances from here can be handed directly to the Foundry SDK clients,
 /// or wrapped in a BearerTokenPolicy for clients that only accept an

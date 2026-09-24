@@ -3,22 +3,27 @@ using Core.Data;
 using Core.Geo.Events;
 using Core.Geo.Handlers;
 using Core.Geo.Models;
-using Core.Http;
 using Core.Tests.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.Tests.Geo;
 
 /// <summary>
-/// ImportCitiesHandler.Merge and GetCitiesHandler against a real, freshly migrated SQL Server
-/// database (geography distances in meters, the IX_Cities_GeoPoint spatial index, ExecuteDelete).
+/// ImportCitiesUpsertHandler, ImportCitiesDeleteHandler and GetCitiesHandler against a real,
+/// freshly migrated SQL Server database (geography distances in meters, the IX_Cities_GeoPoint
+/// spatial index, ExecuteDelete).
 /// </summary>
 public class CitySqlServerTests : IAsyncLifetime
 {
+    private static readonly Dictionary<string, string> Admin1Names = new()
+    {
+        ["US.TN"] = "Tennessee",
+        ["US.GA"] = "Georgia",
+    };
+
     private static readonly GeoNamesCityDto[] Cities =
     [
         City(4644585, "Nashville", "TN", "PPLA", 36.16589, -86.78444, 715884),
@@ -31,12 +36,6 @@ public class CitySqlServerTests : IAsyncLifetime
         City(2643743, "London", "ENG", "PPLC", 51.50853, -0.12574, 8961989),
     ];
 
-    private static readonly Dictionary<string, string> Admin1Names = new()
-    {
-        ["US.TN"] = "Tennessee",
-        ["US.GA"] = "Georgia",
-    };
-
     private readonly string _connectionString = BuildConnectionString();
 
     public async Task InitializeAsync()
@@ -48,7 +47,7 @@ public class CitySqlServerTests : IAsyncLifetime
 
         await using var db = CreateDb();
         await db.Database.MigrateAsync();
-        await CreateImportHandler(db).Merge(Cities, Admin1Names, CancellationToken.None);
+        await Upsert(db, Cities);
     }
 
     public async Task DisposeAsync()
@@ -112,24 +111,41 @@ public class CitySqlServerTests : IAsyncLifetime
     }
 
     [SqlServerFact]
-    public async Task Merge_InsertsUpdatesAndBulkDeletesMissingRows()
+    public async Task Upsert_InsertsUpdatesAndCountsUnchangedRows()
     {
-        // London drops out and Knoxville arrives, so the export still keeps over 90% of the table.
         var incoming = Cities.Where(city => city.Name != "London").ToList();
         incoming[0] = City(4644585, "Nashville", "TN", "PPLA", 36.16589, -86.78444, 720000);
         incoming.Add(City(4634946, "Knoxville", "TN", "PPLA2", 35.96064, -83.92074, 190740));
 
         await using var db = CreateDb();
-        var response = await CreateImportHandler(db).Merge(incoming, Admin1Names, CancellationToken.None);
+        var response = await Upsert(db, incoming);
 
         Assert.Equal(1, response.Inserted);
         Assert.Equal(1, response.Updated);
-        Assert.Equal(1, response.Deleted);
         Assert.Equal(5, response.Unchanged);
 
         await using var verify = CreateDb();
-        Assert.Equal(7, await verify.Cities.CountAsync());
-        Assert.Equal(720000, (await verify.Cities.SingleAsync(city => city.GeonameId == 4644585)).Population);
+        Assert.Equal(8, await verify.Cities.CountAsync());
+        var nashville = await verify.Cities.SingleAsync(city => city.GeonameId == 4644585);
+        Assert.Equal(720000, nashville.Population);
+        Assert.Equal("Tennessee", nashville.Admin1Name);
+    }
+
+    [SqlServerFact]
+    public async Task Delete_BulkDeletesRowsTheExportNoLongerLists()
+    {
+        // London drops out of the export, so the delete job ExecuteDeletes it from dbo.Cities.
+        var blobs = new FakeCityImportBlobStore();
+        blobs.Blobs["geonameids.txt"] = string.Join('\n', Cities.Where(city => city.Name != "London").Select(city => city.GeonameId));
+
+        await using var db = CreateDb();
+        var response = await new ImportCitiesDeleteHandler(db, NullLogger<ImportCitiesDeleteHandler>.Instance, blobs)
+            .Handle(new ImportCitiesDeleteEvent { GeonameIdsBlob = "geonameids.txt" }, CancellationToken.None);
+
+        Assert.Equal(1, response.Deleted);
+
+        await using var verify = CreateDb();
+        Assert.Equal(6, await verify.Cities.CountAsync());
         Assert.False(await verify.Cities.AnyAsync(city => city.GeonameId == 2643743));
     }
 
@@ -148,18 +164,16 @@ public class CitySqlServerTests : IAsyncLifetime
             .UseSqlServer(_connectionString, sql => sql.UseNetTopologySuite())
             .Options);
 
-    private static ImportCitiesHandler CreateImportHandler(WX1116DbContext db) =>
-        new(
-            db,
-            new TransientRetryHelper(NullLogger<TransientRetryHelper>.Instance),
-            new NoHttpClientFactory(),
-            NullLogger<ImportCitiesHandler>.Instance)
-        {
-            // Seven fixture cities: lift the 100k floor so the merge runs.
-            CityFloor = 0,
-        };
+    private static Task<ImportCitiesUpsertResponse> Upsert(WX1116DbContext db, IEnumerable<GeoNamesCityDto> cities)
+    {
+        var blobs = new FakeCityImportBlobStore();
+        blobs.Blobs["admin1codes.txt"] = string.Concat(Admin1Names.Select(pair => $"{pair.Key}\t{pair.Value}\t{pair.Value}\t0\n"));
+        blobs.Blobs["cities.txt"] = string.Join('\n', cities.Select(Line));
+        return new ImportCitiesUpsertHandler(db, NullLogger<ImportCitiesUpsertHandler>.Instance, blobs)
+            .Handle(new ImportCitiesUpsertEvent { CitiesBlob = "cities.txt", Admin1Blob = "admin1codes.txt" }, CancellationToken.None);
+    }
 
-    // Each test gets its own database, so the four tests never see each other's merges.
+    // Each test gets its own database, so the tests never see each other's writes.
     private static string BuildConnectionString()
     {
         var builder = new SqlConnectionStringBuilder(SqlServerFactAttribute.ConnectionString ?? string.Empty)
@@ -184,8 +198,7 @@ public class CitySqlServerTests : IAsyncLifetime
             Timezone = admin1Code == "ENG" ? "Europe/London" : "America/Chicago",
         };
 
-    private sealed class NoHttpClientFactory : IHttpClientFactory
-    {
-        public HttpClient CreateClient(string name) => throw new InvalidOperationException("Merge never downloads.");
-    }
+    /// <summary>Writes <paramref name="city"/> back out as a 19-column cities500.txt row.</summary>
+    private static string Line(GeoNamesCityDto city) => FormattableString.Invariant(
+        $"{city.GeonameId}\t{city.Name}\t{city.Name}\t\t{city.Latitude}\t{city.Longitude}\tP\t{city.FeatureCode}\t{city.CountryCode}\t\t{city.Admin1Code}\t\t\t\t{city.Population}\t\t\t{city.Timezone}\t2024-01-01");
 }

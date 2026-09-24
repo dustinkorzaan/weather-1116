@@ -213,10 +213,21 @@ the local-loop paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, Foundry
 places (feature codes `PPLX`/`PPLH`/`PPLQ`/`PPLW`). The table is loaded by `ImportCitiesEvent`/
 `ImportCitiesHandler` (Core/Geo), which the worker runs daily at 11:00 UTC on the `batch-single`
 queue (`import-cities`): it downloads GeoNames' `cities500.zip` and `admin1CodesASCII.txt`
-(region names) and streams the zip through a temp file, reading it twice so memory stays flat. The
-first pass only collects `GeonameId`s and refuses the import (no writes) unless the export holds
-more than 100,000 cities, at least 90% of the current row count, and no duplicate ids; the second
-upserts one city at a time keyed on `GeonameId`, then rows GeoNames no longer lists are bulk-deleted. Until that job has run once in an
+(region names) and stages them in blob container `temp` (storage account `wx1116prodblob`;
+`BLOB_STORAGE_URL` with the worker's managed identity, or `BLOB_CONNECTION_STRING` locally). admin1
+goes up as it is (`admin1codes{guid}.txt`); the zip is streamed through a temp file one row at a time,
+a repeated `GeonameId` is skipped, and every 1,000 unique rows go up as their own file of raw lines
+(`cities{guid}.txt`), so memory stays flat. The imported `GeonameId`s go up as `geonameids{guid}.txt`.
+Only once every file is up does it enqueue one `ImportCitiesUpsertEvent` per batch file and then one
+`ImportCitiesDeleteEvent`, all on `batch-single`, so each Hangfire job carries only blob names. It
+writes no cities itself. `ImportCitiesUpsertHandler` reads its batch and the admin1 names, looks the
+batch up by `GeonameId`, saves it once and deletes its batch file, so each batch is short and commits
+and retries on its own. `batch-single` runs one job at a time in order, so
+`ImportCitiesDeleteHandler` runs after every batch's first attempt (a failed batch retries later,
+which is safe: the delete never removes an id in the file, so that batch's rows are only stale until
+the retry): it reads every imported id, queries `dbo.Cities` for its
+`GeonameId`s and deletes the ones GeoNames no longer lists 1,000 at a time. A storage lifecycle rule
+deletes anything left in `temp` 7 days after it was written. Until that job has run once in an
 environment, GetCities returns no cities -- trigger `import-cities` from the worker's
 `/hangfire` dashboard after a first deploy. City data is from
 [GeoNames](https://www.geonames.org/) under

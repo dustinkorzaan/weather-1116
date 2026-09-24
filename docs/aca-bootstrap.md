@@ -22,7 +22,7 @@ and assigns Contributor + User Access Administrator on this resource group.
 | Container App (Python) | `wx1116-prod-mcp-srv-python` |
 | Container App (Node.js) | `wx1116-prod-mcp-srv-node` |
 | Functions on ACA | `wx1116-prod-mcp-srv-func-app` |
-| Storage (Functions host) | `wx1116prodblob` |
+| Storage (Functions host, worker's `temp` blob container) | `wx1116prodblob` |
 | Static Web App | `wx1116-prod-react` |
 | SQL Server (Entra-only auth) + database | `wx1116-prod-sql-srv` / `wx1116-prod-sql-database` |
 | App Insights + Log Analytics | `wx1116-prod-appinsights` / `wx1116-prod-log` |
@@ -205,7 +205,12 @@ GetCities only reads `dbo.Cities`.
 After the first deploy, `dbo.Cities` is empty until the worker's daily
 `import-cities` job runs (11:00 UTC); trigger it once from the worker's
 `/hangfire` dashboard (Recurring Jobs → `import-cities` → Trigger now) so
-GetCities has data straight away.
+GetCities has data straight away. That job stages the export in `wx1116prodblob`'s `temp`
+container (the worker's identity has Storage Blob Data Contributor on that container only) and enqueues about 225
+`ImportCitiesUpsertEvent` batches plus a final `ImportCitiesDeleteEvent` on `batch-single`; they
+drain one at a time while the worker is up, and any still queued when it scales to zero resume on
+its next wake. Their files wait with them: the `temp` lifecycle rule only deletes blobs
+7 days after they were written.
 
 ## Step 5 — Deploy apps
 

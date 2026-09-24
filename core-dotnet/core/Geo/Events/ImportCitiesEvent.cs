@@ -4,8 +4,8 @@ using CQMediator;
 namespace Core.Geo.Events;
 
 /// <summary>
-/// Streams GeoNames' cities500 export into dbo.Cities: validates it (100k+ cities, no duplicates) before
-/// any write, upserts one row at a time, then bulk-deletes cities no longer listed.
+/// Stages GeoNames' cities500 export in blob storage, one file per batch of cities, then enqueues one
+/// <see cref="ImportCitiesUpsertEvent"/> job per file and a final <see cref="ImportCitiesDeleteEvent"/>.
 /// Scheduled daily by the worker's RecurringJobScheduler.
 /// </summary>
 public class ImportCitiesEvent : IRequest<ImportCitiesResponse>

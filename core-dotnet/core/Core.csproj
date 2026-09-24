@@ -23,6 +23,7 @@
       (see FoundryTokenCredentialFactory.cs).
     -->
     <PackageReference Include="Azure.Identity" Version="1.18.0" Aliases="AzureIdentityExplicit" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.29.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="10.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">

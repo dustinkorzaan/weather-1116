@@ -36,7 +36,14 @@ param existingEnv array = []
 @description('Secrets currently on the live app as { list: [{ name, value }] }. Carried forward verbatim; this module never authors secrets itself.')
 param existingSecrets object = {}
 
+@description('Principal IDs of other apps\' identities that read and write blobs in the temp container only (the worker stages import-cities files there).')
+param blobDataContributorPrincipalIds array = []
+
+@description('Blob container for short-lived files, e.g. the worker\'s import-cities batches. A lifecycle rule deletes its blobs 7 days after they were last written.')
+param tempContainerName string = 'temp'
+
 var storageBlobDataOwnerRoleId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
+var storageBlobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 var storageQueueDataContributorRoleId = '974c5e8b-45b9-4653-ba55-5f855dd0fb88'
 var storageTableDataContributorRoleId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
 
@@ -105,6 +112,54 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   properties: {
     minimumTlsVersion: 'TLS1_2'
     allowBlobPublicAccess: false
+  }
+}
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
+  parent: storageAccount
+  name: 'default'
+}
+
+resource tempContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  parent: blobService
+  name: tempContainerName
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
+// Catches whatever a run leaves behind: the shared admin1 file, and the batch/id files of a run that
+// failed before its upsert or delete job cleaned them up.
+resource tempLifecycle 'Microsoft.Storage/storageAccounts/managementPolicies@2023-05-01' = {
+  parent: storageAccount
+  name: 'default'
+  properties: {
+    policy: {
+      rules: [
+        {
+          name: 'delete-temp-after-7-days'
+          enabled: true
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                '${tempContainerName}/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterModificationGreaterThan: 7
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
   }
 }
 
@@ -191,6 +246,18 @@ resource storageTableDataContributorAssignment 'Microsoft.Authorization/roleAssi
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageTableDataContributorRoleId)
   }
 }
+
+// Scoped to the temp container only, never the account: the rest of it is the Functions host's
+// AzureWebJobsStorage.
+resource blobDataContributorAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for principalId in blobDataContributorPrincipalIds: {
+  name: guid(tempContainer.id, principalId, storageBlobDataContributorRoleId)
+  scope: tempContainer
+  properties: {
+    principalId: principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleId)
+  }
+}]
 
 output id string = functionContainerApp.id
 output name string = functionContainerApp.name
