@@ -216,9 +216,12 @@ queue (`import-cities`): it downloads GeoNames' `cities500.zip` and `admin1Codes
 (region names) and stages them in blob container `temp` (storage account `wx1116prodblob`;
 `BLOB_STORAGE_URL` with the worker's managed identity, or `BLOB_CONNECTION_STRING` locally). admin1
 goes up as it is (`admin1codes{guid}.txt`); the zip is streamed through a temp file one row at a time,
-a repeated `GeonameId` is skipped, and every 1,000 unique rows go up as their own file of raw lines
+every 1,000 rows go up as their own file of raw lines
 (`cities{guid}.txt`), so memory stays flat. The imported `GeonameId`s go up as `geonameids{guid}.txt`.
-Only once every file is up does it enqueue one `ImportCitiesUpsertEvent` per batch file and then one
+A first pass over the zip, before any blob is written or job enqueued, refuses the import if the
+export repeats a `GeonameId`, has 100,000 cities or fewer, has under 90% of the rows already in
+`dbo.Cities`, or has under 1,000 admin1 regions, so a short or broken download stages nothing for the
+delete to read. Only once those checks pass and every file is up does it enqueue one `ImportCitiesUpsertEvent` per batch file and then one
 `ImportCitiesDeleteEvent`, all on `batch-single`, so each Hangfire job carries only blob names. It
 writes no cities itself. `ImportCitiesUpsertHandler` reads its batch and the admin1 names, looks the
 batch up by `GeonameId`, saves it once and deletes its batch file, so each batch is short and commits
