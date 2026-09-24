@@ -213,10 +213,11 @@ the local-loop paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, Foundry
 places (feature codes `PPLX`/`PPLH`/`PPLQ`/`PPLW`). The table is loaded by `ImportCitiesEvent`/
 `ImportCitiesHandler` (Core/Geo), which the worker runs daily at 11:00 UTC on the `batch-single`
 queue (`import-cities`): it downloads GeoNames' `cities500.zip` and `admin1CodesASCII.txt`
-(region names) and streams the zip through a temp file, reading it twice so memory stays flat. The
-first pass only collects `GeonameId`s and refuses the import (no writes) unless the export holds
-more than 100,000 cities, at least 90% of the current row count, and no duplicate ids; the second
-upserts one city at a time keyed on `GeonameId`, then rows GeoNames no longer lists are bulk-deleted. Until that job has run once in an
+(region names) and streams the zip through a temp file in a single pass, so memory stays flat. It
+writes no cities itself: every 1,000 cities go out as their own `ImportCitiesUpsertEvent` Hangfire
+job on `batch-single` (`ImportCitiesUpsertHandler` looks the batch up by `GeonameId` and saves it
+once), so each batch is short and commits and retries on its own. The parent keeps the imported
+`GeonameId`s and bulk-deletes rows GeoNames no longer lists in batches of 1,000. Until that job has run once in an
 environment, GetCities returns no cities -- trigger `import-cities` from the worker's
 `/hangfire` dashboard after a first deploy. City data is from
 [GeoNames](https://www.geonames.org/) under

@@ -54,7 +54,7 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
 
     private async Task<NonAICitiesResponse> GetCities(GetCitiesEvent request, CancellationToken cancellationToken)
     {
-        var origin = ImportCitiesHandler.CreatePoint(request.Latitude, request.Longitude);
+        var origin = ImportCitiesUpsertHandler.CreatePoint(request.Latitude, request.Longitude);
         var radiusMeters = request.RadiusKm * 1000;
         var minPopulation = request.MinPopulation;
 

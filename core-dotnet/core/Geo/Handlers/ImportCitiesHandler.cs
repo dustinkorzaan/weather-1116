@@ -1,46 +1,33 @@
 using System.Globalization;
 using System.IO.Compression;
 using Core.Data;
-using Core.Data.Domain;
 using Core.Geo.Events;
 using Core.Geo.Models;
+using Core.Hangfire;
 using Core.Http;
 using CQMediator;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite.Geometries;
 
 namespace Core.Geo.Handlers;
 
 /// <summary>
 /// Downloads GeoNames' cities500 export (every populated place with 500+ people) plus its admin1
-/// (state/province) names and merges it into dbo.Cities. The zip is streamed to a temp file and read
-/// twice, one row at a time, so memory stays flat no matter how large the export grows: the first
-/// pass only collects GeonameIds and confirms the export (more than <see cref="MinimumCityCount"/>
-/// cities, no duplicate ids, at least <see cref="MinimumShareOfExistingCities"/> of dbo.Cities)
-/// before anything is written; the second looks up each row by GeonameId and inserts or updates it
-/// on its own. Rows GeoNames no longer lists are then bulk-deleted.
+/// (state/province) names and loads it into dbo.Cities without writing a city itself. The zip is
+/// streamed to a temp file and read once, one row at a time; every <see cref="BatchSize"/> cities are
+/// enqueued as their own <see cref="ImportCitiesUpsertEvent"/> Hangfire job, so each batch is short
+/// and commits and retries on its own. The imported GeonameIds are kept, and rows GeoNames no longer
+/// lists are bulk-deleted in batches of <see cref="BatchSize"/>.
 /// </summary>
 public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCitiesResponse>
 {
     internal const string CitiesUrl = "https://download.geonames.org/export/dump/cities500.zip";
     internal const string CitiesEntryName = "cities500.txt";
     internal const string Admin1CodesUrl = "https://download.geonames.org/export/dump/admin1CodesASCII.txt";
-
-    // A truncated or empty download must never wipe the table, so the import only runs above this.
-    internal const int MinimumCityCount = 100_000;
-
-    // A download that is large but partial (or partly unparsable) would still pass the absolute
-    // floor above and then bulk-delete every city it is missing, so once dbo.Cities holds data the
-    // export must also keep at least this share of the current rows.
-    internal const double MinimumShareOfExistingCities = 0.9;
-
-    // admin1CodesASCII.txt lists about 3,900 regions; an empty or broken body would otherwise blank
-    // every city's Admin1Name (GetCities' region) until the next good run.
-    internal const int MinimumAdmin1Count = 1_000;
-    internal const int DeleteChunkSize = 2_000;
-    internal const int Srid = 4326;
+    internal const string UpsertQueue = "batch-single";
+    internal const int BatchSize = 1_000;
 
     // cities500.txt is tab-delimited with 19 columns and no header row.
     private const int ColumnCount = 19;
@@ -57,195 +44,85 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     private readonly WX1116DbContext _db;
     private readonly TransientRetryHelper _retry;
     private readonly IHttpClientFactory _clientFactory;
+    private readonly IBackgroundJobClient? _backgroundJobs;
     private readonly ILogger<ImportCitiesHandler> _logger;
 
+    // backgroundJobs is optional because CQMediator registers this handler in every Core host, and
+    // hosts without Hangfire (the MCP servers) validate their DI container on startup. Only the
+    // worker, which has Hangfire, ever runs this handler.
     public ImportCitiesHandler(
         WX1116DbContext db,
         TransientRetryHelper retry,
         IHttpClientFactory clientFactory,
-        ILogger<ImportCitiesHandler> logger)
+        ILogger<ImportCitiesHandler> logger,
+        IBackgroundJobClient? backgroundJobs = null)
     {
         _db = db;
         _retry = retry;
         _clientFactory = clientFactory;
+        _backgroundJobs = backgroundJobs;
         _logger = logger;
     }
 
-    /// <summary>City-count floor for an import; tests lower it to exercise a merge on a few rows.</summary>
-    internal int CityFloor { get; init; } = MinimumCityCount;
-
     public async Task<ImportCitiesResponse> Handle(ImportCitiesEvent request, CancellationToken cancellationToken)
     {
+        var backgroundJobs = _backgroundJobs
+            ?? throw new InvalidOperationException("ImportCities needs Hangfire (IBackgroundJobClient) to enqueue its upsert batches.");
+
         using var client = _clientFactory.CreateClient();
         client.Timeout = TimeSpan.FromMinutes(5);
         client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", GetLocationHandler.UserAgent);
 
-        // admin1CodesASCII.txt is ~150 KB, so it is parsed in memory and checked before any write.
+        // admin1CodesASCII.txt is ~150 KB, so it is parsed in memory.
         var admin1Names = await _retry.Execute(async ct =>
         {
             using var httpResponse = await Get(client, Admin1CodesUrl, ct);
             using var admin1Reader = new StreamReader(await httpResponse.Content.ReadAsStreamAsync(ct));
             return ParseAdmin1Names(admin1Reader);
         }, cancellationToken);
-        ConfirmAdmin1Count(admin1Names);
 
         // ZipArchive needs a seekable stream, so the zip goes to a temp file rather than a byte[].
         await using var citiesZip = await _retry.Execute(ct => DownloadToTempFile(client, CitiesUrl, ct), cancellationToken);
         using var archive = new ZipArchive(citiesZip, ZipArchiveMode.Read);
 
-        var response = await Merge(ReadCities(archive), admin1Names, cancellationToken);
-
-        _logger.LogInformation(
-            "ImportCities: {Downloaded} downloaded, {Inserted} inserted, {Updated} updated, {Deleted} deleted, {Unchanged} unchanged",
-            response.Downloaded,
-            response.Inserted,
-            response.Updated,
-            response.Deleted,
-            response.Unchanged);
-
-        return response;
-    }
-
-    /// <summary>
-    /// Enumerates <paramref name="incoming"/> twice. Pass 1 collects the GeonameIds and confirms the
-    /// export (see <see cref="ConfirmCityCount"/>) without writing, so a short, partial, duplicated
-    /// or unreadable export leaves dbo.Cities untouched. Pass 2 upserts each city one at a time (one
-    /// lookup, and a save only when something changed). Rows whose GeonameId was not imported are
-    /// then bulk-deleted.
-    /// </summary>
-    internal async Task<ImportCitiesResponse> Merge(
-        IEnumerable<GeoNamesCityDto> incoming,
-        IReadOnlyDictionary<string, string> admin1Names,
-        CancellationToken cancellationToken)
-    {
+        var response = new ImportCitiesResponse();
         var importedIds = new HashSet<int>();
-        foreach (var dto in incoming)
+        foreach (var batch in ReadCities(archive).Chunk(BatchSize))
         {
-            if (!importedIds.Add(dto.GeonameId))
+            foreach (var dto in batch)
             {
-                throw new InvalidOperationException(
-                    $"GeoNames cities500 export lists geonameid {dto.GeonameId} more than once; import skipped.");
+                importedIds.Add(dto.GeonameId);
+                dto.Admin1Name = admin1Names.GetValueOrDefault(Admin1Key(dto.CountryCode, dto.Admin1Code));
             }
-        }
 
-        var existingCount = await _db.Cities.CountAsync(cancellationToken);
-        ConfirmCityCount(importedIds.Count, existingCount, CityFloor);
-
-        var response = new ImportCitiesResponse { Downloaded = importedIds.Count };
-        foreach (var dto in incoming)
-        {
-            await Upsert(dto, admin1Names, response, cancellationToken);
+            backgroundJobs.EnqueueCQMediatorEvent(new ImportCitiesUpsertEvent { Cities = [.. batch] }, UpsertQueue);
+            response.Downloaded += batch.Length;
+            response.Enqueued++;
         }
 
         // Only GeonameIds come back (about 1 MB for 250k rows), never whole City rows.
         var existingIds = await _db.Cities.Select(city => city.GeonameId).ToListAsync(cancellationToken);
-        var missing = existingIds.Where(id => !importedIds.Contains(id)).ToList();
-
-        foreach (var chunk in missing.Chunk(DeleteChunkSize))
+        foreach (var batch in MissingIdBatches(existingIds, importedIds))
         {
             response.Deleted += await _db.Cities
-                .Where(city => chunk.Contains(city.GeonameId))
+                .Where(city => batch.Contains(city.GeonameId))
                 .ExecuteDeleteAsync(cancellationToken);
         }
+
+        _logger.LogInformation(
+            "ImportCities: {Downloaded} downloaded, {Enqueued} upsert batches enqueued, {Deleted} deleted",
+            response.Downloaded,
+            response.Enqueued,
+            response.Deleted);
 
         return response;
     }
 
-    private async Task Upsert(
-        GeoNamesCityDto dto,
-        IReadOnlyDictionary<string, string> admin1Names,
-        ImportCitiesResponse response,
-        CancellationToken cancellationToken)
-    {
-        var admin1Name = admin1Names.GetValueOrDefault(Admin1Key(dto.CountryCode, dto.Admin1Code));
-        var city = await _db.Cities.FirstOrDefaultAsync(existing => existing.GeonameId == dto.GeonameId, cancellationToken);
+    /// <summary>GeonameIds in dbo.Cities that the export no longer lists, in batches of <see cref="BatchSize"/>.</summary>
+    internal static IEnumerable<int[]> MissingIdBatches(IEnumerable<int> existingIds, HashSet<int> importedIds) =>
+        existingIds.Where(id => !importedIds.Contains(id)).Chunk(BatchSize);
 
-        if (city is null)
-        {
-            city = new City { Id = Guid.NewGuid(), GeonameId = dto.GeonameId };
-            ApplyChanges(city, dto, admin1Name);
-            _db.Cities.Add(city);
-            response.Inserted++;
-        }
-        else if (ApplyChanges(city, dto, admin1Name))
-        {
-            response.Updated++;
-        }
-        else
-        {
-            response.Unchanged++;
-        }
-
-        if (_db.ChangeTracker.HasChanges())
-        {
-            await _db.SaveChangesAsync(cancellationToken);
-        }
-
-        // Nothing is kept tracked between rows, so the context never grows with the export.
-        _db.ChangeTracker.Clear();
-    }
-
-    /// <summary>
-    /// Rejects an export of <paramref name="incomingCount"/> cities that is at or under
-    /// <paramref name="floor"/>, or under <see cref="MinimumShareOfExistingCities"/> of the
-    /// <paramref name="existingCount"/> rows already in dbo.Cities.
-    /// </summary>
-    internal static void ConfirmCityCount(int incomingCount, int existingCount, int floor = MinimumCityCount)
-    {
-        if (incomingCount <= floor)
-        {
-            throw new InvalidOperationException(
-                $"GeoNames cities500 export held only {incomingCount} cities (expected more than {floor}); import skipped.");
-        }
-
-        if (incomingCount < existingCount * MinimumShareOfExistingCities)
-        {
-            throw new InvalidOperationException(
-                $"GeoNames cities500 export held {incomingCount} cities, under {MinimumShareOfExistingCities:P0} of the {existingCount} already in dbo.Cities; import skipped.");
-        }
-    }
-
-    /// <summary>
-    /// Copies <paramref name="dto"/> onto <paramref name="city"/>, assigning only fields whose value
-    /// differs so EF change tracking marks just the columns that really changed. Returns whether
-    /// anything changed.
-    /// </summary>
-    internal static bool ApplyChanges(City city, GeoNamesCityDto dto, string? admin1Name)
-    {
-        var changed = false;
-
-        if (city.Name != dto.Name) { city.Name = dto.Name; changed = true; }
-        if (city.CountryCode != dto.CountryCode) { city.CountryCode = dto.CountryCode; changed = true; }
-        if (city.Admin1Code != dto.Admin1Code) { city.Admin1Code = dto.Admin1Code; changed = true; }
-        if (city.Admin1Name != admin1Name) { city.Admin1Name = admin1Name; changed = true; }
-        if (city.FeatureCode != dto.FeatureCode) { city.FeatureCode = dto.FeatureCode; changed = true; }
-        if (city.Population != dto.Population) { city.Population = dto.Population; changed = true; }
-        if (city.Timezone != dto.Timezone) { city.Timezone = dto.Timezone; changed = true; }
-
-        if (city.GeoPoint is null || city.Latitude != dto.Latitude || city.Longitude != dto.Longitude)
-        {
-            city.Latitude = dto.Latitude;
-            city.Longitude = dto.Longitude;
-            city.GeoPoint = CreatePoint(dto.Latitude, dto.Longitude);
-            changed = true;
-        }
-
-        return changed;
-    }
-
-    internal static Point CreatePoint(double latitude, double longitude) =>
-        new(longitude, latitude) { SRID = Srid };
-
-    internal static void ConfirmAdmin1Count(IReadOnlyDictionary<string, string> admin1Names)
-    {
-        if (admin1Names.Count < MinimumAdmin1Count)
-        {
-            throw new InvalidOperationException(
-                $"GeoNames admin1CodesASCII.txt held only {admin1Names.Count} regions (expected at least {MinimumAdmin1Count}); import skipped.");
-        }
-    }
-
-    /// <summary>Re-opens cities500.txt on every enumeration, so Merge can stream it twice.</summary>
+    /// <summary>Streams cities500.txt out of the zip one row at a time.</summary>
     private static IEnumerable<GeoNamesCityDto> ReadCities(ZipArchive archive)
     {
         var entry = archive.GetEntry(CitiesEntryName)

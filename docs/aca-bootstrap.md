@@ -205,7 +205,9 @@ GetCities only reads `dbo.Cities`.
 After the first deploy, `dbo.Cities` is empty until the worker's daily
 `import-cities` job runs (11:00 UTC); trigger it once from the worker's
 `/hangfire` dashboard (Recurring Jobs → `import-cities` → Trigger now) so
-GetCities has data straight away.
+GetCities has data straight away. That job enqueues about 225 `ImportCitiesUpsertEvent`
+batches on `batch-single`; they drain one at a time while the worker is up, and any still
+queued when it scales to zero resume on its next wake.
 
 ## Step 5 — Deploy apps
 

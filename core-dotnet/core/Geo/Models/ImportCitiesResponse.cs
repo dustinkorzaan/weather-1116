@@ -8,15 +8,10 @@ public class ImportCitiesResponse
     [JsonPropertyName("downloaded")]
     public int Downloaded { get; set; }
 
-    [JsonPropertyName("inserted")]
-    public int Inserted { get; set; }
-
-    [JsonPropertyName("updated")]
-    public int Updated { get; set; }
+    /// <summary>ImportCitiesUpsertEvent jobs enqueued, one per batch of cities.</summary>
+    [JsonPropertyName("enqueued")]
+    public int Enqueued { get; set; }
 
     [JsonPropertyName("deleted")]
     public int Deleted { get; set; }
-
-    [JsonPropertyName("unchanged")]
-    public int Unchanged { get; set; }
 }
