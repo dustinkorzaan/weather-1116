@@ -217,7 +217,7 @@ queue (`import-cities`): it downloads GeoNames' `cities500.zip` and `admin1Codes
 writes no cities itself: every 1,000 cities go out as their own `ImportCitiesUpsertEvent` Hangfire
 job on `batch-single` (`ImportCitiesUpsertHandler` looks the batch up by `GeonameId` and saves it
 once), so each batch is short and commits and retries on its own. The parent keeps the imported
-`GeonameId`s and bulk-deletes rows GeoNames no longer lists in batches of 1,000. Until that job has run once in an
+`GeonameId`s (skipping a repeated id) and bulk-deletes rows GeoNames no longer lists in batches of 1,000. Until that job has run once in an
 environment, GetCities returns no cities -- trigger `import-cities` from the worker's
 `/hangfire` dashboard after a first deploy. City data is from
 [GeoNames](https://www.geonames.org/) under

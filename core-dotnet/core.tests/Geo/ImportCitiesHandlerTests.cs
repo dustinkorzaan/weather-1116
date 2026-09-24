@@ -86,6 +86,23 @@ public class ImportCitiesHandlerTests
     }
 
     [Fact]
+    public async Task Handle_SkipsARepeatedGeonameId()
+    {
+        using var db = CreateDb();
+        var http = new GeoNamesHandler(Zip(string.Join('\n', NashvilleLine, AndorraLine, NashvilleLine)), Admin1Text);
+        var jobs = new RecordingJobClient();
+        var handler = CreateHandler(db, http, jobs);
+
+        var response = await handler.Handle(new ImportCitiesEvent(), CancellationToken.None);
+
+        Assert.Equal(2, response.Downloaded);
+        var created = Assert.Single(jobs.Created);
+        var upsert = Assert.IsType<ImportCitiesUpsertEvent>(
+            HangfireCQMediatorEventSerializer.Deserialize((string)created.Job.Args[1], (string)created.Job.Args[2]));
+        Assert.Equal([4644585, 3041563], upsert.Cities.Select(city => city.GeonameId));
+    }
+
+    [Fact]
     public void MissingIdBatches_SkipsImportedIdsAndSplitsTheRest()
     {
         var existing = Enumerable.Range(1, 3_000);

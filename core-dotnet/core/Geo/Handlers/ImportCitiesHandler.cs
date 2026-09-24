@@ -18,8 +18,8 @@ namespace Core.Geo.Handlers;
 /// (state/province) names and loads it into dbo.Cities without writing a city itself. The zip is
 /// streamed to a temp file and read once, one row at a time; every <see cref="BatchSize"/> cities are
 /// enqueued as their own <see cref="ImportCitiesUpsertEvent"/> Hangfire job, so each batch is short
-/// and commits and retries on its own. The imported GeonameIds are kept, and rows GeoNames no longer
-/// lists are bulk-deleted in batches of <see cref="BatchSize"/>.
+/// and commits and retries on its own. The imported GeonameIds are kept (a repeated id is skipped),
+/// and rows GeoNames no longer lists are bulk-deleted in batches of <see cref="BatchSize"/>.
 /// </summary>
 public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCitiesResponse>
 {
@@ -87,11 +87,11 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
 
         var response = new ImportCitiesResponse();
         var importedIds = new HashSet<int>();
-        foreach (var batch in ReadCities(archive).Chunk(BatchSize))
+        // A GeonameId already seen is skipped, so no batch ever inserts the same city twice.
+        foreach (var batch in ReadCities(archive).Where(dto => importedIds.Add(dto.GeonameId)).Chunk(BatchSize))
         {
             foreach (var dto in batch)
             {
-                importedIds.Add(dto.GeonameId);
                 dto.Admin1Name = admin1Names.GetValueOrDefault(Admin1Key(dto.CountryCode, dto.Admin1Code));
             }
 
