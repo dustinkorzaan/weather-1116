@@ -1,4 +1,5 @@
 using Core.AIWeather.Events;
+using Core.Geo.Events;
 using Core.Hangfire;
 using Hangfire;
 
@@ -31,6 +32,12 @@ public class RecurringJobScheduler : IHostedService
             Cron.Daily(2),
             new ConfirmNashvilleAIWeatherEvent { Version = 4 },
             queue: "batch-multi");
+
+        _recurringJobs.AddOrUpdateCQMediatorEvent(
+            "import-cities",
+            Cron.Daily(11),
+            new ImportCitiesEvent(),
+            queue: "batch-single");
 
         return Task.CompletedTask;
     }

@@ -54,7 +54,10 @@ jobs:
           dockerfile: mcp-srv-func-app/mcp/Dockerfile
           container_app_name: ${{ env.CONTAINER_APP_NAME }}
           resource_group: ${{ env.RESOURCE_GROUP }}
+          secrets_multiline: |
+            db-connection-string=${{ secrets.AZURE_SQL_DB_CONNECTION_STRING }}
           env_overlay_multiline: |
+            DB_CONNECTION_STRING=secretref:db-connection-string
             BUILD_NUMBER=${{ env.BUILD_NUMBER }}
             BUILD_START=${{ steps.build_start.outputs.build_start }}
             BUILD_BRANCH_NAME=${{ env.BUILD_BRANCH_NAME }}

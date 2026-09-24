@@ -42,6 +42,12 @@ param userAssignedIdentityId string
 @description('Client ID of this app\'s dedicated User-Assigned Managed Identity.')
 param userAssignedIdentityClientId string
 
+@description('vCPU per replica, as a string (Bicep has no decimal literal). Must pair with memory per ACA Consumption sizes.')
+param cpu string = '0.25'
+
+@description('Memory per replica, e.g. 0.5Gi. Must pair with cpu per ACA Consumption sizes (memory = 2 x cpu).')
+param memory string = '0.5Gi'
+
 @description('Whether to set AZURE_CLIENT_ID so DefaultAzureCredential picks this UAMI.')
 param setAzureClientId bool = false
 
@@ -115,8 +121,8 @@ resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
           image: image
           env: envVars
           resources: {
-            cpu: json('0.25')
-            memory: '0.5Gi'
+            cpu: json(cpu)
+            memory: memory
           }
         }
       ]

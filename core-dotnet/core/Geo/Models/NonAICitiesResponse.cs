@@ -4,7 +4,7 @@ namespace Core.Geo.Models;
 
 public class NonAICitiesResponse
 {
-    /// <summary>Search radius actually used, after resetting into range and capping to GeoDB's free-tier maximum (100 km).</summary>
+    /// <summary>Search radius actually used, after resetting into range (1-1000 km).</summary>
     [JsonPropertyName("radiusKm")]
     public double RadiusKm { get; set; }
 
@@ -19,7 +19,7 @@ public class NonAICitiesResponse
     [JsonPropertyName("returned")]
     public int Returned { get; set; }
 
-    /// <summary>Cities GeoDB reports within the radius and population filter, which can exceed <see cref="Returned"/>.</summary>
+    /// <summary>Cities within the radius and population filter, which can exceed <see cref="Returned"/>.</summary>
     [JsonPropertyName("totalAvailable")]
     public int TotalAvailable { get; set; }
 

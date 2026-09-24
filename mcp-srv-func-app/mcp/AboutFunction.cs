@@ -4,13 +4,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Mcp;
+using Microsoft.Extensions.Configuration;
 
 namespace WeatherMcpSrvFuncApp;
 
 /// <summary>
-/// Anonymous About probe — leaf AboutNode named mcp-srv-func-app (no children).
+/// Anonymous About probe — leaf AboutNode named mcp-srv-func-app (no children). Healthy when
+/// GetCities is registered and DB_CONNECTION_STRING (dbo.City) is configured.
 /// </summary>
-public class AboutFunction
+public class AboutFunction(IConfiguration configuration)
 {
 	private static readonly string[] ExpectedTools = ["GetCities"];
 	private static readonly Lazy<bool> HasExpectedTool = new(() =>
@@ -21,7 +23,9 @@ public class AboutFunction
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "about")] HttpRequest _)
 	{
 		return new OkObjectResult(
-			AboutTreeBuilder.BuildMcpSrvFuncAppNode(HasExpectedTool.Value));
+			AboutTreeBuilder.BuildMcpSrvFuncAppNode(
+				HasExpectedTool.Value
+				&& !string.IsNullOrWhiteSpace(configuration["DB_CONNECTION_STRING"])));
 	}
 
 	/// <summary>

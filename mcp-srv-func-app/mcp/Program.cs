@@ -34,13 +34,18 @@ if (!string.IsNullOrWhiteSpace(appInsightsConnectionString))
 		.UseAzureMonitorExporter(o => o.ConnectionString = appInsightsConnectionString);
 }
 
-// MCP service is stateless with no database. Register a no-op DbContext for handlers that depend on it
-// but won't be used by any MCP tools (User handlers are auto-registered but unused here).
-builder.Services.AddDbContext<WX1116DbContext>((_, options) =>
-{
-	// Use SqlServer with no connection string - will fail if actually used, but handlers won't be.
-	options.UseSqlServer("Server=(local);");
-});
+// GetCities queries dbo.City (GeoNames cities500, loaded daily by the worker's import-cities job).
+// API's Program.cs owns applying EF Core migrations (Database.Migrate()); this app only reads the
+// already-migrated schema. Authenticates via this app's user-assigned managed identity
+// (AZURE_CLIENT_ID, set by infra/modules/functions-container-app.bicep) -- see
+// ManagedIdentitySqlConnectionStringFactory. Without DB_CONNECTION_STRING the host still starts
+// (so /about answers) with an unusable placeholder connection; GetCities then fails per call and
+// /about reports unhealthy.
+var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
+	builder.Configuration["DB_CONNECTION_STRING"],
+	builder.Configuration["AZURE_CLIENT_ID"]);
+builder.Services.AddDbContext<WX1116DbContext>(options =>
+	options.UseSqlServer(dbConnectionString ?? "Server=(local);", sql => sql.UseNetTopologySuite()));
 
 builder.Services.AddStandardCoreServices();
 

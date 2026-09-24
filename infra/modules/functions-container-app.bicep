@@ -78,6 +78,12 @@ var provisionEnvVars = [
     name: 'AzureWebJobsStorage__clientId'
     value: userAssignedIdentityClientId
   }
+  {
+    // DefaultAzureCredential picks this UAMI for SQL (dbo.City, read by GetCities) --
+    // see ManagedIdentitySqlConnectionStringFactory.
+    name: 'AZURE_CLIENT_ID'
+    value: userAssignedIdentityClientId
+  }
 ]
 
 var provisionEnvNames = map(provisionEnvVars, envVar => envVar.name)

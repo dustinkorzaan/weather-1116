@@ -203,10 +203,22 @@ ports of Core's `GetLatLongHandler`/`GetLocationHandler` with the same tool name
 descriptions, and response shapes. They used to live on MCP Server on Function App, which
 now serves `GetCities(latitude, longitude, radiusKm, minPopulation, maxCities)` through
 Core's `GetCitiesEvent`/`GetCitiesHandler`: the largest cities (by population) within
-`radiusKm` (default 161, reset into 1–1000, then capped at GeoDB's 100 km free-tier limit)
+`radiusKm` (default 161, reset into 1–1000)
 of a coordinate with at least `minPopulation` people (default 0), at most `maxCities` of
 them (default 25, reset into 0–100). All three tools also run in-process through Core on
 the local-loop paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, FoundryConsoleV3).
+
+`GetCitiesHandler` answers from `dbo.City` with a NetTopologySuite geography query
+(`IsWithinDistance`, spatial index `IX_City_GeoPoint`), skipping city sections and historical
+places (feature codes `PPLX`/`PPLH`/`PPLQ`/`PPLW`). The table is loaded by `ImportCitiesEvent`/
+`ImportCitiesHandler` (Core/Geo), which the worker runs daily at 11:00 UTC on the `batch-single`
+queue (`import-cities`): it downloads GeoNames' `cities500.zip` and `admin1CodesASCII.txt`
+(region names), refuses to merge unless the export holds more than 100,000 cities, then
+updates, inserts, and bulk-deletes rows keyed on `GeonameId`. Until that job has run once in an
+environment, GetCities returns no cities -- trigger `import-cities` from the worker's
+`/hangfire` dashboard after a first deploy. City data is from
+[GeoNames](https://www.geonames.org/) under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 `GetPublicWeatherCurrent` followed the same path later: it moved off MCP Server on App
 Service onto `mcp-srv-node` (the raw Open-Meteo `current_weather` payload, the same shape
@@ -310,7 +322,7 @@ and `children`.
 and handlers, including:
 
 - `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
-- `core-dotnet/core/Geo/` — geocoding (`GetLatLong`, `GetLocation`) and nearby cities (`GetCities`, via GeoDB Cities)
+- `core-dotnet/core/Geo/` — geocoding (`GetLatLong`, `GetLocation`) and nearby cities (`GetCities`, a NetTopologySuite query over `dbo.City`) and the daily GeoNames `ImportCities` job
 - `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`), fetched in Open-Meteo's native metric units (°C, km/h, mm) for the AI/MCP tool path. The `WeatherMVC`/`WeatherAPI` Forecast and History HTTP endpoints instead go through `GetUIWeatherForecast`/`GetUIWeatherHistory`, which wrap the same metric fetch and map it via `WeatherResponseMapper` into US customary units (°F, mph, in) so the UIs only format values, not convert them.
 - `core-dotnet/core/AIWeather/`: model-direct AI weather (`GetCurrentAIWeatherV3Handler`, `GetCurrentAIWeatherV4Handler`, `GetCurrentAIWeatherV5Handler`)
 - `core-dotnet/core/About/` — About tree builder and remote about client

@@ -31,8 +31,10 @@ and assigns Contributor + User Access Administrator on this resource group.
 
 Everything uses `location: centralus`.
 
-Every container app runs at the smallest Consumption-plan size ACA allows --
-0.25 vCPU / 0.5Gi memory -- and scales to zero (`minReplicas: 0`, including
+Every container app except `worker` runs at the smallest Consumption-plan size ACA
+allows -- 0.25 vCPU / 0.5Gi memory. `worker` runs at 0.5 vCPU / 1Gi for now, for the
+daily `import-cities` GeoNames merge (sizes are per app in `containerAppsConfig` in
+`infra/main.bicep`). Every app scales to zero (`minReplicas: 0`, including
 blazor and worker) with a 30-minute cooldown before scaling in, so an idle
 environment costs nothing between requests without cold-starting on every
 short gap in traffic. `worker` alone is capped at `maxReplicas: 1`: Hangfire
@@ -42,7 +44,8 @@ replica racing the first would double-run jobs instead of adding throughput.
 Two consequences of scaling everything to zero are worth knowing before you
 rely on this in production, not just during the demo:
 
-- **`worker`'s `Cron.Daily(2)` recurring jobs** (`RecurringJobScheduler`) only
+- **`worker`'s recurring jobs** (`RecurringJobScheduler`: the `Cron.Daily(2)` AI weather
+  checks and the 11:00 UTC `import-cities` GeoNames load) only
   run if a replica happens to be up when Hangfire's scheduler ticks. There is
   no queue-depth/KEDA scale rule bringing `worker` up on a schedule -- the
   only thing that wakes it from zero is an inbound HTTP request, which today
@@ -196,7 +199,14 @@ production shape.
 Run `infra/scripts/create-contained-users.sql` as the SQL Entra admin
 (`wx1116-prod-github-mi`). See comments in
 `prod-provision-infra.yml`. Re-run this if the runtime managed identities are
-deleted and recreated (new principal IDs).
+deleted and recreated (new principal IDs), or when an app gains SQL access --
+`mcp-srv-func-app`'s identity is a read-only (`db_datareader`) user, since
+GetCities only reads `dbo.City`.
+
+After the first deploy, `dbo.City` is empty until the worker's daily
+`import-cities` job runs (11:00 UTC); trigger it once from the worker's
+`/hangfire` dashboard (Recurring Jobs → `import-cities` → Trigger now) so
+GetCities has data straight away.
 
 ## Step 5 — Deploy apps
 

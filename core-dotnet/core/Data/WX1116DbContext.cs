@@ -12,6 +12,8 @@ public class WX1116DbContext(DbContextOptions<WX1116DbContext> options) : DbCont
 
     public DbSet<UserPin> UserPin => Set<UserPin>();
 
+    public DbSet<City> City => Set<City>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(WX1116DbContext).Assembly);

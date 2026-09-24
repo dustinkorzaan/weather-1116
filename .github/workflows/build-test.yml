@@ -117,6 +117,25 @@ jobs:
     name: Test Core Library
     runs-on: ubuntu-latest
 
+    # CitySqlServerTests ([SqlServerFact]) migrate a fresh database per test and run the
+    # GetCities geography queries and the ImportCities merge against it -- the EF InMemory
+    # provider can't evaluate geography distances. They skip when
+    # CORE_TESTS_SQL_CONNECTION_STRING is unset (e.g. local runs without SQL Server).
+    services:
+      sql-server:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "P@ssw0rd2026!"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P P@ssw0rd2026! -C -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 10s
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -128,6 +147,8 @@ jobs:
 
       - name: Run Core tests
         run: dotnet test core-dotnet/core.tests/Core.Tests.csproj --configuration Release --verbosity normal
+        env:
+          CORE_TESTS_SQL_CONNECTION_STRING: "Server=localhost,1433;Database=master;User ID=sa;Password=P@ssw0rd2026!;TrustServerCertificate=True;Authentication=SqlPassword"
 
   test-worker:
     name: Test Worker DotNet
