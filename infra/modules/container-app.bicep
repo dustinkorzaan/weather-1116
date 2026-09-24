@@ -33,6 +33,13 @@ param maxReplicas int = 3
 @description('KEDA cooldown period in seconds before scaling in to minReplicas. 1800 (30 min) trades a longer window of an idle-but-warm replica for fewer cold starts than the 300s platform default; ACA caps this at 3600.')
 param cooldownPeriod int = 1800
 
+@description('Daily window, in scheduledWarmTimezone, during which a cron scale rule holds at least one replica even with no traffic. Covers the worker\'s 11:00 UTC import-cities job, which only runs if a replica is up when Hangfire ticks.')
+param scheduledWarmStart string = '0 11 * * *'
+
+param scheduledWarmEnd string = '30 13 * * *'
+
+param scheduledWarmTimezone string = 'Etc/UTC'
+
 @description('Enable sticky sessions for Blazor Server SignalR.')
 param stickySessions bool = false
 
@@ -130,6 +137,30 @@ resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
         minReplicas: minReplicas
         maxReplicas: maxReplicas
         cooldownPeriod: cooldownPeriod
+        // Declaring any rule drops ACA's implicit HTTP rule, so it is restated
+        // here with the platform default of 10 concurrent requests.
+        rules: [
+          {
+            name: 'http-scale'
+            http: {
+              metadata: {
+                concurrentRequests: '10'
+              }
+            }
+          }
+          {
+            name: 'scheduled-warm'
+            custom: {
+              type: 'cron'
+              metadata: {
+                timezone: scheduledWarmTimezone
+                start: scheduledWarmStart
+                end: scheduledWarmEnd
+                desiredReplicas: '1'
+              }
+            }
+          }
+        ]
       }
     }
   }

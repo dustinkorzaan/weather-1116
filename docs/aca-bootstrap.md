@@ -36,7 +36,11 @@ Every container app runs at the smallest Consumption-plan size ACA allows --
 `infra/main.bicep`). Every app scales to zero (`minReplicas: 0`, including
 blazor and worker) with a 30-minute cooldown before scaling in, so an idle
 environment costs nothing between requests without cold-starting on every
-short gap in traffic. `worker` alone is capped at `maxReplicas: 1`: Hangfire
+short gap in traffic. The exception is a daily warm window: a KEDA `cron`
+scale rule (`scheduled-warm`, alongside a restated default `http-scale` rule)
+holds every app, `mcp-srv-func-app` included, at one replica from 11:00 to
+13:30 UTC, which also keeps `worker` up for the 11:00 UTC `import-cities` job.
+`worker` alone is capped at `maxReplicas: 1`: Hangfire
 recurring jobs assume a single active server, so a second cold-started
 replica racing the first would double-run jobs instead of adding throughput.
 
@@ -45,9 +49,9 @@ rely on this in production, not just during the demo:
 
 - **`worker`'s recurring jobs** (`RecurringJobScheduler`: the `Cron.Daily(2)` AI weather
   checks and the 11:00 UTC `import-cities` GeoNames load) only
-  run if a replica happens to be up when Hangfire's scheduler ticks. There is
-  no queue-depth/KEDA scale rule bringing `worker` up on a schedule -- the
-  only thing that wakes it from zero is an inbound HTTP request, which today
+  run if a replica happens to be up when Hangfire's scheduler ticks. The
+  11:00-13:30 UTC `scheduled-warm` cron rule covers `import-cities`; outside
+  that window the only thing that wakes it from zero is an inbound HTTP request, which today
   means the React UI's `useBackendWake` hook (`ui-react/src/app/useBackendWake.js`,
   used from `App.jsx`) pinging `worker`'s own `/About` directly on page load,
   in parallel with API, MVC, Blazor, and all four MCP hosts, rather than relying
@@ -57,7 +61,7 @@ rely on this in production, not just during the demo:
   up after a single attempt; see the `BackendWakeScreen` full-page loader,
   now showing seven spinning icons (one per target), it drives while that's
   pending. If nobody loads the React UI around 2am,
-  that day's recurring jobs are silently skipped, not just delayed. Keep `worker` at
+  that day's AI weather checks are silently skipped, not just delayed. Keep `worker` at
   `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
   `/About`) if the recurring jobs need to actually run unattended.
 - **`mcp-srv-func-app` cold starts used to compound with `AboutClient`'s 60s
