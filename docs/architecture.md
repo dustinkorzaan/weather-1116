@@ -223,7 +223,9 @@ Only once every file is up does it enqueue one `ImportCitiesUpsertEvent` per bat
 writes no cities itself. `ImportCitiesUpsertHandler` reads its batch and the admin1 names, looks the
 batch up by `GeonameId`, saves it once and deletes its batch file, so each batch is short and commits
 and retries on its own. `batch-single` runs one job at a time in order, so
-`ImportCitiesDeleteHandler` runs last: it reads every imported id, queries `dbo.Cities` for its
+`ImportCitiesDeleteHandler` runs after every batch's first attempt (a failed batch retries later,
+which is safe: the delete never removes an id in the file, so that batch's rows are only stale until
+the retry): it reads every imported id, queries `dbo.Cities` for its
 `GeonameId`s and deletes the ones GeoNames no longer lists 1,000 at a time. A storage lifecycle rule
 deletes anything left in `temp` 7 days after it was written. Until that job has run once in an
 environment, GetCities returns no cities -- trigger `import-cities` from the worker's

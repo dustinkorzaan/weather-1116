@@ -36,7 +36,7 @@ param existingEnv array = []
 @description('Secrets currently on the live app as { list: [{ name, value }] }. Carried forward verbatim; this module never authors secrets itself.')
 param existingSecrets object = {}
 
-@description('Principal IDs of other apps\' identities that read and write blobs in this account (the worker stages import-cities files in the temp container).')
+@description('Principal IDs of other apps\' identities that read and write blobs in the temp container only (the worker stages import-cities files there).')
 param blobDataContributorPrincipalIds array = []
 
 @description('Blob container for short-lived files, e.g. the worker\'s import-cities batches. A lifecycle rule deletes its blobs 7 days after they were last written.')
@@ -247,9 +247,11 @@ resource storageTableDataContributorAssignment 'Microsoft.Authorization/roleAssi
   }
 }
 
+// Scoped to the temp container only, never the account: the rest of it is the Functions host's
+// AzureWebJobsStorage.
 resource blobDataContributorAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for principalId in blobDataContributorPrincipalIds: {
-  name: guid(storageAccount.id, principalId, storageBlobDataContributorRoleId)
-  scope: storageAccount
+  name: guid(tempContainer.id, principalId, storageBlobDataContributorRoleId)
+  scope: tempContainer
   properties: {
     principalId: principalId
     principalType: 'ServicePrincipal'

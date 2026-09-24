@@ -206,7 +206,7 @@ After the first deploy, `dbo.Cities` is empty until the worker's daily
 `import-cities` job runs (11:00 UTC); trigger it once from the worker's
 `/hangfire` dashboard (Recurring Jobs → `import-cities` → Trigger now) so
 GetCities has data straight away. That job stages the export in `wx1116prodblob`'s `temp`
-container (the worker's identity has Storage Blob Data Contributor there) and enqueues about 225
+container (the worker's identity has Storage Blob Data Contributor on that container only) and enqueues about 225
 `ImportCitiesUpsertEvent` batches plus a final `ImportCitiesDeleteEvent` on `batch-single`; they
 drain one at a time while the worker is up, and any still queued when it scales to zero resume on
 its next wake. Their files wait with them: the `temp` lifecycle rule only deletes blobs

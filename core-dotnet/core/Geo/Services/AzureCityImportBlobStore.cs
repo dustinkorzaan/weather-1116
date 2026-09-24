@@ -16,10 +16,12 @@ public class AzureCityImportBlobStore : ICityImportBlobStore
     private readonly BlobContainerClient _container;
     private readonly Lazy<Task> _created;
 
-    public AzureCityImportBlobStore(BlobContainerClient container)
+    // createContainer is for local Azurite only. In Azure, infra creates the temp container and the
+    // worker's role is scoped to that container, so it never tries to create one.
+    public AzureCityImportBlobStore(BlobContainerClient container, bool createContainer = false)
     {
         _container = container;
-        _created = new(() => _container.CreateIfNotExistsAsync());
+        _created = new(() => createContainer ? _container.CreateIfNotExistsAsync() : Task.CompletedTask);
     }
 
     public async Task UploadTextAsync(string blobName, string content, CancellationToken cancellationToken)
@@ -53,7 +55,8 @@ public static class CityImportBlobStoreServiceCollectionExtensions
         if (!string.IsNullOrWhiteSpace(connectionString))
         {
             services.AddSingleton<ICityImportBlobStore>(new AzureCityImportBlobStore(
-                new BlobContainerClient(connectionString, ICityImportBlobStore.ContainerName)));
+                new BlobContainerClient(connectionString, ICityImportBlobStore.ContainerName),
+                createContainer: true));
         }
         else if (!string.IsNullOrWhiteSpace(storageUrl))
         {

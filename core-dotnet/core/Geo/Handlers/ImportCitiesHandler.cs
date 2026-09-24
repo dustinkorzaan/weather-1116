@@ -28,7 +28,8 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     internal const string CitiesEntryName = "cities500.txt";
     internal const string Admin1CodesUrl = "https://download.geonames.org/export/dump/admin1CodesASCII.txt";
 
-    // One worker (WorkerCount = 1) and FIFO, so the delete job enqueued last runs after every upsert.
+    // One worker (WorkerCount = 1) and FIFO, so the delete job enqueued last runs after every upsert's
+    // first attempt. A failed upsert retries later; its ids are in the delete's file, so it deletes none of them.
     internal const string ImportQueue = "batch-single";
     internal const int BatchSize = 1_000;
 
