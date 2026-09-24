@@ -67,13 +67,13 @@ hot reload); React uses `npm start`. Ports come from each project's
 - `mcp-srv-node` serves `GetPublicWeatherCurrent`/`GetPublicWeatherForecast`/`GetPublicWeatherHistory`;
   `mcp-srv-python` serves `GetLatLong`/`GetLocation` (Open-Meteo geocoding, Nominatim reverse
   geocoding); `mcp-srv-func-app` serves `GetCities` (largest cities near a coordinate, via Core's
-  `GetCitiesHandler`); `mcp-srv-app-service` serves the saved-pin tools
-  `GetUser`/`AddUserPin`/`DeleteUserPin`. The geo and pin tools also exist in-process in Core
+  `GetCitiesHandler`); `mcp-srv-app-service` serves the saved-city tools
+  `GetUser`/`AddUserCity`/`DeleteUserCity`. The geo and saved-city tools also exist in-process in Core
   (`Geo/Handlers`, `Users/Handlers`) for the local-loop paths.
   Never register the same tool name on two MCP hosts.
-- `mcp-srv-app-service` needs `DB_CONNECTION_STRING` for its pin tools; without it the host
+- `mcp-srv-app-service` needs `DB_CONNECTION_STRING` for its saved-city tools; without it the host
   still starts but `/About` reports unhealthy and tool calls fail.
-- `GetCities` (in-process on api/mvc and remote on `mcp-srv-func-app`) queries `dbo.City`, a
+- `GetCities` (in-process on api/mvc and remote on `mcp-srv-func-app`) queries `dbo.Cities`, a
   GeoNames `cities500` table loaded by the worker's daily `import-cities` Hangfire job (11:00 UTC,
   `batch-single`). `mcp-srv-func-app` therefore needs `DB_CONNECTION_STRING` too (without it
   `/about` reports unhealthy and GetCities fails), and GetCities returns no cities until

@@ -29,12 +29,12 @@ public class UserController : Controller
 		}
 	}
 
-	[HttpPost("AddPin")]
-	public async Task<IActionResult> AddPin([FromBody] AddUserPinRequest request, CancellationToken cancellationToken)
+	[HttpPost("AddCity")]
+	public async Task<IActionResult> AddCity([FromBody] AddUserCityRequest request, CancellationToken cancellationToken)
 	{
 		try
 		{
-			await _mediator.Send(new AddUserPinEvent
+			await _mediator.Send(new AddUserCityEvent
 			{
 				Latitude = request.Latitude,
 				Longitude = request.Longitude,
@@ -48,12 +48,12 @@ public class UserController : Controller
 		}
 	}
 
-	[HttpDelete("DeletePin")]
-	public async Task<IActionResult> DeletePin([FromQuery] Guid userPinId, CancellationToken cancellationToken)
+	[HttpDelete("DeleteCity")]
+	public async Task<IActionResult> DeleteCity([FromQuery] Guid userCityId, CancellationToken cancellationToken)
 	{
 		try
 		{
-			await _mediator.Send(new DeleteUserPinEvent { UserPinId = userPinId }, cancellationToken);
+			await _mediator.Send(new DeleteUserCityEvent { UserCityId = userCityId }, cancellationToken);
 			return Json(new { success = true });
 		}
 		catch (InvalidOperationException)
@@ -63,7 +63,7 @@ public class UserController : Controller
 	}
 }
 
-public class AddUserPinRequest
+public class AddUserCityRequest
 {
 	public required double Latitude { get; set; }
 

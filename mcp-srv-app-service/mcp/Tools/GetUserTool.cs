@@ -8,7 +8,7 @@ using ModelContextProtocol.Server;
 namespace WeatherMcpSrvAppService.Tools;
 
 /// <summary>
-/// MCP tool that returns the current user and their saved map pins via Core/CQMediator.
+/// MCP tool that returns the current user and their saved cities via Core/CQMediator.
 /// </summary>
 [McpServerToolType]
 public class GetUserTool(IMediator mediator)

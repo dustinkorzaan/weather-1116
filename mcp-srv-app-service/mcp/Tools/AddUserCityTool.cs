@@ -7,21 +7,21 @@ using ModelContextProtocol.Server;
 namespace WeatherMcpSrvAppService.Tools;
 
 /// <summary>
-/// MCP tool that adds a saved map pin for the current user via Core/CQMediator.
+/// MCP tool that adds a saved city for the current user via Core/CQMediator.
 /// </summary>
 [McpServerToolType]
-public class AddUserPinTool(IMediator mediator)
+public class AddUserCityTool(IMediator mediator)
 {
-	[McpServerTool(Name = "AddUserPin"),
-	 Description(WeatherToolDefinitions.AddUserPinDescription)]
-	public async Task<UserPinToolResult> AddUserPin(
+	[McpServerTool(Name = "AddUserCity"),
+	 Description(WeatherToolDefinitions.AddUserCityDescription)]
+	public async Task<UserCityToolResult> AddUserCity(
 		[Description("Latitude in decimal degrees")] double latitude,
 		[Description("Longitude in decimal degrees")] double longitude,
 		[Description("Name of the location, e.g. Nashville, Tennessee")] string locationName,
 		CancellationToken cancellationToken)
 	{
 		await mediator.Send(
-			new AddUserPinEvent
+			new AddUserCityEvent
 			{
 				Latitude = latitude,
 				Longitude = longitude,
@@ -29,6 +29,6 @@ public class AddUserPinTool(IMediator mediator)
 			},
 			cancellationToken);
 
-		return new UserPinToolResult(true);
+		return new UserCityToolResult(true);
 	}
 }

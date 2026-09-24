@@ -66,14 +66,14 @@ function mockHelloFetch(weather = {}) {
       );
     }
 
-    if (url.includes('/User/AddPin')) {
+    if (url.includes('/User/AddCity')) {
       return new Response(
         JSON.stringify({
           id: '00000000-0000-0000-0000-000000000000',
           firstName: '',
           lastName: '',
           email: '',
-          userPins: [
+          userCities: [
             {
               id: '12345678-1234-1234-1234-123456789012',
               latitude: 36.1627,
@@ -96,7 +96,7 @@ function mockHelloFetch(weather = {}) {
           firstName: '',
           lastName: '',
           email: '',
-          userPins: [],
+          userCities: [],
         }),
         {
           status: 200,

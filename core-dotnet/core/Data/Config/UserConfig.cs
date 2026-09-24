@@ -8,7 +8,7 @@ public class UserConfig : IEntityTypeConfiguration<Core.Data.Domain.User>
 {
     public void Configure(EntityTypeBuilder<Core.Data.Domain.User> builder)
     {
-        builder.ToTable("User", "dbo");
+        builder.ToTable("Users", "dbo");
         builder.HasKey(user => user.Id);
         builder.Property(user => user.Id).ValueGeneratedNever();
 
@@ -16,9 +16,9 @@ public class UserConfig : IEntityTypeConfiguration<Core.Data.Domain.User>
         builder.Property(user => user.LastName).HasColumnType("nvarchar(max)");
         builder.Property(user => user.Email).HasColumnType("nvarchar(max)");
 
-        builder.HasMany(user => user.UserPins)
-            .WithOne(pin => pin.User)
-            .HasForeignKey(pin => pin.UserId)
+        builder.HasMany(user => user.UserCities)
+            .WithOne(city => city.User)
+            .HasForeignKey(city => city.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

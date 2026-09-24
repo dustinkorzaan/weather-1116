@@ -3,7 +3,7 @@ using CQMediator;
 namespace Core.Agent.Events;
 
 /// <summary>
-/// Logs one dbo.AgentActivity row (a Request or a Response -- see
+/// Logs one dbo.AgentActivities row (a Request or a Response -- see
 /// <see cref="Core.Data.Domain.AgentActivityDirection"/>) and returns its Id.
 ///
 /// Two ids, two different jobs: send once per Request with <see cref="CorrelationId"/> left

@@ -172,11 +172,11 @@ public static class WeatherToolDefinitions
         strictModeEnabled: true);
 
     public const string GetUserDescription =
-        "Get the current user and their saved map pins. Each pin has an id (GUID), locationName, latitude, and longitude. Call this to see which locations the user has saved, and to find a pin's id before calling DeleteUserPin.";
+        "Get the current user and their saved cities. Each saved city has an id (GUID), locationName, latitude, and longitude. Call this to see which locations the user has saved, and to find a saved city's id before calling DeleteUserCity.";
 
-    public static FunctionTool CreateAddUserPinTool() => ResponseTool.CreateFunctionTool(
-        functionName: "AddUserPin",
-        functionDescription: AddUserPinDescription,
+    public static FunctionTool CreateAddUserCityTool() => ResponseTool.CreateFunctionTool(
+        functionName: "AddUserCity",
+        functionDescription: AddUserCityDescription,
         functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
         {
           "type": "object",
@@ -200,27 +200,27 @@ public static class WeatherToolDefinitions
         """)),
         strictModeEnabled: true);
 
-    public static FunctionTool CreateDeleteUserPinTool() => ResponseTool.CreateFunctionTool(
-        functionName: "DeleteUserPin",
-        functionDescription: DeleteUserPinDescription,
+    public static FunctionTool CreateDeleteUserCityTool() => ResponseTool.CreateFunctionTool(
+        functionName: "DeleteUserCity",
+        functionDescription: DeleteUserCityDescription,
         functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
         {
           "type": "object",
           "properties": {
-            "userPinId": {
+            "userCityId": {
               "type": "string",
-              "description": "The unique identifier (GUID) of the pin to delete, from GetUser"
+              "description": "The unique identifier (GUID) of the saved city to delete, from GetUser"
             }
           },
-          "required": ["userPinId"],
+          "required": ["userCityId"],
           "additionalProperties": false
         }
         """)),
         strictModeEnabled: true);
 
-    public const string AddUserPinDescription =
-        "Add a new pin to the user's saved locations map. Use this when the user wants to save a location. Requires numeric latitude/longitude and a location name.";
+    public const string AddUserCityDescription =
+        "Add a city to the user's saved cities. Use this when the user wants to save a city or place. Requires numeric latitude/longitude and a location name.";
 
-    public const string DeleteUserPinDescription =
-        "Remove a pin from the user's saved locations map. Use this when the user wants to delete a saved location. Requires the pin's id from GetUser; never guess an id.";
+    public const string DeleteUserCityDescription =
+        "Remove a city from the user's saved cities. Use this when the user wants to delete a saved city. Requires the saved city's id from GetUser; never guess an id.";
 }

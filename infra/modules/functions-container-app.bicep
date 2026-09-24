@@ -79,7 +79,7 @@ var provisionEnvVars = [
     value: userAssignedIdentityClientId
   }
   {
-    // DefaultAzureCredential picks this UAMI for SQL (dbo.City, read by GetCities) --
+    // DefaultAzureCredential picks this UAMI for SQL (dbo.Cities, read by GetCities) --
     // see ManagedIdentitySqlConnectionStringFactory.
     name: 'AZURE_CLIENT_ID'
     value: userAssignedIdentityClientId

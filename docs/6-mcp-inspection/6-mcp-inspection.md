@@ -44,7 +44,7 @@ Add a request to a Postman collection pointed at the `/mcp` endpoint (
 
 * Method **POST**, header `Authorization: Bearer <MCP_SRV_APP_SERVICE_KEY>`
 * Body → raw JSON, a JSON-RPC request, e.g. `tools/call` for
-  `GetUser` (no arguments) to list the saved map pins
+  `GetUser` (no arguments) to list the saved cities
 * Postman renders the tools list under the **Tools** tab (once a collection
   is generated from the MCP endpoint) and the JSON-RPC result under
   **Response**
@@ -59,8 +59,8 @@ stateless mode), and the `tools/call` `POST`s for
 `GetPublicWeatherCurrent`/`GetPublicWeatherHistory` returning `200` with the
 tool's JSON content. (This screenshot predates the later splits -
 `GetPublicWeatherCurrent` and `GetPublicWeatherHistory` have since moved to
-`mcp-srv-node`, and `mcp-srv-app-service` now serves the saved-pin tools
-`GetUser`/`AddUserPin`/`DeleteUserPin`; the same Postman/curl steps apply
+`mcp-srv-node`, and `mcp-srv-app-service` now serves the saved-city tools
+`GetUser`/`AddUserCity`/`DeleteUserCity`; the same Postman/curl steps apply
 against `mcp-srv-node`'s `/mcp` endpoint with a `MCP_SRV_NODE_KEY` bearer token.)
 
 ## curl example

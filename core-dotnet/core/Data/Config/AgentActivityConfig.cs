@@ -8,7 +8,7 @@ public class AgentActivityConfig : IEntityTypeConfiguration<AgentActivity>
 {
     public void Configure(EntityTypeBuilder<AgentActivity> builder)
     {
-        builder.ToTable("AgentActivity", "dbo");
+        builder.ToTable("AgentActivities", "dbo");
         builder.HasKey(activity => activity.Id);
         builder.Property(activity => activity.Id).ValueGeneratedNever();
 

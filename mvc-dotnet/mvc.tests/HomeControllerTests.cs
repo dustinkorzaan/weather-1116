@@ -138,7 +138,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
-    public void IndexView_LoadsMapWithoutWaitingOnUserPins()
+    public void IndexView_LoadsMapWithoutWaitingOnUserCities()
     {
         var view = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/Views/Home/Index.cshtml"));
         // The map starts immediately; weatherMap.js fetches /User pins alongside it.
@@ -147,17 +147,17 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
 
         var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
         Assert.Contains("fetch('/User'", script);
-        Assert.Contains("user.userPins", script);
+        Assert.Contains("user.userCities", script);
         Assert.Contains("pin.locationName", script);
         Assert.Contains("pin.latitude", script);
         Assert.Contains("pin.longitude", script);
-        Assert.Contains("fetch('/User/AddPin'", script);
+        Assert.Contains("fetch('/User/AddCity'", script);
         Assert.DoesNotContain("location.reload", script);
         Assert.DoesNotContain("sessionStorage", script);
 
         var addLocation = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/addLocation.js"));
         Assert.DoesNotContain("sessionStorage", addLocation);
-        Assert.Contains("fetch('/User/AddPin'", addLocation);
+        Assert.Contains("fetch('/User/AddCity'", addLocation);
         Assert.Contains("data-get-location-url", view);
         Assert.Contains("GetLocation", view);
         Assert.DoesNotContain("id = \"nyc\"", view);

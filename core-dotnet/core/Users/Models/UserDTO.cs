@@ -16,6 +16,6 @@ public class UserDTO
     [JsonPropertyName("email")]
     public string Email { get; set; } = string.Empty;
 
-    [JsonPropertyName("userPins")]
-    public List<UserPinDTO> UserPins { get; set; } = new();
+    [JsonPropertyName("userCities")]
+    public List<UserCityDTO> UserCities { get; set; } = new();
 }

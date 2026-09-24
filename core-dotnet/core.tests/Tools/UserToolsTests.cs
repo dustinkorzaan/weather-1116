@@ -10,7 +10,7 @@ namespace Core.Tests.Tools;
 
 public class UserToolsTests
 {
-    private static readonly Guid PinId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    private static readonly Guid CityId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
     [Fact]
     public void UserToolFunctions_ExposesExactlyTheThreeUserTools()
@@ -20,7 +20,7 @@ public class UserToolsTests
             .Order()
             .ToArray();
 
-        Assert.Equal(["AddUserPin", "DeleteUserPin", "GetUser"], names);
+        Assert.Equal(["AddUserCity", "DeleteUserCity", "GetUser"], names);
     }
 
     [Fact]
@@ -32,9 +32,9 @@ public class UserToolsTests
         var result = await getUser.InvokeAsync(new AIFunctionArguments());
 
         using var json = JsonDocument.Parse(result!.ToString()!);
-        var pin = Assert.Single(json.RootElement.GetProperty("userPins").EnumerateArray());
-        Assert.Equal(PinId, pin.GetProperty("id").GetGuid());
-        Assert.Equal("Nashville, Tennessee", pin.GetProperty("locationName").GetString());
+        var city = Assert.Single(json.RootElement.GetProperty("userCities").EnumerateArray());
+        Assert.Equal(CityId, city.GetProperty("id").GetGuid());
+        Assert.Equal("Nashville, Tennessee", city.GetProperty("locationName").GetString());
     }
 
     [Fact]
@@ -43,19 +43,19 @@ public class UserToolsTests
         var mediator = new RecordingMediator();
         var tools = new UserToolFunctions(mediator).CreateTools().Cast<AIFunction>().ToDictionary(tool => tool.Name);
 
-        await tools["AddUserPin"].InvokeAsync(new AIFunctionArguments
+        await tools["AddUserCity"].InvokeAsync(new AIFunctionArguments
         {
             ["latitude"] = 30.2672,
             ["longitude"] = -97.7431,
             ["locationName"] = "Austin, Texas",
         });
-        await tools["DeleteUserPin"].InvokeAsync(new AIFunctionArguments { ["userPinId"] = PinId });
+        await tools["DeleteUserCity"].InvokeAsync(new AIFunctionArguments { ["userCityId"] = CityId });
 
-        var added = Assert.IsType<AddUserPinEvent>(mediator.Sent[0]);
+        var added = Assert.IsType<AddUserCityEvent>(mediator.Sent[0]);
         Assert.Equal("Austin, Texas", added.LocationName);
         Assert.Equal(30.2672, added.Latitude);
-        var deleted = Assert.IsType<DeleteUserPinEvent>(mediator.Sent[1]);
-        Assert.Equal(PinId, deleted.UserPinId);
+        var deleted = Assert.IsType<DeleteUserCityEvent>(mediator.Sent[1]);
+        Assert.Equal(CityId, deleted.UserCityId);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class UserToolsTests
         var output = await executor.ExecuteAsync(call, CancellationToken.None);
 
         using var json = JsonDocument.Parse(output);
-        Assert.Equal(PinId, json.RootElement.GetProperty("userPins")[0].GetProperty("id").GetGuid());
+        Assert.Equal(CityId, json.RootElement.GetProperty("userCities")[0].GetProperty("id").GetGuid());
     }
 
     [Fact]
@@ -92,9 +92,9 @@ public class UserToolsTests
                 object user = new UserDTO
                 {
                     FirstName = "Anonymous",
-                    UserPins =
+                    UserCities =
                     [
-                        new UserPinDTO { Id = PinId, Latitude = 36.1627, Longitude = -86.7816, LocationName = "Nashville, Tennessee" },
+                        new UserCityDTO { Id = CityId, Latitude = 36.1627, Longitude = -86.7816, LocationName = "Nashville, Tennessee" },
                     ],
                 };
                 return Task.FromResult((TResponse)user);

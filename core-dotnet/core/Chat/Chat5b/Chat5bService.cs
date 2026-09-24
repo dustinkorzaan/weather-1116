@@ -320,8 +320,8 @@ public sealed class Chat5bService : IChat5ClientService
             model: _settings.DeploymentName,
             tools: _hostedMcpToolFactory.CreateNonAiWeatherTools());
 
-        // Agent User 👤: user sub-agent — lists, adds, and deletes the user's saved map pins, via the
-        // mcp-srv-app-service (GetUser/AddUserPin/DeleteUserPin) remote MCP host.
+        // Agent User 👤: user sub-agent — lists, adds, and deletes the user's saved cities, via the
+        // mcp-srv-app-service (GetUser/AddUserCity/DeleteUserCity) remote MCP host.
         AIAgent userAgent = responsesClient.AsAIAgent(
             name: "User",
             instructions: ChatSystemInstructions.MultiAgentUserAssistant,
@@ -358,7 +358,7 @@ public sealed class Chat5bService : IChat5ClientService
                 userAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "User",
-                    Description = "User assistant. Lists the user's saved map pins (location name, latitude/longitude, and id), adds a pin from numeric latitude/longitude and a location name, or deletes a pin by its id. It never geocodes — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the pin id or coordinates on every call. Send it a natural-language request; it returns the answer as text.",
+                    Description = "User assistant. Lists the user's saved cities (location name, latitude/longitude, and id), adds a city from numeric latitude/longitude and a location name, or deletes a city by its id. It never geocodes — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the city id or coordinates on every call. Send it a natural-language request; it returns the answer as text.",
                 }),
             ]);
     }

@@ -28,7 +28,7 @@ public class LogAgentActivityHandler(
             return id;
         }
 
-        dbContext.AgentActivity.Add(new AgentActivity
+        dbContext.AgentActivities.Add(new AgentActivity
         {
             Id = id,
             CorrelationId = request.CorrelationId ?? id,

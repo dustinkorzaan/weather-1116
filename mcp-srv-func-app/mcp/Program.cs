@@ -34,7 +34,7 @@ if (!string.IsNullOrWhiteSpace(appInsightsConnectionString))
 		.UseAzureMonitorExporter(o => o.ConnectionString = appInsightsConnectionString);
 }
 
-// GetCities queries dbo.City (GeoNames cities500, loaded daily by the worker's import-cities job).
+// GetCities queries dbo.Cities (GeoNames cities500, loaded daily by the worker's import-cities job).
 // API's Program.cs owns applying EF Core migrations (Database.Migrate()); this app only reads the
 // already-migrated schema. Authenticates via this app's user-assigned managed identity
 // (AZURE_CLIENT_ID, set by infra/modules/functions-container-app.bicep) -- see

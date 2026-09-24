@@ -747,7 +747,7 @@ window.weatherMap = (function () {
   let currentCities = [];
 
   function citiesFromUser(user) {
-    return ((user && user.userPins) || [])
+    return ((user && user.userCities) || [])
       .map(function (pin) {
         return { id: pin.id, name: pin.locationName, lat: pin.latitude, lng: pin.longitude };
       })
@@ -788,7 +788,7 @@ window.weatherMap = (function () {
     if (!isValidCity(city)) {
       return Promise.reject(new Error('Unable to find that location.'));
     }
-    return fetch('/User/AddPin', {
+    return fetch('/User/AddCity', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ latitude: city.lat, longitude: city.lng, locationName: city.name }),
@@ -814,7 +814,7 @@ window.weatherMap = (function () {
         return city.id !== cityId;
       })
     );
-    return fetch('/User/DeletePin?userPinId=' + encodeURIComponent(cityId), {
+    return fetch('/User/DeleteCity?userCityId=' + encodeURIComponent(cityId), {
       method: 'DELETE',
       headers: { Accept: 'application/json' },
     })

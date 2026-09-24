@@ -4,7 +4,7 @@ using CQMediator;
 namespace Core.Geo.Events;
 
 /// <summary>
-/// Downloads GeoNames' cities500 export and merges it (insert, update, delete) into dbo.City.
+/// Downloads GeoNames' cities500 export and merges it (insert, update, delete) into dbo.Cities.
 /// Scheduled daily by the worker's RecurringJobScheduler.
 /// </summary>
 public class ImportCitiesEvent : IRequest<ImportCitiesResponse>

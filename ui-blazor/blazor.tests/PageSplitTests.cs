@@ -47,8 +47,8 @@ public sealed class PageSplitTests
         Assert.Contains("Add Location", script);
         Assert.Contains("/Geo/GetLocation", script);
         Assert.Contains("fetch('/User'", script);
-        Assert.Contains("fetch('/User/AddPin'", script);
-        Assert.Contains("'/User/DeletePin?userPinId='", script);
+        Assert.Contains("fetch('/User/AddCity'", script);
+        Assert.Contains("'/User/DeleteCity?userCityId='", script);
         Assert.DoesNotContain("sessionStorage", script);
         Assert.DoesNotContain("weather-map-cities", script);
         Assert.DoesNotContain("DEFAULT_CITIES", script);
@@ -328,7 +328,7 @@ public sealed class PageSplitTests
                 {
                     Content = JsonContent.Create(new
                     {
-                        userPins = new[]
+                        userCities = new[]
                         {
                             new { id = "59e2459a-b25d-44a7-bcb0-2a4f2e444272", locationName = "Atlanta, GA", latitude = 33.749, longitude = -84.388 },
                             new { id = "test-id-2", locationName = "New York, NY", latitude = 40.7128, longitude = -74.0060 },

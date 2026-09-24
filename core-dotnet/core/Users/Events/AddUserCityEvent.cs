@@ -3,9 +3,9 @@ using CQMediator;
 namespace Core.Users.Events;
 
 /// <summary>
-/// Adds a new pin to the current user.
+/// Adds a new saved city to the current user.
 /// </summary>
-public class AddUserPinEvent : IRequest
+public class AddUserCityEvent : IRequest
 {
     public Guid UserId { get; set; } = Core.Data.Domain.UserConstants.AnonymousUserId;
 

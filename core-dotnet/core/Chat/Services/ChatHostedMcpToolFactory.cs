@@ -14,7 +14,7 @@ public sealed class ChatHostedMcpToolFactory
     // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-node (current/forecast/history).
     public IList<AITool> CreateNonAiWeatherTools() => [CreateNonAiWeatherNodeTool()];
 
-    // Agent User 👤's remote MCP tools — mcp-srv-app-service (GetUser/AddUserPin/DeleteUserPin).
+    // Agent User 👤's remote MCP tools — mcp-srv-app-service (GetUser/AddUserCity/DeleteUserCity).
     public IList<AITool> CreateUserTools() => [CreateUserTool()];
 
     private static HostedMcpServerTool CreateGeoTool()

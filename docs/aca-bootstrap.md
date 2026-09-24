@@ -201,9 +201,9 @@ Run `infra/scripts/create-contained-users.sql` as the SQL Entra admin
 `prod-provision-infra.yml`. Re-run this if the runtime managed identities are
 deleted and recreated (new principal IDs), or when an app gains SQL access --
 `mcp-srv-func-app`'s identity is a read-only (`db_datareader`) user, since
-GetCities only reads `dbo.City`.
+GetCities only reads `dbo.Cities`.
 
-After the first deploy, `dbo.City` is empty until the worker's daily
+After the first deploy, `dbo.Cities` is empty until the worker's daily
 `import-cities` job runs (11:00 UTC); trigger it once from the worker's
 `/hangfire` dashboard (Recurring Jobs → `import-cities` → Trigger now) so
 GetCities has data straight away.

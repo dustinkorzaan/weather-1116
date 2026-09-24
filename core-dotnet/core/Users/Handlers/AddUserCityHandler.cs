@@ -6,19 +6,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Core.Users.Handlers;
 
-public class AddUserPinHandler : IRequestHandler<AddUserPinEvent>
+public class AddUserCityHandler : IRequestHandler<AddUserCityEvent>
 {
     private readonly WX1116DbContext _dbContext;
 
-    public AddUserPinHandler(WX1116DbContext dbContext)
+    public AddUserCityHandler(WX1116DbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task Handle(AddUserPinEvent request, CancellationToken cancellationToken)
+    public async Task Handle(AddUserCityEvent request, CancellationToken cancellationToken)
     {
-        var user = await _dbContext.User
-            .Include(u => u.UserPins)
+        var user = await _dbContext.Users
+            .Include(u => u.UserCities)
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
 
         if (user == null)
@@ -26,7 +26,7 @@ public class AddUserPinHandler : IRequestHandler<AddUserPinEvent>
             throw new InvalidOperationException($"User with id {request.UserId} not found.");
         }
 
-        var newPin = new UserPin
+        var newCity = new UserCity
         {
             Id = Guid.NewGuid(),
             UserId = request.UserId,
@@ -35,7 +35,7 @@ public class AddUserPinHandler : IRequestHandler<AddUserPinEvent>
             LocationName = request.LocationName,
         };
 
-        user.UserPins.Add(newPin);
+        user.UserCities.Add(newCity);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

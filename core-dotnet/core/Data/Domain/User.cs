@@ -10,5 +10,5 @@ public class User
 
     public string Email { get; set; } = string.Empty;
 
-    public ICollection<UserPin> UserPins { get; set; } = new List<UserPin>();
+    public ICollection<UserCity> UserCities { get; set; } = new List<UserCity>();
 }

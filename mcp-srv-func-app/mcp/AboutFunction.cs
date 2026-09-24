@@ -10,7 +10,7 @@ namespace WeatherMcpSrvFuncApp;
 
 /// <summary>
 /// Anonymous About probe — leaf AboutNode named mcp-srv-func-app (no children). Healthy when
-/// GetCities is registered and DB_CONNECTION_STRING (dbo.City) is configured.
+/// GetCities is registered and DB_CONNECTION_STRING (dbo.Cities) is configured.
 /// </summary>
 public class AboutFunction(IConfiguration configuration)
 {

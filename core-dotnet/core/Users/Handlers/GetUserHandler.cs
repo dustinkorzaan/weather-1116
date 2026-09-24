@@ -18,8 +18,8 @@ public class GetUserHandler : IRequestHandler<GetUserEvent, UserDTO>
 
     public async Task<UserDTO> Handle(GetUserEvent request, CancellationToken cancellationToken)
     {
-        var user = await _dbContext.User
-            .Include(u => u.UserPins)
+        var user = await _dbContext.Users
+            .Include(u => u.UserCities)
             .FirstOrDefaultAsync(u => u.Id == UserConstants.AnonymousUserId, cancellationToken);
 
         if (user == null)
@@ -33,12 +33,12 @@ public class GetUserHandler : IRequestHandler<GetUserEvent, UserDTO>
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
-            UserPins = user.UserPins.Select(pin => new UserPinDTO
+            UserCities = user.UserCities.Select(city => new UserCityDTO
             {
-                Id = pin.Id,
-                Latitude = pin.Latitude,
-                Longitude = pin.Longitude,
-                LocationName = pin.LocationName,
+                Id = city.Id,
+                Latitude = city.Latitude,
+                Longitude = city.Longitude,
+                LocationName = city.LocationName,
             }).ToList(),
         };
     }
