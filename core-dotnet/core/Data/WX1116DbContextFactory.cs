@@ -17,7 +17,7 @@ public class WX1116DbContextFactory : IDesignTimeDbContextFactory<WX1116DbContex
             ?? "Server=(localdb)\\mssqllocaldb;Database=WX1116DesignTime;Trusted_Connection=True;";
 
         var optionsBuilder = new DbContextOptionsBuilder<WX1116DbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
+        optionsBuilder.UseSqlServer(connectionString, sql => sql.UseNetTopologySuite());
 
         return new WX1116DbContext(optionsBuilder.Options);
     }

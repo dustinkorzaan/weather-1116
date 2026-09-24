@@ -81,7 +81,7 @@ if (string.IsNullOrWhiteSpace(dbConnectionString))
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAgentActivityContextProvider, HttpAgentActivityContextProvider>();
 builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Mvc));
-builder.Services.AddDbContext<WX1116DbContext>(options => options.UseSqlServer(dbConnectionString));
+builder.Services.AddDbContext<WX1116DbContext>(options => options.UseSqlServer(dbConnectionString, sql => sql.UseNetTopologySuite()));
 
 var app = builder.Build();
 

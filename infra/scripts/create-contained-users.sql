@@ -1,5 +1,6 @@
 -- Creates contained database users for the api/mvc/worker/mcp-srv-app-service managed
--- identities and grants db_owner, so those apps can connect to SQL via
+-- identities and grants db_owner, plus a read-only (db_datareader) user for the
+-- mcp-srv-func-app identity (GetCities only reads dbo.City), so those apps can connect to SQL via
 -- Entra-integrated auth (no password anywhere). Must be run over an
 -- Entra-authenticated connection -- Azure SQL does not allow
 -- CREATE USER ... FROM EXTERNAL PROVIDER over a SQL-native login,
@@ -32,3 +33,9 @@ BEGIN
     CREATE USER [wx1116-prod-mcp-srv-app-service-mi] FROM EXTERNAL PROVIDER;
 END
 ALTER ROLE db_owner ADD MEMBER [wx1116-prod-mcp-srv-app-service-mi];
+
+IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'wx1116-prod-mcp-srv-func-app-mi')
+BEGIN
+    CREATE USER [wx1116-prod-mcp-srv-func-app-mi] FROM EXTERNAL PROVIDER;
+END
+ALTER ROLE db_datareader ADD MEMBER [wx1116-prod-mcp-srv-func-app-mi];

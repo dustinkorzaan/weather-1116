@@ -73,6 +73,11 @@ hot reload); React uses `npm start`. Ports come from each project's
   Never register the same tool name on two MCP hosts.
 - `mcp-srv-app-service` needs `DB_CONNECTION_STRING` for its pin tools; without it the host
   still starts but `/About` reports unhealthy and tool calls fail.
+- `GetCities` (in-process on api/mvc and remote on `mcp-srv-func-app`) queries `dbo.City`, a
+  GeoNames `cities500` table loaded by the worker's daily `import-cities` Hangfire job (11:00 UTC,
+  `batch-single`). `mcp-srv-func-app` therefore needs `DB_CONNECTION_STRING` too (without it
+  `/about` reports unhealthy and GetCities fails), and GetCities returns no cities until
+  `import-cities` has run once against that DB — trigger it from the worker's `/hangfire`.
 - React's `BackendWakeGate` pings `mcp-srv-python`'s and `mcp-srv-node`'s `/Wake` at
   `http://localhost:8140/Wake` and `http://localhost:8150/Wake` like every other backend
   layer — without those servers running locally, `npm start` sits on the wake screen

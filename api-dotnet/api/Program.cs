@@ -69,7 +69,7 @@ builder.Services.AddWeatherChatClients();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAgentActivityContextProvider, HttpAgentActivityContextProvider>();
 builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Api));
-builder.Services.AddDbContext<WX1116DbContext>(options => options.UseSqlServer(dbConnectionString));
+builder.Services.AddDbContext<WX1116DbContext>(options => options.UseSqlServer(dbConnectionString, sql => sql.UseNetTopologySuite()));
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("ReactClient", policy =>

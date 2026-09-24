@@ -254,7 +254,7 @@ public sealed class Chat4aService : IChatClientService
     private async Task<string> GetCities(
         [Description("Latitude in decimal degrees")] double latitude,
         [Description("Longitude in decimal degrees")] double longitude,
-        [Description("Search radius in kilometers (1-1000, default 161). Searches are capped at 100 km, the GeoDB free-tier limit.")] double radiusKm = GetCitiesEvent.DefaultRadiusKm,
+        [Description("Search radius in kilometers (1-1000, default 161).")] double radiusKm = GetCitiesEvent.DefaultRadiusKm,
         [Description("Only include cities with at least this many people (0 or more, default 0).")] long minPopulation = GetCitiesEvent.DefaultMinPopulation,
         [Description("Maximum number of cities to return (0-100, default 25).")] int maxCities = GetCitiesEvent.DefaultMaxCities,
         CancellationToken cancellationToken = default)

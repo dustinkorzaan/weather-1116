@@ -31,7 +31,7 @@ var dbConnectionString = ManagedIdentitySqlConnectionStringFactory.Build(
 	builder.Configuration["DB_CONNECTION_STRING"],
 	builder.Configuration["AZURE_CLIENT_ID"]);
 builder.Services.AddDbContext<WX1116DbContext>(options =>
-	options.UseSqlServer(dbConnectionString ?? "Server=(local);"));
+	options.UseSqlServer(dbConnectionString ?? "Server=(local);", sql => sql.UseNetTopologySuite()));
 
 builder.Services.AddStandardCoreServices();
 

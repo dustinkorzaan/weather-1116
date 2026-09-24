@@ -80,8 +80,8 @@ public sealed class WeatherToolExecutor
             citiesEvent.MaxCities = (int)Math.Clamp(maxCities, int.MinValue, int.MaxValue);
         }
 
-        // GeoDB's free tier can refuse or throttle; report that to the model instead of failing the
-        // whole chat turn or AI weather request that happened to call GetCities.
+        // The city database can be unreachable or not yet imported; report that to the model instead of
+        // failing the whole chat turn or AI weather request that happened to call GetCities.
         try
         {
             var cities = await _mediator.Send(citiesEvent, cancellationToken);
