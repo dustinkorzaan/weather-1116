@@ -167,7 +167,7 @@ Foundry, not declared on the request.
 | --- | --- |
 | `GetLatLong` | Resolve a place name to ranked coordinates (default top 5) |
 | `GetLocation` | Reverse-geocode lat/long to a place label |
-| `GetCities` | Largest cities (by population) within a radius of lat/long — `radiusKm` default 161 (1–1000), `minPopulation` default 0, `maxCities` default 25 (0–100); out-of-range values are reset, never rejected, and the radius sent to GeoDB is capped at its 100 km free-tier limit. In-process via Core's `GetCitiesHandler`; remote via `mcp-srv-python`. Both call GeoDB Cities |
+| `GetCities` | Largest cities (by population) within a radius of lat/long — `radiusKm` default 161 (1–1000), `minPopulation` default 0, `maxCities` default 25 (0–100); out-of-range values are reset, never rejected, and the radius sent to GeoDB is capped at its 100 km free-tier limit. In-process via Core's `GetCitiesHandler`; remote via `mcp-srv-func-app` (the same handler) |
 | `GetPublicWeatherCurrent` | Fetch current weather for lat/long |
 | `GetPublicWeatherForecast` | Upcoming forecast: Daily (7 days), Hourly (48 hours), or FifteenMinutes (48 hours) |
 | `GetPublicWeatherHistory` | Recent past: Daily (previous 7 days) or Hourly (previous 48 hours) |
@@ -180,7 +180,7 @@ Foundry, not declared on the request.
   Chat4a's/Chat5a's Geo, NonAI Weather, and User sub-agents, for Chat4a/Chat5a).
 - **MCP (Chat1b, Chat2b, Chat4b, Chat5b):** Remote MCP hosts (`mcp-srv-func-app`, `mcp-srv-app-service`,
   `mcp-srv-python`, `mcp-srv-node`) — platform invokes tools; no local function-call loop in Chat1b. Chat4b's/Chat5b's Geo
-  sub-agent gets `mcp-srv-func-app`'s and `mcp-srv-python`'s (`GetCities`) tools from
+  sub-agent gets `mcp-srv-func-app`'s (`GetCities`) and `mcp-srv-python`'s (`GetLatLong`/`GetLocation`) tools from
   `ChatHostedMcpToolFactory.CreateGeoTools()`; its NonAI Weather sub-agent gets `mcp-srv-node`'s
   tools from `CreateNonAiWeatherTools()`; its User sub-agent gets `mcp-srv-app-service`'s saved-pin
   tools from `CreateUserTools()` — not the combined four-server list Chat1b/Chat2b use.
@@ -272,7 +272,7 @@ earlier turn even within the same chat session; the orchestrator has to resend t
 Chat4b is Chat4a with one change: the sub-agents get their tools from the existing remote MCP
 hosts instead of in-process CQMediator calls — mirroring how Chat2b differs from Chat2a. This
 works cleanly because the MCP hosts are split along exactly the sub-agent boundaries:
-`mcp-srv-func-app` (`GetLatLong`/`GetLocation`) and `mcp-srv-python` (`GetCities`) expose Geo's
+`mcp-srv-func-app` (`GetCities`) and `mcp-srv-python` (`GetLatLong`/`GetLocation`) expose Geo's
 tools, `mcp-srv-node` exposes `GetPublicWeatherCurrent`/`Forecast`/`History` (NonAI Weather's
 tools), and `mcp-srv-app-service` exposes `GetUser`/`AddUserPin`/`DeleteUserPin` (User's tools).
 `ChatHostedMcpToolFactory` (already used by Chat1b/Chat2b) has one method per sub-agent —
@@ -454,9 +454,9 @@ headers stay on those connections, not on the agent.
 
 | `server_label` (inside toolbox) | `server_url` | Auth | Tools the server exposes |
 | --- | --- | --- | --- |
-| `McpSrvFuncApp` | `https://<prod-mcp-srv-func-app>/runtime/webhooks/mcp` | Header `x-functions-key` = Functions `mcp_extension` system key (`MCP_SRV_FUNC_APP_KEY`) | `GetLatLong`, `GetLocation` |
+| `McpSrvFuncApp` | `https://<prod-mcp-srv-func-app>/runtime/webhooks/mcp` | Header `x-functions-key` = Functions `mcp_extension` system key (`MCP_SRV_FUNC_APP_KEY`) | `GetCities` |
 | `McpSrvAppService` | `https://<prod-mcp-srv-app-service>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_APP_SERVICE_KEY>` | `GetUser`, `AddUserPin`, `DeleteUserPin` |
-| `McpSrvPython` | `https://<prod-mcp-srv-python>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_PYTHON_KEY>` | `GetCities` |
+| `McpSrvPython` | `https://<prod-mcp-srv-python>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_PYTHON_KEY>` | `GetLatLong`, `GetLocation` |
 | `McpSrvNode` | `https://<prod-mcp-srv-node>/mcp` | Header `Authorization` = `Bearer <MCP_SRV_NODE_KEY>` | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` |
 
 Production host names are in [`docs/architecture.md`](../architecture.md) (MCP Tool Hosts).

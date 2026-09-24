@@ -49,9 +49,9 @@ def test_mcp_accepts_non_localhost_host_header(monkeypatch):
     assert response.status_code != 401
 
 
-def test_tools_list_returns_only_get_cities(monkeypatch):
-    """Forecast/history live on mcp-srv-node; this host serves GetCities only, with
-    radiusKm/minPopulation/maxCities optional (in that order) so callers can omit them."""
+def test_tools_list_returns_only_geocoding_tools(monkeypatch):
+    """GetCities lives on mcp-srv-func-app and forecast/history on mcp-srv-node; this host serves
+    GetLatLong and GetLocation only."""
     import json
 
     app = _build_test_app(monkeypatch)
@@ -68,11 +68,10 @@ def test_tools_list_returns_only_get_cities(monkeypatch):
     assert response.status_code == 200
     data_line = next((line for line in response.text.splitlines() if line.startswith("data: ")), None)
     payload = json.loads(data_line[len("data: "):] if data_line else response.text)
-    tools = payload["result"]["tools"]
-    assert [tool["name"] for tool in tools] == ["GetCities"]
-    schema = tools[0]["inputSchema"]
-    assert sorted(schema["required"]) == ["latitude", "longitude"]
-    assert list(schema["properties"]) == ["latitude", "longitude", "radiusKm", "minPopulation", "maxCities"]
+    tools = {tool["name"]: tool for tool in payload["result"]["tools"]}
+    assert sorted(tools) == ["GetLatLong", "GetLocation"]
+    assert tools["GetLatLong"]["inputSchema"]["required"] == ["location"]
+    assert sorted(tools["GetLocation"]["inputSchema"]["required"]) == ["latitude", "longitude"]
 
 
 def test_mcp_rejects_all_requests_when_key_unset(monkeypatch):

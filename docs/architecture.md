@@ -55,8 +55,8 @@ not need them.
 | Project | Path | Role |
 | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | Remote MCP server exposing the saved-pin tools `GetUser`, `AddUserPin`, and `DeleteUserPin` via `Core` (reads/writes `dbo.User`/`dbo.UserPin` over `DB_CONNECTION_STRING`) |
-| MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetLatLong` via `Core` |
-| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | Standalone Python MCP server exposing `GetCities` (largest cities near a coordinate) directly against GeoDB Cities (no `Core` dependency, no caching) |
+| MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | Azure Functions MCP host exposing `GetCities` (largest cities near a coordinate) via `Core` |
+| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | Standalone Python MCP server exposing `GetLatLong` (Open-Meteo geocoding) and `GetLocation` (Nominatim reverse geocoding) directly (no `Core` dependency; results cached in-process for 60 minutes) |
 | MCP Server on Node | [`mcp-srv-node`](../mcp-srv-node) | Standalone Node.js (TypeScript) MCP server exposing `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` directly against Open-Meteo (no `Core` dependency, no caching) |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
 
@@ -188,24 +188,25 @@ CQMediator handlers the sample uses in-process elsewhere.
 | Host | Path | Tool | Port | Endpoint | Auth |
 | --- | --- | --- | --- | --- | --- |
 | MCP Server on App Service | [`mcp-srv-app-service/mcp`](../mcp-srv-app-service/mcp) | `GetUser`, `AddUserPin`, `DeleteUserPin` | 8110 | `/mcp` | Bearer `MCP_SRV_APP_SERVICE_KEY` (no default — must be set by developer) |
-| MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetLatLong`, `GetLocation` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
-| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | `GetCities` | 8140 | `/mcp` | Bearer `MCP_SRV_PYTHON_KEY` (no default — must be set by developer) |
+| MCP Server on Function App | [`mcp-srv-func-app/mcp`](../mcp-srv-func-app/mcp) | `GetCities` | 8120 | `/runtime/webhooks/mcp` (Azure) | Functions system key `mcp_extension` (`x-functions-key` header) |
+| MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | `GetLatLong`, `GetLocation` | 8140 | `/mcp` | Bearer `MCP_SRV_PYTHON_KEY` (no default — must be set by developer) |
 | MCP Server on Node | [`mcp-srv-node`](../mcp-srv-node) | `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory` | 8150 | `/mcp` | Bearer `MCP_SRV_NODE_KEY` (no default — must be set by developer) |
 
 `GetPublicWeatherForecast` and `GetPublicWeatherHistory` used to live on MCP
-Server on App Service; they moved to the standalone Python server, which
-calls Open-Meteo directly instead of going through `Core`/CQMediator (no
-shared library, no caching layer — see [`mcp-srv-python/README.md`](../mcp-srv-python/README.md)).
-They now live on `mcp-srv-node`, a line-for-line Node port (same tool names,
-descriptions, resolutions, and response shape — see
-[`mcp-srv-node/README.md`](../mcp-srv-node/README.md)). `mcp-srv-python` serves
-`GetCities(latitude, longitude, radiusKm, minPopulation, maxCities)` instead: the
-largest cities (by population) within `radiusKm` (default 161, reset into 1–1000, then
-capped at GeoDB's 100 km free-tier limit) of a coordinate with at least `minPopulation`
-people (default 0), at most `maxCities` of them (default 25, reset into 0–100), via the
-free GeoDB Cities service. The same tool runs
-in-process through Core's `GetCitiesEvent`/`GetCitiesHandler` on the local-loop
-paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, FoundryConsoleV3).
+Server on App Service, then briefly on `mcp-srv-python`. They now live on
+`mcp-srv-node`, which calls Open-Meteo directly instead of going through
+`Core`/CQMediator (no shared library, no caching layer — see
+[`mcp-srv-node/README.md`](../mcp-srv-node/README.md)). `mcp-srv-python` now serves
+`GetLatLong(location)` (ranked Open-Meteo geocoding matches) and
+`GetLocation(latitude, longitude)` (Nominatim reverse geocoding to a place label) — Python
+ports of Core's `GetLatLongHandler`/`GetLocationHandler` with the same tool names,
+descriptions, and response shapes. They used to live on MCP Server on Function App, which
+now serves `GetCities(latitude, longitude, radiusKm, minPopulation, maxCities)` through
+Core's `GetCitiesEvent`/`GetCitiesHandler`: the largest cities (by population) within
+`radiusKm` (default 161, reset into 1–1000, then capped at GeoDB's 100 km free-tier limit)
+of a coordinate with at least `minPopulation` people (default 0), at most `maxCities` of
+them (default 25, reset into 0–100). All three tools also run in-process through Core on
+the local-loop paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, FoundryConsoleV3).
 
 `GetPublicWeatherCurrent` followed the same path later: it moved off MCP Server on App
 Service onto `mcp-srv-node` (the raw Open-Meteo `current_weather` payload, the same shape

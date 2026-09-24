@@ -7,8 +7,8 @@ public sealed class ChatHostedMcpToolFactory
     public IList<AITool> CreateTools() =>
         [CreateGeoTool(), CreateGeoPythonTool(), CreateNonAiWeatherNodeTool(), CreateUserTool()];
 
-    // Agent Geo 👤's remote MCP tools — mcp-srv-func-app (GetLatLong/GetLocation) and
-    // mcp-srv-python (GetCities).
+    // Agent Geo 👤's remote MCP tools — mcp-srv-func-app (GetCities) and
+    // mcp-srv-python (GetLatLong/GetLocation).
     public IList<AITool> CreateGeoTools() => [CreateGeoTool(), CreateGeoPythonTool()];
 
     // Agent NonAI Weather 👤's remote MCP tools — mcp-srv-node (current/forecast/history).

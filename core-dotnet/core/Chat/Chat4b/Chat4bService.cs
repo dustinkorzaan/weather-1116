@@ -20,7 +20,7 @@ namespace Core.Chat.Chat4b;
 /// sub-agents stateless, same as Chat4a.
 /// The difference from Chat4a: the sub-agents get their tools from the existing remote MCP
 /// hosts (<see cref="ChatHostedMcpToolFactory"/>) instead of in-process CQMediator calls — Geo
-/// gets the <c>mcp-srv-func-app</c> (GetLatLong/GetLocation) and <c>mcp-srv-python</c> (GetCities)
+/// gets the <c>mcp-srv-func-app</c> (GetCities) and <c>mcp-srv-python</c> (GetLatLong/GetLocation)
 /// tools, NonAI Weather gets the <c>mcp-srv-node</c> (current/forecast/history) tools, and User
 /// gets the <c>mcp-srv-app-service</c> (GetUser/AddUserPin/DeleteUserPin) tools. From the
 /// orchestrator's point of view nothing changes: the sub-agents are still ordinary
@@ -164,7 +164,7 @@ public sealed class Chat4bService : IChatClientService
     private AIAgent BuildOrchestrationAgent(ResponsesClient responsesClient)
     {
         // Agent Geo 👤: geo sub-agent — location name ↔ latitude/longitude and nearby cities, via the
-        // mcp-srv-func-app (GetLatLong/GetLocation) and mcp-srv-python (GetCities) remote MCP hosts.
+        // mcp-srv-func-app (GetCities) and mcp-srv-python (GetLatLong/GetLocation) remote MCP hosts.
         AIAgent geoAgent = responsesClient.AsAIAgent(
             name: "Geo",
             instructions: ChatSystemInstructions.MultiAgentGeoAssistant,
