@@ -285,12 +285,14 @@ public class WeatherApiClient
     public async Task AddUserPin(AddUserPinRequest request, CancellationToken cancellationToken = default)
     {
         using var content = JsonContent.Create(request);
-        await _httpClient.PostAsync("User/AddPin", content, cancellationToken);
+        using var response = await _httpClient.PostAsync("User/AddPin", content, cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task DeleteUserPin(Guid userPinId, CancellationToken cancellationToken = default)
     {
-        await _httpClient.DeleteAsync($"User/DeletePin?userPinId={userPinId}", cancellationToken);
+        using var response = await _httpClient.DeleteAsync($"User/DeletePin?userPinId={userPinId}", cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task<AboutNode> GetAbout()

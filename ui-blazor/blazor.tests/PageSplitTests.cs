@@ -23,9 +23,8 @@ public sealed class PageSplitTests
         rendered.WaitForAssertion(() =>
         {
             Assert.Contains("id=\"weather-map\"", rendered.Markup);
-            Assert.Contains("Atlanta, GA", rendered.Markup);
-            Assert.Contains("New York, NY", rendered.Markup);
-            Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", rendered.Markup);
+            // weatherMap.js loads pins from /User in the browser; nothing is baked into the markup.
+            Assert.DoesNotContain("data-cities", rendered.Markup);
         });
 
         Assert.DoesNotContain("\"nyc\"", rendered.Markup);
@@ -47,8 +46,12 @@ public sealed class PageSplitTests
         Assert.Contains("rightclick", script);
         Assert.Contains("Add Location", script);
         Assert.Contains("/Geo/GetLocation", script);
-        Assert.Contains("weather-map-cities", script);
-        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", script);
+        Assert.Contains("fetch('/User'", script);
+        Assert.Contains("fetch('/User/AddPin'", script);
+        Assert.Contains("'/User/DeletePin?userPinId='", script);
+        Assert.DoesNotContain("sessionStorage", script);
+        Assert.DoesNotContain("weather-map-cities", script);
+        Assert.DoesNotContain("DEFAULT_CITIES", script);
         Assert.DoesNotContain("id: 'nyc'", script);
     }
 

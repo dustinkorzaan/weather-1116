@@ -62,7 +62,7 @@ app.MapGet("/User", async (WeatherApiClient client, CancellationToken cancellati
     try
     {
         var response = await client.GetUser(cancellationToken);
-        return Results.Ok(response);
+        return response is null ? Results.StatusCode(StatusCodes.Status502BadGateway) : Results.Ok(response);
     }
     catch (InvalidOperationException)
     {

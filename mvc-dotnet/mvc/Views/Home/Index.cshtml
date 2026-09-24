@@ -23,28 +23,13 @@
     @if (!string.IsNullOrWhiteSpace(mapsApiKey))
     {
         <script>
-            function initWeatherMap() {
-                fetch('/User', {
-                    headers: { Accept: 'application/json' }
-                })
-                    .then(response => response.ok ? response.json() : Promise.reject(new Error('Failed to fetch user')))
-                    .then(user => {
-                        const cities = (user.userPins || []).map(pin => ({
-                            id: pin.id,
-                            name: pin.locationName,
-                            lat: pin.latitude,
-                            lng: pin.longitude
-                        }));
-                        return weatherMap.init('weather-map', @Json.Serialize(mapsApiKey), cities);
-                    })
-                    .catch(function () {
-                        var el = document.getElementById('weather-map');
-                        if (el) {
-                            el.setAttribute('data-status', 'error');
-                        }
-                    });
-            }
-            initWeatherMap();
+            // weatherMap.init loads the map immediately and fetches /User pins alongside it.
+            weatherMap.init('weather-map', @Json.Serialize(mapsApiKey)).catch(function () {
+                var el = document.getElementById('weather-map');
+                if (el) {
+                    el.setAttribute('data-status', 'error');
+                }
+            });
         </script>
     }
 }

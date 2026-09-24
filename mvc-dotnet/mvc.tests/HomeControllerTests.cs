@@ -138,15 +138,26 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
     }
 
     [Fact]
-    public void IndexView_FetchesUserPinsFromApiAndLoadsMap()
+    public void IndexView_LoadsMapWithoutWaitingOnUserPins()
     {
         var view = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/Views/Home/Index.cshtml"));
-        Assert.Contains("fetch('/User'", view);
-        Assert.Contains("user.userPins", view);
-        Assert.Contains("pin.locationName", view);
-        Assert.Contains("pin.latitude", view);
-        Assert.Contains("pin.longitude", view);
-        Assert.Contains("weatherMap.init", view);
+        // The map starts immediately; weatherMap.js fetches /User pins alongside it.
+        Assert.DoesNotContain("fetch('/User'", view);
+        Assert.Contains("weatherMap.init('weather-map'", view);
+
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
+        Assert.Contains("fetch('/User'", script);
+        Assert.Contains("user.userPins", script);
+        Assert.Contains("pin.locationName", script);
+        Assert.Contains("pin.latitude", script);
+        Assert.Contains("pin.longitude", script);
+        Assert.Contains("fetch('/User/AddPin'", script);
+        Assert.DoesNotContain("location.reload", script);
+        Assert.DoesNotContain("sessionStorage", script);
+
+        var addLocation = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/addLocation.js"));
+        Assert.DoesNotContain("sessionStorage", addLocation);
+        Assert.Contains("fetch('/User/AddPin'", addLocation);
         Assert.Contains("data-get-location-url", view);
         Assert.Contains("GetLocation", view);
         Assert.DoesNotContain("id = \"nyc\"", view);
@@ -186,7 +197,7 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("colorScheme", script);
         Assert.Contains("RenderingType.RASTER", script);
         Assert.Contains("createThemedMap", script);
-        Assert.Contains("59e2459a-b25d-44a7-bcb0-2a4f2e444272", script);
+        Assert.DoesNotContain("DEFAULT_CITIES", script);
         Assert.DoesNotContain("id: 'nyc'", script);
     }
 
