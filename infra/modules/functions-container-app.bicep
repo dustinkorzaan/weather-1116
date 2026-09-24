@@ -215,7 +215,7 @@ resource functionContainerApp 'Microsoft.App/containerApps@2026-03-02-preview' =
         cooldownPeriod: 1800
         // Override replaces the platform's trigger-generated rules, so the MCP
         // webhook's HTTP rule is restated alongside the cron rule, which holds
-        // one replica 11:00-13:30 UTC daily (matches modules/container-app.bicep).
+        // one replica 11:00-23:59 UTC daily (matches modules/container-app.bicep).
         allowScalingRuleOverride: true
         rules: [
           {
@@ -233,7 +233,7 @@ resource functionContainerApp 'Microsoft.App/containerApps@2026-03-02-preview' =
               metadata: {
                 timezone: 'Etc/UTC'
                 start: '0 11 * * *'
-                end: '30 13 * * *'
+                end: '59 23 * * *'
                 desiredReplicas: '1'
               }
             }

@@ -36,7 +36,7 @@ param cooldownPeriod int = 1800
 @description('Daily window, in scheduledWarmTimezone, during which a cron scale rule holds at least one replica even with no traffic. Covers the worker\'s 11:00 UTC import-cities job, which only runs if a replica is up when Hangfire ticks.')
 param scheduledWarmStart string = '0 11 * * *'
 
-param scheduledWarmEnd string = '30 13 * * *'
+param scheduledWarmEnd string = '59 23 * * *'
 
 param scheduledWarmTimezone string = 'Etc/UTC'
 
