@@ -16,7 +16,9 @@ services:
 Both are Python ports of Core's `GetLatLongHandler`/`GetLocationHandler` (same tool names,
 descriptions, and response shapes), which still run in-process for the local-loop chat paths.
 Throttling (429), server errors (5xx), and transport errors are retried a few times; other 4xx fail
-immediately.
+immediately. A `GetLatLong` query variant that still fails does not stop the `City` fallback from
+being tried. Successful results are cached in-process for 60 minutes (like Core's handlers), as
+Nominatim's usage policy requires.
 
 `GetCities` used to live here; it is served by [`mcp-srv-func-app`](../mcp-srv-func-app) through
 Core's `GetCitiesHandler`. `GetPublicWeatherForecast`/`GetPublicWeatherHistory` also used to live

@@ -1,6 +1,7 @@
 """GetLatLong (Open-Meteo geocoding) and GetLocation (Nominatim reverse geocoding)."""
 
 import asyncio
+import time
 from typing import Any
 from urllib.parse import urlencode
 
@@ -16,6 +17,37 @@ DEFAULT_COUNT = 5
 MAX_COUNT = 100
 ATTEMPTS = 3
 RETRY_DELAY_SECONDS = 0.5
+
+# Successful results are cached in-process for 60 minutes, like Core's GetLatLongHandler/GetLocationHandler;
+# Nominatim's usage policy requires caching repeated lookups.
+CACHE_TTL_SECONDS = 60 * 60
+CACHE_MAX_ENTRIES = 1024
+_cache: dict[tuple, tuple[float, dict[str, Any]]] = {}
+
+
+def clear_cache() -> None:
+    _cache.clear()
+
+
+def _cache_get(key: tuple) -> dict[str, Any] | None:
+    entry = _cache.get(key)
+    if entry is None:
+        return None
+    expires_at, value = entry
+    if expires_at <= time.monotonic():
+        del _cache[key]
+        return None
+    return value
+
+
+def _cache_set(key: tuple, value: dict[str, Any]) -> None:
+    if len(_cache) >= CACHE_MAX_ENTRIES:
+        now = time.monotonic()
+        for expired in [k for k, (expires_at, _) in _cache.items() if expires_at <= now]:
+            del _cache[expired]
+        if len(_cache) >= CACHE_MAX_ENTRIES:
+            del _cache[next(iter(_cache))]
+    _cache[key] = (time.monotonic() + CACHE_TTL_SECONDS, value)
 
 
 def normalize_count(count: int | None) -> int:
@@ -91,15 +123,35 @@ async def get_lat_long(
     retry_delay_seconds: float = RETRY_DELAY_SECONDS,
 ) -> dict[str, Any]:
     """Ranked latitude/longitude matches for a location name (rank 1 is the best match), at most
-    count of them. Raises ValueError when no query variant matches anything."""
+    count of them.
+
+    Each query variant is tried in turn; one that still fails after its retries does not stop the
+    next variant from being tried. Raises ValueError when a variant answered but none matched, or
+    re-raises the last error when every variant failed."""
     count = normalize_count(count)
+    cache_key = ("GetLatLong", location, count)
+    if (cached := _cache_get(cache_key)) is not None:
+        return cached
+
+    last_error: Exception | None = None
+    any_answered = False
     async with _new_client() as client:
         for query in location_queries(location):
-            data = await _get_json(client, build_geocoding_url(query, count), retry_delay_seconds)
+            try:
+                data = await _get_json(client, build_geocoding_url(query, count), retry_delay_seconds)
+            except (httpx.HTTPError, ValueError) as ex:
+                last_error = ex
+                continue
+
+            any_answered = True
             matches = (data or {}).get("results") or []
             if matches:
-                return {"results": [_to_lat_long(i + 1, m) for i, m in enumerate(matches[:count])]}
+                result = {"results": [_to_lat_long(i + 1, m) for i, m in enumerate(matches[:count])]}
+                _cache_set(cache_key, result)
+                return result
 
+    if last_error is not None and not any_answered:
+        raise last_error
     raise ValueError(f"Non-AI: No results found for '{location}'.")
 
 
@@ -172,6 +224,12 @@ async def get_location(
     retry_delay_seconds: float = RETRY_DELAY_SECONDS,
 ) -> dict[str, Any]:
     """Reverse-geocode a latitude/longitude to a simple place label."""
+    cache_key = ("GetLocation", float(latitude), float(longitude))
+    if (cached := _cache_get(cache_key)) is not None:
+        return cached
+
     async with _new_client() as client:
         data = await _get_json(client, build_reverse_geocode_url(latitude, longitude), retry_delay_seconds)
-    return {"location": location_from_reverse(data if isinstance(data, dict) else None, latitude, longitude)}
+    result = {"location": location_from_reverse(data if isinstance(data, dict) else None, latitude, longitude)}
+    _cache_set(cache_key, result)
+    return result

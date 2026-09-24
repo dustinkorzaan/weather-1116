@@ -147,6 +147,104 @@ async def test_get_lat_long_does_not_retry_400(monkeypatch):
     assert calls["count"] == 1
 
 
+@pytest.mark.asyncio
+async def test_get_lat_long_falls_back_to_city_only_query_after_first_variant_fails(monkeypatch):
+    names: list[str] = []
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        name = request.url.params["name"]
+        names.append(name)
+        if name == "Nashville, TN":
+            return httpx.Response(503)
+        return httpx.Response(200, json={"results": [_open_meteo_match("Nashville")]})
+
+    _install_transport(monkeypatch, transport)
+    result = await get_lat_long("Nashville, TN", retry_delay_seconds=0)
+    assert names == ["Nashville, TN"] * geo.ATTEMPTS + ["Nashville"]
+    assert result["results"][0]["name"] == "Nashville"
+
+
+@pytest.mark.asyncio
+async def test_get_lat_long_reraises_when_every_variant_fails(monkeypatch):
+    _install_transport(monkeypatch, lambda request: httpx.Response(503))
+    with pytest.raises(httpx.HTTPStatusError):
+        await get_lat_long("Nashville, TN", retry_delay_seconds=0)
+
+
+@pytest.mark.asyncio
+async def test_get_lat_long_reports_no_results_when_one_variant_answered_empty(monkeypatch):
+    def transport(request: httpx.Request) -> httpx.Response:
+        if request.url.params["name"] == "Nowhere, ZZ":
+            return httpx.Response(503)
+        return httpx.Response(200, json={})
+
+    _install_transport(monkeypatch, transport)
+    with pytest.raises(ValueError, match="No results found"):
+        await get_lat_long("Nowhere, ZZ", retry_delay_seconds=0)
+
+
+@pytest.mark.asyncio
+async def test_get_lat_long_caches_successful_results(monkeypatch):
+    calls = {"count": 0}
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        calls["count"] += 1
+        return httpx.Response(200, json={"results": [_open_meteo_match("Nashville")]})
+
+    _install_transport(monkeypatch, transport)
+    first = await get_lat_long("Nashville", retry_delay_seconds=0)
+    second = await get_lat_long("Nashville", retry_delay_seconds=0)
+    assert first == second
+    assert calls["count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_get_lat_long_does_not_cache_failures(monkeypatch):
+    calls = {"count": 0}
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        calls["count"] += 1
+        return httpx.Response(200, json={})
+
+    _install_transport(monkeypatch, transport)
+    for _ in range(2):
+        with pytest.raises(ValueError):
+            await get_lat_long("Nowhere", retry_delay_seconds=0)
+    assert calls["count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_get_location_caches_by_coordinate(monkeypatch):
+    calls = {"count": 0}
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        calls["count"] += 1
+        return httpx.Response(200, json={"address": {"city": "Nashville", "state": "Tennessee", "country_code": "us"}})
+
+    _install_transport(monkeypatch, transport)
+    await get_location(36.1627, -86.7816, retry_delay_seconds=0)
+    await get_location(36.1627, -86.7816, retry_delay_seconds=0)
+    await get_location(35.0, -86.0, retry_delay_seconds=0)
+    assert calls["count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_cache_entries_expire_after_ttl(monkeypatch):
+    now = {"t": 1000.0}
+    monkeypatch.setattr(geo.time, "monotonic", lambda: now["t"])
+    calls = {"count": 0}
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        calls["count"] += 1
+        return httpx.Response(200, json={"name": "Somewhere"})
+
+    _install_transport(monkeypatch, transport)
+    await get_location(1.0, 2.0, retry_delay_seconds=0)
+    now["t"] += geo.CACHE_TTL_SECONDS + 1
+    await get_location(1.0, 2.0, retry_delay_seconds=0)
+    assert calls["count"] == 2
+
+
 def test_location_from_address_us_omits_country():
     address = {"city": "Nashville", "state": "Tennessee", "country": "United States", "country_code": "us"}
     assert location_from_address(address) == "Nashville, Tennessee"
