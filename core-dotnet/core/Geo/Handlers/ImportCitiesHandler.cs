@@ -15,9 +15,12 @@ namespace Core.Geo.Handlers;
 
 /// <summary>
 /// Downloads GeoNames' cities500 export (every populated place with 500+ people) plus its admin1
-/// (state/province) names, confirms it holds more than <see cref="MinimumCityCount"/> cities, then
-/// merges it into dbo.Cities: updates changed rows, inserts new ones, and bulk-deletes rows GeoNames
-/// no longer lists.
+/// (state/province) names and merges it into dbo.Cities. The zip is streamed to a temp file and read
+/// twice, one row at a time, so memory stays flat no matter how large the export grows: the first
+/// pass only collects GeonameIds and confirms the export (more than <see cref="MinimumCityCount"/>
+/// cities, no duplicate ids, at least <see cref="MinimumShareOfExistingCities"/> of dbo.Cities)
+/// before anything is written; the second looks up each row by GeonameId and inserts or updates it
+/// on its own. Rows GeoNames no longer lists are then bulk-deleted.
 /// </summary>
 public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCitiesResponse>
 {
@@ -25,7 +28,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     internal const string CitiesEntryName = "cities500.txt";
     internal const string Admin1CodesUrl = "https://download.geonames.org/export/dump/admin1CodesASCII.txt";
 
-    // A truncated or empty download must never wipe the table, so the merge only runs above this.
+    // A truncated or empty download must never wipe the table, so the import only runs above this.
     internal const int MinimumCityCount = 100_000;
 
     // A download that is large but partial (or partly unparsable) would still pass the absolute
@@ -68,23 +71,29 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         _logger = logger;
     }
 
+    /// <summary>City-count floor for an import; tests lower it to exercise a merge on a few rows.</summary>
+    internal int CityFloor { get; init; } = MinimumCityCount;
+
     public async Task<ImportCitiesResponse> Handle(ImportCitiesEvent request, CancellationToken cancellationToken)
     {
         using var client = _clientFactory.CreateClient();
         client.Timeout = TimeSpan.FromMinutes(5);
         client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", GetLocationHandler.UserAgent);
 
-        var citiesZip = await Download(client, CitiesUrl, cancellationToken);
-        var admin1Text = await Download(client, Admin1CodesUrl, cancellationToken);
-
-        var incoming = ReadCitiesZip(citiesZip);
-        using var admin1Reader = new StreamReader(new MemoryStream(admin1Text));
-        var admin1Names = ParseAdmin1Names(admin1Reader);
-
-        ConfirmCityCount(incoming);
+        // admin1CodesASCII.txt is ~150 KB, so it is parsed in memory and checked before any write.
+        var admin1Names = await _retry.Execute(async ct =>
+        {
+            using var httpResponse = await Get(client, Admin1CodesUrl, ct);
+            using var admin1Reader = new StreamReader(await httpResponse.Content.ReadAsStreamAsync(ct));
+            return ParseAdmin1Names(admin1Reader);
+        }, cancellationToken);
         ConfirmAdmin1Count(admin1Names);
 
-        var response = await Merge(incoming, admin1Names, cancellationToken);
+        // ZipArchive needs a seekable stream, so the zip goes to a temp file rather than a byte[].
+        await using var citiesZip = await _retry.Execute(ct => DownloadToTempFile(client, CitiesUrl, ct), cancellationToken);
+        using var archive = new ZipArchive(citiesZip, ZipArchiveMode.Read);
+
+        var response = await Merge(ReadCities(archive), admin1Names, cancellationToken);
 
         _logger.LogInformation(
             "ImportCities: {Downloaded} downloaded, {Inserted} inserted, {Updated} updated, {Deleted} deleted, {Unchanged} unchanged",
@@ -97,50 +106,42 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         return response;
     }
 
+    /// <summary>
+    /// Enumerates <paramref name="incoming"/> twice. Pass 1 collects the GeonameIds and confirms the
+    /// export (see <see cref="ConfirmCityCount"/>) without writing, so a short, partial, duplicated
+    /// or unreadable export leaves dbo.Cities untouched. Pass 2 upserts each city one at a time (one
+    /// lookup, and a save only when something changed). Rows whose GeonameId was not imported are
+    /// then bulk-deleted.
+    /// </summary>
     internal async Task<ImportCitiesResponse> Merge(
-        IReadOnlyList<GeoNamesCityDto> incoming,
+        IEnumerable<GeoNamesCityDto> incoming,
         IReadOnlyDictionary<string, string> admin1Names,
         CancellationToken cancellationToken)
     {
-        var response = new ImportCitiesResponse { Downloaded = incoming.Count };
-
-        var existing = await _db.Cities.ToDictionaryAsync(city => city.GeonameId, cancellationToken);
-        ConfirmShareOfExisting(incoming.Count, existing.Count);
-        var inserts = new List<City>();
-
+        var importedIds = new HashSet<int>();
         foreach (var dto in incoming)
         {
-            var admin1Name = admin1Names.GetValueOrDefault(Admin1Key(dto.CountryCode, dto.Admin1Code));
-
-            if (existing.Remove(dto.GeonameId, out var city))
+            if (!importedIds.Add(dto.GeonameId))
             {
-                if (ApplyChanges(city, dto, admin1Name))
-                {
-                    response.Updated++;
-                }
-                else
-                {
-                    response.Unchanged++;
-                }
-            }
-            else
-            {
-                city = new City { Id = Guid.NewGuid(), GeonameId = dto.GeonameId };
-                ApplyChanges(city, dto, admin1Name);
-                inserts.Add(city);
+                throw new InvalidOperationException(
+                    $"GeoNames cities500 export lists geonameid {dto.GeonameId} more than once; import skipped.");
             }
         }
 
-        _db.Cities.AddRange(inserts);
-        response.Inserted = inserts.Count;
+        var existingCount = await _db.Cities.CountAsync(cancellationToken);
+        ConfirmCityCount(importedIds.Count, existingCount, CityFloor);
 
-        if (_db.ChangeTracker.HasChanges())
+        var response = new ImportCitiesResponse { Downloaded = importedIds.Count };
+        foreach (var dto in incoming)
         {
-            await _db.SaveChangesAsync(cancellationToken);
+            await Upsert(dto, admin1Names, response, cancellationToken);
         }
 
-        // Whatever is left in `existing` is no longer in the GeoNames export.
-        foreach (var chunk in existing.Keys.Chunk(DeleteChunkSize))
+        // Only GeonameIds come back (about 1 MB for 250k rows), never whole City rows.
+        var existingIds = await _db.Cities.Select(city => city.GeonameId).ToListAsync(cancellationToken);
+        var missing = existingIds.Where(id => !importedIds.Contains(id)).ToList();
+
+        foreach (var chunk in missing.Chunk(DeleteChunkSize))
         {
             response.Deleted += await _db.Cities
                 .Where(city => chunk.Contains(city.GeonameId))
@@ -148,6 +149,60 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         }
 
         return response;
+    }
+
+    private async Task Upsert(
+        GeoNamesCityDto dto,
+        IReadOnlyDictionary<string, string> admin1Names,
+        ImportCitiesResponse response,
+        CancellationToken cancellationToken)
+    {
+        var admin1Name = admin1Names.GetValueOrDefault(Admin1Key(dto.CountryCode, dto.Admin1Code));
+        var city = await _db.Cities.FirstOrDefaultAsync(existing => existing.GeonameId == dto.GeonameId, cancellationToken);
+
+        if (city is null)
+        {
+            city = new City { Id = Guid.NewGuid(), GeonameId = dto.GeonameId };
+            ApplyChanges(city, dto, admin1Name);
+            _db.Cities.Add(city);
+            response.Inserted++;
+        }
+        else if (ApplyChanges(city, dto, admin1Name))
+        {
+            response.Updated++;
+        }
+        else
+        {
+            response.Unchanged++;
+        }
+
+        if (_db.ChangeTracker.HasChanges())
+        {
+            await _db.SaveChangesAsync(cancellationToken);
+        }
+
+        // Nothing is kept tracked between rows, so the context never grows with the export.
+        _db.ChangeTracker.Clear();
+    }
+
+    /// <summary>
+    /// Rejects an export of <paramref name="incomingCount"/> cities that is at or under
+    /// <paramref name="floor"/>, or under <see cref="MinimumShareOfExistingCities"/> of the
+    /// <paramref name="existingCount"/> rows already in dbo.Cities.
+    /// </summary>
+    internal static void ConfirmCityCount(int incomingCount, int existingCount, int floor = MinimumCityCount)
+    {
+        if (incomingCount <= floor)
+        {
+            throw new InvalidOperationException(
+                $"GeoNames cities500 export held only {incomingCount} cities (expected more than {floor}); import skipped.");
+        }
+
+        if (incomingCount < existingCount * MinimumShareOfExistingCities)
+        {
+            throw new InvalidOperationException(
+                $"GeoNames cities500 export held {incomingCount} cities, under {MinimumShareOfExistingCities:P0} of the {existingCount} already in dbo.Cities; import skipped.");
+        }
     }
 
     /// <summary>
@@ -181,31 +236,6 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     internal static Point CreatePoint(double latitude, double longitude) =>
         new(longitude, latitude) { SRID = Srid };
 
-    internal static void ConfirmCityCount(IReadOnlyList<GeoNamesCityDto> incoming)
-    {
-        if (incoming.Count <= MinimumCityCount)
-        {
-            throw new InvalidOperationException(
-                $"GeoNames cities500 export held only {incoming.Count} cities (expected more than {MinimumCityCount}); import skipped.");
-        }
-
-        var duplicate = incoming.GroupBy(dto => dto.GeonameId).FirstOrDefault(group => group.Count() > 1);
-        if (duplicate is not null)
-        {
-            throw new InvalidOperationException(
-                $"GeoNames cities500 export lists geonameid {duplicate.Key} more than once; import skipped.");
-        }
-    }
-
-    internal static void ConfirmShareOfExisting(int incomingCount, int existingCount)
-    {
-        if (incomingCount < existingCount * MinimumShareOfExistingCities)
-        {
-            throw new InvalidOperationException(
-                $"GeoNames cities500 export held {incomingCount} cities, under {MinimumShareOfExistingCities:P0} of the {existingCount} already in dbo.Cities; import skipped.");
-        }
-    }
-
     internal static void ConfirmAdmin1Count(IReadOnlyDictionary<string, string> admin1Names)
     {
         if (admin1Names.Count < MinimumAdmin1Count)
@@ -215,14 +245,17 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         }
     }
 
-    internal static List<GeoNamesCityDto> ReadCitiesZip(byte[] zipBytes)
+    /// <summary>Re-opens cities500.txt on every enumeration, so Merge can stream it twice.</summary>
+    private static IEnumerable<GeoNamesCityDto> ReadCities(ZipArchive archive)
     {
-        using var archive = new ZipArchive(new MemoryStream(zipBytes), ZipArchiveMode.Read);
         var entry = archive.GetEntry(CitiesEntryName)
             ?? throw new InvalidOperationException($"GeoNames zip is missing {CitiesEntryName}.");
 
         using var reader = new StreamReader(entry.Open());
-        return Parse(reader).ToList();
+        foreach (var city in Parse(reader))
+        {
+            yield return city;
+        }
     }
 
     /// <summary>Parses cities500.txt; lines with the wrong column count or unparsable numbers are skipped.</summary>
@@ -273,17 +306,49 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
 
     internal static string Admin1Key(string countryCode, string admin1Code) => $"{countryCode}.{admin1Code}";
 
-    private async Task<byte[]> Download(HttpClient client, string url, CancellationToken cancellationToken) =>
-        await _retry.Execute(async ct =>
+    private static async Task<HttpResponseMessage> Get(HttpClient client, string url, CancellationToken cancellationToken)
+    {
+        var httpResponse = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        if (TransientRetryHelper.IsPermanentFailure(httpResponse.StatusCode))
         {
-            using var httpResponse = await client.GetAsync(url, ct);
-            if (TransientRetryHelper.IsPermanentFailure(httpResponse.StatusCode))
-            {
-                // Not an HttpRequestException, so TransientRetryHelper does not retry it.
-                throw new InvalidOperationException($"GeoNames rejected {url} with HTTP {(int)httpResponse.StatusCode}.");
-            }
+            httpResponse.Dispose();
+            // Not an HttpRequestException, so TransientRetryHelper does not retry it.
+            throw new InvalidOperationException($"GeoNames rejected {url} with HTTP {(int)httpResponse.StatusCode}.");
+        }
 
+        try
+        {
             httpResponse.EnsureSuccessStatusCode();
-            return await httpResponse.Content.ReadAsByteArrayAsync(ct);
-        }, cancellationToken);
+            return httpResponse;
+        }
+        catch
+        {
+            httpResponse.Dispose();
+            throw;
+        }
+    }
+
+    /// <summary>Streams <paramref name="url"/> into a temp file that is deleted when the returned stream closes.</summary>
+    private static async Task<FileStream> DownloadToTempFile(HttpClient client, string url, CancellationToken cancellationToken)
+    {
+        using var httpResponse = await Get(client, url, cancellationToken);
+        var file = new FileStream(
+            Path.GetTempFileName(),
+            FileMode.Create,
+            FileAccess.ReadWrite,
+            FileShare.None,
+            bufferSize: 81_920,
+            FileOptions.DeleteOnClose | FileOptions.Asynchronous);
+        try
+        {
+            await httpResponse.Content.CopyToAsync(file, cancellationToken);
+            file.Position = 0;
+            return file;
+        }
+        catch
+        {
+            await file.DisposeAsync();
+            throw;
+        }
+    }
 }

@@ -114,37 +114,6 @@ public class ImportCitiesHandlerTests
     }
 
     [Fact]
-    public void ConfirmCityCount_RejectsDuplicateGeonameIds()
-    {
-        var cities = ManyCities(ImportCitiesHandler.MinimumCityCount + 1);
-        cities[^1].GeonameId = cities[0].GeonameId;
-
-        var ex = Assert.Throws<InvalidOperationException>(() => ImportCitiesHandler.ConfirmCityCount(cities));
-        Assert.Contains("more than once", ex.Message);
-    }
-
-    [Fact]
-    public void ConfirmCityCount_AcceptsMoreThanTheMinimum() =>
-        ImportCitiesHandler.ConfirmCityCount(ManyCities(ImportCitiesHandler.MinimumCityCount + 1));
-
-    [Theory]
-    [InlineData(0, 0)]
-    [InlineData(120_000, 0)]
-    [InlineData(225_000, 230_000)]
-    [InlineData(207_000, 230_000)]
-    public void ConfirmShareOfExisting_AcceptsAFirstLoadOrANearlyCompleteExport(int incoming, int existing) =>
-        ImportCitiesHandler.ConfirmShareOfExisting(incoming, existing);
-
-    [Fact]
-    public void ConfirmShareOfExisting_RejectsALargeButPartialExport()
-    {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
-            ImportCitiesHandler.ConfirmShareOfExisting(120_000, 225_000));
-
-        Assert.Contains("already in dbo.Cities", ex.Message);
-    }
-
-    [Fact]
     public void ConfirmAdmin1Count_RejectsAnEmptyOrTruncatedList()
     {
         var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -154,18 +123,66 @@ public class ImportCitiesHandlerTests
     }
 
     [Fact]
+    public void ConfirmCityCount_RejectsAtOrUnderTheFloor()
+    {
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            ImportCitiesHandler.ConfirmCityCount(ImportCitiesHandler.MinimumCityCount, 0));
+
+        Assert.Contains("expected more than 100000", ex.Message);
+    }
+
+    [Theory]
+    [InlineData(100_001, 0)]
+    [InlineData(120_000, 0)]
+    [InlineData(225_000, 230_000)]
+    [InlineData(207_000, 230_000)]
+    public void ConfirmCityCount_AcceptsAFirstLoadOrANearlyCompleteExport(int incoming, int existing) =>
+        ImportCitiesHandler.ConfirmCityCount(incoming, existing);
+
+    [Theory]
+    [InlineData(120_000, 225_000)]
+    [InlineData(206_999, 230_000)]
+    public void ConfirmCityCount_RejectsALargeButPartialExport(int incoming, int existing)
+    {
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            ImportCitiesHandler.ConfirmCityCount(incoming, existing));
+
+        Assert.Contains("already in dbo.Cities", ex.Message);
+    }
+
+    [Fact]
     public async Task Merge_PartialExport_ThrowsWithoutTouchingTheDatabase()
     {
         using var db = CreateDb();
-        db.Cities.AddRange(NewCity(Dto(NashvilleLine)), NewCity(Dto(AndorraLine)), NewCity(Dto(ManhattanLine)));
+        var nashville = NewCity(Dto(NashvilleLine));
+        nashville.Population = 1;
+        db.Cities.AddRange(nashville, NewCity(Dto(AndorraLine)), NewCity(Dto(ManhattanLine)));
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
-        var handler = CreateHandler(db, new GeoNamesHandler([], string.Empty));
+        var handler = CreateHandler(db, new GeoNamesHandler([], string.Empty), cityFloor: 0);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             handler.Merge([Dto(NashvilleLine)], new Dictionary<string, string>(), CancellationToken.None));
 
+        Assert.Contains("already in dbo.Cities", ex.Message);
         Assert.Equal(3, await db.Cities.CountAsync());
+        Assert.Equal(1, (await db.Cities.SingleAsync(city => city.GeonameId == 4644585)).Population);
+    }
+
+    [Fact]
+    public async Task Merge_DuplicateGeonameId_ThrowsWithoutTouchingTheDatabase()
+    {
+        using var db = CreateDb();
+        var handler = CreateHandler(db, new GeoNamesHandler([], string.Empty), cityFloor: 0);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            handler.Merge(
+                [Dto(NashvilleLine), Dto(AndorraLine), Dto(NashvilleLine)],
+                new Dictionary<string, string>(),
+                CancellationToken.None));
+
+        Assert.Contains("more than once", ex.Message);
+        Assert.Equal(0, await db.Cities.CountAsync());
     }
 
     [Fact]
@@ -174,7 +191,7 @@ public class ImportCitiesHandlerTests
         using var db = CreateDb();
         db.Cities.Add(NewCity(Dto(NashvilleLine)));
         await db.SaveChangesAsync();
-        var http = new GeoNamesHandler(Zip(string.Join('\n', NashvilleLine, AndorraLine)), Admin1Text);
+        var http = new GeoNamesHandler(Zip(string.Join('\n', NashvilleLine, AndorraLine)), ManyAdmin1Regions());
         var handler = CreateHandler(db, http);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -183,8 +200,41 @@ public class ImportCitiesHandlerTests
         Assert.Contains("held only 2 cities", ex.Message);
         Assert.Equal(1, await db.Cities.CountAsync());
         Assert.Equal(
-            [ImportCitiesHandler.CitiesUrl, ImportCitiesHandler.Admin1CodesUrl],
+            [ImportCitiesHandler.Admin1CodesUrl, ImportCitiesHandler.CitiesUrl],
             http.RequestedUrls);
+    }
+
+    [Fact]
+    public async Task Handle_TooFewAdmin1Regions_ThrowsBeforeDownloadingCities()
+    {
+        using var db = CreateDb();
+        var http = new GeoNamesHandler(Zip(NashvilleLine), Admin1Text);
+        var handler = CreateHandler(db, http);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            handler.Handle(new ImportCitiesEvent(), CancellationToken.None));
+
+        Assert.Contains("held only 3 regions", ex.Message);
+        Assert.Equal(0, await db.Cities.CountAsync());
+        Assert.Equal([ImportCitiesHandler.Admin1CodesUrl], http.RequestedUrls);
+    }
+
+    [Fact]
+    public async Task Handle_StreamsTheZipTwiceAndUpsertsEachCity()
+    {
+        using var db = CreateDb();
+        db.Cities.Add(NewCity(Dto(NashvilleLine)));
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var http = new GeoNamesHandler(Zip(string.Join('\n', NashvilleLine, AndorraLine, ManhattanLine)), ManyAdmin1Regions() + Admin1Text);
+        var handler = CreateHandler(db, http, cityFloor: 0);
+
+        var response = await handler.Handle(new ImportCitiesEvent(), CancellationToken.None);
+
+        Assert.Equal(3, response.Downloaded);
+        Assert.Equal(2, response.Inserted);
+        Assert.Equal(1, response.Updated);
+        Assert.Equal("New York", (await db.Cities.SingleAsync(city => city.GeonameId == 5125771)).Admin1Name);
     }
 
     [Fact]
@@ -200,7 +250,7 @@ public class ImportCitiesHandlerTests
         db.ChangeTracker.Clear();
         var admin1Names = ImportCitiesHandler.ParseAdmin1Names(new StringReader(Admin1Text));
         var incoming = new[] { Dto(NashvilleLine), Dto(AndorraLine), Dto(ManhattanLine) };
-        var handler = CreateHandler(db, new GeoNamesHandler([], string.Empty));
+        var handler = CreateHandler(db, new GeoNamesHandler([], string.Empty), cityFloor: 0);
 
         var first = await handler.Merge(incoming, admin1Names, CancellationToken.None);
 
@@ -233,8 +283,9 @@ public class ImportCitiesHandlerTests
         return city;
     }
 
-    private static List<GeoNamesCityDto> ManyCities(int count) =>
-        Enumerable.Range(1, count).Select(id => new GeoNamesCityDto { GeonameId = id }).ToList();
+    private static string ManyAdmin1Regions() =>
+        string.Concat(Enumerable.Range(1, ImportCitiesHandler.MinimumAdmin1Count)
+            .Select(id => $"XX.{id}\tRegion {id}\tRegion {id}\t{id}\n"));
 
     private static byte[] Zip(string citiesText)
     {
@@ -251,12 +302,16 @@ public class ImportCitiesHandlerTests
     private static WX1116DbContext CreateDb() =>
         new(new DbContextOptionsBuilder<WX1116DbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
 
-    private static ImportCitiesHandler CreateHandler(WX1116DbContext db, HttpMessageHandler http) =>
+    private static ImportCitiesHandler CreateHandler(
+        WX1116DbContext db, HttpMessageHandler http, int cityFloor = ImportCitiesHandler.MinimumCityCount) =>
         new(
             db,
             new TransientRetryHelper(NullLogger<TransientRetryHelper>.Instance),
             new FakeHttpClientFactory(http),
-            NullLogger<ImportCitiesHandler>.Instance);
+            NullLogger<ImportCitiesHandler>.Instance)
+        {
+            CityFloor = cityFloor,
+        };
 
     private sealed class FakeHttpClientFactory(HttpMessageHandler handler) : IHttpClientFactory
     {
