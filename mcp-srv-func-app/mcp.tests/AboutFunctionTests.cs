@@ -22,15 +22,17 @@ public class AboutFunctionTests
     }
 
     [Fact]
-    public void HasMcpTool_ReturnsTrue_ForGetLatLong()
+    public void HasMcpTool_ReturnsTrue_ForGetCities()
     {
-        Assert.True(AboutFunction.HasMcpTool("GetLatLong"));
+        Assert.True(AboutFunction.HasMcpTool("GetCities"));
     }
 
-    [Fact]
-    public void HasMcpTool_ReturnsTrue_ForGetLocation()
+    [Theory]
+    [InlineData("GetLatLong")]
+    [InlineData("GetLocation")]
+    public void HasMcpTool_ReturnsFalse_ForToolsMovedToMcpSrvPython(string toolName)
     {
-        Assert.True(AboutFunction.HasMcpTool("GetLocation"));
+        Assert.False(AboutFunction.HasMcpTool(toolName));
     }
 
     [Fact]

@@ -1,7 +1,7 @@
 [project]
 name = "weather-mcp-srv-python"
 version = "0.1.0"
-description = "Standalone Python MCP server exposing the GetCities tool (largest cities near a coordinate) backed by GeoDB Cities."
+description = "Standalone Python MCP server exposing the GetLatLong (Open-Meteo geocoding) and GetLocation (Nominatim reverse geocoding) tools."
 requires-python = ">=3.11"
 dependencies = [
     "mcp[cli]>=2.0",

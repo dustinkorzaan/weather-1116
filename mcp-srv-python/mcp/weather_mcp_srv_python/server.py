@@ -1,21 +1,19 @@
-"""Standalone MCP server exposing the GetCities tool (largest cities near a coordinate, via GeoDB)."""
+"""Standalone MCP server exposing the GetLatLong (Open-Meteo geocoding) and GetLocation (Nominatim
+reverse geocoding) tools."""
 
 import os
+from typing import Annotated
 
 import uvicorn
 from dotenv import load_dotenv, find_dotenv
 from mcp.server.mcpserver import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
+from pydantic import Field
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse
 
 from weather_mcp_srv_python.auth import BearerTokenMiddleware
-from weather_mcp_srv_python.tools.cities import (
-    DEFAULT_MAX_CITIES,
-    DEFAULT_MIN_POPULATION,
-    DEFAULT_RADIUS_KM,
-    get_cities,
-)
+from weather_mcp_srv_python.tools.geo import get_lat_long, get_location
 
 load_dotenv(find_dotenv(usecwd=True))
 
@@ -42,7 +40,7 @@ mcp = MCPServer("WeatherMcpSrvPython")
 
 # Tools this host must have registered to report healthy in /About, mirroring
 # mcp-srv-app-service's AboutController and mcp-srv-func-app's AboutFunction.
-EXPECTED_TOOLS = {"GetCities"}
+EXPECTED_TOOLS = {"GetLatLong", "GetLocation"}
 
 
 @mcp.custom_route("/Wake", methods=["GET"])
@@ -77,23 +75,32 @@ async def about(request: Request) -> JSONResponse:
 
 
 @mcp.tool(
-    name="GetCities",
+    name="GetLatLong",
     description=(
-        "Find the largest cities (by population) within a radius of a latitude and longitude. "
-        "Returns each city's name, region, country, coordinates, distance in km, and population, "
-        "largest first. radiusKm defaults to 161 (range 1-1000), minPopulation to 0, and maxCities "
-        "to 25 (range 0-100); out-of-range values are adjusted, not rejected. The search radius is "
-        "capped at 100 km (the GeoDB free-tier limit), and the result reports the radius actually used."
+        "Resolve a location name to ranked latitude/longitude matches using public geocoding data. "
+        "Returns up to 5 results (rank 1 is the best match). Use state and country to pick the right "
+        "place if rank 1 is wrong."
     ),
 )
-async def get_cities_tool(
-    latitude: float,
-    longitude: float,
-    radiusKm: float | None = DEFAULT_RADIUS_KM,
-    minPopulation: int | None = DEFAULT_MIN_POPULATION,
-    maxCities: int | None = DEFAULT_MAX_CITIES,
+async def get_lat_long_tool(
+    location: Annotated[str, Field(description="City and optional region/country, e.g. Nashville, TN")],
 ) -> dict:
-    return await get_cities(latitude, longitude, radiusKm, minPopulation, maxCities)
+    return await get_lat_long(location)
+
+
+@mcp.tool(
+    name="GetLocation",
+    description=(
+        "Turn a latitude and longitude into a simple place label. Prefers City, State in the US "
+        "(City, State, Country elsewhere), then a feature name, then a formatted coordinate such as "
+        "35.51\u00b0 N, 86.58\u00b0 W."
+    ),
+)
+async def get_location_tool(
+    latitude: Annotated[float, Field(description="Latitude in decimal degrees")],
+    longitude: Annotated[float, Field(description="Longitude in decimal degrees")],
+) -> dict:
+    return await get_location(latitude, longitude)
 
 
 def build_app():

@@ -305,7 +305,7 @@ public sealed class Chat5bService : IChat5ClientService
     private AIAgent BuildOrchestrationAgent(ResponsesClient responsesClient, bool useHardenedPrompt)
     {
         // Agent Geo 👤: geo sub-agent — location name ↔ latitude/longitude and nearby cities, via the
-        // mcp-srv-func-app (GetLatLong/GetLocation) and mcp-srv-python (GetCities) remote MCP hosts.
+        // mcp-srv-func-app (GetCities) and mcp-srv-python (GetLatLong/GetLocation) remote MCP hosts.
         AIAgent geoAgent = responsesClient.AsAIAgent(
             name: "Geo",
             instructions: ChatSystemInstructions.MultiAgentGeoAssistant,

@@ -154,7 +154,7 @@ on `/current-ai-weather`) **→ V5 →**
       autonumber
       participant Console
       participant Model as Foundry Model
-      box MCP Server on Function App
+      box MCP Server on Python
           participant GetLatLongTool
       end
       box MCP Server on App Service
@@ -177,8 +177,8 @@ on `/current-ai-weather`) **→ V5 →**
       participant Console
       participant AppLoop as Agent/Loop
       participant Model as Foundry Model
-      box MCP Server on Function App
-          participant FuncMcp
+      box MCP Server on Python
+          participant PythonMcp
           participant GetLatLongTool
       end
       box MCP Server on App Service
@@ -187,8 +187,8 @@ on `/current-ai-weather`) **→ V5 →**
       end
 
       Console->>AppLoop: system prompt + MCP tools, user prompt last
-      AppLoop->>FuncMcp: Discover MCP Tools
-      FuncMcp-->>AppLoop: MCP Tools
+      AppLoop->>PythonMcp: Discover MCP Tools
+      PythonMcp-->>AppLoop: MCP Tools
       AppLoop->>AppSvcMcp: Discover MCP Tools
       AppSvcMcp-->>AppLoop: MCP Tools
       AppLoop->>Model: system prompt + MCP tools, user prompt last
@@ -224,7 +224,7 @@ on `/current-ai-weather`) **→ V5 →**
       autonumber
       participant Console
       participant Agent as Foundry Agent
-      box MCP Server on Function App
+      box MCP Server on Python
           participant GetLatLongTool
       end
       box MCP Server on App Service
@@ -247,8 +247,8 @@ on `/current-ai-weather`) **→ V5 →**
       participant Console
       participant Agent as Foundry Agent
       participant Model as Foundry Model
-      box MCP Server on Function App
-          participant FuncMcp
+      box MCP Server on Python
+          participant PythonMcp
           participant GetLatLongTool
       end
       box MCP Server on App Service
@@ -257,8 +257,8 @@ on `/current-ai-weather`) **→ V5 →**
       end
 
       Console->>Agent: user prompt only
-      Agent->>FuncMcp: Discover MCP Tools
-      FuncMcp-->>Agent: MCP Tools
+      Agent->>PythonMcp: Discover MCP Tools
+      PythonMcp-->>Agent: MCP Tools
       Agent->>AppSvcMcp: Discover MCP Tools
       AppSvcMcp-->>Agent: MCP Tools
       Agent->>Model: user prompt only

@@ -65,9 +65,11 @@ hot reload); React uses `npm start`. Ports come from each project's
   addition to the existing `MCP_SRV_APP_SERVICE_*` (User sub-agent in Chat4b/5b) and
   `MCP_SRV_FUNC_APP_*` pairs.
 - `mcp-srv-node` serves `GetPublicWeatherCurrent`/`GetPublicWeatherForecast`/`GetPublicWeatherHistory`;
-  `mcp-srv-python` serves `GetCities` (GeoDB, largest cities near a coordinate); `mcp-srv-app-service`
-  serves the saved-pin tools `GetUser`/`AddUserPin`/`DeleteUserPin`. `GetCities` and the pin tools
-  also exist in-process in Core (`GetCitiesHandler`, `Users/Handlers`) for the local-loop paths.
+  `mcp-srv-python` serves `GetLatLong`/`GetLocation` (Open-Meteo geocoding, Nominatim reverse
+  geocoding); `mcp-srv-func-app` serves `GetCities` (largest cities near a coordinate, via Core's
+  `GetCitiesHandler`); `mcp-srv-app-service` serves the saved-pin tools
+  `GetUser`/`AddUserPin`/`DeleteUserPin`. The geo and pin tools also exist in-process in Core
+  (`Geo/Handlers`, `Users/Handlers`) for the local-loop paths.
   Never register the same tool name on two MCP hosts.
 - `mcp-srv-app-service` needs `DB_CONNECTION_STRING` for its pin tools; without it the host
   still starts but `/About` reports unhealthy and tool calls fail.

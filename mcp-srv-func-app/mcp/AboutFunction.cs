@@ -12,7 +12,7 @@ namespace WeatherMcpSrvFuncApp;
 /// </summary>
 public class AboutFunction
 {
-	private static readonly string[] ExpectedTools = ["GetLatLong", "GetLocation"];
+	private static readonly string[] ExpectedTools = ["GetCities"];
 	private static readonly Lazy<bool> HasExpectedTool = new(() =>
 		ExpectedTools.All(HasMcpTool));
 
