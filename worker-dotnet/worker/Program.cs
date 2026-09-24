@@ -3,6 +3,7 @@ using Core;
 using Core.About;
 using Core.Data;
 using Core.Data.Domain;
+using Core.Geo.Services;
 using Core.Hangfire;
 using DotNetEnv;
 using Hangfire;
@@ -61,6 +62,11 @@ if (string.IsNullOrWhiteSpace(dbConnectionString))
 }
 
 builder.Services.AddDbContext<WX1116DbContext>(options => options.UseSqlServer(dbConnectionString, sql => sql.UseNetTopologySuite()));
+
+// import-cities stages its batches in blob storage (BLOB_STORAGE_URL with this app's managed
+// identity, or BLOB_CONNECTION_STRING locally). Without either, the worker still starts and only
+// that job fails.
+builder.Services.AddCityImportBlobStore(builder.Configuration);
 
 // Explicit, non-zero poll interval: a value > TimeSpan.Zero keeps Hangfire on
 // interval polling (every 60s) rather than the aggressive/continuous mode.

@@ -12,6 +12,7 @@ concurrency:
 env:
   RESOURCE_GROUP: wx1116-prod-rg
   ACR_NAME: wx1116prodacr
+  STORAGE_ACCOUNT_NAME: wx1116prodblob
   CONTAINER_APP_NAME: wx1116-prod-worker
   IMAGE_NAME: wx1116-worker
   BUILD_NUMBER: ${{ github.run_number }}
@@ -62,6 +63,7 @@ jobs:
             mcp-node-key=${{ secrets.PROD_MCP_SRV_NODE_KEY }}
           env_overlay_multiline: |
             DB_CONNECTION_STRING=secretref:db-connection-string
+            BLOB_STORAGE_URL=https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net
             AZURE_FOUNDRY_PROD_PROJ_URL=${{ vars.AZURE_FOUNDRY_PROD_PROJ_URL }}
             AZURE_FOUNDRY_PROD_MODEL=${{ vars.AZURE_FOUNDRY_PROD_MODEL }}
             MCP_SRV_APP_SERVICE_URL=${{ vars.PROD_MCP_SRV_APP_SERVICE_URL }}

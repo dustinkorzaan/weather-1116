@@ -211,6 +211,9 @@ module functionsContainerApp 'modules/functions-container-app.bicep' = {
     location: location
     managedEnvironmentId: acaEnvironment.outputs.id
     storageAccountName: storageAccountName
+    blobDataContributorPrincipalIds: [
+      appIdentities[3].outputs.principalId // worker: import-cities batches in the temp container
+    ]
     userAssignedIdentityId: appIdentities[7].outputs.id
     userAssignedIdentityPrincipalId: appIdentities[7].outputs.principalId
     userAssignedIdentityClientId: appIdentities[7].outputs.clientId

@@ -77,9 +77,12 @@ public class ImportCitiesUpsertHandlerTests
         db.Cities.AddRange(existing, stale);
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
-        var upsert = new ImportCitiesUpsertEvent { Cities = [Nashville(), andorra, Manhattan()] };
-        var handler = new ImportCitiesUpsertHandler(db, NullLogger<ImportCitiesUpsertHandler>.Instance);
+        var blobs = new FakeCityImportBlobStore();
+        blobs.Blobs["admin1codes.txt"] = Admin1Text;
+        var upsert = new ImportCitiesUpsertEvent { CitiesBlob = "cities.txt", Admin1Blob = "admin1codes.txt" };
+        var handler = new ImportCitiesUpsertHandler(db, NullLogger<ImportCitiesUpsertHandler>.Instance, blobs);
 
+        blobs.Blobs["cities.txt"] = string.Join('\n', NashvilleLine, AndorraLine, ManhattanLine);
         var first = await handler.Handle(upsert, CancellationToken.None);
 
         Assert.Equal(1, first.Inserted);
@@ -91,7 +94,12 @@ public class ImportCitiesUpsertHandlerTests
         Assert.NotEqual(Guid.Empty, manhattan.Id);
         Assert.Equal("New York", manhattan.Admin1Name);
 
+        // The batch file is deleted once its SaveChanges commits; the shared admin1 file stays.
+        Assert.False(blobs.Blobs.ContainsKey("cities.txt"));
+        Assert.True(blobs.Blobs.ContainsKey("admin1codes.txt"));
+
         db.ChangeTracker.Clear();
+        blobs.Blobs["cities.txt"] = string.Join('\n', NashvilleLine, AndorraLine, ManhattanLine);
         var second = await handler.Handle(upsert, CancellationToken.None);
 
         Assert.Equal(0, second.Inserted);
@@ -99,6 +107,29 @@ public class ImportCitiesUpsertHandlerTests
         Assert.Equal(3, second.Unchanged);
         Assert.False(db.ChangeTracker.HasChanges());
     }
+
+    [Fact]
+    public async Task Handle_FailedSave_KeepsTheBatchFileForTheRetry()
+    {
+        using var db = CreateDb();
+        var blobs = new FakeCityImportBlobStore();
+        blobs.Blobs["admin1codes.txt"] = Admin1Text;
+        blobs.Blobs["cities.txt"] = NashvilleLine;
+        var handler = new ImportCitiesUpsertHandler(db, NullLogger<ImportCitiesUpsertHandler>.Instance, blobs);
+        using var cancelled = new CancellationTokenSource();
+        cancelled.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => handler.Handle(
+            new ImportCitiesUpsertEvent { CitiesBlob = "cities.txt", Admin1Blob = "admin1codes.txt" }, cancelled.Token));
+
+        Assert.True(blobs.Blobs.ContainsKey("cities.txt"));
+    }
+
+    // Real cities500.txt rows: tab-delimited, 19 columns, no header.
+    private const string NashvilleLine = "4644585\tNashville\tNashville\tNashville,Nashville-Davidson\t36.16589\t-86.78444\tP\tPPLA\tUS\t\tTN\t037\t\t\t715884\t169\t165\tAmerica/Chicago\t2024-01-01";
+    private const string ManhattanLine = "5125771\tManhattan\tManhattan\t\t40.78343\t-73.96625\tP\tPPLX\tUS\t\tNY\t061\t\t\t1694251\t0\t22\tAmerica/New_York\t2024-01-01";
+    private const string AndorraLine = "3041563\tAndorra la Vella\tAndorra la Vella\t\t42.50779\t1.52109\tP\tPPLC\tAD\t\t07\t\t\t\t20430\t\t1037\tEurope/Andorra\t2020-03-03";
+    private const string Admin1Text = "US.TN\tTennessee\tTennessee\t4662168\nUS.NY\tNew York\tNew York\t5128638\nAD.07\tAndorra la Vella\tAndorra la Vella\t3041566\n";
 
     private static GeoNamesCityDto Nashville() => new()
     {

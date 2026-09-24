@@ -1,7 +1,6 @@
 using System.IO.Compression;
 using System.Net;
 using System.Text;
-using Core.Data;
 using Core.Geo.Events;
 using Core.Geo.Handlers;
 using Core.Geo.Models;
@@ -10,7 +9,6 @@ using Core.Http;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.States;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -62,57 +60,73 @@ public class ImportCitiesHandlerTests
     }
 
     [Fact]
-    public async Task Handle_EnqueuesOneUpsertJobPerBatchWithAdmin1Names()
+    public async Task Handle_StagesAdmin1BatchesAndIdsInBlobs_ThenEnqueuesUpsertsAndTheDeleteLast()
     {
-        using var db = CreateDb();
         var lines = Enumerable.Range(1, ImportCitiesHandler.BatchSize * 2 + 1)
-            .Select(id => NashvilleLine.Replace("4644585", id.ToString()));
+            .Select(id => NashvilleLine.Replace("4644585", id.ToString()))
+            .Append(NashvilleLine.Replace("4644585", "1"))
+            .ToList();
         var http = new GeoNamesHandler(Zip(string.Join('\n', lines)), Admin1Text);
-        var jobs = new RecordingJobClient();
-        var handler = CreateHandler(db, http, jobs);
+        var blobs = new FakeCityImportBlobStore();
+        var jobs = new RecordingJobClient(blobs);
+        var handler = CreateHandler(http, jobs, blobs);
 
         var response = await handler.Handle(new ImportCitiesEvent(), CancellationToken.None);
 
         Assert.Equal(ImportCitiesHandler.BatchSize * 2 + 1, response.Downloaded);
         Assert.Equal(3, response.Enqueued);
-        Assert.Equal(0, response.Deleted);
-        Assert.All(jobs.Created, created => Assert.Equal(ImportCitiesHandler.UpsertQueue, created.Queue));
-        var events = jobs.Created.Select(created => Assert.IsType<ImportCitiesUpsertEvent>(
-            HangfireCQMediatorEventSerializer.Deserialize((string)created.Job.Args[1], (string)created.Job.Args[2]))).ToList();
-        Assert.Equal([1_000, 1_000, 1], events.Select(e => e.Cities.Count));
-        Assert.All(events.SelectMany(e => e.Cities), city => Assert.Equal("Tennessee", city.Admin1Name));
-        Assert.Equal(0, await db.Cities.CountAsync());
         Assert.Equal([ImportCitiesHandler.Admin1CodesUrl, ImportCitiesHandler.CitiesUrl], http.RequestedUrls);
+        Assert.All(jobs.Created, created => Assert.Equal(ImportCitiesHandler.ImportQueue, created.Queue));
+
+        var events = jobs.Created.Select(created => HangfireCQMediatorEventSerializer.Deserialize(
+            (string)created.Job.Args[1], (string)created.Job.Args[2])).ToList();
+        var upserts = events.Take(3).Select(e => Assert.IsType<ImportCitiesUpsertEvent>(e)).ToList();
+        var delete = Assert.IsType<ImportCitiesDeleteEvent>(events[^1]);
+
+        // admin1 goes up unchanged and every batch points at it.
+        Assert.Equal(Admin1Text, blobs.Blobs[upserts[0].Admin1Blob]);
+        Assert.All(upserts, upsert => Assert.Equal(upserts[0].Admin1Blob, upsert.Admin1Blob));
+        Assert.StartsWith("admin1codes", upserts[0].Admin1Blob);
+
+        // Batch files hold raw cities500 lines: 1,000 / 1,000 / 1, the repeated id 1 skipped.
+        var batches = upserts.Select(upsert => ImportCitiesHandler.Parse(new StringReader(blobs.Blobs[upsert.CitiesBlob])).ToList()).ToList();
+        Assert.Equal([1_000, 1_000, 1], batches.Select(batch => batch.Count));
+        Assert.Equal(Enumerable.Range(1, 2_001), batches.SelectMany(batch => batch).Select(city => city.GeonameId));
+        Assert.All(upserts, upsert => Assert.StartsWith("cities", upsert.CitiesBlob));
+
+        Assert.StartsWith("geonameids", delete.GeonameIdsBlob);
+        Assert.Equal(Enumerable.Range(1, 2_001).ToHashSet(), ImportCitiesDeleteHandler.ParseIds(blobs.Blobs[delete.GeonameIdsBlob]));
+
+        // Every job is enqueued only after every file is up.
+        Assert.All(jobs.BlobCallsAtCreate, count => Assert.Equal(blobs.Calls.Count, count));
+        Assert.Equal(5, blobs.Calls.Count);
     }
 
     [Fact]
-    public async Task Handle_SkipsARepeatedGeonameId()
+    public async Task Handle_FailedCitiesDownload_EnqueuesNothing()
     {
-        using var db = CreateDb();
-        var http = new GeoNamesHandler(Zip(string.Join('\n', NashvilleLine, AndorraLine, NashvilleLine)), Admin1Text);
-        var jobs = new RecordingJobClient();
-        var handler = CreateHandler(db, http, jobs);
+        var http = new GeoNamesHandler([1, 2, 3], Admin1Text);
+        var blobs = new FakeCityImportBlobStore();
+        var jobs = new RecordingJobClient(blobs);
+        var handler = CreateHandler(http, jobs, blobs);
 
-        var response = await handler.Handle(new ImportCitiesEvent(), CancellationToken.None);
+        await Assert.ThrowsAnyAsync<Exception>(() => handler.Handle(new ImportCitiesEvent(), CancellationToken.None));
 
-        Assert.Equal(2, response.Downloaded);
-        var created = Assert.Single(jobs.Created);
-        var upsert = Assert.IsType<ImportCitiesUpsertEvent>(
-            HangfireCQMediatorEventSerializer.Deserialize((string)created.Job.Args[1], (string)created.Job.Args[2]));
-        Assert.Equal([4644585, 3041563], upsert.Cities.Select(city => city.GeonameId));
+        Assert.Empty(jobs.Created);
     }
 
     [Fact]
-    public void MissingIdBatches_SkipsImportedIdsAndSplitsTheRest()
+    public async Task Handle_WithoutBlobStorage_Throws()
     {
-        var existing = Enumerable.Range(1, 3_000);
-        var imported = Enumerable.Range(1, 500).ToHashSet();
+        var handler = new ImportCitiesHandler(
+            new TransientRetryHelper(NullLogger<TransientRetryHelper>.Instance),
+            new FakeHttpClientFactory(new GeoNamesHandler([], Admin1Text)),
+            NullLogger<ImportCitiesHandler>.Instance,
+            new RecordingJobClient(new FakeCityImportBlobStore()));
 
-        var batches = ImportCitiesHandler.MissingIdBatches(existing, imported).ToList();
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(new ImportCitiesEvent(), CancellationToken.None));
 
-        Assert.Equal([1_000, 1_000, 500], batches.Select(batch => batch.Length));
-        Assert.Equal(501, batches[0][0]);
-        Assert.Equal(3_000, batches[^1][^1]);
+        Assert.Contains("blob storage", ex.Message);
     }
 
     private static byte[] Zip(string citiesText)
@@ -127,30 +141,30 @@ public class ImportCitiesHandlerTests
         return stream.ToArray();
     }
 
-    private static WX1116DbContext CreateDb() =>
-        new(new DbContextOptionsBuilder<WX1116DbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
-
-    private static ImportCitiesHandler CreateHandler(WX1116DbContext db, HttpMessageHandler http, IBackgroundJobClient jobs) =>
+    private static ImportCitiesHandler CreateHandler(HttpMessageHandler http, IBackgroundJobClient jobs, FakeCityImportBlobStore blobs) =>
         new(
-            db,
             new TransientRetryHelper(NullLogger<TransientRetryHelper>.Instance),
             new FakeHttpClientFactory(http),
             NullLogger<ImportCitiesHandler>.Instance,
-            jobs);
+            jobs,
+            blobs);
 
     private sealed class FakeHttpClientFactory(HttpMessageHandler handler) : IHttpClientFactory
     {
         public HttpClient CreateClient(string name) => new(handler, disposeHandler: false);
     }
 
-    /// <summary>Records every job ImportCitiesHandler enqueues instead of storing it.</summary>
-    private sealed class RecordingJobClient : IBackgroundJobClient
+    /// <summary>Records every job ImportCitiesHandler enqueues, and how many blob calls came before it.</summary>
+    private sealed class RecordingJobClient(FakeCityImportBlobStore blobs) : IBackgroundJobClient
     {
         public List<(Job Job, string Queue)> Created { get; } = [];
+
+        public List<int> BlobCallsAtCreate { get; } = [];
 
         public string Create(Job job, IState state)
         {
             Created.Add((job, Assert.IsType<EnqueuedState>(state).Queue));
+            BlobCallsAtCreate.Add(blobs.Calls.Count);
             return Created.Count.ToString();
         }
 

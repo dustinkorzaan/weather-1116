@@ -1,32 +1,23 @@
-using System.IO.Compression;
-using System.Net;
-using System.Text;
 using Core.Caching;
 using Core.Data;
 using Core.Geo.Events;
 using Core.Geo.Handlers;
 using Core.Geo.Models;
-using Core.Http;
 using Core.Tests.Data;
-using Hangfire;
-using Hangfire.Common;
-using Hangfire.States;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.Tests.Geo;
 
 /// <summary>
-/// ImportCitiesUpsertHandler, ImportCitiesHandler's bulk delete and GetCitiesHandler against a real,
+/// ImportCitiesUpsertHandler, ImportCitiesDeleteHandler and GetCitiesHandler against a real,
 /// freshly migrated SQL Server database (geography distances in meters, the IX_Cities_GeoPoint
 /// spatial index, ExecuteDelete).
 /// </summary>
 public class CitySqlServerTests : IAsyncLifetime
 {
-    // Declared before Cities, whose initializer reads it.
     private static readonly Dictionary<string, string> Admin1Names = new()
     {
         ["US.TN"] = "Tennessee",
@@ -141,22 +132,16 @@ public class CitySqlServerTests : IAsyncLifetime
     }
 
     [SqlServerFact]
-    public async Task Handle_BulkDeletesRowsTheExportNoLongerLists()
+    public async Task Delete_BulkDeletesRowsTheExportNoLongerLists()
     {
-        // London drops out of the export, so the parent job ExecuteDeletes it from dbo.Cities.
-        var lines = Cities.Where(city => city.Name != "London").Select(Line);
-        var http = new GeoNamesHandler(Zip(string.Join('\n', lines)), "US.TN\tTennessee\tTennessee\t4662168\n");
+        // London drops out of the export, so the delete job ExecuteDeletes it from dbo.Cities.
+        var blobs = new FakeCityImportBlobStore();
+        blobs.Blobs["geonameids.txt"] = string.Join('\n', Cities.Where(city => city.Name != "London").Select(city => city.GeonameId));
 
         await using var db = CreateDb();
-        var handler = new ImportCitiesHandler(
-            db,
-            new TransientRetryHelper(NullLogger<TransientRetryHelper>.Instance),
-            new FakeHttpClientFactory(http),
-            NullLogger<ImportCitiesHandler>.Instance,
-            new DiscardingJobClient());
-        var response = await handler.Handle(new ImportCitiesEvent(), CancellationToken.None);
+        var response = await new ImportCitiesDeleteHandler(db, NullLogger<ImportCitiesDeleteHandler>.Instance, blobs)
+            .Handle(new ImportCitiesDeleteEvent { GeonameIdsBlob = "geonameids.txt" }, CancellationToken.None);
 
-        Assert.Equal(6, response.Downloaded);
         Assert.Equal(1, response.Deleted);
 
         await using var verify = CreateDb();
@@ -179,9 +164,14 @@ public class CitySqlServerTests : IAsyncLifetime
             .UseSqlServer(_connectionString, sql => sql.UseNetTopologySuite())
             .Options);
 
-    private static Task<ImportCitiesUpsertResponse> Upsert(WX1116DbContext db, IEnumerable<GeoNamesCityDto> cities) =>
-        new ImportCitiesUpsertHandler(db, NullLogger<ImportCitiesUpsertHandler>.Instance)
-            .Handle(new ImportCitiesUpsertEvent { Cities = [.. cities] }, CancellationToken.None);
+    private static Task<ImportCitiesUpsertResponse> Upsert(WX1116DbContext db, IEnumerable<GeoNamesCityDto> cities)
+    {
+        var blobs = new FakeCityImportBlobStore();
+        blobs.Blobs["admin1codes.txt"] = string.Concat(Admin1Names.Select(pair => $"{pair.Key}\t{pair.Value}\t{pair.Value}\t0\n"));
+        blobs.Blobs["cities.txt"] = string.Join('\n', cities.Select(Line));
+        return new ImportCitiesUpsertHandler(db, NullLogger<ImportCitiesUpsertHandler>.Instance, blobs)
+            .Handle(new ImportCitiesUpsertEvent { CitiesBlob = "cities.txt", Admin1Blob = "admin1codes.txt" }, CancellationToken.None);
+    }
 
     // Each test gets its own database, so the tests never see each other's writes.
     private static string BuildConnectionString()
@@ -206,48 +196,9 @@ public class CitySqlServerTests : IAsyncLifetime
             Longitude = longitude,
             Population = population,
             Timezone = admin1Code == "ENG" ? "Europe/London" : "America/Chicago",
-            Admin1Name = Admin1Names.GetValueOrDefault(admin1Code == "ENG" ? "GB.ENG" : $"US.{admin1Code}"),
         };
 
     /// <summary>Writes <paramref name="city"/> back out as a 19-column cities500.txt row.</summary>
     private static string Line(GeoNamesCityDto city) => FormattableString.Invariant(
         $"{city.GeonameId}\t{city.Name}\t{city.Name}\t\t{city.Latitude}\t{city.Longitude}\tP\t{city.FeatureCode}\t{city.CountryCode}\t\t{city.Admin1Code}\t\t\t\t{city.Population}\t\t\t{city.Timezone}\t2024-01-01");
-
-    private static byte[] Zip(string citiesText)
-    {
-        using var stream = new MemoryStream();
-        using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
-        {
-            using var writer = new StreamWriter(archive.CreateEntry(ImportCitiesHandler.CitiesEntryName).Open());
-            writer.Write(citiesText);
-        }
-
-        return stream.ToArray();
-    }
-
-    private sealed class FakeHttpClientFactory(HttpMessageHandler handler) : IHttpClientFactory
-    {
-        public HttpClient CreateClient(string name) => new(handler, disposeHandler: false);
-    }
-
-    /// <summary>Accepts the upsert batches without running them; this fact only checks the delete.</summary>
-    private sealed class DiscardingJobClient : IBackgroundJobClient
-    {
-        public string Create(Job job, IState state) => Guid.NewGuid().ToString();
-
-        public bool ChangeState(string jobId, IState state, string expectedState) => throw new NotSupportedException();
-    }
-
-    /// <summary>Serves the cities500 zip and admin1 codes text by URL.</summary>
-    private sealed class GeoNamesHandler(byte[] citiesZip, string admin1Text) : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            HttpContent content = request.RequestUri!.ToString() == ImportCitiesHandler.CitiesUrl
-                ? new ByteArrayContent(citiesZip)
-                : new StringContent(admin1Text, Encoding.UTF8, "text/plain");
-
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = content });
-        }
-    }
 }

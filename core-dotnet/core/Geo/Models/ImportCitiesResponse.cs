@@ -4,14 +4,11 @@ namespace Core.Geo.Models;
 
 public class ImportCitiesResponse
 {
-    /// <summary>Cities parsed from the downloaded cities500 export.</summary>
+    /// <summary>Unique cities parsed from the downloaded cities500 export.</summary>
     [JsonPropertyName("downloaded")]
     public int Downloaded { get; set; }
 
-    /// <summary>ImportCitiesUpsertEvent jobs enqueued, one per batch of cities.</summary>
+    /// <summary>ImportCitiesUpsertEvent jobs enqueued, one per batch file of cities.</summary>
     [JsonPropertyName("enqueued")]
     public int Enqueued { get; set; }
-
-    [JsonPropertyName("deleted")]
-    public int Deleted { get; set; }
 }

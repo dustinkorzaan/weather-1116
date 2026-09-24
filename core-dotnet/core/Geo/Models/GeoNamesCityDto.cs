@@ -1,8 +1,8 @@
 namespace Core.Geo.Models;
 
 /// <summary>
-/// One row of GeoNames' cities500.txt, as parsed by ImportCitiesHandler and carried to
-/// ImportCitiesUpsertHandler. No Id or GeoPoint -- those only exist on the
+/// One row of GeoNames' cities500.txt, as parsed by ImportCitiesHandler (to dedupe the export) and by
+/// ImportCitiesUpsertHandler (from its batch file in blob storage). No Id or GeoPoint -- those only exist on the
 /// <see cref="Core.Data.Domain.City"/> domain entity.
 /// </summary>
 public class GeoNamesCityDto
@@ -15,7 +15,7 @@ public class GeoNamesCityDto
 
     public string Admin1Code { get; set; } = string.Empty;
 
-    /// <summary>Region name from admin1CodesASCII.txt, resolved by ImportCitiesHandler; null when unlisted.</summary>
+    /// <summary>Region name from admin1CodesASCII.txt, resolved by ImportCitiesUpsertHandler; null when unlisted.</summary>
     public string? Admin1Name { get; set; }
 
     public string FeatureCode { get; set; } = string.Empty;
