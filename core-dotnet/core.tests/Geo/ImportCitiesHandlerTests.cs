@@ -185,6 +185,42 @@ public class ImportCitiesHandlerTests
 
         Assert.Contains("more than once", ex.Message);
         Assert.Empty(jobs.Created);
+        Assert.Empty(blobs.Blobs);
+    }
+
+    [Fact]
+    public async Task Handle_RepeatedGeonameIdPastTheFirstBatch_WritesNoBlobAndEnqueuesNothing()
+    {
+        var lines = Enumerable.Range(1, ImportCitiesHandler.BatchSize + 1)
+            .Select(id => NashvilleLine.Replace("4644585", id.ToString()))
+            .Append(NashvilleLine.Replace("4644585", "1"));
+        var http = new GeoNamesHandler(Zip(string.Join('\n', lines)), FullAdmin1Text);
+        var blobs = new FakeCityImportBlobStore();
+        var jobs = new RecordingJobClient(blobs);
+        var handler = CreateHandler(CreateDb(), http, jobs, blobs);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(new ImportCitiesEvent(), CancellationToken.None));
+
+        Assert.Contains("geonameid 1 more than once", ex.Message);
+        Assert.Empty(jobs.Created);
+        Assert.Empty(blobs.Blobs);
+    }
+
+    [Fact]
+    public async Task Handle_ShortExportLargerThanABatch_WritesNoBlobAndEnqueuesNothing()
+    {
+        var lines = Enumerable.Range(1, ImportCitiesHandler.BatchSize + 1)
+            .Select(id => NashvilleLine.Replace("4644585", id.ToString()));
+        var http = new GeoNamesHandler(Zip(string.Join('\n', lines)), FullAdmin1Text);
+        var blobs = new FakeCityImportBlobStore();
+        var jobs = new RecordingJobClient(blobs);
+        var handler = CreateHandler(CreateDb(), http, jobs, blobs, cityFloor: ImportCitiesHandler.BatchSize * 2);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(new ImportCitiesEvent(), CancellationToken.None));
+
+        Assert.Contains("held only 1001 cities", ex.Message);
+        Assert.Empty(jobs.Created);
+        Assert.Empty(blobs.Blobs);
     }
 
     [Fact]
@@ -199,6 +235,7 @@ public class ImportCitiesHandlerTests
 
         Assert.Contains("held only 2 cities", ex.Message);
         Assert.Empty(jobs.Created);
+        Assert.Empty(blobs.Blobs);
     }
 
     [Fact]
@@ -216,6 +253,7 @@ public class ImportCitiesHandlerTests
 
         Assert.Contains("already in dbo.Cities", ex.Message);
         Assert.Empty(jobs.Created);
+        Assert.Empty(blobs.Blobs);
         Assert.Equal(3, await db.Cities.CountAsync());
     }
 

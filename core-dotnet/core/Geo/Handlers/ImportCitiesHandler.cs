@@ -17,16 +17,15 @@ namespace Core.Geo.Handlers;
 
 /// <summary>
 /// Downloads GeoNames' cities500 export (every populated place with 500+ people) plus its admin1
-/// (state/province) names and stages them in blob storage without writing a city itself. admin1 goes
-/// up as it is; the zip is streamed through a temp file one row at a time, a repeated GeonameId is
-/// skipped, and every <see cref="BatchSize"/> unique rows go up as their own file of raw lines. The
-/// imported GeonameIds go up as one more file. The export is then checked (more than
+/// (state/province) names and stages them in blob storage without writing a city itself. The zip is
+/// streamed through a temp file and read twice, one row at a time. Pass 1 only collects GeonameIds and
+/// checks the export (at least <see cref="MinimumAdmin1Count"/> regions, no repeated GeonameId, more than
 /// <see cref="MinimumCityCount"/> cities, at least <see cref="MinimumShareOfExistingCities"/> of
-/// dbo.Cities, at least <see cref="MinimumAdmin1Count"/> regions, no repeated GeonameId); a failed check
-/// throws before anything is enqueued, so nothing is written or deleted. Only after every upload and
-/// check succeeds does it enqueue one
-/// <see cref="ImportCitiesUpsertEvent"/> per batch file and then one <see cref="ImportCitiesDeleteEvent"/>,
-/// all on <see cref="ImportQueue"/>, so each Hangfire job carries only blob names.
+/// dbo.Cities); a failed check throws before any blob is written or job enqueued. Pass 2 uploads admin1
+/// as it is, every <see cref="BatchSize"/> rows as their own file of raw lines, and the imported
+/// GeonameIds, then enqueues one <see cref="ImportCitiesUpsertEvent"/> per batch file and one
+/// <see cref="ImportCitiesDeleteEvent"/>, all on <see cref="ImportQueue"/>, so each Hangfire job carries
+/// only blob names.
 /// </summary>
 public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCitiesResponse>
 {
@@ -106,18 +105,14 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
             return await httpResponse.Content.ReadAsStringAsync(ct);
         }, cancellationToken);
         ConfirmAdmin1Count(ParseAdmin1Names(new StringReader(admin1Text)));
-        var admin1Blob = NewBlobName("admin1codes");
-        await blobs.UploadTextAsync(admin1Blob, admin1Text, cancellationToken);
 
         // ZipArchive needs a seekable stream, so the zip goes to a temp file rather than a byte[].
         await using var citiesZip = await _retry.Execute(ct => DownloadToTempFile(client, CitiesUrl, ct), cancellationToken);
         using var archive = new ZipArchive(citiesZip, ZipArchiveMode.Read);
 
+        // Pass 1: ids and checks only, so a short, partial or duplicated export writes nothing at all.
         var importedIds = new HashSet<int>();
-        var citiesBlobs = new List<string>();
-        var batch = new StringBuilder();
-        var batchCount = 0;
-        foreach (var (line, city) in ReadCities(archive))
+        foreach (var (_, city) in ReadCities(archive))
         {
             // A repeated GeonameId fails the import: the second row may be the one that changed.
             if (!importedIds.Add(city.GeonameId))
@@ -125,7 +120,19 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
                 throw new InvalidOperationException(
                     $"GeoNames cities500 export lists geonameid {city.GeonameId} more than once; import skipped.");
             }
+        }
 
+        ConfirmCityCount(importedIds.Count, await _db.Cities.CountAsync(cancellationToken), CityFloor);
+
+        // Pass 2: stage the files the upsert and delete jobs read.
+        var admin1Blob = NewBlobName("admin1codes");
+        await blobs.UploadTextAsync(admin1Blob, admin1Text, cancellationToken);
+
+        var citiesBlobs = new List<string>();
+        var batch = new StringBuilder();
+        var batchCount = 0;
+        foreach (var (line, _) in ReadCities(archive))
+        {
             batch.Append(line).Append('\n');
             if (++batchCount == BatchSize)
             {
@@ -142,10 +149,8 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         var geonameIdsBlob = NewBlobName("geonameids");
         await blobs.UploadTextAsync(geonameIdsBlob, string.Join('\n', importedIds), cancellationToken);
 
-        ConfirmCityCount(importedIds.Count, await _db.Cities.CountAsync(cancellationToken), CityFloor);
-
-        // Nothing is enqueued until every file is up and the export passed its checks, so a failed
-        // download, upload or check leaves no jobs behind (the 7-day temp lifecycle rule clears the files).
+        // Nothing is enqueued until every file is up, so a failed upload leaves no jobs behind (the
+        // 7-day temp lifecycle rule clears its files).
         foreach (var citiesBlob in citiesBlobs)
         {
             backgroundJobs.EnqueueCQMediatorEvent(
@@ -209,7 +214,10 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         return blobName;
     }
 
-    /// <summary>Streams cities500.txt out of the zip one row at a time, with each row's raw line.</summary>
+    /// <summary>
+    /// Streams cities500.txt out of the zip one row at a time, with each row's raw line. Re-opens the
+    /// entry on every enumeration, so Handle can read the export twice.
+    /// </summary>
     private static IEnumerable<(string Line, GeoNamesCityDto City)> ReadCities(ZipArchive archive)
     {
         var entry = archive.GetEntry(CitiesEntryName)
