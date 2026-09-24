@@ -157,7 +157,10 @@ on `/current-ai-weather`) **→ V5 →**
       box MCP Server on Python
           participant GetLatLongTool
       end
-      box MCP Server on App Service
+      box MCP Server on Function App
+          participant GetCitiesTool
+      end
+      box MCP Server on Node
           participant GetPublicWeatherTool
       end
 
@@ -181,16 +184,22 @@ on `/current-ai-weather`) **→ V5 →**
           participant PythonMcp
           participant GetLatLongTool
       end
-      box MCP Server on App Service
-          participant AppSvcMcp
+      box MCP Server on Function App
+          participant FuncMcp
+          participant GetCitiesTool
+      end
+      box MCP Server on Node
+          participant NodeMcp
           participant GetPublicWeatherTool
       end
 
       Console->>AppLoop: system prompt + MCP tools, user prompt last
       AppLoop->>PythonMcp: Discover MCP Tools
       PythonMcp-->>AppLoop: MCP Tools
-      AppLoop->>AppSvcMcp: Discover MCP Tools
-      AppSvcMcp-->>AppLoop: MCP Tools
+      AppLoop->>FuncMcp: Discover MCP Tools
+      FuncMcp-->>AppLoop: MCP Tools
+      AppLoop->>NodeMcp: Discover MCP Tools
+      NodeMcp-->>AppLoop: MCP Tools
       AppLoop->>Model: system prompt + MCP tools, user prompt last
       Model->>AppLoop: GetLatLong(location)
       AppLoop->>GetLatLongTool: GetLatLong(location)
@@ -227,7 +236,10 @@ on `/current-ai-weather`) **→ V5 →**
       box MCP Server on Python
           participant GetLatLongTool
       end
-      box MCP Server on App Service
+      box MCP Server on Function App
+          participant GetCitiesTool
+      end
+      box MCP Server on Node
           participant GetPublicWeatherTool
       end
 
@@ -251,16 +263,22 @@ on `/current-ai-weather`) **→ V5 →**
           participant PythonMcp
           participant GetLatLongTool
       end
-      box MCP Server on App Service
-          participant AppSvcMcp
+      box MCP Server on Function App
+          participant FuncMcp
+          participant GetCitiesTool
+      end
+      box MCP Server on Node
+          participant NodeMcp
           participant GetPublicWeatherTool
       end
 
       Console->>Agent: user prompt only
       Agent->>PythonMcp: Discover MCP Tools
       PythonMcp-->>Agent: MCP Tools
-      Agent->>AppSvcMcp: Discover MCP Tools
-      AppSvcMcp-->>Agent: MCP Tools
+      Agent->>FuncMcp: Discover MCP Tools
+      FuncMcp-->>Agent: MCP Tools
+      Agent->>NodeMcp: Discover MCP Tools
+      NodeMcp-->>Agent: MCP Tools
       Agent->>Model: user prompt only
       Model->>Agent: GetLatLong(location)
       Agent->>GetLatLongTool: GetLatLong(location)

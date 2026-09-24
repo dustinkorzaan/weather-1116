@@ -24,9 +24,9 @@ Nominatim's usage policy requires.
 Core's `GetCitiesHandler`. `GetPublicWeatherForecast`/`GetPublicWeatherHistory` also used to live
 here; they are served by [`mcp-srv-node`](../mcp-srv-node).
 
-This project has no dependency on the rest of this repo (no shared `core` project, no
-caching layer) — it's a self-contained MCP server you can build, run, and deploy on its
-own.
+This project has no dependency on the rest of this repo (no shared `core` project; its small
+in-process cache lives in `tools/geo.py`) — it's a self-contained MCP server you can build, run,
+and deploy on its own.
 
 ## Running locally
 
