@@ -1,11 +1,4 @@
 window.weatherMap = (function () {
-  const DEFAULT_CITIES = [
-    { id: '59e2459a-b25d-44a7-bcb0-2a4f2e444272', name: 'New York, NY', lat: 40.7128, lng: -74.006 },
-    { id: '329735f1-cfc0-42b4-a48f-0d41677145e8', name: 'Toronto, ON', lat: 43.6532, lng: -79.3832 },
-    { id: '9daab691-7885-400f-8aed-5e21a63f9a7a', name: 'Atlanta, GA', lat: 33.749, lng: -84.388 },
-    { id: '04f5d22f-ca31-4d29-ac9e-a1c4f0127ed1', name: 'Charlotte, NC', lat: 35.2271, lng: -80.8431 },
-  ];
-  const STORAGE_KEY = 'weather-map-cities';
   const DELETE_ICON_SVG =
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
   const PLUS_ICON_SVG =
@@ -509,12 +502,14 @@ window.weatherMap = (function () {
         if (!name) {
           throw new Error('Unable to find that location.');
         }
-        addCity({
+        return addCity({
           id: newCityId(),
           name: name,
           lat: lat,
           lng: lng,
         });
+      })
+      .then(function () {
         controls.hide();
       })
       .catch(function (error) {
@@ -746,43 +741,94 @@ window.weatherMap = (function () {
     return mapsByElement;
   }
 
+  // Pins live in the database, shared with the other UIs and the chat agents, so the
+  // map never keeps its own copy: it re-reads /User on every map load and after
+  // every add or delete.
+  let currentCities = [];
+
+  function citiesFromUser(user) {
+    return ((user && user.userPins) || [])
+      .map(function (pin) {
+        return { id: pin.id, name: pin.locationName, lat: pin.latitude, lng: pin.longitude };
+      })
+      .filter(isValidCity);
+  }
+
+  function renderCities(cities) {
+    currentCities = cities.slice();
+    mapEntries().forEach(function (entry) {
+      entry.cities = currentCities.slice();
+      (entry.markers || []).forEach(function (pin) {
+        if (pin && typeof pin.setMap === 'function') {
+          pin.setMap(null);
+        }
+      });
+      entry.markers =
+        entry.map && entry.maps
+          ? createCityMarkers(entry.maps, entry.map, entry.cities, mapAppearance(entry.theme || resolvedTheme()))
+          : [];
+    });
+  }
+
+  function refreshCities() {
+    return fetch('/User', { headers: { Accept: 'application/json' } })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error('Unable to load saved locations.');
+        }
+        return response.json();
+      })
+      .then(function (user) {
+        renderCities(citiesFromUser(user));
+        return currentCities;
+      });
+  }
+
   function addCity(city) {
     if (!isValidCity(city)) {
-      return;
+      return Promise.reject(new Error('Unable to find that location.'));
     }
-    fetch('/User/AddPin', {
+    return fetch('/User/AddPin', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        latitude: city.lat,
-        longitude: city.lng,
-        locationName: city.name
-      })
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ latitude: city.lat, longitude: city.lng, locationName: city.name }),
     })
-      .then(response => {
+      .then(function (response) {
         if (!response.ok) {
-          throw new Error('Failed to add pin');
+          throw new Error('Unable to save that location.');
         }
-        location.reload();
+        return refreshCities();
       })
-      .catch(function (error) {
-        console.error('Error adding city:', error);
+      .then(function () {
+        mapEntries().forEach(function (entry) {
+          if (entry.map && typeof entry.map.panTo === 'function') {
+            entry.map.panTo({ lat: city.lat, lng: city.lng });
+          }
+        });
       });
   }
 
   function removeCity(cityId) {
-    fetch('/User/DeletePin?userPinId=' + encodeURIComponent(cityId), {
+    renderCities(
+      currentCities.filter(function (city) {
+        return city.id !== cityId;
+      })
+    );
+    return fetch('/User/DeletePin?userPinId=' + encodeURIComponent(cityId), {
       method: 'DELETE',
-      headers: { Accept: 'application/json' }
+      headers: { Accept: 'application/json' },
     })
-      .then(response => {
+      .then(function (response) {
         if (!response.ok) {
-          throw new Error('Failed to delete pin');
+          console.error('Unable to delete that location.');
         }
-        location.reload();
       })
       .catch(function (error) {
-        console.error('Error removing city:', error);
+        console.error('Unable to delete that location:', error);
+      })
+      .then(refreshCities)
+      .catch(function (error) {
+        console.error(error);
       });
   }
 
@@ -796,9 +842,8 @@ window.weatherMap = (function () {
   /**
    * @param {string|HTMLElement} elementOrId
    * @param {string} apiKey
-   * @param {Array<{id:string,name:string,lat:number,lng:number}>} cities
    */
-  function init(elementOrId, apiKey, cities) {
+  function init(elementOrId, apiKey) {
     const element = resolveElement(elementOrId);
     if (!element) {
       return Promise.reject(new Error('Map container not found.'));
@@ -811,11 +856,14 @@ window.weatherMap = (function () {
 
     element.setAttribute('data-status', 'loading');
 
+    // Load pins alongside the Maps script so the map never waits on /User.
+    refreshCities().catch(function (error) {
+      console.error(error);
+    });
+
     return loadGoogleMaps(apiKey).then(function (maps) {
       const appearance = mapAppearance(resolvedTheme());
-      const resolvedCities = (cities || []).map(function (city) {
-        return { id: city.id, name: city.name || city.locationName, lat: city.lat || city.latitude, lng: city.lng || city.longitude };
-      });
+      const resolvedCities = currentCities.slice();
       const entry = {
         maps: maps,
         map: null,

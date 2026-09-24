@@ -238,6 +238,29 @@ test('renders the map on the home route without split page content', async () =>
   expect(mapSource).toContain('useLazyGetLocationQuery');
 });
 
+test('navigating to Home refetches the user so pins added elsewhere appear', async () => {
+  const user = userEvent.setup();
+  const fetchSpy = mockHelloFetch();
+  await renderApp('/');
+
+  const userFetchCount = () =>
+    fetchSpy.mock.calls.filter(([input]) => new URL(requestUrl(input)).pathname.endsWith('/User')).length;
+
+  await waitFor(() => expect(userFetchCount()).toBe(1));
+
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
+  await user.click(await screen.findByRole('menuitem', { name: /hello world/i }));
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
+  await user.click(await screen.findByRole('menuitem', { name: /^home$/i }));
+
+  await waitFor(() => expect(userFetchCount()).toBe(2));
+
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
+  await user.click(await screen.findByRole('menuitem', { name: /^home$/i }));
+
+  await waitFor(() => expect(userFetchCount()).toBe(3));
+});
+
 test('renders hello world on its own page', async () => {
   mockHelloFetch();
   await renderApp('/hello-world');

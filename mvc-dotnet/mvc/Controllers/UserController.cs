@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WeatherMVC.Controllers;
 
+[Route("[controller]")]
 public class UserController : Controller
 {
 	private readonly IMediator _mediator;

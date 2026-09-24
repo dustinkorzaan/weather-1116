@@ -123,27 +123,21 @@
           if (!city) {
             throw new Error('Unable to find that location.');
           }
+          // Off the Home page there is no map, so save the pin directly; Home reads it from /User.
           if (window.weatherMap && typeof window.weatherMap.addCity === 'function') {
-            window.weatherMap.addCity(city);
-          } else {
-            try {
-              const key = 'weather-map-cities';
-              const raw = window.sessionStorage.getItem(key);
-              const cities = raw ? JSON.parse(raw) : null;
-              const list = Array.isArray(cities) ? cities : [
-                { id: '59e2459a-b25d-44a7-bcb0-2a4f2e444272', name: 'New York, NY', lat: 40.7128, lng: -74.006 },
-                { id: '329735f1-cfc0-42b4-a48f-0d41677145e8', name: 'Toronto, ON', lat: 43.6532, lng: -79.3832 },
-                { id: '9daab691-7885-400f-8aed-5e21a63f9a7a', name: 'Atlanta, GA', lat: 33.749, lng: -84.388 },
-                { id: '04f5d22f-ca31-4d29-ac9e-a1c4f0127ed1', name: 'Charlotte, NC', lat: 35.2271, lng: -80.8431 },
-              ];
-              if (!list.some(function (item) { return item.id === city.id; })) {
-                list.push(city);
-              }
-              window.sessionStorage.setItem(key, JSON.stringify(list));
-            } catch (e) {
-              // Ignore storage failures; the pin appears after returning home if the map is loaded.
-            }
+            return window.weatherMap.addCity(city);
           }
+          return fetch('/User/AddPin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ latitude: city.lat, longitude: city.lng, locationName: city.name }),
+          }).then(function (response) {
+            if (!response.ok) {
+              throw new Error('Unable to save that location.');
+            }
+          });
+        })
+        .then(function () {
           setOpen(false);
           input.value = 'Nashville, TN';
         })
