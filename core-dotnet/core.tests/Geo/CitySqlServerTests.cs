@@ -153,7 +153,11 @@ public class CitySqlServerTests : IAsyncLifetime
             db,
             new TransientRetryHelper(NullLogger<TransientRetryHelper>.Instance),
             new NoHttpClientFactory(),
-            NullLogger<ImportCitiesHandler>.Instance);
+            NullLogger<ImportCitiesHandler>.Instance)
+        {
+            // Seven fixture cities: lift the 100k floor so the bulk delete runs.
+            DeleteFloor = 0,
+        };
 
     // Each test gets its own database, so the four tests never see each other's merges.
     private static string BuildConnectionString()
