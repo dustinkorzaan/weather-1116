@@ -209,7 +209,7 @@ them (default 25, reset into 0–100). All three tools also run in-process throu
 the local-loop paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, FoundryConsoleV3).
 
 `GetCitiesHandler` answers from `dbo.Cities` with a NetTopologySuite geography query
-(`IsWithinDistance`, spatial index `IX_City_GeoPoint`), skipping city sections and historical
+(`IsWithinDistance`, spatial index `IX_Cities_GeoPoint`), skipping city sections and historical
 places (feature codes `PPLX`/`PPLH`/`PPLQ`/`PPLW`). The table is loaded by `ImportCitiesEvent`/
 `ImportCitiesHandler` (Core/Geo), which the worker runs daily at 11:00 UTC on the `batch-single`
 queue (`import-cities`): it downloads GeoNames' `cities500.zip` and `admin1CodesASCII.txt`

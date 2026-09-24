@@ -15,7 +15,7 @@ namespace Core.Tests.Geo;
 
 /// <summary>
 /// ImportCitiesHandler.Merge and GetCitiesHandler against a real, freshly migrated SQL Server
-/// database (geography distances in meters, the IX_City_GeoPoint spatial index, ExecuteDelete).
+/// database (geography distances in meters, the IX_Cities_GeoPoint spatial index, ExecuteDelete).
 /// </summary>
 public class CitySqlServerTests : IAsyncLifetime
 {
