@@ -122,9 +122,6 @@ if (!string.IsNullOrWhiteSpace(dbConnectionString))
 	builder.Services.AddHostedService<RecurringJobScheduler>();
 }
 
-// Holds off ACA scale-to-zero while a job (e.g. import-cities) is still running.
-builder.Services.AddHostedService<ProcessingJobKeepAlive>();
-
 var app = builder.Build();
 
 // Hangfire dashboard, open to all (POC — no auth). It reads the shared storage,

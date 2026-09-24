@@ -19,8 +19,8 @@ namespace Core.Geo.Handlers;
 /// twice, one row at a time, so memory stays flat no matter how large the export grows: the first
 /// pass only collects GeonameIds and confirms the export (more than <see cref="MinimumCityCount"/>
 /// cities, no duplicate ids, at least <see cref="MinimumShareOfExistingCities"/> of dbo.Cities)
-/// before anything is written; the second upserts <see cref="UpsertChunkSize"/> rows at a time (one
-/// GeonameId lookup and one save per chunk). Rows GeoNames no longer lists are then bulk-deleted.
+/// before anything is written; the second looks up each row by GeonameId and inserts or updates it
+/// on its own. Rows GeoNames no longer lists are then bulk-deleted.
 /// </summary>
 public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCitiesResponse>
 {
@@ -40,12 +40,6 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     // every city's Admin1Name (GetCities' region) until the next good run.
     internal const int MinimumAdmin1Count = 1_000;
     internal const int DeleteChunkSize = 2_000;
-
-    // One lookup and one SaveChanges per chunk instead of per row: ~225 round-trip pairs for the
-    // whole export rather than ~225k, which is what lets the job finish on a 5 DTU Basic database
-    // before the worker's container scales in. Each chunk commits on its own, so a run that is
-    // still cancelled keeps its progress and the retry skips the rows already written.
-    internal const int UpsertChunkSize = 1_000;
     internal const int Srid = 4326;
 
     // cities500.txt is tab-delimited with 19 columns and no header row.
@@ -115,9 +109,9 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     /// <summary>
     /// Enumerates <paramref name="incoming"/> twice. Pass 1 collects the GeonameIds and confirms the
     /// export (see <see cref="ConfirmCityCount"/>) without writing, so a short, partial, duplicated
-    /// or unreadable export leaves dbo.Cities untouched. Pass 2 upserts the cities
-    /// <see cref="UpsertChunkSize"/> at a time (one lookup, and a save only when something in the
-    /// chunk changed). Rows whose GeonameId was not imported are then bulk-deleted.
+    /// or unreadable export leaves dbo.Cities untouched. Pass 2 upserts each city one at a time (one
+    /// lookup, and a save only when something changed). Rows whose GeonameId was not imported are
+    /// then bulk-deleted.
     /// </summary>
     internal async Task<ImportCitiesResponse> Merge(
         IEnumerable<GeoNamesCityDto> incoming,
@@ -138,9 +132,9 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         ConfirmCityCount(importedIds.Count, existingCount, CityFloor);
 
         var response = new ImportCitiesResponse { Downloaded = importedIds.Count };
-        foreach (var chunk in incoming.Chunk(UpsertChunkSize))
+        foreach (var dto in incoming)
         {
-            await Upsert(chunk, admin1Names, response, cancellationToken);
+            await Upsert(dto, admin1Names, response, cancellationToken);
         }
 
         // Only GeonameIds come back (about 1 MB for 250k rows), never whole City rows.
@@ -158,35 +152,28 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     }
 
     private async Task Upsert(
-        GeoNamesCityDto[] chunk,
+        GeoNamesCityDto dto,
         IReadOnlyDictionary<string, string> admin1Names,
         ImportCitiesResponse response,
         CancellationToken cancellationToken)
     {
-        var ids = chunk.Select(dto => dto.GeonameId).ToList();
-        var existing = await _db.Cities
-            .Where(city => ids.Contains(city.GeonameId))
-            .ToDictionaryAsync(city => city.GeonameId, cancellationToken);
+        var admin1Name = admin1Names.GetValueOrDefault(Admin1Key(dto.CountryCode, dto.Admin1Code));
+        var city = await _db.Cities.FirstOrDefaultAsync(existing => existing.GeonameId == dto.GeonameId, cancellationToken);
 
-        foreach (var dto in chunk)
+        if (city is null)
         {
-            var admin1Name = admin1Names.GetValueOrDefault(Admin1Key(dto.CountryCode, dto.Admin1Code));
-
-            if (!existing.TryGetValue(dto.GeonameId, out var city))
-            {
-                city = new City { Id = Guid.NewGuid(), GeonameId = dto.GeonameId };
-                ApplyChanges(city, dto, admin1Name);
-                _db.Cities.Add(city);
-                response.Inserted++;
-            }
-            else if (ApplyChanges(city, dto, admin1Name))
-            {
-                response.Updated++;
-            }
-            else
-            {
-                response.Unchanged++;
-            }
+            city = new City { Id = Guid.NewGuid(), GeonameId = dto.GeonameId };
+            ApplyChanges(city, dto, admin1Name);
+            _db.Cities.Add(city);
+            response.Inserted++;
+        }
+        else if (ApplyChanges(city, dto, admin1Name))
+        {
+            response.Updated++;
+        }
+        else
+        {
+            response.Unchanged++;
         }
 
         if (_db.ChangeTracker.HasChanges())
@@ -194,7 +181,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
             await _db.SaveChangesAsync(cancellationToken);
         }
 
-        // Nothing is kept tracked between chunks, so the context never grows with the export.
+        // Nothing is kept tracked between rows, so the context never grows with the export.
         _db.ChangeTracker.Clear();
     }
 

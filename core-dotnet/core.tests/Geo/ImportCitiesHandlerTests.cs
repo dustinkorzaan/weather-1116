@@ -274,28 +274,6 @@ public class ImportCitiesHandlerTests
         Assert.False(db.ChangeTracker.HasChanges());
     }
 
-    [Fact]
-    public async Task Merge_SpansSeveralChunks_UpsertsEveryCity()
-    {
-        using var db = CreateDb();
-        var incoming = Enumerable.Range(1, ImportCitiesHandler.UpsertChunkSize * 2 + 1)
-            .Select(id => { var dto = Dto(NashvilleLine); dto.GeonameId = id; return dto; })
-            .ToList();
-        var existing = NewCity(incoming[ImportCitiesHandler.UpsertChunkSize]);
-        existing.Population = 1;
-        db.Cities.Add(existing);
-        await db.SaveChangesAsync();
-        db.ChangeTracker.Clear();
-        var handler = CreateHandler(db, new GeoNamesHandler([], string.Empty), cityFloor: 0);
-
-        var response = await handler.Merge(incoming, new Dictionary<string, string>(), CancellationToken.None);
-
-        Assert.Equal(incoming.Count - 1, response.Inserted);
-        Assert.Equal(1, response.Updated);
-        Assert.Equal(incoming.Count, await db.Cities.CountAsync());
-        Assert.False(db.ChangeTracker.HasChanges());
-    }
-
     private static GeoNamesCityDto Dto(string line) => ImportCitiesHandler.Parse(new StringReader(line)).Single();
 
     private static City NewCity(GeoNamesCityDto dto)
