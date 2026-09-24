@@ -27,6 +27,15 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
 
     // A truncated or empty download must never wipe the table, so the merge only runs above this.
     internal const int MinimumCityCount = 100_000;
+
+    // A download that is large but partial (or partly unparsable) would still pass the absolute
+    // floor above and then bulk-delete every city it is missing, so once dbo.City holds data the
+    // export must also keep at least this share of the current rows.
+    internal const double MinimumShareOfExistingCities = 0.9;
+
+    // admin1CodesASCII.txt lists about 3,900 regions; an empty or broken body would otherwise blank
+    // every city's Admin1Name (GetCities' region) until the next good run.
+    internal const int MinimumAdmin1Count = 1_000;
     internal const int DeleteChunkSize = 2_000;
     internal const int Srid = 4326;
 
@@ -73,6 +82,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         var admin1Names = ParseAdmin1Names(admin1Reader);
 
         ConfirmCityCount(incoming);
+        ConfirmAdmin1Count(admin1Names);
 
         var response = await Merge(incoming, admin1Names, cancellationToken);
 
@@ -95,6 +105,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         var response = new ImportCitiesResponse { Downloaded = incoming.Count };
 
         var existing = await _db.City.ToDictionaryAsync(city => city.GeonameId, cancellationToken);
+        ConfirmShareOfExisting(incoming.Count, existing.Count);
         var inserts = new List<City>();
 
         foreach (var dto in incoming)
@@ -183,6 +194,24 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         {
             throw new InvalidOperationException(
                 $"GeoNames cities500 export lists geonameid {duplicate.Key} more than once; import skipped.");
+        }
+    }
+
+    internal static void ConfirmShareOfExisting(int incomingCount, int existingCount)
+    {
+        if (incomingCount < existingCount * MinimumShareOfExistingCities)
+        {
+            throw new InvalidOperationException(
+                $"GeoNames cities500 export held {incomingCount} cities, under {MinimumShareOfExistingCities:P0} of the {existingCount} already in dbo.City; import skipped.");
+        }
+    }
+
+    internal static void ConfirmAdmin1Count(IReadOnlyDictionary<string, string> admin1Names)
+    {
+        if (admin1Names.Count < MinimumAdmin1Count)
+        {
+            throw new InvalidOperationException(
+                $"GeoNames admin1CodesASCII.txt held only {admin1Names.Count} regions (expected at least {MinimumAdmin1Count}); import skipped.");
         }
     }
 

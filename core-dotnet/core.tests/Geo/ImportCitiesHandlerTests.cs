@@ -127,6 +127,47 @@ public class ImportCitiesHandlerTests
     public void ConfirmCityCount_AcceptsMoreThanTheMinimum() =>
         ImportCitiesHandler.ConfirmCityCount(ManyCities(ImportCitiesHandler.MinimumCityCount + 1));
 
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(120_000, 0)]
+    [InlineData(225_000, 230_000)]
+    [InlineData(207_000, 230_000)]
+    public void ConfirmShareOfExisting_AcceptsAFirstLoadOrANearlyCompleteExport(int incoming, int existing) =>
+        ImportCitiesHandler.ConfirmShareOfExisting(incoming, existing);
+
+    [Fact]
+    public void ConfirmShareOfExisting_RejectsALargeButPartialExport()
+    {
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            ImportCitiesHandler.ConfirmShareOfExisting(120_000, 225_000));
+
+        Assert.Contains("already in dbo.City", ex.Message);
+    }
+
+    [Fact]
+    public void ConfirmAdmin1Count_RejectsAnEmptyOrTruncatedList()
+    {
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            ImportCitiesHandler.ConfirmAdmin1Count(ImportCitiesHandler.ParseAdmin1Names(new StringReader(Admin1Text))));
+
+        Assert.Contains("held only 3 regions", ex.Message);
+    }
+
+    [Fact]
+    public async Task Merge_PartialExport_ThrowsWithoutTouchingTheDatabase()
+    {
+        using var db = CreateDb();
+        db.City.AddRange(NewCity(Dto(NashvilleLine)), NewCity(Dto(AndorraLine)), NewCity(Dto(ManhattanLine)));
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var handler = CreateHandler(db, new GeoNamesHandler([], string.Empty));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            handler.Merge([Dto(NashvilleLine)], new Dictionary<string, string>(), CancellationToken.None));
+
+        Assert.Equal(3, await db.City.CountAsync());
+    }
+
     [Fact]
     public async Task Handle_TooFewCities_ThrowsWithoutTouchingTheDatabase()
     {

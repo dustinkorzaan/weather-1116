@@ -112,21 +112,23 @@ public class CitySqlServerTests : IAsyncLifetime
     }
 
     [SqlServerFact]
-    public async Task Merge_UpdatesChangedRowsAndBulkDeletesMissingOnes()
+    public async Task Merge_InsertsUpdatesAndBulkDeletesMissingRows()
     {
+        // London drops out and Knoxville arrives, so the export still keeps over 90% of the table.
         var incoming = Cities.Where(city => city.Name != "London").ToList();
         incoming[0] = City(4644585, "Nashville", "TN", "PPLA", 36.16589, -86.78444, 720000);
+        incoming.Add(City(4634946, "Knoxville", "TN", "PPLA2", 35.96064, -83.92074, 190740));
 
         await using var db = CreateDb();
         var response = await CreateImportHandler(db).Merge(incoming, Admin1Names, CancellationToken.None);
 
-        Assert.Equal(0, response.Inserted);
+        Assert.Equal(1, response.Inserted);
         Assert.Equal(1, response.Updated);
         Assert.Equal(1, response.Deleted);
         Assert.Equal(5, response.Unchanged);
 
         await using var verify = CreateDb();
-        Assert.Equal(6, await verify.City.CountAsync());
+        Assert.Equal(7, await verify.City.CountAsync());
         Assert.Equal(720000, (await verify.City.SingleAsync(city => city.GeonameId == 4644585)).Population);
         Assert.False(await verify.City.AnyAsync(city => city.GeonameId == 2643743));
     }
