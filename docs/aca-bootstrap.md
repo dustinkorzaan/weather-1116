@@ -60,6 +60,11 @@ rely on this in production, not just during the demo:
   that day's recurring jobs are silently skipped, not just delayed. Keep `worker` at
   `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
   `/About`) if the recurring jobs need to actually run unattended.
+  Once a job *is* running, `ProcessingJobKeepAlive` (worker) pings the
+  replica's own `/Wake` through ingress (`CONTAINER_APP_HOSTNAME`) every 5
+  minutes while Hangfire reports any job processing, so a long job such as
+  `import-cities` is not killed by scale-in 30 minutes after the last request
+  (which surfaces as `SqlException: Operation cancelled by user`).
 - **`mcp-srv-func-app` cold starts used to compound with `AboutClient`'s 60s
   HTTP timeout** (`api-dotnet/api/Program.cs`). API's own `/About` still fans
   out server-side to worker and both MCP hosts via `Task.WhenAll`, but that
