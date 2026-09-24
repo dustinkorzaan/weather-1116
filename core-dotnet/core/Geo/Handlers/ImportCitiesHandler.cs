@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO.Compression;
 using System.Text;
+using Core.Data;
 using Core.Geo.Events;
 using Core.Geo.Models;
 using Core.Geo.Services;
@@ -8,6 +9,7 @@ using Core.Hangfire;
 using Core.Http;
 using CQMediator;
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +20,11 @@ namespace Core.Geo.Handlers;
 /// (state/province) names and stages them in blob storage without writing a city itself. admin1 goes
 /// up as it is; the zip is streamed through a temp file one row at a time, a repeated GeonameId is
 /// skipped, and every <see cref="BatchSize"/> unique rows go up as their own file of raw lines. The
-/// imported GeonameIds go up as one more file. Only after every upload succeeds does it enqueue one
+/// imported GeonameIds go up as one more file. The export is then checked (more than
+/// <see cref="MinimumCityCount"/> cities, at least <see cref="MinimumShareOfExistingCities"/> of
+/// dbo.Cities, at least <see cref="MinimumAdmin1Count"/> regions, no repeated GeonameId); a failed check
+/// throws before anything is enqueued, so nothing is written or deleted. Only after every upload and
+/// check succeeds does it enqueue one
 /// <see cref="ImportCitiesUpsertEvent"/> per batch file and then one <see cref="ImportCitiesDeleteEvent"/>,
 /// all on <see cref="ImportQueue"/>, so each Hangfire job carries only blob names.
 /// </summary>
@@ -33,6 +39,18 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     internal const string ImportQueue = "batch-single";
     internal const int BatchSize = 1_000;
 
+    // A truncated or empty download must never reach the delete job, so the import only runs above this.
+    internal const int MinimumCityCount = 100_000;
+
+    // A download that is large but partial (or partly unparsable) would still pass the absolute floor
+    // above and then delete every city it is missing, so once dbo.Cities holds data the export must
+    // also keep at least this share of the current rows.
+    internal const double MinimumShareOfExistingCities = 0.9;
+
+    // admin1CodesASCII.txt lists about 3,900 regions; an empty or broken body would otherwise blank
+    // every city's Admin1Name (GetCities' region).
+    internal const int MinimumAdmin1Count = 1_000;
+
     // cities500.txt is tab-delimited with 19 columns and no header row.
     private const int ColumnCount = 19;
     private const int GeonameIdColumn = 0;
@@ -45,6 +63,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     private const int PopulationColumn = 14;
     private const int TimezoneColumn = 17;
 
+    private readonly WX1116DbContext _db;
     private readonly TransientRetryHelper _retry;
     private readonly IHttpClientFactory _clientFactory;
     private readonly IBackgroundJobClient? _backgroundJobs;
@@ -55,12 +74,14 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
     // host, and hosts without Hangfire or blob settings (the MCP servers, api, mvc) validate their DI
     // container on startup. Only the worker, which has both, ever runs this handler.
     public ImportCitiesHandler(
+        WX1116DbContext db,
         TransientRetryHelper retry,
         IHttpClientFactory clientFactory,
         ILogger<ImportCitiesHandler> logger,
         IBackgroundJobClient? backgroundJobs = null,
         ICityImportBlobStore? blobs = null)
     {
+        _db = db;
         _retry = retry;
         _clientFactory = clientFactory;
         _backgroundJobs = backgroundJobs;
@@ -84,6 +105,7 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
             using var httpResponse = await Get(client, Admin1CodesUrl, ct);
             return await httpResponse.Content.ReadAsStringAsync(ct);
         }, cancellationToken);
+        ConfirmAdmin1Count(ParseAdmin1Names(new StringReader(admin1Text)));
         var admin1Blob = NewBlobName("admin1codes");
         await blobs.UploadTextAsync(admin1Blob, admin1Text, cancellationToken);
 
@@ -97,10 +119,11 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         var batchCount = 0;
         foreach (var (line, city) in ReadCities(archive))
         {
-            // A GeonameId already seen is skipped, so no batch ever inserts the same city twice.
+            // A repeated GeonameId fails the import: the second row may be the one that changed.
             if (!importedIds.Add(city.GeonameId))
             {
-                continue;
+                throw new InvalidOperationException(
+                    $"GeoNames cities500 export lists geonameid {city.GeonameId} more than once; import skipped.");
             }
 
             batch.Append(line).Append('\n');
@@ -119,7 +142,10 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
         var geonameIdsBlob = NewBlobName("geonameids");
         await blobs.UploadTextAsync(geonameIdsBlob, string.Join('\n', importedIds), cancellationToken);
 
-        // Nothing is enqueued until every file is up, so a failed download or upload leaves no jobs behind.
+        ConfirmCityCount(importedIds.Count, await _db.Cities.CountAsync(cancellationToken), CityFloor);
+
+        // Nothing is enqueued until every file is up and the export passed its checks, so a failed
+        // download, upload or check leaves no jobs behind (the 7-day temp lifecycle rule clears the files).
         foreach (var citiesBlob in citiesBlobs)
         {
             backgroundJobs.EnqueueCQMediatorEvent(
@@ -136,6 +162,38 @@ public class ImportCitiesHandler : IRequestHandler<ImportCitiesEvent, ImportCiti
             response.Enqueued);
 
         return response;
+    }
+
+    /// <summary>City-count floor for an import; tests lower it to exercise a run on a few rows.</summary>
+    internal int CityFloor { get; init; } = MinimumCityCount;
+
+    /// <summary>
+    /// Rejects an export of <paramref name="incomingCount"/> cities that is at or under
+    /// <paramref name="floor"/>, or under <see cref="MinimumShareOfExistingCities"/> of the
+    /// <paramref name="existingCount"/> rows already in dbo.Cities.
+    /// </summary>
+    internal static void ConfirmCityCount(int incomingCount, int existingCount, int floor = MinimumCityCount)
+    {
+        if (incomingCount <= floor)
+        {
+            throw new InvalidOperationException(
+                $"GeoNames cities500 export held only {incomingCount} cities (expected more than {floor}); import skipped.");
+        }
+
+        if (incomingCount < existingCount * MinimumShareOfExistingCities)
+        {
+            throw new InvalidOperationException(
+                $"GeoNames cities500 export held {incomingCount} cities, under {MinimumShareOfExistingCities:P0} of the {existingCount} already in dbo.Cities; import skipped.");
+        }
+    }
+
+    internal static void ConfirmAdmin1Count(IReadOnlyDictionary<string, string> admin1Names)
+    {
+        if (admin1Names.Count < MinimumAdmin1Count)
+        {
+            throw new InvalidOperationException(
+                $"GeoNames admin1CodesASCII.txt held only {admin1Names.Count} regions (expected at least {MinimumAdmin1Count}); import skipped.");
+        }
     }
 
     internal static ICityImportBlobStore RequireBlobs(ICityImportBlobStore? blobs) =>
