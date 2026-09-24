@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Sockets;
 using Core.Http;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -87,6 +88,60 @@ public class TransientRetryHelperTests
 
         Assert.Equal(1, attempts);
     }
+
+    [Theory]
+    [InlineData(HttpStatusCode.BadRequest)]
+    [InlineData(HttpStatusCode.Forbidden)]
+    [InlineData(HttpStatusCode.NotFound)]
+    public async Task Execute_DoesNotRetryPermanentHttpStatus(HttpStatusCode statusCode)
+    {
+        var sut = CreateSut();
+        var attempts = 0;
+
+        var ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sut.Execute<string>(
+                _ =>
+                {
+                    attempts++;
+                    throw new HttpRequestException("rejected", null, statusCode);
+                },
+                CancellationToken.None));
+
+        Assert.Equal(statusCode, ex.StatusCode);
+        Assert.Equal(1, attempts);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.TooManyRequests)]
+    [InlineData(HttpStatusCode.ServiceUnavailable)]
+    public async Task Execute_RetriesThrottlingAndServerErrorStatus(HttpStatusCode statusCode)
+    {
+        var sut = CreateSut();
+        var attempts = 0;
+
+        var result = await sut.Execute(
+            _ =>
+            {
+                attempts++;
+                return attempts == 1
+                    ? throw new HttpRequestException("try again", null, statusCode)
+                    : Task.FromResult("ok");
+            },
+            CancellationToken.None);
+
+        Assert.Equal("ok", result);
+        Assert.Equal(2, attempts);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Forbidden, true)]
+    [InlineData(HttpStatusCode.BadRequest, true)]
+    [InlineData(HttpStatusCode.NotFound, true)]
+    [InlineData(HttpStatusCode.TooManyRequests, false)]
+    [InlineData(HttpStatusCode.InternalServerError, false)]
+    [InlineData(HttpStatusCode.ServiceUnavailable, false)]
+    public void IsPermanentFailure_ClassifiesStatusCodes(HttpStatusCode statusCode, bool expected) =>
+        Assert.Equal(expected, TransientRetryHelper.IsPermanentFailure(statusCode));
 
     [Fact]
     public async Task Execute_DoesNotRetryWhenCanceled()

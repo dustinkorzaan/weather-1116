@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Net;
 using System.Text.Json;
 using Core.Caching;
 using Core.Geo.Events;
@@ -85,7 +84,7 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
             var page = await _retry.Execute(async ct =>
             {
                 using var httpResponse = await client.GetAsync(url, ct);
-                if (IsPermanentFailure(httpResponse.StatusCode))
+                if (TransientRetryHelper.IsPermanentFailure(httpResponse.StatusCode))
                 {
                     // Not an HttpRequestException, so TransientRetryHelper does not retry it.
                     throw new InvalidOperationException($"GeoDB rejected the request with HTTP {(int)httpResponse.StatusCode}.");
@@ -123,9 +122,6 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
         MinPopulation = request.MinPopulation,
         MaxCities = request.MaxCities,
     };
-
-    internal static bool IsPermanentFailure(HttpStatusCode statusCode) =>
-        (int)statusCode is >= 400 and < 500 && statusCode != HttpStatusCode.TooManyRequests;
 
     internal static NonAICity ToCity(GeoDbCity city) => new()
     {

@@ -134,14 +134,6 @@ public class GetCitiesHandlerTests
         Assert.Single(http.RequestedUrls);
     }
 
-    [Theory]
-    [InlineData(HttpStatusCode.Forbidden, true)]
-    [InlineData(HttpStatusCode.BadRequest, true)]
-    [InlineData(HttpStatusCode.TooManyRequests, false)]
-    [InlineData(HttpStatusCode.ServiceUnavailable, false)]
-    public void IsPermanentFailure_ClassifiesStatusCodes(HttpStatusCode statusCode, bool expected) =>
-        Assert.Equal(expected, GetCitiesHandler.IsPermanentFailure(statusCode));
-
     [Fact]
     public async Task Handle_PagesTenAtATimeUntilMaxCitiesIsReached()
     {
