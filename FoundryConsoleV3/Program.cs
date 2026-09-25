@@ -181,7 +181,7 @@ internal class Program
 
 		var getCitiesTool = ResponseTool.CreateFunctionTool(
 			functionName: "GetCities",
-			functionDescription: "Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. radiusKm defaults to 161 (range 1-1000), minPopulation to 0, and maxCities to 25 (range 0-100); out-of-range values are adjusted, not rejected. The result reports the radius actually used; country is the two-letter ISO country code (e.g. US).",
+			functionDescription: "Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. radiusKm defaults to 161 (range 1-1000), minPopulation to 0, and maxCities to 25 (range 1-100); out-of-range values are adjusted, not rejected. The result reports the radius actually used; country is the two-letter ISO country code (e.g. US).",
 			functionParameters: BinaryData.FromBytes(Encoding.UTF8.GetBytes("""
 			{
 			  "type": "object",
@@ -204,7 +204,7 @@ internal class Program
 			    },
 			    "maxCities": {
 			      "type": ["integer", "null"],
-			      "description": "Maximum number of cities to return (0-100, default 25). Null uses the default."
+			      "description": "Maximum number of cities to return (1-100, default 25). Null uses the default."
 			    }
 			  },
 			  "required": ["latitude", "longitude", "radiusKm", "minPopulation", "maxCities"],

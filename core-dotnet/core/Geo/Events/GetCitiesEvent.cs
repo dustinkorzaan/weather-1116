@@ -14,7 +14,7 @@ public class GetCitiesEvent : IRequest<NonAICitiesResponse>
     public const double DefaultRadiusKm = 161;
     public const double MaxRadiusKm = 1000;
     public const long DefaultMinPopulation = 0;
-    public const int MinMaxCities = 0;
+    public const int MinMaxCities = 1;
     public const int DefaultMaxCities = 25;
     public const int MaxMaxCities = 100;
 

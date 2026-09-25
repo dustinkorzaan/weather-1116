@@ -205,7 +205,7 @@ now serves `GetCities(latitude, longitude, radiusKm, minPopulation, maxCities)` 
 Core's `GetCitiesEvent`/`GetCitiesHandler`: the largest cities (by population) within
 `radiusKm` (default 161, reset into 1–1000)
 of a coordinate with at least `minPopulation` people (default 0), at most `maxCities` of
-them (default 25, reset into 0–100). All three tools also run in-process through Core on
+them (default 25, reset into 1–100). All three tools also run in-process through Core on
 the local-loop paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, FoundryConsoleV3).
 
 `GetCitiesHandler` answers from `dbo.Cities` with a NetTopologySuite geography query

@@ -39,11 +39,6 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
         request.MinPopulation = GetCitiesEvent.NormalizeMinPopulation(request.MinPopulation);
         request.MaxCities = GetCitiesEvent.NormalizeMaxCities(request.MaxCities);
 
-        if (request.MaxCities == 0)
-        {
-            return NewResponse(request);
-        }
-
         var cacheKey = JsonSerializer.Serialize(new { Handler = nameof(GetCitiesHandler), Request = request });
         return await _cache.GetOrCreate(
             cacheKey: cacheKey,

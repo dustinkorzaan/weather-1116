@@ -15,7 +15,7 @@ public class GetCitiesTool(IMediator mediator)
 	public async Task<NonAICitiesResponse> GetCities(
 		[McpToolTrigger(
 			"GetCities",
-			"Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. radiusKm defaults to 161 (range 1-1000), minPopulation to 0, and maxCities to 25 (range 0-100); out-of-range values are adjusted, not rejected. The result reports the radius actually used; country is the two-letter ISO country code (e.g. US).")]
+			"Find the largest cities (by population) within a radius of a latitude and longitude. Returns each city's name, region, country, coordinates, distance in km, and population, largest first. radiusKm defaults to 161 (range 1-1000), minPopulation to 0, and maxCities to 25 (range 1-100); out-of-range values are adjusted, not rejected. The result reports the radius actually used; country is the two-letter ISO country code (e.g. US).")]
 		ToolInvocationContext context,
 		[McpToolProperty(
 			"latitude",
@@ -39,7 +39,7 @@ public class GetCitiesTool(IMediator mediator)
 		long? minPopulation,
 		[McpToolProperty(
 			"maxCities",
-			"Maximum number of cities to return (0-100, default 25).",
+			"Maximum number of cities to return (1-100, default 25).",
 			false)]
 		int? maxCities)
 	{

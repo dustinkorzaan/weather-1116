@@ -1,14 +1,9 @@
 using System.Text.Json;
-using Core.Caching;
-using Core.Data;
 using Core.Geo.Events;
 using Core.Geo.Handlers;
 using Core.Geo.Models;
 using Core.Tools;
 using CQMediator;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging.Abstractions;
 using OpenAI.Responses;
 
 namespace Core.Tests.Geo;
@@ -26,7 +21,8 @@ public class GetCitiesHandlerTests
         Assert.Equal(expected, GetCitiesEvent.NormalizeRadiusKm(input));
 
     [Theory]
-    [InlineData(-5, 0)]
+    [InlineData(-5, GetCitiesEvent.MinMaxCities)]
+    [InlineData(0, GetCitiesEvent.MinMaxCities)]
     [InlineData(500, GetCitiesEvent.MaxMaxCities)]
     [InlineData(40, 40)]
     public void NormalizeMaxCities_ResetsIntoRange(int input, int expected) =>
@@ -48,37 +44,6 @@ public class GetCitiesHandlerTests
     [InlineData(50000, 50000)]
     public void NormalizeMinPopulation_ResetsNegativeToZero(long input, long expected) =>
         Assert.Equal(expected, GetCitiesEvent.NormalizeMinPopulation(input));
-
-    [Fact]
-    public async Task Handle_MaxCitiesZero_ReturnsEmptyWithoutQueryingTheDatabase()
-    {
-        using var db = CreateDb();
-        var handler = CreateHandler(db);
-
-        var response = await handler.Handle(
-            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, MaxCities = -3 },
-            CancellationToken.None);
-
-        Assert.Empty(response.Cities);
-        Assert.Equal(0, response.MaxCities);
-    }
-
-    [Theory]
-    [InlineData(GetCitiesEvent.DefaultRadiusKm, GetCitiesEvent.DefaultRadiusKm)]
-    [InlineData(500, 500)]
-    [InlineData(20000, GetCitiesEvent.MaxRadiusKm)]
-    public async Task Handle_ReportsNormalizedRadius(double requested, double expected)
-    {
-        using var db = CreateDb();
-        var handler = CreateHandler(db);
-
-        var response = await handler.Handle(
-            new GetCitiesEvent { Latitude = 36.16, Longitude = -86.78, RadiusKm = requested, MinPopulation = -10, MaxCities = 0 },
-            CancellationToken.None);
-
-        Assert.Equal(expected, response.RadiusKm);
-        Assert.Equal(0, response.MinPopulation);
-    }
 
     [Fact]
     public void ExcludedFeatureCodes_AreCitySectionsAndHistoricalPlaces() =>
@@ -114,15 +79,6 @@ public class GetCitiesHandlerTests
         using var json = JsonDocument.Parse(output);
         Assert.Contains("City database is unavailable", json.RootElement.GetProperty("error").GetString());
     }
-
-    private static WX1116DbContext CreateDb() =>
-        new(new DbContextOptionsBuilder<WX1116DbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
-
-    private static GetCitiesHandler CreateHandler(WX1116DbContext db) =>
-        new(
-            new CacheHelper(new MemoryCache(new MemoryCacheOptions())),
-            db,
-            NullLogger<GetCitiesHandler>.Instance);
 
     private sealed class ThrowingMediator : IMediator
     {
