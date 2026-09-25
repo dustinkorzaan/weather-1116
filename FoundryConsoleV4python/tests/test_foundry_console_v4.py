@@ -61,6 +61,7 @@ def test_get_weather_with_mcp_tools_single_call(mcp_keys, monkeypatch, capsys):
 
     assert len(calls) == 1
     assert [item["role"] for item in calls[0]["input"]] == ["system", "user"]
+    assert all(item["type"] == "message" for item in calls[0]["input"])
     assert len(calls[0]["tools"]) == 4
     assert calls[0]["text"]["format"]["strict"] is True
     out = capsys.readouterr().out

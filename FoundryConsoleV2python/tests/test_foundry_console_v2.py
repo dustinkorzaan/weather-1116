@@ -100,6 +100,7 @@ def test_json_in_json_out_sends_strict_schema(monkeypatch):
 
     assert len(calls) == 1
     assert calls[0]["model"] == app.DEPLOYMENT_NAME
+    assert calls[0]["input"] == [{"type": "message", "role": "user", "content": calls[0]["input"][0]["content"]}]
     assert calls[0]["text"]["format"]["strict"] is True
     assert calls[0]["text"]["format"]["schema"] == app.AI_OUTPUT_SCHEMA
 

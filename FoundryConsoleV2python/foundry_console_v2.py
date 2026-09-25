@@ -83,7 +83,7 @@ def get_weather_will_fail(location: str) -> None:
         response = create_client().responses.create(
             model=DEPLOYMENT_NAME,
             instructions=system_prompt,
-            input=[{"role": "user", "content": user_prompt}],
+            input=[message_item("user", user_prompt)],
         )
         print("\nResponse:")
         print(response.output_text)
@@ -112,7 +112,7 @@ def get_weather_make_up_something(location: str) -> None:
         response = create_client().responses.create(
             model=DEPLOYMENT_NAME,
             instructions=system_prompt,
-            input=[{"role": "user", "content": user_prompt}],
+            input=[message_item("user", user_prompt)],
         )
         print("\nResponse:")
         print(response.output_text)
@@ -149,7 +149,7 @@ Describe today's current weather in {location}?"""
         response = create_client().responses.create(
             model=DEPLOYMENT_NAME,
             instructions=system_prompt,
-            input=[{"role": "user", "content": user_prompt}],
+            input=[message_item("user", user_prompt)],
         )
         print("\nResponse:")
         print(response.output_text)
@@ -198,7 +198,7 @@ Use {location} as the location context."""
         response = create_client().responses.create(
             model=DEPLOYMENT_NAME,
             instructions=system_prompt,
-            input=[{"role": "user", "content": user_prompt}],
+            input=[message_item("user", user_prompt)],
             text=json_schema_text_format(),
         )
         ai_weather = parse_ai_weather(response.output_text)
@@ -228,6 +228,12 @@ def get_api_key() -> str:
     if not api_key:
         raise RuntimeError("API key not found in environment variables.")
     return api_key
+
+
+def message_item(role: str, text: str) -> dict[str, Any]:
+    """An explicit Responses input message. The Foundry endpoint rejects role-only shorthand
+    items without "type": "message" (400 invalid_value on input[n].type)."""
+    return {"type": "message", "role": role, "content": text}
 
 
 def json_schema_text_format() -> dict[str, Any]:

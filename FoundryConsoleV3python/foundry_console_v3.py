@@ -161,7 +161,7 @@ You only return valid JSON."""
 def run_tool_loop(client: Any, system_prompt: str, user_prompt: str) -> str:
     """Call the model, run any function calls it asks for locally, feed the outputs back,
     and repeat until it answers without calling a tool."""
-    input_items: list[Any] = [{"role": "user", "content": user_prompt}]
+    input_items: list[Any] = [message_item("user", user_prompt)]
 
     while True:
         print("\nCreating response with options...")
@@ -194,6 +194,12 @@ def run_tool_loop(client: Any, system_prompt: str, user_prompt: str) -> str:
             input_items.append(
                 {"type": "function_call_output", "call_id": function_call.call_id, "output": function_output}
             )
+
+
+def message_item(role: str, text: str) -> dict[str, Any]:
+    """An explicit Responses input message. The Foundry endpoint rejects role-only shorthand
+    items without "type": "message" (400 invalid_value on input[n].type)."""
+    return {"type": "message", "role": role, "content": text}
 
 
 def call_tool(name: str, arguments_json: str) -> str:

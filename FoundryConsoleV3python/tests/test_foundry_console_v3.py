@@ -41,7 +41,7 @@ def test_run_tool_loop_runs_calls_then_returns_text(monkeypatch):
     assert calls[0]["tools"] == app.TOOLS
     assert calls[0]["text"]["format"]["strict"] is True
     second_input = calls[1]["input"]
-    assert second_input[0] == {"role": "user", "content": "user"}
+    assert second_input[0] == {"type": "message", "role": "user", "content": "user"}
     assert second_input[1] is function_call
     assert second_input[2]["type"] == "function_call_output"
     assert second_input[2]["call_id"] == "call_1"

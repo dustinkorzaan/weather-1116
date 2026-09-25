@@ -104,8 +104,8 @@ You only return valid JSON."""
         response = client.responses.create(
             model=DEPLOYMENT_NAME,
             input=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
+                message_item("system", system_prompt),
+                message_item("user", user_prompt),
             ],
             tools=mcp_tools,
             text={
@@ -128,6 +128,12 @@ You only return valid JSON."""
         print(f"Request failed: {ex}")
 
     pause()
+
+
+def message_item(role: str, text: str) -> dict[str, Any]:
+    """An explicit Responses input message. The Foundry endpoint rejects role-only shorthand
+    items without "type": "message" (400 invalid_value on input[n].type)."""
+    return {"type": "message", "role": role, "content": text}
 
 
 def build_mcp_tools() -> list[dict[str, Any]]:
