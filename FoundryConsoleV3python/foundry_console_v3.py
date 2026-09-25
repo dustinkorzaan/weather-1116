@@ -9,6 +9,7 @@ or database-backed tools, so this console needs no DB_CONNECTION_STRING.
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urlencode
@@ -31,6 +32,9 @@ OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 USER_AGENT = "Weather-1116/1.0 (https://github.com/dustinkorzaan/weather-1116)"
 
 GEO_MATCH_COUNT = 5
+
+ATTEMPTS = 3
+RETRY_DELAY_SECONDS = 0.5
 
 COMPASS_POINTS = [
     "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
@@ -241,7 +245,11 @@ def parse_ai_weather(content: str | None) -> dict[str, Any] | None:
     ai_weather = json.loads(content)
     if not isinstance(ai_weather, dict):
         return None
-    degrees = normalize_source_degrees(int(ai_weather.get("windDirectionSourceDegrees") or 0))
+    raw_degrees = ai_weather.get("windDirectionSourceDegrees")
+    if isinstance(raw_degrees, bool) or not isinstance(raw_degrees, (int, float)):
+        raise ValueError("windDirectionSourceDegrees must be a number.")
+    # round() is banker's rounding, same as C#'s Math.Round.
+    degrees = normalize_source_degrees(int(round(raw_degrees)))
     ai_weather["windDirectionSourceDegrees"] = degrees
     ai_weather["windDirectionSource"] = degrees_to_compass(degrees)
     return ai_weather
@@ -264,14 +272,26 @@ def degrees_to_compass(degrees: int) -> str:
 
 
 def _get_json(url: str) -> Any:
+    """GET JSON, retrying throttling (429), server errors (5xx), and transport errors a few times
+    with a growing pause; other 4xx fail immediately. Same policy as mcp-srv-python's geo tools."""
     with httpx.Client(
         timeout=30.0,
         headers={"Accept": "application/json", "User-Agent": USER_AGENT},
         follow_redirects=True,
     ) as client:
-        response = client.get(url)
-        response.raise_for_status()
-        return response.json()
+        for attempt in range(ATTEMPTS):
+            last_attempt = attempt == ATTEMPTS - 1
+            try:
+                response = client.get(url)
+            except httpx.TransportError:
+                if last_attempt:
+                    raise
+            else:
+                if not (response.status_code == 429 or response.status_code >= 500) or last_attempt:
+                    response.raise_for_status()
+                    return response.json()
+            time.sleep(RETRY_DELAY_SECONDS * (attempt + 1))
+    raise AssertionError("unreachable")
 
 
 def location_queries(location: str) -> list[str]:
@@ -286,9 +306,19 @@ def location_queries(location: str) -> list[str]:
 
 def get_lat_long(location: str) -> dict[str, Any]:
     """Ranked Open-Meteo geocoding matches for a location name (rank 1 is the best match)."""
+    last_error: Exception | None = None
+    any_answered = False
     for query in location_queries(location):
         params = {"name": query, "count": GEO_MATCH_COUNT, "language": "en", "format": "json"}
-        matches = (_get_json(f"{OPEN_METEO_GEOCODING_URL}?{urlencode(params)}") or {}).get("results") or []
+        try:
+            data = _get_json(f"{OPEN_METEO_GEOCODING_URL}?{urlencode(params)}")
+        except (httpx.HTTPError, ValueError) as ex:
+            # A variant that still fails after its retries doesn't stop the next variant.
+            last_error = ex
+            continue
+
+        any_answered = True
+        matches = (data or {}).get("results") or []
         if matches:
             return {
                 "results": [
@@ -303,6 +333,9 @@ def get_lat_long(location: str) -> dict[str, Any]:
                     for rank, match in enumerate(matches[:GEO_MATCH_COUNT], start=1)
                 ]
             }
+
+    if last_error is not None and not any_answered:
+        raise last_error
     raise ValueError(f"Non-AI: No results found for '{location}'.")
 
 
@@ -324,7 +357,12 @@ def build_current_weather_url(latitude: float, longitude: float) -> str:
 
 
 def get_public_weather_current(latitude: float, longitude: float) -> dict[str, Any]:
-    return _get_json(build_current_weather_url(latitude, longitude))
+    weather_data = _get_json(build_current_weather_url(latitude, longitude))
+    current = weather_data.get("current_weather") if isinstance(weather_data, dict) else None
+    if isinstance(current, dict) and isinstance(current.get("winddirection"), (int, float)):
+        # Core's NonAICurrentWeatherResponse models winddirection as an int; hand the model the same.
+        current["winddirection"] = int(round(current["winddirection"]))
+    return weather_data
 
 
 # ---------------------------------------------------------------------------

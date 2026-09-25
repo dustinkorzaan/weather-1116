@@ -100,7 +100,10 @@ def test_json_in_json_out_sends_strict_schema(monkeypatch):
 
     assert len(calls) == 1
     assert calls[0]["model"] == app.DEPLOYMENT_NAME
-    assert calls[0]["input"] == [{"type": "message", "role": "user", "content": calls[0]["input"][0]["content"]}]
+    [sent] = calls[0]["input"]
+    assert sent["type"] == "message"
+    assert sent["role"] == "user"
+    assert "Use Nashville, TN as the location context." in sent["content"]
     assert calls[0]["text"]["format"]["strict"] is True
     assert calls[0]["text"]["format"]["schema"] == app.AI_OUTPUT_SCHEMA
 
@@ -110,6 +113,76 @@ def test_get_api_key_missing_raises(monkeypatch):
 
     with pytest.raises(RuntimeError, match="API key not found"):
         app.get_api_key()
+
+
+def test_parse_ai_weather_rounds_fractional_degrees():
+    result = app.parse_ai_weather(json.dumps({"windDirectionSourceDegrees": 359.6}))
+
+    assert result["windDirectionSourceDegrees"] == 0
+    assert result["windDirectionSource"] == "N"
+
+
+@pytest.mark.parametrize("payload", [{}, {"windDirectionSourceDegrees": None}, {"windDirectionSourceDegrees": "SW"}])
+def test_parse_ai_weather_missing_degrees_raises(payload):
+    with pytest.raises(ValueError, match="windDirectionSourceDegrees must be a number"):
+        app.parse_ai_weather(json.dumps(payload))
+
+
+def test_get_lat_long_falls_back_after_http_error(monkeypatch):
+    monkeypatch.setattr(app, "RETRY_DELAY_SECONDS", 0)
+    names = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        name = request.url.params["name"]
+        names.append(name)
+        if name == "Nashville":
+            return httpx.Response(200, json={"results": [{"name": "Nashville", "latitude": 36.16, "longitude": -86.78}]})
+        return httpx.Response(503)
+
+    _mock_httpx(monkeypatch, handler)
+
+    result = app.get_lat_long("Nashville, TN")
+
+    assert names == ["Nashville, TN"] * app.ATTEMPTS + ["Nashville"]
+    assert result["name"] == "Nashville"
+
+
+def test_get_lat_long_reraises_when_no_variant_answers(monkeypatch):
+    monkeypatch.setattr(app, "RETRY_DELAY_SECONDS", 0)
+    _mock_httpx(monkeypatch, lambda request: httpx.Response(503))
+
+    with pytest.raises(httpx.HTTPStatusError):
+        app.get_lat_long("Nashville, TN")
+
+
+def test_get_json_retries_transient_then_succeeds(monkeypatch):
+    monkeypatch.setattr(app, "RETRY_DELAY_SECONDS", 0)
+    statuses = iter([503, 429, 200])
+    _mock_httpx(monkeypatch, lambda request: httpx.Response(next(statuses), json={"ok": True}))
+
+    assert app._get_json("https://example.test/") == {"ok": True}
+
+
+def test_get_json_does_not_retry_client_errors(monkeypatch):
+    calls = []
+    _mock_httpx(monkeypatch, lambda request: calls.append(1) or httpx.Response(404))
+
+    with pytest.raises(httpx.HTTPStatusError):
+        app._get_json("https://example.test/")
+    assert len(calls) == 1
+
+
+def test_get_public_weather_current_coerces_wind_direction(monkeypatch):
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.headers["User-Agent"] == app.USER_AGENT
+        return httpx.Response(200, json={"current_weather": {"temperature": 20.5, "winddirection": 224.6}})
+
+    _mock_httpx(monkeypatch, handler)
+
+    result = app.get_public_weather_current(36.16, -86.78)
+
+    assert result["current_weather"]["winddirection"] == 225
+    assert isinstance(result["current_weather"]["winddirection"], int)
 
 
 def _mock_httpx(monkeypatch, handler):

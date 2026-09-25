@@ -72,3 +72,16 @@ def test_get_weather_with_mcp_tools_single_call(mcp_keys, monkeypatch, capsys):
 @pytest.mark.parametrize(("degrees", "expected"), [(0, "N"), (180, "S"), (224, "SW"), (340, "NNW"), (349, "N")])
 def test_degrees_to_compass(degrees, expected):
     assert app.degrees_to_compass(degrees) == expected
+
+
+def test_parse_ai_weather_rounds_fractional_degrees():
+    result = app.parse_ai_weather(json.dumps({"windDirectionSourceDegrees": 359.6}))
+
+    assert result["windDirectionSourceDegrees"] == 0
+    assert result["windDirectionSource"] == "N"
+
+
+@pytest.mark.parametrize("payload", [{}, {"windDirectionSourceDegrees": None}, {"windDirectionSourceDegrees": "SW"}])
+def test_parse_ai_weather_missing_degrees_raises(payload):
+    with pytest.raises(ValueError, match="windDirectionSourceDegrees must be a number"):
+        app.parse_ai_weather(json.dumps(payload))

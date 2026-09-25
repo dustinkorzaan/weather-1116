@@ -177,7 +177,11 @@ def parse_ai_weather(content: str | None) -> dict[str, Any] | None:
     ai_weather = json.loads(content)
     if not isinstance(ai_weather, dict):
         return None
-    degrees = normalize_source_degrees(int(ai_weather.get("windDirectionSourceDegrees") or 0))
+    raw_degrees = ai_weather.get("windDirectionSourceDegrees")
+    if isinstance(raw_degrees, bool) or not isinstance(raw_degrees, (int, float)):
+        raise ValueError("windDirectionSourceDegrees must be a number.")
+    # round() is banker's rounding, same as C#'s Math.Round.
+    degrees = normalize_source_degrees(int(round(raw_degrees)))
     ai_weather["windDirectionSourceDegrees"] = degrees
     ai_weather["windDirectionSource"] = degrees_to_compass(degrees)
     return ai_weather
