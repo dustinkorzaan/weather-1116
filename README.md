@@ -27,6 +27,9 @@ weather progression:
 | V3 | [`Foundry Console V3 In Process Tool Callbacks`](FoundryConsoleV3) | Model-direct: tools handled by local in-process tool loops |
 | V4 | [`Foundry Console V4 MCP`](FoundryConsoleV4) | Model-direct: tools handled by remote MCP servers |
 | V5 | [`Foundry Console V5 Agent`](FoundryConsoleV5) | Hosted Foundry Agent owns the instructions, response schema, and MCP tools; console sends only the user prompt |
+| V2 (Python) | [`FoundryConsoleV2python`](FoundryConsoleV2python) | Python port of V2 (`openai` SDK Responses API) |
+| V3 (Python) | [`FoundryConsoleV3python`](FoundryConsoleV3python) | Python port of V3: local tool loop with `GetLatLong` and `GetPublicWeatherCurrent` only |
+| V4 (Python) | [`FoundryConsoleV4python`](FoundryConsoleV4python) | Python port of V4: tools handled by the same four remote MCP servers |
 
 Visit the [React UI](https://wx.korzaan.com/current-ai-weather) to view Current Weather Wired to V3, V4, and V5.
 

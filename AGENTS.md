@@ -115,6 +115,8 @@ for ordinary implementation work.
   `build-test.yml`).
 - `mcp-srv-python` tests: `pip install -e "./mcp[dev]"` then `python -m pytest mcp.tests`
   from `mcp-srv-python/` (pytest, not a .NET test project).
+- `FoundryConsoleV2python`/`V3python`/`V4python` tests: `pip install -e ".[dev]"` then
+  `python -m pytest -q` from each folder (pytest; Python ports of the C# V2–V4 consoles).
 - `mcp-srv-node` tests: `npm ci`, `npm run typecheck`, then `npm test -- --run` from
   `mcp-srv-node/` (Vitest). It runs TypeScript directly via Node 24 type stripping — no build step.
 - On push to `main`, `build-test-provision-deploy.yml` calls `build-test.yml`,
