@@ -276,6 +276,34 @@ jobs:
         run: python -m pytest -q mcp.tests
         working-directory: mcp-srv-python
 
+  test-foundry-console-python:
+    name: Test Foundry Console Python (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - FoundryConsoleV2python
+          - FoundryConsoleV3python
+          - FoundryConsoleV4python
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install package with dev dependencies
+        run: pip install -e ".[dev]"
+        working-directory: ${{ matrix.project }}
+
+      - name: Run ${{ matrix.project }} tests
+        run: python -m pytest -q
+        working-directory: ${{ matrix.project }}
+
   test-mcp-srv-node:
     name: Test MCP Server on Node
     runs-on: ubuntu-latest
@@ -415,6 +443,7 @@ jobs:
       - test-mcp-srv-app-service
       - test-mcp-srv-func-app
       - test-mcp-srv-python
+      - test-foundry-console-python
       - test-mcp-srv-node
       - build-and-test-react
       - bicep-validate

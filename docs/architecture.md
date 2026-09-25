@@ -59,6 +59,7 @@ not need them.
 | MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | Standalone Python MCP server exposing `GetLatLong` (Open-Meteo geocoding) and `GetLocation` (Nominatim reverse geocoding) directly (no `Core` dependency; results cached in-process for 60 minutes) |
 | MCP Server on Node | [`mcp-srv-node`](../mcp-srv-node) | Standalone Node.js (TypeScript) MCP server exposing `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` directly against Open-Meteo (no `Core` dependency, no caching) |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
+| Foundry Console V2–V4 (Python) | [`FoundryConsoleV2python`](../FoundryConsoleV2python) … [`V4python`](../FoundryConsoleV4python) | Python ports of V2–V4 using the `openai` SDK (no `Core` dependency; V3 ships only the geo and public-weather tools); pytest in CI |
 
 Ports for runnable apps are in [`README.md`](../README.md); worker and console
 auth/env details are in this doc and each project's `.env.example`.
@@ -470,6 +471,7 @@ builds on every push:
 - `Core.csproj`, `WeatherAPI.csproj`, `WeatherBlazor.csproj`, `WeatherMVC.csproj`,
   `WeatherWorkerDotNet.csproj`, `WeatherMcpSrvAppService.csproj`, `WeatherMcpSrvFuncApp.csproj`,
   and the five Foundry console projects (`FoundryConsoleV1ModelDirectLegacy`–`V5Agent`) via `dotnet build`.
+- Python Foundry consoles `FoundryConsoleV2python`–`V4python` via `pip install -e ".[dev]"` and `pytest`.
 - React app in `ui-react` via `npm ci && npm run build`, followed by
   `npm test -- --run` (Vitest).
 - `Core.Tests` unit tests.
@@ -534,6 +536,7 @@ mcp-srv-node/
   mcp/                       Standalone Node.js MCP server (TypeScript, run via Node type stripping)
   mcp.tests/                 Vitest suite
 FoundryConsoleV1…V5/         Foundry learning console demos
+FoundryConsoleV2…V4python/   Python ports of the V2–V4 console demos (pytest suites in tests/)
 docs/                        Documentation (including this file)
 ```
 
