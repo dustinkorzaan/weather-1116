@@ -111,6 +111,24 @@ public class CitySqlServerTests : IAsyncLifetime
     }
 
     [SqlServerFact]
+    public async Task GetCities_ResetsOutOfRangeArgumentsIntoRange()
+    {
+        var response = await GetCities(new GetCitiesEvent
+        {
+            Latitude = 36.16589,
+            Longitude = -86.78444,
+            RadiusKm = 20000,
+            MinPopulation = -10,
+            MaxCities = 0,
+        });
+
+        Assert.Equal(GetCitiesEvent.MaxRadiusKm, response.RadiusKm);
+        Assert.Equal(0, response.MinPopulation);
+        Assert.Equal(GetCitiesEvent.MinMaxCities, response.MaxCities);
+        Assert.Equal(["Nashville"], response.Cities.Select(city => city.Name));
+    }
+
+    [SqlServerFact]
     public async Task Upsert_InsertsUpdatesAndCountsUnchangedRows()
     {
         var incoming = Cities.Where(city => city.Name != "London").ToList();
