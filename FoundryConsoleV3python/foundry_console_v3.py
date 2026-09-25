@@ -1,11 +1,10 @@
 """Python port of FoundryConsoleV3: Responses API with in-process tool callbacks.
 
-The model calls local Python functions (GetLatLong, GetLocation, GetPublicWeatherCurrent,
-GetPublicWeatherForecast, GetPublicWeatherHistory) through a local tool-call loop, then
-returns strict JSON.
+The model calls two local Python functions (GetLatLong, GetPublicWeatherCurrent) through a
+local tool-call loop, then returns strict JSON.
 
-Unlike the C# console, the database-backed tools (GetCities, GetUser, AddUserCity,
-DeleteUserCity) are not ported, so this console needs no DB_CONNECTION_STRING.
+Unlike the C# console, only those two tools are ported: no GetLocation, forecast, history,
+or database-backed tools, so this console needs no DB_CONNECTION_STRING.
 """
 
 import json
@@ -26,9 +25,8 @@ DEPLOYMENT_NAME = "gpt-5.4-mini"
 
 OPEN_METEO_GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search"
 OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
-NOMINATIM_REVERSE_URL = "https://nominatim.openstreetmap.org/reverse"
 
-# Nominatim's usage policy requires an identifying User-Agent; same value as Core's GetLocationHandler.
+# Identifying User-Agent; same value as Core's HTTP handlers.
 USER_AGENT = "Weather-1116/1.0 (https://github.com/dustinkorzaan/weather-1116)"
 
 GEO_MATCH_COUNT = 5
@@ -85,38 +83,9 @@ TOOLS: list[dict[str, Any]] = [
         {"location": {"type": "string", "description": "City and optional region/country, e.g. Nashville, TN"}},
     ),
     _function_tool(
-        "GetLocation",
-        "Turn a latitude and longitude into a simple place label. Prefers City, State in the US (City, State, Country elsewhere), then a feature name, then a formatted coordinate such as 35.51° N, 86.58° W.",
-        _LAT_LONG_PROPERTIES,
-    ),
-    _function_tool(
         "GetPublicWeatherCurrent",
         "Get current public weather conditions for a latitude and longitude.",
         _LAT_LONG_PROPERTIES,
-    ),
-    _function_tool(
-        "GetPublicWeatherForecast",
-        "Get an upcoming public weather forecast for a latitude and longitude. Daily is the next 7 days, Hourly is the next 48 hours, and FifteenMinutes is the next 48 hours in 15-minute steps. Use Daily unless the user asks for hourly or 15-minute detail.",
-        {
-            **_LAT_LONG_PROPERTIES,
-            "resolution": {
-                "type": "string",
-                "enum": ["Daily", "Hourly", "FifteenMinutes"],
-                "description": "Daily (next 7 days), Hourly (next 48 hours), or FifteenMinutes (next 48 hours). Defaults to Daily.",
-            },
-        },
-    ),
-    _function_tool(
-        "GetPublicWeatherHistory",
-        "Get recent past public weather for a latitude and longitude. Daily is the previous 7 days, Hourly is the previous 48 hours. Use Daily unless the user asks for hourly detail.",
-        {
-            **_LAT_LONG_PROPERTIES,
-            "resolution": {
-                "type": "string",
-                "enum": ["Daily", "Hourly"],
-                "description": "Daily (previous 7 days) or Hourly (previous 48 hours). Defaults to Daily.",
-            },
-        },
     ),
 ]
 
@@ -133,19 +102,15 @@ def get_weather_json_in_json_out(location: str) -> None:
     clear_console()
     print(f"""Example 4
  - Ask AI "What is the current weather in {location}?"
- - Responses API with in-process tool callbacks (GetLatLong, GetLocation, GetPublicWeatherCurrent, GetPublicWeatherForecast, GetPublicWeatherHistory)
- - Model can call tools to derive lat/long, label a coordinate, and fetch public weather
+ - Responses API with in-process tool callbacks (GetLatLong, GetPublicWeatherCurrent)
+ - Model can call tools to derive lat/long and fetch current public weather
  - JSON output from AI""")
 
     # AI prep
     system_prompt = """You are a helpful weather assistant.
 Use U.S. customary units only: °F, mph, and " (e.g. 72°F, 8 mph, 1"). Convert from the weather tool's native units (°C, km/h, mm). Do not present C, KPH, or MM in responses.
 You can call the GetLatLong tool to resolve a place name to ranked latitude/longitude
-matches (up to 5; rank 1 is the best match). Call GetLocation to turn latitude/longitude into
-a City, State label (City, State, Country outside the US), then a feature name, then a
-formatted coordinate such as 35.51° N, 86.58° W. Call GetPublicWeatherCurrent
-for conditions now, GetPublicWeatherForecast for upcoming weather, or GetPublicWeatherHistory
-for the recent past.
+matches (up to 5; rank 1 is the best match). Call GetPublicWeatherCurrent for conditions now.
 
 # Tool Protocol
 1. When given a location, immediately call your coordinates resolution tool. It returns ranked matches (rank 1 is best); select the single best-matching place using name, state, and country — normally rank 1, but you may skip rank 1 when a lower rank is clearly correct.
@@ -245,14 +210,7 @@ def call_tool(name: str, arguments_json: str) -> str:
 
 TOOL_HANDLERS: dict[str, Callable[[dict[str, Any]], Any]] = {
     "GetLatLong": lambda args: get_lat_long(args["location"]),
-    "GetLocation": lambda args: get_location(args["latitude"], args["longitude"]),
     "GetPublicWeatherCurrent": lambda args: get_public_weather_current(args["latitude"], args["longitude"]),
-    "GetPublicWeatherForecast": lambda args: get_public_weather_forecast(
-        args["latitude"], args["longitude"], args.get("resolution") or "Daily"
-    ),
-    "GetPublicWeatherHistory": lambda args: get_public_weather_history(
-        args["latitude"], args["longitude"], args.get("resolution") or "Daily"
-    ),
 }
 
 
@@ -294,7 +252,7 @@ def degrees_to_compass(degrees: int) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Geo tools (stand-ins for Core's GetLatLongHandler / GetLocationHandler)
+# GetLatLong (stand-in for Core's GetLatLongHandler)
 # ---------------------------------------------------------------------------
 
 
@@ -341,86 +299,13 @@ def get_lat_long(location: str) -> dict[str, Any]:
     raise ValueError(f"Non-AI: No results found for '{location}'.")
 
 
-def location_from_address(address: dict[str, Any] | None) -> str:
-    """City, State in the US; City, State, Country elsewhere; empty when nothing useful is present."""
-    if not address:
-        return ""
-
-    def clean(value: Any) -> str:
-        return value.strip() if isinstance(value, str) else ""
-
-    city = next(
-        (clean(address.get(key)) for key in ("city", "town", "village", "municipality", "county") if clean(address.get(key))),
-        "",
-    )
-    state = clean(address.get("state"))
-    country = clean(address.get("country"))
-    is_us = clean(address.get("country_code")).casefold() == "us"
-
-    parts = [part for part in (city, state) if part]
-    if not is_us and country:
-        parts.append(country)
-    return ", ".join(parts)
-
-
-def format_coordinates(latitude: float, longitude: float) -> str:
-    """e.g. 35.51° N, 86.58° W"""
-
-    def hemisphere(value: float, positive: str, negative: str) -> str:
-        return f"{abs(value):.2f}° {positive if value >= 0 else negative}"
-
-    return f"{hemisphere(latitude, 'N', 'S')}, {hemisphere(longitude, 'E', 'W')}"
-
-
-def get_location(latitude: float, longitude: float) -> dict[str, Any]:
-    """Reverse-geocode a latitude/longitude: structured address label, then Nominatim's
-    feature name, then a formatted coordinate."""
-    params = {
-        "lat": repr(float(latitude)),
-        "lon": repr(float(longitude)),
-        "format": "jsonv2",
-        "addressdetails": 1,
-        "zoom": 10,
-        "accept-language": "en",
-    }
-    data = _get_json(f"{NOMINATIM_REVERSE_URL}?{urlencode(params)}")
-    data = data if isinstance(data, dict) else {}
-
-    label = location_from_address(data.get("address"))
-    if not label:
-        name = data.get("name")
-        label = name.strip() if isinstance(name, str) and name.strip() else format_coordinates(latitude, longitude)
-    return {"location": label}
-
-
 # ---------------------------------------------------------------------------
-# Weather tools (stand-ins for Core's GetPublicWeather*Handler)
+# GetPublicWeatherCurrent (stand-in for Core's GetPublicWeatherCurrentHandler)
 # ---------------------------------------------------------------------------
-
-# Pin all series to metric units; the model converts to U.S. customary units.
-OPEN_METEO_UNITS = {"temperature_unit": "celsius", "wind_speed_unit": "kmh", "precipitation_unit": "mm"}
-
-SUB_HOURLY_FIELDS = "temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m"
-DAILY_FIELDS = "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant"
-
-SUB_HOURLY_KEYS = ["time", *SUB_HOURLY_FIELDS.split(",")]
-DAILY_KEYS = ["time", *DAILY_FIELDS.split(",")]
-PRECIPITATION_KEYS = ["precipitation", "precipitation_sum"]
-
-FORECAST_QUERY: dict[str, dict[str, str]] = {
-    "Daily": {"daily": DAILY_FIELDS, "forecast_days": "7"},
-    "Hourly": {"hourly": SUB_HOURLY_FIELDS, "forecast_hours": "48"},
-    "FifteenMinutes": {"minutely_15": SUB_HOURLY_FIELDS, "forecast_minutely_15": "192"},
-}
-
-HISTORY_QUERY: dict[str, dict[str, str]] = {
-    "Daily": {"daily": DAILY_FIELDS, "past_days": "7", "forecast_days": "0"},
-    "Hourly": {"hourly": SUB_HOURLY_FIELDS, "past_hours": "48", "forecast_hours": "0"},
-}
 
 
 def build_current_weather_url(latitude: float, longitude: float) -> str:
-    # Current weather stays on GMT and skips precipitation_unit, matching Core's current-weather URL.
+    # Metric units, GMT; the model converts to U.S. customary units. Matches Core's current-weather URL.
     params = {
         "latitude": latitude,
         "longitude": longitude,
@@ -431,50 +316,8 @@ def build_current_weather_url(latitude: float, longitude: float) -> str:
     return f"{OPEN_METEO_FORECAST_URL}?{urlencode(params)}"
 
 
-def build_series_url(latitude: float, longitude: float, resolution_query: dict[str, str]) -> str:
-    # timezone=auto keeps forecast/history daily buckets on local days.
-    params = {"latitude": latitude, "longitude": longitude, **resolution_query, **OPEN_METEO_UNITS, "timezone": "auto"}
-    return f"{OPEN_METEO_FORECAST_URL}?{urlencode(params)}"
-
-
-def normalize_series_block(block: dict[str, Any] | None, keys: list[str]) -> None:
-    """Fill in any null series with an empty list and clamp negative precipitation readings to zero."""
-    if block is None:
-        return
-    for key in keys:
-        if block.get(key) is None:
-            block[key] = []
-    for key in PRECIPITATION_KEYS:
-        values = block.get(key)
-        if isinstance(values, list):
-            block[key] = [max(value, 0) if isinstance(value, (int, float)) else value for value in values]
-
-
-def _resolution_query(queries: dict[str, dict[str, str]], resolution: str, kind: str) -> dict[str, str]:
-    if resolution not in queries:
-        raise ValueError(f"Unsupported {kind} resolution: '{resolution}'")
-    return queries[resolution]
-
-
 def get_public_weather_current(latitude: float, longitude: float) -> dict[str, Any]:
     return _get_json(build_current_weather_url(latitude, longitude))
-
-
-def get_public_weather_forecast(latitude: float, longitude: float, resolution: str = "Daily") -> dict[str, Any]:
-    query = _resolution_query(FORECAST_QUERY, resolution, "forecast")
-    weather_data = _get_json(build_series_url(latitude, longitude, query))
-    normalize_series_block(weather_data.get("hourly"), SUB_HOURLY_KEYS)
-    normalize_series_block(weather_data.get("daily"), DAILY_KEYS)
-    normalize_series_block(weather_data.get("minutely_15"), SUB_HOURLY_KEYS)
-    return weather_data
-
-
-def get_public_weather_history(latitude: float, longitude: float, resolution: str = "Daily") -> dict[str, Any]:
-    query = _resolution_query(HISTORY_QUERY, resolution, "history")
-    weather_data = _get_json(build_series_url(latitude, longitude, query))
-    normalize_series_block(weather_data.get("hourly"), SUB_HOURLY_KEYS)
-    normalize_series_block(weather_data.get("daily"), DAILY_KEYS)
-    return weather_data
 
 
 # ---------------------------------------------------------------------------

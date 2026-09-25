@@ -59,7 +59,7 @@ not need them.
 | MCP Server on Python | [`mcp-srv-python`](../mcp-srv-python) | Standalone Python MCP server exposing `GetLatLong` (Open-Meteo geocoding) and `GetLocation` (Nominatim reverse geocoding) directly (no `Core` dependency; results cached in-process for 60 minutes) |
 | MCP Server on Node | [`mcp-srv-node`](../mcp-srv-node) | Standalone Node.js (TypeScript) MCP server exposing `GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, and `GetPublicWeatherHistory` directly against Open-Meteo (no `Core` dependency, no caching) |
 | Foundry Console V1–V5 | [`FoundryConsoleV1`](../FoundryConsoleV1) … [`V5`](../FoundryConsoleV5) | Local learning demos for Foundry / agent patterns (in `Weather.sln` as `FoundryConsoleV1ModelDirectLegacy`–`V5Agent`; built in CI) |
-| Foundry Console V2–V4 (Python) | [`FoundryConsoleV2python`](../FoundryConsoleV2python) … [`V4python`](../FoundryConsoleV4python) | Python ports of V2–V4 using the `openai` SDK (no `Core` dependency; V3 ships only the geo and public-weather tools); pytest in CI |
+| Foundry Console V2–V4 (Python) | [`FoundryConsoleV2python`](../FoundryConsoleV2python) … [`V4python`](../FoundryConsoleV4python) | Python ports of V2–V4 using the `openai` SDK (no `Core` dependency; V3 ships only `GetLatLong` and `GetPublicWeatherCurrent`); pytest in CI |
 
 Ports for runnable apps are in [`README.md`](../README.md); worker and console
 auth/env details are in this doc and each project's `.env.example`.

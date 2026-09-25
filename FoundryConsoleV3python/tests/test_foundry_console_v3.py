@@ -11,9 +11,7 @@ import foundry_console_v3 as app
 def test_tools_are_strict_and_require_every_property():
     names = [tool["name"] for tool in app.TOOLS]
 
-    assert names == [
-        "GetLatLong", "GetLocation", "GetPublicWeatherCurrent", "GetPublicWeatherForecast", "GetPublicWeatherHistory",
-    ]
+    assert names == ["GetLatLong", "GetPublicWeatherCurrent"]
     assert set(names) == set(app.TOOL_HANDLERS)
     for tool in app.TOOLS:
         assert tool["strict"] is True
@@ -59,20 +57,10 @@ def test_run_tool_loop_without_content_raises():
         app.run_tool_loop(SimpleNamespace(responses=FakeResponses()), "system", "user")
 
 
-def test_call_tool_unknown_raises():
-    with pytest.raises(NotImplementedError, match="Unexpected tool call: GetCities"):
-        app.call_tool("GetCities", "{}")
-
-
-def test_forecast_and_history_default_to_daily(monkeypatch):
-    seen = []
-    monkeypatch.setattr(app, "get_public_weather_forecast", lambda lat, lon, res: seen.append(("forecast", res)) or {})
-    monkeypatch.setattr(app, "get_public_weather_history", lambda lat, lon, res: seen.append(("history", res)) or {})
-
-    app.TOOL_HANDLERS["GetPublicWeatherForecast"]({"latitude": 1, "longitude": 2, "resolution": None})
-    app.TOOL_HANDLERS["GetPublicWeatherHistory"]({"latitude": 1, "longitude": 2, "resolution": "Hourly"})
-
-    assert seen == [("forecast", "Daily"), ("history", "Hourly")]
+@pytest.mark.parametrize("name", ["GetLocation", "GetPublicWeatherForecast", "GetPublicWeatherHistory", "GetCities"])
+def test_call_tool_unknown_raises(name):
+    with pytest.raises(NotImplementedError, match=f"Unexpected tool call: {name}"):
+        app.call_tool(name, "{}")
 
 
 @pytest.mark.parametrize(("degrees", "expected"), [(0, "N"), (180, "S"), (224, "SW"), (340, "NNW"), (349, "N")])
@@ -85,25 +73,6 @@ def test_parse_ai_weather_recomputes_compass():
 
     assert result["windDirectionSourceDegrees"] == 180
     assert result["windDirectionSource"] == "S"
-
-
-def test_location_from_address():
-    assert app.location_from_address({"city": "Nashville", "state": "Tennessee", "country": "United States", "country_code": "us"}) == "Nashville, Tennessee"
-    assert app.location_from_address({"town": "Banff", "state": "Alberta", "country": "Canada", "country_code": "ca"}) == "Banff, Alberta, Canada"
-    assert app.location_from_address(None) == ""
-
-
-def test_format_coordinates():
-    assert app.format_coordinates(35.514, -86.581) == "35.51° N, 86.58° W"
-    assert app.format_coordinates(-33.9, 151.2) == "33.90° S, 151.20° E"
-
-
-def test_get_location_falls_back_to_name_then_coordinates(monkeypatch):
-    payloads = iter([{"name": "Lake Placid"}, {}])
-    monkeypatch.setattr(app, "_get_json", lambda url: next(payloads))
-
-    assert app.get_location(44.28, -73.98) == {"location": "Lake Placid"}
-    assert app.get_location(44.28, -73.98) == {"location": "44.28° N, 73.98° W"}
 
 
 def test_get_lat_long_ranks_matches(monkeypatch):
@@ -123,29 +92,24 @@ def test_get_lat_long_ranks_matches(monkeypatch):
     assert result["results"][1]["state"] == "Georgia"
 
 
-def test_build_series_url_forecast_hourly():
-    url = app.build_series_url(36.16, -86.78, app.FORECAST_QUERY["Hourly"])
-    query = parse_qs(urlparse(url).query)
+def test_build_current_weather_url():
+    query = parse_qs(urlparse(app.build_current_weather_url(36.16, -86.78)).query)
 
-    assert query["hourly"] == [app.SUB_HOURLY_FIELDS]
-    assert query["forecast_hours"] == ["48"]
-    assert query["timezone"] == ["auto"]
-    assert query["precipitation_unit"] == ["mm"]
-
-
-def test_get_public_weather_history_normalizes_series(monkeypatch):
-    monkeypatch.setattr(app, "_get_json", lambda url: {"daily": {"time": ["2026-09-24"], "precipitation_sum": [-0.1], "weather_code": None}})
-
-    result = app.get_public_weather_history(36.16, -86.78, "Daily")
-
-    assert result["daily"]["precipitation_sum"] == [0]
-    assert result["daily"]["weather_code"] == []
-    assert result["daily"]["temperature_2m_max"] == []
+    assert query == {
+        "latitude": ["36.16"],
+        "longitude": ["-86.78"],
+        "current_weather": ["true"],
+        "temperature_unit": ["celsius"],
+        "wind_speed_unit": ["kmh"],
+    }
 
 
-def test_unsupported_resolution_raises():
-    with pytest.raises(ValueError, match="Unsupported history resolution: 'FifteenMinutes'"):
-        app.get_public_weather_history(1, 2, "FifteenMinutes")
+def test_get_public_weather_current_dispatch(monkeypatch):
+    monkeypatch.setattr(app, "get_public_weather_current", lambda lat, lon: {"current_weather": {"latitude": lat, "longitude": lon}})
+
+    output = app.call_tool("GetPublicWeatherCurrent", '{"latitude": 36.16, "longitude": -86.78}')
+
+    assert json.loads(output) == {"current_weather": {"latitude": 36.16, "longitude": -86.78}}
 
 
 def _mock_httpx(monkeypatch, handler):

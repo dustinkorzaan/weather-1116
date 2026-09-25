@@ -2,17 +2,14 @@
 
 Python port of [`FoundryConsoleV3`](../FoundryConsoleV3). It uses the Responses API with **in-process tool callbacks**. The model asks for function calls, this console runs them locally, feeds the outputs back, and loops until the model returns strict JSON.
 
-Tools (ported from Core's handlers and from `mcp-srv-python` and `mcp-srv-node`):
+It exposes two tools, ported from Core's handlers:
 
 | Tool | Source |
 | --- | --- |
 | `GetLatLong` | Open-Meteo geocoding, up to 5 ranked matches |
-| `GetLocation` | Nominatim reverse geocoding |
 | `GetPublicWeatherCurrent` | Open-Meteo `current_weather` |
-| `GetPublicWeatherForecast` | Open-Meteo, `Daily` / `Hourly` / `FifteenMinutes` |
-| `GetPublicWeatherHistory` | Open-Meteo, `Daily` / `Hourly` |
 
-Unlike the C# console, it leaves out the database-backed tools (`GetCities`, `GetUser`, `AddUserCity`, `DeleteUserCity`). As a result, it needs no `DB_CONNECTION_STRING`.
+Unlike the C# console, it leaves out `GetLocation`, the forecast and history tools, and the database-backed tools (`GetCities`, `GetUser`, `AddUserCity`, `DeleteUserCity`). As a result, it needs no `DB_CONNECTION_STRING`.
 
 ## Run
 

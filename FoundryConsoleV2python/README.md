@@ -9,7 +9,7 @@ It runs the same four examples as the C# console:
 3. It passes raw Open-Meteo JSON in and gets a string back.
 4. It passes raw Open-Meteo JSON in and gets strict JSON back (`json_schema`, `strict: true`).
 
-Examples 3 and 4 fetch geocoding and current weather straight from Open-Meteo instead of calling Core's `GetLatLongEvent` and `GetPublicWeatherCurrentEvent`.
+Examples 3 and 4 fetch geocoding and current weather straight from Open-Meteo, the same two lookups as GetLatLong and GetPublicWeatherCurrent, instead of calling Core's `GetLatLongEvent` and `GetPublicWeatherCurrentEvent`. The console fetches that data itself before calling the model, so the model gets no tools.
 
 ## Run
 
