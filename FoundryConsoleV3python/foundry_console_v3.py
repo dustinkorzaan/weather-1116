@@ -9,11 +9,12 @@ or database-backed tools, so this console needs no DB_CONNECTION_STRING.
 
 import json
 import os
+from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urlencode
 
 import httpx
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 from openai import OpenAI
 
 ENDPOINT = "https://wx1116prod2th7yydhws5h6.services.ai.azure.com/api/projects/wx1116-prod-proj/openai/v1"
@@ -91,7 +92,7 @@ TOOLS: list[dict[str, Any]] = [
 
 
 def main() -> None:
-    load_dotenv(find_dotenv(usecwd=True))
+    load_dotenv(Path(__file__).with_name(".env"))
 
     location = "Nashville, TN"
 
