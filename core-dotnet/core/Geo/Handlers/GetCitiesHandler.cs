@@ -39,7 +39,7 @@ public class GetCitiesHandler : IRequestHandler<GetCitiesEvent, NonAICitiesRespo
         request.MinPopulation = GetCitiesEvent.NormalizeMinPopulation(request.MinPopulation);
         request.MaxCities = GetCitiesEvent.NormalizeMaxCities(request.MaxCities);
 
-        if (request.MaxCities == 0)
+        if (request.MaxCities <= 0)
         {
             return NewResponse(request);
         }
