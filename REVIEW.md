@@ -9,7 +9,7 @@ it's marked otherwise.
 
 - [ ] Every behaviour change has a test in that stack's test project (xUnit, Vitest or pytest) that fails without the change.
 - [ ] No test was skipped, disabled, deleted or loosened to get green.
-- [ ] `scripts/verify.sh --all` is green. Only `infra` (Bicep) and Core's `[SqlServerFact]` tests may be SKIPPED locally.
+- [ ] `scripts/verify.sh --all` is green. Only `docker:*` (when there's no Docker daemon) and Core's `[SqlServerFact]` tests may be SKIPPED locally; CI runs both.
 - [ ] Async code awaits its work, flows `CancellationToken`, and disposes `HttpClient` responses and streams. There is no `.Result` or `.Wait()`.
 - [ ] Null, empty and failure paths from external calls (Open-Meteo, Nominatim, GeoNames, Foundry, MCP hosts) are handled with a useful error, not a crash.
 

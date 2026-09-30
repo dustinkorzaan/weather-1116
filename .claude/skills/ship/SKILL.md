@@ -49,6 +49,8 @@ Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every p
    - one `test-author` (also `isolation: "worktree"`).
 
    Give each worker the spec path, its task number, and "commit your work, don't push".
+
+   Before spawning, make sure the spec, the plan and any serialized-task merges are **committed**. Worktrees branch from HEAD (`worktree.baseRef: "head"` in `.claude/settings.json`), so uncommitted work is invisible to them. Put `git branch --show-current` and `git rev-parse HEAD` in every worker prompt, so a worker on a stale base can fast-forward.
 3. When the workers return:
    - `git merge --no-ff <worker-branch>` each into your branch, in plan order.
    - Resolve conflicts yourself if trivial; otherwise send the task back to that implementer.
@@ -82,6 +84,8 @@ Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every p
    - title: imperative, under 70 characters;
    - body: fill `.github/pull_request_template.md` from the spec and the final-reviewer's output (criteria → evidence table, verify table, PR notes).
 3. Subscribe to PR activity, then follow `.claude/skills/steward/SKILL.md` for CI and review events.
+   - Webhooks can arrive late or not at all, so also schedule a `send_later` check-in about 60 minutes out: "Re-check PR #N per the steward skill".
+   - Re-arm it on each check-in until the PR is green with no open threads, or is merged or closed.
 4. Final chat message:
    - PR link
    - one-paragraph summary

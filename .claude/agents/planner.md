@@ -26,7 +26,8 @@ Your only write is appending a `## Plan` section to that spec file. Never edit c
    - any MCP tool name registration
 
    It is also not parallel-safe if it touches the same file as another task.
-4. Order the tasks: serialized tasks first (they are usually foundations such as Core contracts), then the parallel batch.
+4. Assign test ownership. For each affected stack, name **one new acceptance-test file** (for example `api-dotnet/api.tests/<Feature>AcceptanceTests.cs` or `ui-react/src/<feature>.acceptance.test.tsx`). Only `test-author` writes to it. Implementers update existing tests and add unit tests elsewhere, never in those files. List the files under `### Acceptance test files`.
+5. Order the tasks: serialized tasks first (they are usually foundations such as Core contracts), then the parallel batch.
 
 ## Output format (append to the spec)
 
@@ -39,6 +40,9 @@ Your only write is appending a `## Plan` section to that spec file. Never edit c
 
 ### Task notes
 1. <what to change and why, existing code to reuse (path), edge cases>
+
+### Acceptance test files (test-author only)
+- `<path>`: AC1, AC2
 
 ### Verification
 - `scripts/verify.sh --all` plus: <any manual/runtime check that tests can't cover>

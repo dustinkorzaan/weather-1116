@@ -23,6 +23,12 @@ if [[ -n "$agent_type" && "$EXEMPT_AGENTS" == *" $agent_type "* ]]; then
   exit 0
 fi
 
+# An implementer that reports STATUS: blocked has already reverted its partial
+# edits and is handing the problem back to the orchestrator; let it stop.
+if grep -q 'STATUS: blocked' <<< "$(field .last_assistant_message)"; then
+  exit 0
+fi
+
 cwd="$(field .cwd)"
 cd "${cwd:-${CLAUDE_PROJECT_DIR:-.}}" 2>/dev/null || exit 0
 git rev-parse --show-toplevel >/dev/null 2>&1 || exit 0

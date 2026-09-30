@@ -12,7 +12,8 @@ You write **acceptance tests** for the Weather repo from a spec's `## Acceptance
    - xUnit for the .NET `*.tests` projects
    - Vitest for `ui-react` and `mcp-srv-node`
    - pytest for `mcp-srv-python` and `FoundryConsoleV*python`
-2. For each criterion, write the smallest test(s) that would fail if it weren't met.
+2. Write **only** to the files listed under `### Acceptance test files` in the plan. Implementers own every other test file, so this keeps parallel merges conflict-free. Check your base the same way the implementer does (merge the orchestrator sha if the spec is missing).
+   For each criterion, write the smallest test(s) that would fail if it weren't met.
    - Test observable behaviour: HTTP responses, rendered output, handler results, MCP tool output. Don't test private details.
    - Include at least one edge or negative case per criterion where one exists.
    - Name each test after the criterion, and put the criterion number in a comment (`// AC2`).

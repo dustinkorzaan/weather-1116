@@ -26,7 +26,10 @@
       "Bash(git worktree:*)",
       "Bash(git switch:*)",
       "Bash(git checkout -b:*)",
-      "Bash(git push -u origin claude/:*)"
+      "Bash(git push -u origin claude/:*)",
+      "Bash(git push)",
+      "Bash(git push origin claude/:*)",
+      "Bash(npm install --prefix:*)"
     ],
     "deny": [
       "Bash(git push --force:*)",
@@ -70,5 +73,8 @@
         ]
       }
     ]
+  },
+  "worktree": {
+    "baseRef": "head"
   }
 }

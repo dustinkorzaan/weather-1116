@@ -54,6 +54,16 @@ install_python() {
 }
 step "python venv ($VENV)" install_python
 
+# --- Bicep CLI (same binary CI's validate-bicep job downloads) ---------------
+install_bicep() {
+  if command -v bicep >/dev/null 2>&1; then return 0; fi
+  curl -sSfL -o /usr/local/bin/bicep \
+    https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 \
+    && chmod +x /usr/local/bin/bicep \
+    && bicep --version >/dev/null
+}
+step "bicep cli" install_bicep
+
 # --- Restore / install -------------------------------------------------------
 step "dotnet restore" dotnet restore Weather.sln --nologo -v q
 npm_ci() {

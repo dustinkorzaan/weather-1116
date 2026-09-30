@@ -91,6 +91,18 @@ declare -A DOTNET_TESTS=(
   [mcp-srv-func-app]=mcp-srv-func-app/mcp.tests/WeatherMcpSrvFuncApp.Tests.csproj
 )
 
+# Images CI builds in its docker-build job.
+DOCKERFILES=(
+  api-dotnet/api/Dockerfile
+  mvc-dotnet/mvc/Dockerfile
+  ui-blazor/blazor/Dockerfile
+  worker-dotnet/worker/Dockerfile
+  mcp-srv-app-service/mcp/Dockerfile
+  mcp-srv-func-app/mcp/Dockerfile
+  mcp-srv-python/mcp/Dockerfile
+  mcp-srv-node/mcp/Dockerfile
+)
+
 map_path() {
   local f="$1" top="${1%%/*}"
   case "$f" in
@@ -115,6 +127,8 @@ map_path() {
   esac
   case "$f" in
     *.sh) [[ -f "$f" ]] && add "shell:$f" ;;
+    */Dockerfile) [[ -f "$f" ]] && add "docker:$f" ;;
+    .dockerignore) for df in "${DOCKERFILES[@]}"; do add "docker:$df"; done ;;
   esac
   case "$f" in
     *.json) [[ -f "$f" && "$f" != */node_modules/* ]] && add "json:$f" ;;
@@ -129,6 +143,7 @@ if [[ "$mode" == "all" ]]; then
   for d in FoundryConsoleV2python FoundryConsoleV3python FoundryConsoleV4python; do add "py:$d"; done
   add infra
   add gh-scripts
+  for df in "${DOCKERFILES[@]}"; do add "docker:$df"; done
 else
   if [[ "$mode" == "paths" ]]; then
     files="$(printf '%s\n' "${paths[@]}")"
@@ -204,13 +219,13 @@ run_check() {
   local id="$1"
   case "$id" in
     dotnet-all)
-      dotnet build Weather.sln --nologo -v q -clp:ErrorsOnly \
-        && dotnet test Weather.sln --no-build --nologo -v q ;;
+      dotnet build Weather.sln -c Release --nologo -v q -clp:ErrorsOnly \
+        && dotnet test Weather.sln -c Release --no-build --nologo -v q ;;
     dotnet-test:*)
-      dotnet test "${DOTNET_TESTS[${id#dotnet-test:}]}" --nologo -v q ;;
+      dotnet test "${DOTNET_TESTS[${id#dotnet-test:}]}" -c Release --nologo -v q ;;
     dotnet-build:*)
       local dir="${id#dotnet-build:}"
-      dotnet build "$dir"/*.csproj --nologo -v q -clp:ErrorsOnly ;;
+      dotnet build "$dir"/*.csproj -c Release --nologo -v q -clp:ErrorsOnly ;;
     react)
       ensure_node_modules ui-react \
         && npm --prefix ui-react run build \
@@ -232,13 +247,21 @@ run_check() {
       jq empty infra/main.parameters.json || return 1
       if command -v bicep >/dev/null 2>&1; then
         local f
-        for f in infra/main.bicep infra/modules/*.bicep; do
+        # Same file set and command as CI's validate-bicep job.
+        for f in $(find infra -name '*.bicep' | sort); do
           bicep build "$f" --stdout >/dev/null || return 1
         done
       else
         echo "bicep CLI not installed; Bicep build left to CI"
         return 3
       fi ;;
+    docker:*)
+      local df="${id#docker:}"
+      if ! docker info >/dev/null 2>&1; then
+        echo "no Docker daemon; image build for $df left to CI"
+        return 3
+      fi
+      docker build -q -f "$df" . >/dev/null ;;
     gh-scripts)
       bash .github/scripts/deploy-foundry-toolbox.test.sh \
         && bash .github/scripts/deploy-foundry-agent.test.sh ;;
