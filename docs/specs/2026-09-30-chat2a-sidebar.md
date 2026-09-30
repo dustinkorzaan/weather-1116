@@ -45,7 +45,8 @@ Revision 2 (PR #377 feedback, comparing it with PR #376) changes AC1, AC2 and AC
    gets narrower. Below 640px it stacks under the map, and the map keeps part of
    the height. No `position: fixed` overlay covers the map. Clicking the button
    again, the panel's **"Close chat"** button, or pressing Escape hides it
-   (`aria-expanded="false"`). Leaving `/` hides the panel.
+   (`aria-expanded="false"`). Leaving `/` closes the panel; on returning it
+   is closed, and (React/Blazor) the conversation history is still there.
 3. **AC3 (uses Chat2a):** unchanged. Given the sidebar is open, when the user
    submits a message, then exactly one `POST` goes to `/Chat2a/messages` with
    body `{ sessionId, message }`. `sessionId` is `null` on the first send, then
