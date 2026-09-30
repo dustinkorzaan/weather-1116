@@ -1,4 +1,42 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(scripts/verify.sh:*)",
+      "Bash(./scripts/verify.sh:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet format:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npm --prefix:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(~/.venvs/weather/bin/python -m pytest:*)",
+      "Bash(jq:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git fetch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git merge:*)",
+      "Bash(git worktree:*)",
+      "Bash(git switch:*)",
+      "Bash(git checkout -b:*)",
+      "Bash(git push -u origin claude/:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push origin main:*)",
+      "Bash(gh pr merge:*)",
+      "mcp__github__merge_pull_request",
+      "mcp__github__enable_pr_auto_merge"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
@@ -6,6 +44,28 @@
           {
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/stop-verify.sh",
+            "timeout": 900
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/stop-verify.sh",
+            "timeout": 900
           }
         ]
       }

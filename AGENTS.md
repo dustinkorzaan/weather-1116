@@ -16,12 +16,45 @@ on ACA, and standalone Python and Node.js servers with no dependency on `Core`).
 - **Never** run `gh pr merge` or equivalent.
 - The user merges pull requests manually.
 
+## Agent orchestration (Claude Code)
+
+- **One check command:** `scripts/verify.sh`.
+  - It maps changed files (vs `origin/main`) to the same checks CI runs and installs missing deps on demand.
+  - Modes: `--all`, `--list`, and `<path>...`.
+  - Use it instead of per-stack commands. "Done" means it is green.
+- **Pipeline:** `/ship <story>` (`.claude/skills/ship/SKILL.md`) runs:
+  1. interview → spec in `docs/specs/`
+  2. `planner`
+  3. parallel `implementer`s in git worktrees, plus `test-author`
+  4. verify
+  5. `peer-reviewer`
+  6. `final-reviewer`
+  7. draft PR → PR follow-through (`.claude/skills/steward/SKILL.md`)
+
+  Each rework loop runs at most **3** rounds, then stops and reports. Flags: `--hands-off` (no questions), `--quick` (small single-stack change).
+- **Roles** live in `.claude/agents/`. The review checklist is `REVIEW.md`; the spec template is `docs/specs/_template.md`.
+- **Hooks:**
+  - `SessionStart` installs every stack's toolchain and deps.
+  - `Stop`/`SubagentStop` run `scripts/verify.sh` on changed files and refuse to let a writing agent finish while it's red (max 3 blocks). Set `CLAUDE_VERIFY_HOOK=off` in the environment to disable.
+
+### Parallel work
+
+Stack folders are independent and safe to change in parallel. These paths are **serialized**: only one worker edits them at a time, and plans order them first:
+
+- `core-dotnet/`, `cqmediator-dotnet/`, `Weather.sln` (every .NET project depends on them)
+- `infra/`, `.github/`, `.claude/`, `AGENTS.md`, `REVIEW.md`
+- any MCP tool name registration (a tool name lives on exactly one host)
+
+Parity work (see `docs/architecture.md` *Feature Parity Contract*) splits naturally: one task each for React, Blazor and MVC, all in parallel.
+
 ### Toolchain (already provisioned in the VM snapshot)
 
 This subsection describes the pre-provisioned Cursor Cloud VM snapshot only.
 Claude Code Remote sessions provision their own container instead, via
-`.claude/hooks/session-start.sh` (apt-installed .NET SDK); that script is
-unrelated to the snapshot state described below.
+`.claude/hooks/session-start.sh`. That script installs the .NET 10 SDK, Node 24, a
+Python 3.12 venv at `~/.venvs/weather` (for `mcp-srv-python` and
+`FoundryConsoleV*python`), and all npm/NuGet dependencies. It is unrelated to
+the snapshot state described below.
 
 - .NET SDK 10 lives in `~/.dotnet` (installed via the official `dotnet-install.sh`,
   not apt). `~/.bashrc` puts it on `PATH` and sets `DOTNET_ROOT`, so interactive
@@ -109,7 +142,8 @@ for ordinary implementation work.
   `.github/workflows/build-test.yml` builds each `.csproj` in Release +
   `npm ci && npm run build && npm test -- --run` in `ui-react`).
 - React: `npm run build`, and `npm test -- --run` (Vitest).
-- .NET test projects: `core-dotnet/core.tests`, `api-dotnet/api.tests`,
+- Shortcut for all of the below: `scripts/verify.sh --all` (or no args for just what changed).
+- .NET test projects: `cqmediator-dotnet/cqmediator.tests`, `core-dotnet/core.tests`, `api-dotnet/api.tests`,
   `mvc-dotnet/mvc.tests`, `worker-dotnet/worker.tests`, `ui-blazor/blazor.tests`,
   `mcp-srv-app-service/mcp.tests`, and `mcp-srv-func-app/mcp.tests` (see CI
   `build-test.yml`).

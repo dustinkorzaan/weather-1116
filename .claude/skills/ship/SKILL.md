@@ -1,0 +1,100 @@
+---
+name: ship
+description: End-to-end multi-agent delivery pipeline for this repo - interview, spec, plan, parallel implementation in worktrees, acceptance tests, verify, peer review, final review, rework (max 3 rounds each), draft PR, then PR follow-through. Use when the user says /ship, "build/implement/fix <story>", or hands over a feature/bug to do hands-off. Args - the story text; optional flags --hands-off (no questions), --quick (small single-stack change).
+---
+
+# /ship: orchestrated delivery
+
+You are the **orchestrator**. You own the branch, the spec, the merges, the push and the PR. Workers do the focused work.
+Stay in the main thread; never hand the orchestration itself to a subagent.
+
+**Hard limits:**
+- **N = 3** rework rounds per gate (test, peer review, final review).
+- Never merge a PR (see `AGENTS.md`).
+- Never skip or disable a test.
+- Never claim done while `scripts/verify.sh --all` is red.
+
+Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every phase boundary, post a one-line status (for example, "Plan ready: 4 tasks, 3 parallel. Implementing.").
+
+## Flags
+
+- `--hands-off`: no questions. Make reasonable assumptions and record every one in the spec's **Assumptions**.
+- `--quick`: for small, single-stack changes (roughly under 150 lines, no serialized paths). Skip the planner and test-author; you or a single implementer do the work. Verify, one peer review, and the final review still run.
+- No flag: the interview is allowed (phase 1), but ask only what you can't infer.
+
+## Phase 0: Setup
+
+1. `git status`. The tree must be clean, or already contain only this story's work.
+2. Branch: use the session's designated branch if one was given; otherwise stay on the current non-`main` branch; otherwise `git switch -c claude/<slug>`.
+3. `git fetch -q origin main`. If `main` moved, merge it in now (not rebase).
+
+## Phase 1: Interview → spec
+
+1. Read the code the story touches first (Explore agents are fine for broad sweeps). Most questions answer themselves.
+2. If a decision genuinely belongs to the user and changes the design, ask **one round** of up to 4 questions with AskUserQuestion. Put your recommended option first. Skip this under `--hands-off`, or when the story already has testable criteria.
+3. Write `docs/specs/YYYY-MM-DD-<slug>.md` from `docs/specs/_template.md`. Every acceptance criterion must be **testable** (observable input → output). Commit it: `Add spec: <title>`.
+
+## Phase 2: Plan
+
+- Spawn `planner` with the spec path.
+- Read its `## Plan`. Sanity-check the parallel-safe marks against *Parallel work* in `AGENTS.md`.
+- If it lists blocking questions: answer them from the code if you can, otherwise ask the user (unless `--hands-off`, in which case pick one and record the assumption).
+- Commit the plan.
+
+## Phase 3: Execute (parallel)
+
+1. **Serialized tasks** (parallel-safe: no), in dependency order: spawn one `implementer` at a time in the main tree. Wait for each; confirm its commit landed.
+2. **Parallel batch**: in a **single message**, spawn:
+   - one `implementer` per parallel-safe task with `isolation: "worktree"`;
+   - one `test-author` (also `isolation: "worktree"`).
+
+   Give each worker the spec path, its task number, and "commit your work, don't push".
+3. When the workers return:
+   - `git merge --no-ff <worker-branch>` each into your branch, in plan order.
+   - Resolve conflicts yourself if trivial; otherwise send the task back to that implementer.
+   - Workers reporting `STATUS: blocked`: fix the plan or ask the user, then re-spawn.
+
+## Phase 4: Test gate (≤ 3 rounds)
+
+- Run `scripts/verify.sh --all`.
+- On FAIL: send the failure tail to an implementer ("fix verify failures: …"), merge, re-run.
+- Test-author tests that still fail mean the implementation is incomplete; that is an implementer fix, not a test edit. Edit a test only if the test itself contradicts the spec, and log that in the spec.
+- After 3 red rounds: stop, write `## Open issues` in the spec, and report to the user.
+
+## Phase 5: Peer review (≤ 3 rounds)
+
+1. Spawn `peer-reviewer` with the spec path.
+2. For every BLOCKING and SHOULD finding: group the findings by file or area, and send each group to an implementer (in parallel worktrees if the groups don't overlap). Merge, then run verify.
+3. Apply NITs only if trivial. Otherwise list them as follow-ups.
+4. Append the round to the spec's **Review log** (findings → fix commit or reason).
+5. Re-review until the verdict is `clean` or 3 rounds are used. After 3 rounds, remaining BLOCKING items go to `## Open issues` and to the user.
+
+## Phase 6: Final review (≤ 3 rounds)
+
+- Spawn `final-reviewer`.
+- On `REWORK`: send the rework items to implementers, go through the test gate, then run the final review again.
+- After 3 REWORK rounds: stop and report, with no PR marked ready.
+
+## Phase 7: PR and follow-through
+
+1. Make sure the spec's Review log and Open issues are current and committed. Then `git push -u origin <branch>`, retrying on network errors only.
+2. Open a **draft** PR:
+   - title: imperative, under 70 characters;
+   - body: fill `.github/pull_request_template.md` from the spec and the final-reviewer's output (criteria → evidence table, verify table, PR notes).
+3. Subscribe to PR activity, then follow `.claude/skills/steward/SKILL.md` for CI and review events.
+4. Final chat message:
+   - PR link
+   - one-paragraph summary
+   - criteria evidence (short)
+   - assumptions made
+   - open issues and follow-ups
+
+## Worker prompts: keep them self-contained
+
+Workers start cold. Every spawn prompt includes:
+- the spec path;
+- the exact task or findings;
+- which branch or worktree they're on;
+- the expected report shape: the one in their agent file.
+
+Never paste the whole conversation. Point them at files instead.
