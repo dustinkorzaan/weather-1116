@@ -242,17 +242,21 @@ public sealed class PageSplitTests
         Assert.DoesNotContain("@oninput", panelSource);
         Assert.Contains("Type == \"done\"", panelSource);
         Assert.Contains("assistantEntry.Usage = streamEvent.Usage", panelSource);
-        Assert.Contains("chat-usage-chip", panelSource);
-        Assert.Contains("FormatChatUsageChip", panelSource);
         Assert.Contains("RequestScrollToBottom", panelSource);
-        Assert.Contains("data-tool-details", panelSource);
-        Assert.Contains("ToolHoverAttributes", panelSource);
         Assert.Contains("ToolArguments", panelSource);
         Assert.Contains("ToolResult", panelSource);
-        Assert.Contains("SafeGfmMarkdown.ToHtml", panelSource);
-        Assert.Contains("MarkupString", panelSource);
         Assert.Contains("Streaming", panelSource);
         Assert.Contains("chat-window", panelSource);
+        Assert.Contains("<ChatMessageList Entries=", panelSource);
+
+        // Entry rendering is shared with the Chat2a sidebar.
+        var listSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Shared/ChatMessageList.razor"));
+        Assert.Contains("chat-usage-chip", listSource);
+        Assert.Contains("FormatChatUsageChip", listSource);
+        Assert.Contains("data-tool-details", listSource);
+        Assert.Contains("ToolHoverAttributes", listSource);
+        Assert.Contains("SafeGfmMarkdown.ToHtml", listSource);
+        Assert.Contains("MarkupString", listSource);
 
         var markdown = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Markdown/SafeGfmMarkdown.cs"));
         Assert.Contains("UsePipeTables", markdown);
