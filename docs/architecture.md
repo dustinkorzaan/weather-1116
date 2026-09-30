@@ -378,6 +378,22 @@ and layout code instead of sharing it.
 | `/current-ai-weather` | Same top bar, then the Current AI Weather widget — no map |
 | `/chat-clients` | Same top bar, then the chat clients (ChatPanel) — no map |
 
+The top bar's right-hand actions are, in order: **Add location** (plus, only
+on `/`) → **Open chat** → the avatar menu. **Open chat** is on every route and
+toggles the **Chat2a** sidebar (`aria-expanded`, `aria-controls="chat2a-sidebar"`),
+a `complementary` panel labelled "Chat2a" anchored to the right edge below the
+top bar. It overlays the page (the map is not resized) and spans the full
+width below 640px. It closes with its **Close chat** button, the header button,
+or Escape. The sidebar talks to the existing `POST /Chat2a/messages` endpoint
+(Weather API for React/Blazor, MVC's own `Chat2aController`) with its own
+session. After every send completes, including a failed one, the UI re-reads
+`GET /User` and the map re-renders its pins from that response, so cities the
+agent adds or deletes appear or disappear without a reload. React refetches
+through the map-pins context; Blazor and MVC call `weatherMap.refreshCities()`,
+which does nothing to the map on routes without one. The conversation survives
+opening and closing the sidebar, but not a full page load (MVC navigations
+reset it).
+
 The avatar menu is a filled person silhouette (`avatar.svg` in all three UIs)
 and its items are ordered:
 **Home** → divider →
@@ -410,8 +426,11 @@ differs by library; the behavior does not:
 
 - A single fluid layout adapts at breakpoints rather than branching into
   distinct mobile/desktop templates.
-- Primary navigation is a top bar with the logo on the left and the person menu
-  on the right; it stays reachable and never overflows the viewport.
+- Primary navigation is a top bar with the logo on the left and, on the right,
+  Add location (only on `/`) → Open chat → the person menu; it stays reachable
+  and never overflows the viewport.
+- The Chat2a sidebar opened from the top bar is fixed to the right edge below
+  the top bar, overlays the content, and spans the full width below 640px.
 - On `/`, the map fills the remaining viewport height below the top bar at every
   width; on `/hello-world`, `/current-ai-weather`, and `/chat-clients` content is
   centered with a max width on large screens.

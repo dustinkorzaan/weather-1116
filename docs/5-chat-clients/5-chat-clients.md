@@ -130,6 +130,15 @@ flowchart TB
 The chat panel lives on `/chat-clients`. Hello and Current AI Weather are
 separate pages (`/hello-world`, `/current-ai-weather`).
 
+All three UIs also have a **Chat2a sidebar**, opened from the **Open chat**
+button in the top bar on every route. It reuses `POST /Chat2a/messages`
+(same backend as the table above) with body `{ sessionId, message }` and keeps
+its own session, independent of the Chat2a tab on `/chat-clients`. It renders
+`token`, `tool_start`/`tool_end` and `error` events the same way. After every
+send completes, including a failed one, it re-reads `GET /User` so the map on
+`/` re-renders its pins when the agent has called `AddUserCity` or
+`DeleteUserCity`. See *Pages and routes* in [architecture.md](../architecture.md).
+
 ## Core layout
 
 ```
