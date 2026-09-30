@@ -51,6 +51,7 @@ public sealed class LayoutCssTests
                 .Build());
         context.Services.AddSingleton(
             new WeatherApiClient(new HttpClient { BaseAddress = new Uri("http://localhost/") }, NullLogger<WeatherApiClient>.Instance));
+        context.Services.AddSingleton(new ChatApiClient(new HttpClient { BaseAddress = new Uri("http://localhost/") }));
 
         var rendered = context.Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, "<div id=\"child\"></div>"));
 
@@ -124,6 +125,7 @@ public sealed class LayoutCssTests
                 .Build());
         context.Services.AddSingleton(
             new WeatherApiClient(new HttpClient { BaseAddress = new Uri("http://localhost/") }, NullLogger<WeatherApiClient>.Instance));
+        context.Services.AddSingleton(new ChatApiClient(new HttpClient { BaseAddress = new Uri("http://localhost/") }));
 
         var rendered = context.Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, "<div id=\"child\"></div>"));
 
