@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { MessageSquareIcon } from 'lucide-react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -29,28 +29,11 @@ function AppShell() {
   const { pathname } = useLocation();
   const isMapVisible = pathname === '/';
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(0);
-  const headerRef = useRef(null);
   const closeChat = useCallback(() => setIsChatOpen(false), []);
-
-  // The chat sidebar sits below the top bar, whose height changes when it wraps
-  // (on resize, or on navigation since Add location only renders on Home).
-  useLayoutEffect(() => {
-    const header = headerRef.current;
-    const measure = () => setHeaderHeight(header?.offsetHeight ?? 0);
-    measure();
-    if (header && typeof ResizeObserver === 'function') {
-      const observer = new ResizeObserver(measure);
-      observer.observe(header);
-      return () => observer.disconnect();
-    }
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [isMapVisible]);
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
-      <header ref={headerRef} className="border-b border-border bg-background shadow-sm">
+      <header className="border-b border-border bg-background shadow-sm">
         <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link className="flex min-w-0 items-center gap-2 text-inherit no-underline" to="/">
             <img src="/logo.svg" alt="Weather logo" className="h-6 w-6 shrink-0" />
@@ -59,19 +42,21 @@ function AppShell() {
 
           <div className="flex items-center gap-2">
             {isMapVisible && <AddLocationControl />}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              aria-label="Open chat"
-              title="Open chat"
-              aria-expanded={isChatOpen}
-              aria-controls="chat2a-sidebar"
-              onClick={() => setIsChatOpen((current) => !current)}
-              className="size-9 rounded-full border-2 border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <MessageSquareIcon aria-hidden="true" className="size-5" />
-            </Button>
+            {isMapVisible && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Open chat"
+                title="Open chat"
+                aria-expanded={isChatOpen}
+                aria-controls="chat2a-sidebar"
+                onClick={() => setIsChatOpen((current) => !current)}
+                className="size-9 rounded-full border-2 border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <MessageSquareIcon aria-hidden="true" className="size-5" />
+              </Button>
+            )}
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -113,17 +98,21 @@ function AppShell() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col">
-        <Routes>
-          <Route path="/" element={<MapPage />} />
-          <Route path="/hello-world" element={<HelloWorldPage />} />
-          <Route path="/current-ai-weather" element={<CurrentAIWeatherPage />} />
-          <Route path="/chat-clients" element={<ChatClientsPage />} />
-          <Route path="/weather" element={<WeatherModalPage />} />
-        </Routes>
-      </div>
+      {/* On Home the Chat2a sidebar docks beside the map (under it below 640px) so the map
+          shrinks instead of being covered. It stays mounted off Home to keep its history. */}
+      <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <Routes>
+            <Route path="/" element={<MapPage />} />
+            <Route path="/hello-world" element={<HelloWorldPage />} />
+            <Route path="/current-ai-weather" element={<CurrentAIWeatherPage />} />
+            <Route path="/chat-clients" element={<ChatClientsPage />} />
+            <Route path="/weather" element={<WeatherModalPage />} />
+          </Routes>
+        </div>
 
-      <Chat2aSidebar open={isChatOpen} onClose={closeChat} top={headerHeight} />
+        <Chat2aSidebar open={isChatOpen && isMapVisible} onClose={closeChat} />
+      </div>
 
       <AboutDialog open={isAboutOpen} onOpenChange={setIsAboutOpen} />
     </div>

@@ -1,19 +1,18 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { XIcon } from 'lucide-react';
-import SafeGfmMarkdown from '../markdown/SafeGfmMarkdown';
 import { Button } from '@/components/ui/button';
 import { findLastIndex } from '../../utils/array';
-import { formatToolHoverText } from '../../utils/chatToolHover';
 import { streamChatMessage } from '../../utils/chatStream';
 import { useMapPins } from '../../map/mapPinsContext';
-import { messageClasses, ToolChip } from './ChatPanel';
+import { ChatMessage } from './ChatPanel';
 
 const CHAT2A_ENDPOINT = '/Chat2a/messages';
 
-// Right-hand Chat2a panel opened from the header. It stays mounted while hidden so the
-// conversation survives open/close and route changes, and re-reads /User after every
-// send so map pins follow AddUserCity/DeleteUserCity tool calls.
-function Chat2aSidebar({ open, onClose, top = 0 }) {
+// Chat2a panel docked beside the map (stacked under it below 640px), opened from the
+// header. It stays mounted while hidden so the conversation survives open/close and
+// route changes, and re-reads /User after every send so map pins follow
+// AddUserCity/DeleteUserCity tool calls.
+function Chat2aSidebar({ open, onClose }) {
   const { refreshCities } = useMapPins();
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -47,6 +46,7 @@ function Chat2aSidebar({ open, onClose, top = 0 }) {
     if (!message || sending) return;
 
     let assistantText = '';
+    let usage = null;
 
     setInput('');
     setSending(true);
@@ -111,6 +111,11 @@ function Chat2aSidebar({ open, onClose, top = 0 }) {
 
           if (payload.type === 'error' && payload.errorMessage) {
             setHistory((current) => [...current, { role: 'error', content: payload.errorMessage }]);
+            return;
+          }
+
+          if (payload.type === 'done') {
+            usage = payload.usage ?? null;
           }
         },
       });
@@ -120,9 +125,9 @@ function Chat2aSidebar({ open, onClose, top = 0 }) {
           const next = [...current];
           const last = next[next.length - 1];
           if (last?.role === 'assistant' && last.streaming) {
-            next[next.length - 1] = { role: 'assistant', content: assistantText };
+            next[next.length - 1] = { role: 'assistant', content: assistantText, usage };
           } else {
-            next.push({ role: 'assistant', content: assistantText });
+            next.push({ role: 'assistant', content: assistantText, usage });
           }
           return next;
         });
@@ -158,8 +163,7 @@ function Chat2aSidebar({ open, onClose, top = 0 }) {
       role="complementary"
       aria-label="Chat2a"
       hidden={!open}
-      style={{ top }}
-      className="fixed right-0 bottom-0 z-40 flex w-full flex-col border-l border-border bg-background text-foreground shadow-lg sm:w-96"
+      className="flex h-1/2 w-full shrink-0 flex-col border-t border-border bg-background text-foreground sm:h-auto sm:w-96 sm:border-t-0 sm:border-l"
     >
       <div className="flex items-center justify-between border-b border-border px-3 py-2">
         <h2 className="text-base font-semibold">Chat2a</h2>
@@ -181,17 +185,7 @@ function Chat2aSidebar({ open, onClose, top = 0 }) {
         className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3"
       >
         {history.map((entry, index) => (
-          entry.role === 'tool' ? (
-            <ToolChip key={index} content={entry.content} details={formatToolHoverText(entry)} />
-          ) : (
-            <div key={index} className={messageClasses(entry)}>
-              {entry.role === 'assistant' && !entry.streaming ? (
-                <SafeGfmMarkdown>{entry.content}</SafeGfmMarkdown>
-              ) : (
-                entry.content
-              )}
-            </div>
-          )
+          <ChatMessage key={index} entry={entry} />
         ))}
       </div>
 
