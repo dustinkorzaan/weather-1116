@@ -162,6 +162,48 @@ public sealed class Chat2aSidebarTests
         Assert.Contains(".chat-toggle-button", css);
     }
 
+    [Fact]
+    public void SiteCss_RaisesHeaderStackingContextAboveTheSidebar()
+    {
+        var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "site.css"));
+
+        var headerZ = ZIndexOf(css, ".layout.weather-shell > .header.weather-header {");
+        var sidebarZ = ZIndexOf(css, ".chat-sidebar {");
+        Assert.True(headerZ > sidebarZ, $"Header z-index {headerZ} must exceed sidebar z-index {sidebarZ}");
+        Assert.True(headerZ < 1000, "Header must stay below modals (1000)");
+    }
+
+    [Fact]
+    public void Sidebar_FocusesInputWhenOpened_SoEscapeClosesRightAway()
+    {
+        using var context = CreateSidebarContext(new StubChatHandler());
+        var rendered = context.Render<Chat2aSidebar>(parameters => parameters.Add(sidebar => sidebar.Open, false));
+
+        Assert.Empty(context.JSInterop.Invocations.Where(i => i.Identifier == FocusIdentifier));
+
+        rendered.Render(parameters => parameters.Add(sidebar => sidebar.Open, true));
+        Assert.Single(context.JSInterop.Invocations.Where(i => i.Identifier == FocusIdentifier));
+
+        rendered.Render(parameters => parameters.Add(sidebar => sidebar.Open, true));
+        Assert.Single(context.JSInterop.Invocations.Where(i => i.Identifier == FocusIdentifier));
+
+        rendered.Render(parameters => parameters.Add(sidebar => sidebar.Open, false));
+        rendered.Render(parameters => parameters.Add(sidebar => sidebar.Open, true));
+        Assert.Equal(2, context.JSInterop.Invocations.Count(i => i.Identifier == FocusIdentifier));
+    }
+
+    private const string FocusIdentifier = "Blazor._internal.domWrapper.focus";
+
+    private static int ZIndexOf(string css, string selectorBlock)
+    {
+        var start = css.IndexOf(selectorBlock, StringComparison.Ordinal);
+        Assert.True(start >= 0, $"Missing {selectorBlock}");
+        var end = css.IndexOf('}', start);
+        var match = System.Text.RegularExpressions.Regex.Match(css[start..end], @"z-index:\s*(\d+)");
+        Assert.True(match.Success, $"No z-index in {selectorBlock}");
+        return int.Parse(match.Groups[1].Value);
+    }
+
     private static void SendMessage(IRenderedComponent<Chat2aSidebar> rendered, string message)
     {
         rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat2a-sidebar-input").HasAttribute("disabled")));

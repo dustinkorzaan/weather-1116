@@ -117,7 +117,12 @@ body {
     color: var(--wx-fg);
 }
 
+/* Fluent's scoped CSS gives .header z-index 10 inside the flex shell, which makes the header a
+   stacking context capped at 10. Raise it above the fixed Chat2a sidebar (35) so the avatar menu
+   and add-location panel open over the sidebar; modals (1000) stay on top. */
 .layout.weather-shell > .header.weather-header {
+    position: relative;
+    z-index: 36;
     background-color: var(--wx-bg);
     color: var(--wx-fg);
     border-bottom: 1px solid var(--wx-border);
@@ -275,7 +280,8 @@ body {
 }
 
 /* Chat2a sidebar: fixed to the right edge below the 48px header, overlaying the map.
-   Above the map (and its pin cards), below chat tool hover cards (40) and modals (1000). */
+   Above the map (and its pin cards); below the header (36, so its menus and panels open over
+   the sidebar) and modals (1000). */
 .chat-sidebar {
     position: fixed;
     top: 48px;

@@ -57,6 +57,7 @@
     private string _draft = string.Empty;
     private bool _isSending;
     private bool _scrollMessagesPending;
+    private bool _wasOpen;
     private ElementReference _inputElement;
     private ElementReference _messagesElement;
 
@@ -78,6 +79,22 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // Focus the input when the sidebar opens so Escape (handled on the aside) works
+        // straight away, matching React/MVC which close on Escape from anywhere.
+        var justOpened = Open && !_wasOpen;
+        _wasOpen = Open;
+        if (justOpened)
+        {
+            try
+            {
+                await _inputElement.FocusAsync();
+            }
+            catch
+            {
+                // Prerender, tests without JS, or a disconnected circuit skip focusing.
+            }
+        }
+
         if (!_scrollMessagesPending)
         {
             return;
