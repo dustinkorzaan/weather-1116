@@ -139,8 +139,12 @@ public sealed class Chat2aSidebarAcceptanceTests
         var header = rendered.Find(".header-actions");
 
         // Map (page body) first, then the panel.
+        // Document order by index: AngleSharp's CompareDocumentPosition misreports
+        // nodes that have different parents.
+        var orderedIds = rendered.FindAll("[id]").Select(element => element.Id).ToList();
         Assert.True(
-            body.CompareDocumentPosition(aside).HasFlag(AngleSharp.Dom.DocumentPositions.Following),
+            orderedIds.IndexOf("child") >= 0
+                && orderedIds.IndexOf("child") < orderedIds.IndexOf("chat2a-sidebar"),
             "The sidebar must come after the page body (map) in the layout.");
 
         // The closest container shared with the page body is a layout row, not the whole shell
