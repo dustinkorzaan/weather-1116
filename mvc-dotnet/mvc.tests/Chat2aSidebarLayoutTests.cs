@@ -3,6 +3,8 @@ using System.Text.RegularExpressions;
 
 namespace WeatherMVC.Tests;
 
+// Implementation details not covered by Chat2aSidebarAcceptanceTests: script load order,
+// toggle/Escape wiring, entry fields fed to chatRender, and the docked CSS layout.
 public class Chat2aSidebarLayoutTests(WeatherMvcWebApplicationFactory factory) : IClassFixture<WeatherMvcWebApplicationFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
@@ -17,82 +19,26 @@ public class Chat2aSidebarLayoutTests(WeatherMvcWebApplicationFactory factory) :
     }
 
     [Fact]
-    public async Task Home_HeaderOrdersAddLocationThenOpenChatThenAvatar()
+    public async Task Home_LoadsMarkdownAndRenderScriptsBeforeSidebarScript()
     {
         var html = await GetHtmlAsync("/");
 
-        var addLocation = html.IndexOf("aria-label=\"Add location\"", StringComparison.Ordinal);
-        var openChat = html.IndexOf("aria-label=\"Open chat\"", StringComparison.Ordinal);
-        var avatar = html.IndexOf("aria-label=\"Open user menu\"", StringComparison.Ordinal);
+        var positions = new[] { "js/lib/marked.min.js", "js/lib/purify.min.js", "js/markdown/safeGfmMarkdown.js", "js/chatRender.js", "js/chatSidebar.js" }
+            .Select(script => html.IndexOf(script, StringComparison.Ordinal))
+            .ToArray();
 
-        Assert.True(addLocation >= 0, "Add location button missing");
-        Assert.True(addLocation < openChat, "Open chat must follow Add location");
-        Assert.True(openChat < avatar, "Open chat must precede the avatar button");
+        Assert.All(positions, position => Assert.True(position >= 0));
+        Assert.Equal(positions.Order(), positions);
     }
 
     [Theory]
     [InlineData("/hello-world")]
     [InlineData("/chat-clients")]
-    public async Task OtherRoutes_RenderOpenChatImmediatelyBeforeAvatar(string path)
+    public async Task OtherRoutes_DoNotLoadSidebarScript(string path)
     {
         var html = await GetHtmlAsync(path);
 
-        Assert.DoesNotContain("aria-label=\"Add location\"", html);
-        var openChat = html.IndexOf("aria-label=\"Open chat\"", StringComparison.Ordinal);
-        var avatar = html.IndexOf("aria-label=\"Open user menu\"", StringComparison.Ordinal);
-        Assert.True(openChat >= 0 && openChat < avatar);
-    }
-
-    [Fact]
-    public async Task Layout_RendersClosedToggleAndHiddenSidebar()
-    {
-        var html = await GetHtmlAsync("/");
-
-        var toggle = Regex.Match(html, "<button id=\"chatSidebarButton\"[^>]*>", RegexOptions.Singleline).Value;
-        Assert.Contains("aria-expanded=\"false\"", toggle);
-        Assert.Contains("aria-controls=\"chat2a-sidebar\"", toggle);
-        Assert.Contains("type=\"button\"", toggle);
-
-        var aside = Regex.Match(html, "<aside id=\"chat2a-sidebar\"[^>]*>", RegexOptions.Singleline).Value;
-        Assert.Contains("role=\"complementary\"", aside);
-        Assert.Contains("aria-label=\"Chat2a\"", aside);
-        Assert.Contains("hidden", aside);
-
-        Assert.Contains("aria-label=\"Close chat\"", html);
-        Assert.Contains("id=\"chat2a-sidebar-input\"", html);
-        Assert.Contains("/js/chatSidebar.js", html);
-    }
-
-    [Fact]
-    public async Task ChatClients_SidebarIdsDoNotCollideWithPageChat()
-    {
-        var html = await GetHtmlAsync("/chat-clients");
-
-        foreach (var id in new[] { "chat-input", "chat-messages", "chat-form", "chat-send", "chat2a-sidebar-input", "chat2a-sidebar-messages" })
-        {
-            Assert.Single(Regex.Matches(html, $"id=\"{id}\""));
-        }
-
-        var sidebar = ReadRepoFile("mvc-dotnet/mvc/Views/Shared/_Chat2aSidebar.cshtml");
-        Assert.DoesNotContain("class=\"chat-tab", sidebar);
-        Assert.DoesNotContain("class=\"chat-messages\"", sidebar);
-    }
-
-    [Fact]
-    public void ChatSidebarScript_PostsChat2aWithSessionAndRendersEvents()
-    {
-        var script = ReadRepoFile("mvc-dotnet/mvc/wwwroot/js/chatSidebar.js");
-
-        Assert.Contains("fetch('/Chat2a/messages'", script);
-        Assert.Contains("JSON.stringify({ sessionId, message })", script);
-        Assert.Contains("let sessionId = null;", script);
-        Assert.Contains("payload.type === 'session'", script);
-        Assert.Contains("sessionId = payload.sessionId;", script);
-        Assert.Contains("payload.type === 'token'", script);
-        Assert.Contains("payload.type === 'tool_start'", script);
-        Assert.Contains("payload.type === 'tool_end'", script);
-        Assert.Contains("payload.type === 'error'", script);
-        Assert.DoesNotContain("innerHTML", script);
+        Assert.DoesNotContain("js/chatSidebar.js", html);
     }
 
     [Fact]
@@ -107,35 +53,37 @@ public class Chat2aSidebarLayoutTests(WeatherMvcWebApplicationFactory factory) :
     }
 
     [Fact]
-    public void ChatSidebarScript_RefreshesCitiesInFinallyWithUserFallback()
+    public void ChatSidebarScript_KeepsToolDetailsAndUsageOnEntriesLikeChatClient()
     {
         var script = ReadRepoFile("mvc-dotnet/mvc/wwwroot/js/chatSidebar.js");
 
-        var finallyBlock = script[script.IndexOf("} finally {", StringComparison.Ordinal)..];
-        Assert.Contains("refreshCities();", finallyBlock);
-        Assert.Contains("window.weatherMap.refreshCities()", script);
-        Assert.Contains("fetch('/User', { headers: { Accept: 'application/json' } })", script);
+        Assert.Contains("toolName: payload.toolName,", script);
+        Assert.Contains("toolArguments: payload.toolArguments,", script);
+        Assert.Contains("running: true,", script);
+        Assert.Contains("pending.running = false;", script);
+        Assert.Contains("pending.toolResult = payload.toolResult;", script);
+        Assert.Contains("assistantEntry.streaming = false;", script);
+        Assert.Contains("assistantEntry.usage = payload.usage || null;", script);
+        Assert.Contains("window.chatRender.attachToolHover(messagesEl);", script);
+        Assert.DoesNotContain("innerHTML", script);
     }
 
     [Fact]
-    public void WeatherMapScript_ExportsRefreshCities()
-    {
-        var script = ReadRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js");
-
-        Assert.Contains("refreshCities: refreshCities,", script);
-    }
-
-    [Fact]
-    public void SiteCss_AnchorsSidebarRightAndFullWidthOnNarrowScreens()
+    public void SiteCss_DocksSidebarBesideMapAndStacksItBelow640px()
     {
         var css = ReadRepoFile("mvc-dotnet/mvc/wwwroot/css/site.css");
 
         var sidebar = Regex.Match(css, @"\n\.chat-sidebar \{[^}]*\}").Value;
-        Assert.Contains("position: fixed;", sidebar);
-        Assert.Contains("right: 0;", sidebar);
-        Assert.Contains("bottom: 0;", sidebar);
-        Assert.Contains("width: 24rem;", sidebar);
+        Assert.DoesNotContain("position: fixed", sidebar);
+        Assert.Contains("flex: 0 0 24rem;", sidebar);
         Assert.Contains("var(--color-bg)", sidebar);
-        Assert.Matches(@"@media \(max-width: 639\.98px\) \{\s*\.chat-sidebar \{\s*width: 100%;", css);
+
+        var mapSection = Regex.Match(css, @"\n\.map-section \{[^}]*\}").Value;
+        Assert.Contains("flex-direction: row;", mapSection);
+        Assert.Matches(@"@media \(max-width: 639\.98px\) \{\s*\.map-section \{\s*flex-direction: column;", css);
+        Assert.Matches(@"@media \(max-width: 639\.98px\) \{\s*\.chat-sidebar \{\s*width: 100%;\s*flex: 1 1 0;", css);
+
+        var header = Regex.Match(css, @"\n\.site-header \{[^}]*\}").Value;
+        Assert.DoesNotContain("z-index", header);
     }
 }

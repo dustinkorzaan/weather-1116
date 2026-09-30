@@ -7,15 +7,14 @@
   const input = document.getElementById('chat2a-sidebar-input');
   const sendButton = document.getElementById('chat2a-sidebar-send');
 
-  if (!button || !sidebar || !closeButton || !messagesEl || !form || !input || !sendButton) {
+  if (!button || !sidebar || !closeButton || !messagesEl || !form || !input || !sendButton || !window.chatRender) {
     return;
   }
-
-  const MESSAGE_ROLES = ['user', 'assistant', 'tool', 'error'];
 
   // The sidebar keeps its own Chat2a session, independent of the /chat-clients Chat2a tab.
   let sessionId = null;
   let isSending = false;
+  const history = [];
 
   function setOpen(open) {
     sidebar.hidden = !open;
@@ -41,21 +40,30 @@
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  // Plain text only: assistant markdown is not rendered in the sidebar.
-  function addMessage(role, content) {
-    const item = document.createElement('div');
-    item.className = `chat-message ${MESSAGE_ROLES.includes(role) ? role : 'assistant'}`;
-    item.textContent = content;
-    messagesEl.appendChild(item);
+  // Rendered by chatRender.js, the same code as the /chat-clients panel.
+  function renderMessages() {
+    messagesEl.replaceChildren();
+    history.forEach((entry) => window.chatRender.renderEntry(entry, messagesEl));
     scrollToBottom();
-    return item;
+  }
+
+  function addEntry(entry) {
+    history.push(entry);
+    window.chatRender.renderEntry(entry, messagesEl);
+    scrollToBottom();
+    return entry;
+  }
+
+  function updateEntry(entry, content) {
+    entry.content = content;
+    renderMessages();
   }
 
   function findLastRunningTool(toolName) {
-    const items = messagesEl.querySelectorAll('.chat-message.tool[data-running="true"]');
-    for (let index = items.length - 1; index >= 0; index -= 1) {
-      if (items[index].dataset.toolName === toolName) {
-        return items[index];
+    for (let index = history.length - 1; index >= 0; index -= 1) {
+      const entry = history[index];
+      if (entry.role === 'tool' && entry.running && entry.toolName === toolName) {
+        return entry;
       }
     }
 
@@ -66,16 +74,6 @@
     sendButton.disabled = isSending;
     sendButton.textContent = isSending ? 'Sending…' : 'Send';
     input.disabled = isSending;
-  }
-
-  // Re-read /User after every completion so the map's pins match the agent's changes.
-  // weatherMap.js only loads on Home; elsewhere a plain GET keeps one refetch per send.
-  function refreshCities() {
-    if (window.weatherMap && typeof window.weatherMap.refreshCities === 'function') {
-      window.weatherMap.refreshCities().catch(() => {});
-    } else {
-      fetch('/User', { headers: { Accept: 'application/json' } }).catch(() => {});
-    }
   }
 
   async function streamChat(message) {
@@ -92,12 +90,16 @@
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-    let assistantEl = null;
+    let assistantEntry = null;
     let assistantText = '';
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) {
+        if (assistantEntry) {
+          assistantEntry.streaming = false;
+          renderMessages();
+        }
         break;
       }
 
@@ -114,30 +116,42 @@
           sessionId = payload.sessionId;
         } else if (payload.type === 'token' && payload.text) {
           assistantText += payload.text;
-          if (!assistantEl) {
-            assistantEl = addMessage('assistant', assistantText);
+          if (!assistantEntry) {
+            assistantEntry = addEntry({ role: 'assistant', content: assistantText, streaming: true });
           } else {
-            assistantEl.textContent = assistantText;
-            scrollToBottom();
+            updateEntry(assistantEntry, assistantText);
           }
         } else if (payload.type === 'tool_start' && payload.toolName) {
-          const toolEl = addMessage('tool', `Running ${payload.toolName} …`);
-          toolEl.dataset.toolName = payload.toolName;
-          toolEl.dataset.running = 'true';
+          addEntry({
+            role: 'tool',
+            content: `Running ${payload.toolName} …`,
+            toolName: payload.toolName,
+            toolArguments: payload.toolArguments,
+            running: true,
+          });
         } else if (payload.type === 'tool_end' && payload.toolName) {
           const pending = findLastRunningTool(payload.toolName);
           if (pending) {
-            pending.dataset.running = 'false';
-            pending.textContent = `Ran ${payload.toolName} …`;
+            pending.running = false;
+            pending.toolArguments = payload.toolArguments || pending.toolArguments;
+            pending.toolResult = payload.toolResult;
+            updateEntry(pending, `Ran ${payload.toolName} …`);
           }
         } else if (payload.type === 'error' && payload.errorMessage) {
-          addMessage('error', payload.errorMessage);
+          addEntry({ role: 'error', content: payload.errorMessage });
         } else if (payload.type === 'done') {
+          if (assistantEntry) {
+            assistantEntry.streaming = false;
+            assistantEntry.usage = payload.usage || null;
+            renderMessages();
+          }
           scrollToBottom();
         }
       }
     }
   }
+
+  window.chatRender.attachToolHover(messagesEl);
 
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
@@ -154,16 +168,23 @@
     input.value = '';
     isSending = true;
     updateSendingControls();
-    addMessage('user', message);
+    addEntry({ role: 'user', content: message });
 
     try {
       await streamChat(message);
     } catch (error) {
-      addMessage('error', error.message || 'Chat failed.');
+      addEntry({ role: 'error', content: error.message || 'Chat failed.' });
     } finally {
       isSending = false;
       updateSendingControls();
-      refreshCities();
+      // Re-read /User after every completion through the map's own path so its pins match the agent's changes.
+      try {
+        if (window.weatherMap && typeof window.weatherMap.refreshCities === 'function') {
+          Promise.resolve(window.weatherMap.refreshCities()).catch(() => {});
+        }
+      } catch {
+        // A failed map refresh must not break the chat.
+      }
       input.focus();
     }
   });
