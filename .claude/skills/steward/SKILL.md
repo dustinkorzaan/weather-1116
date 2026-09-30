@@ -34,9 +34,7 @@ description: Repo rules for driving an open Weather PR to green after it is open
 
 ## Merge conflicts
 
-- Merge `origin/main` into the branch and resolve.
-- For lockfiles (`package-lock.json`): take `main`'s version, then run `npm install --prefix <dir>` to regenerate. Never hand-edit.
-- Run `scripts/verify.sh --all` after any conflict resolution.
+Follow `.claude/skills/sync/SKILL.md` in full. It is also the procedure for a "base branch recovered" notice. Don't improvise a shorter version: the overlap scan and re-review are the point.
 
 ## Done means
 

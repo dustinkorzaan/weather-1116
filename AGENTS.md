@@ -32,6 +32,12 @@ on ACA, and standalone Python and Node.js servers with no dependency on `Core`).
   7. draft PR → PR follow-through (`.claude/skills/steward/SKILL.md`)
 
   Each rework loop runs at most **3** rounds, then stops and reports. Flags: `--hands-off` (no questions), `--quick` (small single-stack change).
+- **`/sync`** (`.claude/skills/sync/SKILL.md`) brings a story branch up to date after other PRs merge:
+  - merge `origin/main` (never rebase);
+  - adapt the branch to the overlapping changes;
+  - verify, re-review, then push and watch CI.
+
+  Pass `#123` or a branch name from a new thread; `--light` skips the overlap scan, and skips review unless there were conflicts or verify fixes. When several PRs are waiting, handle them one at a time: the user merges one, then `/sync` runs on the next. Agents never merge PRs.
 - **Roles** live in `.claude/agents/`. The review checklist is `REVIEW.md`; the spec template is `docs/specs/_template.md`.
 - **Hooks:**
   - `SessionStart` installs every stack's toolchain and deps.
