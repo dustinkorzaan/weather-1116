@@ -240,6 +240,8 @@
         {
             _isSending = false;
             _scrollMessagesPending = true;
+            // Re-enable the composer before waiting on /User and the pin repaint.
+            StateHasChanged();
             await RefreshMapCitiesAsync();
         }
     }

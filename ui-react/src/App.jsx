@@ -33,13 +33,20 @@ function AppShell() {
   const headerRef = useRef(null);
   const closeChat = useCallback(() => setIsChatOpen(false), []);
 
-  // The chat sidebar sits below the top bar, whose height changes when it wraps.
+  // The chat sidebar sits below the top bar, whose height changes when it wraps
+  // (on resize, or on navigation since Add location only renders on Home).
   useLayoutEffect(() => {
-    const measure = () => setHeaderHeight(headerRef.current?.offsetHeight ?? 0);
+    const header = headerRef.current;
+    const measure = () => setHeaderHeight(header?.offsetHeight ?? 0);
     measure();
+    if (header && typeof ResizeObserver === 'function') {
+      const observer = new ResizeObserver(measure);
+      observer.observe(header);
+      return () => observer.disconnect();
+    }
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, []);
+  }, [isMapVisible]);
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
