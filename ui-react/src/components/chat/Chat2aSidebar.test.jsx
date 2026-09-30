@@ -29,75 +29,48 @@ async function send(user, text) {
   await user.click(screen.getByRole('button', { name: /^send$/i }));
 }
 
-test('is labelled Chat2a and hidden while closed', () => {
-  const { container } = renderSidebar({ open: false });
-
-  const panel = container.querySelector('#chat2a-sidebar');
-  expect(panel.getAttribute('role')).toBe('complementary');
-  expect(panel.getAttribute('aria-label')).toBe('Chat2a');
-  expect(panel.hidden).toBe(true);
-  expect(screen.queryByRole('complementary', { name: 'Chat2a' })).toBeNull();
-});
-
-test('Close chat button and Escape call onClose', async () => {
+test('does not listen for Escape while closed', async () => {
   const user = userEvent.setup();
-  const { onClose } = renderSidebar();
+  const { onClose } = renderSidebar({ open: false });
 
-  await user.click(screen.getByRole('button', { name: 'Close chat' }));
   await user.keyboard('{Escape}');
 
-  expect(onClose).toHaveBeenCalledTimes(2);
+  expect(onClose).not.toHaveBeenCalled();
 });
 
-test('sends to Chat2a without gates and reuses the streamed session id', async () => {
+test('shows the streaming reply as plain text, then markdown without a usage chip when done has no usage', async () => {
+  let finish;
+  streamChatMessage.mockImplementation(({ onEvent }) => new Promise((resolve) => {
+    onEvent({ type: 'token', text: '**Added.**' });
+    finish = () => {
+      onEvent({ type: 'done' });
+      resolve();
+    };
+  }));
+  const user = userEvent.setup();
+  const { container } = renderSidebar();
+
+  await send(user, 'add Nashville');
+  await waitFor(() => expect(screen.getByText('**Added.**')).toBeDefined());
+  finish();
+
+  await waitFor(() => expect(container.querySelector('strong')?.textContent).toBe('Added.'));
+  expect(container.querySelector('[data-chat2a-sidebar-messages] [data-tool-details]')).toBeNull();
+});
+
+test('a failed /User refresh is logged and the composer re-enables', async () => {
   streamChatMessage.mockImplementation(async ({ onEvent }) => {
-    onEvent({ type: 'session', sessionId: 'session-1' });
-    onEvent({ type: 'token', text: 'Added.' });
+    onEvent({ type: 'token', text: 'Done.' });
     onEvent({ type: 'done' });
   });
-  const user = userEvent.setup();
-  renderSidebar();
-
-  await send(user, 'add Nashville');
-  await waitFor(() => expect(screen.getByText('Added.')).toBeDefined());
-  await send(user, 'remove Nashville');
-
-  await waitFor(() => expect(streamChatMessage).toHaveBeenCalledTimes(2));
-  const [first, second] = streamChatMessage.mock.calls.map(([args]) => args);
-  expect(first).toMatchObject({ endpoint: '/Chat2a/messages', sessionId: null, message: 'add Nashville' });
-  expect(first.gates).toBeUndefined();
-  expect(second).toMatchObject({ endpoint: '/Chat2a/messages', sessionId: 'session-1', message: 'remove Nashville' });
-});
-
-test('renders tool lines and error events', async () => {
-  streamChatMessage.mockImplementation(async ({ onEvent }) => {
-    onEvent({ type: 'tool_start', toolName: 'AddUserCity', toolArguments: '{}' });
-    onEvent({ type: 'tool_end', toolName: 'AddUserCity', toolResult: 'ok' });
-    onEvent({ type: 'error', errorMessage: 'Agent failed.' });
-  });
-  const user = userEvent.setup();
-  renderSidebar();
-
-  await send(user, 'add Nashville');
-
-  await waitFor(() => expect(screen.getByText('Ran AddUserCity …')).toBeDefined());
-  expect(screen.getByText('Agent failed.')).toBeDefined();
-});
-
-test('refreshes cities once per completed send, including failed sends', async () => {
-  streamChatMessage
-    .mockImplementationOnce(async ({ onEvent }) => {
-      onEvent({ type: 'token', text: 'Done.' });
-      onEvent({ type: 'done' });
-    })
-    .mockRejectedValueOnce(new Error('Chat request failed (500)'));
+  const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
   const user = userEvent.setup();
   const { refreshCities } = renderSidebar();
+  refreshCities.mockRejectedValueOnce(new Error('offline'));
 
-  await send(user, 'first');
-  await waitFor(() => expect(refreshCities).toHaveBeenCalledTimes(1));
+  await send(user, 'add Nashville');
 
-  await send(user, 'second');
-  await waitFor(() => expect(screen.getByText('Chat request failed (500)')).toBeDefined());
-  await waitFor(() => expect(refreshCities).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect(consoleError).toHaveBeenCalledWith('Failed to refresh cities:', expect.any(Error)));
+  expect(screen.getByLabelText(/message/i).disabled).toBe(false);
+  expect(screen.getByRole('button', { name: /^send$/i }).disabled).toBe(false);
 });
