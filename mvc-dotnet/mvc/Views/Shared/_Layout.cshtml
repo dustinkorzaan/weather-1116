@@ -95,6 +95,18 @@
             </div>
             }
 
+            <button id="chatSidebarButton"
+                    type="button"
+                    class="chat-toggle-button"
+                    aria-label="Open chat"
+                    title="Open chat"
+                    aria-expanded="false"
+                    aria-controls="chat2a-sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+            </button>
+
             <div class="avatar-wrap">
                 <button id="avatarMenuButton"
                         type="button"
@@ -147,6 +159,8 @@
         @RenderBody()
     </main>
 
+    <partial name="_Chat2aSidebar" />
+
     <div id="aboutModal" class="about-modal" role="presentation">
         <div class="about-dialog"
              role="dialog"
@@ -180,6 +194,7 @@
     <script src="~/js/theme.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/addLocation.js" asp-append-version="true"></script>
+    <script src="~/js/chatSidebar.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
