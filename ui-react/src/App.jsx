@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { MessageSquareIcon } from 'lucide-react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,13 @@ function AppShell() {
   const isMapVisible = pathname === '/';
   const [isChatOpen, setIsChatOpen] = useState(false);
   const closeChat = useCallback(() => setIsChatOpen(false), []);
+
+  // Leaving Home closes the sidebar (history is kept), matching Blazor and MVC.
+  useEffect(() => {
+    if (!isMapVisible) {
+      setIsChatOpen(false);
+    }
+  }, [isMapVisible]);
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
