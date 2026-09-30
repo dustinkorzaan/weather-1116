@@ -6,6 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
+import chat2aSidebarSource from './components/chat/Chat2aSidebar.jsx?raw';
 import { weatherApi } from './services/weatherApi';
 
 // Google Maps cannot run under jsdom. The real WeatherMap paints one marker per
@@ -96,7 +97,7 @@ function jsonResponse(body, status = 200) {
 
 /**
  * Stateful backend: `/User` returns `state.userCities`; each `/Chat2a/messages`
- * POST shifts the next scripted reply (`{ events, userCitiesAfter }` or `{ fail: true }`).
+ * POST shifts the next scripted reply (`{ events, userCitiesAfter }`, `{ fail: true }` or `{ throws: true }`).
  */
 function mockBackend({ userCities = [], chatReplies = [] } = {}) {
   const state = { userCities, chatReplies: [...chatReplies], chatBodies: [] };
@@ -111,6 +112,12 @@ function mockBackend({ userCities = [], chatReplies = [] } = {}) {
       const reply = state.chatReplies.shift() ?? { events: [{ type: 'done' }] };
       if (reply.userCitiesAfter) {
         state.userCities = reply.userCitiesAfter;
+      }
+      if (reply.response) {
+        return reply.response();
+      }
+      if (reply.throws) {
+        throw new TypeError('Failed to fetch');
       }
       if (reply.fail) {
         return jsonResponse({ error: 'boom' }, 500);
@@ -197,17 +204,20 @@ test('AC1: home header actions are Add location, then Open chat, then the avatar
   expect(headerButtonNames()).toEqual(['Add location', 'Open chat', 'Open user menu']);
 });
 
-// AC1 (edge: route without the plus button)
-test('AC1: on routes without the plus button the chat button sits immediately before the avatar', async () => {
-  mockBackend();
-  await renderApp('/hello-world');
+// AC1 (negative: the chat button exists only on the map page)
+test.each(['/hello-world', '/current-ai-weather', '/chat-clients'])(
+  'AC1: %s has no Open chat button in the header',
+  async (path) => {
+    mockBackend();
+    await renderApp(path);
 
-  expect(screen.queryByRole('button', { name: /add location/i })).toBeNull();
-  expect(headerButtonNames()).toEqual(['Open chat', 'Open user menu']);
-});
+    expect(screen.queryByRole('button', { name: 'Open chat' })).toBeNull();
+    expect(headerButtonNames()).toEqual(['Open user menu']);
+  }
+);
 
 // AC2
-test('AC2: Open chat reveals a right-anchored Chat2a panel and reports aria-expanded', async () => {
+test('AC2: Open chat reveals a Chat2a panel and reports aria-expanded', async () => {
   mockBackend();
   const user = userEvent.setup();
   await renderApp('/');
@@ -218,15 +228,62 @@ test('AC2: Open chat reveals a right-anchored Chat2a panel and reports aria-expa
 
   const panel = await openSidebar(user);
   expect(toggle.getAttribute('aria-expanded')).toBe('true');
-
-  // Right edge, fixed overlay, full width below the sm (640px) breakpoint.
-  expect(panel.className).toMatch(/(^|\s)fixed(\s|$)/);
-  expect(panel.className).toMatch(/(^|\s)right-0(\s|$)/);
-  expect(panel.className).toMatch(/(^|\s)w-full(\s|$)/);
-  expect(panel.className).toMatch(/(^|\s)sm:w-/);
+  expect(screen.getByRole('complementary', { name: 'Chat2a' })).toBe(panel);
 
   // The panel is outside the header (it sits below the top bar, not inside it).
   expect(header().contains(panel)).toBe(false);
+});
+
+function commonAncestor(a, b) {
+  let node = a.parentElement;
+  while (node && !node.contains(b)) {
+    node = node.parentElement;
+  }
+  return node;
+}
+
+// AC2 (docked beside the map, not a fixed overlay)
+test('AC2: the open panel is docked in a row with the map (stacked below 640px), not a fixed overlay', async () => {
+  mockBackend();
+  const user = userEvent.setup();
+  await renderApp('/');
+
+  const panel = await openSidebar(user);
+  const map = screen.getByRole('region', { name: /map/i });
+
+  // No fixed/absolute overlay on the panel itself.
+  expect(panel.className).not.toMatch(/(^|\s)(fixed|absolute)(\s|$)/);
+  expect(panel.style.position).not.toMatch(/fixed|absolute/);
+
+  // Map first, then the panel, in the same flex container that is a column
+  // below the sm (640px) breakpoint and a row at >= 640px.
+  expect(map.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  const row = commonAncestor(map, panel);
+  expect(row).not.toBeNull();
+  expect(row.className).toMatch(/(^|\s)flex(\s|$)/);
+  expect(row.className).toMatch(/(^|\s)flex-col(\s|$)/);
+  expect(row.className).toMatch(/(^|\s)sm:flex-row(\s|$)/);
+  expect(header().contains(row)).toBe(false);
+
+  // Every ancestor between the panel and the row is in-flow as well.
+  for (let node = panel; node && node !== row; node = node.parentElement) {
+    expect(node.className).not.toMatch(/(^|\s)fixed(\s|$)/);
+  }
+});
+
+// AC2 (leaving / hides the panel)
+test('AC2: navigating away from / hides the open panel', async () => {
+  mockBackend();
+  const user = userEvent.setup();
+  await renderApp('/');
+
+  await openSidebar(user);
+
+  await user.click(screen.getByRole('button', { name: /open user menu/i }));
+  await user.click(await screen.findByRole('menuitem', { name: /hello world/i }));
+
+  await waitFor(() => expect(visiblePanel()).toBeNull());
+  expect(screen.queryByRole('button', { name: 'Open chat' })).toBeNull();
 });
 
 // AC2 (toggle closes)
@@ -247,7 +304,7 @@ test('AC2: clicking Open chat again hides the panel', async () => {
 test('AC2: the panel Close chat button hides the panel', async () => {
   mockBackend();
   const user = userEvent.setup();
-  await renderApp('/hello-world');
+  await renderApp('/');
 
   const panel = await openSidebar(user);
   await user.click(within(panel).getByRole('button', { name: 'Close chat' }));
@@ -368,11 +425,11 @@ test('AC4: every completed send, including a failed one, triggers exactly one GE
   expect(backend.chat2aPosts()).toBe(3);
 });
 
-// AC4 (edge: a route without the map still refetches)
-test('AC4: a completed send refetches /User on a route without the map', async () => {
-  const backend = mockBackend({ chatReplies: [{ events: [{ type: 'token', text: 'done here' }, { type: 'done' }] }] });
+// AC4 (edge: a network failure still refetches exactly once)
+test('AC4: a send whose request throws still triggers exactly one GET /User', async () => {
+  const backend = mockBackend({ chatReplies: [{ throws: true }] });
   const user = userEvent.setup();
-  await renderApp('/hello-world');
+  await renderApp('/');
 
   await waitFor(() => expect(backend.userGets()).toBe(1));
 
@@ -380,6 +437,8 @@ test('AC4: a completed send refetches /User on a route without the map', async (
   await sendFromSidebar(user, panel, 'hi');
 
   await waitFor(() => expect(backend.userGets()).toBe(2));
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  expect(backend.userGets()).toBe(2);
 });
 
 // AC5
@@ -428,4 +487,173 @@ test('AC5: the map pin set follows the refetched /User after a sidebar send (add
   // Still on Home, no navigation happened; the map section is the same page.
   expect(screen.getByRole('region', { name: /map/i })).toBeDefined();
   expect(backend.userGets()).toBeGreaterThanOrEqual(3);
+});
+
+/** SSE response whose events are pushed by the test; `close()` ends the stream. */
+function controlledSse() {
+  let controllerRef;
+  const stream = new ReadableStream({
+    start(controller) {
+      controllerRef = controller;
+    },
+  });
+  return {
+    response: () =>
+      new Response(stream, { status: 200, headers: { 'Content-Type': 'text/event-stream' } }),
+    push(event) {
+      controllerRef.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`));
+    },
+    close() {
+      controllerRef.close();
+    },
+  };
+}
+
+// AC6 (markdown)
+test('AC6: a finished sidebar reply renders as GFM markdown like /chat-clients', async () => {
+  mockBackend({
+    chatReplies: [
+      {
+        events: [
+          { type: 'token', text: '**Warmest**\n\n| City | Temp |\n| --- | --- |\n| Nashville | 72 |\n' },
+          { type: 'done' },
+        ],
+      },
+    ],
+  });
+  const user = userEvent.setup();
+  await renderApp('/');
+
+  const panel = await openSidebar(user);
+  await sendFromSidebar(user, panel, 'compare');
+
+  await waitFor(() => expect(within(panel).getByRole('table')).toBeDefined());
+  const strong = within(panel).getByText('Warmest');
+  expect(strong.tagName).toBe('STRONG');
+  expect(strong.closest('.chat-markdown')).not.toBeNull();
+  expect(within(panel).queryByText(/\*\*Warmest\*\*/)).toBeNull();
+});
+
+// AC6 (markdown is sanitized)
+test('AC6: sidebar markdown is sanitized (no raw HTML or script elements)', async () => {
+  mockBackend({
+    chatReplies: [
+      {
+        events: [
+          { type: 'token', text: 'Safe <img src=x onerror="alert(1)"> text <script>alert(2)</script>' },
+          { type: 'done' },
+        ],
+      },
+    ],
+  });
+  const user = userEvent.setup();
+  await renderApp('/');
+
+  const panel = await openSidebar(user);
+  await sendFromSidebar(user, panel, 'hi');
+
+  await waitFor(() => expect(panel.querySelector('.chat-markdown')).not.toBeNull());
+  expect(panel.querySelector('script')).toBeNull();
+  expect(panel.querySelector('img[onerror]')).toBeNull();
+});
+
+// AC6 (usage chip)
+test('AC6: a finished reply with usage shows the same usage chip and hover details as /chat-clients', async () => {
+  mockBackend({
+    chatReplies: [
+      {
+        events: [
+          { type: 'token', text: 'Nashville looks clear.' },
+          {
+            type: 'done',
+            usage: {
+              runtimeMs: 1240,
+              inputTokenCount: 3100,
+              cachedTokenCount: 200,
+              outputTokenCount: 1118,
+              reasoningTokenCount: 40,
+              totalTokenCount: 4218,
+            },
+          },
+        ],
+      },
+    ],
+  });
+  const user = userEvent.setup();
+  await renderApp('/');
+
+  const panel = await openSidebar(user);
+  await sendFromSidebar(user, panel, 'weather');
+
+  const chip = await within(panel).findByText('1.24s · 4,218 tok');
+  expect(chip.getAttribute('data-tool-details')).toContain('Total: 4,218');
+
+  await user.hover(chip);
+  await waitFor(() => {
+    const tooltip = screen.getByRole('tooltip');
+    expect(tooltip.textContent).toContain('Runtime: 1,240 ms');
+    expect(tooltip.textContent).toContain('Input: 3,100');
+    expect(tooltip.textContent).toContain('Total: 4,218');
+  });
+});
+
+// AC6 (usage chip: negative)
+test('AC6: a finished reply without usage shows no usage chip', async () => {
+  mockBackend({ chatReplies: [{ events: [{ type: 'token', text: 'No usage here.' }, { type: 'done' }] }] });
+  const user = userEvent.setup();
+  await renderApp('/');
+
+  const panel = await openSidebar(user);
+  await sendFromSidebar(user, panel, 'hi');
+
+  await waitFor(() => expect(within(panel).getByText('No usage here.')).toBeDefined());
+  expect(within(panel).queryByText(/\btok$/)).toBeNull();
+});
+
+// AC6 (tool hover card)
+test('AC6: tool lines show Waiting for tool output while running, then Arguments and Result on hover', async () => {
+  const sse = controlledSse();
+  mockBackend({ chatReplies: [{ response: sse.response }] });
+  const user = userEvent.setup();
+  await renderApp('/');
+
+  const panel = await openSidebar(user);
+  await sendFromSidebar(user, panel, 'add Nashville');
+
+  sse.push({ type: 'tool_start', toolName: 'AddUserCity' });
+  const running = await within(panel).findByText('Running AddUserCity …');
+  await user.hover(running);
+  await waitFor(() => expect(screen.getByRole('tooltip').textContent).toContain('Waiting for tool output…'));
+  await user.unhover(running);
+  await waitFor(() => expect(screen.queryByRole('tooltip')).toBeNull());
+
+  sse.push({
+    type: 'tool_end',
+    toolName: 'AddUserCity',
+    toolArguments: '{\n  "location": "Nashville, TN"\n}',
+    toolResult: '{\n  "ok": true\n}',
+  });
+  sse.push({ type: 'token', text: 'Added.' });
+  sse.push({ type: 'done' });
+  sse.close();
+
+  const finished = await within(panel).findByText('Ran AddUserCity …');
+  await user.hover(finished);
+  await waitFor(() => {
+    const text = screen.getByRole('tooltip').textContent;
+    expect(text).toContain('Arguments');
+    expect(text).toContain('"location": "Nashville, TN"');
+    expect(text).toContain('Result');
+    expect(text).toContain('"ok": true');
+  });
+});
+
+// AC6 (same shared rendering code, no second copy of the formatting logic)
+test('AC6: the sidebar does not carry its own copy of the chat formatting helpers', () => {
+  expect(chat2aSidebarSource).not.toMatch(/function\s+ToolChip\b/);
+  expect(chat2aSidebarSource).not.toMatch(/role=["']tooltip["']/);
+  expect(chat2aSidebarSource).not.toContain('Waiting for tool output');
+  expect(chat2aSidebarSource).not.toMatch(/function\s+formatChatUsage/);
+  expect(chat2aSidebarSource).not.toMatch(/\btok`/);
+  expect(chat2aSidebarSource).not.toMatch(/Arguments\\n/);
 });
