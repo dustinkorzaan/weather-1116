@@ -1,7 +1,7 @@
 # Chat2a right sidebar with map state synchronization
 
-- **Status:** shipped
-- **Branch / PR:** `claude/affectionate-cray-6sli9u` / (pending)
+- **Status:** in-progress (revision 2)
+- **Branch / PR:** `claude/affectionate-cray-6sli9u` / https://github.com/dustinkorzaan/weather-1116/pull/377
 - **Mode:** interactive (no questions needed: story shipped with testable criteria)
 
 ## Problem
@@ -30,32 +30,48 @@ appear or disappear as soon as the agent finishes answering.
 
 ## Acceptance criteria
 
-1. **AC1 (header button + order):** Given the Home page (`/`), when the top bar
-   renders, then it contains a button with accessible name **"Open chat"**, and
-   in DOM order the header actions are: Add location (plus) → Open chat →
-   Open user menu (avatar). On other routes (no plus button) the chat button
-   still renders immediately before the avatar button.
-2. **AC2 (opens on the right):** Given the sidebar is closed, when the user
-   clicks "Open chat", then a panel with role `complementary` (or `dialog`)
-   labelled **"Chat2a"** becomes visible, anchored to the right edge of the
-   viewport below the top bar, and the button reports `aria-expanded="true"`.
-   Clicking the button again, or the panel's **"Close chat"** button, hides it
-   (`aria-expanded="false"`). At widths < 640px the panel spans the full width.
-3. **AC3 (uses Chat2a):** Given the sidebar is open, when the user submits a
-   message, then exactly one `POST` goes to `/Chat2a/messages` with body
-   `{ sessionId, message }` (sessionId `null` on the first send, then the id
-   from the stream's `session` event on later sends), and streamed `token`
-   events render as the assistant reply; `tool_start`/`tool_end` render as tool
-   lines and `error` events render as an error message.
-4. **AC4 (refetch on every completion):** Given the sidebar is open, when a
-   Chat2a send completes (stream ended normally, or the request failed), then
-   the UI issues a new `GET /User` — once per completed send, i.e. N sends → N
-   refetches.
-5. **AC5 (map reflects changes):** Given the map on `/` shows the pins from
-   `/User`, when a sidebar send completes and the refetched `/User` contains an
-   added city (or lacks a removed one), then the map's pin set equals the cities
-   in the refetched response (added pin present, removed pin gone) without a
-   page reload or navigation.
+Revision 2 (PR #377 feedback, comparing it with PR #376) changes AC1, AC2 and AC4 and adds AC6. The originals are in git history.
+
+1. **AC1 (header button + order, map page only):** Given the Home page (`/`),
+   when the top bar renders, then the header actions in DOM order are:
+   Add location (plus) → **Open chat** → Open user menu (avatar). On every other
+   route (`/hello-world`, `/current-ai-weather`, `/chat-clients`) there is no
+   "Open chat" button.
+2. **AC2 (docked beside the map):** Given `/` with the sidebar closed, when the
+   user clicks "Open chat", then a panel with role `complementary` labelled
+   **"Chat2a"** becomes visible, and the button reports `aria-expanded="true"`.
+   The panel sits **in the layout next to the map, not on top of it**: at
+   widths ≥ 640px it is to the right of the map in the same row, and the map
+   gets narrower. Below 640px it stacks under the map, and the map keeps part of
+   the height. No `position: fixed` overlay covers the map. Clicking the button
+   again, the panel's **"Close chat"** button, or pressing Escape hides it
+   (`aria-expanded="false"`). Leaving `/` hides the panel.
+3. **AC3 (uses Chat2a):** unchanged. Given the sidebar is open, when the user
+   submits a message, then exactly one `POST` goes to `/Chat2a/messages` with
+   body `{ sessionId, message }`. `sessionId` is `null` on the first send, then
+   the id from the stream's `session` event. Streamed `token` events render as
+   the assistant reply, `tool_start`/`tool_end` render as tool lines, and
+   `error` events render as an error message.
+4. **AC4 (refetch on every completion, through the map's own path):** Given the
+   sidebar is open, when a Chat2a send completes (the stream ended normally, or
+   the request failed), then the UI re-reads `GET /User` exactly once for that
+   send, through the same path the map renders from:
+   - React: the map-pins context `refreshCities` (RTK `refetch`);
+   - Blazor and MVC: `weatherMap.refreshCities()`.
+
+   No other `/User` request is made. The MVC fallback `fetch('/User')` is gone.
+5. **AC5 (map reflects changes):** unchanged. After a completed send, the map's
+   pin set equals the cities in the refetched `/User` (added pin present,
+   removed pin gone) without a reload or navigation.
+6. **AC6 (renders like the existing chat panel):** In every UI, sidebar
+   messages render the way the `/chat-clients` Chat2a tab renders them, using
+   **the same shared rendering code** (no second copy of the formatting logic):
+   - finished assistant replies are sanitized GFM markdown (the same renderer
+     as `/chat-clients`);
+   - a finished reply that has `usage` shows the usage chip (same text, for
+     example `1.2s · 345 tok`) with the same hover/focus details;
+   - tool lines show the same hover/focus card with `Arguments` and `Result`
+     sections (`Waiting for tool output…` while running).
 
 ## Affected stacks
 
@@ -73,17 +89,20 @@ behavior, each styled with its own library.
 - "The existing chat 2A API service" is the Chat2a endpoint `POST /Chat2a/messages`
   already used by the `/chat-clients` Chat2a tab (Agent Framework, in-process tools).
 - All three UIs get the feature, per the Feature Parity Contract in `docs/architecture.md`.
-- The chat button is shown on every route (it sits between plus and avatar on
-  `/`, where the plus exists). On routes without a map the refetch is harmless
-  (React updates its RTK Query cache; Blazor/MVC skip the pin re-render when
-  `weatherMap` has no map mounted).
 - "Every chat completion" includes failed sends: the agent may have mutated
   cities before an error, so the refetch always runs in a `finally`.
 - The sidebar keeps its own Chat2a session, independent of the `/chat-clients` Chat2a tab.
-- The sidebar overlays the map (the map is not resized); it closes with its
-  Close button or by toggling the header button. Escape also closes it.
-- Blazor/MVC refetch by calling a newly exported `weatherMap.refreshCities()`
-  (the same function the maps already use after add/delete).
+- Revision 2: the chat button exists only on `/`. Map sync is the sidebar's
+  purpose, and the plus button already follows that rule. In React and Blazor
+  the sidebar stays mounted while hidden, so its conversation survives SPA
+  navigation away from `/` and back. MVC reloads the page on navigation, so its
+  history resets.
+- Revision 2: the sidebar docks beside the map (the map shrinks) instead of
+  overlaying it, so the pins being changed stay visible. Below 640px it stacks
+  under the map. Google Maps re-lays itself out on container resize.
+- Blazor and MVC refetch through `weatherMap.refreshCities()` (exported in revision 1).
+- `blocked` events are not rendered: only Chat5a/Chat5b emit them
+  (`core-dotnet/core/Chat/Chat5b/Chat5bService.cs`), never Chat2a.
 
 ## Plan
 
@@ -139,6 +158,20 @@ No serialized paths are touched (no Core, CQMediator, sln, infra, workflows, `.c
 - **ID collisions:** on `/chat-clients` both the page chat and the sidebar are present. Sidebar ids must be unique (`chat2a-sidebar-*`), and MVC's `chatClient.js` must not select sidebar elements.
 - **Z-order:** the sidebar must sit above the map and pin hover card but below the About modal and the weather modal. Check each UI's existing z-index values.
 - No config, env vars, infra, ports or migrations change.
+
+### Revision 2 plan (PR feedback)
+
+| # | Task | Files | Parallel-safe |
+|---|---|---|---|
+| R1 | React: button only on `/`; sidebar in the map page's flex row (not fixed); usage chip via ChatPanel's existing helpers; drop header measurement | `ui-react/src/App.jsx`, `ui-react/src/pages/MapPage.jsx` (if the row lives there), `ui-react/src/components/chat/Chat2aSidebar.jsx`, `ChatPanel.jsx` (exports only), `Chat2aSidebar.test.jsx` | yes |
+| R2 | Blazor: button only on map page; sidebar docked beside `@Body` on `/`; extract a shared `ChatMessageList` (entries, markdown, usage chip, tool hover attrs) used by both `ChatPanel` and `Chat2aSidebar`; remove the header z-index workaround if the overlay is gone | `ui-blazor/blazor/Shared/*.razor`, `wwwroot/css/site.css`, `blazor.tests/Chat2aSidebarTests.cs`, `LayoutCssTests.cs`, `ChatPanelTests.cs` (must stay green) | yes |
+| R3 | MVC: button only on map page; sidebar partial + scripts only on `Views/Home/Index.cshtml`, docked beside the map; extract `wwwroot/js/chatRender.js` (renderEntry, usage/tool formatters, hover card) used by both `chatClient.js` and `chatSidebar.js`; remove `/User` fallback and the `.site-header` z-index workaround if no longer needed; **keep CRLF in `_Layout.cshtml` and `Index.cshtml`** | `mvc-dotnet/mvc/**`, `mvc.tests/Chat2aSidebarLayoutTests.cs` | yes |
+| R4 | Acceptance tests (test-author): update the three `*acceptance*` files for revised AC1/AC2/AC4 and new AC6 | the 3 acceptance files | yes |
+| R5 | Docs: architecture.md + 5-chat-clients.md for map-only button, docked layout, rendering parity | docs | after R1-R3 (orchestrator) |
+
+Test size: implementer unit tests keep only cases the acceptance files do not
+cover (for example Blazor focus-on-open, cancellation on dispose, CSS rules).
+Duplicated cases are deleted, not skipped.
 
 ## Review log
 
