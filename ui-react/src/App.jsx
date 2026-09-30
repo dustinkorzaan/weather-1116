@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { MessageSquareIcon } from 'lucide-react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
 import AboutDialog from './components/about/AboutDialog';
+import Chat2aSidebar from './components/chat/Chat2aSidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,10 +28,22 @@ function AppShell() {
   const { preference, setPreference } = useTheme();
   const { pathname } = useLocation();
   const isMapVisible = pathname === '/';
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerRef = useRef(null);
+  const closeChat = useCallback(() => setIsChatOpen(false), []);
+
+  // The chat sidebar sits below the top bar, whose height changes when it wraps.
+  useLayoutEffect(() => {
+    const measure = () => setHeaderHeight(headerRef.current?.offsetHeight ?? 0);
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-background shadow-sm">
+      <header ref={headerRef} className="border-b border-border bg-background shadow-sm">
         <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link className="flex min-w-0 items-center gap-2 text-inherit no-underline" to="/">
             <img src="/logo.svg" alt="Weather logo" className="h-6 w-6 shrink-0" />
@@ -38,6 +52,19 @@ function AppShell() {
 
           <div className="flex items-center gap-2">
             {isMapVisible && <AddLocationControl />}
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              aria-label="Open chat"
+              title="Open chat"
+              aria-expanded={isChatOpen}
+              aria-controls="chat2a-sidebar"
+              onClick={() => setIsChatOpen((current) => !current)}
+              className="size-9 rounded-full border-2 border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <MessageSquareIcon aria-hidden="true" className="size-5" />
+            </Button>
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -88,6 +115,8 @@ function AppShell() {
           <Route path="/weather" element={<WeatherModalPage />} />
         </Routes>
       </div>
+
+      <Chat2aSidebar open={isChatOpen} onClose={closeChat} top={headerHeight} />
 
       <AboutDialog open={isAboutOpen} onOpenChange={setIsAboutOpen} />
     </div>

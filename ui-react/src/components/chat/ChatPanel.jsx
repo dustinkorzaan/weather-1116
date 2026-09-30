@@ -93,7 +93,7 @@ const MESSAGE_CLASSES = {
   blocked: 'h-max min-h-min shrink-0 w-full rounded-md bg-amber-500/15 px-3 py-2 text-amber-600 dark:text-amber-400',
 };
 
-function messageClasses(entry) {
+export function messageClasses(entry) {
   if (entry.role === 'assistant' && !entry.streaming) {
     return `${MESSAGE_CLASSES.assistant} chat-markdown`;
   }
@@ -111,7 +111,7 @@ function scrollElementToBottom(element) {
   element.scrollTop = element.scrollHeight;
 }
 
-function ToolChip({ content, details, className }) {
+export function ToolChip({ content, details, className }) {
   const chipRef = useRef(null);
   const tooltipRef = useRef(null);
   const hideTimerRef = useRef(null);

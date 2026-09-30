@@ -62,9 +62,12 @@ export function MapPinsProvider({ children }) {
     [deleteUserCity]
   );
 
+  // Re-reads the user so pins reflect changes made elsewhere (e.g. the Chat2a sidebar).
+  const refreshCities = useCallback(() => refetch(), [refetch]);
+
   const value = useMemo(
-    () => ({ cities, addCity, removeCity, isLoading, error }),
-    [cities, addCity, removeCity, isLoading, error]
+    () => ({ cities, addCity, removeCity, refreshCities, isLoading, error }),
+    [cities, addCity, removeCity, refreshCities, isLoading, error]
   );
 
   return <MapPinsContext.Provider value={value}>{children}</MapPinsContext.Provider>;
