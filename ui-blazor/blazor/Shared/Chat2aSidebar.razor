@@ -1,0 +1,286 @@
+@using WeatherBlazor.Data
+@inject ChatApiClient ChatClient
+@inject IJSRuntime JS
+
+@* Right-hand Chat2a sidebar on the map page. Chat2a's agent can add and delete saved
+   cities, so every completed turn re-reads /User through weatherMap.refreshCities and
+   the map repaints its pins. Stays rendered while hidden so the conversation survives
+   close and reopen. *@
+<aside id="chat2a-sidebar" class="chat-sidebar" aria-label="Chat2a" hidden="@(!Open)">
+    <div class="chat-sidebar-header">
+        <div class="chat-sidebar-heading">
+            <h2 class="chat-sidebar-title">Chat</h2>
+            <p class="chat-sidebar-subtitle">Chat2a · Agent Framework · Local Loops</p>
+        </div>
+        <button type="button" class="chat-sidebar-close" aria-label="Close chat" @onclick="OnClose">&times;</button>
+    </div>
+
+    <div @ref="_messagesElement" class="chat-sidebar-messages" aria-live="polite">
+        @if (_history.Count == 0)
+        {
+            <p class="muted chat-sidebar-empty">Ask about the weather, or ask to add or remove a city on your map.</p>
+        }
+        @foreach (var entry in _history)
+        {
+            @if (entry.Role == "assistant" && !entry.Streaming)
+            {
+                <div class="chat-message assistant chat-markdown">
+                    @((MarkupString)SafeGfmMarkdown.ToHtml(entry.Content))
+                    @if (!string.IsNullOrEmpty(WeatherGridFormat.FormatChatUsageChip(entry.Usage)))
+                    {
+                        <span class="chat-usage-chip" @attributes="UsageHoverAttributes(entry)">@WeatherGridFormat.FormatChatUsageChip(entry.Usage)</span>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="@MessageClass(entry.Role)" @attributes="ToolHoverAttributes(entry)">@entry.Content</div>
+            }
+        }
+    </div>
+
+    <form class="chat-form chat-sidebar-form" @onsubmit="OnSubmit" @onsubmit:preventDefault="true">
+        @* Uncontrolled textarea, same as ChatPanel: chatInput.js owns the draft until submit. *@
+        <textarea @ref="_inputElement"
+                  class="chat-input"
+                  rows="3"
+                  placeholder="Add Nashville, TN to my map…"
+                  aria-label="Message"
+                  disabled="@_isSending"></textarea>
+        <button type="submit" class="chat-sidebar-send" disabled="@_isSending">
+            @(_isSending ? "Sending…" : "Send")
+        </button>
+    </form>
+</aside>
+
+@code {
+    public const string ChatTab = "Chat2a";
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private sealed class ChatEntry
+    {
+        public required string Role { get; set; }
+        public required string Content { get; set; }
+        public string? ToolName { get; set; }
+        public string? ToolArguments { get; set; }
+        public string? ToolResult { get; set; }
+        public bool Running { get; set; }
+        public bool Streaming { get; set; }
+        public ChatUsage? Usage { get; set; }
+    }
+
+    private readonly List<ChatEntry> _history = [];
+    private string? _sessionId;
+    private bool _isSending;
+    private bool _scrollPending;
+    private ElementReference _inputElement;
+    private ElementReference _messagesElement;
+
+    private static string MessageClass(string role) => role switch
+    {
+        "user" => "chat-message user",
+        "tool" => "chat-message tool",
+        "error" => "chat-message error",
+        "blocked" => "chat-message blocked",
+        _ => "chat-message assistant",
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (Open)
+        {
+            _scrollPending = true;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_scrollPending)
+        {
+            return;
+        }
+
+        _scrollPending = false;
+        try
+        {
+            await JS.InvokeVoidAsync("chatInput.scrollToBottom", _messagesElement);
+        }
+        catch
+        {
+            // Script is optional in component tests.
+        }
+    }
+
+    private static Dictionary<string, object>? ToolHoverAttributes(ChatEntry entry)
+    {
+        if (entry.Role != "tool")
+        {
+            return null;
+        }
+
+        var sections = new List<string>();
+        if (!string.IsNullOrWhiteSpace(entry.ToolArguments))
+        {
+            sections.Add($"Arguments\n{entry.ToolArguments}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(entry.ToolResult))
+        {
+            sections.Add($"Result\n{entry.ToolResult}");
+        }
+
+        var hoverText = sections.Count == 0
+            ? (entry.Running ? "Waiting for tool output…" : null)
+            : string.Join("\n\n", sections);
+
+        return string.IsNullOrEmpty(hoverText)
+            ? null
+            : new Dictionary<string, object> { ["data-tool-details"] = hoverText, ["tabindex"] = 0 };
+    }
+
+    private static Dictionary<string, object>? UsageHoverAttributes(ChatEntry entry)
+    {
+        var details = WeatherGridFormat.FormatChatUsageDetails(entry.Usage);
+        return string.IsNullOrEmpty(details)
+            ? null
+            : new Dictionary<string, object> { ["data-tool-details"] = details, ["tabindex"] = 0 };
+    }
+
+    private async Task<string> ReadComposerValueAsync()
+    {
+        try
+        {
+            return await JS.InvokeAsync<string>("chatInput.getValue", _inputElement) ?? string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    private async Task ClearComposerValueAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("chatInput.setValue", _inputElement, string.Empty);
+        }
+        catch
+        {
+            // Tests and missing script leave the textarea as-is.
+        }
+    }
+
+    private async Task OnSubmit()
+    {
+        var message = (await ReadComposerValueAsync()).Trim();
+        if (string.IsNullOrWhiteSpace(message) || _isSending)
+        {
+            return;
+        }
+
+        await ClearComposerValueAsync();
+        _isSending = true;
+        _history.Add(new ChatEntry { Role = "user", Content = message });
+        _scrollPending = true;
+
+        var assistantBuilder = new System.Text.StringBuilder();
+        ChatEntry? assistantEntry = null;
+
+        try
+        {
+            var events = ChatClient.StreamMessageAsync(
+                ChatTab,
+                new ChatSendMessageRequest { SessionId = _sessionId, Message = message },
+                CancellationToken.None);
+
+            await foreach (var streamEvent in events)
+            {
+                if (streamEvent.Type == "session" && !string.IsNullOrWhiteSpace(streamEvent.SessionId))
+                {
+                    _sessionId = streamEvent.SessionId;
+                    continue;
+                }
+
+                if (streamEvent.Type == "token" && !string.IsNullOrEmpty(streamEvent.Text))
+                {
+                    assistantBuilder.Append(streamEvent.Text);
+                    if (assistantEntry is null)
+                    {
+                        assistantEntry = new ChatEntry { Role = "assistant", Content = string.Empty, Streaming = true };
+                        _history.Add(assistantEntry);
+                    }
+
+                    assistantEntry.Content = assistantBuilder.ToString();
+                }
+                else if (streamEvent.Type == "tool_start" && !string.IsNullOrEmpty(streamEvent.ToolName))
+                {
+                    _history.Add(new ChatEntry
+                    {
+                        Role = "tool",
+                        Content = $"Running {streamEvent.ToolName} …",
+                        ToolName = streamEvent.ToolName,
+                        ToolArguments = streamEvent.ToolArguments,
+                        Running = true,
+                    });
+                }
+                else if (streamEvent.Type == "tool_end" && !string.IsNullOrEmpty(streamEvent.ToolName))
+                {
+                    var pending = _history.LastOrDefault(entry => entry.Running && entry.ToolName == streamEvent.ToolName);
+                    if (pending is not null)
+                    {
+                        pending.Running = false;
+                        pending.Content = $"Ran {streamEvent.ToolName} …";
+                        pending.ToolArguments = streamEvent.ToolArguments ?? pending.ToolArguments;
+                        pending.ToolResult = streamEvent.ToolResult;
+                    }
+                }
+                else if ((streamEvent.Type == "error" || streamEvent.Type == "blocked") && !string.IsNullOrEmpty(streamEvent.ErrorMessage))
+                {
+                    _history.Add(new ChatEntry { Role = streamEvent.Type, Content = streamEvent.ErrorMessage });
+                }
+                else if (streamEvent.Type == "done" && assistantEntry is not null)
+                {
+                    assistantEntry.Streaming = false;
+                    assistantEntry.Usage = streamEvent.Usage;
+                }
+
+                _scrollPending = true;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            _history.Add(new ChatEntry { Role = "error", Content = ex.Message });
+        }
+        finally
+        {
+            _isSending = false;
+            if (assistantEntry is not null)
+            {
+                assistantEntry.Streaming = false;
+            }
+
+            _scrollPending = true;
+        }
+
+        await RefreshMapCitiesAsync();
+    }
+
+    // The agent may have called AddUserCity/DeleteUserCity; re-read /User so the map updates.
+    private async Task RefreshMapCitiesAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("weatherMap.refreshCities");
+        }
+        catch
+        {
+            // The map script is optional in component tests.
+        }
+    }
+}

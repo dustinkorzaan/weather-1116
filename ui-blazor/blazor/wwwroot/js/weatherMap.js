@@ -1003,6 +1003,7 @@ window.weatherMap = (function () {
     tryAutoInit: tryAutoInit,
     addCity: addCity,
     removeCity: removeCity,
+    refreshCities: refreshCities,
     weatherModalPath: weatherModalPath,
   };
 })();

@@ -64,6 +64,17 @@
                     </form>
                 }
             </div>
+            <button type="button"
+                    class="chat-toggle-button"
+                    title="Chat"
+                    aria-label="Chat"
+                    aria-expanded="@_chatOpen.ToString().ToLowerInvariant()"
+                    aria-controls="chat2a-sidebar"
+                    @onclick="ToggleChat">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                </svg>
+            </button>
             }
 
         <button id="user-menu-button"
@@ -92,7 +103,12 @@
     </FluentHeader>
 
     <FluentBodyContent Class="weather-body">
-        @Body
+        <div class="weather-body-row">
+            <div class="weather-main">
+                @Body
+            </div>
+            <Chat2aSidebar Open="@(_chatOpen && IsMapPage)" OnClose="CloseChat" />
+        </div>
     </FluentBodyContent>
 </FluentLayout>
 
@@ -166,6 +182,7 @@
     private bool _addLocationLoading;
     private string _addLocation = "Nashville, TN";
     private string _addLocationError = string.Empty;
+    private bool _chatOpen;
 
     private DesignThemeModes FluentMode => _themePreference switch
     {
@@ -309,6 +326,16 @@
 
         _addLocationOpen = !_addLocationOpen;
         _addLocationError = string.Empty;
+    }
+
+    private void ToggleChat()
+    {
+        _chatOpen = !_chatOpen;
+    }
+
+    private void CloseChat()
+    {
+        _chatOpen = false;
     }
 
     private void CloseAddLocation()

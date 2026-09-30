@@ -452,4 +452,53 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("[hidden]", css);
         Assert.DoesNotContain("tailwindcss", css, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public async Task MapPage_HeaderChatIconSitsBetweenThePlusControlAndTheUserMenu()
+    {
+        var html = await _client.GetStringAsync("/");
+
+        var addIndex = html.IndexOf("aria-label=\"Add location\"", StringComparison.Ordinal);
+        var chatIndex = html.IndexOf("id=\"chatToggleButton\"", StringComparison.Ordinal);
+        var userIndex = html.IndexOf("id=\"avatarMenuButton\"", StringComparison.Ordinal);
+        Assert.True(addIndex >= 0 && chatIndex > addIndex && userIndex > chatIndex);
+        Assert.Contains("aria-controls=\"chat2a-sidebar\"", html);
+    }
+
+    [Fact]
+    public async Task MapPage_RendersHiddenChat2aSidebarRightOfTheMainColumn()
+    {
+        var html = await _client.GetStringAsync("/");
+
+        var mainIndex = html.IndexOf("class=\"site-main\"", StringComparison.Ordinal);
+        var sidebarIndex = html.IndexOf("<aside id=\"chat2a-sidebar\" class=\"chat-sidebar\" aria-label=\"Chat2a\" hidden>", StringComparison.Ordinal);
+        Assert.True(mainIndex >= 0 && sidebarIndex > mainIndex);
+        Assert.Contains("chat2aSidebar.js", html);
+        Assert.Contains("safeGfmMarkdown.js", html);
+    }
+
+    [Fact]
+    public async Task NonMapPage_HasNoChatIconOrSidebar()
+    {
+        var html = await _client.GetStringAsync("/hello-world");
+
+        Assert.DoesNotContain("chatToggleButton", html);
+        Assert.DoesNotContain("chat2a-sidebar", html);
+        Assert.DoesNotContain("chat2aSidebar.js", html);
+    }
+
+    [Fact]
+    public void Chat2aSidebarScript_StreamsChat2aAndRefreshesMapCitiesAfterEveryTurn()
+    {
+        var script = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chat2aSidebar.js"));
+        Assert.Contains("fetch('/Chat2a/Messages'", script);
+        Assert.Contains("window.weatherMap.refreshCities()", script);
+
+        // The refresh runs in the submit handler's finally block, so it follows every completion.
+        var finallyIndex = script.LastIndexOf("} finally {", StringComparison.Ordinal);
+        Assert.True(script.IndexOf("refreshMapCities();", finallyIndex, StringComparison.Ordinal) > finallyIndex);
+
+        var map = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/weatherMap.js"));
+        Assert.Contains("refreshCities: refreshCities", map);
+    }
 }

@@ -373,7 +373,7 @@ and layout code instead of sharing it.
 
 | Route | Contents |
 | --- | --- |
-| `/` | Top bar (logo left, person/avatar menu right) above a full-viewport Google Map. Pin click opens a weather modal (Current AI Weather, forecast, and history). |
+| `/` | Top bar (logo left; add-location plus, chat icon and person/avatar menu right) above a full-viewport Google Map. Pin click opens a weather modal (Current AI Weather, forecast, and history). The chat icon toggles a right-hand Chat2a sidebar; after every completed chat turn the UI re-reads `/User`, so cities the agent added or deleted appear on (or leave) the map. |
 | `/hello-world` | Same top bar, then the hello message — no map |
 | `/current-ai-weather` | Same top bar, then the Current AI Weather widget — no map |
 | `/chat-clients` | Same top bar, then the chat clients (ChatPanel) — no map |

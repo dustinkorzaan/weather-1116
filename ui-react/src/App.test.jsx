@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, expect, test, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
@@ -593,4 +593,103 @@ test('header plus control opens a location popdown and stays open while geo sear
     .find((url) => url.includes('/Geo'));
   expect(geoUrl).toBeDefined();
   expect(geoUrl).toContain('location=Nashville');
+});
+
+function sseResponse(events) {
+  const body = events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join('');
+  return new Response(body, { status: 200, headers: { 'Content-Type': 'text/event-stream' } });
+}
+
+test('header chat icon sits between the plus control and the user menu', async () => {
+  mockHelloFetch();
+  await renderApp('/');
+
+  const addButton = screen.getByRole('button', { name: /add location/i });
+  const chatButton = screen.getByRole('button', { name: /^chat$/i });
+  const userButton = screen.getByRole('button', { name: /open user menu/i });
+
+  expect(addButton.compareDocumentPosition(chatButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(chatButton.compareDocumentPosition(userButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+});
+
+test('header chat icon toggles the Chat2a sidebar on the right', async () => {
+  const user = userEvent.setup();
+  mockHelloFetch();
+  await renderApp('/');
+
+  const chatButton = screen.getByRole('button', { name: /^chat$/i });
+  expect(chatButton.getAttribute('aria-expanded')).toBe('false');
+  expect(screen.queryByRole('complementary', { name: 'Chat2a' })).toBeNull();
+
+  await user.click(chatButton);
+
+  const sidebar = screen.getByRole('complementary', { name: 'Chat2a' });
+  expect(chatButton.getAttribute('aria-expanded')).toBe('true');
+  expect(sidebar.className).toContain('border-l');
+  // Map column comes first, sidebar is its right-hand sibling.
+  expect(sidebar.previousElementSibling.contains(screen.getByRole('region', { name: /map/i }))).toBe(true);
+
+  await user.click(screen.getByRole('button', { name: /close chat/i }));
+  expect(screen.queryByRole('complementary', { name: 'Chat2a' })).toBeNull();
+});
+
+test('chat icon is only in the header on the map page', async () => {
+  mockHelloFetch();
+  await renderApp('/hello-world');
+
+  expect(screen.queryByRole('button', { name: /^chat$/i })).toBeNull();
+});
+
+test('Chat2a sidebar posts to the Chat2a API and refetches the user after every completion', async () => {
+  const user = userEvent.setup();
+  const fetchSpy = mockHelloFetch();
+  const baseFetch = fetchSpy.getMockImplementation();
+  const chatBodies = [];
+  let userCities = [];
+
+  fetchSpy.mockImplementation(async (input, init) => {
+    const url = requestUrl(input);
+    const { pathname } = new URL(url);
+    if (pathname.endsWith('/Chat2a/messages')) {
+      chatBodies.push(JSON.parse(init.body));
+      userCities = [
+        { id: 'c1', latitude: 36.1627, longitude: -86.7816, locationName: 'Nashville, Tennessee' },
+      ];
+      return sseResponse([
+        { type: 'session', sessionId: 'session-1' },
+        { type: 'tool_start', toolName: 'AddUserCity', toolArguments: '{}' },
+        { type: 'tool_end', toolName: 'AddUserCity', toolResult: 'ok' },
+        { type: 'token', text: 'Added Nashville.' },
+        { type: 'done' },
+      ]);
+    }
+    if (pathname.endsWith('/User')) {
+      return new Response(JSON.stringify({ id: 'u', userCities }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    return baseFetch(input, init);
+  });
+
+  await renderApp('/');
+
+  const userFetchCount = () =>
+    fetchSpy.mock.calls.filter(([input]) => new URL(requestUrl(input)).pathname.endsWith('/User')).length;
+  await waitFor(() => expect(userFetchCount()).toBe(1));
+
+  await user.click(screen.getByRole('button', { name: /^chat$/i }));
+  const sidebar = screen.getByRole('complementary', { name: 'Chat2a' });
+  await user.type(within(sidebar).getByLabelText(/message/i), 'Add Nashville to my map');
+  await user.click(within(sidebar).getByRole('button', { name: /^send$/i }));
+
+  await within(sidebar).findByText('Added Nashville.');
+  await waitFor(() => expect(userFetchCount()).toBe(2));
+  expect(chatBodies[0]).toEqual({ sessionId: null, message: 'Add Nashville to my map' });
+
+  await user.type(within(sidebar).getByLabelText(/message/i), 'Thanks');
+  await user.click(within(sidebar).getByRole('button', { name: /^send$/i }));
+
+  await waitFor(() => expect(userFetchCount()).toBe(3));
+  expect(chatBodies[1]).toEqual({ sessionId: 'session-1', message: 'Thanks' });
 });

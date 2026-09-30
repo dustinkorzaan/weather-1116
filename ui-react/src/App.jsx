@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
 import AboutDialog from './components/about/AboutDialog';
+import Chat2aSidebar from './components/chat/Chat2aSidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +25,7 @@ import { MapPinsProvider } from './map/mapPinsContext';
 
 function AppShell() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { preference, setPreference } = useTheme();
   const { pathname } = useLocation();
   const isMapVisible = pathname === '/';
@@ -38,6 +41,21 @@ function AppShell() {
 
           <div className="flex items-center gap-2">
             {isMapVisible && <AddLocationControl />}
+            {isMapVisible && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Chat"
+                aria-expanded={isChatOpen}
+                aria-controls="chat2a-sidebar"
+                title="Chat"
+                onClick={() => setIsChatOpen((current) => !current)}
+                className="size-9 rounded-full border-2 border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground"
+              >
+                <MessageCircle aria-hidden="true" />
+              </Button>
+            )}
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -79,14 +97,18 @@ function AppShell() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col">
-        <Routes>
-          <Route path="/" element={<MapPage />} />
-          <Route path="/hello-world" element={<HelloWorldPage />} />
-          <Route path="/current-ai-weather" element={<CurrentAIWeatherPage />} />
-          <Route path="/chat-clients" element={<ChatClientsPage />} />
-          <Route path="/weather" element={<WeatherModalPage />} />
-        </Routes>
+      <div className="flex min-h-0 flex-1 max-sm:flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <Routes>
+            <Route path="/" element={<MapPage />} />
+            <Route path="/hello-world" element={<HelloWorldPage />} />
+            <Route path="/current-ai-weather" element={<CurrentAIWeatherPage />} />
+            <Route path="/chat-clients" element={<ChatClientsPage />} />
+            <Route path="/weather" element={<WeatherModalPage />} />
+          </Routes>
+        </div>
+        {/* Stays mounted while hidden so the conversation survives close/reopen. */}
+        <Chat2aSidebar open={isChatOpen && isMapVisible} onClose={() => setIsChatOpen(false)} />
       </div>
 
       <AboutDialog open={isAboutOpen} onOpenChange={setIsAboutOpen} />

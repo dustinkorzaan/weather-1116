@@ -1,0 +1,23 @@
+@* Right-hand Chat2a sidebar on the map page, opened from the header chat icon.
+   Chat2a's agent can add and delete saved cities, so chat2aSidebar.js re-reads /User
+   through weatherMap.refreshCities after every completed turn and the map repaints. *@
+<aside id="chat2a-sidebar" class="chat-sidebar" aria-label="Chat2a" hidden>
+    <div class="chat-sidebar-header">
+        <div class="chat-sidebar-heading">
+            <h2 class="chat-sidebar-title">Chat</h2>
+            <p class="chat-sidebar-subtitle">Chat2a · Agent Framework · Local Loops</p>
+        </div>
+        <button id="chat2a-sidebar-close" type="button" class="chat-sidebar-close" aria-label="Close chat">&times;</button>
+    </div>
+    <div id="chat2a-sidebar-messages" class="chat-sidebar-messages" aria-live="polite">
+        <p class="chat-sidebar-empty">Ask about the weather, or ask to add or remove a city on your map.</p>
+    </div>
+    <form id="chat2a-sidebar-form" class="chat-form">
+        <label class="sr-only" for="chat2a-sidebar-input">Message</label>
+        <textarea id="chat2a-sidebar-input"
+                  class="text-area"
+                  rows="3"
+                  placeholder="Add Nashville, TN to my map…"></textarea>
+        <button id="chat2a-sidebar-send" type="submit" class="btn chat-send">Send</button>
+    </form>
+</aside>
