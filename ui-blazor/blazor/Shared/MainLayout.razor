@@ -64,6 +64,20 @@
                     </form>
                 }
             </div>
+
+            @* The Chat2a sidebar exists to edit saved cities next to their pins, so like
+               Add location it is offered on the map page only. *@
+            <button type="button"
+                    class="chat-toggle-button"
+                    title="Open chat"
+                    aria-label="Open chat"
+                    aria-expanded="@_chatOpen.ToString().ToLowerInvariant()"
+                    aria-controls="chat2a-sidebar"
+                    @onclick="ToggleChat">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+            </button>
             }
 
         <button id="user-menu-button"
@@ -92,7 +106,15 @@
     </FluentHeader>
 
     <FluentBodyContent Class="weather-body">
-        @Body
+        @* On / the page and the Chat2a sidebar share one flex row (sidebar docked right, the map
+           narrows; stacked under the map below 640px). Elsewhere both wrappers are display:
+           contents and the sidebar stays mounted but hidden, so its history survives navigation. *@
+        <div class="weather-main @(IsMapPage ? "is-map-page" : null)">
+            <div class="weather-main-page">
+                @Body
+            </div>
+            <Chat2aSidebar Open="ChatVisible" OnClose="CloseChat" />
+        </div>
     </FluentBodyContent>
 </FluentLayout>
 
@@ -166,6 +188,7 @@
     private bool _addLocationLoading;
     private string _addLocation = "Nashville, TN";
     private string _addLocationError = string.Empty;
+    private bool _chatOpen;
 
     private DesignThemeModes FluentMode => _themePreference switch
     {
@@ -230,12 +253,19 @@
         }
     }
 
+    private bool ChatVisible => _chatOpen && IsMapPage;
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
     {
         if (_addLocationOpen && !IsMapPage)
         {
             _addLocationOpen = false;
             _addLocationError = string.Empty;
+        }
+
+        if (!IsMapPage)
+        {
+            _chatOpen = false;
         }
 
         _ = InvokeAsync(StateHasChanged);
@@ -319,6 +349,16 @@
         }
 
         _addLocationOpen = false;
+    }
+
+    private void ToggleChat()
+    {
+        _chatOpen = !_chatOpen;
+    }
+
+    private void CloseChat()
+    {
+        _chatOpen = false;
     }
 
     private void OnAddLocationInput(ChangeEventArgs args)

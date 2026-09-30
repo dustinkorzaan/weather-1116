@@ -899,6 +899,7 @@ window.weatherMap = (function () {
     init: init,
     addCity: addCity,
     removeCity: removeCity,
+    refreshCities: refreshCities,
     weatherModalPath: weatherModalPath,
     formatLocationWithLatLong: formatLocationWithLatLong,
   };

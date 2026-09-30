@@ -378,6 +378,33 @@ and layout code instead of sharing it.
 | `/current-ai-weather` | Same top bar, then the Current AI Weather widget — no map |
 | `/chat-clients` | Same top bar, then the chat clients (ChatPanel) — no map |
 
+On `/` the top bar's right-hand actions are, in order: **Add location**
+(plus) → **Open chat** → the avatar menu. Other routes show only the avatar
+menu. **Open chat** toggles the **Chat2a** sidebar (`aria-expanded`,
+`aria-controls="chat2a-sidebar"`), a `complementary` panel labelled "Chat2a".
+It is docked in the layout beside the map rather than on top of it:
+- at widths of 640px and up, it sits to the right of the map and the map gets narrower;
+- below 640px, it stacks under the map.
+
+It closes with its **Close chat** button, the header button, Escape, or by
+leaving `/`.
+
+The sidebar talks to the existing `POST /Chat2a/messages` endpoint (Weather API
+for React/Blazor, MVC's own `Chat2aController`) with its own session. Its
+messages go through the same rendering code as the `/chat-clients` panel in
+each UI: markdown replies, usage chip, and tool hover with arguments and result.
+- React: `ChatMessage` in `ChatPanel.jsx`.
+- Blazor: `ChatMessageList.razor`.
+- MVC: `wwwroot/js/chatRender.js`.
+
+After every send completes, including a failed one, the map re-reads
+`GET /User` once and re-renders its pins, so cities the agent adds or deletes
+appear or disappear without a reload. React does this through the map-pins
+context `refreshCities` and Blazor/MVC through `weatherMap.refreshCities()`.
+
+In React and Blazor the conversation survives closing the sidebar and SPA
+navigation. MVC's resets on navigation, because navigation reloads the page.
+
 The avatar menu is a filled person silhouette (`avatar.svg` in all three UIs)
 and its items are ordered:
 **Home** → divider →
@@ -410,8 +437,11 @@ differs by library; the behavior does not:
 
 - A single fluid layout adapts at breakpoints rather than branching into
   distinct mobile/desktop templates.
-- Primary navigation is a top bar with the logo on the left and the person menu
-  on the right; it stays reachable and never overflows the viewport.
+- Primary navigation is a top bar with the logo on the left and, on the right,
+  Add location and Open chat (both only on `/`) → the person menu; it stays
+  reachable and never overflows the viewport.
+- On `/`, the open Chat2a sidebar shares the map's row at 640px and up (the map
+  narrows) and stacks under the map below 640px; it never overlays the map.
 - On `/`, the map fills the remaining viewport height below the top bar at every
   width; on `/hello-world`, `/current-ai-weather`, and `/chat-clients` content is
   centered with a max width on large screens.

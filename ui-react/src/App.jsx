@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { MessageSquareIcon } from 'lucide-react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
 import AboutDialog from './components/about/AboutDialog';
+import Chat2aSidebar from './components/chat/Chat2aSidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +28,15 @@ function AppShell() {
   const { preference, setPreference } = useTheme();
   const { pathname } = useLocation();
   const isMapVisible = pathname === '/';
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const closeChat = useCallback(() => setIsChatOpen(false), []);
+
+  // Leaving Home closes the sidebar (history is kept), matching Blazor and MVC.
+  useEffect(() => {
+    if (!isMapVisible) {
+      setIsChatOpen(false);
+    }
+  }, [isMapVisible]);
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
@@ -38,6 +49,21 @@ function AppShell() {
 
           <div className="flex items-center gap-2">
             {isMapVisible && <AddLocationControl />}
+            {isMapVisible && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Open chat"
+                title="Open chat"
+                aria-expanded={isChatOpen}
+                aria-controls="chat2a-sidebar"
+                onClick={() => setIsChatOpen((current) => !current)}
+                className="size-9 rounded-full border-2 border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <MessageSquareIcon aria-hidden="true" className="size-5" />
+              </Button>
+            )}
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -79,14 +105,20 @@ function AppShell() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col">
-        <Routes>
-          <Route path="/" element={<MapPage />} />
-          <Route path="/hello-world" element={<HelloWorldPage />} />
-          <Route path="/current-ai-weather" element={<CurrentAIWeatherPage />} />
-          <Route path="/chat-clients" element={<ChatClientsPage />} />
-          <Route path="/weather" element={<WeatherModalPage />} />
-        </Routes>
+      {/* On Home the Chat2a sidebar docks beside the map (under it below 640px) so the map
+          shrinks instead of being covered. It stays mounted off Home to keep its history. */}
+      <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <Routes>
+            <Route path="/" element={<MapPage />} />
+            <Route path="/hello-world" element={<HelloWorldPage />} />
+            <Route path="/current-ai-weather" element={<CurrentAIWeatherPage />} />
+            <Route path="/chat-clients" element={<ChatClientsPage />} />
+            <Route path="/weather" element={<WeatherModalPage />} />
+          </Routes>
+        </div>
+
+        <Chat2aSidebar open={isChatOpen && isMapVisible} onClose={closeChat} />
       </div>
 
       <AboutDialog open={isAboutOpen} onOpenChange={setIsAboutOpen} />

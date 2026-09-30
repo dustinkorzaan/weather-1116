@@ -345,6 +345,109 @@ code {
   overflow-y: auto;
 }
 
+/* Chat2a sidebar (header "Open chat" button) */
+
+.chat-toggle-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 9999px;
+  background: var(--color-bg);
+  color: var(--color-avatar);
+  cursor: pointer;
+}
+
+.chat-toggle-button:hover,
+.chat-toggle-button[aria-expanded="true"] {
+  background: var(--color-bg-muted);
+  color: var(--color-avatar-hover);
+}
+
+.chat-toggle-button:focus {
+  outline: none;
+}
+
+.chat-toggle-button:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-primary-soft);
+}
+
+/* Docked in .map-section's row, right of the map: the map narrows instead of being covered. */
+.chat-sidebar {
+  display: flex;
+  width: 24rem;
+  min-height: 0;
+  flex: 0 0 24rem;
+  flex-direction: column;
+  border-left: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.chat-sidebar-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.chat-sidebar-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.chat-sidebar-close {
+  padding: 0 0.5rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.chat-sidebar-close:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.chat-sidebar-messages {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.chat-sidebar-form {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Below 640px the sidebar stacks under the map, which keeps half of the height. */
+@media (max-width: 639.98px) {
+  .chat-sidebar {
+    width: 100%;
+    flex: 1 1 0;
+    border-top: 1px solid var(--color-border);
+    border-left: 0;
+  }
+}
+
 /* About modal */
 
 .about-modal {
@@ -521,7 +624,13 @@ code {
   width: 100%;
   min-height: 0;
   flex: 1;
-  flex-direction: column;
+  flex-direction: row;
+}
+
+@media (max-width: 639.98px) {
+  .map-section {
+    flex-direction: column;
+  }
 }
 
 .map-key-hint {
@@ -534,6 +643,7 @@ code {
   position: relative;
   display: flex;
   width: 100%;
+  min-width: 0;
   min-height: 0;
   flex: 1;
   flex-direction: column;

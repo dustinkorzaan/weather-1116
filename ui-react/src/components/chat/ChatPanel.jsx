@@ -204,6 +204,29 @@ function ToolChip({ content, details, className }) {
   );
 }
 
+// One history entry: tool lines as hover chips, finished assistant replies as sanitized
+// markdown with the usage chip. Shared with the header Chat2a sidebar.
+export function ChatMessage({ entry }) {
+  if (entry.role === 'tool') {
+    return <ToolChip content={entry.content} details={formatToolHoverText(entry)} />;
+  }
+
+  const finishedReply = entry.role === 'assistant' && !entry.streaming;
+  const usageChip = finishedReply ? formatChatUsageChip(entry.usage) : null;
+  return (
+    <div className={messageClasses(entry)}>
+      {finishedReply ? <SafeGfmMarkdown>{entry.content}</SafeGfmMarkdown> : entry.content}
+      {usageChip ? (
+        <ToolChip
+          content={usageChip}
+          details={formatChatUsageDetails(entry.usage)}
+          className="mt-1.5 w-fit text-xs text-muted-foreground"
+        />
+      ) : null}
+    </div>
+  );
+}
+
 function createEmptyHistory() {
   return Object.fromEntries(TAB_CONFIG.map((tab) => [tab.id, []]));
 }
@@ -433,28 +456,7 @@ function ChatPanel() {
               className="flex min-h-48 max-h-[29rem] flex-col gap-2 overflow-x-auto overflow-y-auto p-1"
             >
               {histories[activeTab].map((entry, index) => (
-                entry.role === 'tool' ? (
-                  <ToolChip
-                    key={`${activeTab}-${index}`}
-                    content={entry.content}
-                    details={formatToolHoverText(entry)}
-                  />
-                ) : (
-                  <div key={`${activeTab}-${index}`} className={messageClasses(entry)}>
-                    {entry.role === 'assistant' && !entry.streaming ? (
-                      <SafeGfmMarkdown>{entry.content}</SafeGfmMarkdown>
-                    ) : (
-                      entry.content
-                    )}
-                    {entry.role === 'assistant' && !entry.streaming && formatChatUsageChip(entry.usage) ? (
-                      <ToolChip
-                        content={formatChatUsageChip(entry.usage)}
-                        details={formatChatUsageDetails(entry.usage)}
-                        className="mt-1.5 w-fit text-xs text-muted-foreground"
-                      />
-                    ) : null}
-                  </div>
-                )
+                <ChatMessage key={`${activeTab}-${index}`} entry={entry} />
               ))}
             </div>
 
