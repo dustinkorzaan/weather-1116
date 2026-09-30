@@ -117,12 +117,7 @@ body {
     color: var(--wx-fg);
 }
 
-/* Fluent's scoped CSS gives .header z-index 10 inside the flex shell, which makes the header a
-   stacking context capped at 10. Raise it above the fixed Chat2a sidebar (35) so the avatar menu
-   and add-location panel open over the sidebar; modals (1000) stay on top. */
 .layout.weather-shell > .header.weather-header {
-    position: relative;
-    z-index: 36;
     background-color: var(--wx-bg);
     color: var(--wx-fg);
     border-bottom: 1px solid var(--wx-border);
@@ -279,36 +274,67 @@ body {
     font-size: 0.875rem;
 }
 
-/* Chat2a sidebar: fixed to the right edge below the 48px header, overlaying the map.
-   Above the map (and its pin cards); below the header (36, so its menus and panels open over
-   the sidebar) and modals (1000). */
+/* Body row for the map page: the page and the Chat2a sidebar sit side by side in the layout,
+   so the map narrows instead of being covered (Google Maps re-lays itself out on resize).
+   Off the map page both wrappers are display: contents, leaving page layout untouched. */
+.weather-main,
+.weather-main-page {
+    display: contents;
+}
+
+.weather-main.is-map-page {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    align-items: stretch;
+    min-height: 0;
+    width: 100%;
+}
+
+.weather-main.is-map-page > .weather-main-page {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* Chat2a sidebar: docked to the right of the map in the same flex row (no overlay). */
 .chat-sidebar {
-    position: fixed;
-    top: 48px;
-    right: 0;
-    bottom: 0;
-    z-index: 35;
     box-sizing: border-box;
     display: flex;
+    flex: 0 0 24rem;
     flex-direction: column;
     width: 24rem;
     max-width: 100%;
+    min-height: 0;
     padding: 0.75rem;
     gap: 0.5rem;
     border-left: 1px solid var(--wx-border);
     background: var(--wx-bg);
     color: var(--wx-fg);
-    box-shadow: -10px 0 15px -3px rgb(0 0 0 / 0.15);
 }
 
 .chat-sidebar[hidden] {
     display: none;
 }
 
+/* Phones: stack the sidebar under the map; the map keeps the top 45% of the height
+   (zero-basis grow ratios, so neither side's content changes the split). */
 @media (max-width: 639.98px) {
+    .weather-main.is-map-page {
+        flex-direction: column;
+    }
+
+    .weather-main.is-map-page > .weather-main-page {
+        flex: 45 1 0;
+    }
+
     .chat-sidebar {
+        flex: 55 1 0;
         width: 100%;
         border-left: 0;
+        border-top: 1px solid var(--wx-border);
     }
 }
 

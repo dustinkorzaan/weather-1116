@@ -1,0 +1,92 @@
+@using WeatherBlazor.Data
+
+@* Shared transcript rendering for ChatPanel and Chat2aSidebar: finished assistant replies as
+   sanitized GFM markdown plus the usage chip, tool lines with a data-tool-details hover card
+   (chatInput.js shows it at document level). The caller owns the scroll container. *@
+@foreach (var entry in Entries)
+{
+    @if (entry.Role == "assistant" && !entry.Streaming)
+    {
+        <div class="chat-message assistant chat-markdown">
+            @((MarkupString)SafeGfmMarkdown.ToHtml(entry.Content))
+            @if (!string.IsNullOrEmpty(WeatherGridFormat.FormatChatUsageChip(entry.Usage)))
+            {
+                <span class="chat-usage-chip" @attributes="UsageHoverAttributes(entry)">@WeatherGridFormat.FormatChatUsageChip(entry.Usage)</span>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="@MessageClass(entry.Role)" @attributes="ToolHoverAttributes(entry)">@entry.Content</div>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ChatEntry> Entries { get; set; } = [];
+
+    private static string MessageClass(string role) => role switch
+    {
+        "user" => "chat-message user",
+        "tool" => "chat-message tool",
+        "error" => "chat-message error",
+        "blocked" => "chat-message blocked",
+        _ => "chat-message assistant",
+    };
+
+    private static string? ToolHoverText(ChatEntry entry)
+    {
+        if (entry.Role != "tool")
+        {
+            return null;
+        }
+
+        var sections = new List<string>();
+        if (!string.IsNullOrWhiteSpace(entry.ToolArguments))
+        {
+            sections.Add($"Arguments\n{entry.ToolArguments}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(entry.ToolResult))
+        {
+            sections.Add($"Result\n{entry.ToolResult}");
+        }
+
+        if (sections.Count == 0)
+        {
+            return entry.Running ? "Waiting for tool output…" : null;
+        }
+
+        return string.Join("\n\n", sections);
+    }
+
+    private static Dictionary<string, object>? ToolHoverAttributes(ChatEntry entry)
+    {
+        var hoverText = ToolHoverText(entry);
+        if (string.IsNullOrEmpty(hoverText))
+        {
+            return null;
+        }
+
+        return new Dictionary<string, object>
+        {
+            ["data-tool-details"] = hoverText,
+            ["tabindex"] = 0,
+        };
+    }
+
+    private static Dictionary<string, object>? UsageHoverAttributes(ChatEntry entry)
+    {
+        var details = WeatherGridFormat.FormatChatUsageDetails(entry.Usage);
+        if (string.IsNullOrEmpty(details) || string.IsNullOrEmpty(WeatherGridFormat.FormatChatUsageChip(entry.Usage)))
+        {
+            return null;
+        }
+
+        return new Dictionary<string, object>
+        {
+            ["data-tool-details"] = details,
+            ["tabindex"] = 0,
+        };
+    }
+}
