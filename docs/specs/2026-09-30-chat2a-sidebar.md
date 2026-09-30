@@ -1,6 +1,6 @@
 # Chat2a right sidebar with map state synchronization
 
-- **Status:** in-progress
+- **Status:** shipped
 - **Branch / PR:** `claude/affectionate-cray-6sli9u` / (pending)
 - **Mode:** interactive (no questions needed: story shipped with testable criteria)
 
@@ -150,6 +150,7 @@ No serialized paths are touched (no Core, CQMediator, sln, infra, workflows, `.c
 | 1 | peer | NIT: stale Blazor z-index comment | 64ccf3c |
 | 2 | peer | clean. SHOULD: React sidebar `top` not re-measured when Home header wraps after navigation (~320px) | 6a97751 (ResizeObserver on header, re-run on route change; jsdom has no layout, so manual check at 320px) |
 | 2 | peer | NIT: Blazor composer stayed disabled until `/User` refresh finished | 6a97751 (StateHasChanged before refresh) |
+| 1 | final | SHIP — all five ACs evidenced in React/Blazor/MVC; verify --all green | d5f45ab |
 
 ## Open issues
 
