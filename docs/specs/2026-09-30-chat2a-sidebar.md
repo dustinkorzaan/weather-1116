@@ -148,6 +148,8 @@ No serialized paths are touched (no Core, CQMediator, sln, infra, workflows, `.c
 | 1 | peer | SHOULD: Blazor Escape only worked with focus inside the aside | 64ccf3c (textarea focused on open + test); Escape after clicking outside the panel still requires focus in the panel |
 | 1 | peer | SHOULD: MVC `_Layout.cshtml` CRLF→LF churn | e64c46b (CRLF restored; diff is +15/-0) |
 | 1 | peer | NIT: stale Blazor z-index comment | 64ccf3c |
+| 2 | peer | clean. SHOULD: React sidebar `top` not re-measured when Home header wraps after navigation (~320px) | 6a97751 (ResizeObserver on header, re-run on route change; jsdom has no layout, so manual check at 320px) |
+| 2 | peer | NIT: Blazor composer stayed disabled until `/User` refresh finished | 6a97751 (StateHasChanged before refresh) |
 
 ## Open issues
 
