@@ -153,9 +153,6 @@ code {
 /* Header / avatar menu */
 
 .site-header {
-  /* Keeps the header's dropdowns above the Chat2a sidebar (z-index 44). */
-  position: relative;
-  z-index: 45;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg);
   box-shadow: var(--shadow-sm);
@@ -379,21 +376,16 @@ code {
   box-shadow: 0 0 0 2px var(--color-primary-soft);
 }
 
-/* Overlays the map below the top bar (nav height + 1px border); below the About and weather modals. */
+/* Docked in .map-section's row, right of the map: the map narrows instead of being covered. */
 .chat-sidebar {
-  position: fixed;
-  top: calc(3.25rem + 1px);
-  right: 0;
-  bottom: 0;
-  z-index: 44;
   display: flex;
   width: 24rem;
-  max-width: 100%;
+  min-height: 0;
+  flex: 0 0 24rem;
   flex-direction: column;
   border-left: 1px solid var(--color-border);
   background: var(--color-bg);
   color: var(--color-text);
-  box-shadow: var(--shadow-lg);
 }
 
 .chat-sidebar-header {
@@ -446,9 +438,12 @@ code {
   border-top: 1px solid var(--color-border);
 }
 
+/* Below 640px the sidebar stacks under the map, which keeps half of the height. */
 @media (max-width: 639.98px) {
   .chat-sidebar {
     width: 100%;
+    flex: 1 1 0;
+    border-top: 1px solid var(--color-border);
     border-left: 0;
   }
 }
@@ -629,7 +624,13 @@ code {
   width: 100%;
   min-height: 0;
   flex: 1;
-  flex-direction: column;
+  flex-direction: row;
+}
+
+@media (max-width: 639.98px) {
+  .map-section {
+    flex-direction: column;
+  }
 }
 
 .map-key-hint {
@@ -642,6 +643,7 @@ code {
   position: relative;
   display: flex;
   width: 100%;
+  min-width: 0;
   min-height: 0;
   flex: 1;
   flex-direction: column;

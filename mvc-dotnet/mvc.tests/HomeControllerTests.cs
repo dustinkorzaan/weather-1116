@@ -368,19 +368,26 @@ public class HomeControllerTests(WeatherMvcWebApplicationFactory factory) : ICla
         Assert.Contains("function requestScrollToBottom(tabId)", script);
         Assert.Contains("payload.type === 'done'", script);
         Assert.Contains("requestScrollToBottom(tabId)", script);
-        Assert.Contains("function formatChatUsageChip(usage)", script);
         Assert.Contains("assistantEntry.usage = payload.usage || null", script);
-        Assert.Contains("chat-usage-chip", script);
-        Assert.Contains("function formatToolHoverText(entry)", script);
-        Assert.Contains("dataset.toolDetails", script);
         Assert.Contains("payload.toolArguments", script);
         Assert.Contains("payload.toolResult", script);
-        Assert.Contains("chat-tool-hover-card", script);
-        Assert.Contains("chat-tool-hover-wrap", script);
-        Assert.Contains("scheduleToolHoverHide", script);
-        Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", script);
-        Assert.Contains("safeGfmMarkdown.render", script);
         Assert.Contains("streaming", script);
+        Assert.Contains("window.chatRender.renderEntry(entry, messagesEl)", script);
+        Assert.Contains("window.chatRender.attachToolHover(messagesEl)", script);
+        Assert.True(
+            html.IndexOf("js/chatRender.js", StringComparison.Ordinal) < html.IndexOf("js/chatClient.js", StringComparison.Ordinal),
+            "chatRender.js must load before chatClient.js");
+
+        var render = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/chatRender.js"));
+        Assert.Contains("function formatChatUsageChip(usage)", render);
+        Assert.Contains("chat-usage-chip", render);
+        Assert.Contains("function formatToolHoverText(entry)", render);
+        Assert.Contains("dataset.toolDetails", render);
+        Assert.Contains("chat-tool-hover-card", render);
+        Assert.Contains("chat-tool-hover-wrap", render);
+        Assert.Contains("scheduleToolHoverHide", render);
+        Assert.Contains("TOOL_HOVER_CLOSE_DELAY_MS", render);
+        Assert.Contains("safeGfmMarkdown.render", render);
 
         var markdown = File.ReadAllText(RepoFiles.FindRepoFile("mvc-dotnet/mvc/wwwroot/js/markdown/safeGfmMarkdown.js"));
         Assert.Contains("marked.parse", markdown);
