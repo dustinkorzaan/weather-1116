@@ -37,7 +37,7 @@ on ACA, and standalone Python and Node.js servers with no dependency on `Core`).
   - adapt the branch to the overlapping changes;
   - verify, re-review, then push and watch CI.
 
-  Pass `#123` or a branch name from a new thread; `--light` does merge, verify and push only. When several PRs are waiting, sync and merge them one at a time.
+  Pass `#123` or a branch name from a new thread; `--light` skips the overlap scan, and skips review unless there were conflicts or verify fixes. When several PRs are waiting, handle them one at a time: the user merges one, then `/sync` runs on the next. Agents never merge PRs.
 - **Roles** live in `.claude/agents/`. The review checklist is `REVIEW.md`; the spec template is `docs/specs/_template.md`.
 - **Hooks:**
   - `SessionStart` installs every stack's toolchain and deps.
