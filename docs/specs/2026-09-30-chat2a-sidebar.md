@@ -144,6 +144,10 @@ No serialized paths are touched (no Core, CQMediator, sln, infra, workflows, `.c
 
 | Round | Gate | Findings | Resolution (commit / reason) |
 |---|---|---|---|
+| 1 | peer | BLOCKING: Blazor header stacking context (z 10) let sidebar cover avatar menu / add-location panel | 64ccf3c (header `position: relative; z-index: 36` + CSS test) |
+| 1 | peer | SHOULD: Blazor Escape only worked with focus inside the aside | 64ccf3c (textarea focused on open + test); Escape after clicking outside the panel still requires focus in the panel |
+| 1 | peer | SHOULD: MVC `_Layout.cshtml` CRLF→LF churn | e64c46b (CRLF restored; diff is +15/-0) |
+| 1 | peer | NIT: stale Blazor z-index comment | 64ccf3c |
 
 ## Open issues
 
