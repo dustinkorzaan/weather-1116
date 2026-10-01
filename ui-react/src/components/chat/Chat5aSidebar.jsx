@@ -9,9 +9,8 @@ import Chat5GateOptions from './Chat5GateOptions';
 
 const CHAT5A_ENDPOINT = '/Chat5a/messages';
 
-// Code Input and LLM Output start unchecked here (unlike the /chat-clients Chat5a tab):
-// plain "add <city>" requests skip the keyword heuristic, and replies stream instead of
-// waiting for the output check.
+// Code Input and LLM Output start unchecked here by user preference (unlike the
+// /chat-clients Chat5a tab); LLM Output off keeps replies streaming.
 const DEFAULT_GATES = { maxLength: true, ruleInput: false, llmInput: true, systemPrompt: true, llmOutput: false };
 
 // Chat5a panel docked beside the map (stacked under it below 640px), opened from the

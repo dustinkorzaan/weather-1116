@@ -1,6 +1,6 @@
 # Home map chat becomes Chat5a, gates widen to geo and saved cities, "add" means save
 
-- **Status:** in-progress
+- **Status:** in-progress (final review)
 - **Branch / PR:** `claude/hopeful-cori-x18m82` / (PR link added on open)
 - **Mode:** interactive (no questions needed: the story's four items are specific)
 
@@ -214,6 +214,7 @@ Implementers rename the old story's `*Chat2aSidebar*` test files to the `*Chat5a
 | Round | Gate | Findings | Resolution (commit / reason) |
 |---|---|---|---|
 | 1 | Test | Core AC7/AC8 acceptance tests red: hardened scope said "removing" (no `remove` word) and the "add is not a lookup" sentence lacked "is not". Blazor AC10 red: the test compared the ElementReference id to bUnit's empty `blazor:elementreference` attribute. | Prompt wording fixed (all 4 prompts, Foundry .md, docs paste block). The Blazor test helper now compares only when the attribute carries an id: a test-harness bug, not a spec change. The focus-call assertion is unchanged. |
+| 1 | Peer review | clean; 3 NITs (stale "byte-for-byte" claims in 5-chat-clients.md and ChatSystemInstructions.cs; stale React gate-default comment; sidebar messages id is React-only) | All 3 applied in the follow-up commit |
 
 ## Open issues
 

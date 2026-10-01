@@ -132,7 +132,8 @@ separate pages (`/hello-world`, `/current-ai-weather`).
 
 All three UIs also have a **Chat5a sidebar** on the map page (`/`), opened
 from the **Open chat** button in the top bar and docked beside the map (ids
-`chat5a-sidebar`, `chat5a-sidebar-input`, `data-chat5a-sidebar-messages`). It reuses
+`chat5a-sidebar`, `chat5a-sidebar-input`, and `data-chat5a-sidebar-messages` in React /
+`#chat5a-sidebar-messages` in Blazor and MVC). It reuses
 `POST /Chat5a/messages` (same backend as the table above) with body
 `{ sessionId, message, enableMaxLengthGate, enableRuleInputGate, enableLlmInputGate,
 enableSystemPromptGuard, enableLlmOutputGate }` and keeps its own session, independent
@@ -332,8 +333,9 @@ usage-chip undercount) Chat4a already has.
 
 Chat5a and Chat5b are full, independent copies of Chat4a and Chat4b — not wrappers around
 them — with five independently toggleable guardrail gates added around the same Geo/NonAI
-Weather/AI Weather Orchestration shape. Chat4aService.cs, Chat4bService.cs, and the two
-controllers stay byte-for-byte untouched; Chat5a/Chat5b exist so the "unsecured" baseline
+Weather/AI Weather Orchestration shape. The two Chat4
+controllers stay untouched, and Chat4aService.cs/Chat4bService.cs only share wording updates
+(delegate descriptions); Chat5a/Chat5b exist so the "unsecured" baseline
 (Chat4a/Chat4b) and a guarded variant can be compared side by side, checkbox by checkbox, as a
 teaching tool for securing a multi-agent LLM system. All five gates default to **on** on
 `/chat-clients` (the Home map sidebar starts with Code Input and LLM Output off; see above); unchecking
