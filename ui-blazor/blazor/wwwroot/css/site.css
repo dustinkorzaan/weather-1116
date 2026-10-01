@@ -283,7 +283,7 @@ body {
     font-size: 0.875rem;
 }
 
-/* Body row for the map page: the page and the Chat2a sidebar sit side by side in the layout,
+/* Body row for the map page: the page and the Chat5a sidebar sit side by side in the layout,
    so the map narrows instead of being covered (Google Maps re-lays itself out on resize).
    Off the map page both wrappers are display: contents, leaving page layout untouched. */
 .weather-main,
@@ -308,7 +308,7 @@ body {
     min-height: 0;
 }
 
-/* Chat2a sidebar: docked to the right of the map in the same flex row (no overlay). */
+/* Chat5a sidebar: docked to the right of the map in the same flex row (no overlay). */
 .chat-sidebar {
     box-sizing: border-box;
     display: flex;

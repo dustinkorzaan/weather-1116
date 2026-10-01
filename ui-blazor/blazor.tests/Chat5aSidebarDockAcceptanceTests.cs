@@ -15,8 +15,11 @@ using WeatherBlazor.Shared;
 
 namespace WeatherBlazor.Tests;
 
-/// <summary>Acceptance tests for docs/specs/2026-09-30-chat2a-sidebar.md (Blazor).</summary>
-public sealed class Chat2aSidebarAcceptanceTests
+/// <summary>
+/// Acceptance tests for docs/specs/2026-09-30-chat2a-sidebar.md (Blazor), carried over to the
+/// sidebar after docs/specs/2026-10-01-home-chat5a-sidebar-gates.md renamed it to Chat5a.
+/// </summary>
+public sealed class Chat5aSidebarDockAcceptanceTests
 {
     // AC1
     [Fact]
@@ -30,7 +33,7 @@ public sealed class Chat2aSidebarAcceptanceTests
             HeaderButtonLabels(rendered));
 
         var chatButton = rendered.Find(".header-actions button[aria-label=\"Open chat\"]");
-        Assert.Equal("chat2a-sidebar", chatButton.GetAttribute("aria-controls"));
+        Assert.Equal("chat5a-sidebar", chatButton.GetAttribute("aria-controls"));
     }
 
     // AC1 (negative: the chat button exists only on the map page)
@@ -54,13 +57,13 @@ public sealed class Chat2aSidebarAcceptanceTests
 
     // AC2
     [Fact]
-    public void AC2_OpenChatTogglesChat2aComplementaryPanel_AndAriaExpanded()
+    public void AC2_OpenChatTogglesChat5aComplementaryPanel_AndAriaExpanded()
     {
         using var context = CreateContext(new ScriptedChatHandler());
         var rendered = RenderLayout(context);
 
-        var aside = rendered.Find("#chat2a-sidebar");
-        Assert.Equal("Chat2a", aside.GetAttribute("aria-label"));
+        var aside = rendered.Find("#chat5a-sidebar");
+        Assert.Equal("Chat5a", aside.GetAttribute("aria-label"));
         Assert.Equal("complementary", aside.GetAttribute("role"));
         Assert.True(aside.HasAttribute("hidden"), "Sidebar must start hidden.");
         Assert.Equal("false", OpenChatButton(rendered).GetAttribute("aria-expanded"));
@@ -69,19 +72,19 @@ public sealed class Chat2aSidebarAcceptanceTests
 
         rendered.WaitForAssertion(() =>
         {
-            Assert.False(rendered.Find("#chat2a-sidebar").HasAttribute("hidden"));
+            Assert.False(rendered.Find("#chat5a-sidebar").HasAttribute("hidden"));
             Assert.Equal("true", OpenChatButton(rendered).GetAttribute("aria-expanded"));
         });
 
         // The panel is not inside the header.
-        Assert.Empty(rendered.FindAll(".header-actions #chat2a-sidebar"));
+        Assert.Empty(rendered.FindAll(".header-actions #chat5a-sidebar"));
 
         // Clicking the toggle again hides it.
         OpenChatButton(rendered).Click();
 
         rendered.WaitForAssertion(() =>
         {
-            Assert.True(rendered.Find("#chat2a-sidebar").HasAttribute("hidden"));
+            Assert.True(rendered.Find("#chat5a-sidebar").HasAttribute("hidden"));
             Assert.Equal("false", OpenChatButton(rendered).GetAttribute("aria-expanded"));
         });
     }
@@ -94,13 +97,13 @@ public sealed class Chat2aSidebarAcceptanceTests
         var rendered = RenderLayout(context);
 
         OpenChatButton(rendered).Click();
-        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat2a-sidebar").HasAttribute("hidden")));
+        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat5a-sidebar").HasAttribute("hidden")));
 
-        rendered.Find("#chat2a-sidebar button[aria-label=\"Close chat\"]").Click();
+        rendered.Find("#chat5a-sidebar button[aria-label=\"Close chat\"]").Click();
 
         rendered.WaitForAssertion(() =>
         {
-            Assert.True(rendered.Find("#chat2a-sidebar").HasAttribute("hidden"));
+            Assert.True(rendered.Find("#chat5a-sidebar").HasAttribute("hidden"));
             Assert.Equal("false", OpenChatButton(rendered).GetAttribute("aria-expanded"));
         });
     }
@@ -113,13 +116,13 @@ public sealed class Chat2aSidebarAcceptanceTests
         var rendered = RenderLayout(context);
 
         OpenChatButton(rendered).Click();
-        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat2a-sidebar").HasAttribute("hidden")));
+        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat5a-sidebar").HasAttribute("hidden")));
 
         PressEscape(rendered);
 
         rendered.WaitForAssertion(() =>
         {
-            Assert.True(rendered.Find("#chat2a-sidebar").HasAttribute("hidden"));
+            Assert.True(rendered.Find("#chat5a-sidebar").HasAttribute("hidden"));
             Assert.Equal("false", OpenChatButton(rendered).GetAttribute("aria-expanded"));
         });
     }
@@ -132,10 +135,10 @@ public sealed class Chat2aSidebarAcceptanceTests
         var rendered = RenderLayout(context);
 
         OpenChatButton(rendered).Click();
-        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat2a-sidebar").HasAttribute("hidden")));
+        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat5a-sidebar").HasAttribute("hidden")));
 
         var body = rendered.Find("#child");
-        var aside = rendered.Find("#chat2a-sidebar");
+        var aside = rendered.Find("#chat5a-sidebar");
         var header = rendered.Find(".header-actions");
 
         // Map (page body) first, then the panel.
@@ -144,7 +147,7 @@ public sealed class Chat2aSidebarAcceptanceTests
         var orderedIds = rendered.FindAll("[id]").Select(element => element.Id).ToList();
         Assert.True(
             orderedIds.IndexOf("child") >= 0
-                && orderedIds.IndexOf("child") < orderedIds.IndexOf("chat2a-sidebar"),
+                && orderedIds.IndexOf("child") < orderedIds.IndexOf("chat5a-sidebar"),
             "The sidebar must come after the page body (map) in the layout.");
 
         // The closest container shared with the page body is a layout row, not the whole shell
@@ -162,8 +165,8 @@ public sealed class Chat2aSidebarAcceptanceTests
         using var context = CreateContext(new ScriptedChatHandler());
         var rendered = RenderLayout(context);
         OpenChatButton(rendered).Click();
-        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat2a-sidebar").HasAttribute("hidden")));
-        var row = CommonAncestor(rendered.Find("#child"), rendered.Find("#chat2a-sidebar"))!;
+        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat5a-sidebar").HasAttribute("hidden")));
+        var row = CommonAncestor(rendered.Find("#child"), rendered.Find("#chat5a-sidebar"))!;
         var rowClasses = row.ClassList.ToArray();
 
         var cssPath = Path.Combine(AppContext.BaseDirectory, "site.css");
@@ -171,9 +174,9 @@ public sealed class Chat2aSidebarAcceptanceTests
         var css = File.ReadAllText(cssPath);
 
         // No sidebar rule makes it a fixed/absolute overlay.
-        var sidebarDeclarations = Regex.Matches(css, @"([^{}]*(?:chat2a-sidebar|chat-sidebar)[^{}]*)\{([^{}]*)\}")
+        var sidebarDeclarations = Regex.Matches(css, @"([^{}]*(?:chat5a-sidebar|chat-sidebar)[^{}]*)\{([^{}]*)\}")
             .Where(match => !match.Groups[1].Value.Contains("chat-sidebar-", StringComparison.Ordinal)
-                || Regex.IsMatch(match.Groups[1].Value, @"(?:\.chat-sidebar|#chat2a-sidebar)(?![-\w])"))
+                || Regex.IsMatch(match.Groups[1].Value, @"(?:\.chat-sidebar|#chat5a-sidebar)(?![-\w])"))
             .Select(match => match.Groups[2].Value)
             .ToList();
         Assert.NotEmpty(sidebarDeclarations);
@@ -192,7 +195,7 @@ public sealed class Chat2aSidebarAcceptanceTests
             .ToList();
         Assert.Contains(breakpointBodies, body =>
             Regex.IsMatch(body, $@"\.(?:{rowSelector})(?![-\w])[^{{}}]*\{{[^{{}}]*(?:flex-direction|grid-template)")
-            || Regex.IsMatch(body, @"(?:chat2a-sidebar|\.chat-sidebar)(?![-\w])[^{}]*\{[^{}]*(?:width|height|flex)"));
+            || Regex.IsMatch(body, @"(?:chat5a-sidebar|\.chat-sidebar)(?![-\w])[^{}]*\{[^{}]*(?:width|height|flex)"));
     }
 
     // AC2 (leaving / hides the panel)
@@ -203,13 +206,13 @@ public sealed class Chat2aSidebarAcceptanceTests
         var rendered = RenderLayout(context);
 
         OpenChatButton(rendered).Click();
-        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat2a-sidebar").HasAttribute("hidden")));
+        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat5a-sidebar").HasAttribute("hidden")));
 
         context.Services.GetRequiredService<NavigationManager>().NavigateTo("/hello-world");
 
         rendered.WaitForAssertion(() =>
         {
-            var asides = rendered.FindAll("#chat2a-sidebar");
+            var asides = rendered.FindAll("#chat5a-sidebar");
             Assert.True(asides.Count == 0 || asides[0].HasAttribute("hidden"), "Sidebar must be hidden off the map page.");
             Assert.Empty(rendered.FindAll("button[aria-label=\"Open chat\"]"));
         });
@@ -217,7 +220,7 @@ public sealed class Chat2aSidebarAcceptanceTests
 
     // AC3
     [Fact]
-    public void AC3_SendPostsSessionIdAndMessageToChat2a_AndRendersStreamedEvents()
+    public void AC3_SendPostsSessionIdAndMessageToChat5a_AndRendersStreamedEvents()
     {
         var handler = new ScriptedChatHandler(
             ScriptedChatHandler.Sse(
@@ -228,7 +231,7 @@ public sealed class Chat2aSidebarAcceptanceTests
                 new { type = "token", text = "Nashville to your cities." },
                 new { type = "done" }),
             ScriptedChatHandler.Sse(
-                new { type = "error", errorMessage = "Chat2a failed upstream." },
+                new { type = "error", errorMessage = "Chat5a failed upstream." },
                 new { type = "done" }));
         using var context = CreateContext(handler);
         var composer = new ComposerValue(context);
@@ -245,15 +248,15 @@ public sealed class Chat2aSidebarAcceptanceTests
         Assert.Single(handler.Requests);
         var first = handler.Requests[0];
         Assert.Equal(HttpMethod.Post, first.Method);
-        Assert.EndsWith("/Chat2a/messages", first.Path);
+        Assert.EndsWith("/Chat5a/messages", first.Path);
         AssertBody(first.Body, expectedSessionId: null, expectedMessage: "add Nashville to my cities");
 
         Send(rendered, composer, "what else?");
 
-        rendered.WaitForAssertion(() => Assert.Contains("Chat2a failed upstream.", rendered.Markup));
+        rendered.WaitForAssertion(() => Assert.Contains("Chat5a failed upstream.", rendered.Markup));
 
         Assert.Equal(2, handler.Requests.Count);
-        Assert.EndsWith("/Chat2a/messages", handler.Requests[1].Path);
+        Assert.EndsWith("/Chat5a/messages", handler.Requests[1].Path);
         AssertBody(handler.Requests[1].Body, expectedSessionId: "sidebar-session-1", expectedMessage: "what else?");
     }
 
@@ -286,7 +289,7 @@ public sealed class Chat2aSidebarAcceptanceTests
 
         // Exactly one refresh per send, all through weatherMap.refreshCities; the sidebar makes
         // no /User request of its own.
-        Assert.All(handler.Requests, request => Assert.EndsWith("/Chat2a/messages", request.Path));
+        Assert.All(handler.Requests, request => Assert.EndsWith("/Chat5a/messages", request.Path));
         Assert.Equal(3, context.JSInterop.Invocations["weatherMap.refreshCities"].Count);
     }
 
@@ -302,7 +305,7 @@ public sealed class Chat2aSidebarAcceptanceTests
         Send(rendered, composer, "one");
 
         rendered.WaitForAssertion(() => context.JSInterop.VerifyInvoke("weatherMap.refreshCities", 1));
-        rendered.WaitForAssertion(() => Assert.Empty(rendered.FindAll("#chat2a-sidebar textarea[disabled]")));
+        rendered.WaitForAssertion(() => Assert.Empty(rendered.FindAll("#chat5a-sidebar textarea[disabled]")));
         Assert.Single(context.JSInterop.Invocations["weatherMap.refreshCities"]);
     }
 
@@ -365,15 +368,15 @@ public sealed class Chat2aSidebarAcceptanceTests
 
         rendered.WaitForAssertion(() =>
         {
-            var markdown = rendered.Find("#chat2a-sidebar .chat-markdown");
+            var markdown = rendered.Find("#chat5a-sidebar .chat-markdown");
             Assert.NotNull(markdown.QuerySelector("strong"));
             Assert.NotNull(markdown.QuerySelector("table"));
         });
-        Assert.Empty(rendered.FindAll("#chat2a-sidebar script"));
-        Assert.DoesNotContain("**Warmest**", rendered.Find("#chat2a-sidebar .chat-markdown").TextContent);
+        Assert.Empty(rendered.FindAll("#chat5a-sidebar script"));
+        Assert.DoesNotContain("**Warmest**", rendered.Find("#chat5a-sidebar .chat-markdown").TextContent);
         Assert.Contains(
             Normalize(SafeGfmMarkdown.ToHtml(reply)),
-            Normalize(rendered.Find("#chat2a-sidebar .chat-markdown").InnerHtml));
+            Normalize(rendered.Find("#chat5a-sidebar .chat-markdown").InnerHtml));
     }
 
     // AC6 (usage chip)
@@ -413,7 +416,7 @@ public sealed class Chat2aSidebarAcceptanceTests
 
         rendered.WaitForAssertion(() =>
         {
-            var chip = rendered.Find("#chat2a-sidebar .chat-markdown .chat-usage-chip[data-tool-details]");
+            var chip = rendered.Find("#chat5a-sidebar .chat-markdown .chat-usage-chip[data-tool-details]");
             Assert.Equal(WeatherGridFormat.FormatChatUsageChip(usage), chip.TextContent.Trim());
             Assert.Equal("1.24s · 4,218 tok", chip.TextContent.Trim());
             Assert.Equal(WeatherGridFormat.FormatChatUsageDetails(usage), chip.GetAttribute("data-tool-details"));
@@ -433,8 +436,8 @@ public sealed class Chat2aSidebarAcceptanceTests
 
         Send(rendered, composer, "hi");
 
-        rendered.WaitForAssertion(() => Assert.Contains("No usage here.", rendered.Find("#chat2a-sidebar .chat-markdown").TextContent));
-        Assert.Empty(rendered.FindAll("#chat2a-sidebar .chat-usage-chip"));
+        rendered.WaitForAssertion(() => Assert.Contains("No usage here.", rendered.Find("#chat5a-sidebar .chat-markdown").TextContent));
+        Assert.Empty(rendered.FindAll("#chat5a-sidebar .chat-usage-chip"));
     }
 
     // AC6 (tool hover card)
@@ -452,7 +455,7 @@ public sealed class Chat2aSidebarAcceptanceTests
         stream.Push(new { type = "tool_start", toolName = "AddUserCity" });
         rendered.WaitForAssertion(() =>
         {
-            var tool = rendered.Find("#chat2a-sidebar .chat-message.tool[data-tool-details]");
+            var tool = rendered.Find("#chat5a-sidebar .chat-message.tool[data-tool-details]");
             Assert.Contains("AddUserCity", tool.TextContent);
             Assert.Equal("Waiting for tool output…", tool.GetAttribute("data-tool-details"));
             Assert.Equal("0", tool.GetAttribute("tabindex"));
@@ -471,7 +474,7 @@ public sealed class Chat2aSidebarAcceptanceTests
 
         rendered.WaitForAssertion(() =>
         {
-            var tool = rendered.Find("#chat2a-sidebar .chat-message.tool[data-tool-details]");
+            var tool = rendered.Find("#chat5a-sidebar .chat-message.tool[data-tool-details]");
             Assert.Equal(
                 "Arguments\n{\"location\":\"Nashville, TN\"}\n\nResult\n{\"ok\":true}",
                 tool.GetAttribute("data-tool-details"));
@@ -492,7 +495,7 @@ public sealed class Chat2aSidebarAcceptanceTests
         var sidebarComposer = new ComposerValue(sidebarContext);
         var sidebar = RenderSidebar(sidebarContext);
         Send(sidebar, sidebarComposer, "add Nashville");
-        sidebar.WaitForAssertion(() => Assert.NotEmpty(sidebar.FindAll("#chat2a-sidebar .chat-usage-chip")));
+        sidebar.WaitForAssertion(() => Assert.NotEmpty(sidebar.FindAll("#chat5a-sidebar .chat-usage-chip")));
 
         using var panelContext = CreateContext(new ScriptedChatHandler(Script()));
         new ComposerValue(panelContext).Value = "add Nashville";
@@ -502,7 +505,7 @@ public sealed class Chat2aSidebarAcceptanceTests
 
         Assert.Equal(
             MessageSignature(panel.FindAll(".chat-message")),
-            MessageSignature(sidebar.FindAll("#chat2a-sidebar .chat-message")));
+            MessageSignature(sidebar.FindAll("#chat5a-sidebar .chat-message")));
     }
 
     // ---- helpers ----
@@ -533,8 +536,8 @@ public sealed class Chat2aSidebarAcceptanceTests
     private static IRenderedComponent<MainLayout> RenderLayout(BunitContext context)
         => context.Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, "<div id=\"child\"></div>"));
 
-    private static IRenderedComponent<Chat2aSidebar> RenderSidebar(BunitContext context)
-        => context.Render<Chat2aSidebar>(parameters => parameters
+    private static IRenderedComponent<Chat5aSidebar> RenderSidebar(BunitContext context)
+        => context.Render<Chat5aSidebar>(parameters => parameters
             .Add(sidebar => sidebar.Open, true)
             .Add(sidebar => sidebar.OnClose, () => { }));
 
@@ -550,10 +553,10 @@ public sealed class Chat2aSidebarAcceptanceTests
     /// Types into the sidebar composer and submits. Works whether the composer is
     /// uncontrolled (read via chatInput.getValue, like ChatPanel) or @bind-ed.
     /// </summary>
-    private static void Send(IRenderedComponent<Chat2aSidebar> rendered, ComposerValue composer, string message)
+    private static void Send(IRenderedComponent<Chat5aSidebar> rendered, ComposerValue composer, string message)
     {
         composer.Value = message;
-        var textarea = rendered.Find("#chat2a-sidebar textarea");
+        var textarea = rendered.Find("#chat5a-sidebar textarea");
         try
         {
             textarea.Input(message);
@@ -570,18 +573,18 @@ public sealed class Chat2aSidebarAcceptanceTests
             }
         }
 
-        rendered.Find("#chat2a-sidebar form").Submit();
+        rendered.Find("#chat5a-sidebar form").Submit();
     }
 
     private static void PressEscape(IRenderedComponent<MainLayout> rendered)
     {
         try
         {
-            rendered.Find("#chat2a-sidebar").KeyDown(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs { Key = "Escape" });
+            rendered.Find("#chat5a-sidebar").KeyDown(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs { Key = "Escape" });
         }
         catch (MissingEventHandlerException)
         {
-            rendered.Find("#chat2a-sidebar textarea").KeyDown(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs { Key = "Escape" });
+            rendered.Find("#chat5a-sidebar textarea").KeyDown(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs { Key = "Escape" });
         }
     }
 
@@ -612,8 +615,20 @@ public sealed class Chat2aSidebarAcceptanceTests
         using var document = JsonDocument.Parse(body);
         var root = document.RootElement;
         var names = root.EnumerateObject().Select(property => property.Name).OrderBy(name => name).ToArray();
-        Assert.Equal(new[] { "message", "sessionId" }, names);
+        Assert.Equal(
+            new[]
+            {
+                "enableLlmInputGate", "enableLlmOutputGate", "enableMaxLengthGate",
+                "enableRuleInputGate", "enableSystemPromptGuard", "message", "sessionId",
+            },
+            names);
         Assert.Equal(expectedMessage, root.GetProperty("message").GetString());
+        // Sidebar defaults: every gate on except Code Input.
+        Assert.True(root.GetProperty("enableMaxLengthGate").GetBoolean());
+        Assert.False(root.GetProperty("enableRuleInputGate").GetBoolean());
+        Assert.True(root.GetProperty("enableLlmInputGate").GetBoolean());
+        Assert.True(root.GetProperty("enableSystemPromptGuard").GetBoolean());
+        Assert.True(root.GetProperty("enableLlmOutputGate").GetBoolean());
         if (expectedSessionId is null)
         {
             Assert.Equal(JsonValueKind.Null, root.GetProperty("sessionId").ValueKind);
