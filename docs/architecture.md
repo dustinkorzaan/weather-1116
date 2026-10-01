@@ -380,8 +380,8 @@ and layout code instead of sharing it.
 
 On `/` the top bar's right-hand actions are, in order: **Add location**
 (plus) → **Open chat** → the avatar menu. Other routes show only the avatar
-menu. **Open chat** toggles the **Chat2a** sidebar (`aria-expanded`,
-`aria-controls="chat2a-sidebar"`), a `complementary` panel labelled "Chat2a".
+menu. **Open chat** toggles the **Chat5a** sidebar (`aria-expanded`,
+`aria-controls="chat5a-sidebar"`), a `complementary` panel labelled "Chat5a".
 It is docked in the layout beside the map rather than on top of it:
 - at widths of 640px and up, it sits to the right of the map and the map gets narrower;
 - below 640px, it stacks under the map.
@@ -389,10 +389,21 @@ It is docked in the layout beside the map rather than on top of it:
 It closes with its **Close chat** button, the header button, Escape, or by
 leaving `/`.
 
-The sidebar talks to the existing `POST /Chat2a/messages` endpoint (Weather API
-for React/Blazor, MVC's own `Chat2aController`) with its own session. Its
-messages go through the same rendering code as the `/chat-clients` panel in
-each UI: markdown replies, usage chip, and tool hover with arguments and result.
+The sidebar talks to the existing `POST /Chat5a/messages` endpoint (Weather API
+for React/Blazor, MVC's own `Chat5aController`) with its own session. Below the
+textarea it shows the same five gate checkboxes as the `/chat-clients` Chat5a
+tab, in pipeline order: 500 Char, Code Input, LLM Input, Sys Prompt, LLM Output.
+In the sidebar **Code Input starts unchecked** and the other four start checked,
+so each send carries `enableRuleInputGate: false` until the user checks it; the
+`/chat-clients` tabs keep all five checked by default. Gate state is per sidebar
+and survives closing and reopening it, like the conversation. The gates accept
+weather, location/geo, listing saved cities, adding/saving a city and
+removing/deleting a city, so pin management works with the gates on (see
+*Chat5a/Chat5b* in [5-chat-clients.md](5-chat-clients/5-chat-clients.md)).
+
+Its messages go through the same rendering code as the `/chat-clients` panel in
+each UI: markdown replies, usage chip, tool hover with arguments and result,
+and blocked entries for the stream's `blocked` events.
 - React: `ChatMessage` in `ChatPanel.jsx`.
 - Blazor: `ChatMessageList.razor`.
 - MVC: `wwwroot/js/chatRender.js`.
@@ -401,6 +412,9 @@ After every send completes, including a failed one, the map re-reads
 `GET /User` once and re-renders its pins, so cities the agent adds or deletes
 appear or disappear without a reload. React does this through the map-pins
 context `refreshCities` and Blazor/MVC through `weatherMap.refreshCities()`.
+Focus then returns to the sidebar textarea (`chat5a-sidebar-input`) whether the
+send finished normally, was blocked or failed, so the user can type the next
+message without clicking back in.
 
 In React and Blazor the conversation survives closing the sidebar and SPA
 navigation. MVC's resets on navigation, because navigation reloads the page.
@@ -440,7 +454,7 @@ differs by library; the behavior does not:
 - Primary navigation is a top bar with the logo on the left and, on the right,
   Add location and Open chat (both only on `/`) → the person menu; it stays
   reachable and never overflows the viewport.
-- On `/`, the open Chat2a sidebar shares the map's row at 640px and up (the map
+- On `/`, the open Chat5a sidebar shares the map's row at 640px and up (the map
   narrows) and stacks under the map below 640px; it never overlays the map.
 - On `/`, the map fills the remaining viewport height below the top bar at every
   width; on `/hello-world`, `/current-ai-weather`, and `/chat-clients` content is
