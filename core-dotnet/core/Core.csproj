@@ -13,17 +13,8 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.AI.Extensions.OpenAI" Version="3.0.0-beta.2" />
-    <!--
-      Aliased: Azure.AI.Extensions.OpenAI pulls in a preview Azure.Core that
-      vendors its own copies of DefaultAzureCredential/ManagedIdentityCredential
-      alongside the real Azure.Identity assembly that
-      Microsoft.Data.SqlClient.Extensions.Azure depends on, so both are loaded
-      side by side and the unaliased type names are ambiguous. The alias picks
-      Azure.Identity's copy explicitly wherever those two types are used
-      (see FoundryTokenCredentialFactory.cs).
-    -->
-    <PackageReference Include="Azure.Identity" Version="1.18.0" Aliases="AzureIdentityExplicit" />
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.29.2" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.30.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="10.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
@@ -33,14 +24,14 @@
     <PackageReference Include="Hangfire.Core" Version="1.8.25" />
     <PackageReference Include="Microsoft.Agents.AI" Version="1.22.0" />
     <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.22.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="7.1.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="7.1.1" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.10.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.10.0" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.10.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.12" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.12" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="OpenAI" Version="2.13.0" />
