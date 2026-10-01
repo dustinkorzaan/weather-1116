@@ -24,7 +24,7 @@
 
     @if (!string.IsNullOrWhiteSpace(_errorMessage))
     {
-        <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@_errorMessage</FluentMessageBar>
+        <FluentMessageBar Intent="MessageBarIntent.Error" AllowDismiss="false" Class="stack-gap">@_errorMessage</FluentMessageBar>
     }
 
     @if (_isLoading)
@@ -37,15 +37,15 @@
         <div class="weather-results">
             <div class="chat-markdown">@((MarkupString)SafeGfmMarkdown.ToHtml(_aiWeather.FullSummary))</div>
             <FluentGrid Spacing="2">
-                <FluentGridItem xs="12" sm="6">
+                <FluentGridItem Xs="12" Sm="6">
                     <div class="stat-label">Temperature</div>
                     <div>@FormatTemperatureF(_aiWeather.TemperatureF)</div>
                 </FluentGridItem>
-                <FluentGridItem xs="12" sm="6">
+                <FluentGridItem Xs="12" Sm="6">
                     <div class="stat-label">Wind Speed</div>
                     <div>@FormatWindSpeedMph(_aiWeather.WindSpeedMPH)</div>
                 </FluentGridItem>
-                <FluentGridItem xs="12" sm="6">
+                <FluentGridItem Xs="12" Sm="6">
                     <div class="stat-label">Wind Direction</div>
                     <div class="wind-direction">
                         @WeatherGridFormat.FormatWindDirection(_aiWeather.WindDirectionSource, _aiWeather.WindDirectionSourceDegrees)
@@ -54,11 +54,11 @@
                               style="@($"transform: rotate({WeatherGridFormat.NormalizeSourceDegrees(_aiWeather.WindDirectionSourceDegrees)}deg)")">v</span>
                     </div>
                 </FluentGridItem>
-                <FluentGridItem xs="12" sm="6">
+                <FluentGridItem Xs="12" Sm="6">
                     <div class="stat-label">Conditions</div>
                     <div>@_aiWeather.Conditions</div>
                 </FluentGridItem>
-                <FluentGridItem xs="12" sm="6">
+                <FluentGridItem Xs="12" Sm="6">
                     <div class="stat-label">Lat/Long</div>
                     <div>@FormatLatLong(_aiWeather.Latitude, _aiWeather.Longitude)</div>
                 </FluentGridItem>
