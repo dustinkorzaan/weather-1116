@@ -219,8 +219,8 @@ public static class WeatherToolDefinitions
         strictModeEnabled: true);
 
     public const string AddUserCityDescription =
-        "Add a city to the user's saved cities. Use this when the user wants to save a city or place. Requires numeric latitude/longitude and a location name.";
+        "Add a city to the user's saved cities. Use this when the user wants to add, save, or pin a city or place (e.g. \"add Nashville\" means save Nashville, not look it up). Requires numeric latitude/longitude and a location name.";
 
     public const string DeleteUserCityDescription =
-        "Remove a city from the user's saved cities. Use this when the user wants to delete a saved city. Requires the saved city's id from GetUser; never guess an id.";
+        "Remove a city from the user's saved cities. Use this when the user wants to remove, delete, or unpin a saved city. Requires the saved city's id from GetUser; never guess an id.";
 }

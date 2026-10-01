@@ -130,4 +130,28 @@ public class ChatSystemInstructionsTests
         Assert.DoesNotContain("GetLatLong", prompt);
         Assert.DoesNotContain("UserCity", prompt);
     }
+
+    [Theory]
+    [InlineData(nameof(ChatSystemInstructions.WeatherAssistant))]
+    [InlineData(nameof(ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant))]
+    [InlineData(nameof(ChatSystemInstructions.Chat5HardenedAiWeatherOrchestrationAssistant))]
+    [InlineData(nameof(ChatSystemInstructions.MultiAgentUserAssistant))]
+    public void SavedCityPrompts_MapAddSavePinAndRemoveDeleteUnpinSynonyms(string promptName)
+    {
+        var prompt = (string)typeof(ChatSystemInstructions).GetField(promptName)!.GetValue(null)!;
+
+        Assert.Contains("\"Add\", \"save\", and \"pin\" a city all mean saving it", prompt);
+        Assert.Contains("\"remove\", \"delete\", and \"unpin\" a city all mean deleting a saved city", prompt);
+    }
+
+    [Theory]
+    [InlineData(nameof(ChatSystemInstructions.WeatherAssistant))]
+    [InlineData(nameof(ChatSystemInstructions.MultiAgentAiWeatherOrchestrationAssistant))]
+    [InlineData(nameof(ChatSystemInstructions.Chat5HardenedAiWeatherOrchestrationAssistant))]
+    public void OrchestratorPrompts_SayAddCityIsNotALookup(string promptName)
+    {
+        var prompt = (string)typeof(ChatSystemInstructions).GetField(promptName)!.GetValue(null)!;
+
+        Assert.Contains("not to look up the place or its weather", prompt);
+    }
 }

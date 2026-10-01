@@ -351,7 +351,7 @@ public sealed class Chat5aService : IChat5ClientService
                 geoAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "Geo",
-                    Description = "Geo assistant. Resolves a location name to latitude/longitude, or reverse-geocodes latitude/longitude to a place label. Send it a natural-language geo question; it returns the answer as text.",
+                    Description = "Geo assistant. Resolves a location name to latitude/longitude, reverse-geocodes latitude/longitude to a place label, or lists the largest cities within a radius of a latitude/longitude. Send it a natural-language geo question; it returns the answer as text.",
                 }),
                 // session omitted — AsAIFunction creates a fresh, throwaway session per call, so NonAI
                 // Weather is stateless per delegated call; the orchestrator alone owns memory.
@@ -365,7 +365,7 @@ public sealed class Chat5aService : IChat5ClientService
                 userAgent.AsAIFunction(new AIFunctionFactoryOptions
                 {
                     Name = "User",
-                    Description = "User assistant. Lists the user's saved cities (location name, latitude/longitude, and id), adds a city from numeric latitude/longitude and a location name, or deletes a city by its id. It never geocodes — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the city id or coordinates on every call. Send it a natural-language request; it returns the answer as text.",
+                    Description = "User assistant. Lists the user's saved cities (location name, latitude/longitude, and id), adds a city from numeric latitude/longitude and a location name (\"add\", \"save\", or \"pin\" a city all mean add), or deletes a city by its id (\"remove\", \"delete\", or \"unpin\" a city all mean delete). It never geocodes — resolve a place name to coordinates via Geo first. It has no memory of its own, so include the city id or coordinates on every call. Send it a natural-language request; it returns the answer as text.",
                 }),
             ]);
     }

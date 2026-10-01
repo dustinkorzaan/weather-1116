@@ -5,8 +5,9 @@ namespace Core.Chat.Services.ChatScopeGate;
 /// <summary>
 /// Chat5a/Chat5b gates #3 ("LLM Input") and #5 ("LLM Output"). Issues its own minimal,
 /// non-streaming <see cref="ResponsesClient.CreateResponseAsync"/> call — never the
-/// orchestration agent itself — classifying whether the given text is about weather (a
-/// location by itself does not count).
+/// orchestration agent itself — classifying whether the given text is one of the five in-scope
+/// request kinds (weather, location/geo, listing saved cities, adding/saving a city, or
+/// removing/deleting a saved city) with nothing unrelated bundled in.
 /// Registered twice under different <see cref="Name"/> values, once for the user's message
 /// (gate #3) and once for the orchestrator's completed reply (gate #5).
 /// </summary>

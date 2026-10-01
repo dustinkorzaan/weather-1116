@@ -71,6 +71,20 @@ public class UserToolsTests
     }
 
     [Fact]
+    public void WeatherToolDefinitions_AddAndDeleteDescriptionsNameTheirSynonyms()
+    {
+        foreach (var verb in new[] { "add", "save", "pin" })
+        {
+            Assert.Contains(verb, WeatherToolDefinitions.AddUserCityDescription);
+        }
+
+        foreach (var verb in new[] { "remove", "delete", "unpin" })
+        {
+            Assert.Contains(verb, WeatherToolDefinitions.DeleteUserCityDescription);
+        }
+    }
+
+    [Fact]
     public void WeatherToolDefinitions_GetUserTakesNoArguments()
     {
         var tool = WeatherToolDefinitions.CreateGetUserTool();
