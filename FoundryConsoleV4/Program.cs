@@ -114,25 +114,25 @@ internal class Program
 			serverLabel: "McpSrvFuncApp",
 			serverUri: new Uri("https://wx1116-prod-mcp-srv-func-app.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/runtime/webhooks/mcp"),
 			headers: new Dictionary<string, string> { ["x-functions-key"] = mcpSrvFuncAppKey },
-			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(DefaultMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		var myMcpSrvAppService = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvAppService",
 			serverUri: new Uri("https://wx1116-prod-mcp-srv-app-service.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvAppServiceKey}" },
-			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(DefaultMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		var myMcpSrvPython = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvPython",
 			serverUri: new Uri("https://wx1116-prod-mcp-srv-python.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvPythonKey}" },
-			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(DefaultMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		var myMcpSrvNode = ResponseTool.CreateMcpTool(
 			serverLabel: "McpSrvNode",
 			serverUri: new Uri("https://wx1116-prod-mcp-srv-node.thankfulrock-0d49c0fe.centralus.azurecontainerapps.io/mcp"),
 			headers: new Dictionary<string, string> { ["Authorization"] = $"Bearer {mcpSrvNodeKey}" },
-			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
+			toolCallApprovalPolicy: new McpToolCallApprovalPolicy(DefaultMcpToolCallApprovalPolicy.NeverRequireApproval));
 
 		Console.WriteLine($"\nMCP Servers:\n{myMcpSrvFuncApp.ServerLabel} {myMcpSrvFuncApp.ServerUri}\n{myMcpSrvAppService.ServerLabel} {myMcpSrvAppService.ServerUri}\n{myMcpSrvPython.ServerLabel} {myMcpSrvPython.ServerUri}\n{myMcpSrvNode.ServerLabel} {myMcpSrvNode.ServerUri}");
 

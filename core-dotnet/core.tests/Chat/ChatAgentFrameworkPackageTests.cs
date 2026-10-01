@@ -11,7 +11,7 @@ namespace Core.Tests.Chat;
 public class ChatAgentFrameworkPackageTests
 {
     [Fact]
-    public void ExtensionsAi_StaysOnAgentFramework_1_22_0_Train()
+    public void ExtensionsAi_StaysOnAgentFramework_1_23_0_Train()
     {
         var abstractions = typeof(AIFunctionFactory).Assembly.GetName();
         var extensionsAi = typeof(ChatClientBuilder).Assembly.GetName();
@@ -24,13 +24,13 @@ public class ChatAgentFrameworkPackageTests
         Assert.Equal(new Version(10, 10, 0, 0), abstractions.Version);
         Assert.Equal("Microsoft.Extensions.AI", extensionsAi.Name);
         Assert.Equal(new Version(10, 10, 0, 0), extensionsAi.Version);
-        Assert.Equal(new Version(1, 22, 0, 0), agentsAi.Version);
+        Assert.Equal(new Version(1, 23, 0, 0), agentsAi.Version);
         Assert.Equal("Microsoft.Agents.AI.OpenAI", agentsOpenAi.Name);
-        Assert.Equal(new Version(1, 22, 0, 0), agentsOpenAi.Version);
+        Assert.Equal(new Version(1, 23, 0, 0), agentsOpenAi.Version);
         Assert.Equal("Microsoft.Extensions.AI.OpenAI", adapter.Name);
         Assert.Equal(new Version(10, 10, 0, 0), adapter.Version);
         Assert.Equal("OpenAI", openai.Name);
-        Assert.Equal(new Version(2, 13, 0, 0), openai.Version);
+        Assert.Equal(new Version(2, 14, 0, 0), openai.Version);
     }
 
     [Fact]
