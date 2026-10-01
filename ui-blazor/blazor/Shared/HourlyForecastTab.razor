@@ -21,7 +21,7 @@
 
     @if (!string.IsNullOrWhiteSpace(_errorMessage))
     {
-        <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@_errorMessage</FluentMessageBar>
+        <FluentMessageBar Intent="MessageBarIntent.Error" AllowDismiss="false" Class="stack-gap">@_errorMessage</FluentMessageBar>
     }
 
     @if (_rows.Count > 0)

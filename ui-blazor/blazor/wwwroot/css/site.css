@@ -63,9 +63,10 @@ body {
     width: 100%;
 }
 
-/* FluentBodyContent sets align-items: flex-start and height: 100% (specificity
-   .body-content[b-*]). flex-start + a child with width: 100% collapses the map
-   to 0px wide, which is why prod home looked like an empty white page. */
+/* The v4 FluentBodyContent set align-items: flex-start and height: 100%.
+   flex-start + a child with width: 100% collapses the map to 0px wide, which
+   is why prod home looked like an empty white page. The plain <main> keeps
+   the old class names so this rule still owns the body's flex sizing. */
 .layout.weather-shell > .body-content.weather-body {
     display: flex;
     flex: 1 1 auto;
@@ -78,7 +79,7 @@ body {
     padding: 0;
 }
 
-/* Plain <a> + <h1>: FluentAnchor Hypertext hydrates as an underlined
+/* Plain <a> + <h1>: a Fluent link hydrates as an underlined
    link and can wrap the title onto a second line after first paint. */
 .layout.weather-shell a.brand-link,
 .layout.weather-shell a.brand-link:link,
@@ -117,7 +118,15 @@ body {
     color: var(--wx-fg);
 }
 
+/* Plain <header>: Fluent UI v5 has no FluentHeader, so the flex row and
+   48px height it used to provide live here. */
 .layout.weather-shell > .header.weather-header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    box-sizing: border-box;
+    height: 48px;
+    padding: 0 10px;
     background-color: var(--wx-bg);
     color: var(--wx-fg);
     border-bottom: 1px solid var(--wx-border);
@@ -556,7 +565,7 @@ fluent-menu-item a {
     gap: 1rem;
 }
 
-.footer-links fluent-anchor,
+.footer-links fluent-link,
 .footer-links a {
     color: var(--wx-soft);
 }

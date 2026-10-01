@@ -3,7 +3,7 @@
 <section class="weather-map-section" aria-label="Map">
     @if (string.IsNullOrWhiteSpace(_apiKey))
     {
-        <FluentMessageBar Intent="MessageIntent.Warning" AllowDismiss="false">
+        <FluentMessageBar Intent="MessageBarIntent.Warning" AllowDismiss="false">
             Set GOOGLE_MAPS_API_KEY in appsettings (or env GOOGLE_MAPS_API_KEY) to enable Google Maps.
         </FluentMessageBar>
     }
