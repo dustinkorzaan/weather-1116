@@ -4,7 +4,7 @@
     var mapsApiKey = Configuration["GOOGLE_MAPS_API_KEY"] ?? "";
 }
 
-@* The Chat2a sidebar docks beside the map (below it under 640px), so the map narrows instead of being covered. *@
+@* The Chat5a sidebar docks beside the map (below it under 640px), so the map narrows instead of being covered. *@
 <section class="map-section" aria-label="Map">
     <div class="map-canvas-wrap">
         @if (string.IsNullOrWhiteSpace(mapsApiKey))
@@ -17,7 +17,7 @@
              data-status="@(string.IsNullOrWhiteSpace(mapsApiKey) ? "missing-key" : "loading")"
              data-get-location-url="@Url.Action("GetLocation", "Geo")"></div>
     </div>
-    <partial name="_Chat2aSidebar" />
+    <partial name="_Chat5aSidebar" />
 </section>
 
 @section Scripts {

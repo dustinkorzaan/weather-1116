@@ -345,7 +345,7 @@ code {
   overflow-y: auto;
 }
 
-/* Chat2a sidebar (header "Open chat" button) */
+/* Chat5a sidebar (header "Open chat" button) */
 
 .chat-toggle-button {
   box-sizing: border-box;
@@ -436,6 +436,11 @@ code {
   gap: 0.5rem;
   padding: 0.75rem;
   border-top: 1px solid var(--color-border);
+}
+
+/* The form already pads its children, so the gate row drops the /chat-clients padding. */
+.chat-sidebar-form .chat-sidebar-gate-options {
+  padding: 0;
 }
 
 /* Below 640px the sidebar stacks under the map, which keeps half of the height. */
