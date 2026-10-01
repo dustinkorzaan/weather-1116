@@ -205,7 +205,7 @@ function ToolChip({ content, details, className }) {
 }
 
 // One history entry: tool lines as hover chips, finished assistant replies as sanitized
-// markdown with the usage chip. Shared with the header Chat2a sidebar.
+// markdown with the usage chip. Shared with the header Chat5a sidebar.
 export function ChatMessage({ entry }) {
   if (entry.role === 'tool') {
     return <ToolChip content={entry.content} details={formatToolHoverText(entry)} />;

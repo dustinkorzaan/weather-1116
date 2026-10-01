@@ -4,7 +4,7 @@ import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AddLocationControl from './components/AddLocationControl';
 import AboutDialog from './components/about/AboutDialog';
-import Chat2aSidebar from './components/chat/Chat2aSidebar';
+import Chat5aSidebar from './components/chat/Chat5aSidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,7 +57,7 @@ function AppShell() {
                 aria-label="Open chat"
                 title="Open chat"
                 aria-expanded={isChatOpen}
-                aria-controls="chat2a-sidebar"
+                aria-controls="chat5a-sidebar"
                 onClick={() => setIsChatOpen((current) => !current)}
                 className="size-9 rounded-full border-2 border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
               >
@@ -105,7 +105,7 @@ function AppShell() {
         </div>
       </header>
 
-      {/* On Home the Chat2a sidebar docks beside the map (under it below 640px) so the map
+      {/* On Home the Chat5a sidebar docks beside the map (under it below 640px) so the map
           shrinks instead of being covered. It stays mounted off Home to keep its history. */}
       <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -118,7 +118,7 @@ function AppShell() {
           </Routes>
         </div>
 
-        <Chat2aSidebar open={isChatOpen && isMapVisible} onClose={closeChat} />
+        <Chat5aSidebar open={isChatOpen && isMapVisible} onClose={closeChat} />
       </div>
 
       <AboutDialog open={isAboutOpen} onOpenChange={setIsAboutOpen} />
