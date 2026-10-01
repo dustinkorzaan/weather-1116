@@ -159,7 +159,9 @@ public sealed class WeatherModalTests
         var rendered = context.Render<WeatherBlazor.Pages.Weather>();
         rendered.Find("button.about-close").Click();
 
-        Assert.Equal("http://localhost/", navigation.Uri);
+        // The delayed stub fetch can complete mid-click, in which case bUnit queues the
+        // click behind that render instead of running Close() before Click() returns.
+        rendered.WaitForAssertion(() => Assert.Equal("http://localhost/", navigation.Uri));
     }
 
     private static BunitContext CreateContext()

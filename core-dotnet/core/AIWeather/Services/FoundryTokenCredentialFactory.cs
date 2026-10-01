@@ -1,7 +1,5 @@
-extern alias AzureIdentityExplicit;
-
 using Azure.Core;
-using AzureIdentity = AzureIdentityExplicit::Azure.Identity;
+using Azure.Identity;
 
 namespace Core.AIWeather.Services;
 
@@ -43,6 +41,6 @@ public static class FoundryTokenCredentialFactory
     /// </summary>
     internal static TokenCredential Resolve(string? managedIdentityClientId) =>
         string.IsNullOrWhiteSpace(managedIdentityClientId)
-            ? new AzureIdentity.DefaultAzureCredential()
-            : new AzureIdentity.ManagedIdentityCredential(AzureIdentity.ManagedIdentityId.FromUserAssignedClientId(managedIdentityClientId));
+            ? new DefaultAzureCredential()
+            : new ManagedIdentityCredential(ManagedIdentityId.FromUserAssignedClientId(managedIdentityClientId));
 }
