@@ -1,5 +1,5 @@
 // Shared chat message rendering for the /chat-clients panel (chatClient.js) and the
-// Chat2a sidebar (chatSidebar.js): markdown replies, usage chips and tool hover cards.
+// Chat5a sidebar (chatSidebar.js): markdown replies, usage chips and tool hover cards.
 window.chatRender = (() => {
   const MESSAGE_ROLES = ['user', 'assistant', 'tool', 'error', 'blocked'];
 

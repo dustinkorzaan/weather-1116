@@ -4,12 +4,13 @@ using System.Text.RegularExpressions;
 namespace WeatherMVC.Tests;
 
 /// <summary>
-/// Acceptance tests for docs/specs/2026-09-30-chat2a-sidebar.md (MVC).
+/// Acceptance tests for docs/specs/2026-09-30-chat2a-sidebar.md (MVC), updated now that the sidebar
+/// runs Chat5a (docs/specs/2026-10-01-home-chat5a-sidebar-gates.md).
 /// Served HTML is asserted through <see cref="WeatherMvcWebApplicationFactory"/>. MVC has no JS
 /// test runner, so script behaviour (AC2 toggling, AC3-AC6) is asserted on the script sources
 /// (the same pattern HomeControllerTests uses); the spec's manual check covers runtime.
 /// </summary>
-public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factory) : IClassFixture<WeatherMvcWebApplicationFactory>
+public class Chat5aSidebarDockAcceptanceTests(WeatherMvcWebApplicationFactory factory) : IClassFixture<WeatherMvcWebApplicationFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 
@@ -30,7 +31,7 @@ public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factor
         Assert.True(openChat < IndexOfRequired(html, "</header>"), "Open chat must be in the top bar.");
 
         var button = OpeningTag(html, "button", "aria-label=\"Open chat\"");
-        Assert.Contains("aria-controls=\"chat2a-sidebar\"", button);
+        Assert.Contains("aria-controls=\"chat5a-sidebar\"", button);
         Assert.Contains("aria-expanded=\"false\"", button);
         Assert.Contains("type=\"button\"", button);
     }
@@ -49,14 +50,14 @@ public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factor
 
     // AC2
     [Fact]
-    public async Task AC2_Home_RendersHiddenChat2aComplementaryPanel_WithCloseButton()
+    public async Task AC2_Home_RendersHiddenChat5aComplementaryPanel_WithCloseButton()
     {
         var html = await GetHtmlAsync("/");
 
         var panelTag = PanelTag(html);
         Assert.Equal("aside", panelTag.Groups[1].Value);
         Assert.Contains("role=\"complementary\"", panelTag.Value);
-        Assert.Contains("aria-label=\"Chat2a\"", panelTag.Value);
+        Assert.Contains("aria-label=\"Chat5a\"", panelTag.Value);
         Assert.Matches("\\shidden(\\s|>|=)", panelTag.Value);
 
         // The panel lives outside the top bar (it sits below it).
@@ -65,9 +66,9 @@ public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factor
         var panelEnd = html.IndexOf($"</{panelTag.Groups[1].Value}>", panelTag.Index, StringComparison.Ordinal);
         var panel = html[panelTag.Index..panelEnd];
         Assert.Matches("<button[^>]*aria-label=\"Close chat\"", panel);
-        Assert.Contains("id=\"chat2a-sidebar-input\"", panel);
+        Assert.Contains("id=\"chat5a-sidebar-input\"", panel);
 
-        Assert.Single(Regex.Matches(html, "id=\"chat2a-sidebar\""));
+        Assert.Single(Regex.Matches(html, "id=\"chat5a-sidebar\""));
         Assert.Single(Regex.Matches(html, "js/chatSidebar\\.js"));
     }
 
@@ -78,8 +79,8 @@ public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factor
     {
         var html = await GetHtmlAsync(path);
 
-        Assert.DoesNotContain("id=\"chat2a-sidebar\"", html);
-        Assert.DoesNotContain("chat2a-sidebar-input", html);
+        Assert.DoesNotContain("id=\"chat5a-sidebar\"", html);
+        Assert.DoesNotContain("chat5a-sidebar-input", html);
         Assert.DoesNotContain("js/chatSidebar.js", html);
     }
 
@@ -118,7 +119,7 @@ public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factor
 
         // No rule for the sidebar element itself makes it a fixed/absolute overlay.
         var sidebarDeclarations = Regex.Matches(css, @"([^{}]*)\{([^{}]*)\}")
-            .Where(match => Regex.IsMatch(match.Groups[1].Value, @"(?:\.chat-sidebar|#chat2a-sidebar)(?![-\w])"))
+            .Where(match => Regex.IsMatch(match.Groups[1].Value, @"(?:\.chat-sidebar|#chat5a-sidebar)(?![-\w])"))
             .Select(match => match.Groups[2].Value)
             .ToList();
         Assert.NotEmpty(sidebarDeclarations);
@@ -137,7 +138,7 @@ public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factor
             .ToList();
         Assert.Contains(breakpointBodies, body =>
             Regex.IsMatch(body, $@"\.(?:{rowSelector})(?![-\w])[^{{}}]*\{{[^{{}}]*(?:flex-direction|grid-template)")
-            || Regex.IsMatch(body, @"(?:#chat2a-sidebar|\.chat-sidebar)(?![-\w])[^{}]*\{[^{}]*(?:width|height|flex)"));
+            || Regex.IsMatch(body, @"(?:#chat5a-sidebar|\.chat-sidebar)(?![-\w])[^{}]*\{[^{}]*(?:width|height|flex)"));
     }
 
     // AC2 (toggle, Close chat, Escape)
@@ -146,32 +147,35 @@ public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factor
     {
         var script = ReadRepoFile("mvc-dotnet/mvc/wwwroot/js/chatSidebar.js");
 
-        Assert.Contains("chat2a-sidebar", script);
+        Assert.Contains("chat5a-sidebar", script);
         Assert.Contains("chatSidebarButton", script);
         Assert.Contains("aria-expanded", script);
         Assert.Contains("hidden", script);
         Assert.Matches("['\"]Escape['\"]", script);
     }
 
-    // AC3
+    // AC3 (now Chat5a: same session handling and stream events, plus the five gate fields)
     [Fact]
-    public void AC3_ChatSidebarScript_PostsSessionIdAndMessageToChat2a_AndRendersStreamEvents()
+    public void AC3_ChatSidebarScript_PostsSessionIdMessageAndGatesToChat5a_AndRendersStreamEvents()
     {
         var script = ReadRepoFile("mvc-dotnet/mvc/wwwroot/js/chatSidebar.js");
 
-        Assert.Matches("['\"`]/Chat2a/messages['\"`]", script);
+        Assert.Matches("['\"`]/Chat5a/messages['\"`]", script);
         Assert.Matches(@"method:\s*['""]POST['""]", script);
-        Assert.Matches(@"JSON\.stringify\(\{\s*sessionId(\s*:\s*\w+)?\s*,\s*message(\s*:\s*\w+)?\s*\}\)", script);
+        Assert.Matches(@"JSON\.stringify\(\{\s*sessionId(\s*:\s*\w+)?\s*,\s*message(\s*:\s*\w+)?\s*,", script);
+        foreach (var field in new[] { "enableMaxLengthGate", "enableRuleInputGate", "enableLlmInputGate", "enableSystemPromptGuard", "enableLlmOutputGate" })
+        {
+            Assert.Contains(field + ":", script);
+        }
 
-        // Only Chat2a: no other chat endpoint and no guardrail gate fields in the body.
-        Assert.DoesNotMatch(@"/Chat(1a|1b|2b|3|4a|4b|5a|5b)/messages", script);
-        Assert.DoesNotContain("enableMaxLengthGate", script);
+        // Only Chat5a: no other chat endpoint.
+        Assert.DoesNotMatch(@"/Chat(1a|1b|2a|2b|3|4a|4b|5b)/messages", script);
 
         // Session id from the stream's `session` event is reused on later sends.
         Assert.Matches("['\"]session['\"]", script);
         Assert.Contains(".sessionId", script);
 
-        foreach (var eventType in new[] { "token", "tool_start", "tool_end", "error" })
+        foreach (var eventType in new[] { "token", "tool_start", "tool_end", "error", "blocked" })
         {
             Assert.Matches($"['\"]{eventType}['\"]", script);
         }
@@ -179,6 +183,7 @@ public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factor
         // Sidebar must not bind to the /chat-clients page chat elements.
         Assert.DoesNotMatch("['\"#]chat-input['\"]", script);
         Assert.DoesNotMatch("['\"#]chat-messages['\"]", script);
+        Assert.DoesNotMatch("['\"#]chat-gate-options['\"]", script);
     }
 
     // AC4
@@ -331,8 +336,8 @@ public class Chat2aSidebarAcceptanceTests(WeatherMvcWebApplicationFactory factor
 
     private static Match PanelTag(string html)
     {
-        var panelTag = Regex.Match(html, "<(\\w+)[^>]*\\bid=\"chat2a-sidebar\"[^>]*>");
-        Assert.True(panelTag.Success, "Expected an element with id=\"chat2a-sidebar\".");
+        var panelTag = Regex.Match(html, "<(\\w+)[^>]*\\bid=\"chat5a-sidebar\"[^>]*>");
+        Assert.True(panelTag.Success, "Expected an element with id=\"chat5a-sidebar\".");
         return panelTag;
     }
 
