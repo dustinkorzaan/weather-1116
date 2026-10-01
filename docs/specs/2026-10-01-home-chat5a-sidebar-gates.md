@@ -132,6 +132,8 @@ already exists on both the Weather API and MVC, so no endpoint change.
   `/chat-clients` Chat5a/Chat5b tabs. Those tabs keep all five checked, because they
   exist to demo the gates.
 - LLM Output also starts unchecked in the sidebar (user follow-up request during implementation).
+- The sidebar placeholder reads "Ask about weather, a location, or add/remove a saved city…" in all
+  three UIs (user follow-up request during implementation).
 - The sidebar shows the five checkboxes (the story says "chat5a with the 5 gates"), with
   per-sidebar state that survives open/close like the conversation does.
 - The sidebar component, ids and test files are renamed from `chat2a`/`Chat2a` to
@@ -211,6 +213,7 @@ Implementers rename the old story's `*Chat2aSidebar*` test files to the `*Chat5a
 
 | Round | Gate | Findings | Resolution (commit / reason) |
 |---|---|---|---|
+| 1 | Test | Core AC7/AC8 acceptance tests red: hardened scope said "removing" (no `remove` word) and the "add is not a lookup" sentence lacked "is not". Blazor AC10 red: the test compared the ElementReference id to bUnit's empty `blazor:elementreference` attribute. | Prompt wording fixed (all 4 prompts, Foundry .md, docs paste block). The Blazor test helper now compares only when the attribute carries an id: a test-harness bug, not a spec change. The focus-call assertion is unchanged. |
 
 ## Open issues
 

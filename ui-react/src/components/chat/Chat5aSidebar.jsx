@@ -221,7 +221,7 @@ function Chat5aSidebar({ open, onClose }) {
           className="w-full resize-y rounded-md border border-input bg-background px-2.5 py-2 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
           rows={3}
           value={input}
-          placeholder="Ask Chat5a to add or remove a city…"
+          placeholder="Ask about weather, a location, or add/remove a saved city…"
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={onKeyDown}
           disabled={sending}

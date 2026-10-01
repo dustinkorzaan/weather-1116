@@ -152,6 +152,6 @@ public class ChatSystemInstructionsTests
     {
         var prompt = (string)typeof(ChatSystemInstructions).GetField(promptName)!.GetValue(null)!;
 
-        Assert.Contains("not to look up the place or its weather", prompt);
+        Assert.Contains("it is not a request to look up the place or its weather", prompt);
     }
 }

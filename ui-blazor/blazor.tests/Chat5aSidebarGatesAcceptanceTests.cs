@@ -410,7 +410,8 @@ public sealed class Chat5aSidebarGatesAcceptanceTests
         var textarea = rendered.Find("#chat5a-sidebar-input");
         var refAttribute = textarea.Attributes.FirstOrDefault(a =>
             a.Name.Equals("blazor:elementreference", StringComparison.OrdinalIgnoreCase));
-        if (refAttribute is not null)
+        // bUnit renders the attribute name with an empty value, so only compare when it carries an id.
+        if (!string.IsNullOrEmpty(refAttribute?.Value))
         {
             Assert.Equal(refAttribute.Value, reference.Id);
         }
