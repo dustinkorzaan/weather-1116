@@ -1,6 +1,6 @@
 # Home map chat becomes Chat5a, gates widen to geo and saved cities, "add" means save
 
-- **Status:** in-progress (final review)
+- **Status:** shipped (draft PR)
 - **Branch / PR:** `claude/hopeful-cori-x18m82` / (PR link added on open)
 - **Mode:** interactive (no questions needed: the story's four items are specific)
 
@@ -173,7 +173,7 @@ already exists on both the Weather API and MVC, so no endpoint change.
    - Out of scope, leave alone: `FoundryConsoleV3/Program.cs`, which keeps its own copies of the descriptions.
 2. **React.**
    - Rename the component to `Chat5aSidebar`, with ids `chat5a-sidebar`, `chat5a-sidebar-input` and `data-chat5a-sidebar-messages`. Use `aria-label`/heading "Chat5a", endpoint `/Chat5a/messages`, and update `aria-controls` in `App.jsx`.
-   - Gate state lives in the component: `{ maxLength: true, ruleInput: false, llmInput: true, systemPrompt: true, llmOutput: true }`. It survives open/close because the component stays mounted. Reuse `Chat5GateOptions` below the textarea, and pass `gates` to `streamChatMessage` (`ui-react/src/utils/chatStream.js` already maps them to the body).
+   - Gate state lives in the component: `{ maxLength: true, ruleInput: false, llmInput: true, systemPrompt: true, llmOutput: false }`. It survives open/close because the component stays mounted. Reuse `Chat5GateOptions` below the textarea, and pass `gates` to `streamChatMessage` (`ui-react/src/utils/chatStream.js` already maps them to the body).
    - Add a `blocked` branch that pushes `{ role: 'blocked' }`. `ChatMessage` in `ChatPanel.jsx` already styles it.
    - Focus: give the textarea a `ref`, and focus it in an effect when `sending` goes from true to false while `open`. The textarea is disabled during the send, so it must be focused after the re-render, not inside `finally`.
    - Update the Sys Prompt description in `Chat5GateOptions.jsx` so it no longer says "only answer weather questions (not a location by itself)". Use the same new text in all three UIs, for example "…telling it to only answer weather, location and saved-city requests…".
@@ -215,6 +215,7 @@ Implementers rename the old story's `*Chat2aSidebar*` test files to the `*Chat5a
 |---|---|---|---|
 | 1 | Test | Core AC7/AC8 acceptance tests red: hardened scope said "removing" (no `remove` word) and the "add is not a lookup" sentence lacked "is not". Blazor AC10 red: the test compared the ElementReference id to bUnit's empty `blazor:elementreference` attribute. | Prompt wording fixed (all 4 prompts, Foundry .md, docs paste block). The Blazor test helper now compares only when the attribute carries an id: a test-harness bug, not a spec change. The focus-call assertion is unchanged. |
 | 1 | Peer review | clean; 3 NITs (stale "byte-for-byte" claims in 5-chat-clients.md and ChatSystemInstructions.cs; stale React gate-default comment; sidebar messages id is React-only) | All 3 applied in the follow-up commit |
+| 1 | Final review | SHIP; note: plan task 2 still showed `llmOutput: true` | Plan note updated |
 
 ## Open issues
 
