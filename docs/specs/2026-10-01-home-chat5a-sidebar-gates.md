@@ -143,10 +143,68 @@ already exists on both the Weather API and MVC, so no endpoint change.
 - The hosted Foundry agent (Chat3) reads its instructions from Foundry. The repo copy in
   `.github/foundry-agents/` is updated, but redeploying the hosted agent is out of scope.
 - Item 4 is about the Home sidebar only ("the new home chat next to the map").
+- The Sys Prompt checkbox hover text ("only answer weather questions (not a location by
+  itself)") becomes wrong under AC7, so it is reworded the same way in all three UIs,
+  which also changes the `/chat-clients` tooltip.
+- `FoundryConsoleV3/Program.cs` keeps its own copy of the add/delete tool descriptions
+  and is left unchanged (console sample, out of scope).
 
 ## Plan
 
-<Filled by the `planner` agent.>
+| # | Task | Files (create/modify) | Tests to add/update | Depends on | Parallel-safe |
+|---|------|------------------------|---------------------|------------|---------------|
+| 1 | Core: widen the gates, prompt and tool-description synonyms, Foundry instructions sync | `core-dotnet/core/Chat/Services/ChatScopeGate/RuleScopeGate.cs`, `core-dotnet/core/Chat/Services/ChatScopeGate/LlmScopeGate.cs` (doc comment), `core-dotnet/core/Chat/Services/ChatSystemInstructions.cs`, `core-dotnet/core/Tools/WeatherToolDefinitions.cs`, `core-dotnet/core/Chat/Chat4a/Chat4aService.cs`, `core-dotnet/core/Chat/Chat4b/Chat4bService.cs`, `core-dotnet/core/Chat/Chat5a/Chat5aService.cs`, `core-dotnet/core/Chat/Chat5b/Chat5bService.cs`, `.github/foundry-agents/wx1116-agent-for-chat.instructions.md` | update `core-dotnet/core.tests/Chat/RuleScopeGateTests.cs`, `core-dotnet/core.tests/Chat/Chat5SystemInstructionsTests.cs`, `core-dotnet/core.tests/Chat/ChatSystemInstructionsTests.cs`; Chat5a/5b service tests only if they assert delegate descriptions | - | no (Core, .github) |
+| 2 | React: Home sidebar becomes Chat5a with gates, blocked entries, focus restore | rename `ui-react/src/components/chat/Chat2aSidebar.jsx` → `Chat5aSidebar.jsx`; modify `ui-react/src/App.jsx`, `ui-react/src/components/chat/Chat5GateOptions.jsx` (Sys Prompt hover text), comment in `ui-react/src/map/mapPinsContext.jsx` | rename/update `ui-react/src/components/chat/Chat2aSidebar.test.jsx` → `Chat5aSidebar.test.jsx`; rename/update `ui-react/src/chat2aSidebar.acceptance.test.jsx` → `chat5aSidebarDock.acceptance.test.jsx` (old story's AC, keep passing); `ChatPanel.test.jsx` if it pins the Sys Prompt text | 1 (soft: wording only) | yes |
+| 3 | Blazor: same as 2 | rename `ui-blazor/blazor/Shared/Chat2aSidebar.razor` → `Chat5aSidebar.razor`; modify `ui-blazor/blazor/Shared/MainLayout.razor`, `ui-blazor/blazor/Shared/ChatPanel.razor` (Sys Prompt title; optionally extract gate row to new `ui-blazor/blazor/Shared/Chat5GateOptions.razor`), comments in `ChatMessageList.razor`, `Data/ChatEntry.cs`, `wwwroot/css/site.css` | rename/update `ui-blazor/blazor.tests/Chat2aSidebarTests.cs` → `Chat5aSidebarTests.cs`; rename/update `Chat2aSidebarAcceptanceTests.cs` → `Chat5aSidebarDockAcceptanceTests.cs`; `PageSplitTests.cs`, `ChatPanelTests.cs` where they reference Chat2a sidebar / Sys Prompt text | 1 (soft) | yes |
+| 4 | MVC: same as 2 | rename `mvc-dotnet/mvc/Views/Shared/_Chat2aSidebar.cshtml` → `_Chat5aSidebar.cshtml`; modify `mvc-dotnet/mvc/wwwroot/js/chatSidebar.js`, `Views/Home/Index.cshtml`, `Views/Shared/_Layout.cshtml` (`aria-controls`), `Views/Shared/_ChatPanel.cshtml` (Sys Prompt title), comments in `wwwroot/js/chatRender.js`, `wwwroot/css/site.css` (add gate-row style for the sidebar if needed) | rename/update `mvc-dotnet/mvc.tests/Chat2aSidebarAcceptanceTests.cs` → `Chat5aSidebarDockAcceptanceTests.cs` and `Chat2aSidebarLayoutTests.cs` → `Chat5aSidebarLayoutTests.cs` | 1 (soft) | yes |
+| 5 | Docs | `docs/architecture.md` (Home header/sidebar section ~L380-445), `docs/5-chat-clients/5-chat-clients.md` (sidebar section ~L133, Gate #4 ~L348, gate scope wording, add/remove synonyms), `README.md` only if it describes the sidebar | none | 1-4 (wording) | yes |
+
+### Task notes
+1. **Core (serialized, first).**
+   - `RuleScopeGate`: keep `DenyListPattern` byte-identical (non-goal). Rename `WeatherPattern` to an allow pattern that also matches geo signals (`where is`, `coordinates`, `lat`/`long`, a numeric `-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?` pair, `cit(y|ies)`, `near`, `location`) and saved-city signals (`add|save|pin|unpin|remove|delete` as verbs, `my (saved )?(cities|pins?|list|locations)`). Must pass every AC5 in-scope phrase and still reject "What tools do you have?", "Tell me a joke." (no allow keyword) and deny-list hits. Update the reason text and class/field comments, which currently say location is not in scope.
+   - In `RuleScopeGateTests`, replace `BlocksPinOnlyMessagesWithNoWeatherKeyword` and `BlocksLocationOnlyMessagesWithNoWeatherKeyword` with allow theories. Keep the bundled-request gap test. Note: "What state is Memphis in?" may legitimately pass or fail. Drop it rather than pin it.
+   - `Chat5ScopeClassifierPrompt`: list the five kinds and say replies reporting them are in scope. Keep the bundled `OUT_OF_SCOPE` and do-not-follow lines (existing tests `IsATerseInScopeOutOfScopeClassifier`, `TreatsBundledOffTopicRequestsAsOutOfScope` and `IsDualUse...` must stay green). Remove "a location is not in scope by itself". Replace `HasNoPinCarveOut` and `TreatsLocationAloneAsOutOfScope` with positive tests.
+   - `Chat5HardenedAiWeatherOrchestrationAssistant`: widen the scope paragraph to the five kinds plus decline/override text. Its Geo line becomes the Chat4 one (largest cities). Add the "To save a city… / To delete…" lines from `MultiAgentAiWeatherOrchestrationAssistant` and the add/remove synonym line. Update `Chat5SystemInstructionsTests`: `RefusesOffTopicRequests` currently asserts `DoesNotContain("largest cities")` and `ListsUserAgentButStaysWeatherOnly` asserts the weather-only sentence. Both flip.
+   - AC8 synonym sentence goes in `WeatherAssistant`, `MultiAgentAiWeatherOrchestrationAssistant`, the hardened prompt and `MultiAgentUserAssistant`. `MultiAgentAiWeatherOrchestrationAssistant_IsUnchangedByChat5` must stay green: don't add "Only accept requests about weather" to the plain prompt. Mirror the `WeatherAssistant` text into `.github/foundry-agents/wx1116-agent-for-chat.instructions.md`.
+   - AC9: change `AddUserCityDescription`/`DeleteUserCityDescription` in `WeatherToolDefinitions.cs`. `UserToolFunctions` and the `mcp-srv-app-service` tools already reference the constants, so they need no edit. Change the User delegate `Description` in Chat4a/4b/5a/5b, and the Geo delegate in Chat5a/5b to Chat4a's wording.
+   - Out of scope, leave alone: `FoundryConsoleV3/Program.cs`, which keeps its own copies of the descriptions.
+2. **React.**
+   - Rename the component to `Chat5aSidebar`, with ids `chat5a-sidebar`, `chat5a-sidebar-input` and `data-chat5a-sidebar-messages`. Use `aria-label`/heading "Chat5a", endpoint `/Chat5a/messages`, and update `aria-controls` in `App.jsx`.
+   - Gate state lives in the component: `{ maxLength: true, ruleInput: false, llmInput: true, systemPrompt: true, llmOutput: true }`. It survives open/close because the component stays mounted. Reuse `Chat5GateOptions` below the textarea, and pass `gates` to `streamChatMessage` (`ui-react/src/utils/chatStream.js` already maps them to the body).
+   - Add a `blocked` branch that pushes `{ role: 'blocked' }`. `ChatMessage` in `ChatPanel.jsx` already styles it.
+   - Focus: give the textarea a `ref`, and focus it in an effect when `sending` goes from true to false while `open`. The textarea is disabled during the send, so it must be focused after the re-render, not inside `finally`.
+   - Update the Sys Prompt description in `Chat5GateOptions.jsx` so it no longer says "only answer weather questions (not a location by itself)". Use the same new text in all three UIs, for example "…telling it to only answer weather, location and saved-city requests…".
+3. **Blazor.**
+   - Rename to `Chat5aSidebar`, with ids `chat5a-sidebar*`. Switch to the `ChatApiClient.StreamMessageAsync(string, Chat5SendMessageRequest, ...)` overload (`ui-blazor/blazor/Data/ChatApiClient.cs`), using `"Chat5a"` and `EnableRuleInputGate` from sidebar state (default false).
+   - Add a `blocked` branch, copied from `ChatPanel.razor` around L299. `ChatMessageList` already maps the `blocked` class.
+   - Gate checkboxes have the same labels/titles as `ChatPanel.razor` L44-62. Extracting a shared `Chat5GateOptions.razor` keeps them identical, but this is optional.
+   - Focus: set a `_focusInputPending` flag in `finally` and call `_inputElement.FocusAsync()` in `OnAfterRenderAsync`, reusing the existing try/catch pattern at L65-78.
+   - Update `aria-controls` in `MainLayout.razor`.
+4. **MVC.**
+   - Rename the partial and ids to `chat5a-sidebar*`, and update `aria-controls`. Add a gate row with `data-sidebar-gate="..."`. It needs a different container id than `chat-gate-options`, which `chatClient.js` reads by id. Code Input has no `checked`; titles match `_ChatPanel.cshtml`.
+   - `chatSidebar.js`: POST `/Chat5a/messages` with the five `enable*` fields read from the checkboxes, and add a `blocked` branch (`chatRender.js` already knows the role).
+   - `finally` already calls `input.focus()` after `updateSendingControls()`. Keep that ordering and cover it in the source-text test, following the `RepoFiles` pattern.
+5. **Docs.**
+   - Rename the "Chat2a sidebar" prose to Chat5a, with gates and Code Input off by default.
+   - Describe the widened gate scope (five kinds) and the add/save/pin and remove/delete/unpin mapping. Fix the Gate #4 sentence.
+
+### Acceptance test files (test-author only)
+- `core-dotnet/core.tests/Chat/Chat5GateScopeAcceptanceTests.cs`: AC5, AC6, AC7, AC8, AC9 (string/regex assertions; the Foundry `.md` sync check reads the file through the repo root)
+- `ui-react/src/chat5aSidebarGates.acceptance.test.jsx`: AC1, AC2, AC3, AC4, AC10
+- `ui-blazor/blazor.tests/Chat5aSidebarGatesAcceptanceTests.cs`: AC1, AC2, AC3, AC4, AC10 (bUnit; the focus check uses `Blazor._internal.domWrapper.focus` the same way `Chat2aSidebarTests.cs` L145 does)
+- `mvc-dotnet/mvc.tests/Chat5aSidebarGatesAcceptanceTests.cs`: AC1, AC2, AC3, AC4, AC10 (rendered HTML via `WeatherMvcWebApplicationFactory`, plus source-text checks of `chatSidebar.js`)
+
+Implementers rename the old story's `*Chat2aSidebar*` test files to the `*Chat5aSidebar(Dock|Layout)*` names above and update them. They must not create or edit the four files listed here.
+
+### Verification
+- `scripts/verify.sh --all`.
+- Manual check, if a model is configured: on `/` in each UI, "Add Nashville" saves a pin with the default gates, and "Tell me a joke" is blocked by LLM Input.
+
+### Risks
+- Parity: tasks 2-4 must ship the same ids, labels, gate defaults and Sys Prompt hover text. The Sys Prompt tooltip on `/chat-clients` changes too, as a consequence of AC7.
+- The Code Input regex becomes broader. It is deliberately blunt; a verb like "add" will let some off-topic text through. That is acceptable because the LLM gates catch it, and the class doc should say so.
+- The hosted Chat3 agent is not redeployed, so the repo instructions file can drift from Foundry until the next `prod-deploy-foundry-agents.yml` run.
+- Tasks 2-4 only depend softly on task 1. They can start right away, but end-to-end behaviour (unblocked location and saved-city prompts) needs task 1 merged.
 
 ## Review log
 
