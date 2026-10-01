@@ -5,20 +5,28 @@ import { findLastIndex } from '../../utils/array';
 import { streamChatMessage } from '../../utils/chatStream';
 import { useMapPins } from '../../map/mapPinsContext';
 import { ChatMessage } from './ChatPanel';
+import Chat5GateOptions from './Chat5GateOptions';
 
-const CHAT2A_ENDPOINT = '/Chat2a/messages';
+const CHAT5A_ENDPOINT = '/Chat5a/messages';
 
-// Chat2a panel docked beside the map (stacked under it below 640px), opened from the
-// header. It stays mounted while hidden so the conversation survives open/close and
-// route changes, and re-reads /User after every send so map pins follow
+// Code Input starts unchecked here (unlike the /chat-clients Chat5a tab) so plain
+// "add <city>" requests reach the LLM gates instead of the keyword heuristic.
+const DEFAULT_GATES = { maxLength: true, ruleInput: false, llmInput: true, systemPrompt: true, llmOutput: true };
+
+// Chat5a panel docked beside the map (stacked under it below 640px), opened from the
+// header. It stays mounted while hidden so the conversation and gate choices survive
+// open/close and route changes, and re-reads /User after every send so map pins follow
 // AddUserCity/DeleteUserCity tool calls.
-function Chat2aSidebar({ open, onClose }) {
+function Chat5aSidebar({ open, onClose }) {
   const { refreshCities } = useMapPins();
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [history, setHistory] = useState([]);
+  const [gates, setGates] = useState(DEFAULT_GATES);
   const sessionRef = useRef(null);
   const messagesRef = useRef(null);
+  const inputRef = useRef(null);
+  const wasSendingRef = useRef(false);
 
   useLayoutEffect(() => {
     const element = messagesRef.current;
@@ -26,6 +34,15 @@ function Chat2aSidebar({ open, onClose }) {
       element.scrollTop = element.scrollHeight;
     }
   }, [history, open]);
+
+  // The textarea is disabled while sending, so focus can only return to it after the
+  // re-render that re-enables it, not inside sendMessage's finally.
+  useEffect(() => {
+    if (wasSendingRef.current && !sending && open) {
+      inputRef.current?.focus();
+    }
+    wasSendingRef.current = sending;
+  }, [sending, open]);
 
   useEffect(() => {
     if (!open) {
@@ -54,9 +71,10 @@ function Chat2aSidebar({ open, onClose }) {
 
     try {
       await streamChatMessage({
-        endpoint: CHAT2A_ENDPOINT,
+        endpoint: CHAT5A_ENDPOINT,
         sessionId: sessionRef.current,
         message,
+        gates,
         onEvent: (payload) => {
           if (payload.type === 'session' && payload.sessionId) {
             sessionRef.current = payload.sessionId;
@@ -106,6 +124,11 @@ function Chat2aSidebar({ open, onClose }) {
               };
               return next;
             });
+            return;
+          }
+
+          if (payload.type === 'blocked' && payload.errorMessage) {
+            setHistory((current) => [...current, { role: 'blocked', content: payload.errorMessage }]);
             return;
           }
 
@@ -159,14 +182,14 @@ function Chat2aSidebar({ open, onClose }) {
 
   return (
     <aside
-      id="chat2a-sidebar"
+      id="chat5a-sidebar"
       role="complementary"
-      aria-label="Chat2a"
+      aria-label="Chat5a"
       hidden={!open}
       className="flex h-1/2 w-full shrink-0 flex-col border-t border-border bg-background text-foreground sm:h-auto sm:w-96 sm:border-t-0 sm:border-l"
     >
       <div className="flex items-center justify-between border-b border-border px-3 py-2">
-        <h2 className="text-base font-semibold">Chat2a</h2>
+        <h2 className="text-base font-semibold">Chat5a</h2>
         <Button
           type="button"
           variant="ghost"
@@ -181,7 +204,7 @@ function Chat2aSidebar({ open, onClose }) {
 
       <div
         ref={messagesRef}
-        data-chat2a-sidebar-messages
+        data-chat5a-sidebar-messages
         className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3"
       >
         {history.map((entry, index) => (
@@ -190,16 +213,21 @@ function Chat2aSidebar({ open, onClose }) {
       </div>
 
       <form className="flex flex-col gap-2 border-t border-border p-3" onSubmit={onSubmit}>
-        <label className="sr-only" htmlFor="chat2a-sidebar-input">Message</label>
+        <label className="sr-only" htmlFor="chat5a-sidebar-input">Message</label>
         <textarea
-          id="chat2a-sidebar-input"
+          ref={inputRef}
+          id="chat5a-sidebar-input"
           className="w-full resize-y rounded-md border border-input bg-background px-2.5 py-2 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
           rows={3}
           value={input}
-          placeholder="Ask Chat2a to add or remove a city…"
+          placeholder="Ask Chat5a to add or remove a city…"
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={onKeyDown}
           disabled={sending}
+        />
+        <Chat5GateOptions
+          state={gates}
+          onChange={(key, value) => setGates((current) => ({ ...current, [key]: value }))}
         />
         <Button
           className="self-end bg-primary px-4 py-2 text-primary-foreground shadow-sm hover:bg-primary/80"
@@ -213,4 +241,4 @@ function Chat2aSidebar({ open, onClose }) {
   );
 }
 
-export default Chat2aSidebar;
+export default Chat5aSidebar;

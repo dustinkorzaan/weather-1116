@@ -1,4 +1,5 @@
-// Acceptance tests for docs/specs/2026-09-30-chat2a-sidebar.md (React).
+// Acceptance tests for docs/specs/2026-09-30-chat2a-sidebar.md (React), carried over to the
+// Chat5a sidebar by docs/specs/2026-10-01-home-chat5a-sidebar-gates.md.
 import { afterEach, expect, test, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -6,7 +7,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
-import chat2aSidebarSource from './components/chat/Chat2aSidebar.jsx?raw';
+import chat5aSidebarSource from './components/chat/Chat5aSidebar.jsx?raw';
 import { weatherApi } from './services/weatherApi';
 
 // Google Maps cannot run under jsdom. The real WeatherMap paints one marker per
@@ -96,7 +97,7 @@ function jsonResponse(body, status = 200) {
 }
 
 /**
- * Stateful backend: `/User` returns `state.userCities`; each `/Chat2a/messages`
+ * Stateful backend: `/User` returns `state.userCities`; each `/Chat5a/messages`
  * POST shifts the next scripted reply (`{ events, userCitiesAfter }`, `{ fail: true }` or `{ throws: true }`).
  */
 function mockBackend({ userCities = [], chatReplies = [] } = {}) {
@@ -106,7 +107,7 @@ function mockBackend({ userCities = [], chatReplies = [] } = {}) {
     const url = requestUrl(input);
     const pathname = new URL(url, 'http://localhost').pathname;
 
-    if (pathname.endsWith('/Chat2a/messages')) {
+    if (pathname.endsWith('/Chat5a/messages')) {
       const rawBody = init?.body ?? (input instanceof Request ? await input.clone().text() : undefined);
       state.chatBodies.push(rawBody === undefined ? undefined : JSON.parse(rawBody));
       const reply = state.chatReplies.shift() ?? { events: [{ type: 'done' }] };
@@ -146,10 +147,10 @@ function mockBackend({ userCities = [], chatReplies = [] } = {}) {
     return jsonResponse({}, 404);
   });
 
-  const chat2aPosts = () =>
+  const chat5aPosts = () =>
     spy.mock.calls.filter(
       ([input, init]) =>
-        new URL(requestUrl(input), 'http://localhost').pathname.endsWith('/Chat2a/messages') &&
+        new URL(requestUrl(input), 'http://localhost').pathname.endsWith('/Chat5a/messages') &&
         requestMethod(input, init) === 'POST'
     ).length;
 
@@ -160,7 +161,7 @@ function mockBackend({ userCities = [], chatReplies = [] } = {}) {
         requestMethod(input, init) === 'GET'
     ).length;
 
-  return { spy, state, chat2aPosts, userGets };
+  return { spy, state, chat5aPosts, userGets };
 }
 
 function header() {
@@ -175,8 +176,8 @@ function headerButtonNames() {
 
 function visiblePanel() {
   return (
-    screen.queryByRole('complementary', { name: 'Chat2a' }) ??
-    screen.queryByRole('dialog', { name: 'Chat2a' })
+    screen.queryByRole('complementary', { name: 'Chat5a' }) ??
+    screen.queryByRole('dialog', { name: 'Chat5a' })
   );
 }
 
@@ -217,7 +218,7 @@ test.each(['/hello-world', '/current-ai-weather', '/chat-clients'])(
 );
 
 // AC2
-test('AC2: Open chat reveals a Chat2a panel and reports aria-expanded', async () => {
+test('AC2: Open chat reveals a Chat5a panel and reports aria-expanded', async () => {
   mockBackend();
   const user = userEvent.setup();
   await renderApp('/');
@@ -228,7 +229,7 @@ test('AC2: Open chat reveals a Chat2a panel and reports aria-expanded', async ()
 
   const panel = await openSidebar(user);
   expect(toggle.getAttribute('aria-expanded')).toBe('true');
-  expect(screen.getByRole('complementary', { name: 'Chat2a' })).toBe(panel);
+  expect(screen.getByRole('complementary', { name: 'Chat5a' })).toBe(panel);
 
   // The panel is outside the header (it sits below the top bar, not inside it).
   expect(header().contains(panel)).toBe(false);
@@ -328,7 +329,7 @@ test('AC2: Escape closes the panel', async () => {
 });
 
 // AC3
-test('AC3: a send posts { sessionId, message } once to /Chat2a/messages and renders streamed events', async () => {
+test('AC3: a send posts { sessionId, message, gates } once to /Chat5a/messages and renders streamed events', async () => {
   const backend = mockBackend({
     chatReplies: [
       {
@@ -343,7 +344,7 @@ test('AC3: a send posts { sessionId, message } once to /Chat2a/messages and rend
       },
       {
         events: [
-          { type: 'error', errorMessage: 'Chat2a failed upstream.' },
+          { type: 'error', errorMessage: 'Chat5a failed upstream.' },
           { type: 'done' },
         ],
       },
@@ -361,21 +362,37 @@ test('AC3: a send posts { sessionId, message } once to /Chat2a/messages and rend
   expect(within(panel).getAllByText(/AddUserCity/).length).toBeGreaterThan(0);
   expect(within(panel).getByText('add Nashville to my cities')).toBeDefined();
 
-  expect(backend.chat2aPosts()).toBe(1);
-  expect(backend.state.chatBodies[0]).toEqual({ sessionId: null, message: 'add Nashville to my cities' });
+  expect(backend.chat5aPosts()).toBe(1);
+  expect(backend.state.chatBodies[0]).toEqual({
+    sessionId: null,
+    message: 'add Nashville to my cities',
+    enableMaxLengthGate: true,
+    enableRuleInputGate: false,
+    enableLlmInputGate: true,
+    enableSystemPromptGuard: true,
+    enableLlmOutputGate: true,
+  });
 
   // Second send reuses the session id from the stream's `session` event.
   await sendFromSidebar(user, panel, 'what else?');
   await waitFor(() => {
-    expect(within(panel).getByText('Chat2a failed upstream.')).toBeDefined();
+    expect(within(panel).getByText('Chat5a failed upstream.')).toBeDefined();
   });
 
-  expect(backend.chat2aPosts()).toBe(2);
-  expect(backend.state.chatBodies[1]).toEqual({ sessionId: 'sidebar-session-1', message: 'what else?' });
+  expect(backend.chat5aPosts()).toBe(2);
+  expect(backend.state.chatBodies[1]).toEqual({
+    sessionId: 'sidebar-session-1',
+    message: 'what else?',
+    enableMaxLengthGate: true,
+    enableRuleInputGate: false,
+    enableLlmInputGate: true,
+    enableSystemPromptGuard: true,
+    enableLlmOutputGate: true,
+  });
 });
 
 // AC3 (edge: the sidebar never calls another chat endpoint)
-test('AC3: the sidebar never posts to a chat endpoint other than Chat2a', async () => {
+test('AC3: the sidebar never posts to a chat endpoint other than Chat5a', async () => {
   const backend = mockBackend({ chatReplies: [{ events: [{ type: 'token', text: 'ok' }, { type: 'done' }] }] });
   const user = userEvent.setup();
   await renderApp('/');
@@ -386,7 +403,7 @@ test('AC3: the sidebar never posts to a chat endpoint other than Chat2a', async 
 
   const otherChatPosts = backend.spy.mock.calls
     .map(([input]) => new URL(requestUrl(input), 'http://localhost').pathname)
-    .filter((pathname) => /\/Chat\w+\/messages$/.test(pathname) && !pathname.endsWith('/Chat2a/messages'));
+    .filter((pathname) => /\/Chat\w+\/messages$/.test(pathname) && !pathname.endsWith('/Chat5a/messages'));
   expect(otherChatPosts).toEqual([]);
 });
 
@@ -422,7 +439,7 @@ test('AC4: every completed send, including a failed one, triggers exactly one GE
   // No extra refetches trail behind: N sends -> N refetches.
   await new Promise((resolve) => setTimeout(resolve, 50));
   expect(backend.userGets()).toBe(4);
-  expect(backend.chat2aPosts()).toBe(3);
+  expect(backend.chat5aPosts()).toBe(3);
 });
 
 // AC4 (edge: a network failure still refetches exactly once)
@@ -650,10 +667,10 @@ test('AC6: tool lines show Waiting for tool output while running, then Arguments
 
 // AC6 (same shared rendering code, no second copy of the formatting logic)
 test('AC6: the sidebar does not carry its own copy of the chat formatting helpers', () => {
-  expect(chat2aSidebarSource).not.toMatch(/function\s+ToolChip\b/);
-  expect(chat2aSidebarSource).not.toMatch(/role=["']tooltip["']/);
-  expect(chat2aSidebarSource).not.toContain('Waiting for tool output');
-  expect(chat2aSidebarSource).not.toMatch(/function\s+formatChatUsage/);
-  expect(chat2aSidebarSource).not.toMatch(/\btok`/);
-  expect(chat2aSidebarSource).not.toMatch(/Arguments\\n/);
+  expect(chat5aSidebarSource).not.toMatch(/function\s+ToolChip\b/);
+  expect(chat5aSidebarSource).not.toMatch(/role=["']tooltip["']/);
+  expect(chat5aSidebarSource).not.toContain('Waiting for tool output');
+  expect(chat5aSidebarSource).not.toMatch(/function\s+formatChatUsage/);
+  expect(chat5aSidebarSource).not.toMatch(/\btok`/);
+  expect(chat5aSidebarSource).not.toMatch(/Arguments\\n/);
 });

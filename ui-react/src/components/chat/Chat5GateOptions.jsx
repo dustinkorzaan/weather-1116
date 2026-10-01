@@ -25,7 +25,7 @@ const GATES = [
     key: 'systemPrompt',
     label: 'Sys Prompt',
     description:
-      "Orchestration - Prompt-based Scope Guard. An instruction in the orchestrator's own system prompt telling it to only answer weather questions (not a location by itself) — no code enforces this, so it's the easiest gate to bypass.",
+      "Orchestration - Prompt-based Scope Guard. An instruction in the orchestrator's own system prompt telling it to only handle weather, location/geo and saved-city requests (list, add/save, remove/delete) — no code enforces this, so it's the easiest gate to bypass.",
   },
   {
     key: 'llmOutput',
