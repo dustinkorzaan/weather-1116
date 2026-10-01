@@ -130,15 +130,23 @@ flowchart TB
 The chat panel lives on `/chat-clients`. Hello and Current AI Weather are
 separate pages (`/hello-world`, `/current-ai-weather`).
 
-All three UIs also have a **Chat2a sidebar** on the map page (`/`), opened
-from the **Open chat** button in the top bar and docked beside the map. It reuses `POST /Chat2a/messages`
-(same backend as the table above) with body `{ sessionId, message }` and keeps
-its own session, independent of the Chat2a tab on `/chat-clients`. It renders
-`token`, `tool_start`/`tool_end` and `error` events through the same shared
-rendering code as this panel: markdown replies, usage chip, and tool hover.
-After every send completes, including a failed one, the map re-reads
-`GET /User` once and re-renders its pins when the agent has called `AddUserCity` or
-`DeleteUserCity`. See *Pages and routes* in [architecture.md](../architecture.md).
+All three UIs also have a **Chat5a sidebar** on the map page (`/`), opened
+from the **Open chat** button in the top bar and docked beside the map (ids
+`chat5a-sidebar`, `chat5a-sidebar-input`, and `data-chat5a-sidebar-messages` in React /
+`#chat5a-sidebar-messages` in Blazor and MVC). It reuses
+`POST /Chat5a/messages` (same backend as the table above) with body
+`{ sessionId, message, enableMaxLengthGate, enableRuleInputGate, enableLlmInputGate,
+enableSystemPromptGuard, enableLlmOutputGate }` and keeps its own session, independent
+of the Chat5a tab on `/chat-clients`. Below the textarea it shows the same five gate
+checkboxes (labels and hover text) as the Chat5a tab. In the sidebar **Code Input and
+LLM Output are unchecked by default**, so a default send carries `enableRuleInputGate: false`
+and `enableLlmOutputGate: false` and the other three flags `true`; the `/chat-clients` Chat5a/Chat5b tabs keep all five checked.
+It renders `token`, `tool_start`/`tool_end`, `blocked` and `error` events through the
+same shared rendering code as this panel: markdown replies, usage chip, tool hover and
+blocked entries. After every send completes, including a blocked or failed one, the
+map re-reads `GET /User` once and re-renders its pins when the agent has called
+`AddUserCity` or `DeleteUserCity`, and focus returns to the sidebar textarea. See
+*Pages and routes* in [architecture.md](../architecture.md).
 
 ## Core layout
 
@@ -185,6 +193,14 @@ Foundry, not declared on the request.
 | `AddUserCity` | Save a city from lat/long and a location name |
 | `DeleteUserCity` | Delete a saved city by its id (from `GetUser`) |
 
+"Add", "save" and "pin" a city all mean `AddUserCity`, and "remove", "delete" and "unpin" a
+city all mean `DeleteUserCity`. The shared tool descriptions (`WeatherToolDefinitions`, used by
+the Responses API tools, `UserToolFunctions` and the `mcp-srv-app-service` MCP tools), the User
+delegate description in Chat4a/Chat4b/Chat5a/Chat5b, and the prompts that own these tools
+(`WeatherAssistant`, `MultiAgentAiWeatherOrchestrationAssistant`,
+`Chat5HardenedAiWeatherOrchestrationAssistant`, `MultiAgentUserAssistant`) all say so. An
+"add <city>" request saves the city; it is not a request to look up the place or its weather.
+
 - **In-process (Chat1a, Chat2a, Chat4a, Chat5a):** Core `WeatherToolExecutor` runs CQMediator handlers when the
   model emits function calls (V3 loop for Responses; Agent Framework tool loop for Chat2a and, inside
   Chat4a's/Chat5a's Geo, NonAI Weather, and User sub-agents, for Chat4a/Chat5a).
@@ -205,12 +221,21 @@ sub-agents, same tool sets, same `AsAIFunction` delegation. The five guardrail g
 around that orchestration, not inside it: no new tools are introduced, and gate checks never call
 `GetLatLong`/`GetPublicWeatherCurrent`/etc.
 
-The gates stay **weather-only** even though a User sub-agent is attached. With the gates on, a
-saved-city-only request ("save Nashville", "delete my Austin pin") is blocked — it has no weather keyword
-for the Code Input gate, and the LLM gates and hardened prompt treat it as off-topic. A weather
-question that happens to mention saved cities ("what's the weather at my saved cities?") can still get
-through. With the gates off, Chat5a/Chat5b handle saved cities exactly like Chat4a/Chat4b. The hardened
-prompt only lists the User agent in its tool list; its scope and refusal rules are unchanged.
+All five gates accept the same **five request kinds**, matching what the attached sub-agents do:
+
+1. weather;
+2. locations/geo (place to coordinates, where a place is, the largest or nearby cities);
+3. listing the user's saved cities;
+4. adding/saving a city ("add Nashville", "pin Seattle");
+5. removing/deleting a saved city ("remove Austin", "delete my Austin pin").
+
+Everything else (jokes, poems, "what tools do you have?", instruction overrides) stays blocked.
+The Code Input regex allows weather, geo and saved-city keywords and keeps its deny-list. The LLM
+classifier prompt (`Chat5ScopeClassifierPrompt`, shared by LLM Input and LLM Output) names the five
+kinds and treats replies that report them ("Saved Nashville to your cities") as in scope; unrelated
+content, alone or bundled with an in-scope request, is still `OUT_OF_SCOPE`. The hardened prompt
+accepts the same five kinds, and its Geo and save/delete lines match the plain orchestrator prompt.
+With the gates off, Chat5a/Chat5b handle requests exactly like Chat4a/Chat4b.
 
 **Chat2a/Chat2b memory:** `IChatSessionStore` only tracks session ids and a display audit trail
 (user/assistant text). Multi-turn context for Agent Framework tabs comes from `AgentSession`
@@ -308,10 +333,12 @@ usage-chip undercount) Chat4a already has.
 
 Chat5a and Chat5b are full, independent copies of Chat4a and Chat4b — not wrappers around
 them — with five independently toggleable guardrail gates added around the same Geo/NonAI
-Weather/AI Weather Orchestration shape. Chat4aService.cs, Chat4bService.cs, and the two
-controllers stay byte-for-byte untouched; Chat5a/Chat5b exist so the "unsecured" baseline
+Weather/AI Weather Orchestration shape. The two Chat4
+controllers stay untouched, and Chat4aService.cs/Chat4bService.cs only share wording updates
+(delegate descriptions); Chat5a/Chat5b exist so the "unsecured" baseline
 (Chat4a/Chat4b) and a guarded variant can be compared side by side, checkbox by checkbox, as a
-teaching tool for securing a multi-agent LLM system. All five gates default to **on**; unchecking
+teaching tool for securing a multi-agent LLM system. All five gates default to **on** on
+`/chat-clients` (the Home map sidebar starts with Code Input and LLM Output off; see above); unchecking
 any of them reverts that layer to Chat4a's/Chat4b's exact unguarded behavior.
 
 The checkboxes are listed in the same order the pipeline runs them:
@@ -345,7 +372,8 @@ since that turn produced no resolution.
 Sys Prompt is the one gate with nothing checking it programmatically. When checked, the
 orchestrator is built with `Chat5HardenedAiWeatherOrchestrationAssistant` — the same
 `MultiAgentAiWeatherOrchestrationAssistant` instructions Chat4a/Chat4b use, plus an inserted
-paragraph telling the model to only accept weather requests (not a location by itself), decline anything else, and
+paragraph telling the model to only accept weather, location/geo and saved-city requests (list, add/save,
+remove/delete), decline anything else, and
 ignore instructions embedded in the user's message that try to override that rule. If the model
 honors it, the refusal is just an ordinary model reply — streamed as normal `token` events like
 any other answer, indistinguishable in the transport from a real weather answer. There is no
@@ -369,8 +397,8 @@ history normally.
 
 `ChatStreamEvent.Blocked(string message)` is additive alongside the existing `error`/`done`/etc.
 factories — no existing event type or consumer changes. For gates #1, #2, #3, and #5, the message
-is formatted `"Blocked by {gate.Name}: {reason}"`, e.g. `"Blocked by Code Input: message does not
-contain a weather keyword"` or `"Blocked by 500 Char: message exceeds 500
+is formatted `"Blocked by {gate.Name}: {reason}"`, e.g. `"Blocked by Code Input: message matches an
+off-topic/instruction-override pattern"` or `"Blocked by 500 Char: message exceeds 500
 characters"` — `gate.Name` and `Reason` come straight from `ChatScopeGateResult`. Gate #4 never
 emits a `blocked` event, per above. A `blocked` turn still ends with a normal `done` event (zero
 or near-zero usage) so the client's turn lifecycle stays consistent with a completed one.
@@ -501,6 +529,7 @@ Call those tools whenever you need real data instead of guessing.
 The user has saved cities. GetUser returns them (each with an id, locationName, latitude, and longitude) — call it when the user asks about their saved cities or locations, e.g. "weather at my saved cities".
 AddUserCity saves a city: resolve the place to coordinates with GetLatLong first, then pass the latitude, longitude, and a clean location name.
 DeleteUserCity removes a saved city by its id: call GetUser first to find the saved city's id, and never guess an id.
+"Add", "save", and "pin" a city all mean saving it to the user's saved cities with AddUserCity; "remove", "delete", and "unpin" a city all mean deleting a saved city with DeleteUserCity. A request like "add Nashville" is a request to save that city; it is not a request to look up the place or its weather.
 Be conversational, concise, and helpful.
 GitHub-flavored Markdown (bold, lists, tables, code) is allowed when it makes the answer easier to read. Do not emit raw HTML.
 When you report current weather, use one or two friendly sentences and include the place name, temperature, wind speed, wind direction, and overall conditions. Keep those facts in the reply even if a tool also returned them as JSON.

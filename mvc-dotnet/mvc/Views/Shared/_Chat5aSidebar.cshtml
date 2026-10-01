@@ -1,0 +1,38 @@
+<aside id="chat5a-sidebar" class="chat-sidebar" role="complementary" aria-label="Chat5a" hidden>
+    <div class="chat-sidebar-header">
+        <h2 class="chat-sidebar-title">Chat5a</h2>
+        <button id="chat5a-sidebar-close"
+                type="button"
+                class="chat-sidebar-close"
+                aria-label="Close chat">&times;</button>
+    </div>
+    <div id="chat5a-sidebar-messages" class="chat-sidebar-messages" aria-live="polite"></div>
+    <form id="chat5a-sidebar-form" class="chat-sidebar-form">
+        <label class="sr-only" for="chat5a-sidebar-input">Message</label>
+        <textarea id="chat5a-sidebar-input"
+                  class="text-area"
+                  rows="3"
+                  placeholder="Ask about weather, a location, or add/remove a saved city…"></textarea>
+        <button id="chat5a-sidebar-send"
+                type="submit"
+                class="btn">Send</button>
+        @* Same labels and titles as the /chat-clients gate row (_ChatPanel.cshtml); Code Input and LLM Output start unchecked here. *@
+        <div id="chat5a-sidebar-gate-options" class="chat-gate-options chat-sidebar-gate-options">
+            <label title="Pre-Orchestration - Deterministic Max Length. Blocks the request if the message is over 500 characters.">
+                <input type="checkbox" data-sidebar-gate="maxLength" checked> 500 Char
+            </label>
+            <label title="Pre-Orchestration - Deterministic Input Check. A keyword/regex heuristic classifies the message as in/out of scope, no LLM call.">
+                <input type="checkbox" data-sidebar-gate="ruleInput"> Code Input
+            </label>
+            <label title="Pre-Orchestration - LLM-based Input Check. A separate, cheap LLM call classifies the message as in/out of scope before the orchestrator runs.">
+                <input type="checkbox" data-sidebar-gate="llmInput" checked> LLM Input
+            </label>
+            <label title="Orchestration - Prompt-based Scope Guard. An instruction in the orchestrator's own system prompt telling it to only handle weather, location/geo and saved-city requests (list, add/save, remove/delete) &mdash; no code enforces this, so it's the easiest gate to bypass.">
+                <input type="checkbox" data-sidebar-gate="systemPrompt" checked> Sys Prompt
+            </label>
+            <label title="Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown. You will have to wait for the complete reply to finish generating before you see any of it, since streaming is disabled for that turn.">
+                <input type="checkbox" data-sidebar-gate="llmOutput"> LLM Output (waits for full reply)
+            </label>
+        </div>
+    </form>
+</aside>

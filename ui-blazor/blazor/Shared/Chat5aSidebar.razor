@@ -3,18 +3,19 @@
 @inject ChatApiClient ChatClient
 @inject IJSRuntime JS
 
-@* Map-page chat sidebar: always Chat2a (Agent Framework, in-process tools), with its own session.
+@* Map-page chat sidebar: always Chat5a (Agent Framework, in-process tools, five toggleable gates),
+   with its own session and gate state (Code Input and LLM Output off by default here, unlike /chat-clients).
    MainLayout docks it beside the map on / and keeps it mounted (hidden) elsewhere, so the
    conversation survives open/close and route changes. Messages render through the same
    ChatMessageList as the /chat-clients panel. *@
-<aside id="chat2a-sidebar"
+<aside id="chat5a-sidebar"
        class="chat-sidebar"
        role="complementary"
-       aria-label="Chat2a"
+       aria-label="Chat5a"
        hidden="@(!Open)"
        @onkeydown="OnKeyDown">
     <div class="chat-sidebar-header">
-        <h2 class="chat-sidebar-title">Chat2a</h2>
+        <h2 class="chat-sidebar-title">Chat5a</h2>
         <button type="button"
                 class="chat-sidebar-close"
                 aria-label="Close chat"
@@ -22,7 +23,7 @@
                 @onclick="CloseAsync">&times;</button>
     </div>
 
-    <div @ref="_messagesElement" id="chat2a-sidebar-messages" class="chat-messages chat-sidebar-messages">
+    <div @ref="_messagesElement" id="chat5a-sidebar-messages" class="chat-messages chat-sidebar-messages">
         <ChatMessageList Entries="_history" />
     </div>
 
@@ -30,10 +31,10 @@
         @* Uncontrolled like ChatPanel: chatInput.js owns the draft (and Enter-to-send) until submit.
            _draft is only a fallback when the JS helper is unavailable. *@
         <textarea @ref="_inputElement"
-                  id="chat2a-sidebar-input"
+                  id="chat5a-sidebar-input"
                   class="chat-input"
                   rows="3"
-                  placeholder="Ask Chat2a…"
+                  placeholder="Ask about weather, a location, or add/remove a saved city…"
                   aria-label="Message"
                   disabled="@_isSending"
                   @onchange="OnDraftChange"></textarea>
@@ -41,6 +42,7 @@
             @(_isSending ? "Sending…" : "Send")
         </button>
     </form>
+    <Chat5GateOptions State="_gates" />
 </aside>
 
 @code {
@@ -51,11 +53,13 @@
     public EventCallback OnClose { get; set; }
 
     private readonly List<ChatEntry> _history = [];
+    private readonly Chat5GateState _gates = new() { RuleInput = false, LlmOutput = false };
     private readonly CancellationTokenSource _cts = new();
     private string? _sessionId;
     private string _draft = string.Empty;
     private bool _isSending;
     private bool _scrollMessagesPending;
+    private bool _focusInputPending;
     private bool _wasOpen;
     private ElementReference _inputElement;
     private ElementReference _messagesElement;
@@ -64,9 +68,13 @@
     {
         // Focus the input when the sidebar opens so Escape (handled on the aside) works
         // straight away, matching React/MVC which close on Escape from anywhere.
+        // Also refocus after every send completes: the textarea was disabled while sending,
+        // so it can only take focus once this render has re-enabled it.
         var justOpened = Open && !_wasOpen;
         _wasOpen = Open;
-        if (justOpened)
+        var refocus = _focusInputPending && Open;
+        _focusInputPending = false;
+        if (justOpened || refocus)
         {
             try
             {
@@ -153,8 +161,17 @@
         try
         {
             var chatEvents = ChatClient.StreamMessageAsync(
-                "Chat2a",
-                new ChatSendMessageRequest { SessionId = _sessionId, Message = message },
+                "Chat5a",
+                new Chat5SendMessageRequest
+                {
+                    SessionId = _sessionId,
+                    Message = message,
+                    EnableMaxLengthGate = _gates.MaxLength,
+                    EnableRuleInputGate = _gates.RuleInput,
+                    EnableLlmInputGate = _gates.LlmInput,
+                    EnableSystemPromptGuard = _gates.SystemPrompt,
+                    EnableLlmOutputGate = _gates.LlmOutput,
+                },
                 _cts.Token);
 
             await foreach (var streamEvent in chatEvents)
@@ -212,6 +229,11 @@
                     _history.Add(new ChatEntry { Role = "error", Content = streamEvent.ErrorMessage });
                     StateHasChanged();
                 }
+                else if (streamEvent.Type == "blocked" && !string.IsNullOrEmpty(streamEvent.ErrorMessage))
+                {
+                    _history.Add(new ChatEntry { Role = "blocked", Content = streamEvent.ErrorMessage });
+                    StateHasChanged();
+                }
                 else if (streamEvent.Type == "done")
                 {
                     if (assistantEntry is not null)
@@ -242,6 +264,7 @@
             }
 
             _scrollMessagesPending = true;
+            _focusInputPending = true;
             // Re-enable the composer before waiting on /User and the pin repaint.
             StateHasChanged();
             await RefreshMapCitiesAsync();

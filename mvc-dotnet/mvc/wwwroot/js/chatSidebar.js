@@ -1,17 +1,21 @@
 (() => {
   const button = document.getElementById('chatSidebarButton');
-  const sidebar = document.getElementById('chat2a-sidebar');
-  const closeButton = document.getElementById('chat2a-sidebar-close');
-  const messagesEl = document.getElementById('chat2a-sidebar-messages');
-  const form = document.getElementById('chat2a-sidebar-form');
-  const input = document.getElementById('chat2a-sidebar-input');
-  const sendButton = document.getElementById('chat2a-sidebar-send');
+  const sidebar = document.getElementById('chat5a-sidebar');
+  const closeButton = document.getElementById('chat5a-sidebar-close');
+  const messagesEl = document.getElementById('chat5a-sidebar-messages');
+  const form = document.getElementById('chat5a-sidebar-form');
+  const input = document.getElementById('chat5a-sidebar-input');
+  const sendButton = document.getElementById('chat5a-sidebar-send');
+  const gateOptionsEl = document.getElementById('chat5a-sidebar-gate-options');
+  const gateCheckboxes = gateOptionsEl
+    ? Array.from(gateOptionsEl.querySelectorAll('input[data-sidebar-gate]'))
+    : [];
 
   if (!button || !sidebar || !closeButton || !messagesEl || !form || !input || !sendButton || !window.chatRender) {
     return;
   }
 
-  // The sidebar keeps its own Chat2a session, independent of the /chat-clients Chat2a tab.
+  // The sidebar keeps its own Chat5a session and gate checkboxes, independent of the /chat-clients Chat5a tab.
   let sessionId = null;
   let isSending = false;
   const history = [];
@@ -76,11 +80,25 @@
     input.disabled = isSending;
   }
 
+  // Reads the checkbox for a gate; Code Input and LLM Output default off in the sidebar, the rest on.
+  function isGateEnabled(gate, fallback) {
+    const checkbox = gateCheckboxes.find((item) => item.dataset.sidebarGate === gate);
+    return checkbox ? checkbox.checked : fallback;
+  }
+
   async function streamChat(message) {
-    const response = await fetch('/Chat2a/messages', {
+    const response = await fetch('/Chat5a/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, message }),
+      body: JSON.stringify({
+        sessionId,
+        message,
+        enableMaxLengthGate: isGateEnabled('maxLength', true),
+        enableRuleInputGate: isGateEnabled('ruleInput', false),
+        enableLlmInputGate: isGateEnabled('llmInput', true),
+        enableSystemPromptGuard: isGateEnabled('systemPrompt', true),
+        enableLlmOutputGate: isGateEnabled('llmOutput', false),
+      }),
     });
 
     if (!response.ok || !response.body) {
@@ -137,6 +155,8 @@
             pending.toolResult = payload.toolResult;
             updateEntry(pending, `Ran ${payload.toolName} …`);
           }
+        } else if (payload.type === 'blocked' && payload.errorMessage) {
+          addEntry({ role: 'blocked', content: payload.errorMessage });
         } else if (payload.type === 'error' && payload.errorMessage) {
           addEntry({ role: 'error', content: payload.errorMessage });
         } else if (payload.type === 'done') {
@@ -185,6 +205,7 @@
       } catch {
         // A failed map refresh must not break the chat.
       }
+      // Focus only after updateSendingControls() re-enabled the textarea; a disabled one can't take focus.
       input.focus();
     }
   });

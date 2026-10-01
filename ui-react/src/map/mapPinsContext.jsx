@@ -62,7 +62,7 @@ export function MapPinsProvider({ children }) {
     [deleteUserCity]
   );
 
-  // Re-reads the user so pins reflect changes made elsewhere (e.g. the Chat2a sidebar).
+  // Re-reads the user so pins reflect changes made elsewhere (e.g. the Chat5a sidebar).
   const refreshCities = useCallback(() => refetch(), [refetch]);
 
   const value = useMemo(

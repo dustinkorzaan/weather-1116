@@ -12,8 +12,9 @@ using WeatherBlazor.Shared;
 
 namespace WeatherBlazor.Tests;
 
-// Implementation details the acceptance tests (Chat2aSidebarAcceptanceTests) do not cover.
-public sealed class Chat2aSidebarTests
+// Implementation details the acceptance tests (Chat5aSidebarDockAcceptanceTests,
+// Chat5aSidebarGatesAcceptanceTests) do not cover.
+public sealed class Chat5aSidebarTests
 {
     [Fact]
     public void MainLayout_DocksSidebarInTheBodyRowOnMapPage_AndKeepsItMountedWithHistoryOffIt()
@@ -28,40 +29,40 @@ public sealed class Chat2aSidebarTests
         var row = rendered.Find(".body-content.weather-body > .weather-main");
         Assert.Contains("is-map-page", row.ClassName);
         Assert.NotNull(rendered.Find(".weather-main > .weather-main-page > #child"));
-        Assert.NotNull(rendered.Find(".weather-main > #chat2a-sidebar"));
+        Assert.NotNull(rendered.Find(".weather-main > #chat5a-sidebar"));
 
         rendered.Find("button[aria-label=\"Open chat\"]").Click();
         SendLayoutMessage(rendered, "hello");
-        rendered.WaitForAssertion(() => Assert.Contains("Hi there.", rendered.Find("#chat2a-sidebar").InnerHtml));
+        rendered.WaitForAssertion(() => Assert.Contains("Hi there.", rendered.Find("#chat5a-sidebar").InnerHtml));
 
         var navigation = context.Services.GetRequiredService<NavigationManager>();
         navigation.NavigateTo("/hello-world");
         rendered.WaitForAssertion(() =>
         {
             Assert.DoesNotContain("is-map-page", rendered.Find(".weather-main").ClassName);
-            Assert.True(rendered.Find("#chat2a-sidebar").HasAttribute("hidden"));
-            Assert.Contains("Hi there.", rendered.Find("#chat2a-sidebar").InnerHtml);
+            Assert.True(rendered.Find("#chat5a-sidebar").HasAttribute("hidden"));
+            Assert.Contains("Hi there.", rendered.Find("#chat5a-sidebar").InnerHtml);
         });
 
         navigation.NavigateTo("/");
         rendered.WaitForAssertion(() =>
         {
             Assert.Contains("is-map-page", rendered.Find(".weather-main").ClassName);
-            Assert.True(rendered.Find("#chat2a-sidebar").HasAttribute("hidden"));
+            Assert.True(rendered.Find("#chat5a-sidebar").HasAttribute("hidden"));
             Assert.Equal("false", rendered.Find("button[aria-label=\"Open chat\"]").GetAttribute("aria-expanded"));
         });
 
         rendered.Find("button[aria-label=\"Open chat\"]").Click();
-        Assert.Contains("Hi there.", rendered.Find("#chat2a-sidebar").InnerHtml);
+        Assert.Contains("Hi there.", rendered.Find("#chat5a-sidebar").InnerHtml);
     }
 
     [Fact]
     public void Sidebar_UsesIdsDistinctFromTheChatClientsPage()
     {
         using var context = CreateSidebarContext(new StubChatHandler());
-        var rendered = context.Render<Chat2aSidebar>();
+        var rendered = context.Render<Chat5aSidebar>();
 
-        Assert.NotNull(rendered.Find("#chat2a-sidebar-input"));
+        Assert.NotNull(rendered.Find("#chat5a-sidebar-input"));
         Assert.DoesNotContain("id=\"chat-input\"", rendered.Markup);
         Assert.DoesNotContain("id=\"chat-messages\"", rendered.Markup);
     }
@@ -69,7 +70,7 @@ public sealed class Chat2aSidebarTests
     [Fact]
     public void ChatPanelAndSidebar_RenderEntriesThroughTheSharedMessageList()
     {
-        foreach (var file in new[] { "ChatPanel.razor", "Chat2aSidebar.razor" })
+        foreach (var file in new[] { "ChatPanel.razor", "Chat5aSidebar.razor" })
         {
             var source = File.ReadAllText(RepoFiles.FindRepoFile($"ui-blazor/blazor/Shared/{file}"));
 
@@ -81,10 +82,84 @@ public sealed class Chat2aSidebarTests
     }
 
     [Fact]
+    public void ChatPanelAndSidebar_RenderGatesThroughTheSharedGateOptions()
+    {
+        foreach (var file in new[] { "ChatPanel.razor", "Chat5aSidebar.razor" })
+        {
+            var source = File.ReadAllText(RepoFiles.FindRepoFile($"ui-blazor/blazor/Shared/{file}"));
+
+            Assert.Contains("<Chat5GateOptions State=", source);
+            Assert.DoesNotContain("type=\"checkbox\"", source);
+            Assert.DoesNotContain("class Chat5GateState", source);
+        }
+    }
+
+    [Fact]
+    public void Sidebar_GateState_IsItsOwn_CodeInputAndLlmOutputOffByDefault_AndTogglesTheNextSend()
+    {
+        var handler = new StubChatHandler(
+            Sse(new { type = "session", sessionId = "s-1" }, new { type = "done" }),
+            Sse(new { type = "done" }));
+        using var context = CreateSidebarContext(handler);
+        var rendered = context.Render<Chat5aSidebar>(parameters => parameters.Add(sidebar => sidebar.Open, true));
+
+        var boxes = rendered.FindAll("#chat5a-sidebar .chat-gate-options input[type=checkbox]");
+        Assert.Equal(new[] { true, false, true, true, false }, boxes.Select(box => box.HasAttribute("checked")).ToArray());
+
+        rendered.Find("#chat5a-sidebar-input").Change("hello");
+        rendered.Find("form.chat-sidebar-form").Submit();
+        rendered.WaitForAssertion(() => Assert.Single(handler.Bodies));
+        Assert.False(GateField(handler.Bodies[0], "enableRuleInputGate"));
+        Assert.False(GateField(handler.Bodies[0], "enableLlmOutputGate"));
+
+        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat5a-sidebar-input").HasAttribute("disabled")));
+        rendered.FindAll("#chat5a-sidebar .chat-gate-options input[type=checkbox]")[1].Change(true);
+        rendered.FindAll("#chat5a-sidebar .chat-gate-options input[type=checkbox]")[4].Change(true);
+        rendered.Find("#chat5a-sidebar-input").Change("again");
+        rendered.Find("form.chat-sidebar-form").Submit();
+        rendered.WaitForAssertion(() => Assert.Equal(2, handler.Bodies.Count));
+
+        Assert.True(GateField(handler.Bodies[1], "enableRuleInputGate"));
+        Assert.True(GateField(handler.Bodies[1], "enableLlmOutputGate"));
+        Assert.True(GateField(handler.Bodies[1], "enableMaxLengthGate"));
+        Assert.EndsWith("/Chat5a/messages", handler.Paths[1]);
+    }
+
+    [Fact]
+    public void Sidebar_RendersBlockedEvents_AndRefocusesTheInputAfterEachCompletedSend()
+    {
+        var handler = new StubChatHandler(
+            Sse(new { type = "blocked", errorMessage = "Only weather, location and saved-city requests." }, new { type = "done" }),
+            Sse(new { type = "token", text = "Sunny." }, new { type = "done" }));
+        using var context = CreateSidebarContext(handler);
+        var rendered = context.Render<Chat5aSidebar>(parameters => parameters.Add(sidebar => sidebar.Open, true));
+        Assert.Single(context.JSInterop.Invocations, i => i.Identifier == FocusIdentifier);
+
+        rendered.Find("#chat5a-sidebar-input").Change("tell me a joke");
+        rendered.Find("form.chat-sidebar-form").Submit();
+
+        rendered.WaitForAssertion(() =>
+        {
+            var blocked = rendered.Find("#chat5a-sidebar .chat-message.blocked");
+            Assert.Contains("Only weather, location and saved-city requests.", blocked.TextContent);
+            Assert.Equal(2, context.JSInterop.Invocations.Count(i => i.Identifier == FocusIdentifier));
+        });
+
+        rendered.Find("#chat5a-sidebar-input").Change("weather in Paris");
+        rendered.Find("form.chat-sidebar-form").Submit();
+
+        rendered.WaitForAssertion(() =>
+        {
+            Assert.Contains("Sunny.", rendered.Find("#chat5a-sidebar").InnerHtml);
+            Assert.Equal(3, context.JSInterop.Invocations.Count(i => i.Identifier == FocusIdentifier));
+        });
+    }
+
+    [Fact]
     public void Sidebar_FocusesInputWhenOpened_SoEscapeClosesRightAway()
     {
         using var context = CreateSidebarContext(new StubChatHandler());
-        var rendered = context.Render<Chat2aSidebar>(parameters => parameters.Add(sidebar => sidebar.Open, false));
+        var rendered = context.Render<Chat5aSidebar>(parameters => parameters.Add(sidebar => sidebar.Open, false));
 
         Assert.DoesNotContain(context.JSInterop.Invocations, i => i.Identifier == FocusIdentifier);
 
@@ -104,9 +179,9 @@ public sealed class Chat2aSidebarTests
     {
         var handler = new HangingChatHandler();
         using var context = CreateSidebarContext(handler);
-        var rendered = context.Render<Chat2aSidebar>(parameters => parameters.Add(sidebar => sidebar.Open, true));
+        var rendered = context.Render<Chat5aSidebar>(parameters => parameters.Add(sidebar => sidebar.Open, true));
 
-        rendered.Find("#chat2a-sidebar-input").Change("hello");
+        rendered.Find("#chat5a-sidebar-input").Change("hello");
         rendered.Find("form.chat-sidebar-form").Submit();
         await handler.Started.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
@@ -154,8 +229,8 @@ public sealed class Chat2aSidebarTests
 
     private static void SendLayoutMessage(IRenderedComponent<MainLayout> rendered, string message)
     {
-        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat2a-sidebar-input").HasAttribute("disabled")));
-        rendered.Find("#chat2a-sidebar-input").Change(message);
+        rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat5a-sidebar-input").HasAttribute("disabled")));
+        rendered.Find("#chat5a-sidebar-input").Change(message);
         rendered.Find("form.chat-sidebar-form").Submit();
     }
 
@@ -191,18 +266,30 @@ public sealed class Chat2aSidebarTests
         return builder.ToString();
     }
 
+    private static bool GateField(string body, string name)
+    {
+        using var document = JsonDocument.Parse(body);
+        return document.RootElement.GetProperty(name).GetBoolean();
+    }
+
     private sealed class StubChatHandler(params string[] responses) : HttpMessageHandler
     {
         private int _count;
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        public List<string> Bodies { get; } = [];
+
+        public List<string> Paths { get; } = [];
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            Paths.Add(request.RequestUri?.AbsolutePath ?? string.Empty);
+            Bodies.Add(request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken));
             var index = _count++;
             var payload = index < responses.Length ? responses[index] : string.Empty;
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(payload, Encoding.UTF8, "text/event-stream"),
-            });
+            };
         }
     }
 

@@ -249,7 +249,7 @@ public sealed class PageSplitTests
         Assert.Contains("chat-window", panelSource);
         Assert.Contains("<ChatMessageList Entries=", panelSource);
 
-        // Entry rendering is shared with the Chat2a sidebar.
+        // Entry rendering is shared with the Chat5a sidebar.
         var listSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Shared/ChatMessageList.razor"));
         Assert.Contains("chat-usage-chip", listSource);
         Assert.Contains("FormatChatUsageChip", listSource);

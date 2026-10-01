@@ -1,7 +1,7 @@
 namespace WeatherBlazor.Data;
 
 // One rendered line in a chat transcript, shared by ChatPanel (/chat-clients) and the
-// header Chat2aSidebar so both render through ChatMessageList.
+// header Chat5aSidebar so both render through ChatMessageList.
 public class ChatEntry
 {
     public required string Role { get; set; }
