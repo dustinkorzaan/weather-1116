@@ -21,7 +21,7 @@
         <FluentTabs @bind-ActiveTabId="ActiveTab" Class="weather-dialog-tabs">
             @foreach (var tab in Tabs)
             {
-                <FluentTab Id="@tab.Id" Label="@tab.Label"></FluentTab>
+                <FluentTab Id="@tab.Id" Header="@tab.Label"></FluentTab>
             }
         </FluentTabs>
 
