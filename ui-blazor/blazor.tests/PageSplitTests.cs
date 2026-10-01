@@ -84,7 +84,7 @@ public sealed class PageSplitTests
 
         var pageSource = File.ReadAllText(RepoFiles.FindRepoFile("ui-blazor/blazor/Pages/CurrentAIWeather.razor"));
         Assert.Contains("Class=\"ai-weather-submit\"", pageSource);
-        Assert.Contains("Slot=\"start\"", pageSource);
+        Assert.Contains("slot=\"start\"", pageSource);
         Assert.Contains("chat-markdown", pageSource);
         Assert.Contains("SafeGfmMarkdown.ToHtml", pageSource);
         Assert.Contains("MarkupString", pageSource);
@@ -145,7 +145,7 @@ public sealed class PageSplitTests
         {
             Assert.Contains("Get Current AI Weather", rendered.Markup);
             Assert.Contains("ai-weather-submit", rendered.Markup);
-            Assert.Contains("fluent-progress-ring", rendered.Markup, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("fluent-spinner", rendered.Markup, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("slot=\"start\"", rendered.Markup, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("Connecting to Microsoft Foundry...", rendered.Markup);
         });

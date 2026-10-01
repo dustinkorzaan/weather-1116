@@ -25,7 +25,7 @@ public sealed class Chat2aSidebarTests
         using var context = CreateLayoutContext(handler);
         var rendered = context.Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, "<div id=\"child\"></div>"));
 
-        var row = rendered.Find(".body-content.weather-body > .weather-main");
+        var row = rendered.Find(".fluent-layout-item.weather-body > .weather-main");
         Assert.Contains("is-map-page", row.ClassName);
         Assert.NotNull(rendered.Find(".weather-main > .weather-main-page > #child"));
         Assert.NotNull(rendered.Find(".weather-main > #chat2a-sidebar"));
@@ -138,7 +138,7 @@ public sealed class Chat2aSidebarTests
     {
         var css = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "site.css"));
 
-        Assert.DoesNotContain("z-index", RuleBody(css, ".layout.weather-shell > .header.weather-header {"));
+        Assert.DoesNotContain("z-index", RuleBody(css, ".fluent-layout.weather-shell > .fluent-layout-item.weather-header {"));
         Assert.DoesNotContain("z-index", RuleBody(css, ".chat-sidebar {"));
     }
 

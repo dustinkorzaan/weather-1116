@@ -5,12 +5,12 @@
 @inject IConfiguration Configuration
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject IThemeService ThemeService
 
 <PageTitle>Weather Razor</PageTitle>
-<FluentDesignTheme CustomColor="#6b7280" Mode="@FluentMode" />
 
-<FluentLayout Class="weather-shell">
-    <FluentHeader Height="48" Class="weather-header">
+<FluentLayout Id="weather-shell" Class="weather-shell">
+    <FluentLayoutItem Area="LayoutArea.Header" Height="48px" Class="weather-header">
         <a href="/" class="brand-link">
             <img src="logo.svg" alt="Weather logo" width="24" height="24" class="brand-logo" />
             <h1 class="brand-title">Weather Blazor</h1>
@@ -87,25 +87,25 @@
                 aria-label="Open user menu">
             <img src="avatar.svg" alt="" width="20" height="20" class="avatar-icon" />
         </button>
-        <FluentMenu Anchor="user-menu-button"
-                    Trigger="MouseButton.Left"
-                    HorizontalPosition="HorizontalPosition.Right">
-            <FluentMenuItem Label="Home" OnClick="@(() => NavigateTo("/"))" />
-            <FluentDivider />
-            <FluentMenuItem Label="Hello World" OnClick="@(() => NavigateTo("/hello-world"))" />
-            <FluentMenuItem Label="Current AI Weather" OnClick="@(() => NavigateTo("/current-ai-weather"))" />
-            <FluentMenuItem Label="Chat Clients" OnClick="@(() => NavigateTo("/chat-clients"))" />
-            <FluentDivider />
-            <FluentMenuItem Label="@ThemeItemLabel("light", "Light")" OnClick="@(() => SetThemeAsync("light"))" />
-            <FluentMenuItem Label="@ThemeItemLabel("dark", "Dark")" OnClick="@(() => SetThemeAsync("dark"))" />
-            <FluentMenuItem Label="@ThemeItemLabel("system", "System")" OnClick="@(() => SetThemeAsync("system"))" />
-            <FluentDivider />
-            <FluentMenuItem Label="About" OnClick="OpenAboutModal" />
+        <FluentMenu Trigger="user-menu-button">
+            <FluentMenuList>
+                <FluentMenuItem Label="Home" OnClick="@(() => NavigateTo("/"))" />
+                <FluentDivider />
+                <FluentMenuItem Label="Hello World" OnClick="@(() => NavigateTo("/hello-world"))" />
+                <FluentMenuItem Label="Current AI Weather" OnClick="@(() => NavigateTo("/current-ai-weather"))" />
+                <FluentMenuItem Label="Chat Clients" OnClick="@(() => NavigateTo("/chat-clients"))" />
+                <FluentDivider />
+                <FluentMenuItem Label="@ThemeItemLabel("light", "Light")" OnClick="@(() => SetThemeAsync("light"))" />
+                <FluentMenuItem Label="@ThemeItemLabel("dark", "Dark")" OnClick="@(() => SetThemeAsync("dark"))" />
+                <FluentMenuItem Label="@ThemeItemLabel("system", "System")" OnClick="@(() => SetThemeAsync("system"))" />
+                <FluentDivider />
+                <FluentMenuItem Label="About" OnClick="OpenAboutModal" />
+            </FluentMenuList>
         </FluentMenu>
         </div>
-    </FluentHeader>
+    </FluentLayoutItem>
 
-    <FluentBodyContent Class="weather-body">
+    <FluentLayoutItem Area="LayoutArea.Content" Class="weather-body">
         @* On / the page and the Chat2a sidebar share one flex row (sidebar docked right, the map
            narrows; stacked under the map below 640px). Elsewhere both wrappers are display:
            contents and the sidebar stays mounted but hidden, so its history survives navigation. *@
@@ -115,7 +115,7 @@
             </div>
             <Chat2aSidebar Open="ChatVisible" OnClose="CloseChat" />
         </div>
-    </FluentBodyContent>
+    </FluentLayoutItem>
 </FluentLayout>
 
 <div class="about-modal @(_aboutDialogHidden ? null : "is-open")"
@@ -134,13 +134,13 @@
             @if (_isAboutLoading)
             {
                 <div class="inline-row">
-                    <FluentProgressRing Width="20px" Stroke="ProgressStroke.Small" />
+                    <FluentSpinner Size="SpinnerSize.Small" />
                     <span>Loading About information...</span>
                 </div>
             }
             else if (!string.IsNullOrWhiteSpace(_aboutError))
             {
-                <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false">@_aboutError</FluentMessageBar>
+                <FluentMessageBar Intent="MessageBarIntent.Error" AllowDismiss="false">@_aboutError</FluentMessageBar>
             }
             else if (_aboutRoot is not null)
             {
@@ -152,22 +152,21 @@
             <FluentDivider Style="margin: 1rem 0;" />
 
             <div class="footer-links">
-                <FluentAnchor Href="@_uiReactUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">UI React</FluentAnchor>
-                <FluentAnchor Href="@_mvcUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MVC</FluentAnchor>
-                <FluentAnchor Href="@_apiAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">API About</FluentAnchor>
-                <FluentAnchor Href="@_workerHangfireUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">Worker Hangfire</FluentAnchor>
-                <FluentAnchor Href="@_mcpSrvAppServiceAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP App Service About</FluentAnchor>
-                <FluentAnchor Href="@_mcpSrvFuncAppAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP Func App About</FluentAnchor>
-                <FluentAnchor Href="@_mcpSrvPythonAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP Python About</FluentAnchor>
-                <FluentAnchor Href="@_mcpSrvNodeAboutUrl" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">MCP Node About</FluentAnchor>
-                <FluentAnchor Href="https://github.com/dustinkorzaan/weather-1116" Target="_blank" Rel="noopener noreferrer" Appearance="Appearance.Hypertext">GitHub</FluentAnchor>
+                <FluentLink Href="@_uiReactUrl" Target="LinkTarget.Blank">UI React</FluentLink>
+                <FluentLink Href="@_mvcUrl" Target="LinkTarget.Blank">MVC</FluentLink>
+                <FluentLink Href="@_apiAboutUrl" Target="LinkTarget.Blank">API About</FluentLink>
+                <FluentLink Href="@_workerHangfireUrl" Target="LinkTarget.Blank">Worker Hangfire</FluentLink>
+                <FluentLink Href="@_mcpSrvAppServiceAboutUrl" Target="LinkTarget.Blank">MCP App Service About</FluentLink>
+                <FluentLink Href="@_mcpSrvFuncAppAboutUrl" Target="LinkTarget.Blank">MCP Func App About</FluentLink>
+                <FluentLink Href="@_mcpSrvPythonAboutUrl" Target="LinkTarget.Blank">MCP Python About</FluentLink>
+                <FluentLink Href="@_mcpSrvNodeAboutUrl" Target="LinkTarget.Blank">MCP Node About</FluentLink>
+                <FluentLink Href="https://github.com/dustinkorzaan/weather-1116" Target="LinkTarget.Blank">GitHub</FluentLink>
             </div>
         </div>
     </div>
 </div>
 
-<FluentDialogProvider />
-<FluentMenuProvider />
+<FluentProviders />
 
 @code {
     private string _uiReactUrl = "http://localhost:3000";
@@ -190,11 +189,14 @@
     private string _addLocationError = string.Empty;
     private bool _chatOpen;
 
-    private DesignThemeModes FluentMode => _themePreference switch
+    // Neutral gray brand ramp; v5 dropped FluentDesignTheme's CustomColor for the theme service.
+    private const string BrandColor = "#6b7280";
+
+    private ThemeMode FluentMode => _themePreference switch
     {
-        "light" => DesignThemeModes.Light,
-        "dark" => DesignThemeModes.Dark,
-        _ => DesignThemeModes.System,
+        "light" => ThemeMode.Light,
+        "dark" => ThemeMode.Dark,
+        _ => ThemeMode.System,
     };
 
     protected override void OnInitialized()
@@ -236,6 +238,8 @@
         {
             // Tests and missing script keep System.
         }
+
+        await ApplyFluentThemeAsync();
     }
 
     private bool IsMapPage
@@ -291,6 +295,20 @@
         catch
         {
             // Theme script is optional in component tests.
+        }
+
+        await ApplyFluentThemeAsync();
+    }
+
+    private async Task ApplyFluentThemeAsync()
+    {
+        try
+        {
+            await ThemeService.SetThemeAsync(new ThemeSettings(BrandColor, Mode: FluentMode));
+        }
+        catch
+        {
+            // Fluent's theme script is not loaded in component tests.
         }
     }
 

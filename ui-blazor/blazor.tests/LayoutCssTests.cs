@@ -12,13 +12,13 @@ namespace WeatherBlazor.Tests;
 public sealed class LayoutCssTests
 {
     [Fact]
-    public void SiteCss_StretchesFluentBodyContentSoTheMapHasWidth()
+    public void SiteCss_StretchesFluentLayoutContentSoTheMapHasWidth()
     {
         var cssPath = Path.Combine(AppContext.BaseDirectory, "site.css");
         Assert.True(File.Exists(cssPath), $"Expected copied site.css at {cssPath}");
 
         var css = File.ReadAllText(cssPath);
-        Assert.Contains(".layout.weather-shell > .body-content.weather-body", css);
+        Assert.Contains(".fluent-layout.weather-shell > .fluent-layout-item.weather-body", css);
         Assert.Contains("align-items: stretch", css);
         Assert.Contains("color-scheme: light", css);
         Assert.Contains("html[data-theme=\"dark\"] .weather-map", css);
@@ -57,8 +57,8 @@ public sealed class LayoutCssTests
 
         Assert.Contains("weather-shell", rendered.Markup);
         Assert.Contains("weather-body", rendered.Markup);
-        Assert.Contains("class=\"layout weather-shell\"", rendered.Markup);
-        Assert.Contains("body-content weather-body", rendered.Markup);
+        Assert.Contains("class=\"fluent-layout weather-shell\"", rendered.Markup);
+        Assert.Contains("fluent-layout-item weather-body", rendered.Markup);
         Assert.Contains("class=\"brand-title\"", rendered.Markup);
         Assert.Contains("<a href=\"/\" class=\"brand-link\">", rendered.Markup);
         Assert.Contains("<h1 class=\"brand-title\">Weather Blazor</h1>", rendered.Markup);

@@ -11,8 +11,8 @@
     <FluentTabs @bind-ActiveTabId="ActiveTab">
         @foreach (var tab in _tabs)
         {
-            <FluentTab Id="@tab.Id" Label="@tab.Label" title="@tab.Label">
-                <Header>@tab.ShortLabel</Header>
+            <FluentTab Id="@tab.Id" aria-label="@tab.Label" title="@tab.Label">
+                <HeaderTemplate>@tab.ShortLabel</HeaderTemplate>
             </FluentTab>
         }
     </FluentTabs>
@@ -37,7 +37,7 @@
                           aria-label="Message"
                           disabled="@IsActiveTabSending"></textarea>
                 <FluentButton Type="ButtonType.Submit"
-                              Appearance="Appearance.Outline"
+                              Appearance="ButtonAppearance.Outline"
                               Disabled="IsActiveTabSending">
                     @(IsActiveTabSending ? "Sending…" : "Send")
                 </FluentButton>

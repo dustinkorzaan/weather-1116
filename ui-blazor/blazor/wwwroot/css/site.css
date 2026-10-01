@@ -54,19 +54,17 @@ body {
     font-family: var(--wx-font);
 }
 
+/* FluentLayout (v5) is a CSS grid sized to 100dvh: header row, then the content row. */
 .weather-shell {
-    display: flex;
-    flex-direction: column;
     flex: 1;
     min-height: 0;
-    height: 100%;
     width: 100%;
 }
 
-/* FluentBodyContent sets align-items: flex-start and height: 100% (specificity
-   .body-content[b-*]). flex-start + a child with width: 100% collapses the map
-   to 0px wide, which is why prod home looked like an empty white page. */
-.layout.weather-shell > .body-content.weather-body {
+/* The content area must stretch its children: flex-start + a child with width: 100%
+   collapses the map to 0px wide, which is why prod home once looked like an empty
+   white page. */
+.fluent-layout.weather-shell > .fluent-layout-item.weather-body {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -78,15 +76,15 @@ body {
     padding: 0;
 }
 
-/* Plain <a> + <h1>: FluentAnchor Hypertext hydrates as an underlined
+/* Plain <a> + <h1>: a Fluent link hydrates as an underlined
    link and can wrap the title onto a second line after first paint. */
-.layout.weather-shell a.brand-link,
-.layout.weather-shell a.brand-link:link,
-.layout.weather-shell a.brand-link:visited,
-.layout.weather-shell a.brand-link:hover,
-.layout.weather-shell a.brand-link:focus,
-.layout.weather-shell a.brand-link:focus-visible,
-.layout.weather-shell a.brand-link:active {
+.fluent-layout.weather-shell a.brand-link,
+.fluent-layout.weather-shell a.brand-link:link,
+.fluent-layout.weather-shell a.brand-link:visited,
+.fluent-layout.weather-shell a.brand-link:hover,
+.fluent-layout.weather-shell a.brand-link:focus,
+.fluent-layout.weather-shell a.brand-link:focus-visible,
+.fluent-layout.weather-shell a.brand-link:active {
     display: flex;
     min-width: 0;
     align-items: center;
@@ -96,14 +94,14 @@ body {
     outline: none;
 }
 
-.layout.weather-shell .brand-logo {
+.fluent-layout.weather-shell .brand-logo {
     width: 1.5rem;
     height: 1.5rem;
     flex-shrink: 0;
 }
 
-.layout.weather-shell h1.brand-title,
-.layout.weather-shell .brand-title {
+.fluent-layout.weather-shell h1.brand-title,
+.fluent-layout.weather-shell .brand-title {
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -117,14 +115,19 @@ body {
     color: var(--wx-fg);
 }
 
-.layout.weather-shell > .header.weather-header {
+/* v5's header area defaults to the brand background and overflow: hidden, which would
+   clip the Add location panel that drops below the header. */
+.fluent-layout.weather-shell > .fluent-layout-item.weather-header {
+    box-sizing: border-box;
+    padding: 0 10px;
+    overflow: visible;
     background-color: var(--wx-bg);
     color: var(--wx-fg);
     border-bottom: 1px solid var(--wx-border);
 }
 
-.layout.weather-shell .avatar-button,
-.layout.weather-shell #user-menu-button {
+.fluent-layout.weather-shell .avatar-button,
+.fluent-layout.weather-shell #user-menu-button {
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
@@ -143,39 +146,39 @@ body {
     cursor: pointer;
 }
 
-.layout.weather-shell .avatar-button:hover,
-.layout.weather-shell #user-menu-button:hover {
+.fluent-layout.weather-shell .avatar-button:hover,
+.fluent-layout.weather-shell #user-menu-button:hover {
     color: var(--wx-soft);
     background: var(--wx-hover);
 }
 
-.layout.weather-shell .avatar-button:focus {
+.fluent-layout.weather-shell .avatar-button:focus {
     outline: none;
 }
 
-.layout.weather-shell .avatar-button:focus-visible {
+.fluent-layout.weather-shell .avatar-button:focus-visible {
     box-shadow: 0 0 0 2px var(--wx-border-strong);
 }
 
-.layout.weather-shell .avatar-icon {
+.fluent-layout.weather-shell .avatar-icon {
     display: block;
     width: 1.25rem;
     height: 1.25rem;
     flex-shrink: 0;
 }
 
-.layout.weather-shell .header-actions {
+.fluent-layout.weather-shell .header-actions {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.layout.weather-shell .add-location-wrap {
+.fluent-layout.weather-shell .add-location-wrap {
     position: relative;
 }
 
-.layout.weather-shell .add-location-button,
-.layout.weather-shell .chat-toggle-button {
+.fluent-layout.weather-shell .add-location-button,
+.fluent-layout.weather-shell .chat-toggle-button {
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
@@ -193,21 +196,21 @@ body {
     cursor: pointer;
 }
 
-.layout.weather-shell .add-location-button:hover,
-.layout.weather-shell .chat-toggle-button:hover,
-.layout.weather-shell .chat-toggle-button[aria-expanded="true"] {
+.fluent-layout.weather-shell .add-location-button:hover,
+.fluent-layout.weather-shell .chat-toggle-button:hover,
+.fluent-layout.weather-shell .chat-toggle-button[aria-expanded="true"] {
     color: var(--wx-soft);
     background: var(--wx-hover);
 }
 
-.layout.weather-shell .add-location-backdrop {
+.fluent-layout.weather-shell .add-location-backdrop {
     position: fixed;
     inset: 0;
     z-index: 30;
     background: transparent;
 }
 
-.layout.weather-shell .add-location-panel {
+.fluent-layout.weather-shell .add-location-panel {
     position: absolute;
     right: 0;
     z-index: 40;
@@ -224,12 +227,12 @@ body {
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.25);
 }
 
-.layout.weather-shell .add-location-label {
+.fluent-layout.weather-shell .add-location-label {
     font-size: 0.875rem;
     font-weight: 600;
 }
 
-.layout.weather-shell .add-location-input {
+.fluent-layout.weather-shell .add-location-input {
     width: 100%;
     box-sizing: border-box;
     padding: 0.4rem 0.65rem;
@@ -239,7 +242,7 @@ body {
     color: var(--wx-fg);
 }
 
-.layout.weather-shell .add-location-submit {
+.fluent-layout.weather-shell .add-location-submit {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -254,12 +257,12 @@ body {
     cursor: pointer;
 }
 
-.layout.weather-shell .add-location-submit:disabled {
+.fluent-layout.weather-shell .add-location-submit:disabled {
     opacity: 0.7;
     cursor: default;
 }
 
-.layout.weather-shell .add-location-spinner {
+.fluent-layout.weather-shell .add-location-spinner {
     width: 1rem;
     height: 1rem;
     border: 2px solid rgb(255 255 255 / 0.4);
@@ -268,7 +271,7 @@ body {
     animation: spin 1s linear infinite;
 }
 
-.layout.weather-shell .add-location-error {
+.fluent-layout.weather-shell .add-location-error {
     margin: 0;
     color: var(--wx-error-fg);
     font-size: 0.875rem;
@@ -475,7 +478,7 @@ fluent-menu-item a {
 }
 
 .muted {
-    color: var(--neutral-foreground-hint, #616161);
+    color: var(--colorNeutralForeground3, #616161);
     font-size: 0.9rem;
 }
 
@@ -530,7 +533,7 @@ fluent-menu-item a {
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--neutral-foreground-hint, #616161);
+    color: var(--colorNeutralForeground3, #616161);
 }
 
 .wind-direction {
@@ -556,7 +559,7 @@ fluent-menu-item a {
     gap: 1rem;
 }
 
-.footer-links fluent-anchor,
+.footer-links fluent-link,
 .footer-links a {
     color: var(--wx-soft);
 }
@@ -713,7 +716,7 @@ fluent-menu-item a {
 .weather-grid th {
     padding: 0.4rem 1rem 0.4rem 0;
     border-bottom: 1px solid var(--wx-border-strong);
-    color: var(--neutral-foreground-hint, #616161);
+    color: var(--colorNeutralForeground3, #616161);
     font-weight: 600;
     white-space: nowrap;
 }

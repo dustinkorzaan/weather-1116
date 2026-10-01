@@ -13,25 +13,25 @@
         <FluentTabs @bind-ActiveTabId="ActiveTab">
             @foreach (var tab in _tabs)
             {
-                <FluentTab Id="@tab.Id" Label="@tab.Label"></FluentTab>
+                <FluentTab Id="@tab.Id" Header="@tab.Label"></FluentTab>
             }
         </FluentTabs>
         <p class="muted tab-description">@_tabs.First(tab => tab.Id == _activeTab).Description</p>
 
         <EditForm Model="this" OnValidSubmit="GetCurrentAIWeather" @onsubmit:preventDefault="true">
             <div class="form-row">
-                <FluentTextField @bind-Value="location"
+                <FluentTextInput @bind-Value="location"
                                  Label="Location"
                                  Disabled="isAiWeatherLoading"
                                  Style="flex: 1 1 12rem; max-width: 20rem;" />
                 <FluentButton Type="ButtonType.Submit"
-                              Appearance="Appearance.Outline"
+                              Appearance="ButtonAppearance.Outline"
                               Class="ai-weather-submit"
                               Disabled="isAiWeatherLoading">
                     @if (isAiWeatherLoading)
                     {
                         @* start slot sits beside the label so the button grows wider instead of wrapping. *@
-                        <FluentProgressRing Slot="start" Width="16px" Stroke="ProgressStroke.Small" />
+                        <FluentSpinner slot="start" Size="SpinnerSize.Tiny" />
                     }
                     Get Current AI Weather
                 </FluentButton>
@@ -40,7 +40,7 @@
 
         @if (!string.IsNullOrWhiteSpace(aiWeatherError))
         {
-            <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false" Class="stack-gap">@aiWeatherError</FluentMessageBar>
+            <FluentMessageBar Intent="MessageBarIntent.Error" AllowDismiss="false" Class="stack-gap">@aiWeatherError</FluentMessageBar>
         }
 
         @if (isAiWeatherLoading)
@@ -53,15 +53,15 @@
             <div class="weather-results">
                 <div class="chat-markdown">@((MarkupString)SafeGfmMarkdown.ToHtml(aiWeather.FullSummary))</div>
                 <FluentGrid Spacing="2">
-                    <FluentGridItem xs="12" sm="6">
+                    <FluentGridItem Xs="12" Sm="6">
                         <div class="stat-label">Temperature</div>
                         <div>@FormatTemperatureF(aiWeather.TemperatureF)</div>
                     </FluentGridItem>
-                    <FluentGridItem xs="12" sm="6">
+                    <FluentGridItem Xs="12" Sm="6">
                         <div class="stat-label">Wind Speed</div>
                         <div>@FormatWindSpeedMph(aiWeather.WindSpeedMPH)</div>
                     </FluentGridItem>
-                    <FluentGridItem xs="12" sm="6">
+                    <FluentGridItem Xs="12" Sm="6">
                         <div class="stat-label">Wind Direction</div>
                         <div class="wind-direction">
                             @WeatherGridFormat.FormatWindDirection(aiWeather.WindDirectionSource, aiWeather.WindDirectionSourceDegrees)
@@ -70,11 +70,11 @@
                                   style="@($"transform: rotate({WeatherGridFormat.NormalizeSourceDegrees(aiWeather.WindDirectionSourceDegrees)}deg)")">v</span>
                         </div>
                     </FluentGridItem>
-                    <FluentGridItem xs="12" sm="6">
+                    <FluentGridItem Xs="12" Sm="6">
                         <div class="stat-label">Conditions</div>
                         <div>@aiWeather.Conditions</div>
                     </FluentGridItem>
-                    <FluentGridItem xs="12" sm="6">
+                    <FluentGridItem Xs="12" Sm="6">
                         <div class="stat-label">Lat/Long</div>
                         <div>@FormatLatLong(aiWeather.Latitude, aiWeather.Longitude)</div>
                     </FluentGridItem>
