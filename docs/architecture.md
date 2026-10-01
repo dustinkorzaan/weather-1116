@@ -393,8 +393,9 @@ The sidebar talks to the existing `POST /Chat5a/messages` endpoint (Weather API
 for React/Blazor, MVC's own `Chat5aController`) with its own session. Below the
 textarea it shows the same five gate checkboxes as the `/chat-clients` Chat5a
 tab, in pipeline order: 500 Char, Code Input, LLM Input, Sys Prompt, LLM Output.
-In the sidebar **Code Input starts unchecked** and the other four start checked,
-so each send carries `enableRuleInputGate: false` until the user checks it; the
+In the sidebar **Code Input and LLM Output start unchecked** and the other three start
+checked, so each send carries `enableRuleInputGate: false` and `enableLlmOutputGate: false`
+until the user checks them; the
 `/chat-clients` tabs keep all five checked by default. Gate state is per sidebar
 and survives closing and reopening it, like the conversation. The gates accept
 weather, location/geo, listing saved cities, adding/saving a city and

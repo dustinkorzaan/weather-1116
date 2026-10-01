@@ -623,12 +623,12 @@ public sealed class Chat5aSidebarDockAcceptanceTests
             },
             names);
         Assert.Equal(expectedMessage, root.GetProperty("message").GetString());
-        // Sidebar defaults: every gate on except Code Input.
+        // Sidebar defaults: every gate on except Code Input and LLM Output.
         Assert.True(root.GetProperty("enableMaxLengthGate").GetBoolean());
         Assert.False(root.GetProperty("enableRuleInputGate").GetBoolean());
         Assert.True(root.GetProperty("enableLlmInputGate").GetBoolean());
         Assert.True(root.GetProperty("enableSystemPromptGuard").GetBoolean());
-        Assert.True(root.GetProperty("enableLlmOutputGate").GetBoolean());
+        Assert.False(root.GetProperty("enableLlmOutputGate").GetBoolean());
         if (expectedSessionId is null)
         {
             Assert.Equal(JsonValueKind.Null, root.GetProperty("sessionId").ValueKind);

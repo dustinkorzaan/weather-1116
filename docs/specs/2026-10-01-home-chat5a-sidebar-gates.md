@@ -18,7 +18,7 @@ textbox, because the textarea is disabled while sending and loses focus.
 ## Goals
 
 - The Home map chat sidebar in React, Blazor and MVC uses Chat5a and shows the five
-  gate checkboxes. Code Input starts unchecked there.
+  gate checkboxes. Code Input and LLM Output start unchecked there.
 - All five gates (shared Core code, so Chat5a and Chat5b on `/chat-clients` and the
   sidebar) accept five request kinds: weather, location/geo, list saved cities,
   add/save a city, remove/delete a city. Everything else stays blocked.
@@ -29,9 +29,9 @@ textbox, because the textarea is disabled while sending and loses focus.
 ## Non-goals
 
 - No change to `/chat-clients` gate defaults: all five gates stay checked by default
-  there (Code Input is unchecked by default only in the Home sidebar).
+  there (Code Input and LLM Output are unchecked by default only in the Home sidebar).
 - No change to the `Chat5SendMessageRequest` contract or its server-side defaults
-  (all `true`). The sidebar sends `enableRuleInputGate: false` explicitly.
+  (all `true`). The sidebar sends `enableRuleInputGate: false` and `enableLlmOutputGate: false` explicitly.
 - No new tools. No change to the 500 Char gate or the deny-list of the Code Input gate.
 - The Chat4a/4b prompts (`MultiAgentAiWeatherOrchestrationAssistant`) change only to
   add the add/remove synonym wording (AC8). They keep their meaning otherwise.
@@ -45,14 +45,14 @@ textbox, because the textarea is disabled while sending and loses focus.
    MVC, when the user submits a message with the default gate state, then exactly one
    `POST` goes to `/Chat5a/messages` with body
    `{ sessionId, message, enableMaxLengthGate: true, enableRuleInputGate: false,
-   enableLlmInputGate: true, enableSystemPromptGuard: true, enableLlmOutputGate: true }`.
+   enableLlmInputGate: true, enableSystemPromptGuard: true, enableLlmOutputGate: false }`.
    `sessionId` is `null` on the first send, then the id from the stream's `session` event.
    No request goes to `/Chat2a/messages` from the sidebar.
 2. **AC2 (labels and checkboxes):** Given the Home sidebar is open, then the panel has
    role `complementary` with accessible name **"Chat5a"**, its heading reads "Chat5a",
    and below the textarea there are five checkboxes in this order: 500 Char, Code Input,
    LLM Input, Sys Prompt, LLM Output (same labels and hover descriptions as the
-   `/chat-clients` Chat5a tab). Code Input is unchecked and the other four are checked.
+   `/chat-clients` Chat5a tab). Code Input and LLM Output are unchecked and the other three are checked.
    Toggling a checkbox changes the matching field on the next send (for example,
    checking Code Input sends `enableRuleInputGate: true`).
 3. **AC3 (blocked events render):** Given the sidebar, when the stream emits
@@ -131,6 +131,7 @@ already exists on both the Weather API and MVC, so no endpoint change.
 - "Uncheck Code Input by default" applies to the Home sidebar only, not the
   `/chat-clients` Chat5a/Chat5b tabs. Those tabs keep all five checked, because they
   exist to demo the gates.
+- LLM Output also starts unchecked in the sidebar (user follow-up request during implementation).
 - The sidebar shows the five checkboxes (the story says "chat5a with the 5 gates"), with
   per-sidebar state that survives open/close like the conversation does.
 - The sidebar component, ids and test files are renamed from `chat2a`/`Chat2a` to

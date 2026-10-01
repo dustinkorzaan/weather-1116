@@ -16,7 +16,7 @@
         <button id="chat5a-sidebar-send"
                 type="submit"
                 class="btn">Send</button>
-        @* Same labels and titles as the /chat-clients gate row (_ChatPanel.cshtml); Code Input starts unchecked here. *@
+        @* Same labels and titles as the /chat-clients gate row (_ChatPanel.cshtml); Code Input and LLM Output start unchecked here. *@
         <div id="chat5a-sidebar-gate-options" class="chat-gate-options chat-sidebar-gate-options">
             <label title="Pre-Orchestration - Deterministic Max Length. Blocks the request if the message is over 500 characters.">
                 <input type="checkbox" data-sidebar-gate="maxLength" checked> 500 Char
@@ -31,7 +31,7 @@
                 <input type="checkbox" data-sidebar-gate="systemPrompt" checked> Sys Prompt
             </label>
             <label title="Post-Orchestration - LLM-based Output Check. A separate LLM call classifies the full response before it's shown. You will have to wait for the complete reply to finish generating before you see any of it, since streaming is disabled for that turn.">
-                <input type="checkbox" data-sidebar-gate="llmOutput" checked> LLM Output (waits for full reply)
+                <input type="checkbox" data-sidebar-gate="llmOutput"> LLM Output (waits for full reply)
             </label>
         </div>
     </form>

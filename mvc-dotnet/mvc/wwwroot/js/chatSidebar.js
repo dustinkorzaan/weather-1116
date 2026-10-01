@@ -80,7 +80,7 @@
     input.disabled = isSending;
   }
 
-  // Reads the checkbox for a gate; Code Input defaults off in the sidebar, the rest on.
+  // Reads the checkbox for a gate; Code Input and LLM Output default off in the sidebar, the rest on.
   function isGateEnabled(gate, fallback) {
     const checkbox = gateCheckboxes.find((item) => item.dataset.sidebarGate === gate);
     return checkbox ? checkbox.checked : fallback;
@@ -97,7 +97,7 @@
         enableRuleInputGate: isGateEnabled('ruleInput', false),
         enableLlmInputGate: isGateEnabled('llmInput', true),
         enableSystemPromptGuard: isGateEnabled('systemPrompt', true),
-        enableLlmOutputGate: isGateEnabled('llmOutput', true),
+        enableLlmOutputGate: isGateEnabled('llmOutput', false),
       }),
     });
 

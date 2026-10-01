@@ -75,7 +75,7 @@ test('a failed /User refresh is logged and the composer re-enables', async () =>
   expect(screen.getByRole('button', { name: /^send$/i }).disabled).toBe(false);
 });
 
-test('sends the sidebar gate defaults (Code Input off) and follows checkbox toggles', async () => {
+test('sends the sidebar gate defaults (Code Input and LLM Output off) and follows checkbox toggles', async () => {
   streamChatMessage.mockImplementation(async ({ onEvent }) => {
     onEvent({ type: 'done' });
   });
@@ -89,7 +89,7 @@ test('sends the sidebar gate defaults (Code Input off) and follows checkbox togg
   await waitFor(() => expect(streamChatMessage).toHaveBeenCalledTimes(1));
   expect(streamChatMessage.mock.calls[0][0]).toMatchObject({
     endpoint: '/Chat5a/messages',
-    gates: { maxLength: true, ruleInput: false, llmInput: true, systemPrompt: true, llmOutput: true },
+    gates: { maxLength: true, ruleInput: false, llmInput: true, systemPrompt: true, llmOutput: false },
   });
 
   await waitFor(() => expect(screen.getByLabelText(/message/i).disabled).toBe(false));

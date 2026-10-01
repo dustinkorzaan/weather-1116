@@ -370,7 +370,7 @@ test('AC3: a send posts { sessionId, message, gates } once to /Chat5a/messages a
     enableRuleInputGate: false,
     enableLlmInputGate: true,
     enableSystemPromptGuard: true,
-    enableLlmOutputGate: true,
+    enableLlmOutputGate: false,
   });
 
   // Second send reuses the session id from the stream's `session` event.
@@ -387,7 +387,7 @@ test('AC3: a send posts { sessionId, message, gates } once to /Chat5a/messages a
     enableRuleInputGate: false,
     enableLlmInputGate: true,
     enableSystemPromptGuard: true,
-    enableLlmOutputGate: true,
+    enableLlmOutputGate: false,
   });
 });
 

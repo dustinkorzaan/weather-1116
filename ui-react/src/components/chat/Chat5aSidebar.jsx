@@ -9,9 +9,10 @@ import Chat5GateOptions from './Chat5GateOptions';
 
 const CHAT5A_ENDPOINT = '/Chat5a/messages';
 
-// Code Input starts unchecked here (unlike the /chat-clients Chat5a tab) so plain
-// "add <city>" requests reach the LLM gates instead of the keyword heuristic.
-const DEFAULT_GATES = { maxLength: true, ruleInput: false, llmInput: true, systemPrompt: true, llmOutput: true };
+// Code Input and LLM Output start unchecked here (unlike the /chat-clients Chat5a tab):
+// plain "add <city>" requests skip the keyword heuristic, and replies stream instead of
+// waiting for the output check.
+const DEFAULT_GATES = { maxLength: true, ruleInput: false, llmInput: true, systemPrompt: true, llmOutput: false };
 
 // Chat5a panel docked beside the map (stacked under it below 640px), opened from the
 // header. It stays mounted while hidden so the conversation and gate choices survive

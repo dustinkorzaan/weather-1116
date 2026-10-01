@@ -95,7 +95,7 @@ public sealed class Chat5aSidebarTests
     }
 
     [Fact]
-    public void Sidebar_GateState_IsItsOwn_CodeInputOffByDefault_AndTogglesTheNextSend()
+    public void Sidebar_GateState_IsItsOwn_CodeInputAndLlmOutputOffByDefault_AndTogglesTheNextSend()
     {
         var handler = new StubChatHandler(
             Sse(new { type = "session", sessionId = "s-1" }, new { type = "done" }),
@@ -104,22 +104,23 @@ public sealed class Chat5aSidebarTests
         var rendered = context.Render<Chat5aSidebar>(parameters => parameters.Add(sidebar => sidebar.Open, true));
 
         var boxes = rendered.FindAll("#chat5a-sidebar .chat-gate-options input[type=checkbox]");
-        Assert.Equal(new[] { true, false, true, true, true }, boxes.Select(box => box.HasAttribute("checked")).ToArray());
+        Assert.Equal(new[] { true, false, true, true, false }, boxes.Select(box => box.HasAttribute("checked")).ToArray());
 
         rendered.Find("#chat5a-sidebar-input").Change("hello");
         rendered.Find("form.chat-sidebar-form").Submit();
         rendered.WaitForAssertion(() => Assert.Single(handler.Bodies));
         Assert.False(GateField(handler.Bodies[0], "enableRuleInputGate"));
+        Assert.False(GateField(handler.Bodies[0], "enableLlmOutputGate"));
 
         rendered.WaitForAssertion(() => Assert.False(rendered.Find("#chat5a-sidebar-input").HasAttribute("disabled")));
         rendered.FindAll("#chat5a-sidebar .chat-gate-options input[type=checkbox]")[1].Change(true);
-        rendered.FindAll("#chat5a-sidebar .chat-gate-options input[type=checkbox]")[4].Change(false);
+        rendered.FindAll("#chat5a-sidebar .chat-gate-options input[type=checkbox]")[4].Change(true);
         rendered.Find("#chat5a-sidebar-input").Change("again");
         rendered.Find("form.chat-sidebar-form").Submit();
         rendered.WaitForAssertion(() => Assert.Equal(2, handler.Bodies.Count));
 
         Assert.True(GateField(handler.Bodies[1], "enableRuleInputGate"));
-        Assert.False(GateField(handler.Bodies[1], "enableLlmOutputGate"));
+        Assert.True(GateField(handler.Bodies[1], "enableLlmOutputGate"));
         Assert.True(GateField(handler.Bodies[1], "enableMaxLengthGate"));
         Assert.EndsWith("/Chat5a/messages", handler.Paths[1]);
     }

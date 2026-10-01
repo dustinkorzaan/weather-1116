@@ -137,9 +137,9 @@ from the **Open chat** button in the top bar and docked beside the map (ids
 `{ sessionId, message, enableMaxLengthGate, enableRuleInputGate, enableLlmInputGate,
 enableSystemPromptGuard, enableLlmOutputGate }` and keeps its own session, independent
 of the Chat5a tab on `/chat-clients`. Below the textarea it shows the same five gate
-checkboxes (labels and hover text) as the Chat5a tab. In the sidebar **Code Input is
-unchecked by default**, so a default send carries `enableRuleInputGate: false` and the
-other four flags `true`; the `/chat-clients` Chat5a/Chat5b tabs keep all five checked.
+checkboxes (labels and hover text) as the Chat5a tab. In the sidebar **Code Input and
+LLM Output are unchecked by default**, so a default send carries `enableRuleInputGate: false`
+and `enableLlmOutputGate: false` and the other three flags `true`; the `/chat-clients` Chat5a/Chat5b tabs keep all five checked.
 It renders `token`, `tool_start`/`tool_end`, `blocked` and `error` events through the
 same shared rendering code as this panel: markdown replies, usage chip, tool hover and
 blocked entries. After every send completes, including a blocked or failed one, the
@@ -336,7 +336,7 @@ Weather/AI Weather Orchestration shape. Chat4aService.cs, Chat4bService.cs, and 
 controllers stay byte-for-byte untouched; Chat5a/Chat5b exist so the "unsecured" baseline
 (Chat4a/Chat4b) and a guarded variant can be compared side by side, checkbox by checkbox, as a
 teaching tool for securing a multi-agent LLM system. All five gates default to **on** on
-`/chat-clients` (the Home map sidebar starts with Code Input off; see above); unchecking
+`/chat-clients` (the Home map sidebar starts with Code Input and LLM Output off; see above); unchecking
 any of them reverts that layer to Chat4a's/Chat4b's exact unguarded behavior.
 
 The checkboxes are listed in the same order the pipeline runs them:

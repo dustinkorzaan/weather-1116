@@ -69,7 +69,7 @@ public class Chat5aSidebarLayoutTests(WeatherMvcWebApplicationFactory factory) :
     }
 
     [Fact]
-    public async Task Home_SidebarGateRow_HasFiveGatesInOrder_WithCodeInputUnchecked()
+    public async Task Home_SidebarGateRow_HasFiveGatesInOrder_WithCodeInputAndLlmOutputUnchecked()
     {
         var html = await GetHtmlAsync("/");
 
@@ -79,7 +79,7 @@ public class Chat5aSidebarLayoutTests(WeatherMvcWebApplicationFactory factory) :
 
         var inputs = Regex.Matches(row.Groups[1].Value, "<input[^>]*data-sidebar-gate=\"(\\w+)\"[^>]*>");
         Assert.Equal(["maxLength", "ruleInput", "llmInput", "systemPrompt", "llmOutput"], inputs.Select(input => input.Groups[1].Value));
-        Assert.All(inputs, input => Assert.Equal(input.Groups[1].Value != "ruleInput", input.Value.Contains(" checked")));
+        Assert.All(inputs, input => Assert.Equal(input.Groups[1].Value is not ("ruleInput" or "llmOutput"), input.Value.Contains(" checked")));
 
         // The /chat-clients row is read by id in chatClient.js, so the sidebar must not reuse it or its attribute.
         Assert.DoesNotContain("id=\"chat-gate-options\"", html);
@@ -114,7 +114,7 @@ public class Chat5aSidebarLayoutTests(WeatherMvcWebApplicationFactory factory) :
         Assert.Contains("enableRuleInputGate: isGateEnabled('ruleInput', false),", script);
         Assert.Contains("enableLlmInputGate: isGateEnabled('llmInput', true),", script);
         Assert.Contains("enableSystemPromptGuard: isGateEnabled('systemPrompt', true),", script);
-        Assert.Contains("enableLlmOutputGate: isGateEnabled('llmOutput', true),", script);
+        Assert.Contains("enableLlmOutputGate: isGateEnabled('llmOutput', false),", script);
         Assert.Contains("addEntry({ role: 'blocked', content: payload.errorMessage });", script);
     }
 
