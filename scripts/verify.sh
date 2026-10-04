@@ -213,6 +213,25 @@ ensure_venv() {
   fi
 }
 
+# First interpreter that can import PyYAML: system python3, then the weather
+# venv. Installs only PyYAML (never the full venv) when neither has it.
+yaml_python() {
+  local py
+  for py in python3 "$VENV/bin/python"; do
+    if "$py" -c 'import yaml' 2>/dev/null; then echo "$py"; return 0; fi
+  done
+  for py in "$VENV/bin/python" python3; do
+    "$py" -m pip --version >/dev/null 2>&1 || continue
+    echo "  installing PyYAML for $py" >&2
+    if "$py" -m pip install -q pyyaml >&2 2>&1 \
+        || "$py" -m pip install -q --user pyyaml >&2 2>&1; then
+      "$py" -c 'import yaml' 2>/dev/null && { echo "$py"; return 0; }
+    fi
+  done
+  echo "no Python with PyYAML, and pip could not install it" >&2
+  return 1
+}
+
 # ---------------------------------------------------------------------------
 # Check runners (each returns 0 pass, 1 fail, 3 skipped)
 # ---------------------------------------------------------------------------
@@ -281,11 +300,9 @@ run_check() {
     yaml:*)
       # Parse only (no workflow schema), but strict about duplicate keys:
       # PyYAML lets the last key win, while Actions rejects the file.
-      local f="${id#yaml:}"
-      ensure_venv || return 1
-      "$VENV/bin/python" -c 'import yaml' 2>/dev/null \
-        || "$VENV/bin/python" -m pip install -q pyyaml || return 1
-      "$VENV/bin/python" - "$f" <<'PY' ;;
+      local f="${id#yaml:}" py
+      py="$(yaml_python)" || return 1
+      "$py" - "$f" <<'PY' ;;
 import sys, yaml
 
 class StrictLoader(yaml.SafeLoader):
