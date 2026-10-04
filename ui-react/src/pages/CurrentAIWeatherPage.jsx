@@ -78,7 +78,7 @@ function CurrentAIWeatherPage() {
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto p-4">
       <section aria-labelledby="current-ai-weather-heading">
-        <h2 id="current-ai-weather-heading" className="mb-3 text-xl font-semibold">
+        <h2 id="current-ai-weather-heading" className="mb-4 text-2xl font-semibold">
           Current AI Weather
         </h2>
 
@@ -99,7 +99,7 @@ function CurrentAIWeatherPage() {
           </label>
           <input
             id="ai-weather-location"
-            className="min-w-40 max-w-80 flex-1 rounded-md border border-input bg-background px-2.5 py-1.5 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
+            className="min-w-40 max-w-80 flex-1 rounded-md border border-input bg-card px-2.5 py-1.5 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
             type="text"
             value={location}
             onChange={(event) => setLocations((previous) => ({ ...previous, [activeTab]: event.target.value }))}
@@ -109,7 +109,7 @@ function CurrentAIWeatherPage() {
           <Button
             type="submit"
             size="lg"
-            className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/80"
+            className="bg-primary text-primary-foreground hover:bg-primary/85"
             disabled={isFetching}
             aria-busy={isFetching}
           >
