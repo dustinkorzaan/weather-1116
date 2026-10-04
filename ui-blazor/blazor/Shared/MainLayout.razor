@@ -88,7 +88,10 @@
                 aria-label="Open user menu">
             <img src="avatar.svg" alt="" width="20" height="20" class="avatar-icon" />
         </button>
+        @* Fluent v5's <fluent-menu> pops up its first child, so the items need a FluentMenuList
+           wrapper; without it only "Home" became the popover and the rest stayed on screen. *@
         <FluentMenu Trigger="user-menu-button">
+            <FluentMenuList>
             <FluentMenuItem Label="Home" OnClick="@(() => NavigateTo("/"))" />
             <FluentDivider />
             <FluentMenuItem Label="Hello World" OnClick="@(() => NavigateTo("/hello-world"))" />
@@ -100,6 +103,7 @@
             <FluentMenuItem Label="@ThemeItemLabel("system", "System")" OnClick="@(() => SetThemeAsync("system"))" />
             <FluentDivider />
             <FluentMenuItem Label="About" OnClick="OpenAboutModal" />
+            </FluentMenuList>
         </FluentMenu>
         </div>
     </header>
@@ -238,11 +242,14 @@
         await ApplyFluentThemeAsync();
     }
 
+    // Twilight indigo: Fluent derives its brand ramp (primary buttons, selected tabs, focus) from it.
+    private const string BrandColor = "#4b4fb5";
+
     private async Task ApplyFluentThemeAsync()
     {
         try
         {
-            await ThemeService.SetThemeAsync(new ThemeSettings("#6b7280", 0, 0, FluentMode, false));
+            await ThemeService.SetThemeAsync(new ThemeSettings(BrandColor, 0, 0, FluentMode, false));
         }
         catch
         {
