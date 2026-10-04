@@ -11,7 +11,7 @@ description: Repo rules for driving an open Weather PR to green after it is open
 - Mark a draft ready for review unless the user asks.
 - Rebase, amend, or force-push. Bring `main` in with `git merge origin/main`.
 - Skip, disable, or loosen a test to get green.
-- Push without running `scripts/verify.sh` (changed mode, or `--all` if Core, CQMediator or the solution changed).
+- Push without running `scripts/verify.sh`. Changed mode is enough: it already runs every .NET check when `core-dotnet/`, `cqmediator-dotnet/` or `Weather.sln` changed.
 
 ## CI red
 
@@ -22,7 +22,7 @@ description: Repo rules for driving an open Weather PR to green after it is open
      - **Bicep build** runs in CI only.
    - For those, reason from the log and the diff, and say in the PR comment that the fix was not locally reproducible.
 3. Fix the root cause, verify, commit, push.
-4. At most **3** fix pushes per distinct failure. After that, comment on the PR once with: the failing check, the root-cause hypothesis, what was tried, and the proposed patch. Then tell the user.
+4. At most **3** fix pushes per distinct failure. This cap deliberately overrides the harness's unlimited drive-to-green loop. After that, comment on the PR once with: the failing check, the root-cause hypothesis, what was tried, and the proposed patch. Then tell the user, and keep watching the PR: no more pushes for that failure, but new failures, review comments and conflicts are still yours.
 5. If the same check is red on `main`: port an existing fix if there is one. Otherwise comment once saying it isn't this PR's failure.
 
 ## Review comments
@@ -44,6 +44,15 @@ On every event and check-in:
 1. `git fetch origin main`, then `OLD_BASE=$(git merge-base HEAD origin/main)`.
 2. If `main` has moved, compare `git diff --name-only $OLD_BASE origin/main` with this branch's files (`git diff --name-only $OLD_BASE HEAD`). Count it as an overlap when they share a top-level folder or root file (a stack folder, but also `scripts/`, `.claude/`, `docs/` or `.github/`), or when `main` touched `core-dotnet/`, `cqmediator-dotnet/`, `Weather.sln`, or an MCP tool registration this branch calls.
 3. Overlap: run `.claude/skills/sync/SKILL.md` with `--light`. No overlap: leave the branch alone. A merge commit with no reason behind it only costs a CI run.
+
+## Check-ins
+
+The `send_later` check-in covers webhooks that arrive late or not at all.
+
+- Re-arm it after each check-in: the first about 50 minutes after the last activity, later ones about 4 hours apart.
+- A check-in is **quiet** when CI is green on the head, there are no unanswered threads, no conflicts, and no overlapping `main` commits (see *Stale base*). A red or pending check is never quiet, including a failure past the 3-push cap.
+- Stop re-arming after 3 quiet check-ins in a row, or as soon as the PR is merged or closed.
+- Reset the count on a message from the user, a review or comment on the PR, a push to the branch, or an overlapping `main` commit. Commits on `main` that don't overlap don't reset it.
 
 ## Done means
 

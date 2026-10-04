@@ -71,6 +71,7 @@ Under `--light`, it runs only for conflicts or verify fixes, since step 2 is ski
 1. Spawn `peer-reviewer`. Pass the spec path if there is one, and tell it to focus on the conflict files, the adaptations and any verify fixes.
 2. Fix BLOCKING and SHOULD findings, verify again (≤ 3 rounds).
 3. **With a spec only:** spawn `final-reviewer` against the spec. REWORK → fix → verify → final review again (≤ 3 rounds). Without a spec, skip `final-reviewer`: it needs acceptance criteria to judge against.
+4. If step 2 changed code, spawn `peer-reviewer` again on the fixed tree (it counts toward the 3 rounds). Its last verdict, clean or not, is the one §5 posts.
 
 ## 5. Record and push
 
@@ -80,9 +81,10 @@ Under `--light`, it runs only for conflicts or verify fixes, since step 2 is ski
 2. **Commit** only if the tree is dirty (spec edits, fixes): `git status --porcelain` is empty means nothing to commit.
 3. **Push:** `git push`, or `git push -u origin <branch>` if it has no upstream yet. Retry only on network errors. If the push is rejected as non-fast-forward, someone pushed meanwhile: `git fetch origin <branch>`, `git merge origin/<branch>`, verify, push again. Never force.
 4. **PR body:** refresh the Verify table, and add "Synced with main at `<sha>`: <one-line summary>".
-5. **Follow-through:**
+5. **Post the review** if §4 ran: the last peer-review verdict, after the push, as `.claude/agents/peer-reviewer.md` *Delivery* describes. A clean verdict is still posted (summary comment, no line comments). A review that stays in chat is not delivered.
+6. **Follow-through:**
    - Subscribe to PR activity.
-   - Schedule a `send_later` check-in about 60 minutes out: "Re-check PR #N per the steward skill".
+   - Schedule a `send_later` check-in about 50 minutes out: "Re-check PR #N per the steward skill". Re-arm and stop it as *Check-ins* in the steward skill says.
    - Follow the steward skill until CI is green on the new head.
 
 ## 6. Report (one short message)
