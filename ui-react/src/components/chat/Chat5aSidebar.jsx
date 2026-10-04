@@ -217,7 +217,7 @@ function Chat5aSidebar({ open, onClose }) {
         <textarea
           ref={inputRef}
           id="chat5a-sidebar-input"
-          className="w-full resize-y rounded-md border border-input bg-background px-2.5 py-2 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
+          className="w-full resize-y rounded-md border border-input bg-card px-2.5 py-2 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
           rows={3}
           value={input}
           placeholder="Ask about weather, a location, or add/remove a saved city…"

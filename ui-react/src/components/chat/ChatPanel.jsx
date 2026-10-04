@@ -436,7 +436,7 @@ function ChatPanel() {
               value={tab.id}
               aria-label={tab.label}
               title={tab.label}
-              className="h-auto flex-none cursor-pointer rounded-md border-2 border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground after:hidden hover:border-foreground/40 hover:bg-accent hover:text-accent-foreground group-data-[variant=line]/tabs-list:bg-muted group-data-[variant=line]/tabs-list:hover:bg-accent group-data-[variant=line]/tabs-list:data-active:bg-primary group-data-[variant=line]/tabs-list:data-active:text-primary-foreground data-active:border-primary data-active:bg-primary data-active:text-primary-foreground data-active:shadow-none data-active:hover:bg-primary/80 data-active:hover:text-primary-foreground"
+              className="h-auto flex-none cursor-pointer rounded-md border-2 border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground after:hidden hover:border-foreground/40 hover:bg-accent hover:text-accent-foreground group-data-[variant=line]/tabs-list:bg-card group-data-[variant=line]/tabs-list:hover:bg-accent group-data-[variant=line]/tabs-list:data-active:bg-primary group-data-[variant=line]/tabs-list:data-active:text-primary-foreground data-active:border-primary data-active:bg-primary data-active:text-primary-foreground data-active:shadow-none data-active:hover:bg-primary/80 data-active:hover:text-primary-foreground"
             >
               {tab.shortLabel}
             </TabsTrigger>

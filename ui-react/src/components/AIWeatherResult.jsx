@@ -16,8 +16,8 @@ function AIWeatherResult({ data }) {
   return (
     <div className="mt-5">
       {/* Temperature leads as a large readout; the other readings sit in a quiet row under it. */}
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
-        <div className="col-span-2 flex flex-col gap-1 border-b border-border pb-4 sm:col-span-4">
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="col-span-full flex flex-col gap-1 border-b border-border pb-4">
           <dt className="text-sm text-muted-foreground">Temperature</dt>
           <dd className="text-6xl leading-none font-semibold tracking-tight text-sun">
             {formatTemperatureF(data.temperatureF)}
