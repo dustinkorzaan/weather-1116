@@ -6,7 +6,7 @@ function HelloWorldPage() {
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto p-4">
       <section aria-labelledby="hello-world-heading">
-        <h2 id="hello-world-heading" className="mb-2 text-xl font-semibold">
+        <h2 id="hello-world-heading" className="mb-3 text-2xl font-semibold">
           Hello World
         </h2>
         <p className="text-base leading-normal text-foreground">

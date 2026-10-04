@@ -419,8 +419,8 @@ function ChatPanel() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold">Chat Clients</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <h2 className="text-2xl font-semibold">Chat Clients</h2>
+      <p className="mt-1 max-w-prose text-sm text-muted-foreground">
         Nine standalone chat tabs: Responses API vs Agent Framework (V3 in-process / V4 MCP), plus Chat3 against a hosted Foundry agent (V5), plus Chat4a and Chat4b's multi-agent orchestration (AI Weather Orchestration delegating to Geo, NonAI Weather and User, in-process for Chat4a and remote MCP for Chat4b), plus Chat5a and Chat5b, the same orchestration with five toggleable guardrail gates.
       </p>
 
@@ -436,7 +436,7 @@ function ChatPanel() {
               value={tab.id}
               aria-label={tab.label}
               title={tab.label}
-              className="h-auto flex-none cursor-pointer rounded-md border-2 border-border bg-muted px-3 py-1.5 text-sm font-medium text-foreground shadow-sm after:hidden hover:border-foreground/40 hover:bg-accent hover:text-accent-foreground group-data-[variant=line]/tabs-list:bg-muted group-data-[variant=line]/tabs-list:hover:bg-accent group-data-[variant=line]/tabs-list:data-active:bg-primary group-data-[variant=line]/tabs-list:data-active:text-primary-foreground data-active:border-primary data-active:bg-primary data-active:text-primary-foreground data-active:shadow-none data-active:hover:bg-primary/80 data-active:hover:text-primary-foreground"
+              className="h-auto flex-none cursor-pointer rounded-md border-2 border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground after:hidden hover:border-foreground/40 hover:bg-accent hover:text-accent-foreground group-data-[variant=line]/tabs-list:bg-card group-data-[variant=line]/tabs-list:hover:bg-accent group-data-[variant=line]/tabs-list:data-active:bg-primary group-data-[variant=line]/tabs-list:data-active:text-primary-foreground data-active:border-primary data-active:bg-primary data-active:text-primary-foreground data-active:shadow-none data-active:hover:bg-primary/80 data-active:hover:text-primary-foreground"
             >
               {tab.shortLabel}
             </TabsTrigger>
@@ -464,7 +464,7 @@ function ChatPanel() {
               <label className="sr-only" htmlFor="chat-input">Message</label>
               <textarea
                 id="chat-input"
-                className="w-full flex-1 resize-y rounded-md border border-input bg-background px-2.5 py-2 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
+                className="w-full flex-1 resize-y rounded-md border border-input bg-card px-2.5 py-2 text-foreground focus:border-ring focus:outline-none disabled:bg-muted"
                 rows={3}
                 value={input}
                 placeholder="Ask about weather in a city…"
@@ -473,7 +473,7 @@ function ChatPanel() {
                 disabled={isActiveTabSending}
               />
               <Button
-                className="bg-primary px-4 py-2 text-primary-foreground shadow-sm hover:bg-primary/80"
+                className="bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/85"
                 type="submit"
                 disabled={isActiveTabSending}
               >

@@ -23,6 +23,27 @@ import MapPage from './pages/MapPage';
 import WeatherModalPage from './pages/WeatherModalPage';
 import { MapPinsProvider } from './map/mapPinsContext';
 
+// The logo.svg sun, inlined so it can take the palette's sun color in both themes.
+function SunMark() {
+  return (
+    <svg
+      role="img"
+      aria-label="Weather logo"
+      viewBox="0 0 24 24"
+      className="size-7 shrink-0 text-sun"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 7c2.76 0 5 2.24 5 5c0 2.76 -2.24 5 -5 5c-2.76 0 -5 -2.24 -5 -5c0 -2.76 2.24 -5 5 -5Z" />
+      <path d="M12 21v1M21 12h1M12 3v-1M3 12h-1" />
+      <path d="M18.5 18.5l0.5 0.5M18.5 5.5l0.5 -0.5M5.5 5.5l-0.5 -0.5M5.5 18.5l-0.5 0.5" />
+    </svg>
+  );
+}
+
 function AppShell() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const { preference, setPreference } = useTheme();
@@ -40,10 +61,13 @@ function AppShell() {
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-background shadow-sm">
-        <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <Link className="flex min-w-0 items-center gap-2 text-inherit no-underline" to="/">
-            <img src="/logo.svg" alt="Weather logo" className="h-6 w-6 shrink-0" />
+      <header className="border-b border-border bg-background">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-2.5">
+          <Link
+            className="flex min-w-0 items-center gap-2.5 rounded-md text-inherit no-underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            to="/"
+          >
+            <SunMark />
             <h1 className="truncate text-xl font-semibold">Weather React</h1>
           </Link>
 
