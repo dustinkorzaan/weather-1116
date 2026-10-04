@@ -38,7 +38,7 @@ window.weatherTheme = (function () {
 
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute('content', resolved === 'dark' ? '#111827' : '#ffffff');
+      meta.setAttribute('content', resolved === 'dark' ? '#292929' : '#ffffff');
     }
 
     try {
