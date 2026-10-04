@@ -194,36 +194,6 @@ ensure_node_modules() {
   fi
 }
 
-# Interpreter for the YAML parse check. Prefer one that already imports
-# PyYAML. Never call ensure_venv: that installs the whole Python stack, and a
-# failed `python3 -m venv` can leave a python symlink with no pip, which then
-# fails every later run.
-yaml_interpreter() {
-  YAML_PY=""
-  if python3 -c 'import yaml' 2>/dev/null; then
-    YAML_PY=python3
-    return 0
-  fi
-  if [[ -x "$VENV/bin/python" ]] && "$VENV/bin/python" -c 'import yaml' 2>/dev/null; then
-    YAML_PY="$VENV/bin/python"
-    return 0
-  fi
-  if python3 -m pip install -q pyyaml && python3 -c 'import yaml' 2>/dev/null; then
-    YAML_PY=python3
-    return 0
-  fi
-  # A half-created venv has a python symlink and no pip. Remove it before retrying.
-  if [[ -e "$VENV" ]] && { [[ ! -x "$VENV/bin/python" ]] || ! "$VENV/bin/python" -m pip --version >/dev/null 2>&1; }; then
-    rm -rf "$VENV"
-  fi
-  if [[ ! -x "$VENV/bin/python" ]]; then
-    echo "  creating python venv at $VENV for PyYAML"
-    python3 -m venv "$VENV" || { rm -rf "$VENV"; return 1; }
-  fi
-  "$VENV/bin/python" -m pip install -q pyyaml || return 1
-  YAML_PY="$VENV/bin/python"
-}
-
 ensure_venv() {
   if [[ ! -x "$VENV/bin/python" ]]; then
     echo "  creating python venv at $VENV"
@@ -241,6 +211,25 @@ ensure_venv() {
       -e "./FoundryConsoleV3python[dev]" \
       -e "./FoundryConsoleV4python[dev]"
   fi
+}
+
+# First interpreter that can import PyYAML: system python3, then the weather
+# venv. Installs only PyYAML (never the full venv) when neither has it.
+yaml_python() {
+  local py
+  for py in python3 "$VENV/bin/python"; do
+    if "$py" -c 'import yaml' 2>/dev/null; then echo "$py"; return 0; fi
+  done
+  for py in "$VENV/bin/python" python3; do
+    "$py" -m pip --version >/dev/null 2>&1 || continue
+    echo "  installing PyYAML for $py" >&2
+    if "$py" -m pip install -q pyyaml >&2 2>&1 \
+        || "$py" -m pip install -q --user pyyaml >&2 2>&1; then
+      "$py" -c 'import yaml' 2>/dev/null && { echo "$py"; return 0; }
+    fi
+  done
+  echo "no Python with PyYAML, and pip could not install it" >&2
+  return 1
 }
 
 # ---------------------------------------------------------------------------
@@ -311,9 +300,9 @@ run_check() {
     yaml:*)
       # Parse only (no workflow schema), but strict about duplicate keys:
       # PyYAML lets the last key win, while Actions rejects the file.
-      local f="${id#yaml:}"
-      yaml_interpreter || return 1
-      "$YAML_PY" - "$f" <<'PY'
+      local f="${id#yaml:}" py
+      py="$(yaml_python)" || return 1
+      "$py" - "$f" <<'PY'
 import sys, yaml
 
 class StrictLoader(yaml.SafeLoader):
