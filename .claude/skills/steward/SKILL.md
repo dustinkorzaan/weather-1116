@@ -11,7 +11,7 @@ description: Repo rules for driving an open Weather PR to green after it is open
 - Mark a draft ready for review unless the user asks.
 - Rebase, amend, or force-push. Bring `main` in with `git merge origin/main`.
 - Skip, disable, or loosen a test to get green.
-- Push without running `scripts/verify.sh` (changed mode, or `--all` if Core, CQMediator or the solution changed).
+- Push without running `scripts/verify.sh`. Changed mode is enough: it already runs every .NET check when `core-dotnet/`, `cqmediator-dotnet/` or `Weather.sln` changed.
 
 ## CI red
 
@@ -22,7 +22,7 @@ description: Repo rules for driving an open Weather PR to green after it is open
      - **Bicep build** runs in CI only.
    - For those, reason from the log and the diff, and say in the PR comment that the fix was not locally reproducible.
 3. Fix the root cause, verify, commit, push.
-4. At most **3** fix pushes per distinct failure. After that, comment on the PR once with: the failing check, the root-cause hypothesis, what was tried, and the proposed patch. Then tell the user.
+4. At most **3** fix pushes per distinct failure. This cap deliberately overrides the harness's unlimited drive-to-green loop. After that, comment on the PR once with: the failing check, the root-cause hypothesis, what was tried, and the proposed patch. Then tell the user, and keep watching the PR: no more pushes for that failure, but new failures, review comments and conflicts are still yours.
 5. If the same check is red on `main`: port an existing fix if there is one. Otherwise comment once saying it isn't this PR's failure.
 
 ## Review comments

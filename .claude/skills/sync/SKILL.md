@@ -71,6 +71,7 @@ Under `--light`, it runs only for conflicts or verify fixes, since step 2 is ski
 1. Spawn `peer-reviewer`. Pass the spec path if there is one, and tell it to focus on the conflict files, the adaptations and any verify fixes.
 2. Fix BLOCKING and SHOULD findings, verify again (≤ 3 rounds).
 3. **With a spec only:** spawn `final-reviewer` against the spec. REWORK → fix → verify → final review again (≤ 3 rounds). Without a spec, skip `final-reviewer`: it needs acceptance criteria to judge against.
+4. **Post the peer review on the PR** as `.claude/agents/peer-reviewer.md` *Delivery* describes, once the fixes are pushed (step 5). A review that stays in chat is not delivered.
 
 ## 5. Record and push
 
@@ -82,7 +83,7 @@ Under `--light`, it runs only for conflicts or verify fixes, since step 2 is ski
 4. **PR body:** refresh the Verify table, and add "Synced with main at `<sha>`: <one-line summary>".
 5. **Follow-through:**
    - Subscribe to PR activity.
-   - Schedule a `send_later` check-in about 60 minutes out: "Re-check PR #N per the steward skill".
+   - Schedule a `send_later` check-in about 50 minutes out: "Re-check PR #N per the steward skill". Re-arm and stop it as `.claude/skills/ship/SKILL.md` phase 7 says.
    - Follow the steward skill until CI is green on the new head.
 
 ## 6. Report (one short message)

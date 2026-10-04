@@ -1,6 +1,6 @@
 ---
 name: ship
-description: End-to-end multi-agent delivery pipeline for this repo - interview, spec, plan, parallel implementation in worktrees, acceptance tests, verify, peer review, final review, rework (max 3 rounds each), draft PR, then PR follow-through. Use when the user says /ship, "build/implement/fix <story>", or hands over a feature/bug to do hands-off. Args - the story text; optional flags --hands-off (no questions), --quick (small single-stack change).
+description: End-to-end multi-agent delivery pipeline for this repo - interview, spec, plan, parallel implementation in worktrees, acceptance tests, verify, peer review, final review, rework (max 3 rounds each), draft PR, then PR follow-through. Use when the user says /ship or hands over a story, feature or multi-step bug to deliver as a PR. Not for small direct edits (a typo, a one-file fix, a question): do those inline unless the user asks for the pipeline. Args - the story text; optional flags --hands-off (no questions), --quick (small single-stack change).
 ---
 
 # /ship: orchestrated delivery
@@ -71,10 +71,7 @@ Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every p
 3. Apply NITs only if trivial. Otherwise list them as follow-ups.
 4. Append the round to the spec's **Review log** (findings → fix commit or reason).
 5. Re-review until the verdict is `clean` or 3 rounds are used. After 3 rounds, commit the remaining BLOCKING items under `## Open issues` and report them to the user with the line `STATUS: blocked`, as in phase 4.
-6. **Post the review on the PR** so other agents can reply in thread. A review that stays in chat is not delivered.
-   - If the PR is not open yet, post it in phase 7 as soon as the PR exists.
-   - One summary comment: verdict, verify table, criteria coverage.
-   - One line comment per finding, on the changed line, with the severity, the scenario, and the fix.
+6. **Post the review on the PR** as `.claude/agents/peer-reviewer.md` *Delivery* describes. If the PR is not open yet, post it in phase 7 as soon as the PR exists.
 
 ## Phase 6: Final review (≤ 3 rounds)
 
@@ -88,11 +85,11 @@ Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every p
 2. Open a **draft** PR:
    - title: imperative, under 70 characters;
    - body: fill `.github/pull_request_template.md` from the spec and the final-reviewer's output (criteria → evidence table, verify table, PR notes).
-   - Post the latest peer review if it is not already on the PR: one summary comment, plus one line comment per finding (severity, scenario, fix).
+   - Post the latest peer review if it is not already on the PR (see *Delivery* in `.claude/agents/peer-reviewer.md`).
 3. Record the PR in the spec: set **Branch / PR** to the PR link and **Status** to `in-review`, commit (`Spec: link PR #N`), and push. The spec is otherwise left with a placeholder link and a stale status once the PR merges.
 4. Subscribe to PR activity, then follow `.claude/skills/steward/SKILL.md` for CI and review events.
-   - Webhooks can arrive late or not at all, so also schedule a `send_later` check-in about 60 minutes out: "Re-check PR #N per the steward skill".
-   - Re-arm it on each check-in until the PR is green with no open threads, or is merged or closed.
+   - Webhooks can arrive late or not at all, so also schedule a `send_later` check-in about 50 minutes out: "Re-check PR #N per the steward skill".
+   - Re-arm it after each check-in, about 4 hours apart. Stop after 3 check-ins in a row that found nothing new, or when the PR is merged or closed. Any new activity resets that count.
 5. Final chat message:
    - PR link
    - one-paragraph summary
