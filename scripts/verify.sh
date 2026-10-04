@@ -194,6 +194,36 @@ ensure_node_modules() {
   fi
 }
 
+# Interpreter for the YAML parse check. Prefer one that already imports
+# PyYAML. Never call ensure_venv: that installs the whole Python stack, and a
+# failed `python3 -m venv` can leave a python symlink with no pip, which then
+# fails every later run.
+yaml_interpreter() {
+  YAML_PY=""
+  if python3 -c 'import yaml' 2>/dev/null; then
+    YAML_PY=python3
+    return 0
+  fi
+  if [[ -x "$VENV/bin/python" ]] && "$VENV/bin/python" -c 'import yaml' 2>/dev/null; then
+    YAML_PY="$VENV/bin/python"
+    return 0
+  fi
+  if python3 -m pip install -q pyyaml && python3 -c 'import yaml' 2>/dev/null; then
+    YAML_PY=python3
+    return 0
+  fi
+  # A half-created venv has a python symlink and no pip. Remove it before retrying.
+  if [[ -e "$VENV" ]] && { [[ ! -x "$VENV/bin/python" ]] || ! "$VENV/bin/python" -m pip --version >/dev/null 2>&1; }; then
+    rm -rf "$VENV"
+  fi
+  if [[ ! -x "$VENV/bin/python" ]]; then
+    echo "  creating python venv at $VENV for PyYAML"
+    python3 -m venv "$VENV" || { rm -rf "$VENV"; return 1; }
+  fi
+  "$VENV/bin/python" -m pip install -q pyyaml || return 1
+  YAML_PY="$VENV/bin/python"
+}
+
 ensure_venv() {
   if [[ ! -x "$VENV/bin/python" ]]; then
     echo "  creating python venv at $VENV"
@@ -282,10 +312,8 @@ run_check() {
       # Parse only (no workflow schema), but strict about duplicate keys:
       # PyYAML lets the last key win, while Actions rejects the file.
       local f="${id#yaml:}"
-      ensure_venv || return 1
-      "$VENV/bin/python" -c 'import yaml' 2>/dev/null \
-        || "$VENV/bin/python" -m pip install -q pyyaml || return 1
-      "$VENV/bin/python" - "$f" <<'PY' ;;
+      yaml_interpreter || return 1
+      "$YAML_PY" - "$f" <<'PY'
 import sys, yaml
 
 class StrictLoader(yaml.SafeLoader):
@@ -308,6 +336,7 @@ StrictLoader.add_constructor(
 with open(sys.argv[1]) as fh:
     list(yaml.load_all(fh, Loader=StrictLoader))
 PY
+      ;;
     *)
       echo "unknown check $id"; return 1 ;;
   esac
