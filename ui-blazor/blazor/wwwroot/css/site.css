@@ -3,18 +3,22 @@
 :root {
     --wx-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
     --body-font: var(--wx-font);
-    --wx-bg: #ffffff;
-    --wx-fg: #111827;
-    --wx-muted: #6b7280;
-    --wx-soft: #374151;
-    --wx-border: #e5e7eb;
-    --wx-border-strong: #d1d5db;
-    --wx-hover: #f9fafb;
+    /* Custom chrome follows Fluent's own tokens (with matching fallbacks for first paint), so the
+       header, sidebar and chat sit on the same neutrals as Fluent's cards, inputs and menus. */
+    --wx-brand: var(--colorBrandBackground, #4b4fb5);
+    --wx-on-brand: var(--colorNeutralForegroundOnBrand, #ffffff);
+    --wx-bg: var(--colorNeutralBackground1, #ffffff);
+    --wx-fg: var(--colorNeutralForeground1, #242424);
+    --wx-muted: var(--colorNeutralForeground3, #616161);
+    --wx-soft: var(--colorNeutralForeground2, #424242);
+    --wx-border: var(--colorNeutralStroke2, #e0e0e0);
+    --wx-border-strong: var(--colorNeutralStroke1, #d1d1d1);
+    --wx-hover: var(--colorNeutralBackground1Hover, #f5f5f5);
     --wx-map: #e8eef4;
-    --wx-chat-user-bg: #1f2937;
-    --wx-chat-user-fg: #ffffff;
-    --wx-assistant-bg: #f5f5f5;
-    --wx-assistant-border: #e0e0e0;
+    --wx-chat-user-bg: var(--wx-brand);
+    --wx-chat-user-fg: var(--wx-on-brand);
+    --wx-assistant-bg: var(--colorNeutralBackground3, #f5f5f5);
+    --wx-assistant-border: var(--colorNeutralStroke2, #e0e0e0);
     --wx-error-bg: #fde7e9;
     --wx-error-fg: #a4262c;
     --wx-healthy-bg: #dff6dd;
@@ -23,22 +27,29 @@
 
 html.dark,
 html[data-theme="dark"] {
-    --wx-bg: #1f2937;
-    --wx-fg: #f9fafb;
-    --wx-muted: #9ca3af;
-    --wx-soft: #d1d5db;
-    --wx-border: #374151;
-    --wx-border-strong: #4b5563;
-    --wx-hover: #374151;
+    --wx-brand: var(--colorBrandBackground, #6b6fd0);
+    --wx-bg: var(--colorNeutralBackground1, #292929);
+    --wx-fg: var(--colorNeutralForeground1, #ffffff);
+    --wx-muted: var(--colorNeutralForeground3, #adadad);
+    --wx-soft: var(--colorNeutralForeground2, #d6d6d6);
+    --wx-border: var(--colorNeutralStroke2, #525252);
+    --wx-border-strong: var(--colorNeutralStroke1, #666666);
+    --wx-hover: var(--colorNeutralBackground1Hover, #3d3d3d);
     --wx-map: #0b111d;
-    --wx-chat-user-bg: #e5e7eb;
-    --wx-chat-user-fg: #111827;
-    --wx-assistant-bg: #111827;
-    --wx-assistant-border: #4b5563;
+    --wx-assistant-bg: var(--colorNeutralBackground3, #141414);
+    --wx-assistant-border: var(--colorNeutralStroke2, #525252);
     --wx-error-bg: #7f1d1d;
     --wx-error-fg: #fecaca;
     --wx-healthy-bg: #14532d;
     --wx-healthy-fg: #bbf7d0;
+}
+
+table {
+    font-variant-numeric: tabular-nums;
+}
+
+input[type="checkbox"] {
+    accent-color: var(--wx-brand);
 }
 
 html, body {
@@ -399,16 +410,22 @@ body {
 .chat-sidebar-send {
     align-self: flex-end;
     padding: 0.4rem 0.9rem;
-    border: 1px solid var(--wx-border-strong);
+    border: 1px solid var(--wx-brand);
     border-radius: 0.375rem;
-    background: var(--wx-bg);
-    color: var(--wx-fg);
+    background: var(--wx-brand);
+    color: var(--wx-on-brand);
     font-size: 0.875rem;
+    font-weight: 600;
     cursor: pointer;
 }
 
 .chat-sidebar-send:hover {
-    background: var(--wx-hover);
+    background: var(--colorBrandBackgroundHover, var(--wx-brand));
+}
+
+.chat-sidebar-send:focus-visible {
+    outline: 2px solid var(--wx-brand);
+    outline-offset: 2px;
 }
 
 .chat-sidebar-send:disabled {
@@ -474,9 +491,17 @@ fluent-menu-item a {
 
 .page-title,
 .section-title {
-    margin: 0 0 0.5rem;
-    font-size: 1.35rem;
+    margin: 0 0 0.75rem;
+    font-size: 1.75rem;
     font-weight: 600;
+    line-height: 1.25;
+}
+
+/* FocusOnNavigate moves focus to the page heading for screen readers; it is not a keyboard
+   stop, so it should not paint a focus box after every navigation. */
+.page-title:focus,
+.section-title:focus {
+    outline: none;
 }
 
 .hello-section {
@@ -484,15 +509,15 @@ fluent-menu-item a {
 }
 
 .muted {
-    color: var(--neutral-foreground-hint, #616161);
-    font-size: 0.9rem;
+    max-width: 70ch;
+    color: var(--wx-muted);
+    font-size: 0.9375rem;
 }
 
 .stack-gap {
     margin: 0.75rem 0;
 }
 
-.weather-card,
 .chat-card {
     margin-top: 1.25rem;
 }
@@ -527,19 +552,32 @@ fluent-menu-item a {
 }
 
 .weather-results {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 }
 
 .weather-results .chat-markdown {
-    margin-bottom: 1rem;
+    max-width: 65ch;
+    margin: 1.25rem 0 1rem;
+    line-height: 1.6;
 }
 
 .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--wx-muted);
+}
+
+.weather-stats > :first-child {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--wx-border);
+}
+
+.stat-readout {
+    font-size: 3.75rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--neutral-foreground-hint, #616161);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    /* Brand foreground, not background: Fluent lightens it in dark mode so it stays legible. */
+    color: var(--colorBrandForeground1, #4b4fb5);
 }
 
 .wind-direction {

@@ -7,8 +7,8 @@
 <PageTitle>Weather Razor - Current AI Weather</PageTitle>
 
 <div class="content-page">
-    <FluentCard Class="weather-card">
-        <h2 class="section-title">Current AI Weather</h2>
+    <section class="weather-card" aria-labelledby="current-ai-weather-heading">
+        <h2 id="current-ai-weather-heading" class="section-title">Current AI Weather</h2>
 
         <FluentTabs @bind-ActiveTabId="ActiveTab">
             @foreach (var tab in _tabs)
@@ -25,7 +25,7 @@
                                  Disabled="isAiWeatherLoading"
                                  Style="flex: 1 1 12rem; max-width: 20rem;" />
                 <FluentButton Type="ButtonType.Submit"
-                              Appearance="ButtonAppearance.Outline"
+                              Appearance="ButtonAppearance.Primary"
                               Class="ai-weather-submit"
                               Disabled="isAiWeatherLoading">
                     @if (isAiWeatherLoading)
@@ -51,11 +51,11 @@
         @if (aiWeather is not null && !isAiWeatherLoading)
         {
             <div class="weather-results">
-                <div class="chat-markdown">@((MarkupString)SafeGfmMarkdown.ToHtml(aiWeather.FullSummary))</div>
-                <FluentGrid Spacing="2">
-                    <FluentGridItem Xs="12" Sm="6">
+                @* Temperature leads as a full-width readout; the other readings sit under it. *@
+                <FluentGrid Spacing="2" Class="weather-stats">
+                    <FluentGridItem Xs="12">
                         <div class="stat-label">Temperature</div>
-                        <div>@FormatTemperatureF(aiWeather.TemperatureF)</div>
+                        <div class="stat-readout">@FormatTemperatureF(aiWeather.TemperatureF)</div>
                     </FluentGridItem>
                     <FluentGridItem Xs="12" Sm="6">
                         <div class="stat-label">Wind Speed</div>
@@ -79,6 +79,7 @@
                         <div>@FormatLatLong(aiWeather.Latitude, aiWeather.Longitude)</div>
                     </FluentGridItem>
                 </FluentGrid>
+                <div class="chat-markdown weather-summary">@((MarkupString)SafeGfmMarkdown.ToHtml(aiWeather.FullSummary))</div>
                 @if (aiWeather.RunLogDetails.Count > 0)
                 {
                     <div class="weather-grid-wrap" style="margin-top: 1rem;">
@@ -115,7 +116,7 @@
                 }
             </div>
         }
-    </FluentCard>
+    </section>
 </div>
 
 @code {

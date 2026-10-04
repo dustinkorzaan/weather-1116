@@ -131,6 +131,13 @@ public sealed class LayoutCssTests
 
         Assert.Contains("aria-label=\"Add location\"", rendered.Markup);
 
+        // Fluent v5's <fluent-menu> pops up its first child: the items must sit inside one
+        // <fluent-menu-list>, or every item after the first renders permanently on screen.
+        var menu = rendered.Find("fluent-menu");
+        Assert.Single(menu.Children);
+        Assert.Equal("FLUENT-MENU-LIST", menu.Children[0].TagName);
+        Assert.Contains("About", menu.Children[0].TextContent);
+
         context.Services.GetRequiredService<NavigationManager>().NavigateTo("/hello-world");
 
         rendered.WaitForAssertion(() =>
