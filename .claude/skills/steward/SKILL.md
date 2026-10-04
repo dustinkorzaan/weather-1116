@@ -36,10 +36,20 @@ description: Repo rules for driving an open Weather PR to green after it is open
 
 Follow `.claude/skills/sync/SKILL.md` in full. It is also the procedure for a "base branch recovered" notice. Don't improvise a shorter version: the overlap scan and re-review are the point.
 
+## Stale base
+
+CI runs on pushes to the branch (`build-test.yml` has no `pull_request` trigger), so a green check proves the branch head, not the head merged with today's `main`. Two PRs can each be green and still break `main` once both land.
+
+On every event and check-in:
+1. `git fetch origin main`, then `OLD_BASE=$(git merge-base HEAD origin/main)`.
+2. If `main` has moved, compare `git diff --name-only $OLD_BASE origin/main` with this branch's files (`git diff --name-only $OLD_BASE HEAD`). Count it as an overlap when they share a stack folder, or when `main` touched `core-dotnet/`, `cqmediator-dotnet/`, `Weather.sln`, or an MCP tool registration this branch calls.
+3. Overlap: run `.claude/skills/sync/SKILL.md` with `--light`. No overlap: leave the branch alone. A merge commit with no reason behind it only costs a CI run.
+
 ## Done means
 
 - CI green on the head commit;
 - no conflicts;
-- no unanswered review threads.
+- no unanswered review threads;
+- no overlap with commits on `main` that the head doesn't contain (see *Stale base*).
 
 Then say once that the PR is waiting on the user's review and merge.

@@ -38,6 +38,7 @@ on ACA, and standalone Python and Node.js servers with no dependency on `Core`).
   - verify, re-review, then push and watch CI.
 
   Pass `#123` or a branch name from a new thread; `--light` skips the overlap scan, and skips review unless there were conflicts or verify fixes. When several PRs are waiting, handle them one at a time: the user merges one, then `/sync` runs on the next. Agents never merge PRs.
+  CI runs on branch pushes, not on the merge with `main`, so the steward also runs `/sync --light` on its own when `main` gains commits that overlap the PR (*Stale base* in the steward skill).
 - **Roles** live in `.claude/agents/`. The review checklist is `REVIEW.md`; the spec template is `docs/specs/_template.md`.
 - **Hooks:**
   - `SessionStart` installs every stack's toolchain and deps.

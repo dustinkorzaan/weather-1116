@@ -132,6 +132,7 @@ map_path() {
   esac
   case "$f" in
     *.json) [[ -f "$f" && "$f" != */node_modules/* ]] && add "json:$f" ;;
+    *.yml|*.yaml) [[ -f "$f" && "$f" != */node_modules/* ]] && add "yaml:$f" ;;
   esac
 }
 
@@ -144,6 +145,7 @@ if [[ "$mode" == "all" ]]; then
   add infra
   add gh-scripts
   for df in "${DOCKERFILES[@]}"; do add "docker:$df"; done
+  for f in .github/workflows/*.yml; do add "yaml:$f"; done
 else
   if [[ "$mode" == "paths" ]]; then
     files="$(printf '%s\n' "${paths[@]}")"
@@ -276,6 +278,15 @@ run_check() {
         */tsconfig*.json|*/launchSettings.json|.vscode/*|.devcontainer/*) return 0 ;;
       esac
       jq empty "$f" ;;
+    yaml:*)
+      # Parse only (no workflow schema): catches the indentation and quoting
+      # slips that otherwise surface as a CI run that never starts.
+      local f="${id#yaml:}"
+      if ! python3 -c 'import yaml' 2>/dev/null; then
+        echo "PyYAML not installed; YAML parse of $f left to CI"
+        return 3
+      fi
+      python3 -c 'import sys, yaml; list(yaml.safe_load_all(open(sys.argv[1])))' "$f" ;;
     *)
       echo "unknown check $id"; return 1 ;;
   esac
