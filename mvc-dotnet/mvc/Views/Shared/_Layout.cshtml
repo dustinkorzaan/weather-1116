@@ -21,7 +21,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#f6f7f5" />
     <script>
         (function () {
             var key = 'weather-theme';
@@ -38,7 +38,7 @@
             root.style.colorScheme = resolved;
             var meta = document.querySelector('meta[name="theme-color"]');
             if (meta) {
-                meta.setAttribute('content', resolved === 'dark' ? '#111827' : '#ffffff');
+                meta.setAttribute('content', resolved === 'dark' ? '#0f1615' : '#f6f7f5');
             }
         })();
     </script>
