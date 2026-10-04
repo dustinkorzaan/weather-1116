@@ -1,6 +1,6 @@
 # <Title>
 
-- **Status:** draft | planned | in-progress | shipped | blocked
+- **Status:** draft | planned | in-progress | in-review | shipped | blocked  <!-- /ship sets in-review when the PR opens; shipped is only written after the merge (e.g. by the next story), since agents never merge -->
 - **Branch / PR:** `<branch>` / <PR link>
 - **Mode:** interactive | hands-off | quick
 

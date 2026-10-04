@@ -1,6 +1,6 @@
 # Chat2a right sidebar with map state synchronization
 
-- **Status:** in-progress (revision 2)
+- **Status:** shipped (merged as #377)
 - **Branch / PR:** `claude/affectionate-cray-6sli9u` / https://github.com/dustinkorzaan/weather-1116/pull/377
 - **Mode:** interactive (no questions needed: story shipped with testable criteria)
 
