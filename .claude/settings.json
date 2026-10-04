@@ -29,12 +29,19 @@
       "Bash(git push -u origin claude/:*)",
       "Bash(git push)",
       "Bash(git push origin claude/:*)",
+      "Bash(git push -u origin ccr-:*)",
+      "Bash(git push origin ccr-:*)",
       "Bash(npm install --prefix:*)"
     ],
     "deny": [
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git push origin main:*)",
+      "Bash(git push -u origin main:*)",
+      "Bash(git push origin HEAD:main:*)",
+      "Bash(git push -u origin HEAD:main:*)",
+      "Bash(git push origin +:*)",
+      "Bash(git push -u origin +:*)",
       "Bash(gh pr merge:*)",
       "mcp__github__merge_pull_request",
       "mcp__github__enable_pr_auto_merge"
