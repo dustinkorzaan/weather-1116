@@ -89,7 +89,7 @@ Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every p
 3. Record the PR in the spec: set **Branch / PR** to the PR link and **Status** to `in-review`, commit (`Spec: link PR #N`), and push. The spec is otherwise left with a placeholder link and a stale status once the PR merges.
 4. Subscribe to PR activity, then follow `.claude/skills/steward/SKILL.md` for CI and review events.
    - Webhooks can arrive late or not at all, so also schedule a `send_later` check-in about 50 minutes out: "Re-check PR #N per the steward skill".
-   - Re-arm it after each check-in, about 4 hours apart. Stop after 3 check-ins in a row that found nothing new, or when the PR is merged or closed. Any new activity resets that count.
+   - Re-arm and stop it as *Check-ins* in `.claude/skills/steward/SKILL.md` says.
 5. Final chat message:
    - PR link
    - one-paragraph summary

@@ -45,6 +45,15 @@ On every event and check-in:
 2. If `main` has moved, compare `git diff --name-only $OLD_BASE origin/main` with this branch's files (`git diff --name-only $OLD_BASE HEAD`). Count it as an overlap when they share a top-level folder or root file (a stack folder, but also `scripts/`, `.claude/`, `docs/` or `.github/`), or when `main` touched `core-dotnet/`, `cqmediator-dotnet/`, `Weather.sln`, or an MCP tool registration this branch calls.
 3. Overlap: run `.claude/skills/sync/SKILL.md` with `--light`. No overlap: leave the branch alone. A merge commit with no reason behind it only costs a CI run.
 
+## Check-ins
+
+The `send_later` check-in covers webhooks that arrive late or not at all.
+
+- Re-arm it after each check-in: the first about 50 minutes after the last activity, later ones about 4 hours apart.
+- A check-in is **quiet** when CI is green on the head, there are no unanswered threads, no conflicts, and no overlapping `main` commits (see *Stale base*). A red or pending check is never quiet, including a failure past the 3-push cap.
+- Stop re-arming after 3 quiet check-ins in a row, or as soon as the PR is merged or closed.
+- Reset the count on a message from the user, a review or comment on the PR, a push to the branch, or an overlapping `main` commit. Commits on `main` that don't overlap don't reset it.
+
 ## Done means
 
 - CI green on the head commit;
