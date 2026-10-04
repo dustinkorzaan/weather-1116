@@ -71,6 +71,10 @@ Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every p
 3. Apply NITs only if trivial. Otherwise list them as follow-ups.
 4. Append the round to the spec's **Review log** (findings → fix commit or reason).
 5. Re-review until the verdict is `clean` or 3 rounds are used. After 3 rounds, commit the remaining BLOCKING items under `## Open issues` and report them to the user with the line `STATUS: blocked`, as in phase 4.
+6. **Post the review on the PR** so other agents can reply in thread. A review that stays in chat is not delivered.
+   - If the PR is not open yet, post it in phase 7 as soon as the PR exists.
+   - One summary comment: verdict, verify table, criteria coverage.
+   - One line comment per finding, on the changed line, with the severity, the scenario, and the fix.
 
 ## Phase 6: Final review (≤ 3 rounds)
 
@@ -84,6 +88,7 @@ Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every p
 2. Open a **draft** PR:
    - title: imperative, under 70 characters;
    - body: fill `.github/pull_request_template.md` from the spec and the final-reviewer's output (criteria → evidence table, verify table, PR notes).
+   - Post the latest peer review if it is not already on the PR: one summary comment, plus one line comment per finding (severity, scenario, fix).
 3. Record the PR in the spec: set **Branch / PR** to the PR link and **Status** to `in-review`, commit (`Spec: link PR #N`), and push. The spec is otherwise left with a placeholder link and a stale status once the PR merges.
 4. Subscribe to PR activity, then follow `.claude/skills/steward/SKILL.md` for CI and review events.
    - Webhooks can arrive late or not at all, so also schedule a `send_later` check-in about 60 minutes out: "Re-check PR #N per the steward skill".
