@@ -14,22 +14,22 @@ import {
 /** Renders an AI weather query result: summary markdown, a stat grid, and an optional run-log table. */
 function AIWeatherResult({ data }) {
   return (
-    <div className="mt-3.5">
-      <div className="chat-markdown mb-2.5 text-base">
-        <SafeGfmMarkdown>{data.fullSummary}</SafeGfmMarkdown>
-      </div>
-      <dl className="grid gap-x-4 gap-y-1.5">
-        <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
-          <dt className="font-semibold">Temperature</dt>
-          <dd>{formatTemperatureF(data.temperatureF)}</dd>
+    <div className="mt-5">
+      {/* Temperature leads as a large readout; the other readings sit in a quiet row under it. */}
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="col-span-full flex flex-col gap-1 border-b border-border pb-4">
+          <dt className="text-sm text-muted-foreground">Temperature</dt>
+          <dd className="text-6xl leading-none font-semibold tracking-tight text-sun">
+            {formatTemperatureF(data.temperatureF)}
+          </dd>
         </div>
-        <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
-          <dt className="font-semibold">Wind Speed</dt>
-          <dd>{formatWindSpeedMph(data.windSpeedMPH)}</dd>
+        <div className="flex flex-col gap-1">
+          <dt className="text-sm text-muted-foreground">Wind Speed</dt>
+          <dd className="font-medium">{formatWindSpeedMph(data.windSpeedMPH)}</dd>
         </div>
-        <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
-          <dt className="font-semibold">Wind Direction</dt>
-          <dd className="inline-flex items-center gap-2">
+        <div className="flex flex-col gap-1">
+          <dt className="text-sm text-muted-foreground">Wind Direction</dt>
+          <dd className="inline-flex items-center gap-2 font-medium">
             <span>{formatWindDirection(data.windDirectionSource, data.windDirectionSourceDegrees)}</span>
             <span
               aria-hidden="true"
@@ -40,18 +40,21 @@ function AIWeatherResult({ data }) {
             </span>
           </dd>
         </div>
-        <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
-          <dt className="font-semibold">Conditions</dt>
-          <dd>{data.conditions}</dd>
+        <div className="flex flex-col gap-1">
+          <dt className="text-sm text-muted-foreground">Conditions</dt>
+          <dd className="font-medium">{data.conditions}</dd>
         </div>
-        <div className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[minmax(8rem,11rem)_1fr]">
-          <dt className="font-semibold">Lat/Long</dt>
-          <dd>{formatLatLong(data.latitude, data.longitude)}</dd>
+        <div className="flex flex-col gap-1">
+          <dt className="text-sm text-muted-foreground">Lat/Long</dt>
+          <dd className="font-medium">{formatLatLong(data.latitude, data.longitude)}</dd>
         </div>
       </dl>
+      <div className="chat-markdown mt-5 max-w-prose text-base leading-relaxed">
+        <SafeGfmMarkdown>{data.fullSummary}</SafeGfmMarkdown>
+      </div>
 
       {data.runLogDetails?.length > 0 && (
-        <div className="mt-4 overflow-x-auto">
+        <div className="mt-6 overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-border text-muted-foreground">
