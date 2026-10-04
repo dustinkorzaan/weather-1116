@@ -287,7 +287,7 @@ test('renders current AI weather on its own page', async () => {
   expect(screen.queryByRole('button', { name: /add location/i })).toBeNull();
 });
 
-test('current AI weather submit is a charcoal button instead of blue or a flat outline', async () => {
+test('current AI weather submit uses the theme primary color instead of a raw blue or a flat outline', async () => {
   mockHelloFetch();
   await renderApp('/current-ai-weather');
 
@@ -299,7 +299,7 @@ test('current AI weather submit is a charcoal button instead of blue or a flat o
   expect(button.className).not.toMatch(/bg-white/);
 });
 
-test('chat tabs and send use clickable gray controls instead of blue', async () => {
+test('chat tabs and send use clickable theme-colored controls instead of a raw blue', async () => {
   mockHelloFetch();
   await renderApp('/chat-clients');
 
@@ -359,6 +359,11 @@ test('current AI weather reads location query, clears it, and fetches', async ()
   expect(windValue?.querySelector('[aria-hidden="true"]')?.style.transform).toBe('rotate(180deg)');
   expect(screen.getByText('Lat/Long')).toBeDefined();
   expect(screen.getByText('36.16° N, 86.78° W')).toBeDefined();
+  // Responsive contract: the stats are one column on small screens and only open into a grid at a breakpoint.
+  const stats = screen.getByText('Temperature').closest('dl');
+  expect(stats?.className).toMatch(/(^|\s)grid-cols-1(\s|$)/);
+  expect(stats?.className).not.toMatch(/(^|\s)grid-cols-([2-9]|1\d)(\s|$)/);
+  expect(stats?.className).toMatch(/(^|\s)sm:grid-cols-\d+(\s|$)/);
   expect(screen.queryByText('Temperature F')).toBeNull();
   expect(screen.queryByText('Wind Speed MPH')).toBeNull();
 });
