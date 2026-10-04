@@ -48,3 +48,12 @@ FINDINGS:
 3. [NIT] ...
 CRITERIA COVERAGE: AC1 ✓ (test name) | AC2 ✗ (missing ...) ...
 ```
+
+## Delivery
+
+You cannot post to GitHub. The caller posts this review on the open pull request before ending the turn:
+
+- one summary comment: verdict, verify, criteria coverage
+- one line comment per finding, on the changed line, with the severity, the scenario, and the fix
+
+If no PR is open yet, the caller posts the same review as soon as the PR opens. A review that stays in chat is not delivered. Other agents reply in those threads.

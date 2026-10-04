@@ -1,7 +1,7 @@
 # Home map chat becomes Chat5a, gates widen to geo and saved cities, "add" means save
 
-- **Status:** shipped (draft PR)
-- **Branch / PR:** `claude/hopeful-cori-x18m82` / (PR link added on open)
+- **Status:** shipped (merged as #384)
+- **Branch / PR:** `claude/hopeful-cori-x18m82` / https://github.com/dustinkorzaan/weather-1116/pull/384
 - **Mode:** interactive (no questions needed: the story's four items are specific)
 
 ## Problem
