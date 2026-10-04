@@ -55,7 +55,7 @@ Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every p
    - `git merge --no-ff <worker-branch>` each into your branch, in plan order.
    - Resolve conflicts yourself if trivial; otherwise send the task back to that implementer.
    - Workers reporting `STATUS: blocked`: fix the plan or ask the user, then re-spawn.
-4. **Clean up** each merged worker: `git worktree remove --force <path>` and `git branch -D <worker-branch>`. Each worktree carries its own `node_modules`, `bin/` and `obj/` (hundreds of MB), and the session's disk is a fixed allowance, so leftover worktrees from several rework rounds can fill it. Keep a blocked worker's worktree until it is re-spawned or abandoned.
+4. **Clean up** each merged worker: `git worktree remove --force <path>` and `git branch -D <worker-branch>`. This applies after every worker merge in phases 3-6, not only here. Each worktree carries its own `node_modules`, `bin/` and `obj/` (hundreds of MB), and the session's disk is a fixed allowance, so leftover worktrees from several rework rounds can fill it. Keep a blocked worker's worktree until it is re-spawned or abandoned.
 
 ## Phase 4: Test gate (≤ 3 rounds)
 
@@ -70,7 +70,7 @@ Keep a live checklist with TaskCreate/TaskUpdate, one task per phase. At every p
 2. For every BLOCKING and SHOULD finding: group the findings by file or area, and send each group to an implementer (in parallel worktrees if the groups don't overlap). Merge, then run verify.
 3. Apply NITs only if trivial. Otherwise list them as follow-ups.
 4. Append the round to the spec's **Review log** (findings → fix commit or reason).
-5. Re-review until the verdict is `clean` or 3 rounds are used. After 3 rounds, remaining BLOCKING items go to `## Open issues` and to the user.
+5. Re-review until the verdict is `clean` or 3 rounds are used. After 3 rounds, commit the remaining BLOCKING items under `## Open issues` and report them to the user with the line `STATUS: blocked`, as in phase 4.
 
 ## Phase 6: Final review (≤ 3 rounds)
 

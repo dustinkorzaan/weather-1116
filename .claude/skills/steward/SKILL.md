@@ -42,7 +42,7 @@ CI runs on pushes to the branch (`build-test.yml` has no `pull_request` trigger)
 
 On every event and check-in:
 1. `git fetch origin main`, then `OLD_BASE=$(git merge-base HEAD origin/main)`.
-2. If `main` has moved, compare `git diff --name-only $OLD_BASE origin/main` with this branch's files (`git diff --name-only $OLD_BASE HEAD`). Count it as an overlap when they share a stack folder, or when `main` touched `core-dotnet/`, `cqmediator-dotnet/`, `Weather.sln`, or an MCP tool registration this branch calls.
+2. If `main` has moved, compare `git diff --name-only $OLD_BASE origin/main` with this branch's files (`git diff --name-only $OLD_BASE HEAD`). Count it as an overlap when they share a top-level folder or root file (a stack folder, but also `scripts/`, `.claude/`, `docs/` or `.github/`), or when `main` touched `core-dotnet/`, `cqmediator-dotnet/`, `Weather.sln`, or an MCP tool registration this branch calls.
 3. Overlap: run `.claude/skills/sync/SKILL.md` with `--light`. No overlap: leave the branch alone. A merge commit with no reason behind it only costs a CI run.
 
 ## Done means

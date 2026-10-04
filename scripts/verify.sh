@@ -279,14 +279,35 @@ run_check() {
       esac
       jq empty "$f" ;;
     yaml:*)
-      # Parse only (no workflow schema): catches the indentation and quoting
-      # slips that otherwise surface as a CI run that never starts.
+      # Parse only (no workflow schema), but strict about duplicate keys:
+      # PyYAML lets the last key win, while Actions rejects the file.
       local f="${id#yaml:}"
-      if ! python3 -c 'import yaml' 2>/dev/null; then
-        echo "PyYAML not installed; YAML parse of $f left to CI"
-        return 3
-      fi
-      python3 -c 'import sys, yaml; list(yaml.safe_load_all(open(sys.argv[1])))' "$f" ;;
+      ensure_venv || return 1
+      "$VENV/bin/python" -c 'import yaml' 2>/dev/null \
+        || "$VENV/bin/python" -m pip install -q pyyaml || return 1
+      "$VENV/bin/python" - "$f" <<'PY' ;;
+import sys, yaml
+
+class StrictLoader(yaml.SafeLoader):
+    pass
+
+def construct_mapping(loader, node, deep=False):
+    seen = set()
+    for key_node, _ in node.value:
+        if key_node.tag == "tag:yaml.org,2002:merge":
+            continue  # "<<" merge keys may repeat and may be overridden
+        key = loader.construct_object(key_node, deep=deep)
+        if key in seen:
+            raise yaml.constructor.ConstructorError(
+                None, None, f"duplicate key {key!r}", key_node.start_mark)
+        seen.add(key)
+    return yaml.SafeLoader.construct_mapping(loader, node, deep)
+
+StrictLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping)
+with open(sys.argv[1]) as fh:
+    list(yaml.load_all(fh, Loader=StrictLoader))
+PY
     *)
       echo "unknown check $id"; return 1 ;;
   esac
