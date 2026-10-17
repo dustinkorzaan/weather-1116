@@ -284,7 +284,8 @@ run_check() {
       fi
       docker build -q -f "$df" . >/dev/null ;;
     gh-scripts)
-      bash .github/scripts/deploy-foundry-toolbox.test.sh \
+      bash .github/scripts/aca-functions-mcp-key.test.sh \
+        && bash .github/scripts/deploy-foundry-toolbox.test.sh \
         && bash .github/scripts/deploy-foundry-agent.test.sh ;;
     shell:*)
       local f="${id#shell:}"

@@ -240,6 +240,14 @@ openssl rand -base64 32
 secret into their own container app secrets. Because both sides come from one
 GitHub secret, there is no copy-back step and no redeploy ordering requirement.
 
+Unlike `DB_CONNECTION_STRING`, this is a Functions **system key**, not an
+application setting. Adding it to the Container App's secrets/environment
+variables does not register it with Functions authentication. The separate
+`aca-functions-mcp-key.sh` step uses `az containerapp function keys set` after
+the deployed host is healthy. Both `Running` and `RunningAtMaxScale` are ready
+states when health is `Healthy`; reaching the replica limit is normal with
+`maxReplicas=1`.
+
 To rotate: update the GitHub secret, then re-run the func deploy plus the
 api/mvc/worker deploys.
 
