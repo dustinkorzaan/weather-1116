@@ -4,12 +4,12 @@ version = "0.1.0"
 description = "Python port of FoundryConsoleV4: Responses API with remote MCP servers as tools."
 requires-python = ">=3.11"
 dependencies = [
-    "openai>=3.22",
-    "python-dotenv>=1.2.3",
+    "openai>=3.33.0",
+    "python-dotenv>=1.2.4",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=9.1"]
+dev = ["pytest>=9.1.1"]
 
 [project.scripts]
 foundry-console-v4-python = "foundry_console_v4:main"
