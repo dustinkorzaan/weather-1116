@@ -71,8 +71,10 @@ while true; do
 
   echo "Waiting on revision $LATEST_REVISION (runningState=$RUNNING_STATE, healthState=$HEALTH_STATE)..."
 
-  if [ "$RUNNING_STATE" = "Running" ] && [ "$HEALTH_STATE" = "Healthy" ]; then
-    echo "::notice::Revision $LATEST_REVISION is Running/Healthy."
+  # RunningAtMaxScale is normal when maxReplicas=1, not a readiness failure.
+  if [[ "$RUNNING_STATE" = "Running" || "$RUNNING_STATE" = "RunningAtMaxScale" ]] \
+    && [ "$HEALTH_STATE" = "Healthy" ]; then
+    echo "::notice::Revision $LATEST_REVISION is $RUNNING_STATE/Healthy."
     break
   fi
 
@@ -84,7 +86,7 @@ while true; do
   esac
 
   if [ "$ELAPSED_S" -ge "$WAIT_TIMEOUT_S" ]; then
-    echo "Revision $LATEST_REVISION did not become Running/Healthy within ${WAIT_TIMEOUT_S}s (runningState=$RUNNING_STATE, healthState=$HEALTH_STATE)." >&2
+    echo "Revision $LATEST_REVISION did not become Running or RunningAtMaxScale with Healthy health within ${WAIT_TIMEOUT_S}s (runningState=$RUNNING_STATE, healthState=$HEALTH_STATE)." >&2
     exit 1
   fi
 

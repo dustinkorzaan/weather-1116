@@ -364,6 +364,9 @@ jobs:
       - name: Validate Foundry agent deploy payload
         run: bash .github/scripts/deploy-foundry-agent.test.sh
 
+      - name: Validate Functions MCP system key readiness
+        run: bash .github/scripts/aca-functions-mcp-key.test.sh
+
   build-and-test-react:
     name: Build and Test React Project
     runs-on: ubuntu-latest
