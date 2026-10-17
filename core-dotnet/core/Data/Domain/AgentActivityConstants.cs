@@ -19,6 +19,6 @@ public static class AgentActivityHost
     public const string Api = "Api";
     public const string Mvc = "Mvc";
 
-    /// <summary>worker-dotnet -- the confirm-nashville-ai-weather-v3/v4 Hangfire recurring jobs (RecurringJobScheduler).</summary>
+    /// <summary>worker-dotnet -- background jobs processed by its Hangfire servers.</summary>
     public const string Worker = "Worker";
 }

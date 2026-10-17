@@ -30,12 +30,10 @@ builder.Services.Configure<HangfireAboutHealthOptions>(options =>
 	HangfireAboutHealthOptions.Configure(options, builder.Configuration));
 builder.Services.AddControllers();
 
-// dbo.AgentActivities logging: the confirm-nashville-ai-weather-v3/v4 recurring jobs below call
-// straight into GetCurrentAIWeatherV3Handler/V4Handler, the same handlers API's AIWeatherController
-// and MVC's HomeController call -- this is the third host (alongside Api and Mvc) that can produce
-// AgentActivity rows. DB_CONNECTION_STRING is a hard requirement here, same as API and MVC.
-// HttpAgentActivityContextProvider is registered too, but a Hangfire recurring job has no
-// ambient HttpContext, so it always returns null and rows logged from this host leave Context null.
+// Hangfire-triggered AI weather events use the same handlers API's AIWeatherController and MVC's
+// HomeController call, so this host can produce AgentActivity rows too. DB_CONNECTION_STRING is a
+// hard requirement here, same as API and MVC. Hangfire jobs have no ambient HttpContext, so rows
+// logged from this host leave Context null.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAgentActivityContextProvider, HttpAgentActivityContextProvider>();
 builder.Services.AddSingleton<IAgentActivityHostProvider>(new AgentActivityHostProvider(AgentActivityHost.Worker));

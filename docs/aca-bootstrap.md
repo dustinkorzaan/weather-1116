@@ -34,7 +34,7 @@ Everything uses `location: centralus`.
 Every container app runs at the smallest Consumption-plan size ACA allows --
 0.25 vCPU / 0.5Gi memory (sizes are per app in `containerAppsConfig` in
 `infra/main.bicep`). Every app scales to zero (`minReplicas: 0`, including
-blazor and worker) with a 30-minute cooldown before scaling in, so an idle
+blazor and worker) with the platform-default 5-minute cooldown before scaling in, so an idle
 environment costs nothing between requests without cold-starting on every
 short gap in traffic. `worker` alone is capped at `maxReplicas: 1`: Hangfire
 recurring jobs assume a single active server, so a second cold-started
@@ -44,23 +44,10 @@ Every other Container App is also capped at `maxReplicas: 1`.
 Two consequences of scaling everything to zero are worth knowing before you
 rely on this in production, not just during the demo:
 
-- **`worker`'s recurring jobs** (`RecurringJobScheduler`: the `Cron.Daily(2)` AI weather
-  checks) only
-  run if a replica happens to be up when Hangfire's scheduler ticks. There is
-  no queue-depth/KEDA scale rule bringing `worker` up on a schedule -- the
-  only thing that wakes it from zero is an inbound HTTP request, which today
-  means the React UI's `useBackendWake` hook (`ui-react/src/app/useBackendWake.js`,
-  used from `App.jsx`) pinging `worker`'s own `/About` directly on page load,
-  in parallel with API, MVC, Blazor, and all four MCP hosts, rather than relying
-  on API's `/About` fan-out to reach it (see below for why that changed).
-  `useBackendWake` fires a fresh ping per target roughly every 30s -- without
-  cancelling ones still in flight -- until each succeeds, rather than giving
-  up after a single attempt; see the `BackendWakeScreen` full-page loader,
-  now showing seven spinning icons (one per target), it drives while that's
-  pending. If nobody loads the React UI around 2am,
-  that day's AI weather checks are silently skipped, not just delayed. Keep `worker` at
-  `minReplicas: 1` (or add a scheduled wake, e.g. a Logic App/cron hitting
-  `/About`) if the recurring jobs need to actually run unattended.
+- **`worker` has no automatic recurring jobs.** The daily AI-weather checks
+  have been removed, and `import-cities` is available only through a manual
+  trigger in the `/hangfire` dashboard. The worker scales from zero when an
+  inbound request wakes it; it is not kept running for a schedule.
 - **`mcp-srv-func-app` cold starts used to compound with `AboutClient`'s 60s
   HTTP timeout** (`api-dotnet/api/Program.cs`). API's own `/About` still fans
   out server-side to worker and both MCP hosts via `Task.WhenAll`, but that
@@ -355,7 +342,7 @@ Do not configure MCP servers or agents in the Foundry portal.
   returns `200` with a valid TLS certificate
 - MCP Inspector: see `docs/6-mcp-inspection/6-mcp-inspection.md`
 - A container app that has scaled to zero takes a few seconds to answer its
-  first request after an idle gap longer than the 30-minute cooldown -- that
+  first request after an idle gap longer than the 5-minute cooldown -- that
   is expected, not a failure.
 
 ## Static Web App custom domain

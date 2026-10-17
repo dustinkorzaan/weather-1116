@@ -74,7 +74,7 @@ var appIdentityConfig = [
   { key: 'mcp-srv-func-app', name: '${namePrefix}-${environmentName}-mcp-srv-func-app-mi' }
 ]
 
-// Every app scales to zero (minReplicas 0) on the same extended cooldown --
+// Every app scales to zero (minReplicas 0) on the platform-default cooldown --
 // see modules/container-app.bicep's cooldownPeriod default. Every app is capped
 // at one replica; the worker must never scale above one because Hangfire jobs
 // assume a single active server and a second replica could run jobs twice.

@@ -653,7 +653,6 @@ Foundry project's own identity already hold for their respective Agents API use.
 `MCP_SRV_APP_SERVICE_*`/`MCP_SRV_PYTHON_*`/`MCP_SRV_NODE_*` variables as the Chat1b/Chat2b
 remote-MCP chat tabs
 (see [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)).
-The confirm-nashville-ai-weather-v4 worker recurring job needs them too.
 `GetCurrentAIWeatherV5Handler` needs `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`
 instead - the agent owns tool resolution, so no `MCP_SRV_*` variables apply.
 
