@@ -4,13 +4,13 @@ version = "0.1.0"
 description = "Python port of FoundryConsoleV2: model direct against the Foundry unified AI services endpoint (Responses API)."
 requires-python = ">=3.11"
 dependencies = [
-    "openai>=3.22",
+    "openai>=3.33.0",
     "httpx>=0.28.1",
-    "python-dotenv>=1.2.3",
+    "python-dotenv>=1.2.4",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=9.1"]
+dev = ["pytest>=9.1.1"]
 
 [project.scripts]
 foundry-console-v2-python = "foundry_console_v2:main"

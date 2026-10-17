@@ -4,17 +4,17 @@ version = "0.1.0"
 description = "Standalone Python MCP server exposing the GetLatLong (Open-Meteo geocoding) and GetLocation (Nominatim reverse geocoding) tools."
 requires-python = ">=3.11"
 dependencies = [
-    "mcp[cli]>=2.2",
+    "mcp[cli]>=2.3.0",
     "httpx>=0.28.1",
-    "python-dotenv>=1.2.3",
+    "python-dotenv>=1.2.4",
     "uvicorn>=0.54",
-    "azure-monitor-opentelemetry>=1.8.10",
-    "opentelemetry-instrumentation-httpx>=0.65b0",
-    "opentelemetry-instrumentation-starlette>=0.65b0",
+    "azure-monitor-opentelemetry>=1.8.11",
+    "opentelemetry-instrumentation-httpx>=0.66b1",
+    "opentelemetry-instrumentation-starlette>=0.66b1",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=9.1", "pytest-asyncio>=1.4"]
+dev = ["pytest>=9.1.1", "pytest-asyncio>=1.4"]
 
 [project.scripts]
 weather-mcp-srv-python = "weather_mcp_srv_python.server:main"
