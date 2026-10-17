@@ -210,7 +210,7 @@ resource functionContainerApp 'Microsoft.App/containerApps@2024-10-02-preview' =
       ]
       scale: {
         minReplicas: 0
-        maxReplicas: 5
+        maxReplicas: 1
         cooldownPeriod: 1800
       }
     }

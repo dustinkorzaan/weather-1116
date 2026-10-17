@@ -35,7 +35,7 @@ public class RecurringJobScheduler : IHostedService
 
         _recurringJobs.AddOrUpdateCQMediatorEvent(
             "import-cities",
-            Cron.Daily(11),
+            Cron.Never(),
             new ImportCitiesEvent(),
             queue: "batch-single");
 

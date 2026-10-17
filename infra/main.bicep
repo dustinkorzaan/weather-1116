@@ -75,18 +75,17 @@ var appIdentityConfig = [
 ]
 
 // Every app scales to zero (minReplicas 0) on the same extended cooldown --
-// see modules/container-app.bicep's cooldownPeriod default. worker stays
-// capped at maxReplicas 1: Hangfire recurring jobs assume a single active
-// server, so a second cold-started replica racing the first would double-run
-// jobs instead of adding throughput.
+// see modules/container-app.bicep's cooldownPeriod default. Every app is capped
+// at one replica; the worker must never scale above one because Hangfire jobs
+// assume a single active server and a second replica could run jobs twice.
 var containerAppsConfig = [
-  { key: 'api', setAzureClientId: true, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
-  { key: 'mvc', setAzureClientId: true, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
-  { key: 'blazor', setAzureClientId: false, maxReplicas: 5, stickySessions: true, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'api', setAzureClientId: true, maxReplicas: 1, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'mvc', setAzureClientId: true, maxReplicas: 1, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'blazor', setAzureClientId: false, maxReplicas: 1, stickySessions: true, cpu: '0.25', memory: '0.5Gi' }
   { key: 'worker', setAzureClientId: true, maxReplicas: 1, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
-  { key: 'mcp-srv-app-service', setAzureClientId: true, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
-  { key: 'mcp-srv-python', setAzureClientId: false, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
-  { key: 'mcp-srv-node', setAzureClientId: false, maxReplicas: 5, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'mcp-srv-app-service', setAzureClientId: true, maxReplicas: 1, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'mcp-srv-python', setAzureClientId: false, maxReplicas: 1, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
+  { key: 'mcp-srv-node', setAzureClientId: false, maxReplicas: 1, stickySessions: false, cpu: '0.25', memory: '0.5Gi' }
 ]
 
 module githubActionsIdentity 'modules/managed-identity.bicep' = {

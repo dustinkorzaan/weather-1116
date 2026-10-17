@@ -28,7 +28,7 @@ param targetPort int = 8080
 param minReplicas int = 0
 
 @description('Maximum replicas.')
-param maxReplicas int = 3
+param maxReplicas int = 1
 
 @description('KEDA cooldown period in seconds before scaling in to minReplicas. 1800 (30 min) trades a longer window of an idle-but-warm replica for fewer cold starts than the 300s platform default; ACA caps this at 3600.')
 param cooldownPeriod int = 1800
