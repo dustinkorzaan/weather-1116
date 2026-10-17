@@ -39,12 +39,13 @@ environment costs nothing between requests without cold-starting on every
 short gap in traffic. `worker` alone is capped at `maxReplicas: 1`: Hangfire
 recurring jobs assume a single active server, so a second cold-started
 replica racing the first would double-run jobs instead of adding throughput.
+Every other Container App is also capped at `maxReplicas: 1`.
 
 Two consequences of scaling everything to zero are worth knowing before you
 rely on this in production, not just during the demo:
 
 - **`worker`'s recurring jobs** (`RecurringJobScheduler`: the `Cron.Daily(2)` AI weather
-  checks and the 11:00 UTC `import-cities` GeoNames load) only
+  checks) only
   run if a replica happens to be up when Hangfire's scheduler ticks. There is
   no queue-depth/KEDA scale rule bringing `worker` up on a schedule -- the
   only thing that wakes it from zero is an inbound HTTP request, which today
@@ -202,9 +203,9 @@ deleted and recreated (new principal IDs), or when an app gains SQL access --
 `mcp-srv-func-app`'s identity is a read-only (`db_datareader`) user, since
 GetCities only reads `dbo.Cities`.
 
-After the first deploy, `dbo.Cities` is empty until the worker's daily
-`import-cities` job runs (11:00 UTC); trigger it once from the worker's
-`/hangfire` dashboard (Recurring Jobs → `import-cities` → Trigger now) so
+After the first deploy, `dbo.Cities` is empty until the worker's `import-cities`
+job is triggered manually from the worker's `/hangfire` dashboard
+(Recurring Jobs → `import-cities` → Trigger now) so
 GetCities has data straight away. An empty table passes the 90%-of-existing check, but the
 export must still hold more than 100,000 cities. That job stages the export in `wx1116prodblob`'s `temp`
 container (the worker's identity has Storage Blob Data Contributor on that container only) and enqueues about 225

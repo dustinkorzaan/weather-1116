@@ -33,6 +33,7 @@ public class RecurringJobScheduler : IHostedService
             new ConfirmNashvilleAIWeatherEvent { Version = 4 },
             queue: "batch-multi");
 
+        // Keep the job in the dashboard for manual triggers, but never schedule it automatically.
         _recurringJobs.AddOrUpdateCQMediatorEvent(
             "import-cities",
             Cron.Never(),
