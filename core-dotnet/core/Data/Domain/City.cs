@@ -3,7 +3,7 @@ using NetTopologySuite.Geometries;
 namespace Core.Data.Domain;
 
 /// <summary>
-/// A populated place from GeoNames' cities500 export, loaded daily by ImportCitiesHandler.
+/// A populated place from GeoNames' cities500 export, loaded by ImportCitiesHandler.
 /// <see cref="Latitude"/>/<see cref="Longitude"/> duplicate <see cref="GeoPoint"/> for readability.
 /// </summary>
 public class City

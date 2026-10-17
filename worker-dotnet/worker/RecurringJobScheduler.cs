@@ -1,4 +1,3 @@
-using Core.AIWeather.Events;
 using Core.Geo.Events;
 using Core.Hangfire;
 using Hangfire;
@@ -21,21 +20,13 @@ public class RecurringJobScheduler : IHostedService
     {
         _recurringJobs.RemoveIfExists("");
 
-        _recurringJobs.AddOrUpdateCQMediatorEvent(
-            "confirm-nashville-ai-weather-v3",
-            Cron.Daily(2),
-            new ConfirmNashvilleAIWeatherEvent { Version = 3 },
-            queue: "batch-multi");
+        _recurringJobs.RemoveIfExists("confirm-nashville-ai-weather-v3");
+        _recurringJobs.RemoveIfExists("confirm-nashville-ai-weather-v4");
 
-        _recurringJobs.AddOrUpdateCQMediatorEvent(
-            "confirm-nashville-ai-weather-v4",
-            Cron.Daily(2),
-            new ConfirmNashvilleAIWeatherEvent { Version = 4 },
-            queue: "batch-multi");
-
+        // Keep the job in the dashboard for manual triggers, but never schedule it automatically.
         _recurringJobs.AddOrUpdateCQMediatorEvent(
             "import-cities",
-            Cron.Daily(11),
+            Cron.Never(),
             new ImportCitiesEvent(),
             queue: "batch-single");
 

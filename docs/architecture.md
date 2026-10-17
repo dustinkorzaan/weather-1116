@@ -212,7 +212,7 @@ the local-loop paths (Chat1a, Chat2a, Chat4a/Chat5a's Geo sub-agent, V3, Foundry
 `GetCitiesHandler` answers from `dbo.Cities` with a NetTopologySuite geography query
 (`IsWithinDistance`, spatial index `IX_Cities_GeoPoint`), skipping city sections and historical
 places (feature codes `PPLX`/`PPLH`/`PPLQ`/`PPLW`). The table is loaded by `ImportCitiesEvent`/
-`ImportCitiesHandler` (Core/Geo), which the worker runs daily at 11:00 UTC on the `batch-single`
+`ImportCitiesHandler` (Core/Geo), which the worker can run manually on the `batch-single`
 queue (`import-cities`): it downloads GeoNames' `cities500.zip` and `admin1CodesASCII.txt`
 (region names) and stages them in blob container `temp` (storage account `wx1116prodblob`;
 `BLOB_STORAGE_URL` with the worker's managed identity, or `BLOB_CONNECTION_STRING` locally). admin1
@@ -339,7 +339,7 @@ and `children`.
 and handlers, including:
 
 - `core-dotnet/core/HelloWorld/` — hello-world demo (`HelloWorldEvent`, `HelloWorldHandler`)
-- `core-dotnet/core/Geo/` — geocoding (`GetLatLong`, `GetLocation`) and nearby cities (`GetCities`, a NetTopologySuite query over `dbo.Cities`) and the daily GeoNames `ImportCities` job
+- `core-dotnet/core/Geo/` — geocoding (`GetLatLong`, `GetLocation`) and nearby cities (`GetCities`, a NetTopologySuite query over `dbo.Cities`) and the manually triggered GeoNames `ImportCities` job
 - `core-dotnet/core/Weather/` — public weather (`GetPublicWeatherCurrent`, `GetPublicWeatherForecast`, `GetPublicWeatherHistory`), fetched in Open-Meteo's native metric units (°C, km/h, mm) for the AI/MCP tool path. The `WeatherMVC`/`WeatherAPI` Forecast and History HTTP endpoints instead go through `GetUIWeatherForecast`/`GetUIWeatherHistory`, which wrap the same metric fetch and map it via `WeatherResponseMapper` into US customary units (°F, mph, in) so the UIs only format values, not convert them.
 - `core-dotnet/core/AIWeather/`: model-direct AI weather (`GetCurrentAIWeatherV3Handler`, `GetCurrentAIWeatherV4Handler`, `GetCurrentAIWeatherV5Handler`)
 - `core-dotnet/core/About/` — About tree builder and remote about client
@@ -653,7 +653,6 @@ Foundry project's own identity already hold for their respective Agents API use.
 `MCP_SRV_APP_SERVICE_*`/`MCP_SRV_PYTHON_*`/`MCP_SRV_NODE_*` variables as the Chat1b/Chat2b
 remote-MCP chat tabs
 (see [`docs/5-chat-clients/5-chat-clients.md`](5-chat-clients/5-chat-clients.md)).
-The confirm-nashville-ai-weather-v4 worker recurring job needs them too.
 `GetCurrentAIWeatherV5Handler` needs `AZURE_FOUNDRY_PROD_CURRENT_WX_AGENT_NAME`
 instead - the agent owns tool resolution, so no `MCP_SRV_*` variables apply.
 
